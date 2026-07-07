@@ -11,6 +11,8 @@
 \usepackage{array}
 \usepackage{xcolor}
 \usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{listings}
 \usepackage[numbered,framed]{matlab-prettifier}
@@ -27,6 +29,13 @@
   pdftitle={DP-LMI Package User Manual},
   pdfauthor={DP-LMI Package}
 }
+
+\newcommand{\sectionbreak}{\clearpage}
+\titleformat{\section}[display]
+  {\normalfont\Huge\bfseries}
+  {\thesection}
+  {0.6em}
+  {}
 
 \lstdefinestyle{dpmatlab}{
   style=Matlab-editor,
@@ -66,14 +75,14 @@
 \begin{abstract}
 This manual describes the current public behavior of the \pkg.  The present
 implementation provides \code{dpbase} for cell-local Bernstein coefficient
-storage and \code{dpmat} for known finite real matrix data on tensor grids.
-Decision-variable and solver-facing layers such as \code{dpvar} and
-\code{dplmi} remain planned package layers; they are not public APIs in this
-repository version.
+storage, \code{dpmat} for known finite real matrix data on tensor grids, and
+an initial \code{dpvar} layer for continuous degree-1 YALMIP-backed decision
+expressions.  Solver-facing \code{dplmi} assembly, SDP solver invocation, and
+relaxation-lemma workflows remain future package layers in this repository
+version.
 \end{abstract}
 
 \tableofcontents
-\newpage
 
 \section{Installation And Verification}
 
@@ -97,8 +106,9 @@ addpath(pwd)
 
 \subsection{Run The Current Test Suite}
 
-The current verification entry point runs the non-SDP tests for \code{+helper},
-\code{@dpbase}, and \code{@dpmat}.
+The current verification entry point runs the non-SDP tests for
+\code{+helper}, \code{@dpbase}, \code{@dpmat}, and \code{@dpvar}.  The
+\code{@dpvar} tests require YALMIP to be available on the \matlab{} path.
 
 \begin{lstlisting}[style=dpmatlab]
 results = tests.run_all;
@@ -109,11 +119,14 @@ Expected result: all currently implemented tests pass.  The suite covers helper
 validation, \code{dpbase} construction, grid metadata, local storage, label
 ordering, rate-bound validation, and current \code{dpmat} construction,
 evaluation, algebra, display, plotting, matrix operations, indexing,
-assignment, structural transforms, and error boundaries.
+assignment, structural transforms, and error boundaries.  It also covers the
+current \code{dpvar} constructor, continuity-by-shared-coefficients behavior,
+affine algebra, mixed known/decision products, matrix operations, indexing,
+assignment, and validation boundaries.
 
-The command above does not verify YALMIP modeling, SDP solver calls, relaxation
-lemma assembly, or DP-LMI feasibility workflows because those public layers are
-not implemented in this version.
+The command above does not verify \code{dplmi} assembly, SDP solver calls,
+relaxation lemma assembly, or DP-LMI feasibility workflows because those public
+layers are not implemented in this version.
 
 \section{Quick Start}
 
@@ -277,19 +290,57 @@ exact function handle for evaluation.  The inherited local coefficients are
 placeholder zeros used only to satisfy shared \code{dpbase} storage; they are
 not Bernstein evidence and cannot enter coefficient algebra.
 
-\section{Bernstein Storage Background}
+\subsection{A Continuous Decision Variable}
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(2, {[0 1 2]}, "symmetric");
+
+P.MatrixSize
+P.Degree
+P.IsContinuous
+P.ContainsDecision
+left = P.coeffs(1);
+right = P.coeffs(2);
+isequal(getvariables(left{2}), getvariables(right{1}))
+\end{lstlisting}
+
+Expected structural outputs:
+
+\begin{lstlisting}[style=dpoutput]
+MatrixSize =
+     2     2
+
+Degree =
+     1
+
+IsContinuous    -> true
+ContainsDecision-> true
+shared boundary -> true
+\end{lstlisting}
+
+\code{dpvar} creates YALMIP decision coefficients on the global grid nodes and
+reuses the same coefficient handles in adjacent physical cells.  Continuity is
+therefore built into storage; no equality LMI is added by the constructor.
+
+\section{Bernstein And Grid Background}
 
 \subsection{One Cell, Local Coordinates}
 
-On one physical interval \([\rho_0,\rho_1]\), a local coordinate
-\(\alpha \in [0,1]\) can represent a degree-\(m\) Bernstein polynomial as
+On one physical interval \([\rho_0,\rho_1]\), the package uses the normalized
+coordinate
+\[
+  \alpha = \frac{\rho_1-\rho}{\rho_1-\rho_0},
+  \qquad 0 \leq \alpha \leq 1.
+\]
+A degree-\(m\) Bernstein polynomial is written as
 \[
   P(\alpha) = \sum_{i=0}^{m} C_i B_i^m(\alpha),
   \qquad
   B_i^m(\alpha) = \binom{m}{i}\alpha^{m-i}(1-\alpha)^i.
 \]
 For matrix-valued data, each coefficient \(C_i\) is a matrix with the same
-payload size.  \code{dpbase} stores those matrices as a flat cell array.
+payload size.  \code{dpbase} stores those matrices as one flat coefficient
+cell for each physical grid cell.
 
 \begin{center}
 \begin{tikzpicture}[x=4.2cm,y=2.1cm,>=Latex]
@@ -304,11 +355,113 @@ payload size.  \code{dpbase} stores those matrices as a flat cell array.
 \end{tikzpicture}
 \end{center}
 
+Degree one is the line-segment case.  It is useful intuition for
+piecewise-linear \code{dpmat} data and for the current degree-1 \code{dpvar}
+constructor, but Bernstein storage is not limited to splines.
+
+\subsection{Quadratic And Higher-Degree Bases}
+
+For degree two, one cell has three local labels \(0,1,2\):
+\[
+  P(\alpha) =
+  C_0\alpha^2 + 2C_1\alpha(1-\alpha) + C_2(1-\alpha)^2.
+\]
+The middle coefficient \(C_1\) controls the interior Bernstein basis function,
+not an extra physical grid node.  The physical interval still has two endpoints;
+the polynomial degree controls how many local coefficient labels live inside
+that cell.
+
+\begin{center}
+\begin{tikzpicture}[x=6.0cm,y=2.8cm,>=Latex]
+  \draw[->] (-0.04,0) -- (1.08,0) node[right] {$\alpha$};
+  \draw[->] (0,-0.04) -- (0,1.12) node[above] {$B_i^2$};
+  \draw[gray!35] (0,0) grid[xstep=0.25,ystep=0.25] (1,1);
+  \draw[blue!70!black,thick,domain=0:1,samples=80]
+    plot (\x,{(\x)^2});
+  \draw[green!45!black,thick,domain=0:1,samples=80]
+    plot (\x,{2*(\x)*(1-\x)});
+  \draw[red!70!black,thick,domain=0:1,samples=80]
+    plot (\x,{(1-\x)^2});
+  \node[blue!70!black] at (0.82,0.78) {$B_0^2$};
+  \node[green!45!black] at (0.50,0.62) {$B_1^2$};
+  \node[red!70!black] at (0.18,0.78) {$B_2^2$};
+  \node[below] at (0,0) {$0$};
+  \node[below] at (1,0) {$1$};
+\end{tikzpicture}
+\end{center}
+
+The same pattern extends to any degree \(m\).  A cubic cell stores four
+coefficient labels \(0,1,2,3\), a quartic cell stores five, and so on.  The
+labels are local to the current physical cell; adjacent cells have their own
+local coefficient cells even when continuous objects share boundary handles.
+
+\subsection{Products And Degree Growth}
+
+Multiplication is the main reason the package treats Bernstein labels as
+coefficient data rather than as samples.  On one cell, multiplying two
+degree-1 factors produces a degree-2 polynomial:
+\[
+\begin{aligned}
+  P(\alpha) &= \alpha P_0 + (1-\alpha)P_1,\\
+  Q(\alpha) &= \alpha Q_0 + (1-\alpha)Q_1,\\
+  P(\alpha)Q(\alpha)
+    &= B_0^2 P_0Q_0
+     + B_1^2 \frac{P_0Q_1 + P_1Q_0}{2}
+     + B_2^2 P_1Q_1.
+\end{aligned}
+\]
+
+\begin{center}
+\begin{tikzpicture}[x=6.2cm,y=2.4cm,>=Latex]
+  \draw[->] (-0.04,0) -- (1.08,0) node[right] {$\alpha$};
+  \draw[->] (0,-0.08) -- (0,1.22) node[above] {value};
+  \draw[gray!30] (0,0) grid[xstep=0.25,ystep=0.25] (1,1);
+  \draw[blue!65!black,thick] (0,0.25) -- (1,0.95);
+  \draw[orange!85!black,thick] (0,0.90) -- (1,0.35);
+  \draw[purple!70!black,very thick,domain=0:1,samples=80]
+    plot (\x,{(0.25 + 0.70*\x)*(0.90 - 0.55*\x)});
+  \node[blue!65!black] at (0.84,1.05) {$P$};
+  \node[orange!85!black] at (0.17,1.02) {$Q$};
+  \node[purple!70!black] at (0.64,0.42) {$PQ$};
+  \node[below] at (0,0) {$0$};
+  \node[below] at (1,0) {$1$};
+\end{tikzpicture}
+\end{center}
+
+For general scalar degrees \(n\) and \(m\),
+\[
+  P(\alpha) = \sum_i P_i B_i^n(\alpha),
+  \qquad
+  Q(\alpha) = \sum_j Q_j B_j^m(\alpha),
+\]
+and
+\[
+  P(\alpha)Q(\alpha) =
+  \sum_{k=0}^{n+m} R_k B_k^{n+m}(\alpha),
+\]
+where
+\[
+  R_k =
+  \sum_{i+j=k} P_iQ_j
+  \frac{\binom{n}{i}\binom{m}{j}}{\binom{n+m}{k}}.
+\]
+For example, if \(P\) has degree two and \(Q\) has degree three, then the
+degree-five coefficient with label \(k=2\) is
+\[
+  R_2 =
+  \frac{3}{10}P_0Q_2
+  + \frac{6}{10}P_1Q_1
+  + \frac{1}{10}P_2Q_0.
+\]
+This is the binomial-normalized convolution used by coefficient-backed
+\code{dpmat} multiplication and by mixed known/decision products that remain
+affine in YALMIP variables.
+
 \subsection{Tensor-Product Labels}
 
-For \(\ell\) parameter dimensions and degree \(m\), each local label is an
-\(\ell\)-tuple in \(\{0,\ldots,m\}^{\ell}\).  The number of local coefficients
-per physical cell is
+For \(\ell\) parameter dimensions and scalar degree \(m\), each local label is
+an \(\ell\)-tuple in \(\{0,\ldots,m\}^{\ell}\).  The number of local
+coefficients per physical cell is
 \[
   (m+1)^\ell.
 \]
@@ -318,15 +471,128 @@ For example, \(\ell=2\) and \(m=1\) gives labels
 \]
 which is exactly the order returned by \code{obj.lbls()}.
 
-\subsection{Products And Degree Growth}
+\begin{center}
+\begin{tikzpicture}[x=1.45cm,y=1.15cm,>=Latex]
+  \draw[step=1,gray!50] (0,0) grid (3,2);
+  \foreach \x/\lab in {0/\rho_0,1/\rho_1,2/\rho_2,3/\rho_3} {
+    \draw[fill=black] (\x,0) circle (1pt);
+    \node[below] at (\x,0) {$\lab$};
+  }
+  \foreach \y/\lab in {0/\eta_0,1/\eta_1,2/\eta_2} {
+    \draw[fill=black] (0,\y) circle (1pt);
+    \node[left] at (0,\y) {$\lab$};
+  }
+  \node at (0.5,0.5) {$(1,1)$};
+  \node at (1.5,0.5) {$(2,1)$};
+  \node at (2.5,0.5) {$(3,1)$};
+  \node at (0.5,1.5) {$(1,2)$};
+  \node at (1.5,1.5) {$(2,2)$};
+  \node at (2.5,1.5) {$(3,2)$};
+  \node[align=center] at (1.5,-0.85) {physical tensor-grid cells};
 
-When two Bernstein polynomials are multiplied on the same physical cell, their
-local labels add and the result has the sum of the operand degrees.  The package
-uses protected \code{dpbase} utilities for this binomial-scaled convolution and
-degree elevation.  Users see the behavior through coefficient-backed
-\code{dpmat} algebra: matrix multiplication raises degree, while addition,
-subtraction, concatenation, indexing, and assignment preserve or elevate
-coefficients as needed.
+  \begin{scope}[shift={(5.0,0.25)},x=1.0cm,y=1.0cm]
+    \draw[thick] (0,0) rectangle (1,1);
+    \draw[fill=blue!70!black] (0,0) circle (1.6pt);
+    \draw[fill=blue!70!black] (0,1) circle (1.6pt);
+    \draw[fill=blue!70!black] (1,0) circle (1.6pt);
+    \draw[fill=blue!70!black] (1,1) circle (1.6pt);
+    \node[anchor=east] at (-0.08,0) {$(0,0)$};
+    \node[anchor=east] at (-0.08,1) {$(0,1)$};
+    \node[anchor=west] at (1.08,0) {$(1,0)$};
+    \node[anchor=west] at (1.08,1) {$(1,1)$};
+    \node[align=center] at (0.5,-0.55) {local labels\\inside one cell};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+Tensor-product multiplication adds labels component-wise.  In two dimensions,
+a label \((i_1,i_2)\) from degree \(n\) and a label \((j_1,j_2)\) from degree
+\(m\) contribute to result label
+\[
+  (k_1,k_2) = (i_1+j_1,\ i_2+j_2),
+\]
+with a scale factor that is the product of the one-dimensional binomial ratios.
+For three parameters, the same rule applies to triples such as
+\((i_1,i_2,i_3)+(j_1,j_2,j_3)\).  This is why a degree-1 object over a
+three-dimensional parameter grid has \(2^3=8\) local coefficient labels per
+physical cell.
+
+\subsection{Data Layout Seen From MATLAB}
+
+The physical grid and the local Bernstein labels are separate.  A two-parameter
+\code{dpmat} with a degree-1 global coefficient grid stores four local
+coefficients per physical cell:
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+
+A.npar()
+A.ncell()
+A.ncoeff()
+A.lbls()
+A.coeffs([1 1])
+A.evaluate([0.25, 12.5])
+\end{lstlisting}
+
+Expected structural outputs:
+
+\begin{lstlisting}[style=dpoutput]
+npar()   -> 2
+ncell()  -> 1
+ncoeff() -> 4
+
+lbls() =
+     0     0
+     0     1
+     1     0
+     1     1
+
+coeffs([1 1])-> {1, 3, 5, 7}
+evaluate([0.25 12.5]) -> 2.5
+\end{lstlisting}
+
+A degree-2 scalar cell stores three coefficients and evaluates with the
+quadratic basis shown above.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {1, 2, 4}, Degree=2);
+
+A.Degree
+A.ncoeff()
+A.evaluate(0.5)
+\end{lstlisting}
+
+Expected output:
+
+\begin{lstlisting}[style=dpoutput]
+Degree   -> 2
+ncoeff() -> 3
+evaluate(0.5) -> 2.25
+\end{lstlisting}
+
+The current \code{dpvar} constructor is degree one, but it uses the same
+cell-local label ordering and tensor-grid storage.
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(1, {[0 1], [10 20]});
+
+P.Degree
+P.ncoeff()
+P.lbls()
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+Degree   -> 1
+ncoeff() -> 4
+
+lbls() =
+     0     0
+     0     1
+     1     0
+     1     1
+\end{lstlisting}
 
 \section{\texorpdfstring{\code{dpbase}}{dpbase} Reference}
 
@@ -516,7 +782,7 @@ The stored coefficient represents the compact form
 but \code{dpbase} only stores and validates this payload.  It does not solve or
 test any inequality involving \(\dot\rho\).
 
-\section{Validation And Error Boundaries}
+\subsection{Validation And Error Boundaries}
 
 The constructor rejects malformed inputs early and uses domain-specific error
 identifiers.  The following examples are expected to error:
@@ -868,6 +1134,13 @@ Expected result: \code{numel(h)} is \code{2}, one plotted line for each matrix
 entry.  Legends use LaTeX labels such as \(\code{A}_{1,1}\) and the
 \(\rho\)-axis label uses LaTeX formatting.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{matlab-figures/dpmat-plot-1d.png}
+  \caption{One-dimensional \code{dpmat} plot generated from MATLAB.}
+  \label{fig:dpmat-plot-1d}
+\end{figure}
+
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1], [10 20]}, @(rho, eta) [rho + eta, rho - eta]);
 h = plot(A, [1 2], SamplesPerCell=2, EdgeColor="none");
@@ -877,6 +1150,18 @@ numel(h)
 Expected result: \code{numel(h)} is \code{2}, one transparent surface for each
 matrix entry.  Two-dimensional plotting defaults to \code{FaceAlpha=0.5} unless
 the caller supplies a different value, and accepts ordinary graphics options.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{matlab-figures/dpmat-plot-2d.png}
+  \caption{Two-dimensional \code{dpmat} surface plot generated from MATLAB.}
+  \label{fig:dpmat-plot-2d}
+\end{figure}
+
+The figure files are generated by running \code{doc/generate\_plot\_figures.m}
+from the repository root.  They live under \code{doc/matlab-figures/} so the
+manual source, generated plot assets, and regeneration entry point stay in the
+same documentation tree.
 
 \subsection{Validation Boundaries}
 
@@ -896,23 +1181,240 @@ assignments with incompatible payload size, invalid reshape sizes, invalid
 diagonal or triangular offsets, and invalid plot dimensions or
 \code{SamplesPerCell}.
 
+\section{\texorpdfstring{\code{dpvar}}{dpvar} Reference}
+
+\subsection{Purpose}
+
+\code{dpvar} represents continuous degree-1 Bernstein decision variables on a
+tensor grid.  Its coefficients are YALMIP \code{sdpvar} matrices stored through
+the same \code{dpbase} cell-local layout used by \code{dpmat}.  The current
+slice is an affine expression layer; it is not an inequality object and does
+not call an SDP solver.
+
+\subsection{Syntax}
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(n, gridVectors)
+P = dpvar(n, n, gridVectors)
+P = dpvar(n, m, gridVectors)
+P = dpvar(..., "full")
+P = dpvar(..., "symmetric")
+P = dpvar(..., RateBounds=rb)
+C = P + Q
+C = P - Q
+C = -P
+C = +P
+C = P + A
+C = A * P
+C = P * A
+T = P.'
+H = P'
+B = P(rows, cols)
+P(rows, cols) = rhs
+C = [P, A]
+C = [P; P]
+C = blkdiag(P, 1, A)
+D = diff(P)
+\end{lstlisting}
+
+Here \code{A} may be coefficient-backed \code{dpmat} data or compatible numeric
+data.  Bare affine \code{sdpvar} matrices can also be promoted to constant
+coefficient data in supported affine operations.
+
+\subsection{Construction And Continuity}
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(2, {[0 1 2]}, "symmetric");
+
+size(P)
+P.Degree
+P.SourceSummary
+first = P.coeffs(1);
+second = P.coeffs(2);
+numel(getvariables(first{1}))
+isequal(getvariables(first{2}), getvariables(second{1}))
+\end{lstlisting}
+
+Expected structural outputs:
+
+\begin{lstlisting}[style=dpoutput]
+size(P)       -> [2 2]
+Degree        -> 1
+SourceSummary -> "decision"
+variables in first endpoint -> 3
+shared boundary handle      -> true
+\end{lstlisting}
+
+For a square matrix, \code{dpvar(n, gridVectors)} follows YALMIP's symmetric
+default.  Use \code{"full"} when every matrix entry should be an independent
+decision variable.  Rectangular matrices are full by construction.
+
+Adjacent physical cells share the YALMIP coefficient handle at their common
+boundary.  This is how the current constructor preserves continuity; it does
+not add equality constraints.
+
+\subsection{Rate Metadata}
+
+\code{RateBounds} can be supplied as metadata on a \code{dpvar}.  The table has
+one row per parameter dimension and lower/upper bounds in columns one and two.
+The constructor stores the metadata outside \code{LocalValues}; it does not
+enumerate rate vertices.
+
+\begin{lstlisting}[style=dpmatlab]
+rb = [-1 2; -3 4];
+P = dpvar(1, {[0 1], [10 20]}, RateBounds=rb);
+
+P.HasRateDependence
+P.RateBounds
+\end{lstlisting}
+
+Expected output:
+
+\begin{lstlisting}[style=dpoutput]
+HasRateDependence -> true
+RateBounds        -> [-1 2; -3 4]
+\end{lstlisting}
+
+\subsection{Cell-Local Derivatives}
+
+\code{diff(P)} returns a discontinuous cell-local derivative-row \code{dpvar}.
+Each physical hypercube stores one coefficient row per parameter direction.
+The derivative object keeps any \code{RateBounds} metadata from \code{P}, but
+it does not contract those rows with rate vertices or assemble LMIs.
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(1, {[0 2]}, RateBounds=[-2 3]);
+D = diff(P);
+
+D.SourceSummary
+D.IsContinuous
+D.Degree
+D.DerivativeSourceDegree
+D.HasRateDependence
+rows = D.coeffs(1);
+numel(rows)
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+SourceSummary          -> "derivative"
+IsContinuous           -> false
+Degree                 -> 0
+DerivativeSourceDegree -> 1
+HasRateDependence      -> true
+numel(rows)            -> 1
+\end{lstlisting}
+
+For a two-parameter degree-1 object, \code{diff(P)} stores two derivative rows
+in each physical cell.  Ordinary algebra, indexing, assignment, and
+concatenation reject derivative-row objects in this slice; row contraction and
+rate-vertex assembly belong to future solver-facing code.
+
+\subsection{Affine Algebra And Products}
+
+\code{dpvar} supports affine coefficient operations and products where at most
+one side contains decision variables.  Products with coefficient-backed known
+data use the same Bernstein degree-growth rule as \code{dpmat}.
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(1, {[0 1]});
+A = dpmat({[0 1]}, {10, 20}, Degree=1);
+
+L = A * P;
+R = P * A;
+
+L.Degree
+R.Degree
+L.ContainsDecision
+\end{lstlisting}
+
+Expected output:
+
+\begin{lstlisting}[style=dpoutput]
+L.Degree        -> 2
+R.Degree        -> 2
+ContainsDecision-> true
+\end{lstlisting}
+
+Same-bound mixed scalar grids are aligned on a common refinement.  Mixed
+physical bounds are rejected.  Products such as \code{P * Q}, \code{P * x}
+where \code{x} is a bare decision variable, and products involving rate
+metadata are rejected in this slice because they would leave the supported
+affine SDP expression layer.
+
+\subsection{Matrix Operations And Indexing}
+
+Matrix-like methods report and transform the YALMIP coefficient payloads, not
+the number of physical cells.  The supported structural methods mirror the
+current \code{dpmat} coefficient-backed methods.
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(2, {[0 1]}, "full");
+
+length(P)
+height(P)
+width(P)
+numel(P)
+ndims(P)
+size(vec(P))
+size(diag(P))
+size(reshape(P, [1 4]))
+size(P(:, end))
+\end{lstlisting}
+
+Expected output:
+
+\begin{lstlisting}[style=dpoutput]
+length(P)          -> 2
+height(P)          -> 2
+width(P)           -> 2
+numel(P)           -> 4
+ndims(P)           -> 2
+size(vec(P))       -> [4 1]
+size(diag(P))      -> [2 1]
+size(reshape(P,[1 4])) -> [1 4]
+size(P(:,end))     -> [2 1]
+\end{lstlisting}
+
+Concatenation, \code{blkdiag}, structural transforms, matrix slicing, and
+matrix assignment accept numeric constants, affine \code{sdpvar} blocks, other
+compatible \code{dpvar} objects, and coefficient-backed \code{dpmat} blocks.
+They reject nonlinear YALMIP expressions, function-only \code{dpmat} operands,
+unsupported dimensions, matrix growth, deletion assignment, and incompatible
+rate metadata.
+
+\subsection{Validation Boundaries}
+
+\code{dpvar} fixes \code{Degree=1}, \code{IsContinuous=true}, and
+\code{ContainsDecision=true} for the public constructor.  Attempts to pass
+\code{Degree}, \code{IsContinuous}, \code{ContainsDecision}, or
+\code{HasRateDependence} as constructor options are rejected.  A
+\code{"symmetric"} structure flag requires a square matrix.  Grid and
+\code{RateBounds} validation follows the shared \code{dpbase} rules.
+
 \section{Current Limits}
 
 This repository version intentionally has a narrow public surface.
 
 \begin{itemize}[leftmargin=*]
-  \item \code{dpbase}, \code{dpmat}, \code{helper.chk},
+  \item \code{dpbase}, \code{dpmat}, \code{dpvar}, \code{helper.chk},
         \code{helper.scanMats}, and \code{helper.cell2bern} are implemented and
-        tested.
+        covered by the current non-SDP test entry point.
   \item \code{dpmat} is a known-data object only.  It does not contain YALMIP
         decisions, rate dependence, exact function-handle algebra beyond
         evaluation/plot sampling, or solver-facing LMI assembly.
-  \item \code{dpvar} and \code{dplmi} are planned package layers, but they are
-        not present as public class folders in this version.
+  \item \code{dpvar} is currently a continuous degree-1 YALMIP-backed affine
+        expression object with cell-local derivative-row output from
+        \code{diff(P)}.  It does not implement nonlinear decision products,
+        rate-dependent products, derivative-row contraction, inequality
+        assembly, or solver calls.
+  \item \code{dplmi} remains a future package layer.
   \item There is no public \code{dpdiff} class.  Future derivative behavior is
         expected to belong to \code{dpvar}.
   \item YALMIP modeling, SDP solver invocation, finite rate-vertex assembly,
-        and relaxation lemma workflows are not public behavior yet.
+        and relaxation lemma workflows beyond the current affine \code{dpvar}
+        expression layer are not public behavior yet.
   \item Private Bernstein utilities support internal tests and implementation,
         but they are not user-facing functions.
 \end{itemize}

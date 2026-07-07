@@ -26,7 +26,8 @@ function obj = subsasgn(obj, S, rhs)
         error("dpmat:FunctionOnlyAlgebra", ...
             "Function-backed dpmat objects need explicit Bernstein coefficient evidence for this operation.");
     end
-    [rows, cols] = matSubs(S(1).subs, obj.MatrixSize, "dpmat:InvalidAssignment");
+    [rows, cols] = internal.matSubs(S(1).subs, obj.MatrixSize, ...
+        "dpmat:InvalidAssignment");
     grid = obj.mergeGrid("dpmat:MixedGrid", rhs);
     lhsData = asData(grid, obj, [], "dpmat:InvalidAssignment");
     rhsData = asData(grid, rhs, [numel(rows), numel(cols)], "dpmat:InvalidAssignment");

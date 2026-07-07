@@ -40,15 +40,49 @@ function testCommonStructuralMethods(testCase)
     R = reshape(A, [1 4]);
     L = tril(A);
     U = triu(A, 1);
+    T = trace(A);
+    S1 = sum(A);
+    S2 = sum(A, 2);
+    Sa = sum(A, "all");
+    M1 = mean(A);
+    Ma = mean(A, "all");
+    Cs = cumsum(A, 2);
+    Fu = flipud(A);
+    Fl = fliplr(A);
+    Fp = flip(A, 2);
+    Q = rot90(A);
+    Rp = repmat(A, 1, 2);
 
     testCase.verifyEqual(size(V), [4 1]);
     testCase.verifyEqual(size(D), [2 1]);
     testCase.verifyEqual(size(R), [1 4]);
+    testCase.verifyEqual(size(T), [1 1]);
+    testCase.verifyEqual(size(S1), [1 2]);
+    testCase.verifyEqual(size(S2), [2 1]);
+    testCase.verifyEqual(size(Sa), [1 1]);
+    testCase.verifyEqual(size(M1), [1 2]);
+    testCase.verifyEqual(size(Ma), [1 1]);
+    testCase.verifyEqual(size(Rp), [2 4]);
     verifyCoeff(testCase, V, 1, {[1; 3; 2; 4], [10; 30; 20; 40]});
     verifyCoeff(testCase, D, 1, {[1; 4], [10; 40]});
     verifyCoeff(testCase, R, 1, {[1 3 2 4], [10 30 20 40]});
     verifyCoeff(testCase, L, 1, {[1 0; 3 4], [10 0; 30 40]});
     verifyCoeff(testCase, U, 1, {[0 2; 0 0], [0 20; 0 0]});
+    verifyCoeff(testCase, T, 1, {5, 50});
+    verifyCoeff(testCase, S1, 1, {[4 6], [40 60]});
+    verifyCoeff(testCase, S2, 1, {[3; 7], [30; 70]});
+    verifyCoeff(testCase, Sa, 1, {10, 100});
+    verifyCoeff(testCase, M1, 1, {[2 3], [20 30]});
+    verifyCoeff(testCase, Ma, 1, {2.5, 25});
+    verifyCoeff(testCase, Cs, 1, {[1 3; 3 7], [10 30; 30 70]});
+    verifyCoeff(testCase, Fu, 1, {[3 4; 1 2], [30 40; 10 20]});
+    verifyCoeff(testCase, Fl, 1, {[2 1; 4 3], [20 10; 40 30]});
+    verifyCoeff(testCase, Fp, 1, {[2 1; 4 3], [20 10; 40 30]});
+    verifyCoeff(testCase, Q, 1, {[2 4; 1 3], [20 40; 10 30]});
+    verifyCoeff(testCase, Rp, 1, {
+        [1 2 1 2; 3 4 3 4], ...
+        [10 20 10 20; 30 40 30 40]
+        });
     testCase.verifyTrue(isequal(A, A));
     testCase.verifyFalse(isequal(A, D));
 end
@@ -185,10 +219,17 @@ function testStructuralRejections(testCase)
 
     testCase.verifyError(@() vec(F), "dpmat:FunctionOnlyAlgebra");
     testCase.verifyError(@() tril(F), "dpmat:FunctionOnlyAlgebra");
+    testCase.verifyError(@() trace(F), "dpmat:FunctionOnlyAlgebra");
+    testCase.verifyError(@() sum(F), "dpmat:FunctionOnlyAlgebra");
     testCase.verifyError(@() blkdiag(A, F), "dpmat:FunctionOnlyAlgebra");
     testCase.verifyError(@() reshape(A, 3, 3), "dpmat:InvalidReshape");
     testCase.verifyError(@() diag(A, 3), "dpmat:InvalidDiag");
     testCase.verifyError(@() triu(A, 0.5), "dpmat:InvalidTriangularPart");
+    testCase.verifyError(@() sum(A, "rows"), "dpmat:InvalidSum");
+    testCase.verifyError(@() mean(A, [1 2]), "dpmat:InvalidMean");
+    testCase.verifyError(@() cumsum(A, 0.5), "dpmat:InvalidCumsum");
+    testCase.verifyError(@() rot90(A, 0.5), "dpmat:InvalidRot90");
+    testCase.verifyError(@() repmat(A, [1 2 3]), "dpmat:InvalidRepmat");
 end
 
 function deleteAssign(A)

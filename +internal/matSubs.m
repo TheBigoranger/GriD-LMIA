@@ -1,5 +1,11 @@
 function [rows, cols] = matSubs(subs, sz, errId)
-    %MATSUBS Normalize dpmat two-dimensional matrix subscripts.
+    %MATSUBS Normalize two-dimensional matrix payload subscripts.
+    %
+    %   Syntax:
+    %     [rows, cols] = internal.matSubs(subs, sz, errId)
+    %
+    %   Example:
+    %     [rows, cols] = internal.matSubs({":", 2}, [3 4], "pkg:BadSub");
 
     if numel(subs) ~= 2
         error(errId, "Matrix indexing requires row and column subscripts.");
@@ -9,7 +15,8 @@ function [rows, cols] = matSubs(subs, sz, errId)
 end
 
 function idx = oneSub(sub, n, errId)
-    if (ischar(sub) && strcmp(sub, ":")) || (isstring(sub) && isscalar(sub) && sub == ":")
+    if (ischar(sub) && strcmp(sub, ":")) || ...
+            (isstring(sub) && isscalar(sub) && sub == ":")
         idx = 1:n;
         return
     end

@@ -65,6 +65,19 @@ function testBadPlainPayload(testCase)
     end
 end
 
+function testSymbolicPayloadOk(testCase)
+    % dpbase storage accepts real 2-D YALMIP payloads for dpvar subclasses.
+    X = sdpvar(2, 2, 'full');
+
+    obj = dpbase({[0 1]}, [2 2], 0, scalarVals(X), ...
+        ContainsDecision=true);
+
+    coeffs = obj.coeffs(1);
+    testCase.verifyTrue(isa(coeffs{1}, "sdpvar"));
+    testCase.verifyEqual(size(coeffs{1}), [2 2]);
+    testCase.verifyTrue(obj.ContainsDecision);
+end
+
 function testRatePayloadOk(testCase)
     % Rate-affine payload structs should preserve constant and rate parts.
     payload = ratePayload(2);

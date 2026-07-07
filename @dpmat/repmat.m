@@ -1,0 +1,44 @@
+function out = repmat(obj, varargin)
+    %REPMAT Repeat each coefficient payload in a two-dimensional block pattern.
+    %
+    %   Syntax:
+    %     B = repmat(A, m, n)
+    %     B = repmat(A, [m n])
+    %
+    %   Example:
+    %     A = dpmat({[0 1]}, {[1 2], 2 * [1 2]}, Degree=1);
+    %     B = repmat(A, 2, 1);
+
+    sz = parseRep(varargin);
+    out = unOp(obj, @(a) repmat(a, sz));
+end
+
+function sz = parseRep(args)
+    if numel(args) == 1 && isnumeric(args{1}) && isvector(args{1})
+        sz = reshape(args{1}, 1, []);
+        if isscalar(sz)
+            sz = [sz sz];
+        end
+    elseif numel(args) == 2
+        sz = zeros(1, 2);
+        for k = 1:2
+            sz(k) = helper.chk(args{k}, "dpmat:InvalidRepmat", ...
+                "Repetition counts must be positive integer scalars.", ...
+                "numeric", "real", "scalar", "finite", "integer", "positive");
+        end
+        return
+    else
+        error("dpmat:InvalidRepmat", ...
+            "dpmat repmat expects a scalar, a two-element size vector, or two size scalars.");
+    end
+
+    if numel(sz) ~= 2
+        error("dpmat:InvalidRepmat", ...
+            "dpmat repmat supports exactly two matrix repetition counts.");
+    end
+    for k = 1:2
+        sz(k) = helper.chk(sz(k), "dpmat:InvalidRepmat", ...
+            "Repetition counts must be positive integer scalars.", ...
+            "numeric", "real", "scalar", "finite", "integer", "positive");
+    end
+end

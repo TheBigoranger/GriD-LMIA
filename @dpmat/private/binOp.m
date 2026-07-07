@@ -14,7 +14,7 @@ function out = binOp(lhs, rhs, fcn, errId)
     deg = max(ld.Degree, rd.Degree);
     lhsVals = elevVals(anchor, ld.LocalValues, ld.Degree, deg, grid);
     rhsVals = elevVals(anchor, rd.LocalValues, rd.Degree, deg, grid);
-    vals = zipVals(anchor, lhsVals, rhsVals, fcn, grid);
+    vals = internal.zipVals(lhsVals, rhsVals, fcn, grid);
 
     out = dpmat(grid, vals, Degree=deg);
 end

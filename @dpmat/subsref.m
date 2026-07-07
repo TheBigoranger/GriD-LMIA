@@ -14,7 +14,8 @@ function varargout = subsref(obj, S)
             error("dpmat:FunctionOnlyAlgebra", ...
                 "Function-backed dpmat objects need explicit Bernstein coefficient evidence for this operation.");
         end
-        [rows, cols] = matSubs(S(1).subs, obj.MatrixSize, "dpmat:InvalidSubscript");
+        [rows, cols] = internal.matSubs(S(1).subs, obj.MatrixSize, ...
+            "dpmat:InvalidSubscript");
         nCell = obj.GridInfo.NumNodes - 1;
         vals = internal.mkNest(nCell, @(subs) cellfun(@(a) a(rows, cols), ...
             internal.cellGet(obj.LocalValues, subs), UniformOutput=false));

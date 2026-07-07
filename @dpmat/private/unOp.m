@@ -5,8 +5,6 @@ function out = unOp(obj, fcn)
         error("dpmat:FunctionOnlyAlgebra", ...
             "Function-backed dpmat objects need explicit Bernstein coefficient evidence for this operation.");
     end
-    nCell = obj.GridInfo.NumNodes - 1;
-    vals = internal.mkNest(nCell, @(subs) cellfun(fcn, ...
-        internal.cellGet(obj.LocalValues, subs), UniformOutput=false));
+    vals = internal.mapVals(obj.LocalValues, fcn, obj.GridInfo.Vectors);
     out = dpmat(obj.GridInfo.Vectors, vals, Degree=obj.Degree);
 end
