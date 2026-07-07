@@ -1,4 +1,4 @@
-function out = bernProd(lhs, lhsDeg, rhs, rhsDeg, nPar)
+function out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
 %BERNPROD Cell-local Bernstein coefficient product.
 
 lhsDeg = double(helper.chk(lhsDeg, "dpbase:InvalidDegree", ...
@@ -7,6 +7,7 @@ lhsDeg = double(helper.chk(lhsDeg, "dpbase:InvalidDegree", ...
 rhsDeg = double(helper.chk(rhsDeg, "dpbase:InvalidDegree", ...
     "rhsDeg must be a nonnegative integer scalar.", ...
     "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+nPar = obj.npar();
 lhsN = (lhsDeg + 1) ^ nPar;
 rhsN = (rhsDeg + 1) ^ nPar;
 helper.chk(lhs, "dpbase:InvalidCoefficientCell", ...
@@ -17,8 +18,8 @@ helper.chk(rhs, "dpbase:InvalidCoefficientCell", ...
     "cell", "Numel", rhsN);
 
 outDeg = lhsDeg + rhsDeg;
-lhsLbls = combRows(repmat({0:lhsDeg}, 1, nPar));
-outLbls = combRows(repmat({0:outDeg}, 1, nPar));
+lhsLbls = internal.combRows(repmat({0:lhsDeg}, 1, nPar));
+outLbls = internal.combRows(repmat({0:outDeg}, 1, nPar));
 out = cell(1, size(outLbls, 1));
 
 for outIdx = 1:size(outLbls, 1)

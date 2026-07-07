@@ -37,7 +37,7 @@ classdef dpbase
 
             % Normalize once at the parent layer so dpmat/dpvar/dplmi can
             % share the same tensor-grid contract and label ordering.
-            info = mkGrid(gridVectors);
+            info = internal.mkGrid(gridVectors, "dpbase");
             sz = double(helper.chk(matrixSize, "dpbase:InvalidMatrixSize", ...
                 "matrixSize must be a 1x2 positive integer vector.", ...
                 "numeric", "real", "finite", "integer", "positive", "Size", [1, 2]));
@@ -64,11 +64,11 @@ classdef dpbase
             if isempty(localValues)
                 % Default construction represents a coefficient-backed zero
                 % object on every physical cell, not sampled node data.
-                vals = mkVals(nCell, nCoeff, sz);
+                vals = internal.mkVals(nCell, nCoeff, sz);
                 hasRate = false;
             else
                 vals = localValues;
-                hasRate = chkVals(vals, nCell, nCoeff, sz, nPar);
+                hasRate = internal.chkVals(vals, nCell, nCoeff, sz, nPar);
             end
             if hasRate && isempty(rb)
                 error("dpbase:InvalidRateBounds", ...
@@ -89,6 +89,12 @@ classdef dpbase
             obj.RateBounds = rb;
             obj.SourceSummary = options.SourceSummary;
         end
+    end
+
+    methods (Access = protected)
+        out = bernElev(obj, coeffs, fromDeg, toDeg)
+        out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
+        grid = mergeGrid(obj, errId, varargin)
     end
 
 end

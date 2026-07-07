@@ -7,6 +7,8 @@ function results = run_all
 %   Example:
 %     results = tests.run_all();
 root = fileparts(mfilename("fullpath"));
-results = [runtests(fullfile(root, "+helper")), runtests(fullfile(root, "+dpbase"))];
+results = [runtests(fullfile(root, "+helper")), ...
+    runtests(fullfile(root, "+dpbase")), ...
+    runtests(fullfile(root, "+dpmat"))];
 assertSuccess(results);
 end

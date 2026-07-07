@@ -11,5 +11,5 @@ function out = lbls(obj)
 
     nPar = obj.npar();
     vecs = repmat({0:obj.Degree}, 1, nPar);
-    out = combRows(vecs);
+    out = internal.combRows(vecs);
 end

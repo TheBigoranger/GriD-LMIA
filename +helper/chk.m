@@ -1,5 +1,13 @@
 function val = chk(val, errId, msg, varargin)
     %CHK Validate common internal argument predicates.
+    %
+    %   Syntax:
+    %     val = helper.chk(val, errId, msg, tags...)
+    %     val = helper.chk(val, errId, msg, tags..., Name, Value)
+    %
+    %   Example:
+    %     v = helper.chk([1 2], "pkg:BadValue", "bad value", ...
+    %         "numeric", "real", "finite", "Size", [1 2]);
 
     opts = struct( ...
         "Size", [], ...
@@ -42,6 +50,8 @@ function val = chk(val, errId, msg, varargin)
                 failIf(~isscalar(val), errId, msg);
             case "vector"
                 failIf(~isvector(val), errId, msg);
+            case "matrix"
+                failIf(~ismatrix(val), errId, msg);
             case "finite"
                 failIf(~isnumeric(val) || any(~isfinite(val), "all"), errId, msg);
             case "integer"

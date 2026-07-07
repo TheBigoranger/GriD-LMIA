@@ -65,10 +65,11 @@
 
 \begin{abstract}
 This manual describes the current public behavior of the \pkg.  The present
-implementation provides the \code{dpbase} class and shared validation tests for
-cell-local Bernstein coefficient storage on tensor grids.  Solver-facing DP-LMI
-objects such as \code{dpmat}, \code{dpvar}, and \code{dplmi} are planned package
-layers, but they are not yet public APIs in this repository version.
+implementation provides \code{dpbase} for cell-local Bernstein coefficient
+storage and \code{dpmat} for known finite real matrix data on tensor grids.
+Decision-variable and solver-facing layers such as \code{dpvar} and
+\code{dplmi} remain planned package layers; they are not public APIs in this
+repository version.
 \end{abstract}
 
 \tableofcontents
@@ -96,18 +97,19 @@ addpath(pwd)
 
 \subsection{Run The Current Test Suite}
 
-The current verification entry point runs the non-SDP tests for \code{+helper}
-and \code{@dpbase}.
+The current verification entry point runs the non-SDP tests for \code{+helper},
+\code{@dpbase}, and \code{@dpmat}.
 
 \begin{lstlisting}[style=dpmatlab]
 results = tests.run_all;
 table(results)
 \end{lstlisting}
 
-Expected result: all currently implemented tests pass.  At the time this manual
-was written, the suite contained 30 tests covering helper validation and
-\code{dpbase} construction, grid metadata, local storage, label ordering, and
-rate-bound validation.
+Expected result: all currently implemented tests pass.  The suite covers helper
+validation, \code{dpbase} construction, grid metadata, local storage, label
+ordering, rate-bound validation, and current \code{dpmat} construction,
+evaluation, algebra, matrix operations, indexing, assignment, and error
+boundaries.
 
 The command above does not verify YALMIP modeling, SDP solver calls, relaxation
 lemma assembly, or DP-LMI feasibility workflows because those public layers are
@@ -116,8 +118,8 @@ not implemented in this version.
 \section{Quick Start}
 
 \code{dpbase} stores one flat Bernstein coefficient cell for each physical cell
-of a tensor grid.  The default constructor creates zero numeric coefficient
-payloads; it does not sample a function at grid nodes.
+of a tensor grid.  \code{dpmat} builds on that storage to represent known
+parameter-dependent matrices.
 
 \subsection{A Scalar Grid}
 
@@ -218,6 +220,63 @@ lbls() =
 The first parameter index varies more slowly than the second.  This row order
 is used consistently for physical cells and local Bernstein labels.
 
+\subsection{A Known Matrix}
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {2, 4}, Degree=1);
+
+A.MatrixSize
+A.Degree
+A.SourceSummary
+A.evaluate(0.25)
+C = A + 5;
+C.coeffs(1)
+\end{lstlisting}
+
+Expected structural outputs:
+
+\begin{lstlisting}[style=dpoutput]
+MatrixSize =
+     1     1
+
+Degree =
+     1
+
+SourceSummary =
+    "coefficient-backed"
+
+A.evaluate(0.25) -> 2.5
+C.coeffs(1)      -> {7, 9}
+\end{lstlisting}
+
+The expression \code{A + 5} returns another coefficient-backed \code{dpmat} on
+the same grid.
+
+\subsection{A Function-Backed Known Matrix}
+
+\begin{lstlisting}[style=dpmatlab]
+F = dpmat({[0 pi]}, @(rho) sin(rho));
+
+F.SourceSummary
+F.evaluate(pi/2)
+F.coeffs(1)
+\end{lstlisting}
+
+Expected outputs:
+
+\begin{lstlisting}[style=dpoutput]
+SourceSummary =
+    "function"
+
+F.evaluate(pi/2) -> 1
+F.coeffs(1)      -> {0, 0}
+\end{lstlisting}
+
+Function-backed \code{dpmat} objects without an explicit \code{Degree} keep the
+exact function handle for evaluation.  The inherited local coefficients are
+placeholder zeros used only to satisfy shared \code{dpbase} storage; they are
+not Bernstein evidence and cannot enter coefficient algebra.
+
 \section{Bernstein Storage Background}
 
 \subsection{One Cell, Local Coordinates}
@@ -227,7 +286,7 @@ On one physical interval \([\rho_0,\rho_1]\), a local coordinate
 \[
   P(\alpha) = \sum_{i=0}^{m} C_i B_i^m(\alpha),
   \qquad
-  B_i^m(\alpha) = \binom{m}{i}\alpha^i(1-\alpha)^{m-i}.
+  B_i^m(\alpha) = \binom{m}{i}\alpha^{m-i}(1-\alpha)^i.
 \]
 For matrix-valued data, each coefficient \(C_i\) is a matrix with the same
 payload size.  \code{dpbase} stores those matrices as a flat cell array.
@@ -263,10 +322,11 @@ which is exactly the order returned by \code{obj.lbls()}.
 
 When two Bernstein polynomials are multiplied on the same physical cell, their
 local labels add and the result has the sum of the operand degrees.  The package
-contains private implementation utilities for this binomial-scaled convolution
-and degree elevation.  These utilities are internal; users should inspect
-coefficient ordering through public methods such as \code{lbls},
-\code{cells}, \code{ncoeff}, and \code{coeffs}.
+uses protected \code{dpbase} utilities for this binomial-scaled convolution and
+degree elevation.  Users see the behavior through coefficient-backed
+\code{dpmat} algebra: matrix multiplication raises degree, while addition,
+subtraction, concatenation, indexing, and assignment preserve or elevate
+coefficients as needed.
 
 \section{\texorpdfstring{\code{dpbase}}{dpbase} Reference}
 
@@ -476,14 +536,223 @@ numeric matrices matching \code{matrixSize}.  Symbolic YALMIP payloads are not
 accepted by \code{dpbase}; they belong in future subclasses that can define
 symbolic algebra and solver assembly coherently.
 
+\section{\texorpdfstring{\code{dpmat}}{dpmat} Reference}
+
+\subsection{Purpose}
+
+\code{dpmat} represents known finite real matrix data on a parameter grid.  It
+inherits \code{dpbase} storage and adds source handling, exact function
+evaluation, coefficient-backed algebra, matrix structural operations, and
+two-dimensional block indexing for known data.
+
+\subsection{Syntax}
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat(gridVectors, source)
+A = dpmat(gridVectors, source, Degree=m)
+val = A.evaluate(point)
+val = evaluate(A, point)
+C = A + B
+C = A - B
+C = -A
+C = A * B
+C = A * M
+C = M * A
+T = A.'
+H = A'
+C = [A, B]
+C = [A; B]
+C = cat(1, A, B)
+C = cat(2, A, B)
+B = A(rows, cols)
+A(rows, cols) = rhs
+\end{lstlisting}
+
+\code{source} can be a function handle, a global cell grid of numeric Bernstein
+coefficients, or explicit nested \code{LocalValues} in the \code{dpbase}
+contract.
+
+\subsection{Source Modes}
+
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.28\linewidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Mode & Behavior \\
+\midrule
+Function handle, no \code{Degree} &
+Stores the exact \code{FunctionHandle}, probes the lower grid point only to
+infer matrix size, sets \code{Degree=1}, and leaves inherited coefficients as
+placeholder zeros.  Function-only objects use
+\code{SourceSummary="function"} and cannot enter coefficient algebra. \\
+Function handle with \code{Degree} &
+Validates that the handle is representable as local Bernstein data of that
+degree, populates \code{LocalValues}, keeps the exact \code{FunctionHandle}, and
+uses \code{SourceSummary="function-bernstein"}. \\
+Global cell grid &
+Converts overlapping global Bernstein coefficient grids into flat local
+coefficient cells.  The public helper \code{helper.cell2bern} exposes this same
+conversion for inspection.  For degree \(m\), the global cell array size must
+be \((n_{\mathrm{cell}}m)+1\) along each parameter dimension. \\
+Nested \code{LocalValues} &
+Passes explicit local coefficients through the \code{dpbase} nested-cell
+contract.  The degree is inferred from the flat coefficient count
+\((m+1)^{\ell}\) when it is not supplied explicitly. \\
+\bottomrule
+\end{tabularx}
+
+All current \code{dpmat} objects are continuous known data.  Their fixed
+metadata is:
+\begin{itemize}[leftmargin=*]
+  \item \code{IsContinuous=true}
+  \item \code{ContainsDecision=false}
+  \item \code{HasRateDependence=false}
+\end{itemize}
+Constructor options that try to override those metadata fields are rejected.
+
+\subsection{Evaluation}
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {2, 4}, Degree=1);
+A.evaluate(0.75)
+
+B = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+B.evaluate([0.25, 12.5])
+
+F = dpmat({[0 pi]}, @(rho) sin(rho));
+F.evaluate(pi/2)
+\end{lstlisting}
+
+Expected outputs:
+
+\begin{lstlisting}[style=dpoutput]
+A.evaluate(0.75)        -> 3.5
+B.evaluate([0.25 12.5]) -> 2.5
+F.evaluate(pi/2)        -> 1
+\end{lstlisting}
+
+Coefficient-backed objects evaluate by Bernstein interpolation on the active
+physical cell.  Function-backed objects evaluate through the retained exact
+handle.  Evaluation points must be finite, real, have one entry per parameter
+dimension, and lie inside the grid bounds.
+
+\subsection{Coefficient Algebra}
+
+\code{dpmat} supports coefficient-backed \code{+}, \code{-}, unary \code{-}, and
+matrix \code{*}.  Numeric scalars and compatible numeric matrices promote to
+constant \code{dpmat} operands.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 1]}, {10, 20, 30}, Degree=2);
+C = A + B;
+
+C.Degree
+C.coeffs(1)
+\end{lstlisting}
+
+Expected output:
+
+\begin{lstlisting}[style=dpoutput]
+C.Degree   -> 2
+C.coeffs(1)-> {11, 21.5, 32}
+\end{lstlisting}
+
+Multiplication raises Bernstein degree through binomial-normalized local
+coefficient convolution.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {[1 2], [3 4]}, Degree=1);
+B = dpmat({[0 1]}, {[5; 6], [7; 8]}, Degree=1);
+K = A * B;
+
+K.Degree
+size(K)
+K.coeffs(1)
+\end{lstlisting}
+
+Expected output:
+
+\begin{lstlisting}[style=dpoutput]
+K.Degree   -> 2
+size(K)    -> [1 1]
+K.coeffs(1)-> {17, 31, 53}
+\end{lstlisting}
+
+Same-bound mixed scalar grids are aligned on a common refinement before
+coefficient algebra.  Mixed physical bounds are rejected.  Function-only
+\code{dpmat} objects are rejected by coefficient algebra until exact
+function-handle algebra is designed.
+
+\subsection{Matrix Operations And Indexing}
+
+\code{dpmat} supports transpose, conjugate transpose for real data, horizontal
+and vertical concatenation, \code{cat} along dimensions 1 and 2, two-dimensional
+matrix slicing, and block assignment.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {
+    [1 2 3; 4 5 6], ...
+    [10 20 30; 40 50 60]
+    }, Degree=1);
+
+lastCol = A(:, end);
+firstRow = A([true false], :);
+
+size(lastCol)
+lastCol.coeffs(1)
+\end{lstlisting}
+
+Expected output:
+
+\begin{lstlisting}[style=dpoutput]
+size(lastCol)     -> [2 1]
+lastCol.coeffs(1)-> {[3; 6], [30; 60]}
+\end{lstlisting}
+
+Assignment accepts numeric constants and compatible \code{dpmat} blocks.  It
+does not support deletion assignment, matrix growth, unsupported dimensions, or
+coefficient operations on function-only objects.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {zeros(2), 2*ones(2)}, Degree=1);
+A(:, 2) = 5;
+A.coeffs(1)
+\end{lstlisting}
+
+Expected output:
+
+\begin{lstlisting}[style=dpoutput]
+A.coeffs(1)-> {[0 5; 0 5], [2 5; 2 5]}
+\end{lstlisting}
+
+\subsection{Validation Boundaries}
+
+\code{dpmat} rejects unsupported source types, malformed global coefficient
+grids, malformed nested local values, non-finite or complex payloads, bad
+function arity, empty or complex function outputs, non-polynomial handles when
+explicit Bernstein evidence is requested, and functions that require a higher
+\code{Degree} than the caller supplied.  It also rejects constructor attempts to
+set \code{IsContinuous}, \code{ContainsDecision}, \code{HasRateDependence}, or
+\code{RateBounds}.
+
+Operational errors include out-of-bounds or wrong-dimensional evaluation
+points, function-only coefficient algebra, incompatible matrix sizes, mixed
+physical grid bounds, \code{cat} dimensions other than 1 or 2, deletion
+assignment, matrix-growth assignment, and block assignments with incompatible
+payload size.
+
 \section{Current Limits}
 
 This repository version intentionally has a narrow public surface.
 
 \begin{itemize}[leftmargin=*]
-  \item \code{dpbase} and \code{helper.chk} are implemented and tested.
-  \item \code{dpmat}, \code{dpvar}, and \code{dplmi} are planned package layers,
-        but they are not present as public class folders in this version.
+  \item \code{dpbase}, \code{dpmat}, \code{helper.chk},
+        \code{helper.scanMats}, and \code{helper.cell2bern} are implemented and
+        tested.
+  \item \code{dpmat} is a known-data object only.  It does not contain YALMIP
+        decisions, rate dependence, exact function-handle algebra, plotting, or
+        solver-facing LMI assembly.
+  \item \code{dpvar} and \code{dplmi} are planned package layers, but they are
+        not present as public class folders in this version.
   \item There is no public \code{dpdiff} class.  Future derivative behavior is
         expected to belong to \code{dpvar}.
   \item YALMIP modeling, SDP solver invocation, finite rate-vertex assembly,

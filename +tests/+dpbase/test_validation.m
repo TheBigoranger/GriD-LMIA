@@ -4,11 +4,13 @@ function tests = test_validation
 end
 
 function testBadGridShape(testCase)
+    % Grid input should be a nonempty cell array of grid vectors.
     testCase.verifyError(@() dpbase([0 1], [1 1], 0), "dpbase:InvalidGrid");
     testCase.verifyError(@() dpbase({}, [1 1], 0), "dpbase:InvalidGrid");
 end
 
 function testBadGridNodes(testCase)
+    % Grid vectors should be finite, strictly increasing numeric nodes.
     testCase.verifyError(@() dpbase({[0 1 1]}, [1 1], 0), "dpbase:InvalidGridVector");
     testCase.verifyError(@() dpbase({[0 2 1]}, [1 1], 0), "dpbase:InvalidGridVector");
     testCase.verifyError(@() dpbase({[0 Inf]}, [1 1], 0), "dpbase:InvalidGridVector");
@@ -16,18 +18,21 @@ function testBadGridNodes(testCase)
 end
 
 function testBadDeg(testCase)
+    % Degree should be a finite nonnegative integer.
     testCase.verifyError(@() dpbase({[0 1]}, [1 1], -1), "dpbase:InvalidDegree");
     testCase.verifyError(@() dpbase({[0 1]}, [1 1], 1.5), "dpbase:InvalidDegree");
     testCase.verifyError(@() dpbase({[0 1]}, [1 1], Inf), "dpbase:InvalidDegree");
 end
 
 function testBadSize(testCase)
+    % MatrixSize should be a positive 2-D integer size vector.
     testCase.verifyError(@() dpbase({[0 1]}, [1 0], 0), "dpbase:InvalidMatrixSize");
     testCase.verifyError(@() dpbase({[0 1]}, [1 1 1], 0), "dpbase:InvalidMatrixSize");
     testCase.verifyError(@() dpbase({[0 1]}, [1.5 1], 0), "dpbase:InvalidMatrixSize");
 end
 
 function testBadRateBounds(testCase)
+    % RateBounds should match parameter count and contain finite lower/upper pairs.
     testCase.verifyError(@() dpbase({[0 1]}, [1 1], 0, [], RateBounds=[0 1; -1 1]), ...
         "dpbase:InvalidRateBounds");
     testCase.verifyError(@() dpbase({[0 1]}, [1 1], 0, [], RateBounds=[1 -1]), ...
@@ -37,6 +42,7 @@ function testBadRateBounds(testCase)
 end
 
 function testBadCoeffCount(testCase)
+    % LocalValues should fail for missing cells or wrong coefficient counts.
     testCase.verifyError(@() dpbase({[0 1 2]}, [1 1], 1, {{1, 2}}), ...
         "dpbase:InvalidLocalValues");
     testCase.verifyError(@() dpbase({[0 1 2]}, [1 1], 1, {{1}, {2, 3}}), ...
@@ -60,6 +66,7 @@ function testBadPlainPayload(testCase)
 end
 
 function testRatePayloadOk(testCase)
+    % Rate-affine payload structs should preserve constant and rate parts.
     payload = ratePayload(2);
     rb = [-1 1; -2 2];
 
@@ -74,6 +81,7 @@ function testRatePayloadOk(testCase)
 end
 
 function testBadRatePayload(testCase)
+    % Malformed rate-affine structs should fail payload validation.
     payload = ratePayload(1);
 
     nonCellRate = payload;
@@ -102,6 +110,7 @@ function testBadRatePayload(testCase)
 end
 
 function testRateNeedsBounds(testCase)
+    % Rate-affine payloads should require explicit RateBounds.
     payload = ratePayload(1);
 
     testCase.verifyError(@() dpbase({[0 1]}, [2 2], 0, scalarVals(payload)), ...
@@ -111,11 +120,13 @@ function testRateNeedsBounds(testCase)
 end
 
 function testFlagNeedsBounds(testCase)
+    % Explicit HasRateDependence should also require RateBounds.
     testCase.verifyError(@() dpbase({[0 1]}, [1 1], 0, [], HasRateDependence=true), ...
         "dpbase:InvalidRateBounds");
 end
 
 function testBoundsSetRateFlag(testCase)
+    % Supplying RateBounds should mark the object as rate-dependent.
     obj = dpbase({[0 1]}, [1 1], 0, [], RateBounds=[-1 1]);
 
     testCase.verifyTrue(obj.HasRateDependence);

@@ -4,6 +4,7 @@ function tests = test_grid_info
 end
 
 function testFields(testCase)
+    % GridInfo should expose stable primitive grid metadata only.
     obj = dpbase({[0 1], [10 20 30]}, [1 1], 1);
 
     % GridInfo should expose only primitive facts; derived counts stay computed.
@@ -15,6 +16,7 @@ function testFields(testCase)
 end
 
 function testPointOrder(testCase)
+    % Tensor grid points should follow MATLAB row-order enumeration.
     obj = dpbase({[0 1], [10 20 30]}, [1 1], 0);
 
     expected = [

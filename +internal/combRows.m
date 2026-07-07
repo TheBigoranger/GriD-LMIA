@@ -1,5 +1,5 @@
 function rows = combRows(vecs)
-    %COMBROWS Cartesian product rows in MATLAB-style combination order.
+    %COMBROWS Cartesian product rows in shared combination order.
 
     nDim = numel(vecs);
     n = cellfun(@numel, vecs);

@@ -4,6 +4,7 @@ function tests = test_local_storage
 end
 
 function testScalarFlat(testCase)
+    % Scalar grids should expose flat per-cell coefficient storage.
     localValues = {{11, 12, 13}, {21, 22, 23}};
     obj = dpbase({[0 1 2]}, [1 1], 2, localValues);
 
@@ -15,6 +16,7 @@ function testScalarFlat(testCase)
 end
 
 function testTensorNest(testCase)
+    % Tensor grids should preserve nested physical-cell access.
     localValues = {
         {mkCoeff(110), mkCoeff(120)}, ...
         {mkCoeff(210), mkCoeff(220)}
@@ -28,6 +30,7 @@ function testTensorNest(testCase)
 end
 
 function testRateOutside(testCase)
+    % Rate bounds should live on the object, not inside LocalValues.
     obj = dpbase({[0 1], [10 20]}, [1 1], 0, [], ...
         RateBounds=[-1 1; -2 2]);
 
@@ -39,6 +42,7 @@ function testRateOutside(testCase)
 end
 
 function testBadNest(testCase)
+    % Tensor LocalValues must be nested by physical cell dimensions.
     flatCells = {mkCoeff(11), mkCoeff(12), mkCoeff(21), mkCoeff(22)};
 
     testCase.verifyError(@() dpbase({[0 1 2], [10 20 30]}, [1 1], 1, flatCells), ...
@@ -46,6 +50,7 @@ function testBadNest(testCase)
 end
 
 function testBadCoeffCount(testCase)
+    % Each physical cell must contain exactly ncoeff local coefficients.
     badValues = {{1}, {2, 3}};
 
     testCase.verifyError(@() dpbase({[0 1 2]}, [1 1], 1, badValues), ...
@@ -53,6 +58,7 @@ function testBadCoeffCount(testCase)
 end
 
 function testBadCellSubs(testCase)
+    % coeffs should reject out-of-range, wrong-width, or noninteger subscripts.
     obj = dpbase({[0 1 2], [10 20]}, [1 1], 0);
 
     testCase.verifyError(@() obj.coeffs([0 1]), "dpbase:InvalidCellSubs");
