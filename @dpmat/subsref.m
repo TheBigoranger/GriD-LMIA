@@ -24,9 +24,29 @@ function varargout = subsref(obj, S)
             varargout{1} = out;
             return
         end
-        [varargout{1:nargout}] = builtin("subsref", out, S(2:end));
+        varargout = dotRef(out, S(2:end), nargout);
         return
     end
 
-    [varargout{1:nargout}] = builtin("subsref", obj, S);
+    varargout = dotRef(obj, S, nargout);
+end
+
+function out = dotRef(obj, S, nOut)
+    out = cell(1, max(nOut, 1));
+    if nOut <= 1
+        out{1} = builtin("subsref", obj, S);
+        return
+    end
+
+    try
+        [out{1:nOut}] = builtin("subsref", obj, S);
+    catch err
+        if err.identifier ~= "MATLAB:needMoreRhsOutputs"
+            rethrow(err)
+        end
+        % numel(A) follows matrix-payload semantics, but scalar dpmat
+        % property access still returns one value.
+        out = cell(1, 1);
+        out{1} = builtin("subsref", obj, S);
+    end
 end
