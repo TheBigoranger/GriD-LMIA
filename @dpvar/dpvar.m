@@ -15,10 +15,6 @@ classdef (InferiorClasses = {?dpmat}) dpvar < dpbase
     %   dpvar is method-superior to dpmat so mixed known/decision algebra
     %   dispatches through the affine dpvar expression layer.
 
-    properties (SetAccess = private)
-        DerivativeSourceDegree
-    end
-
     methods
         function obj = dpvar(varargin)
             if nargin == 1 && isstruct(varargin{1}) && isfield(varargin{1}, "DpvarInternal")
@@ -33,25 +29,19 @@ classdef (InferiorClasses = {?dpmat}) dpvar < dpbase
                 hasRate = init.HasRateDependence;
                 rb = init.RateBounds;
                 summary = init.SourceSummary;
-                isCont = init.IsContinuous;
-                srcDeg = init.DerivativeSourceDegree;
             else
                 [grid, sz, vals, hasRate, rb] = ctorArgs(varargin{:});
                 deg = 1;
                 hasDec = true;
                 summary = "decision";
-                isCont = true;
-                srcDeg = [];
             end
 
             obj@dpbase(grid, sz, deg, vals, ...
-                IsContinuous=isCont, ...
+                IsContinuous=true, ...
                 ContainsDecision=hasDec, ...
                 HasRateDependence=hasRate, ...
                 RateBounds=rb, ...
-                SourceSummary=summary, ...
-                DerivativeSourceDegree=srcDeg);
-            obj.DerivativeSourceDegree = srcDeg;
+                SourceSummary=summary);
         end
     end
 

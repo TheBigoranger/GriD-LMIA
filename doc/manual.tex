@@ -1214,7 +1214,6 @@ P(rows, cols) = rhs
 C = [P, A]
 C = [P; P]
 C = blkdiag(P, 1, A)
-D = diff(P)
 \end{lstlisting}
 
 Here \code{A} may be coefficient-backed \code{dpmat} data or compatible numeric
@@ -1274,42 +1273,6 @@ Expected output:
 HasRateDependence -> true
 RateBounds        -> [-1 2; -3 4]
 \end{lstlisting}
-
-\subsection{Cell-Local Derivatives}
-
-\code{diff(P)} returns a discontinuous cell-local derivative-row \code{dpvar}.
-Each physical hypercube stores one coefficient row per parameter direction.
-The derivative object keeps any \code{RateBounds} metadata from \code{P}, but
-it does not contract those rows with rate vertices or assemble LMIs.
-
-\begin{lstlisting}[style=dpmatlab]
-P = dpvar(1, {[0 2]}, RateBounds=[-2 3]);
-D = diff(P);
-
-D.SourceSummary
-D.IsContinuous
-D.Degree
-D.DerivativeSourceDegree
-D.HasRateDependence
-rows = D.coeffs(1);
-numel(rows)
-\end{lstlisting}
-
-Expected structural output:
-
-\begin{lstlisting}[style=dpoutput]
-SourceSummary          -> "derivative"
-IsContinuous           -> false
-Degree                 -> 0
-DerivativeSourceDegree -> 1
-HasRateDependence      -> true
-numel(rows)            -> 1
-\end{lstlisting}
-
-For a two-parameter degree-1 object, \code{diff(P)} stores two derivative rows
-in each physical cell.  Ordinary algebra, indexing, assignment, and
-concatenation reject derivative-row objects in this slice; row contraction and
-rate-vertex assembly belong to future solver-facing code.
 
 \subsection{Affine Algebra And Products}
 
@@ -1405,10 +1368,9 @@ This repository version intentionally has a narrow public surface.
         decisions, rate dependence, exact function-handle algebra beyond
         evaluation/plot sampling, or solver-facing LMI assembly.
   \item \code{dpvar} is currently a continuous degree-1 YALMIP-backed affine
-        expression object with cell-local derivative-row output from
-        \code{diff(P)}.  It does not implement nonlinear decision products,
-        rate-dependent products, derivative-row contraction, inequality
-        assembly, or solver calls.
+        expression object.  It does not implement public derivative
+        construction, nonlinear decision products, rate-dependent products,
+        inequality assembly, or solver calls.
   \item \code{dplmi} remains a future package layer.
   \item There is no public \code{dpdiff} class.  Future derivative behavior is
         expected to belong to \code{dpvar}.

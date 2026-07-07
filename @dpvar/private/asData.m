@@ -4,7 +4,6 @@ function data = asData(grid, val, reqSize, rb, errId)
     info = internal.mkGrid(grid, "dpvar");
 
     if isa(val, "dpvar")
-        chkNoDeriv(val, errId);
         chkRate(rb, val.RateBounds, errId);
         chkSize(val.MatrixSize, reqSize, errId);
         if sameGrid(info, val, errId)

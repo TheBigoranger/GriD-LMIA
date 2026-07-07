@@ -9,8 +9,6 @@ function obj = subsasgn(obj, S, rhs)
     %     P = dpvar(2, {[0 1]}, "full");
     %     P(1, :) = [1 2];
 
-    chkNoDeriv(obj, "dpvar:InvalidAssignment");
-
     if ~strcmp(S(1).type, "()")
         obj = builtin("subsasgn", obj, S, rhs);
         return

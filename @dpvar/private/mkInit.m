@@ -1,17 +1,5 @@
-function init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary, options)
+function init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary)
     %MKINIT Package prepared coefficient data for the dpvar constructor.
-    arguments
-        grid
-        sz
-        deg
-        vals
-        hasDec
-        hasRate
-        rb
-        summary
-        options.IsContinuous (1, 1) logical = true
-        options.DerivativeSourceDegree = []
-    end
 
     init = struct( ...
         "DpvarInternal", true, ...
@@ -22,7 +10,5 @@ function init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary, option
         "ContainsDecision", hasDec, ...
         "HasRateDependence", hasRate, ...
         "RateBounds", rb, ...
-        "SourceSummary", summary, ...
-        "IsContinuous", options.IsContinuous, ...
-        "DerivativeSourceDegree", options.DerivativeSourceDegree);
+        "SourceSummary", summary);
 end

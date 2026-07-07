@@ -1,6 +1,5 @@
 function out = unOp(obj, fcn, sz)
     %UNOP Apply a unary operation to every dpvar coefficient.
-    chkNoDeriv(obj, "dpvar:UnsupportedDerivativeRows");
 
     if nargin < 3 || isempty(sz)
         % Infer matrix size from one mapped coefficient, allowing trace/transpose.

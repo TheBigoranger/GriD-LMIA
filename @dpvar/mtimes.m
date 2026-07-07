@@ -11,9 +11,6 @@ function out = mtimes(lhs, rhs)
     %     A = dpmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     %     C = A * P;
 
-    chkNoDeriv(lhs, "dpvar:InvalidMultiplication");
-    chkNoDeriv(rhs, "dpvar:InvalidMultiplication");
-
     if isa(lhs, "dpvar") && isa(rhs, "dpvar")
         error("dpvar:InvalidMultiplication", ...
             "dpvar * dpvar is unsupported because it would create quadratic decision terms.");

@@ -1,13 +1,5 @@
-function hasRate = chkVals(vals, nCell, nCoeff, sz, nPar, layout, srcDeg)
+function hasRate = chkVals(vals, nCell, nCoeff, sz, nPar)
     %CHKVALS Validate nested cell-local Bernstein payloads.
-    if nargin < 6 || strlength(string(layout)) == 0
-        layout = "flat";
-    else
-        layout = string(layout);
-    end
-    if nargin < 7 || isempty(srcDeg)
-        srcDeg = [];
-    end
 
     helper.chk(vals, "dpbase:InvalidLocalValues", ...
         "LocalValues must match the physical nested-cell grid shape.", ...
@@ -17,31 +9,12 @@ function hasRate = chkVals(vals, nCell, nCoeff, sz, nPar, layout, srcDeg)
     for k = 1:nCell(1)
         if isscalar(nCell)
             coeffs = vals{k};
-            if layout == "derivativeRows"
-                helper.chk(coeffs, "dpbase:InvalidCoefficientCell", ...
-                    "Derivative LocalValues entries must store one coefficient row per parameter.", ...
-                    "cell", "Numel", nPar);
-                for r = 1:nPar
-                    nRow = derivCount(srcDeg, nPar);
-                    hasRate = chkCoeffRow(coeffs{r}, nRow, sz, nPar) || hasRate;
-                end
-            else
-                hasRate = chkCoeffRow(coeffs, nCoeff, sz, nPar) || hasRate;
-            end
+            hasRate = chkCoeffRow(coeffs, nCoeff, sz, nPar) || hasRate;
         else
             % Preserve the nested physical-cell shape while walking down one
             % parameter dimension at a time.
-            hasRate = internal.chkVals(vals{k}, nCell(2:end), nCoeff, sz, nPar, ...
-                layout, srcDeg) || hasRate;
+            hasRate = internal.chkVals(vals{k}, nCell(2:end), nCoeff, sz, nPar) || hasRate;
         end
-    end
-end
-
-function n = derivCount(srcDeg, nPar)
-    if isempty(srcDeg) || srcDeg == 0
-        n = 1;
-    else
-        n = srcDeg * (srcDeg + 1) ^ (nPar - 1);
     end
 end
 

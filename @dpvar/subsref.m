@@ -10,7 +10,6 @@ function varargout = subsref(obj, S)
     %     q = P(:, 1);
 
     if strcmp(S(1).type, "()")
-        chkNoDeriv(obj, "dpvar:UnsupportedDerivativeRows");
         [rows, cols] = internal.matSubs(S(1).subs, obj.MatrixSize, ...
             "dpvar:InvalidSubscript");
         vals = internal.mapVals(obj.LocalValues, @(a) a(rows, cols), ...

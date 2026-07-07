@@ -33,7 +33,6 @@ classdef dpbase
                 options.HasRateDependence (1, 1) logical = false
                 options.RateBounds = []
                 options.SourceSummary = "coefficient-backed"
-                options.DerivativeSourceDegree = []
             end
 
             % Normalize once at the parent layer so dpmat/dpvar/dplmi can
@@ -46,14 +45,6 @@ classdef dpbase
             deg = double(helper.chk(degree, "dpbase:InvalidDegree", ...
                 "degree must be a nonnegative integer scalar.", ...
                 "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-            summary = string(options.SourceSummary);
-            srcDeg = [];
-            if ~isempty(options.DerivativeSourceDegree)
-                srcDeg = double(helper.chk(options.DerivativeSourceDegree, ...
-                    "dpbase:InvalidDegree", ...
-                    "DerivativeSourceDegree must be a nonnegative integer scalar.", ...
-                    "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-            end
             nPar = numel(info.Vectors);
             rb = options.RateBounds;
             if isempty(rb)
@@ -77,15 +68,7 @@ classdef dpbase
                 hasRate = false;
             else
                 vals = localValues;
-                if summary == "derivative"
-                    if isempty(srcDeg)
-                        srcDeg = deg + 1;
-                    end
-                    hasRate = internal.chkVals(vals, nCell, nCoeff, sz, nPar, ...
-                        "derivativeRows", srcDeg);
-                else
-                    hasRate = internal.chkVals(vals, nCell, nCoeff, sz, nPar);
-                end
+                hasRate = internal.chkVals(vals, nCell, nCoeff, sz, nPar);
             end
             if hasRate && isempty(rb)
                 error("dpbase:InvalidRateBounds", ...
@@ -104,7 +87,7 @@ classdef dpbase
             % dplmi is the layer that will enumerate finite rate vertices.
             obj.HasRateDependence = options.HasRateDependence || ~isempty(rb);
             obj.RateBounds = rb;
-            obj.SourceSummary = summary;
+            obj.SourceSummary = options.SourceSummary;
         end
     end
 
