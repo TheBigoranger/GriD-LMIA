@@ -9,19 +9,19 @@ export const referenceEntries = [
     name: "cells",
     type: "dpbase method",
     task: "Enumerate physical cell subscripts.",
-    href: "/DP-LMI-package/documents/reference/dpbase/#cells",
+    href: "/DP-LMI-package/documents/reference/dpbase/storage-inspection/#cells",
   },
   {
     name: "coeffs",
     type: "dpbase method",
     task: "Read local Bernstein coefficient families.",
-    href: "/DP-LMI-package/documents/reference/dpbase/#coeffs",
+    href: "/DP-LMI-package/documents/reference/dpbase/storage-inspection/#coeffs",
   },
   {
     name: "lbls",
     type: "dpbase method",
     task: "Inspect local Bernstein labels in flat row order.",
-    href: "/DP-LMI-package/documents/reference/dpbase/#lbls",
+    href: "/DP-LMI-package/documents/reference/dpbase/storage-inspection/#lbls",
   },
   {
     name: "dpmat",
@@ -30,16 +30,34 @@ export const referenceEntries = [
     href: "/DP-LMI-package/documents/reference/dpmat/",
   },
   {
+    name: "dpmat constructor",
+    type: "dpmat function",
+    task: "Create coefficient-backed or function-backed known-data matrices.",
+    href: "/DP-LMI-package/documents/reference/dpmat/constructor/",
+  },
+  {
     name: "evaluate",
     type: "dpmat method",
     task: "Evaluate known matrix data at one parameter point.",
-    href: "/DP-LMI-package/documents/reference/dpmat/#evaluate",
+    href: "/DP-LMI-package/documents/reference/dpmat/evaluate/",
   },
   {
     name: "plot",
     type: "dpmat method",
     task: "Sample one- or two-parameter known data for diagnostics.",
-    href: "/DP-LMI-package/documents/reference/dpmat/#display-table-and-plot",
+    href: "/DP-LMI-package/documents/reference/dpmat/plot/",
+  },
+  {
+    name: "table",
+    type: "dpmat method",
+    task: "Inspect Bernstein coefficient rows as a MATLAB table.",
+    href: "/DP-LMI-package/documents/reference/dpmat/table/",
+  },
+  {
+    name: "dpmat matrix operations",
+    type: "dpmat methods",
+    task: "Use coefficient-backed algebra, transforms, summaries, assembly, and indexing.",
+    href: "/DP-LMI-package/documents/reference/dpmat/matrix-operations/",
   },
   {
     name: "dpvar",
@@ -48,16 +66,28 @@ export const referenceEntries = [
     href: "/DP-LMI-package/documents/reference/dpvar/",
   },
   {
+    name: "dpvar constructor",
+    type: "dpvar function",
+    task: "Create symmetric or full continuous Bernstein decision variables.",
+    href: "/DP-LMI-package/documents/reference/dpvar/constructor/",
+  },
+  {
     name: "rhodiff",
     type: "dpvar method",
     task: "Build discontinuous rate-vertex derivative expressions.",
-    href: "/DP-LMI-package/documents/reference/dpvar/#rhodiff",
+    href: "/DP-LMI-package/documents/reference/dpvar/rhodiff/",
+  },
+  {
+    name: "dpvar matrix operations",
+    type: "dpvar methods",
+    task: "Use affine algebra, known-data products, transforms, summaries, assembly, and indexing.",
+    href: "/DP-LMI-package/documents/reference/dpvar/matrix-operations/",
   },
   {
     name: "le/ge",
     type: "dpvar comparison",
     task: "Create dplmi constraints from dpvar residuals.",
-    href: "/DP-LMI-package/documents/reference/dpvar/#comparisons",
+    href: "/DP-LMI-package/documents/reference/dpvar/comparisons/",
   },
   {
     name: "dplmi",
@@ -66,9 +96,15 @@ export const referenceEntries = [
     href: "/DP-LMI-package/documents/reference/dplmi/",
   },
   {
+    name: "dplmi constructor",
+    type: "dplmi function",
+    task: "Store coefficient-wise scalar or matrix residual constraints.",
+    href: "/DP-LMI-package/documents/reference/dplmi/constructor/",
+  },
+  {
     name: "toYalmip",
     type: "dplmi method",
     task: "Concatenate stored constraints for YALMIP optimize calls.",
-    href: "/DP-LMI-package/documents/reference/dplmi/#toyalmip",
+    href: "/DP-LMI-package/documents/reference/dplmi/toyalmip/",
   },
 ];

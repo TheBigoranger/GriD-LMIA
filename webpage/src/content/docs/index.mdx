@@ -1,0 +1,67 @@
+---
+title: DP-LMI Manual
+description: A visual portal into the DP-LMI MATLAB/YALMIP package.
+---
+
+import DpmatStorageDiagram from "../../components/DpmatStorageDiagram.astro";
+
+<section class="portal-hero">
+  <div class="portal-copy">
+    <p class="portal-kicker">Cell-local Bernstein documentation</p>
+    <h2>Look up DP-LMI classes, methods, and the storage model without digging through source.</h2>
+    <p>
+      DP-LMI is a MATLAB/YALMIP package for differential parameter-dependent LMIs.
+      The current implementation centers on <code>dpmat</code>, <code>dpvar</code>,
+      <code>rhodiff</code>, and direct coefficient-wise <code>dplmi</code> assembly.
+    </p>
+    <div class="portal-actions">
+      <a href="/DP-LMI-package/documents/">Documents</a>
+      <a href="/DP-LMI-package/documents/reference/dpmat/constructor/">dpmat constructor</a>
+      <a href="/DP-LMI-package/documents/reference/dpvar/constructor/">dpvar constructor</a>
+    </div>
+  </div>
+  <DpmatStorageDiagram />
+</section>
+
+## Start Here
+
+<div class="link-grid">
+  <a class="jump-card" href="/DP-LMI-package/documents/">
+    <strong>Documents</strong>
+    <span>Reference index, math background, and MATLAB-style function pages.</span>
+  </a>
+  <a class="jump-card" href="/DP-LMI-package/examples/">
+    <strong>Examples</strong>
+    <span>Small workflows for setup, <code>dpmat</code>, <code>dpvar</code>, and <code>dplmi</code>.</span>
+  </a>
+  <a class="jump-card" href="/DP-LMI-package/documents/math/bernstein-polynomial/">
+    <strong>Bernstein Polynomial</strong>
+    <span>Local coordinates, tensor labels, convolution, and coefficient-wise constraints.</span>
+  </a>
+  <a class="jump-card" href="/DP-LMI-package/thanks/">
+    <strong>Thanks</strong>
+    <span>Runtime tools, documentation tooling, and comparison references.</span>
+  </a>
+</div>
+
+## Current Implemented Slice
+
+| Layer | Current behavior |
+| :--- | :--- |
+| `dpbase` | Backend parent for tensor-grid metadata, nested `LocalValues`, local labels, and coefficient inspection. |
+| `dpmat` | Known finite real matrix data from function handles, Bernstein coefficient grids, or explicit local values. |
+| `dpvar` | Continuous YALMIP-backed Bernstein decision expressions with affine algebra and structural matrix operations. |
+| `rhodiff` | Discontinuous rate-vertex derivative expressions with scalar and tensor-grid rate bounds. |
+| `dplmi` | Direct coefficient-wise YALMIP constraints and `toYalmip` handoff. |
+
+## Setup Snapshot
+
+```matlab
+projectRoot = "path/to/Differential Parameter-Dependent Linear Matrix Inequality";
+addpath(genpath(projectRoot));
+rmpath(genpath(fullfile(projectRoot, "doc")));
+
+results = tests.run_all();
+```
+
+Relaxation-lemma assembly, Polya assembly, package-owned solver wrappers, strictness-margin diagnostics, and residual evidence are reserved future layers. The implemented solver-facing path documented here is direct coefficient-wise assembly through YALMIP constraints.

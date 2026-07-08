@@ -7,14 +7,21 @@ Use this page as the lookup entry for current DP-LMI behavior. The reference pag
 
 ## Reference Index
 
-| Name | Kind | Primary use |
-| :--- | :--- | :--- |
-| [`dpbase`](/DP-LMI-package/documents/reference/dpbase/) | Backend class | Understand shared tensor-grid metadata and cell-local Bernstein storage. |
-| [`dpmat`](/DP-LMI-package/documents/reference/dpmat/) | Known-data class | Construct, evaluate, display, plot, and combine known parameter-dependent matrices. |
-| [`dpvar`](/DP-LMI-package/documents/reference/dpvar/) | Decision-expression class | Create continuous YALMIP-backed Bernstein decision variables and affine expressions. |
-| [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/#rhodiff) | `dpvar` method | Form rate-vertex derivative expressions from `dpvar` objects. |
-| [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) | Constraint class | Store coefficient-wise DP-LMI constraints for YALMIP. |
-| [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/#toyalmip) | `dplmi` method | Concatenate stored constraints before `optimize`. |
+<div class="method-grid">
+  <a class="method-card" href="/DP-LMI-package/documents/reference/dpbase/"><strong>dpbase</strong><span>Shared storage contract, labels, cells, and coefficient evidence.</span></a>
+  <a class="method-card" href="/DP-LMI-package/documents/reference/dpmat/"><strong>dpmat</strong><span>Known parameter-dependent matrices, evaluation, display, and plotting.</span></a>
+  <a class="method-card" href="/DP-LMI-package/documents/reference/dpvar/"><strong>dpvar</strong><span>YALMIP-backed Bernstein decision variables and affine expressions.</span></a>
+  <a class="method-card" href="/DP-LMI-package/documents/reference/dplmi/"><strong>dplmi</strong><span>Coefficient-wise constraints and YALMIP handoff.</span></a>
+</div>
+
+## Function Pages
+
+| Area | Pages |
+| :--- | :--- |
+| `dpbase` | [`storage inspection`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/) |
+| `dpmat` | [`constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/), [`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/), [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/), [`table`](/DP-LMI-package/documents/reference/dpmat/table/), [`matrix operations`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/) |
+| `dpvar` | [`constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/), [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/), [`matrix operations`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/), [`comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) |
+| `dplmi` | [`constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/), [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) |
 
 The generated [lookup table](/DP-LMI-package/documents/reference-index/) is produced from `src/data/reference-index.js` and checked during the build workflow.
 

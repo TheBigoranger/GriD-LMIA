@@ -11,6 +11,7 @@ export default defineConfig({
       title: "DP-LMI Manual",
       description:
         "Reference-first manual for the DP-LMI MATLAB/YALMIP package.",
+      customCss: ["./src/styles/manual.css"],
       social: [
         {
           icon: "github",
@@ -20,33 +21,9 @@ export default defineConfig({
       ],
       sidebar: [
         { label: "Welcome", link: "/" },
-        {
-          label: "Documents",
-          items: [
-            { label: "Reference Index", slug: "documents" },
-            { label: "Lookup Table", slug: "documents/reference-index" },
-            {
-              label: "Mathematics",
-              items: [
-                {
-                  label: "Bernstein Polynomial",
-                  slug: "documents/math/bernstein-polynomial",
-                },
-              ],
-            },
-            {
-              label: "Reference",
-              items: [
-                { label: "dpbase", slug: "documents/reference/dpbase" },
-                { label: "dpmat", slug: "documents/reference/dpmat" },
-                { label: "dpvar", slug: "documents/reference/dpvar" },
-                { label: "dplmi", slug: "documents/reference/dplmi" },
-              ],
-            },
-          ],
-        },
-        { label: "Examples", slug: "examples" },
-        { label: "Thanks", slug: "thanks" },
+        { label: "Documents", link: "/documents/" },
+        { label: "Examples", link: "/examples/" },
+        { label: "Thanks", link: "/thanks/" },
       ],
     }),
   ],
