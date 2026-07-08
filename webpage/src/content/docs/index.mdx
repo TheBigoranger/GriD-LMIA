@@ -26,16 +26,21 @@ import DpmatStorageDiagram from "../../components/DpmatStorageDiagram.astro";
 <section class="product-walkthrough">
   <p class="portal-kicker">One local Bernstein cell</p>
   <p>
-    Start from two degree-1 factors on the same local coordinate
-    <code>alpha</code>. Their product is degree 2, so the code has to create
-    new local Bernstein coefficients instead of reusing the original two labels.
+    Pick one segment of a one-dimensional parameter grid and map it to a local
+    coordinate. Two degree-1 Bernstein factors are straight lines on this
+    segment, but their product is a quadratic curve.
   </p>
+
+$$
+\rho \in [\rho_i,\rho_{i+1}], \qquad
+\alpha = \frac{\rho-\rho_i}{\rho_{i+1}-\rho_i} \in [0,1].
+$$
 
 $$
 \begin{aligned}
 P(\alpha) &= B_{0,1}(\alpha)P_0 + B_{1,1}(\alpha)P_1,\\
 Q(\alpha) &= B_{0,1}(\alpha)Q_0 + B_{1,1}(\alpha)Q_1,\\
-P(\alpha)Q(\alpha)
+R(\alpha) &= P(\alpha)Q(\alpha)\\
 &= B_{0,2}(\alpha)R_0
  + B_{1,2}(\alpha)R_1
  + B_{2,2}(\alpha)R_2 .
@@ -51,9 +56,10 @@ R_2 &= P_1Q_1.
 $$
 
   <p>
-    In code, this is coefficient convolution. The resulting degree-2
-    coefficients are stored back into each object's cell-local
-    <code>LocalValues</code> entry; the diagram below shows that storage step.
+    In code, this is coefficient convolution on the selected cell. The
+    resulting degree-2 coefficients are stored back into that cell's
+    <code>LocalValues</code> entry; the diagram below shows the same
+    multiplication as two lines becoming one quadratic product curve.
   </p>
   <DpmatStorageDiagram />
 </section>

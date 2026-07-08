@@ -309,6 +309,74 @@
   stroke-width: 3;
 }
 
+.storage-diagram .grid-strip line,
+.storage-diagram .axis-line {
+  stroke: #334155;
+  stroke-width: 3;
+}
+
+.storage-diagram .grid-node circle {
+  fill: #0f172a;
+  stroke: #cbd5e1;
+  stroke-width: 4;
+}
+
+.storage-diagram .tick {
+  stroke: #64748b;
+  stroke-width: 2;
+}
+
+.storage-diagram .line-p,
+.storage-diagram .line-q,
+.storage-diagram .curve-r {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 6;
+}
+
+.storage-diagram .line-p {
+  stroke: #2563eb;
+}
+
+.storage-diagram .line-q {
+  stroke: #f97316;
+}
+
+.storage-diagram .curve-r {
+  stroke: #7c3aed;
+}
+
+.storage-diagram .dot-p {
+  fill: #2563eb;
+}
+
+.storage-diagram .dot-q {
+  fill: #f97316;
+}
+
+.storage-diagram .dot-r {
+  fill: #7c3aed;
+}
+
+.storage-diagram .legend-p,
+.storage-diagram .legend-q,
+.storage-diagram .legend-r {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.storage-diagram .legend-p {
+  fill: #1d4ed8;
+}
+
+.storage-diagram .legend-q {
+  fill: #c2410c;
+}
+
+.storage-diagram .legend-r {
+  fill: #6d28d9;
+}
+
 .storage-diagram .notes text {
   fill: #334155;
   font-size: 16px;
