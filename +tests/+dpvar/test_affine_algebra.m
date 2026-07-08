@@ -168,6 +168,22 @@ function testRateMetadataPropagatesAndChecksMismatch(testCase)
     testCase.verifyError(@() P + R, "dpvar:InvalidAddition");
 end
 
+function testZeroAffineCancellationsClearMetadata(testCase)
+    % Cancelled affine expressions should become compact nondecision zeros.
+    P = dpvar(1, {[0 1]});
+    D = rhodiff(P, [-1 1]);
+
+    Z1 = P - P;
+    Z2 = P + (-P);
+    Z3 = D - D;
+
+    verifyZeroDpvar(testCase, Z1, [1 1]);
+    verifyZeroDpvar(testCase, Z2, [1 1]);
+    verifyZeroDpvar(testCase, Z3, [1 1]);
+    testCase.verifyTrue(isequal(Z1 + P, P));
+    testCase.verifyTrue(isequal(P - Z1, P));
+end
+
 function verifyCoeffExpr(testCase, actual, expected)
     % Compare affine coefficient expressions by their normalized YALMIP bases.
     testCase.verifyEqual(numel(actual), numel(expected));
@@ -175,4 +191,16 @@ function verifyCoeffExpr(testCase, actual, expected)
         diff = actual{k} - expected{k};
         testCase.verifyEqual(full(getbase(diff)), zeros(size(getbase(diff))), AbsTol=1e-10);
     end
+end
+
+function verifyZeroDpvar(testCase, obj, sz)
+    % Arithmetic fast paths should remove stale YALMIP/rate metadata.
+    testCase.verifyEqual(size(obj), sz);
+    testCase.verifyEqual(obj.Degree, 0);
+    testCase.verifyFalse(obj.ContainsDecision);
+    testCase.verifyFalse(obj.HasRateDependence);
+    testCase.verifyEmpty(obj.RateBounds);
+    coeffs = obj.coeffs(ones(1, obj.npar()));
+    testCase.verifyEqual(numel(coeffs), 1);
+    testCase.verifyEqual(coeffs{1}, zeros(sz));
 end

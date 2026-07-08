@@ -1,0 +1,76 @@
+---
+import DocsLayout from "../layouts/DocsLayout.astro";
+---
+
+<DocsLayout title="API Reference | DP-LMI Package">
+  <section class="hero compact">
+    <h1>API Reference</h1>
+    <p class="lead">
+      The public reference tracks implemented MATLAB classes and functions.
+      Backend behavior is documented only where it explains user-visible
+      <code>dpmat</code> and <code>dpvar</code> behavior.
+    </p>
+  </section>
+
+  <section class="reference-list" aria-label="API reference index">
+    <article id="dpbase" class="reference-item">
+      <h2><code>dpbase</code></h2>
+      <p>
+        Backend parent for grid metadata, cell ordering, local coefficient
+        storage, inherited inspection properties, and validation. Ordinary
+        modeling code should construct <code>dpmat</code> or <code>dpvar</code>.
+      </p>
+    </article>
+
+    <article id="dpmat" class="reference-item">
+      <h2><code>dpmat</code></h2>
+      <p>
+        Known finite real matrix data. Supported behavior includes
+        coefficient-backed construction, function-backed construction,
+        evaluation, display, <code>table</code>, plotting, matrix operations,
+        indexing, assignment, <code>isequal</code>, coefficient algebra,
+        numeric promotion, common-grid refinement, and zero fast paths.
+      </p>
+      <pre><code>{`A = dpmat({[0 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 1]}, {10, 20, 30}, Degree=2);
+C = A + B;
+D = A * A;`}</code></pre>
+    </article>
+
+    <article id="dpvar" class="reference-item">
+      <h2><code>dpvar</code></h2>
+      <p>
+        YALMIP-backed gridded Bernstein decision expressions. Supported
+        behavior includes symmetric/full construction, degree-zero constants,
+        affine algebra, compatible numeric and <code>dpmat</code> promotion,
+        supported known-data products, matrix operations, comparisons, and
+        rate-weighted derivatives through <code>rhodiff</code>.
+      </p>
+      <pre><code>{`P = dpvar(2, {[0 1]}, "symmetric", RateBounds=[-1 1]);
+dP = rhodiff(P);
+C = dP + P <= 0;`}</code></pre>
+    </article>
+
+    <article id="dplmi" class="reference-item">
+      <h2><code>dplmi</code></h2>
+      <p>
+        Finite YALMIP constraint assembly from <code>dpvar</code> residuals.
+        Comparisons such as <code>P >= 0</code> are the primary entry point.
+        <code>toYalmip</code> exposes the assembled constraints for ordinary
+        YALMIP <code>optimize</code> calls.
+      </p>
+      <pre><code>{`C = P >= 0;
+constraints = C.toYalmip;
+sol = optimize(constraints, [], sdpsettings("verbose", 0));`}</code></pre>
+    </article>
+
+    <article id="bernsteinTable" class="reference-item">
+      <h2><code>bernsteinTable</code></h2>
+      <p>
+        Returns a tabular view of coefficient-backed object cells, local
+        labels, physical grid coordinates, Bernstein basis strings, and stored
+        values. <code>dpmat/table</code> delegates to this public helper.
+      </p>
+    </article>
+  </section>
+</DocsLayout>

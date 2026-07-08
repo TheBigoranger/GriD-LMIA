@@ -11,6 +11,35 @@ function out = mtimes(lhs, rhs)
     %     A = dpmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     %     C = A * P;
 
+    if isa(lhs, "dpvar") && isZeroObj(lhs) && hasProdSize(rhs)
+        grid = prodGrid(lhs, rhs);
+        out = zeroObj(grid, prodSize(lhs.MatrixSize, opSize(rhs)));
+        return
+    end
+    if hasProdSize(lhs) && isa(rhs, "dpvar") && isZeroObj(rhs)
+        grid = prodGrid(rhs, lhs);
+        out = zeroObj(grid, prodSize(opSize(lhs), rhs.MatrixSize));
+        return
+    end
+    if isa(lhs, "dpvar") && isZeroNum(rhs)
+        out = zeroObj(lhs.GridInfo.Vectors, prodSize(lhs.MatrixSize, size(rhs)));
+        return
+    end
+    if isZeroNum(lhs) && isa(rhs, "dpvar")
+        out = zeroObj(rhs.GridInfo.Vectors, prodSize(size(lhs), rhs.MatrixSize));
+        return
+    end
+    if isa(lhs, "dpvar") && isa(rhs, "dpmat") && isZeroKnown(rhs)
+        grid = lhs.mergeGrid("dpvar:MixedGrid", lhs, rhs);
+        out = zeroObj(grid, prodSize(lhs.MatrixSize, rhs.MatrixSize));
+        return
+    end
+    if isa(lhs, "dpmat") && isZeroKnown(lhs) && isa(rhs, "dpvar")
+        grid = rhs.mergeGrid("dpvar:MixedGrid", lhs, rhs);
+        out = zeroObj(grid, prodSize(lhs.MatrixSize, rhs.MatrixSize));
+        return
+    end
+
     if isa(lhs, "dpvar") && isa(rhs, "dpvar")
         error("dpvar:InvalidMultiplication", ...
             "dpvar * dpvar is unsupported because it would create quadratic decision terms.");
@@ -73,6 +102,25 @@ end
 
 function tf = isScalarNum(val)
     tf = isnumeric(val) && isscalar(val) && isreal(val) && isfinite(val);
+end
+
+function tf = hasProdSize(val)
+    tf = isa(val, "dpvar") || isa(val, "dpmat") || isnumeric(val);
+end
+
+function sz = opSize(val)
+    if isa(val, "dpvar") || isa(val, "dpmat")
+        sz = val.MatrixSize;
+    else
+        sz = size(val);
+    end
+end
+
+function grid = prodGrid(anchor, other)
+    grid = anchor.GridInfo.Vectors;
+    if isa(other, "dpbase")
+        grid = anchor.mergeGrid("dpvar:MixedGrid", anchor, other);
+    end
 end
 
 function sz = prodSize(lhs, rhs)

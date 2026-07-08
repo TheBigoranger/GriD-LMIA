@@ -18,6 +18,41 @@ function testDispAndDisplayText(testCase)
     testCase.verifyTrue(contains(detail, "Coefficients per cell: 2"));
 end
 
+function testTableListsBernsteinCoefficients(testCase)
+    % table(A) should expose cell-local Bernstein metadata for the console.
+    A = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+
+    T = table(A);
+
+    testCase.verifyEqual(T.Properties.VariableNames, {'TermIndex', ...
+        'CellSubscript', 'CoeffSubscript', 'LocalIndex', 'Basis', ...
+        'IsPhysicalNode', 'Value'});
+    testCase.verifyEqual(height(T), 3);
+    testCase.verifyEqual(T.CellSubscript{1}, 1);
+    testCase.verifyEqual(T.CoeffSubscript{2}, 2);
+    testCase.verifyEqual(T.LocalIndex{2}, 1);
+    testCase.verifyEqual(string(T.Basis(2)), "2a(1-a)");
+    testCase.verifyFalse(T.IsPhysicalNode(2));
+    testCase.verifyEqual(T.Value{3}, 3);
+end
+
+function testTableTensorGridOrderingAndFunctionOnlyRejection(testCase)
+    % Tensor rows should follow the shared local-label combination order.
+    A = dpmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1);
+    F = dpmat({[0 1]}, @(rho) rho);
+
+    T = table(A);
+
+    testCase.verifyEqual(height(T), 4);
+    testCase.verifyEqual(T.CellSubscript{1}, [1 1]);
+    testCase.verifyEqual(T.LocalIndex{1}, [0 0]);
+    testCase.verifyEqual(T.CoeffSubscript{4}, [2 2]);
+    testCase.verifyEqual(string(T.Basis(4)), "(1-a1) * (1-a2)");
+    testCase.verifyEqual(T.Value{1}, 1);
+    testCase.verifyEqual(T.Value{4}, 4);
+    testCase.verifyError(@() table(F), "dpmat:FunctionOnlyTable");
+end
+
 function testPlotOneDimensionalFunctionBacked(testCase)
     % 1-D plotting should sample through evaluate and label each matrix entry.
     fig = figure("Visible", "off");

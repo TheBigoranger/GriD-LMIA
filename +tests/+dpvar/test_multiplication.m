@@ -99,6 +99,30 @@ function testDerivativeNumericMatrixProducts(testCase)
     verifyCoeffExpr(testCase, R.coeffs(1), {cd{1, 1} * [4 5]; cd{2, 1} * [4 5]});
 end
 
+function testZeroProductsClearMetadataAndAvoidQuadraticGuard(testCase)
+    % Zero products should not carry decision/rate metadata or form BMIs.
+    P = dpvar(2, 1, {[0 1]}, "full");
+    D = rhodiff(P, [-1 1]);
+    V = dpvar(1, 2, {[0 1]}, "full");
+    W = dpvar(2, 1, {[0 1]}, "full");
+    Z = V - V;
+
+    Z1 = P * 0;
+    Z2 = 0 * P;
+    Z3 = D * 0;
+    Z4 = zeros(1, 2) * P;
+    Z5 = P * zeros(1, 3);
+    Z6 = Z * W;
+
+    verifyZeroDpvar(testCase, Z1, [2 1]);
+    verifyZeroDpvar(testCase, Z2, [2 1]);
+    verifyZeroDpvar(testCase, Z3, [2 1]);
+    verifyZeroDpvar(testCase, Z4, [1 1]);
+    verifyZeroDpvar(testCase, Z5, [2 3]);
+    verifyZeroDpvar(testCase, Z6, [1 1]);
+    testCase.verifyError(@() P * zeros(2, 1), "dpvar:InvalidMultiplication");
+end
+
 function testMixedScalarGridUsesCommonRefinement(testCase)
     % Products on same-bound mixed grids are recomputed cell-locally.
     P = dpvar(1, {[0 1]});
@@ -191,4 +215,16 @@ function verifyCoeffExpr(testCase, actual, expected)
             testCase.verifyEqual(diff, zeros(size(diff)), AbsTol=1e-10);
         end
     end
+end
+
+function verifyZeroDpvar(testCase, obj, sz)
+    % Zero product shortcuts should return compact ordinary coefficients.
+    testCase.verifyEqual(size(obj), sz);
+    testCase.verifyEqual(obj.Degree, 0);
+    testCase.verifyFalse(obj.ContainsDecision);
+    testCase.verifyFalse(obj.HasRateDependence);
+    testCase.verifyEmpty(obj.RateBounds);
+    coeffs = obj.coeffs(ones(1, obj.npar()));
+    testCase.verifyEqual(numel(coeffs), 1);
+    testCase.verifyEqual(coeffs{1}, zeros(sz));
 end

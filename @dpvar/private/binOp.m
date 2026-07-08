@@ -20,6 +20,11 @@ function out = binOp(lhs, rhs, fcn, errId)
     rhsVals = elevVals(anchor, rd.LocalValues, rd.Degree, deg, grid);
     vals = zipRows(lhsVals, rhsVals, fcn, grid);
 
+    if isZeroVals(vals)
+        out = zeroObj(grid, reqSize);
+        return
+    end
+
     hasRate = ld.HasRateDependence || rd.HasRateDependence;
     if ~hasRate
         rb = [];

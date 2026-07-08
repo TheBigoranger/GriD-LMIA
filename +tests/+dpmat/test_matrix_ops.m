@@ -87,6 +87,28 @@ function testCommonStructuralMethods(testCase)
     testCase.verifyFalse(isequal(A, D));
 end
 
+function testIsequalComparesNormalizedBernsteinEvidence(testCase)
+    % Equality should compare coefficient evidence after grid/degree alignment.
+    grid = [0 1];
+    A = dpmat([0, 1], @(x) [-1, 0.5; -1, -2] + ...
+        x * [-1.3, -20; 2, -10], Degree=1);
+    A1 = dpmat(grid, {[-1, 0.5; -1, -2], ...
+        [-1, 0.5; -1, -2] + [-1.3, -20; 2, -10]});
+    B = dpmat({[0 0.5 1]}, {0, 0.5, 1}, Degree=1);
+    C = dpmat({[0 1]}, {0, 0.5, 1}, Degree=2);
+    D = dpmat({[0 1]}, {0, 1}, Degree=1);
+    E = dpmat({[0 1]}, {0, 2}, Degree=1);
+    F = dpmat({[0 2]}, {0, 2}, Degree=1);
+    G = dpmat({[0 1]}, {zeros(2), ones(2)}, Degree=1);
+
+    testCase.verifyTrue(isequal(A, A1));
+    testCase.verifyTrue(isequal(B, C));
+    testCase.verifyTrue(isequal(C, D));
+    testCase.verifyFalse(isequal(D, E));
+    testCase.verifyFalse(isequal(D, F));
+    testCase.verifyFalse(isequal(D, G));
+end
+
 function testDiagConstructionAndReshapeInference(testCase)
     % Vector diag and one empty reshape dimension should follow MATLAB usage.
     A = dpmat({[0 1]}, {[1; 2; 3], [4; 5; 6]}, Degree=1);

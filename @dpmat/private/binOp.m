@@ -16,5 +16,10 @@ function out = binOp(lhs, rhs, fcn, errId)
     rhsVals = elevVals(anchor, rd.LocalValues, rd.Degree, deg, grid);
     vals = helper.zipVals(lhsVals, rhsVals, fcn, grid);
 
+    if isZeroVals(vals)
+        out = zeroObj(grid, reqSize);
+        return
+    end
+
     out = dpmat(grid, vals, Degree=deg);
 end

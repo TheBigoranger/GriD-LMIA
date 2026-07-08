@@ -1,0 +1,75 @@
+---
+import DocsLayout from "../layouts/DocsLayout.astro";
+
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+---
+
+<DocsLayout title="DP-LMI Package Documentation">
+  <section class="hero">
+    <div>
+      <h1>Differential parameter-dependent LMI package</h1>
+      <p class="lead">
+        MATLAB/YALMIP tools for cell-local Bernstein polynomial matrices,
+        gridded decision variables, rate-weighted derivatives, and direct
+        coefficient-wise LMI assembly.
+      </p>
+    </div>
+    <aside class="hero-panel" aria-label="Current implementation snapshot">
+      <h2>Current v0 scope</h2>
+      <p>
+        Implemented now: <code>dpbase</code>, <code>dpmat</code>,
+        <code>dpvar</code>, <code>rhodiff</code>, <code>dplmi.toYalmip</code>,
+        coefficient algebra, plotting, and solver smoke tests with MOSEK
+        preference plus <code>lmilab</code> fallback.
+      </p>
+    </aside>
+  </section>
+
+  <section class="doc-grid" aria-label="Documentation entry points">
+    <a class="doc-card" href={`${base}background/`}>
+      <h3>Bernstein Background</h3>
+      <p>Local cells, coefficient labels, tensor grids, and degree growth.</p>
+    </a>
+    <a class="doc-card" href={`${base}setup/`}>
+      <h3>Install And Quick Start</h3>
+      <p>Path setup, test verification, and first runnable MATLAB workflows.</p>
+    </a>
+    <a class="doc-card" href={`${base}api/`}>
+      <h3>API Reference</h3>
+      <p>Reference pages for <code>dpbase</code>, <code>dpmat</code>, <code>dpvar</code>, and <code>dplmi</code>.</p>
+    </a>
+    <a class="doc-card" href={`${base}examples/`}>
+      <h3>Examples</h3>
+      <p>Known-data algebra, gridded decisions, derivatives, and YALMIP handoff.</p>
+    </a>
+    <a class="doc-card" href={`${base}status/`}>
+      <h3>Status And Limits</h3>
+      <p>Implemented behavior separated from reserved relaxation and Polya work.</p>
+    </a>
+    <a class="doc-card" href="https://github.com/TheBigoranger/DP-LMI-package">
+      <h3>Repository</h3>
+      <p>Source code, tests, LaTeX manual, and this GitHub Pages site.</p>
+    </a>
+  </section>
+
+  <section class="band two-col">
+    <div>
+      <h2>Documentation follows the code</h2>
+      <p>
+        The package stores Bernstein coefficients cell by cell. Known data live
+        in <code>dpmat</code>; YALMIP-backed decision expressions live in
+        <code>dpvar</code>; comparisons produce <code>dplmi</code> objects that
+        hand finite constraints to YALMIP.
+      </p>
+    </div>
+    <div class="rail">
+      <p>
+        The first public documentation deliberately stays within tested
+        behavior. Relaxation lemma assembly, Polya options, residual
+        diagnostics, and package-owned solver wrappers remain future work.
+      </p>
+    </div>
+  </section>
+</DocsLayout>

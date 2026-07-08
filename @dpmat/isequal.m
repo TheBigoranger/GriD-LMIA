@@ -1,12 +1,13 @@
 function tf = isequal(varargin)
-    %ISEQUAL True when dpmat objects have identical metadata and coefficients.
+    %ISEQUAL True when dpmat objects have equivalent coefficient evidence.
     %
     %   Syntax:
     %     tf = isequal(A, B)
     %
     %   Example:
-    %     A = dpmat({[0 1]}, {1, 2}, Degree=1);
-    %     tf = isequal(A, A);
+    %     A = dpmat({[0 1]}, @(rho) rho, Degree=1);
+    %     B = dpmat({[0 1]}, {0, 1}, Degree=1);
+    %     tf = isequal(A, B);
 
     if nargin < 2
         tf = true;
@@ -30,14 +31,72 @@ function tf = isequal(varargin)
 end
 
 function tf = sameOne(a, b)
-    tf = builtin("isequal", a.MatrixSize, b.MatrixSize) && ...
-        builtin("isequal", a.Degree, b.Degree) && ...
+    if ~sameMeta(a, b)
+        tf = false;
+        return
+    end
+
+    if hasEvidence(a) && hasEvidence(b)
+        tf = sameEvidence(a, b);
+        return
+    end
+
+    % Function-only objects have placeholder LocalValues, so their equality
+    % remains exact metadata/function-handle equality rather than evidence-based.
+    tf = builtin("isequal", a.Degree, b.Degree) && ...
         builtin("isequal", a.GridInfo.Vectors, b.GridInfo.Vectors) && ...
-        builtin("isequal", a.LocalValues, b.LocalValues) && ...
+        builtin("isequal", a.SourceSummary, b.SourceSummary) && ...
+        builtin("isequal", a.FunctionHandle, b.FunctionHandle);
+end
+
+function tf = sameMeta(a, b)
+    tf = builtin("isequal", a.MatrixSize, b.MatrixSize) && ...
         builtin("isequal", a.IsContinuous, b.IsContinuous) && ...
         builtin("isequal", a.ContainsDecision, b.ContainsDecision) && ...
         builtin("isequal", a.HasRateDependence, b.HasRateDependence) && ...
-        builtin("isequal", a.RateBounds, b.RateBounds) && ...
-        builtin("isequal", a.SourceSummary, b.SourceSummary) && ...
-        builtin("isequal", a.FunctionHandle, b.FunctionHandle);
+        builtin("isequal", a.RateBounds, b.RateBounds);
+end
+
+function tf = hasEvidence(obj)
+    tf = obj.SourceSummary ~= "function";
+end
+
+function tf = sameEvidence(a, b)
+    try
+        grid = a.mergeGrid("dpmat:InvalidEquality", a, b);
+        ad = asData(grid, a, a.MatrixSize, "dpmat:InvalidEquality");
+        bd = asData(grid, b, a.MatrixSize, "dpmat:InvalidEquality");
+    catch
+        tf = false;
+        return
+    end
+
+    deg = max(ad.Degree, bd.Degree);
+    av = elevVals(a, ad.LocalValues, ad.Degree, deg, grid);
+    bv = elevVals(a, bd.LocalValues, bd.Degree, deg, grid);
+    tf = valsEqual(av, bv);
+end
+
+function tf = valsEqual(a, b)
+    if iscell(a) || iscell(b)
+        if ~(iscell(a) && iscell(b)) || ~isequal(size(a), size(b))
+            tf = false;
+            return
+        end
+        tf = true;
+        for k = 1:numel(a)
+            if ~valsEqual(a{k}, b{k})
+                tf = false;
+                return
+            end
+        end
+        return
+    end
+
+    if ~isequal(size(a), size(b)) || ~isnumeric(a) || ~isnumeric(b)
+        tf = false;
+        return
+    end
+    scale = max([1; abs(a(:)); abs(b(:))]);
+    tf = all(abs(a(:) - b(:)) <= 1e-9 * scale);
 end

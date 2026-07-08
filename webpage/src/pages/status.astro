@@ -1,0 +1,53 @@
+---
+import DocsLayout from "../layouts/DocsLayout.astro";
+---
+
+<DocsLayout title="Status And Limits | DP-LMI Package">
+  <section class="hero compact">
+    <h1>Status And Limits</h1>
+    <p class="lead">
+      The current public surface is intentionally narrow: direct
+      coefficient-wise YALMIP assembly over cell-local Bernstein data.
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>Implemented Now</h2>
+    <table class="status-table">
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th>Current behavior</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>dpmat</code></td>
+          <td>Known-data construction, evaluation, display, plotting, structural operations, coefficient algebra, matrix products, and zero simplifications.</td>
+        </tr>
+        <tr>
+          <td><code>dpvar</code></td>
+          <td>YALMIP-backed affine decision expressions, supported known-data products, matrix operations, comparisons, and rate derivatives.</td>
+        </tr>
+        <tr>
+          <td><code>dplmi</code></td>
+          <td>Direct finite coefficient-wise constraints, rate-row enumeration, <code>toYalmip</code>, and solver smoke tests.</td>
+        </tr>
+        <tr>
+          <td>Documentation</td>
+          <td>LaTeX manual in <code>doc/manual.tex</code> and GitHub Pages source in <code>webpage/</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <h2>Reserved Future Work</h2>
+    <p>
+      Relaxation lemma assembly, Polya relaxation, strictness margins,
+      residual diagnostics, and package-owned solver wrappers are not
+      documented as implemented APIs. Users currently call YALMIP directly
+      after converting <code>dplmi</code> objects with <code>toYalmip</code>.
+    </p>
+  </section>
+</DocsLayout>

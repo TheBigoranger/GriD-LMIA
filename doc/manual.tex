@@ -111,8 +111,8 @@ addpath(pwd)
 The current verification entry point runs the tests for \code{+helper},
 \code{@dpbase}, \code{@dpmat}, \code{@dpvar}, and \code{@dplmi}.  The
 \code{@dpvar} and \code{@dplmi} tests require YALMIP to be available on the
-\matlab{} path.  Solver smoke tests use installed YALMIP solvers; the MOSEK
-example is skipped unless MOSEK is available.
+\matlab{} path.  Solver smoke tests use installed YALMIP solvers; they prefer
+MOSEK when available and fall back to \code{lmilab} otherwise.
 
 \begin{lstlisting}[style=dpmatlab]
 results = tests.run_all;
@@ -1633,7 +1633,7 @@ solDp = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
 [solConst.problem, solDp.problem]
 \end{lstlisting}
 
-Expected result under an available SDP solver:
+Expected result under MOSEK:
 
 \begin{lstlisting}[style=dpoutput]
 [solConst.problem, solDp.problem] -> [1 0]
@@ -1641,14 +1641,17 @@ Expected result under an available SDP solver:
 
 YALMIP returns \code{problem=1} for the constant-\(P\) infeasible case and
 \code{problem=0} for the degree-one parameter-dependent feasible case in the
-current local test setup.
+current local MOSEK test setup.  When MOSEK is unavailable, the smoke test
+falls back to \code{lmilab} and checks the solver-dispatch path without using
+LMILAB to certify this infeasibility distinction.
 
 \subsection{A Block DP-LMI With A Performance Variable}
 
-This example is adapted from the root \code{test.m} case.  The test suite now
-keeps it in the \code{dplmi} solver-smoke tests.  It combines known
+This example is adapted from the root \code{test.m} case.  The test suite keeps
+the same block structure in a reduced-grid \code{dplmi} solver-smoke test; the
+manual version below keeps the original 20-point grid.  It combines known
 parameter-dependent matrices, a rate-weighted derivative, a scalar degree-zero
-performance variable, block matrix assembly, and MOSEK-backed optimization.
+performance variable, block matrix assembly, and solver-backed optimization.
 
 \begin{lstlisting}[style=dpmatlab]
 grid = linspace(0, 1, 20);
@@ -1671,7 +1674,11 @@ E2 = P >= 0;
 numel(E1.Constraints)
 numel(E2.Constraints)
 
-opts = sdpsettings('solver', 'mosek', 'verbose', 0);
+if exist('mosekopt', 'file') ~= 0
+    opts = sdpsettings('solver', 'mosek', 'verbose', 0);
+else
+    opts = sdpsettings('solver', 'lmilab', 'verbose', 0);
+end
 objective = gamma.LocalValues{1}{1};
 sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
 value(objective)
@@ -1689,8 +1696,8 @@ coefficients, and two rate vertices from \code{diffP}, so it produces
 \(19 \times 3 \times 2 = 114\) direct constraints.  The positivity constraint
 has \(19\) intervals and two degree-one coefficients, so it produces
 \(19 \times 2 = 38\) constraints.  The final numeric value depends on the
-installed solver and tolerances; the test verifies a successful MOSEK solve and
-a finite objective value when MOSEK is available.
+installed solver and tolerances; the test verifies a successful solve and a
+finite objective value, using MOSEK when available and \code{lmilab} otherwise.
 
 \subsection{Validation Boundaries}
 

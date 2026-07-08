@@ -166,6 +166,41 @@ function testFunctionBernsteinCanEnterAlgebra(testCase)
     verifyCoeff(testCase, C, 1, {1, 2});
 end
 
+function testZeroFastPathsCollapseDegree(testCase)
+    % Provably zero arithmetic should return compact degree-zero data.
+    A = dpmat({[0 1]}, {1, 3}, Degree=1);
+    F = dpmat({[0 1]}, @(rho) rho * ones(2));
+
+    Z1 = A - A;
+    Z2 = A + (-A);
+    Z3 = A * 0;
+    Z4 = 0 * A;
+    Z5 = F * 0;
+    Z6 = Z1 * A;
+
+    verifyZeroDpmat(testCase, Z1, [1 1]);
+    verifyZeroDpmat(testCase, Z2, [1 1]);
+    verifyZeroDpmat(testCase, Z3, [1 1]);
+    verifyZeroDpmat(testCase, Z4, [1 1]);
+    verifyZeroDpmat(testCase, Z5, [2 2]);
+    verifyZeroDpmat(testCase, Z6, [1 1]);
+    testCase.verifyTrue(isequal(A + Z1, A));
+    testCase.verifyTrue(isequal(A - Z1, A));
+    testCase.verifyError(@() F + 1, "dpmat:FunctionOnlyAlgebra");
+end
+
+function testZeroMatrixMultiplicationSizes(testCase)
+    % Zero numeric matrices should still enforce matrix-product dimensions.
+    A = dpmat({[0 1]}, {ones(2, 3), 2 * ones(2, 3)}, Degree=1);
+
+    L = zeros(4, 2) * A;
+    R = A * zeros(3, 5);
+
+    verifyZeroDpmat(testCase, L, [4 3]);
+    verifyZeroDpmat(testCase, R, [2 5]);
+    testCase.verifyError(@() A * zeros(4, 1), "dpmat:InvalidMultiplication");
+end
+
 function out = bernProdExpected(lhs, lhsDeg, rhs, rhsDeg, nPar)
     % Local oracle for tensor Bernstein product coefficients.
     outDeg = lhsDeg + rhsDeg;
@@ -216,4 +251,13 @@ function verifyCoeff(testCase, obj, cellSubs, expected)
     for k = 1:numel(expected)
         testCase.verifyEqual(coeffs{k}, expected{k}, AbsTol=1e-10);
     end
+end
+
+function verifyZeroDpmat(testCase, obj, sz)
+    % Check the compact zero representation used by arithmetic fast paths.
+    testCase.verifyEqual(size(obj), sz);
+    testCase.verifyEqual(obj.Degree, 0);
+    coeffs = obj.coeffs(ones(1, obj.npar()));
+    testCase.verifyEqual(numel(coeffs), 1);
+    testCase.verifyEqual(coeffs{1}, zeros(sz));
 end
