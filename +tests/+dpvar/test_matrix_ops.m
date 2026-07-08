@@ -233,17 +233,32 @@ function testStructuralOpsPreserveRateMetadata(testCase)
     % Structural transforms should keep RateBounds outside LocalValues.
     rb = [-1 1];
     P = dpvar(2, {[0 1]}, "full", RateBounds=rb);
+    Q = dpvar(2, {[0 1]}, "full");
+    R = dpvar(2, {[0 1]}, "full", RateBounds=rb);
+    Bad = dpvar(2, {[0 1]}, "full", RateBounds=[0 1]);
 
     U = triu(P);
     S = P(:, 1);
     B = blkdiag(P, 1);
+    H = [Q, R];
+    G = blkdiag(Q(1, 1), R(1, 1));
+    A = rateAssign(P, R);
 
     testCase.verifyTrue(U.HasRateDependence);
     testCase.verifyTrue(S.HasRateDependence);
     testCase.verifyTrue(B.HasRateDependence);
+    testCase.verifyTrue(H.HasRateDependence);
+    testCase.verifyTrue(G.HasRateDependence);
+    testCase.verifyTrue(A.HasRateDependence);
     testCase.verifyEqual(U.RateBounds, rb);
     testCase.verifyEqual(S.RateBounds, rb);
     testCase.verifyEqual(B.RateBounds, rb);
+    testCase.verifyEqual(H.RateBounds, rb);
+    testCase.verifyEqual(G.RateBounds, rb);
+    testCase.verifyEqual(A.RateBounds, rb);
+    testCase.verifyError(@() [R, Bad], "dpvar:InvalidConcatenation");
+    testCase.verifyError(@() blkdiag(R, Bad), "dpvar:InvalidBlkdiag");
+    testCase.verifyError(@() rateAssign(R, Bad), "dpvar:InvalidAssignment");
 end
 
 function testRejectsInvalidConcatenation(testCase)
@@ -269,7 +284,7 @@ function testIndexingAndAssignmentRejections(testCase)
     testCase.verifyError(@() growAssign(P), "dpvar:InvalidAssignment");
     testCase.verifyError(@() badSizeAssign(P), "dpvar:InvalidAssignment");
     testCase.verifyError(@() nonlinearAssign(P, x), "dpvar:InvalidAssignment");
-    testCase.verifyError(@() rateAssign(P, R), "dpvar:InvalidAssignment");
+    testCase.verifyEqual(rateAssign(P, R).RateBounds, [-1 1]);
 end
 
 function testStructuralRejections(testCase)
@@ -308,8 +323,8 @@ function nonlinearAssign(P, x)
     P(1, 1) = x * x;
 end
 
-function rateAssign(P, R)
-    % Exercise rate-dependent assignment rejection through a local helper.
+function P = rateAssign(P, R)
+    % Exercise rate-dependent assignment through a local helper.
     P(:, :) = R;
 end
 

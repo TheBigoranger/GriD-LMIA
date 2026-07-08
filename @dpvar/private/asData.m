@@ -1,14 +1,17 @@
-function data = asData(grid, val, reqSize, rb, errId, allowEmptyRate)
+function data = asData(grid, val, reqSize, rb, errId)
     %ASDATA Convert supported operands to dpvar data on the target grid.
 
-    if nargin < 6
-        allowEmptyRate = false;
-    end
     info = helper.mkGrid(grid, "dpvar");
 
     if isa(val, "dpvar")
-        chkRate(rb, val.RateBounds, errId, allowEmptyRate);
-        chkSize(val.MatrixSize, reqSize, errId);
+        if ~isempty(val.RateBounds) && (isempty(rb) || ~isequal(rb, val.RateBounds))
+            error(errId, "dpvar operands must have matching RateBounds.");
+        end
+        % Empty operand metadata inherits the operation-level bounds picked
+        % from the other dpvar input.
+        if ~isempty(reqSize) && ~isequal(val.MatrixSize, reqSize)
+            error(errId, "dpvar operand matrix sizes are incompatible for this operation.");
+        end
         nCoeff = (val.Degree + 1) ^ val.npar();
         hasRows = isRateRows(val.LocalValues, val.GridInfo.Vectors, nCoeff);
         same = sameGrid(info, val, errId);
@@ -32,7 +35,9 @@ function data = asData(grid, val, reqSize, rb, errId, allowEmptyRate)
             error("dpvar:FunctionOnlyAlgebra", ...
                 "Function-backed dpmat objects need explicit Bernstein coefficient evidence for dpvar algebra.");
         end
-        chkSize(val.MatrixSize, reqSize, errId);
+        if ~isempty(reqSize) && ~isequal(val.MatrixSize, reqSize)
+            error(errId, "dpvar operand matrix sizes are incompatible for this operation.");
+        end
         if sameGrid(info, val, errId)
             vals = val.LocalValues;
         else
@@ -46,7 +51,7 @@ function data = asData(grid, val, reqSize, rb, errId, allowEmptyRate)
     end
 
     mat = chkMat(val, reqSize, errId);
-    data = pack(size(mat), 0, constVals(info.NumNodes - 1, mat), ...
+    data = pack(size(mat), 0, helper.mkNest(info.NumNodes - 1, @(~) {mat}), ...
         isa(mat, "sdpvar"), false, true, false);
 end
 
@@ -105,27 +110,6 @@ function [subs, alpha] = localPoint(obj, pt)
     end
 end
 
-function chkRate(rb, otherRb, errId, allowEmptyRate)
-    if isempty(rb) && isempty(otherRb)
-        return
-    end
-    if allowEmptyRate && isempty(otherRb)
-        return
-    end
-    if ~(isequal(rb, otherRb))
-        error(errId, "dpvar operands must have matching RateBounds.");
-    end
-end
-
-function chkSize(sz, reqSize, errId)
-    if isempty(reqSize)
-        return
-    end
-    if ~isequal(sz, reqSize)
-        error(errId, "dpvar operand matrix sizes are incompatible for this operation.");
-    end
-end
-
 function mat = chkMat(val, reqSize, errId)
     if isa(val, "sdpvar")
         if ~ismatrix(val) || ~isreal(val) || ~islinear(val)
@@ -150,8 +134,4 @@ function mat = chkMat(val, reqSize, errId)
     else
         error(errId, "Numeric operand size is incompatible for this operation.");
     end
-end
-
-function vals = constVals(nCell, mat)
-    vals = helper.mkNest(nCell, @(~) {mat});
 end

@@ -62,6 +62,28 @@ function testMixedScalarGridUsesCommonRefinement(testCase)
         cp{2} * 30});
 end
 
+function testComposedKnownDecisionExpression(testCase)
+    % Chained affine products should preserve degree growth and coefficients.
+    P = dpvar(1, {[0 1]});
+    A = dpmat({[0 1]}, {10, 20}, Degree=1);
+    B = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+    C = dpmat({[0 1]}, {4, 5}, Degree=1);
+    D = dpmat({[0 1]}, {7, 8, 9, 10}, Degree=3);
+    cp = P.coeffs(1);
+
+    E = (P * A + B) * C - D;
+
+    s0 = 10 * cp{1} + 1;
+    s1 = (20 * cp{1} + 10 * cp{2}) / 2 + 2;
+    s2 = 20 * cp{2} + 3;
+    testCase.verifyEqual(E.Degree, 3);
+    verifyCoeffExpr(testCase, E.coeffs(1), { ...
+        s0 * 4 - 7, ...
+        s0 * 5 / 3 + s1 * 8 / 3 - 8, ...
+        s1 * 10 / 3 + s2 * 4 / 3 - 9, ...
+        s2 * 5 - 10});
+end
+
 function testRejectsUnsupportedProducts(testCase)
     % Products that leave the affine SDP layer should fail clearly.
     P = dpvar(1, {[0 1]});

@@ -20,6 +20,23 @@ function testTensorCoefficientInterpolation(testCase)
     testCase.verifyEqual(val, 2.5, AbsTol=1e-12);
 end
 
+function testThreeDimensionalDegreeTwoInterpolation(testCase)
+    % 3-D degree-2 data should evaluate with tensor Bernstein weights.
+    data = cell(3, 3, 3);
+    for i = 0:2
+        for j = 0:2
+            for k = 0:2
+                data{i + 1, j + 1, k + 1} = i + 10 * j + 100 * k;
+            end
+        end
+    end
+    A = dpmat({[0 1], [0 1], [0 1]}, data, Degree=2);
+
+    val = A.evaluate([0.25, 0.5, 0.75]);
+
+    testCase.verifyEqual(val, 160.5, AbsTol=1e-12);
+end
+
 function testFunctionBackedUsesExactHandle(testCase)
     % Function-backed dpmat should evaluate through the retained exact handle.
     A = dpmat({[0 pi]}, @(rho) sin(rho));

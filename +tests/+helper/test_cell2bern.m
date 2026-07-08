@@ -34,6 +34,29 @@ function testTensorOrderMatchesDpmatCoeffs(testCase)
     testCase.verifyEqual(flat{2}, {[2 1], [2 2], [3 1], [3 2]});
 end
 
+function testThreeDimensionalDegreeTwoOrder(testCase)
+    % 3-D degree-2 conversion should preserve flat tensor coefficient order.
+    data = cell(5, 5, 3);
+    for i = 1:5
+        for j = 1:5
+            for k = 1:3
+                data{i, j, k} = [i, j, k];
+            end
+        end
+    end
+
+    grid = {[0 1 2], [10 20 30], [100 200]};
+    [flat, subs] = helper.cell2bern(grid, data, Degree=2);
+    A = dpmat(grid, data, Degree=2);
+
+    testCase.verifyEqual(subs, [1 1 1; 1 2 1; 2 1 1; 2 2 1]);
+    testCase.verifyEqual(flat{3}, A.coeffs([2 1 1]));
+    testCase.verifyEqual(numel(flat{3}), 27);
+    testCase.verifyEqual(flat{3}{1}, [3, 1, 1]);
+    testCase.verifyEqual(flat{3}{14}, [4, 2, 2]);
+    testCase.verifyEqual(flat{3}{27}, [5, 3, 3]);
+end
+
 function testValidation(testCase)
     % Malformed data, degree choices, and options should fail clearly.
     testCase.verifyError(@() helper.cell2bern({[0 1]}, {1, "bad"}, Degree=1), ...

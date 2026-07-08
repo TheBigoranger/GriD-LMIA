@@ -41,11 +41,10 @@ function out = mtimes(lhs, rhs)
         error("dpvar:InvalidMultiplication", "At least one operand must be a dpvar.");
     end
 
-    allowEmptyRate = hasRateRows(lhs) || hasRateRows(rhs);
-    rb = opRateBounds(allowEmptyRate, lhs, rhs);
+    rb = pickRb("dpvar:InvalidMultiplication", lhs, rhs);
     grid = anchor.mergeGrid("dpvar:MixedGrid", lhs, rhs);
-    ld = asData(grid, lhs, [], rb, "dpvar:InvalidMultiplication", allowEmptyRate);
-    rd = asData(grid, rhs, [], rb, "dpvar:InvalidMultiplication", allowEmptyRate);
+    ld = asData(grid, lhs, [], rb, "dpvar:InvalidMultiplication");
+    rd = asData(grid, rhs, [], rb, "dpvar:InvalidMultiplication");
 
     if ld.ContainsDecision && rd.ContainsDecision
         error("dpvar:InvalidMultiplication", ...
@@ -78,32 +77,4 @@ end
 
 function tf = isScalarNum(val)
     tf = isnumeric(val) && isscalar(val) && isreal(val) && isfinite(val);
-end
-
-function tf = hasRateRows(val)
-    tf = false;
-    if isa(val, "dpvar")
-        nCoeff = (val.Degree + 1) ^ val.npar();
-        tf = isRateRows(val.LocalValues, val.GridInfo.Vectors, nCoeff);
-    end
-end
-
-function rb = opRateBounds(allowEmptyRate, varargin)
-    rb = [];
-    for k = 1:numel(varargin)
-        val = varargin{k};
-        if ~isa(val, "dpvar") || isempty(val.RateBounds)
-            continue
-        end
-        if isempty(rb)
-            rb = val.RateBounds;
-        elseif ~isequal(rb, val.RateBounds)
-            error("dpvar:InvalidMultiplication", ...
-                "dpvar operands must have matching RateBounds.");
-        end
-    end
-    if allowEmptyRate && isempty(rb)
-        error("dpvar:InvalidMultiplication", ...
-            "Rate-vertex dpvar expressions require RateBounds.");
-    end
 end

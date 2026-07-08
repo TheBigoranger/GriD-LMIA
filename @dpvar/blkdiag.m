@@ -9,14 +9,15 @@ function out = blkdiag(varargin)
     %     P = dpvar(1, {[0 1]});
     %     B = blkdiag(P, eye(2));
 
-    anchor = pickAnchor(varargin);
+    anchor = pickAnchor("dpvar:InvalidBlkdiag", varargin);
     grid = anchor.mergeGrid("dpvar:MixedGrid", varargin{:});
+    rb = pickRb("dpvar:InvalidBlkdiag", varargin{:});
     data = repmat(struct("MatrixSize", [], "Degree", [], ...
         "LocalValues", [], "ContainsDecision", [], "HasRateDependence", [], ...
         "IsContinuous", [], "HasRateRows", []), ...
         1, numel(varargin));
     for k = 1:numel(varargin)
-        data(k) = asData(grid, varargin{k}, [], anchor.RateBounds, ...
+        data(k) = asData(grid, varargin{k}, [], rb, ...
             "dpvar:InvalidBlkdiag");
     end
 
@@ -32,26 +33,11 @@ function out = blkdiag(varargin)
         sum(arrayfun(@(d) d.MatrixSize(2), data))];
     hasDec = any(arrayfun(@(d) d.ContainsDecision, data));
     hasRate = any(arrayfun(@(d) d.HasRateDependence, data));
-    rb = anchor.RateBounds;
     if ~hasRate
         rb = [];
     end
 
     out = dpvar(mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, "expression"));
-end
-
-function anchor = pickAnchor(args)
-    anchor = [];
-    for k = 1:numel(args)
-        if isa(args{k}, "dpvar")
-            anchor = args{k};
-            break
-        end
-    end
-    if isempty(anchor)
-        error("dpvar:InvalidBlkdiag", ...
-            "At least one blkdiag input must be a dpvar.");
-    end
 end
 
 function coeffs = blkCell(data, subs)

@@ -67,6 +67,31 @@ function testTensorGridCoefficientProduct(testCase)
     testCase.verifyEqual(coeffs{9}, 32);
 end
 
+function testTensorHighDegreeProduct(testCase)
+    % A 2-D degree-2 by degree-1 product should use tensor binomial scaling.
+    grid = {[0 1], [10 20]};
+    Adata = cell(3, 3);
+    Bdata = cell(2, 2);
+    for i = 0:2
+        for j = 0:2
+            Adata{i + 1, j + 1} = i + 10 * j;
+        end
+    end
+    for i = 0:1
+        for j = 0:1
+            Bdata{i + 1, j + 1} = 100 + i + 10 * j;
+        end
+    end
+    A = dpmat(grid, Adata, Degree=2);
+    B = dpmat(grid, Bdata, Degree=1);
+
+    C = A * B;
+
+    testCase.verifyEqual(C.Degree, 3);
+    verifyCoeff(testCase, C, [1 1], ...
+        bernProdExpected(A.coeffs([1 1]), 2, B.coeffs([1 1]), 1, 2));
+end
+
 function testMixedScalarGridUsesCommonRefinement(testCase)
     % Same-bound mixed scalar grids should align on a common refinement.
     A = dpmat({[0 1]}, {1, 2}, Degree=1);
@@ -81,6 +106,18 @@ function testMixedScalarGridUsesCommonRefinement(testCase)
     verifyCoeff(testCase, S, 2, {21.5, 32});
     verifyCoeff(testCase, P, 1, {10, 17.5, 30});
     verifyCoeff(testCase, P, 2, {30, 42.5, 60});
+end
+
+function testMixedTensorGridUsesCommonRefinement(testCase)
+    % Same-bound tensor grids should refine each affected physical axis.
+    A = dpmat({[0 1], [0 1]}, {1 2; 3 4}, Degree=1);
+    B = dpmat({[0 0.5 1], [0 1]}, {10 20; 30 40; 50 60}, Degree=1);
+
+    S = A + B;
+
+    testCase.verifyEqual(S.GridInfo.Vectors, {[0 0.5 1], [0 1]});
+    verifyCoeff(testCase, S, [1 1], {11, 22, 32, 43});
+    verifyCoeff(testCase, S, [2 1], {32, 43, 53, 64});
 end
 
 function testNumericPromotion(testCase)
@@ -127,6 +164,49 @@ function testFunctionBernsteinCanEnterAlgebra(testCase)
 
     testCase.verifyEqual(C.SourceSummary, "coefficient-backed");
     verifyCoeff(testCase, C, 1, {1, 2});
+end
+
+function out = bernProdExpected(lhs, lhsDeg, rhs, rhsDeg, nPar)
+    % Local oracle for tensor Bernstein product coefficients.
+    outDeg = lhsDeg + rhsDeg;
+    lhsLbls = helper.combRows(repmat({0:lhsDeg}, 1, nPar));
+    outLbls = helper.combRows(repmat({0:outDeg}, 1, nPar));
+    out = cell(1, size(outLbls, 1));
+    for outIdx = 1:size(outLbls, 1)
+        outLbl = outLbls(outIdx, :);
+        acc = [];
+        for lhsIdx = 1:size(lhsLbls, 1)
+            lhsLbl = lhsLbls(lhsIdx, :);
+            rhsLbl = outLbl - lhsLbl;
+            if all(rhsLbl >= 0) && all(rhsLbl <= rhsDeg)
+                rhsIdx = lblIdxExpected(rhsLbl, rhsDeg);
+                term = lhs{lhsIdx} * rhs{rhsIdx} ...
+                    * prodScaleExpected(lhsLbl, lhsDeg, rhsLbl, rhsDeg, outLbl);
+                if isempty(acc)
+                    acc = term;
+                else
+                    acc = acc + term;
+                end
+            end
+        end
+        out{outIdx} = acc;
+    end
+end
+
+function scale = prodScaleExpected(lhsLbl, lhsDeg, rhsLbl, rhsDeg, outLbl)
+    outDeg = lhsDeg + rhsDeg;
+    scale = 1;
+    for k = 1:numel(outLbl)
+        scale = scale ...
+            * nchoosek(lhsDeg, lhsLbl(k)) ...
+            * nchoosek(rhsDeg, rhsLbl(k)) ...
+            / nchoosek(outDeg, outLbl(k));
+    end
+end
+
+function idx = lblIdxExpected(lbl, deg)
+    mult = (deg + 1) .^ (numel(lbl) - 1:-1:0);
+    idx = sum(lbl .* mult) + 1;
 end
 
 function verifyCoeff(testCase, obj, cellSubs, expected)

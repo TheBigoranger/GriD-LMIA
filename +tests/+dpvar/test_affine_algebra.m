@@ -93,12 +93,25 @@ function testRejectsUnsupportedOperands(testCase)
     testCase.verifyError(@() P + x * x, "dpvar:InvalidAddition");
 end
 
-function testRateMetadataMustMatch(testCase)
-    % Rate metadata is object state, so affine operands must agree.
-    P = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
+function testRateMetadataPropagatesAndChecksMismatch(testCase)
+    % Missing RateBounds should inherit the operation-level metadata.
+    rb = [-1 1];
+    P = dpvar(1, {[0 1]}, RateBounds=rb);
     Q = dpvar(1, {[0 1]});
+    R = dpvar(1, {[0 1]}, RateBounds=[0 1]);
+    cp = P.coeffs(1);
+    cq = Q.coeffs(1);
 
-    testCase.verifyError(@() P + Q, "dpvar:InvalidAddition");
+    S = P + Q;
+    D = Q - P;
+
+    testCase.verifyTrue(S.HasRateDependence);
+    testCase.verifyTrue(D.HasRateDependence);
+    testCase.verifyEqual(S.RateBounds, rb);
+    testCase.verifyEqual(D.RateBounds, rb);
+    verifyCoeffExpr(testCase, S.coeffs(1), {cp{1} + cq{1}, cp{2} + cq{2}});
+    verifyCoeffExpr(testCase, D.coeffs(1), {cq{1} - cp{1}, cq{2} - cp{2}});
+    testCase.verifyError(@() P + R, "dpvar:InvalidAddition");
 end
 
 function verifyCoeffExpr(testCase, actual, expected)

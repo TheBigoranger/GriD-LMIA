@@ -82,6 +82,33 @@ function testTensorDegreeOneFormulaAndRateOrder(testCase)
     verifyCoeffTable(testCase, cd, exp);
 end
 
+function testTensorDegreeTwoFormula(testCase)
+    % Tensor degree-two derivatives should elevate partials to common degree.
+    grid = {[0 2], [10 14]};
+    rb = [-1 2; -3 5];
+    P = dpvar(1, grid);
+    A = dpmat(grid, {10 20; 30 40}, Degree=1);
+    C = P * A;
+    cc = C.coeffs([1 1]);
+
+    D = rhodiff(C, rb);
+    cd = D.coeffs([1 1]);
+
+    verts = [
+        -1 -3
+        -1 5
+        2 -3
+        2 5
+    ];
+    exp = cell(4, 9);
+    for row = 1:4
+        exp(row, :) = tensorDiffExpected(cc, 2, [2 4], verts(row, :), [1 1]);
+    end
+    testCase.verifyEqual(C.Degree, 2);
+    testCase.verifyEqual(D.Degree, 2);
+    verifyCoeffTable(testCase, cd, exp);
+end
+
 function testImplicitAndInvalidRateBounds(testCase)
     % rhodiff should use object RateBounds or reject incompatible bounds.
     P = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
@@ -211,6 +238,47 @@ function testDerivativeMatrixProductsAndRejections(testCase)
     testCase.verifyError(@() D * D, "dpvar:InvalidMultiplication");
     testCase.verifyError(@() D * P, "dpvar:InvalidMultiplication");
     testCase.verifyError(@() R * 2, "dpvar:InvalidMultiplication");
+end
+
+function row = tensorDiffExpected(vals, deg, h, rate, sz)
+    % Local oracle for rate-weighted tensor derivative coefficients.
+    nPar = numel(h);
+    row = cell(1, (deg + 1) ^ nPar);
+    for dim = 1:nPar
+        vecs = repmat({0:deg}, 1, nPar);
+        vecs{dim} = 0:(deg - 1);
+        partLbls = helper.combRows(vecs);
+        for k = 1:size(partLbls, 1)
+            lbl = partLbls(k, :);
+            nxt = lbl;
+            nxt(dim) = nxt(dim) + 1;
+            base = (vals{lblIdxExpected(nxt, deg)} - vals{lblIdxExpected(lbl, deg)}) ...
+                * (deg * rate(dim) / h(dim));
+            for outLabel = lbl(dim):(lbl(dim) + 1)
+                out = lbl;
+                out(dim) = outLabel;
+                idx = lblIdxExpected(out, deg);
+                scale = nchoosek(deg - 1, lbl(dim)) ...
+                    * nchoosek(1, outLabel - lbl(dim)) ...
+                    / nchoosek(deg, outLabel);
+                if isempty(row{idx})
+                    row{idx} = base * scale;
+                else
+                    row{idx} = row{idx} + base * scale;
+                end
+            end
+        end
+    end
+    for k = 1:numel(row)
+        if isempty(row{k})
+            row{k} = zeros(sz);
+        end
+    end
+end
+
+function idx = lblIdxExpected(lbl, deg)
+    mult = (deg + 1) .^ (numel(lbl) - 1:-1:0);
+    idx = sum(lbl .* mult) + 1;
 end
 
 function verifyCoeffTable(testCase, actual, expected)

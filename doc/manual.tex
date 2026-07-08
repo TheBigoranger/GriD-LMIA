@@ -74,13 +74,13 @@
 
 \begin{abstract}
 This manual describes the current public behavior of the \pkg.  The present
-implementation provides \code{dpbase} for cell-local Bernstein coefficient
-storage, \code{dpmat} for known finite real matrix data on tensor grids, and
-an initial \code{dpvar} layer for continuous degree-1 YALMIP-backed decision
-expressions plus cell-local rate-weighted derivatives through
-\code{rhodiff}.  Solver-facing \code{dplmi} assembly, SDP solver invocation,
-and relaxation-lemma workflows remain future package layers in this repository
-version.
+implementation uses \code{dpbase} as the backend parent for cell-local
+Bernstein coefficient storage, provides \code{dpmat} for known finite real
+matrix data on tensor grids, and provides an initial \code{dpvar} layer for
+continuous degree-1 YALMIP-backed decision expressions plus cell-local
+rate-weighted derivatives through \code{rhodiff}.  Solver-facing \code{dplmi}
+assembly, SDP solver invocation, and relaxation-lemma workflows remain future
+package layers in this repository version.
 \end{abstract}
 
 \tableofcontents
@@ -132,110 +132,13 @@ layers are not implemented in this version.
 
 \section{Quick Start}
 
-\code{dpbase} stores one flat Bernstein coefficient cell for each physical cell
-of a tensor grid.  \code{dpmat} builds on that storage to represent known
-parameter-dependent matrices.
+Most users should start with \code{dpmat} for known parameter-dependent data
+and \code{dpvar} for YALMIP-backed decision expressions.  Both classes extend
+the shared \code{dpbase} backend, so they expose common grid, cell, label, and
+coefficient-inspection methods; ordinary modeling code should not need to
+construct raw \code{dpbase} objects.
 
-\subsection{A Scalar Grid}
-
-\begin{lstlisting}[style=dpmatlab]
-obj = dpbase({[0 1 3]}, [2 3], 1);
-
-obj.MatrixSize
-obj.Degree
-obj.GridInfo.Bounds
-obj.npar()
-obj.ncell()
-obj.ncoeff()
-size(obj)
-obj.cells()
-obj.lbls()
-\end{lstlisting}
-
-Expected structural outputs:
-
-\begin{lstlisting}[style=dpoutput]
-MatrixSize =
-     2     3
-
-Degree =
-     1
-
-Bounds =
-     0     3
-
-npar()   -> 1
-ncell()  -> 2
-ncoeff() -> 2
-size(obj)-> [2 3]
-
-cells() =
-     1
-     2
-
-lbls() =
-     0
-     1
-\end{lstlisting}
-
-There are two physical intervals, \([0,1]\) and \([1,3]\).  Because the degree
-is one and the grid is one-dimensional, each physical cell stores two local
-Bernstein coefficients.
-
-\subsection{Access Local Coefficients}
-
-\begin{lstlisting}[style=dpmatlab]
-c1 = obj.coeffs(1);
-c2 = obj.coeffs(2);
-\end{lstlisting}
-
-Expected result: both \code{c1} and \code{c2} are \code{1x2} cell arrays.  Each
-entry is a numeric zero matrix of size \code{2x3}.  The first cell corresponds
-to local labels \(0\) and \(1\) on the interval \([0,1]\); the second cell uses
-the same local labels on the interval \([1,3]\).
-
-\subsection{A Tensor Grid}
-
-\begin{lstlisting}[style=dpmatlab]
-obj = dpbase({[0 1 2], [10 20 30]}, [1 1], 1);
-
-obj.GridInfo.Points
-obj.cells()
-obj.lbls()
-obj.coeffs([2 1])
-\end{lstlisting}
-
-Expected structural outputs:
-
-\begin{lstlisting}[style=dpoutput]
-GridInfo.Points =
-     0    10
-     0    20
-     0    30
-     1    10
-     1    20
-     1    30
-     2    10
-     2    20
-     2    30
-
-cells() =
-     1     1
-     1     2
-     2     1
-     2     2
-
-lbls() =
-     0     0
-     0     1
-     1     0
-     1     1
-\end{lstlisting}
-
-The first parameter index varies more slowly than the second.  This row order
-is used consistently for physical cells and local Bernstein labels.
-
-\subsection{A Known Matrix}
+\subsection{A Known Matrix On A Scalar Grid}
 
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1]}, {2, 4}, Degree=1);
@@ -246,6 +149,8 @@ A.SourceSummary
 A.evaluate(0.25)
 C = A + 5;
 C.coeffs(1)
+A.cells()
+A.lbls()
 \end{lstlisting}
 
 Expected structural outputs:
@@ -262,10 +167,56 @@ SourceSummary =
 
 A.evaluate(0.25) -> 2.5
 C.coeffs(1)      -> {7, 9}
+
+cells() =
+     1
+
+lbls() =
+     0
+     1
 \end{lstlisting}
 
 The expression \code{A + 5} returns another coefficient-backed \code{dpmat} on
-the same grid.
+the same grid.  The \code{cells}, \code{lbls}, and \code{coeffs} methods come
+from the shared \code{dpbase} backend, but the user-facing object remains a
+\code{dpmat}.
+
+\subsection{A Known Matrix On A Tensor Grid}
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+
+A.GridInfo.Points
+A.cells()
+A.lbls()
+A.coeffs([1 1])
+\end{lstlisting}
+
+Expected structural outputs:
+
+\begin{lstlisting}[style=dpoutput]
+GridInfo.Points =
+     0    10
+     0    20
+     1    10
+     1    20
+
+cells() =
+     1     1
+
+lbls() =
+     0     0
+     0     1
+     1     0
+     1     1
+
+A.coeffs([1 1]) -> {1, 3, 5, 7}
+\end{lstlisting}
+
+The first parameter index varies more slowly than the second.  This row order
+is used consistently for physical cells and local Bernstein labels across
+\code{dpmat} and \code{dpvar}, because both inherit the same backend storage
+contract.
 
 \subsection{A Function-Backed Known Matrix}
 
@@ -414,21 +365,33 @@ degree-1 factors produces a degree-2 polynomial:
 \]
 
 \begin{center}
-\begin{tikzpicture}[x=6.2cm,y=2.4cm,>=Latex]
+\begin{tikzpicture}[x=6.2cm,y=1.85cm,>=Latex]
   \draw[->] (-0.04,0) -- (1.08,0) node[right] {$\alpha$};
-  \draw[->] (0,-0.08) -- (0,1.22) node[above] {value};
-  \draw[gray!30] (0,0) grid[xstep=0.25,ystep=0.25] (1,1);
-  \draw[blue!65!black,thick] (0,0.25) -- (1,0.95);
-  \draw[orange!85!black,thick] (0,0.90) -- (1,0.35);
+  \draw[->] (0,-0.08) -- (0,1.55) node[above] {value};
+  \draw[gray!30] (0,0) grid[xstep=0.25,ystep=0.25] (1,1.5);
+  \draw[blue!65!black,thick] (0,0.25) -- (1,1.30);
+  \draw[orange!85!black,thick] (0,1.30) -- (1,0.25);
   \draw[purple!70!black,very thick,domain=0:1,samples=80]
-    plot (\x,{(0.25 + 0.70*\x)*(0.90 - 0.55*\x)});
-  \node[blue!65!black] at (0.84,1.05) {$P$};
-  \node[orange!85!black] at (0.17,1.02) {$Q$};
-  \node[purple!70!black] at (0.64,0.42) {$PQ$};
+    plot (\x,{(0.25 + 1.05*\x)*(1.30 - 1.05*\x)});
+  \draw[purple!45!black,dashed] (0,0.325) -- (0.5,0.876) -- (1,0.325);
+  \fill[purple!70!black] (0,0.325) circle (1.4pt)
+    node[left] {\scriptsize $P_1Q_1$};
+  \fill[purple!70!black] (0.5,0.876) circle (1.4pt)
+    node[above] {\scriptsize $\frac{P_0Q_1+P_1Q_0}{2}$};
+  \fill[purple!70!black] (1,0.325) circle (1.4pt)
+    node[right] {\scriptsize $P_0Q_0$};
+  \node[blue!65!black] at (0.82,1.42) {$P$};
+  \node[orange!85!black] at (0.18,1.42) {$Q$};
+  \node[purple!70!black] at (0.52,0.48) {$PQ$};
   \node[below] at (0,0) {$0$};
   \node[below] at (1,0) {$1$};
 \end{tikzpicture}
 \end{center}
+
+The dashed purple control polygon is not another sampled curve.  It marks the
+three degree-2 Bernstein coefficients of the product.  The middle coefficient
+is higher than the curve value at \(\alpha=1/2\) because the basis function
+\(B_1^2(\alpha)=2\alpha(1-\alpha)\) already carries a factor of two.
 
 For general scalar degrees \(n\) and \(m\),
 \[
@@ -447,6 +410,32 @@ where
   \sum_{i+j=k} P_iQ_j
   \frac{\binom{n}{i}\binom{m}{j}}{\binom{n+m}{k}}.
 \]
+This is coefficient convolution with Bernstein binomial normalization.  An
+equivalent way to see the same rule, matching the source note
+\code{DLMI with Berstain Polynomial.pdf}, is to first absorb the binomial
+weights into the coefficient vectors:
+\[
+  \widehat P_i = \binom{n}{i}P_i,\qquad
+  \widehat Q_j = \binom{m}{j}Q_j.
+\]
+Then the weighted product coefficients are the ordinary discrete convolution
+\[
+  \widehat R_k
+  = (\widehat P * \widehat Q)_k
+  = \sum_{i+j=k}\widehat P_i\widehat Q_j,
+\]
+and the Bernstein coefficients used by the package are recovered by dividing
+back by the degree-\(n+m\) binomial weight:
+\[
+  R_k = \frac{\widehat R_k}{\binom{n+m}{k}}.
+\]
+For the linear case, the unnormalized convolution is simply
+\[
+  [P_0,P_1] * [Q_0,Q_1]
+  =
+  [P_0Q_0,\ P_0Q_1+P_1Q_0,\ P_1Q_1],
+\]
+and the middle Bernstein coefficient is divided by \(\binom{2}{1}=2\).
 For example, if \(P\) has degree two and \(Q\) has degree three, then the
 degree-five coefficient with label \(k=2\) is
 \[
@@ -458,6 +447,22 @@ degree-five coefficient with label \(k=2\) is
 This is the binomial-normalized convolution used by coefficient-backed
 \code{dpmat} multiplication and by mixed known/decision products that remain
 affine in YALMIP variables.
+
+For tensor-product Bernstein polynomials, the same convolution happens over
+multi-indices.  If \(p\), \(q\), and \(k\) are local labels, then product
+terms contribute only when \(p+q=k\), and the one-dimensional binomial ratios
+multiply axis by axis:
+\[
+  R_k =
+  \sum_{p+q=k} P_pQ_q
+  \prod_{r=1}^{\ell}
+  \frac{\binom{n}{p_r}\binom{m}{q_r}}
+       {\binom{n+m}{k_r}}.
+\]
+Thus two multilinear \(2\times2\) coefficient arrays in two parameters become
+one \(3\times3\) degree-2 coefficient array.  This is the tensor version of
+the same coefficient convolution, not a multiplication of physical grid
+samples.
 
 \subsection{Tensor-Product Labels}
 
@@ -596,15 +601,27 @@ lbls() =
      1     1
 \end{lstlisting}
 
-\section{\texorpdfstring{\code{dpbase}}{dpbase} Reference}
+\section{\texorpdfstring{\code{dpbase}}{dpbase} Backend Architecture}
 
 \subsection{Purpose}
 
-\code{dpbase} is the shared coefficient-backed storage class for gridded
-DP-LMI objects.  It stores tensor-grid metadata, matrix payload size, Bernstein
-degree, nested physical-cell coefficient data, and rate-dependence metadata.
+\code{dpbase} is the shared backend parent class for gridded DP-LMI objects.
+\code{dpmat} and \code{dpvar} extend from it: \code{dpmat} adds known numeric
+data and exact evaluation, while \code{dpvar} adds YALMIP-backed decision
+coefficients and affine expression behavior.  Ordinary user workflows should
+construct \code{dpmat} and \code{dpvar}, not raw \code{dpbase} objects.
 
-\subsection{Syntax}
+The purpose of this section is architectural.  It explains why \code{dpmat}
+and \code{dpvar} expose the same grid, cell, local-label, coefficient, and
+metadata inspection behavior.  The parent class stores tensor-grid metadata,
+matrix payload size, Bernstein degree, nested physical-cell coefficient data,
+and rate-dependence metadata.
+
+\subsection{Backend Constructor Contract}
+
+The raw constructor is mainly useful for implementation, tests, and reading
+the inherited storage contract.  It is not the recommended modeling entry
+point.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = dpbase(gridVectors, matrixSize, degree)
@@ -612,7 +629,7 @@ obj = dpbase(gridVectors, matrixSize, degree, localValues)
 obj = dpbase(gridVectors, matrixSize, degree, localValues, Name=Value)
 \end{lstlisting}
 
-\subsection{Inputs}
+\subsection{Backend Inputs}
 
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
@@ -633,7 +650,7 @@ cell. \\
 \bottomrule
 \end{tabularx}
 
-\subsection{Name-Value Options}
+\subsection{Backend Metadata Options}
 
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.3\linewidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
@@ -641,9 +658,11 @@ Option & Description \\
 \midrule
 \code{IsContinuous} &
 Logical metadata flag.  \code{dpbase} records the flag but does not enforce
-boundary sharing itself.  Future subclasses own continuity construction. \\
+boundary sharing itself.  Subclasses such as \code{dpvar} own continuity
+construction. \\
 \code{ContainsDecision} &
-Logical metadata flag for future decision-variable subclasses. \\
+Logical metadata flag used by decision-variable subclasses such as
+\code{dpvar}. \\
 \code{HasRateDependence} &
 Logical metadata flag.  If true, nonempty \code{RateBounds} must be supplied. \\
 \code{RateBounds} &
@@ -656,10 +675,11 @@ String metadata describing the coefficient source.  The default is
 \bottomrule
 \end{tabularx}
 
-\subsection{Properties}
+\subsection{Inherited Inspection Properties}
 
-All public properties have private set access.  Users can inspect them but
-cannot assign to them after construction.
+All public properties have private set access.  Users normally inspect these
+properties through \code{dpmat} or \code{dpvar} objects; they cannot assign to
+them after construction.
 
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.32\linewidth}@{\hspace{0.02\linewidth}}>{\raggedright\arraybackslash}p{0.58\linewidth}@{}}
 \toprule
@@ -682,7 +702,7 @@ each leaf stores a flat coefficient cell. \\
 \bottomrule
 \end{tabular}
 
-\subsection{Methods}
+\subsection{Inherited Inspection Methods}
 
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.31\linewidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
@@ -703,10 +723,15 @@ a numeric row vector or a cell array with one physical-cell index per parameter.
 \bottomrule
 \end{tabularx}
 
-\subsection{Custom Local Values}
+\subsection{Backend Local-Storage Example}
 
-For a one-dimensional grid with two physical cells and degree two, each physical
-cell must store three local coefficients.
+The examples below show the parent storage contract for readers who need to
+understand inherited behavior or implementation tests.  They are not the
+recommended starting point for modeling; use \code{dpmat} for known data and
+\code{dpvar} for decision expressions.
+
+For a one-dimensional grid with two physical cells and degree two, each
+physical cell stores three local coefficients.
 
 \begin{lstlisting}[style=dpmatlab]
 localValues = {{11, 12, 13}, {21, 22, 23}};
@@ -746,10 +771,11 @@ ans =
     {[211]}    {[212]}    {[213]}    {[214]}
 \end{lstlisting}
 
-\subsection{Rate Metadata}
+\subsection{Backend Rate Metadata}
 
 \code{dpbase} validates rate bounds and rate-affine coefficient payloads, but it
-does not enumerate rate vertices or assemble LMIs.  That solver-facing work is
+does not enumerate rate vertices or assemble LMIs.  Public derivative behavior
+currently belongs to \code{dpvar/rhodiff}; solver-facing finite LMI assembly is
 reserved for a future \code{dplmi} layer.
 
 \begin{lstlisting}[style=dpmatlab]
@@ -784,10 +810,11 @@ The stored coefficient represents the compact form
 but \code{dpbase} only stores and validates this payload.  It does not solve or
 test any inequality involving \(\dot\rho\).
 
-\subsection{Validation And Error Boundaries}
+\subsection{Backend Validation And Error Boundaries}
 
-The constructor rejects malformed inputs early and uses domain-specific error
-identifiers.  The following examples are expected to error:
+The parent constructor rejects malformed storage inputs early and uses
+domain-specific error identifiers.  The following examples are expected to
+error:
 
 \begin{lstlisting}[style=dpmatlab]
 dpbase([0 1], [1 1], 0)                 % dpbase:InvalidGrid
@@ -798,10 +825,10 @@ dpbase({[0 1]}, [1 1], 0, [], ...
     HasRateDependence=true)             % dpbase:InvalidRateBounds
 \end{lstlisting}
 
-Plain coefficient payloads at the \code{dpbase} layer must be finite, real,
-numeric matrices matching \code{matrixSize}.  Symbolic YALMIP payloads are not
-accepted by \code{dpbase}; they belong in future subclasses that can define
-symbolic algebra and solver assembly coherently.
+Ordinary coefficient payloads at the \code{dpbase} layer must be finite, real,
+numeric matrices or real two-dimensional \code{sdpvar} matrices matching
+\code{matrixSize}.  The parent class validates storage shape only; user-facing
+symbolic algebra is defined by \code{dpvar}.
 
 \section{\texorpdfstring{\code{dpmat}}{dpmat} Reference}
 
@@ -1465,9 +1492,10 @@ rate metadata.
 This repository version intentionally has a narrow public surface.
 
 \begin{itemize}[leftmargin=*]
-  \item \code{dpbase}, \code{dpmat}, \code{dpvar}, \code{helper.chk},
-        \code{helper.scanMats}, and \code{helper.cell2bern} are implemented and
-        covered by the current non-SDP test entry point.
+  \item The backend parent \code{dpbase}, user-facing \code{dpmat} and
+        \code{dpvar} classes, \code{helper.chk}, \code{helper.scanMats}, and
+        \code{helper.cell2bern} are implemented and covered by the current
+        non-SDP test entry point.
   \item \code{dpmat} is a known-data object only.  It does not contain YALMIP
         decisions, rate dependence, exact function-handle algebra beyond
         evaluation/plot sampling, or solver-facing LMI assembly.

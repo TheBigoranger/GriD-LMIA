@@ -25,9 +25,11 @@ function obj = subsasgn(obj, S, rhs)
     [rows, cols] = helper.matSubs(S(1).subs, obj.MatrixSize, ...
         "dpvar:InvalidAssignment");
     grid = obj.mergeGrid("dpvar:MixedGrid", rhs);
-    lhsData = asData(grid, obj, [], obj.RateBounds, "dpvar:InvalidAssignment");
+    rb = pickRb("dpvar:InvalidAssignment", obj, rhs);
+    lhsData = asData(grid, obj, [], rb, ...
+        "dpvar:InvalidAssignment");
     rhsData = asData(grid, rhs, [numel(rows), numel(cols)], ...
-        obj.RateBounds, "dpvar:InvalidAssignment");
+        rb, "dpvar:InvalidAssignment");
 
     deg = max(lhsData.Degree, rhsData.Degree);
     lhsVals = elevVals(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
@@ -38,7 +40,6 @@ function obj = subsasgn(obj, S, rhs)
 
     hasDec = lhsData.ContainsDecision || rhsData.ContainsDecision;
     hasRate = lhsData.HasRateDependence || rhsData.HasRateDependence;
-    rb = obj.RateBounds;
     if ~hasRate
         rb = [];
     end

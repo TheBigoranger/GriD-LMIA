@@ -18,9 +18,10 @@ function out = cat(dim, varargin)
             "dpvar only supports cat along dimensions 1 and 2.");
     end
 
-    anchor = pickAnchor(varargin);
+    anchor = pickAnchor("dpvar:InvalidConcatenation", varargin);
     grid = anchor.mergeGrid("dpvar:MixedGrid", varargin{:});
-    [data, sz] = catData(anchor, dim, varargin, grid);
+    rb = pickRb("dpvar:InvalidConcatenation", varargin{:});
+    [data, sz] = catData(dim, varargin, grid, rb);
     deg = max(arrayfun(@(d) d.Degree, data));
 
     for k = 1:numel(data)
@@ -32,7 +33,6 @@ function out = cat(dim, varargin)
     vals = helper.mkNest(nCell, @(subs) catCell(dim, data, subs));
     hasDec = any(arrayfun(@(d) d.ContainsDecision, data));
     hasRate = any(arrayfun(@(d) d.HasRateDependence, data));
-    rb = anchor.RateBounds;
     if ~hasRate
         rb = [];
     end
@@ -44,21 +44,7 @@ function out = cat(dim, varargin)
     end
 end
 
-function anchor = pickAnchor(args)
-    anchor = [];
-    for k = 1:numel(args)
-        if isa(args{k}, "dpvar")
-            anchor = args{k};
-            break
-        end
-    end
-    if isempty(anchor)
-        error("dpvar:InvalidConcatenation", ...
-            "At least one concatenated value must be a dpvar.");
-    end
-end
-
-function [data, outSize] = catData(anchor, dim, args, grid)
+function [data, outSize] = catData(dim, args, grid, rb)
     data = repmat(struct( ...
         "MatrixSize", [], ...
         "Degree", [], ...
@@ -72,7 +58,7 @@ function [data, outSize] = catData(anchor, dim, args, grid)
 
     for k = 1:numel(args)
         val = args{k};
-        data(k) = asData(grid, val, [], anchor.RateBounds, ...
+        data(k) = asData(grid, val, [], rb, ...
             "dpvar:InvalidConcatenation");
         sz(k, :) = data(k).MatrixSize;
         isScalar(k) = ~isa(val, "dpbase") && ...
