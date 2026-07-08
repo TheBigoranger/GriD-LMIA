@@ -12,6 +12,7 @@ This page is a stable installation and download entry. It is intentionally short
 | Source archive | [Download `main` as ZIP](https://github.com/TheBigoranger/DP-LMI-package/archive/refs/heads/main.zip) |
 | PDF manual | [Download `doc/manual.pdf`](https://github.com/TheBigoranger/DP-LMI-package/raw/main/doc/manual.pdf) |
 | GitHub repository | [TheBigoranger/DP-LMI-package](https://github.com/TheBigoranger/DP-LMI-package) |
+| Version history | [Open version history](/DP-LMI-package/version-history/) |
 
 ## Requirements
 

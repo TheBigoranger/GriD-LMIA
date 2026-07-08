@@ -31,6 +31,7 @@ export default defineConfig({
       sidebar: [
         { label: "Welcome", link: "/" },
         { label: "Install", slug: "install" },
+        { label: "Version History", slug: "version-history" },
         {
           label: "Documents",
           items: [

@@ -1,0 +1,52 @@
+---
+title: Version History
+description: Current manual version and release-history skeleton for the DP-LMI documentation.
+---
+
+import { versionInfo } from "../../data/version.js";
+import { historyPolicy, versionHistory } from "../../data/version-history.js";
+
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/">Welcome</a>
+  <span>/</span>
+  <span>Version History</span>
+</nav>
+
+<section class="version-panel">
+  <p class="portal-kicker">Current Manual Version</p>
+  <div class="version-number">{versionInfo.current}</div>
+  <p>
+    This value is generated from <code>{versionInfo.source}</code>, using
+    <code>{versionInfo.sourcePattern}</code> as the source pattern.
+  </p>
+</section>
+
+## History Skeleton
+
+The history list is intentionally small for now. It gives future rolling
+updates a stable location without inventing unreleased versions.
+
+<div class="history-list">
+  {versionHistory.map((entry) => (
+    <article>
+      <div>
+        <strong>{entry.version === "current" ? versionInfo.current : entry.version}</strong>
+        <span>{entry.status}</span>
+      </div>
+      <time>{entry.date}</time>
+      <p>{entry.summary}</p>
+    </article>
+  ))}
+</div>
+
+## Update Rule
+
+<ul>
+  <li>Version source of truth: <code>{historyPolicy.sourceOfTruth}</code>.</li>
+  <li>Current-version sync: {historyPolicy.updateRule}</li>
+  <li>History append rule: {historyPolicy.appendRule}</li>
+</ul>
+
+When future public versions roll forward, add a new row in
+`webpage/src/data/version-history.js` and keep the current version synchronized
+from the TeX manual rather than editing the displayed current version manually.

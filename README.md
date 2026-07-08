@@ -66,6 +66,7 @@ F = toYalmip(C);
 
 - Online manual: https://thebigoranger.github.io/DP-LMI-package/
 - Install and downloads: https://thebigoranger.github.io/DP-LMI-package/install/
+- Version history: https://thebigoranger.github.io/DP-LMI-package/version-history/
 - Solver smoke examples: https://thebigoranger.github.io/DP-LMI-package/examples/solver-smoke/
 - `dpmat/plot` output examples: https://thebigoranger.github.io/DP-LMI-package/documents/reference/dpmat/plot/
 - Local PDF manual: `doc/manual.pdf`
