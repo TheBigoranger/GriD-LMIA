@@ -127,6 +127,7 @@ function c = mkCoeff(offset)
 end
 
 function out = lowerOnly(rho)
+    % Guard that function-backed construction probes only the lower grid point.
     if rho ~= 0
         error("test:UnexpectedSample", "Constructor should only probe the lower point.");
     end

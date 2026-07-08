@@ -157,6 +157,7 @@ function localValues = tensorVals(payload)
 end
 
 function payload = ratePayload(nPar)
+    % Build a valid rate-affine payload with one rate matrix per parameter.
     payload = struct("Constant", eye(2), "Rate", {cell(1, nPar)});
     for k = 1:nPar
         payload.Rate{k} = k * ones(2);

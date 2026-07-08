@@ -1,7 +1,7 @@
 function [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
     %MKDATA Route dpmat constructor sources into dpbase constructor inputs.
 
-    info = internal.mkGrid(grid, "dpmat");
+    info = helper.mkGrid(grid, "dpmat");
     vecs = info.Vectors;
     if ~isempty(optDeg)
         optDeg = double(helper.chk(optDeg, "dpmat:InvalidDegree", ...
@@ -21,7 +21,7 @@ function [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
     fh = [];
     summary = "coefficient-backed";
     if ~isempty(src) && all(cellfun(@isnumeric, src(:)))
-        [sz, deg, vals] = internal.gridToLocal(src, vecs, optDeg, "dpmat");
+        [sz, deg, vals] = helper.gridToLocal(src, vecs, optDeg, "dpmat");
     else
         [sz, deg, vals] = localData(src, vecs, optDeg);
     end

@@ -3,7 +3,7 @@ function vals = fitVals(info, deg, sz, evalFcn)
 
     vecs = info.Vectors;
     nPar = numel(vecs);
-    lbls = internal.combRows(repmat({0:deg}, 1, nPar));
+    lbls = helper.combRows(repmat({0:deg}, 1, nPar));
     nCoeff = size(lbls, 1);
     alphas = ones(nCoeff, nPar);
     if deg > 0
@@ -27,7 +27,7 @@ function vals = fitVals(info, deg, sz, evalFcn)
     % samples in cells lets numeric and affine sdpvar payloads share the path.
     W = V \ eye(nCoeff);
     nCell = info.NumNodes - 1;
-    vals = internal.mkNest(nCell, @(subs) coeffsAt( ...
+    vals = helper.mkNest(nCell, @(subs) coeffsAt( ...
         subs, vecs, alphas, W, nCoeff, sz, evalFcn));
 end
 

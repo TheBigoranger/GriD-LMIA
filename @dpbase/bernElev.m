@@ -22,8 +22,8 @@ function out = bernElev(obj, coeffs, fromDeg, toDeg)
         return
     end
 
-    oldLbls = internal.combRows(repmat({0:fromDeg}, 1, nPar));
-    newLbls = internal.combRows(repmat({0:toDeg}, 1, nPar));
+    oldLbls = helper.combRows(repmat({0:fromDeg}, 1, nPar));
+    newLbls = helper.combRows(repmat({0:toDeg}, 1, nPar));
     out = cell(1, size(newLbls, 1));
     % gap is the extra Bernstein degree supplied by partition-of-unity factors.
     gap = toDeg - fromDeg;

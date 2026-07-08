@@ -10,8 +10,8 @@ function [flatCoeffs, cellSubs] = cell2bern(gridVectors, data, varargin)
     %     c = helper.cell2bern({[0 1 2]}, {10, 11, 12, 13, 14}, Degree=2);
 
     degOpt = parseOptions(varargin{:});
-    info = internal.mkGrid(gridVectors, "cell2bern");
-    [~, ~, ~, flatCoeffs, cellSubs] = internal.gridToLocal(data, info.Vectors, degOpt, "cell2bern");
+    info = helper.mkGrid(gridVectors, "cell2bern");
+    [~, ~, ~, flatCoeffs, cellSubs] = helper.gridToLocal(data, info.Vectors, degOpt, "cell2bern");
 end
 
 function degOpt = parseOptions(varargin)

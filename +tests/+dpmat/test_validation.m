@@ -76,6 +76,7 @@ function testDecisionAndRateOptionsUnavailable(testCase)
 end
 
 function out = numericOnlyNonpoly(rho)
+    % Force numeric fallback before rejecting a non-polynomial handle.
     if ~isnumeric(rho)
         error("test:NoSymbolicPath", "Use numeric fallback.");
     end
@@ -83,6 +84,7 @@ function out = numericOnlyNonpoly(rho)
 end
 
 function out = badProbeShape(rho)
+    % Return inconsistent probe sizes so Bernstein sampling fails validation.
     if rho == 0
         out = 1;
     else

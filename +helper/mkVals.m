@@ -1,7 +1,7 @@
 function vals = mkVals(nCell, nCoeff, sz)
     %MKVALS Allocate nested physical cells of zero payloads.
 
-    vals = internal.mkNest(nCell, @(~) zeroCoeff(nCoeff, sz));
+    vals = helper.mkNest(nCell, @(~) zeroCoeff(nCoeff, sz));
 end
 
 function coeffs = zeroCoeff(nCoeff, sz)

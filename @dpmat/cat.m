@@ -36,7 +36,7 @@ function out = cat(dim, varargin)
     end
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = internal.mkNest(nCell, @(subs) catCell(dim, data, subs));
+    vals = helper.mkNest(nCell, @(subs) catCell(dim, data, subs));
     out = dpmat(grid, vals, Degree=deg);
 
     if ~isequal(size(out), sz)
@@ -114,19 +114,19 @@ function [data, outSize] = catData(anchor, dim, args, grid)
             data(k).MatrixSize = sz(k, :);
             data(k).Degree = 0;
             nCell = cellfun(@numel, grid) - 1;
-            data(k).LocalValues = internal.mkNest(nCell, @(~) {mat});
+            data(k).LocalValues = helper.mkNest(nCell, @(~) {mat});
             data(k).IsContinuous = true;
         end
     end
 end
 
 function coeffs = catCell(dim, data, subs)
-    nCoeff = numel(internal.cellGet(data(1).LocalValues, subs));
+    nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
     coeffs = cell(1, nCoeff);
     for c = 1:nCoeff
         pieces = cell(1, numel(data));
         for k = 1:numel(data)
-            one = internal.cellGet(data(k).LocalValues, subs);
+            one = helper.cellGet(data(k).LocalValues, subs);
             pieces{k} = one{c};
         end
         coeffs{c} = builtin("cat", dim, pieces{:});

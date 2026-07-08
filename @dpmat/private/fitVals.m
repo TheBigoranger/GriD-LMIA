@@ -6,12 +6,12 @@ function [vals, lbls] = fitVals(info, deg, sz, evalFcn)
     %     [vals, lbls] = fitVals(gridInfo, degree, matrixSize, evalFcn)
     %
     %   Example:
-    %     info = internal.mkGrid({[0 1]}, "dpmat");
+    %     info = helper.mkGrid({[0 1]}, "dpmat");
     %     vals = fitVals(info, 1, [1 1], @(pt) pt(1));
 
     vecs = info.Vectors;
     nPar = numel(vecs);
-    lbls = internal.combRows(repmat({0:deg}, 1, nPar));
+    lbls = helper.combRows(repmat({0:deg}, 1, nPar));
     nCoeff = size(lbls, 1);
     alphas = ones(nCoeff, nPar);
     if deg > 0
@@ -33,7 +33,7 @@ function [vals, lbls] = fitVals(info, deg, sz, evalFcn)
     end
 
     nCell = info.NumNodes - 1;
-    vals = internal.mkNest(nCell, @(subs) coeffsAt( ...
+    vals = helper.mkNest(nCell, @(subs) coeffsAt( ...
         subs, vecs, alphas, V, nCoeff, sz, evalFcn));
 end
 

@@ -5,6 +5,6 @@ function out = unOp(obj, fcn)
         error("dpmat:FunctionOnlyAlgebra", ...
             "Function-backed dpmat objects need explicit Bernstein coefficient evidence for this operation.");
     end
-    vals = internal.mapVals(obj.LocalValues, fcn, obj.GridInfo.Vectors);
+    vals = helper.mapVals(obj.LocalValues, fcn, obj.GridInfo.Vectors);
     out = dpmat(obj.GridInfo.Vectors, vals, Degree=obj.Degree);
 end

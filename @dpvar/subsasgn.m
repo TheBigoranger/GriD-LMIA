@@ -22,7 +22,7 @@ function obj = subsasgn(obj, S, rhs)
             "dpvar does not support deletion assignment.");
     end
 
-    [rows, cols] = internal.matSubs(S(1).subs, obj.MatrixSize, ...
+    [rows, cols] = helper.matSubs(S(1).subs, obj.MatrixSize, ...
         "dpvar:InvalidAssignment");
     grid = obj.mergeGrid("dpvar:MixedGrid", rhs);
     lhsData = asData(grid, obj, [], obj.RateBounds, "dpvar:InvalidAssignment");
@@ -33,8 +33,8 @@ function obj = subsasgn(obj, S, rhs)
     lhsVals = elevVals(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
     rhsVals = elevVals(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
     nCell = cellfun(@numel, grid) - 1;
-    vals = internal.mkNest(nCell, @(subs) assignCell( ...
-        internal.cellGet(lhsVals, subs), internal.cellGet(rhsVals, subs), rows, cols));
+    vals = helper.mkNest(nCell, @(subs) assignCell( ...
+        helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), rows, cols));
 
     hasDec = lhsData.ContainsDecision || rhsData.ContainsDecision;
     hasRate = lhsData.HasRateDependence || rhsData.HasRateDependence;

@@ -5,7 +5,7 @@ function data = asData(grid, val, reqSize, errId)
     %   backed dpmat operands are reused directly when their grid already matches
     %   grid, or re-expressed on grid for same-bound common-refinement algebra.
 
-    info = internal.mkGrid(grid, "dpmat");
+    info = helper.mkGrid(grid, "dpmat");
 
     if isa(val, "dpmat")
         % Function-only objects carry exact evaluators, not Bernstein evidence.
@@ -52,6 +52,6 @@ function data = asData(grid, val, reqSize, errId)
     data.MatrixSize = size(mat);
     data.Degree = 0;
     nCell = info.NumNodes - 1;
-    data.LocalValues = internal.mkNest(nCell, @(~) {mat});
+    data.LocalValues = helper.mkNest(nCell, @(~) {mat});
     data.IsContinuous = true;
 end

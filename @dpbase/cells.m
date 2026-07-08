@@ -11,5 +11,5 @@ function subs = cells(obj)
 
     n = obj.GridInfo.NumNodes - 1;
     vecs = arrayfun(@(k) 1:k, n, "UniformOutput", false);
-    subs = internal.combRows(vecs);
+    subs = helper.combRows(vecs);
 end

@@ -14,7 +14,7 @@ function vals = mkNest(nCell, mkLeaf, prefix)
             vals{k} = mkLeaf(subs);
         else
             % Nested cells preserve LocalValues{i1}{i2}... physical access.
-            vals{k} = internal.mkNest(nCell(2:end), mkLeaf, subs);
+            vals{k} = helper.mkNest(nCell(2:end), mkLeaf, subs);
         end
     end
 end

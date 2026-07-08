@@ -29,7 +29,7 @@ function out = cat(dim, varargin)
     end
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = internal.mkNest(nCell, @(subs) catCell(dim, data, subs));
+    vals = helper.mkNest(nCell, @(subs) catCell(dim, data, subs));
     hasDec = any(arrayfun(@(d) d.ContainsDecision, data));
     hasRate = any(arrayfun(@(d) d.HasRateDependence, data));
     rb = anchor.RateBounds;
@@ -64,7 +64,9 @@ function [data, outSize] = catData(anchor, dim, args, grid)
         "Degree", [], ...
         "LocalValues", [], ...
         "ContainsDecision", [], ...
-        "HasRateDependence", []), 1, numel(args));
+        "HasRateDependence", [], ...
+        "IsContinuous", [], ...
+        "HasRateRows", []), 1, numel(args));
     sz = zeros(numel(args), 2);
     isScalar = false(1, numel(args));
 
@@ -97,7 +99,7 @@ function [data, outSize] = catData(anchor, dim, args, grid)
 
     for k = find(isScalar)
         data(k).MatrixSize = sz(k, :);
-        data(k).LocalValues = internal.mapVals(data(k).LocalValues, ...
+        data(k).LocalValues = helper.mapVals(data(k).LocalValues, ...
             @(a) repmat(a, sz(k, :)), grid);
     end
 end
@@ -116,12 +118,12 @@ function common = commonDim(vals, label)
 end
 
 function coeffs = catCell(dim, data, subs)
-    nCoeff = numel(internal.cellGet(data(1).LocalValues, subs));
+    nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
     coeffs = cell(1, nCoeff);
     for c = 1:nCoeff
         pieces = cell(1, numel(data));
         for k = 1:numel(data)
-            one = internal.cellGet(data(k).LocalValues, subs);
+            one = helper.cellGet(data(k).LocalValues, subs);
             pieces{k} = one{c};
         end
         coeffs{c} = cat(dim, pieces{:});

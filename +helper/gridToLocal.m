@@ -23,13 +23,13 @@ function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
 
     sz = helper.scanMats(src(:), owner + ":InvalidData", ...
         "Each coefficient payload must be a nonempty finite real numeric matrix.");
-    cellSubs = internal.combRows(arrayfun(@(n) 1:n, nCell, "UniformOutput", false));
+    cellSubs = helper.combRows(arrayfun(@(n) 1:n, nCell, "UniformOutput", false));
     flat = cell(size(cellSubs, 1), 1);
     for r = 1:size(cellSubs, 1)
         flat{r} = coeffsFromGrid(src, cellSubs(r, :), deg, nPar);
     end
 
-    vals = internal.mkNest(nCell, @(subs) coeffsFromGrid(src, subs, deg, nPar));
+    vals = helper.mkNest(nCell, @(subs) coeffsFromGrid(src, subs, deg, nPar));
 end
 
 function dims = gridDims(src, nPar, owner)
@@ -68,7 +68,7 @@ function deg = gridDeg(dims, nCell, optDeg, owner)
 end
 
 function coeffs = coeffsFromGrid(src, cellSubs, deg, nPar)
-    lbls = internal.combRows(repmat({0:deg}, 1, nPar));
+    lbls = helper.combRows(repmat({0:deg}, 1, nPar));
     coeffs = cell(1, size(lbls, 1));
     for k = 1:size(lbls, 1)
         % Shared global grid boundaries become the matching local coefficient.

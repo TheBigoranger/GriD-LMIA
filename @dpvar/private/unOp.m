@@ -3,7 +3,7 @@ function out = unOp(obj, fcn, sz)
 
     if nargin < 3 || isempty(sz)
         % Infer matrix size from one mapped coefficient, allowing trace/transpose.
-        coeffs = internal.cellGet(obj.LocalValues, ones(1, obj.npar()));
+        coeffs = helper.cellGet(obj.LocalValues, ones(1, obj.npar()));
         sample = mapCoeff(coeffs{1}, fcn);
         if isstruct(sample)
             sz = size(sample.Constant);
@@ -11,11 +11,12 @@ function out = unOp(obj, fcn, sz)
             sz = size(sample);
         end
     end
-    vals = internal.mapVals(obj.LocalValues, @(a) mapCoeff(a, fcn), ...
+    vals = helper.mapVals(obj.LocalValues, @(a) mapCoeff(a, fcn), ...
         obj.GridInfo.Vectors);
 
     out = dpvar(mkInit(obj.GridInfo.Vectors, sz, obj.Degree, vals, ...
-        obj.ContainsDecision, obj.HasRateDependence, obj.RateBounds, "expression"));
+        obj.ContainsDecision, obj.HasRateDependence, obj.RateBounds, ...
+        "expression", obj.IsContinuous));
 end
 
 function val = mapCoeff(val, fcn)

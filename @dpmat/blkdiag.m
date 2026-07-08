@@ -35,17 +35,17 @@ function out = blkdiag(varargin)
     end
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = internal.mkNest(nCell, @(subs) blkCell(data, subs));
+    vals = helper.mkNest(nCell, @(subs) blkCell(data, subs));
     out = dpmat(grid, vals, Degree=deg);
 end
 
 function coeffs = blkCell(data, subs)
-    nCoeff = numel(internal.cellGet(data(1).LocalValues, subs));
+    nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
     coeffs = cell(1, nCoeff);
     for c = 1:nCoeff
         parts = cell(1, numel(data));
         for k = 1:numel(data)
-            one = internal.cellGet(data(k).LocalValues, subs);
+            one = helper.cellGet(data(k).LocalValues, subs);
             parts{k} = one{c};
         end
 

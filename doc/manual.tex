@@ -77,8 +77,9 @@ This manual describes the current public behavior of the \pkg.  The present
 implementation provides \code{dpbase} for cell-local Bernstein coefficient
 storage, \code{dpmat} for known finite real matrix data on tensor grids, and
 an initial \code{dpvar} layer for continuous degree-1 YALMIP-backed decision
-expressions.  Solver-facing \code{dplmi} assembly, SDP solver invocation, and
-relaxation-lemma workflows remain future package layers in this repository
+expressions plus cell-local rate-weighted derivatives through
+\code{rhodiff}.  Solver-facing \code{dplmi} assembly, SDP solver invocation,
+and relaxation-lemma workflows remain future package layers in this repository
 version.
 \end{abstract}
 
@@ -122,7 +123,8 @@ evaluation, algebra, display, plotting, matrix operations, indexing,
 assignment, structural transforms, and error boundaries.  It also covers the
 current \code{dpvar} constructor, continuity-by-shared-coefficients behavior,
 affine algebra, mixed known/decision products, matrix operations, indexing,
-assignment, and validation boundaries.
+assignment, \code{rhodiff} rate-vertex derivative storage, and validation
+boundaries.
 
 The command above does not verify \code{dplmi} assembly, SDP solver calls,
 relaxation lemma assembly, or DP-LMI feasibility workflows because those public
@@ -1200,6 +1202,8 @@ P = dpvar(n, m, gridVectors)
 P = dpvar(..., "full")
 P = dpvar(..., "symmetric")
 P = dpvar(..., RateBounds=rb)
+D = rhodiff(P, rb)
+D = rhodiff(P)
 C = P + Q
 C = P - Q
 C = -P
@@ -1274,6 +1278,98 @@ HasRateDependence -> true
 RateBounds        -> [-1 2; -3 4]
 \end{lstlisting}
 
+\clearpage
+
+\subsection{\texorpdfstring{Rate-Weighted Derivatives With \code{rhodiff}}{Rate-Weighted Derivatives With rhodiff}}
+
+\code{rhodiff} differentiates a \code{dpvar} with respect to the gridded
+parameters and multiplies the local partial derivatives by bounded
+\(\dot\rho\) vertices.  The output is another \code{dpvar}, but it is
+discontinuous across physical-cell boundaries because each cell keeps its own
+local derivative evidence.  This is deliberate: derivative boundary data are
+cell-local and are not collapsed into a shared global node.
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(1, {[0 2]}, RateBounds=[-2 3]);
+D = rhodiff(P);
+
+D.Degree
+D.IsContinuous
+D.HasRateDependence
+D.RateBounds
+size(D.coeffs(1))
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+Degree            -> 0
+IsContinuous      -> false
+HasRateDependence -> true
+RateBounds        -> [-2 3]
+size(D.coeffs(1)) -> [2 1]
+\end{lstlisting}
+
+For this scalar degree-one cell, if \code{c = P.coeffs(1)}, then the two
+stored derivative rows are
+\[
+  -2\,\frac{c_1 - c_0}{2}
+  \quad\text{and}\quad
+  3\,\frac{c_1 - c_0}{2}.
+\]
+The denominator is the physical cell width.  In general, a scalar degree
+\(m\) cell \([\rho_i,\rho_{i+1}]\) stores
+\[
+  v\,\frac{m}{h_i}\left(c_{q+1}-c_q\right),
+  \qquad q = 0,\ldots,m-1,
+\]
+for each rate vertex \(v\).  Scalar derivatives of degree \(m>0\) therefore
+drop to degree \(m-1\); degree-zero expressions differentiate to zero rows.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[x=1.5cm,y=1.0cm,>=Latex]
+    \draw[->] (0,0) -- (6.2,0) node[right] {\(\rho\)};
+    \draw[->] (0,-0.15) -- (0,2.6) node[above] {coefficient value};
+    \draw[black!35] (0.9,0) -- (0.9,-0.12) node[below] {\(\rho_i\)};
+    \draw[black!35] (3.0,0) -- (3.0,-0.12) node[below] {\(\rho_{i+1}\)};
+    \draw[black!35] (5.1,0) -- (5.1,-0.12) node[below] {\(\rho_{i+2}\)};
+    \draw[blue!70!black,thick] (0.9,0.75) -- (3.0,1.75);
+    \draw[blue!70!black,thick] (3.0,0.95) -- (5.1,2.2);
+    \fill[blue!70!black] (0.9,0.75) circle (1.6pt) node[above left] {\(c_0^{(i)}\)};
+    \fill[blue!70!black] (3.0,1.75) circle (1.6pt) node[above] {\(c_1^{(i)}\)};
+    \fill[blue!70!black] (3.0,0.95) circle (1.6pt) node[below right] {\(c_0^{(i+1)}\)};
+    \fill[blue!70!black] (5.1,2.2) circle (1.6pt) node[above] {\(c_1^{(i+1)}\)};
+    \draw[red!70!black,thick,->] (1.25,1.05) -- (2.0,1.41)
+      node[midway,above] {\(\dot\rho=v_-\)};
+    \draw[green!45!black,thick,->] (1.35,0.6) -- (2.35,1.08)
+      node[midway,below] {\(\dot\rho=v_+\)};
+    \node[align=center,draw=black!25,rounded corners=2pt,inner sep=4pt]
+      at (4.2,0.75) {each cell stores\\one row per\\rate vertex};
+  \end{tikzpicture}
+  \caption{\code{rhodiff} keeps derivative evidence local to each physical
+  cell.  The cell slope is scaled once for each admissible rate vertex, so
+  shared position coefficients need not imply shared derivative rows.}
+\end{figure}
+
+For tensor grids, \code{RateBounds} has one row per parameter dimension and
+\code{rhodiff} enumerates the Cartesian product of lower/upper bounds.  A
+two-parameter grid with bounds \([-1,2]\) and \([-3,5]\) therefore stores four
+rate rows in the order
+\[
+  (-1,-3),\quad (-1,5),\quad (2,-3),\quad (2,5).
+\]
+The local partial derivatives are accumulated after elevation into a common
+tensor Bernstein degree, so a degree-one two-parameter \code{dpvar} returns a
+degree-one derivative object with a \code{4x4} coefficient table on each
+physical cell.
+
+The supported call forms are \code{rhodiff(P, rb)} and \code{rhodiff(P)}.  The
+second form requires \code{P} to carry nonempty \code{RateBounds}.  If explicit
+bounds are supplied and \code{P} already carries bounds, the two tables must
+match.  Re-differentiating an existing rate-vertex expression is rejected in
+this slice.
+
 \subsection{Affine Algebra And Products}
 
 \code{dpvar} supports affine coefficient operations and products where at most
@@ -1305,6 +1401,14 @@ physical bounds are rejected.  Products such as \code{P * Q}, \code{P * x}
 where \code{x} is a bare decision variable, and products involving rate
 metadata are rejected in this slice because they would leave the supported
 affine SDP expression layer.
+
+Rate-vertex derivative expressions from \code{rhodiff} may still participate
+in supported affine operations.  Ordinary \code{dpvar}, numeric, affine
+\code{sdpvar}, and coefficient-backed \code{dpmat} operands are broadcast
+across the derivative rows when the grids and matrix sizes are compatible.
+Products are allowed with numeric or coefficient-backed known data, but
+products between two rate-dependent expressions or between a rate-dependent
+expression and another decision expression are rejected.
 
 \subsection{Matrix Operations And Indexing}
 
@@ -1368,12 +1472,13 @@ This repository version intentionally has a narrow public surface.
         decisions, rate dependence, exact function-handle algebra beyond
         evaluation/plot sampling, or solver-facing LMI assembly.
   \item \code{dpvar} is currently a continuous degree-1 YALMIP-backed affine
-        expression object.  It does not implement public derivative
-        construction, nonlinear decision products, rate-dependent products,
+        expression object with \code{rhodiff} support for discontinuous
+        cell-local rate-vertex derivatives.  It does not implement nonlinear
+        decision products, products with rate dependence on both sides,
         inequality assembly, or solver calls.
   \item \code{dplmi} remains a future package layer.
-  \item There is no public \code{dpdiff} class.  Future derivative behavior is
-        expected to belong to \code{dpvar}.
+  \item There is no public \code{dpdiff} class.  Public derivative behavior
+        belongs to \code{dpvar} through \code{rhodiff}.
   \item YALMIP modeling, SDP solver invocation, finite rate-vertex assembly,
         and relaxation lemma workflows beyond the current affine \code{dpvar}
         expression layer are not public behavior yet.

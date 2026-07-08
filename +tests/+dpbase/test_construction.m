@@ -50,9 +50,11 @@ function testReadOnlyProps(testCase)
 end
 
 function setSummary(obj)
+    % Local setter helper should trigger the read-only property guard.
     obj.SourceSummary = "manual";
 end
 
 function setDeg(obj)
+    % Local setter helper should exercise the Degree immutability path.
     obj.Degree = 3;
 end

@@ -1,20 +1,29 @@
-function data = asData(grid, val, reqSize, rb, errId)
+function data = asData(grid, val, reqSize, rb, errId, allowEmptyRate)
     %ASDATA Convert supported operands to dpvar data on the target grid.
 
-    info = internal.mkGrid(grid, "dpvar");
+    if nargin < 6
+        allowEmptyRate = false;
+    end
+    info = helper.mkGrid(grid, "dpvar");
 
     if isa(val, "dpvar")
-        chkRate(rb, val.RateBounds, errId);
+        chkRate(rb, val.RateBounds, errId, allowEmptyRate);
         chkSize(val.MatrixSize, reqSize, errId);
-        if sameGrid(info, val, errId)
+        nCoeff = (val.Degree + 1) ^ val.npar();
+        hasRows = isRateRows(val.LocalValues, val.GridInfo.Vectors, nCoeff);
+        same = sameGrid(info, val, errId);
+        if same
             vals = val.LocalValues;
+        elseif hasRows
+            error(errId, ...
+                "Rate-vertex dpvar expressions require matching grids in this operation.");
         else
             % Same-bound refinement only takes Bernstein point samples and
             % recombines them linearly, preserving affine YALMIP structure.
             vals = fitVals(info, val.Degree, val.MatrixSize, @(pt) evalDpvar(val, pt));
         end
         data = pack(val.MatrixSize, val.Degree, vals, ...
-            val.ContainsDecision, val.HasRateDependence);
+            val.ContainsDecision, val.HasRateDependence, val.IsContinuous, hasRows);
         return
     end
 
@@ -31,20 +40,24 @@ function data = asData(grid, val, reqSize, rb, errId)
             % common refinement before entering symbolic dpvar algebra.
             vals = fitVals(info, val.Degree, val.MatrixSize, @(pt) evaluate(val, pt));
         end
-        data = pack(val.MatrixSize, val.Degree, vals, false, val.HasRateDependence);
+        data = pack(val.MatrixSize, val.Degree, vals, false, ...
+            val.HasRateDependence, val.IsContinuous, false);
         return
     end
 
     mat = chkMat(val, reqSize, errId);
-    data = pack(size(mat), 0, constVals(info.NumNodes - 1, mat), isa(mat, "sdpvar"), false);
+    data = pack(size(mat), 0, constVals(info.NumNodes - 1, mat), ...
+        isa(mat, "sdpvar"), false, true, false);
 end
 
-function data = pack(sz, deg, vals, hasDec, hasRate)
+function data = pack(sz, deg, vals, hasDec, hasRate, isCont, hasRows)
     data.MatrixSize = sz;
     data.Degree = deg;
     data.LocalValues = vals;
     data.ContainsDecision = hasDec;
     data.HasRateDependence = hasRate;
+    data.IsContinuous = isCont;
+    data.HasRateRows = hasRows;
 end
 
 function tf = sameGrid(info, val, errId)
@@ -92,8 +105,11 @@ function [subs, alpha] = localPoint(obj, pt)
     end
 end
 
-function chkRate(rb, otherRb, errId)
+function chkRate(rb, otherRb, errId, allowEmptyRate)
     if isempty(rb) && isempty(otherRb)
+        return
+    end
+    if allowEmptyRate && isempty(otherRb)
         return
     end
     if ~(isequal(rb, otherRb))
@@ -137,5 +153,5 @@ function mat = chkMat(val, reqSize, errId)
 end
 
 function vals = constVals(nCell, mat)
-    vals = internal.mkNest(nCell, @(~) {mat});
+    vals = helper.mkNest(nCell, @(~) {mat});
 end

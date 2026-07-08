@@ -4,6 +4,7 @@ function tests = test_multiplication
 end
 
 function setupOnce(~)
+    % Clear YALMIP global state so variable IDs do not leak between tests.
     yalmip("clear");
 end
 
@@ -81,6 +82,7 @@ function testRejectsUnsupportedProducts(testCase)
 end
 
 function verifyCoeffExpr(testCase, actual, expected)
+    % Compare numeric or affine coefficient expressions without solving them.
     testCase.verifyEqual(numel(actual), numel(expected));
     for k = 1:numel(expected)
         diff = actual{k} - expected{k};

@@ -26,7 +26,7 @@ function obj = subsasgn(obj, S, rhs)
         error("dpmat:FunctionOnlyAlgebra", ...
             "Function-backed dpmat objects need explicit Bernstein coefficient evidence for this operation.");
     end
-    [rows, cols] = internal.matSubs(S(1).subs, obj.MatrixSize, ...
+    [rows, cols] = helper.matSubs(S(1).subs, obj.MatrixSize, ...
         "dpmat:InvalidAssignment");
     grid = obj.mergeGrid("dpmat:MixedGrid", rhs);
     lhsData = asData(grid, obj, [], "dpmat:InvalidAssignment");
@@ -36,8 +36,8 @@ function obj = subsasgn(obj, S, rhs)
     lhsVals = elevVals(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
     rhsVals = elevVals(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
     nCell = cellfun(@numel, grid) - 1;
-    vals = internal.mkNest(nCell, @(subs) assignCell( ...
-        internal.cellGet(lhsVals, subs), internal.cellGet(rhsVals, subs), rows, cols));
+    vals = helper.mkNest(nCell, @(subs) assignCell( ...
+        helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), rows, cols));
 
     obj = dpmat(grid, vals, Degree=deg);
 end

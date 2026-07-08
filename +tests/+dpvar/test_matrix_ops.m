@@ -4,6 +4,7 @@ function tests = test_matrix_ops
 end
 
 function setupOnce(~)
+    % Clear YALMIP global state so variable IDs do not leak between tests.
     yalmip("clear");
 end
 
@@ -288,26 +289,32 @@ function testStructuralRejections(testCase)
 end
 
 function deleteAssign(P)
+    % Exercise deletion-assignment rejection through a local function handle.
     P(1, :) = [];
 end
 
 function growAssign(P)
+    % Exercise out-of-bounds growth rejection through a local function handle.
     P(3, :) = 1;
 end
 
 function badSizeAssign(P)
+    % Exercise block-size mismatch rejection through a local function handle.
     P(1, :) = ones(2);
 end
 
 function nonlinearAssign(P, x)
+    % Exercise nonlinear sdpvar assignment rejection through a local helper.
     P(1, 1) = x * x;
 end
 
 function rateAssign(P, R)
+    % Exercise rate-dependent assignment rejection through a local helper.
     P(:, :) = R;
 end
 
 function verifyCoeffExpr(testCase, actual, expected)
+    % Compare numeric or affine coefficient expressions without solving them.
     testCase.verifyEqual(numel(actual), numel(expected));
     for k = 1:numel(expected)
         diff = actual{k} - expected{k};

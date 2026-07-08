@@ -29,15 +29,21 @@ classdef (InferiorClasses = {?dpmat}) dpvar < dpbase
                 hasRate = init.HasRateDependence;
                 rb = init.RateBounds;
                 summary = init.SourceSummary;
+                if isfield(init, "IsContinuous")
+                    isCont = init.IsContinuous;
+                else
+                    isCont = true;
+                end
             else
                 [grid, sz, vals, hasRate, rb] = ctorArgs(varargin{:});
                 deg = 1;
                 hasDec = true;
                 summary = "decision";
+                isCont = true;
             end
 
             obj@dpbase(grid, sz, deg, vals, ...
-                IsContinuous=true, ...
+                IsContinuous=isCont, ...
                 ContainsDecision=hasDec, ...
                 HasRateDependence=hasRate, ...
                 RateBounds=rb, ...
@@ -50,12 +56,12 @@ end
 function [grid, sz, vals, hasRate, rb] = ctorArgs(varargin)
     [sz, grid, info, typ, rb] = parseArgs(varargin{:});
     nCell = info.NumNodes - 1;
-    nodes = internal.mkNest(info.NumNodes, @(~) sdpvar(sz(1), sz(2), char(typ)));
-    lbls = internal.combRows(repmat({0:1}, 1, numel(info.Vectors)));
+    nodes = helper.mkNest(info.NumNodes, @(~) sdpvar(sz(1), sz(2), char(typ)));
+    lbls = helper.combRows(repmat({0:1}, 1, numel(info.Vectors)));
 
     % The global node tree is reused by every adjacent physical cell, which
     % makes continuity a shared-handle property rather than an equality LMI.
-    vals = internal.mkNest(nCell, @(subs) cellVals(nodes, subs, lbls));
+    vals = helper.mkNest(nCell, @(subs) cellVals(nodes, subs, lbls));
     hasRate = ~isempty(rb);
 end
 
@@ -137,13 +143,13 @@ function [sz, grid, info, typ, rb] = parseArgs(varargin)
         error("dpvar:InvalidStructure", ...
             "symmetric dpvar variables must be square.");
     end
-    info = internal.mkGrid(grid, "dpvar");
+    info = helper.mkGrid(grid, "dpvar");
 end
 
 function coeffs = cellVals(nodes, subs, lbls)
     nCoeff = size(lbls, 1);
     coeffs = cell(1, nCoeff);
     for k = 1:nCoeff
-        coeffs{k} = internal.cellGet(nodes, subs + lbls(k, :));
+        coeffs{k} = helper.cellGet(nodes, subs + lbls(k, :));
     end
 end

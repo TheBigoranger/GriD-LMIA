@@ -4,6 +4,7 @@ function tests = test_construction
 end
 
 function setupOnce(~)
+    % Clear YALMIP global state so variable IDs do not leak between tests.
     yalmip("clear");
 end
 
@@ -78,10 +79,12 @@ function testRateBounds(testCase)
 end
 
 function verifySameVars(testCase, lhs, rhs)
+    % Shared coefficient handles should expose identical YALMIP variable IDs.
     testCase.verifyEqual(getvariables(lhs), getvariables(rhs));
 end
 
 function val = firstCoeff(obj)
+    % Pull the first scalar-cell coefficient for compact constructor checks.
     coeffs = obj.coeffs(1);
     val = coeffs{1};
 end

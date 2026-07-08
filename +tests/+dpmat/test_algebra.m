@@ -130,6 +130,7 @@ function testFunctionBernsteinCanEnterAlgebra(testCase)
 end
 
 function verifyCoeff(testCase, obj, cellSubs, expected)
+    % Compare one physical cell's coefficients against numeric expectations.
     coeffs = obj.coeffs(cellSubs);
     testCase.verifyEqual(numel(coeffs), numel(expected));
     for k = 1:numel(expected)

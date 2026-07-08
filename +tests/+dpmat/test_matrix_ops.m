@@ -233,18 +233,22 @@ function testStructuralRejections(testCase)
 end
 
 function deleteAssign(A)
+    % Exercise deletion-assignment rejection through a local function handle.
     A(1, :) = [];
 end
 
 function growAssign(A)
+    % Exercise out-of-bounds growth rejection through a local function handle.
     A(3, :) = 1;
 end
 
 function badSizeAssign(A)
+    % Exercise block-size mismatch rejection through a local function handle.
     A(1, :) = ones(2);
 end
 
 function verifyCoeff(testCase, obj, cellSubs, expected)
+    % Compare one physical cell's coefficients against numeric expectations.
     coeffs = obj.coeffs(cellSubs);
     testCase.verifyEqual(numel(coeffs), numel(expected));
     for k = 1:numel(expected)

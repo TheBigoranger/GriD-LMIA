@@ -1,0 +1,160 @@
+function out = rhodiff(obj, rb)
+    %RHODIFF Cell-local rate-weighted derivative of a dpvar expression.
+    %
+    %   Syntax:
+    %     D = rhodiff(P, rb)
+    %     D = rhodiff(P)
+    %
+    %   Example:
+    %     P = dpvar(1, {[0 1 2]}, RateBounds=[-1 1]);
+    %     D = rhodiff(P);
+    %
+    %   rhodiff(P, rb) stores one rate-vertex row per physical hypercube.
+    %   The derivative is discontinuous at shared cell boundaries because
+    %   each hypercube uses its own local Bernstein coefficients.
+
+    if nargin > 2
+        error("dpvar:InvalidDiff", ...
+            "rhodiff supports only rhodiff(P) and rhodiff(P, RateBounds).");
+    end
+
+    nPar = obj.npar();
+    inCoeff = (obj.Degree + 1) ^ nPar;
+    if isRateRows(obj.LocalValues, obj.GridInfo.Vectors, inCoeff)
+        error("dpvar:InvalidDiff", ...
+            "rhodiff of an existing rate-vertex dpvar expression is unsupported.");
+    end
+
+    if nargin < 2
+        if ~obj.HasRateDependence || isempty(obj.RateBounds)
+            error("dpvar:MissingRateBounds", ...
+                "rhodiff(P) requires P to carry nonempty RateBounds.");
+        end
+        rb = obj.RateBounds;
+    else
+        rb = chkRateBounds(rb, nPar);
+        if ~isempty(obj.RateBounds) && ~isequal(rb, obj.RateBounds)
+            error("dpvar:RateBoundsMismatch", ...
+                "Explicit RateBounds must match P.RateBounds when both are present.");
+        end
+    end
+
+    verts = rateVerts(rb);
+    deg = obj.Degree;
+    if deg == 0 || nPar == 1
+        outDeg = max(deg - 1, 0);
+    else
+        % Multivariate partials have mixed degree.  Store their rate-weighted
+        % sum after elevation to the common tensor degree m basis.
+        outDeg = deg;
+    end
+
+    grid = obj.GridInfo.Vectors;
+    nCell = obj.GridInfo.NumNodes - 1;
+    vals = helper.mkNest(nCell, @(subs) diffCell(obj, subs, verts, outDeg));
+    hasDec = obj.ContainsDecision && deg > 0;
+    out = dpvar(mkInit(grid, obj.MatrixSize, outDeg, vals, ...
+        hasDec, true, rb, "derivative", false));
+end
+
+function rb = chkRateBounds(rb, nPar)
+    rb = double(helper.chk(rb, "dpvar:InvalidRateBounds", ...
+        "RateBounds must be a finite ell-by-2 matrix with lower <= upper.", ...
+        "numeric", "real", "finite", "rowbounds", "Size", [nPar, 2]));
+end
+
+function verts = rateVerts(rb)
+    vecs = cell(1, size(rb, 1));
+    for k = 1:size(rb, 1)
+        vecs{k} = rb(k, :);
+    end
+    verts = helper.combRows(vecs);
+end
+
+function coeffs = diffCell(obj, subs, verts, outDeg)
+    deg = obj.Degree;
+    nPar = obj.npar();
+    nVert = size(verts, 1);
+    nOut = (outDeg + 1) ^ nPar;
+    sz = obj.MatrixSize;
+    if deg == 0
+        coeffs = cell(nVert, nOut);
+        for row = 1:nVert
+            for c = 1:nOut
+                coeffs{row, c} = zeros(sz);
+            end
+        end
+        return
+    end
+
+    vals = helper.cellGet(obj.LocalValues, subs);
+    h = zeros(1, nPar);
+    for k = 1:nPar
+        grid = obj.GridInfo.Vectors{k};
+        h(k) = grid(subs(k) + 1) - grid(subs(k));
+    end
+
+    coeffs = cell(nVert, nOut);
+    for row = 1:nVert
+        if nPar == 1
+            coeffs(row, :) = scalarDiff(vals, deg, h(1), verts(row, 1));
+        else
+            coeffs(row, :) = tensorDiff(vals, deg, h, verts(row, :), sz);
+        end
+    end
+end
+
+function row = scalarDiff(vals, deg, h, rate)
+    row = cell(1, deg);
+    scale = deg * rate / h;
+    for q = 0:(deg - 1)
+        row{q + 1} = (vals{q + 2} - vals{q + 1}) .* scale;
+    end
+end
+
+function row = tensorDiff(vals, deg, h, rate, sz)
+    nPar = numel(h);
+    row = cell(1, (deg + 1) ^ nPar);
+
+    for dim = 1:nPar
+        vecs = repmat({0:deg}, 1, nPar);
+        vecs{dim} = 0:(deg - 1);
+        partLbls = helper.combRows(vecs);
+        for k = 1:size(partLbls, 1)
+            lbl = partLbls(k, :);
+            nxt = lbl;
+            nxt(dim) = nxt(dim) + 1;
+            base = (vals{lblIdx(nxt, deg)} - vals{lblIdx(lbl, deg)}) ...
+                .* (deg * rate(dim) / h(dim));
+
+            % Each partial has degree m-1 in this dimension; elevate the
+            % two affected Bernstein coefficients into the common degree m
+            % tensor basis before accumulating the rate-weighted sum.
+            for outLabel = lbl(dim):(lbl(dim) + 1)
+                out = lbl;
+                out(dim) = outLabel;
+                idx = lblIdx(out, deg);
+                scale = nchoosek(deg - 1, lbl(dim)) ...
+                    * nchoosek(1, outLabel - lbl(dim)) ...
+                    / nchoosek(deg, outLabel);
+                term = base .* scale;
+                if isempty(row{idx})
+                    row{idx} = term;
+                else
+                    row{idx} = row{idx} + term;
+                end
+            end
+        end
+    end
+
+    for k = 1:numel(row)
+        if isempty(row{k})
+            row{k} = zeros(sz);
+        end
+    end
+end
+
+function idx = lblIdx(lbl, deg)
+    mult = (deg + 1) .^ (numel(lbl) - 1:-1:0);
+    idx = sum(lbl .* mult) + 1;
+end

@@ -9,6 +9,23 @@ function vals = elevVals(obj, vals, fromDeg, toDeg, grid)
     end
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = internal.mkNest(nCell, @(subs) obj.bernElev( ...
-        internal.cellGet(vals, subs), fromDeg, toDeg));
+    nCoeff = (fromDeg + 1) ^ numel(grid);
+    hasRows = isRateRows(vals, grid, nCoeff);
+    vals = helper.mkNest(nCell, @(subs) elevCell(obj, ...
+        helper.cellGet(vals, subs), fromDeg, toDeg, hasRows));
+end
+
+function coeffs = elevCell(obj, coeffs, fromDeg, toDeg, hasRows)
+    if ~hasRows
+        coeffs = obj.bernElev(coeffs, fromDeg, toDeg);
+        return
+    end
+
+    nRows = size(coeffs, 1);
+    nCoeff = (toDeg + 1) ^ obj.npar();
+    out = cell(nRows, nCoeff);
+    for row = 1:nRows
+        out(row, :) = obj.bernElev(coeffs(row, :), fromDeg, toDeg);
+    end
+    coeffs = out;
 end

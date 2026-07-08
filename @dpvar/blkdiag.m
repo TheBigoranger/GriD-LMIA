@@ -12,7 +12,8 @@ function out = blkdiag(varargin)
     anchor = pickAnchor(varargin);
     grid = anchor.mergeGrid("dpvar:MixedGrid", varargin{:});
     data = repmat(struct("MatrixSize", [], "Degree", [], ...
-        "LocalValues", [], "ContainsDecision", [], "HasRateDependence", []), ...
+        "LocalValues", [], "ContainsDecision", [], "HasRateDependence", [], ...
+        "IsContinuous", [], "HasRateRows", []), ...
         1, numel(varargin));
     for k = 1:numel(varargin)
         data(k) = asData(grid, varargin{k}, [], anchor.RateBounds, ...
@@ -26,7 +27,7 @@ function out = blkdiag(varargin)
     end
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = internal.mkNest(nCell, @(subs) blkCell(data, subs));
+    vals = helper.mkNest(nCell, @(subs) blkCell(data, subs));
     sz = [sum(arrayfun(@(d) d.MatrixSize(1), data)), ...
         sum(arrayfun(@(d) d.MatrixSize(2), data))];
     hasDec = any(arrayfun(@(d) d.ContainsDecision, data));
@@ -54,12 +55,12 @@ function anchor = pickAnchor(args)
 end
 
 function coeffs = blkCell(data, subs)
-    nCoeff = numel(internal.cellGet(data(1).LocalValues, subs));
+    nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
     coeffs = cell(1, nCoeff);
     for c = 1:nCoeff
         parts = cell(1, numel(data));
         for k = 1:numel(data)
-            one = internal.cellGet(data(k).LocalValues, subs);
+            one = helper.cellGet(data(k).LocalValues, subs);
             parts{k} = one{c};
         end
         coeffs{c} = blkdiag(parts{:});

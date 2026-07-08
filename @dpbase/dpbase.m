@@ -37,7 +37,7 @@ classdef dpbase
 
             % Normalize once at the parent layer so dpmat/dpvar/dplmi can
             % share the same tensor-grid contract and label ordering.
-            info = internal.mkGrid(gridVectors, "dpbase");
+            info = helper.mkGrid(gridVectors, "dpbase");
             sz = double(helper.chk(matrixSize, "dpbase:InvalidMatrixSize", ...
                 "matrixSize must be a 1x2 positive integer vector.", ...
                 "numeric", "real", "finite", "integer", "positive", "Size", [1, 2]));
@@ -64,11 +64,11 @@ classdef dpbase
             if isempty(localValues)
                 % Default construction represents a coefficient-backed zero
                 % object on every physical cell, not sampled node data.
-                vals = internal.mkVals(nCell, nCoeff, sz);
+                vals = helper.mkVals(nCell, nCoeff, sz);
                 hasRate = false;
             else
                 vals = localValues;
-                hasRate = internal.chkVals(vals, nCell, nCoeff, sz, nPar);
+                hasRate = helper.chkVals(vals, nCell, nCoeff, sz, nPar);
             end
             if hasRate && isempty(rb)
                 error("dpbase:InvalidRateBounds", ...

@@ -18,8 +18,8 @@ helper.chk(rhs, "dpbase:InvalidCoefficientCell", ...
     "cell", "Numel", rhsN);
 
 outDeg = lhsDeg + rhsDeg;
-lhsLbls = internal.combRows(repmat({0:lhsDeg}, 1, nPar));
-outLbls = internal.combRows(repmat({0:outDeg}, 1, nPar));
+lhsLbls = helper.combRows(repmat({0:lhsDeg}, 1, nPar));
+outLbls = helper.combRows(repmat({0:outDeg}, 1, nPar));
 out = cell(1, size(outLbls, 1));
 
 for outIdx = 1:size(outLbls, 1)

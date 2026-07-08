@@ -5,7 +5,7 @@ function vals = checkBernstein(fh, info, deg, sz)
     %     vals = checkBernstein(fh, gridInfo, degree, matrixSize)
     %
     %   Example:
-    %     info = internal.mkGrid({[0 1]}, "dpmat");
+    %     info = helper.mkGrid({[0 1]}, "dpmat");
     %     vals = checkBernstein(@(rho) rho, info, 1, [1 1]);
 
     nPar = numel(info.Vectors);
@@ -62,7 +62,7 @@ function vals = checkBernstein(fh, info, deg, sz)
     end
     probes = unique(probes, "rows", "stable");
 
-    cells = internal.combRows(arrayfun(@(n) 1:n, nCell, "UniformOutput", false));
+    cells = helper.combRows(arrayfun(@(n) 1:n, nCell, "UniformOutput", false));
     for cellIdx = 1:size(cells, 1)
         cellSubs = cells(cellIdx, :);
         bounds = zeros(nPar, 2);
@@ -70,7 +70,7 @@ function vals = checkBernstein(fh, info, deg, sz)
             v = info.Vectors{q};
             bounds(q, :) = v(cellSubs(q):(cellSubs(q) + 1));
         end
-        coeffs = internal.cellGet(vals, cellSubs);
+        coeffs = helper.cellGet(vals, cellSubs);
         for p = 1:size(probes, 1)
             alpha = probes(p, :);
 

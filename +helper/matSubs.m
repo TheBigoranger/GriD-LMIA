@@ -2,10 +2,10 @@ function [rows, cols] = matSubs(subs, sz, errId)
     %MATSUBS Normalize two-dimensional matrix payload subscripts.
     %
     %   Syntax:
-    %     [rows, cols] = internal.matSubs(subs, sz, errId)
+    %     [rows, cols] = helper.matSubs(subs, sz, errId)
     %
     %   Example:
-    %     [rows, cols] = internal.matSubs({":", 2}, [3 4], "pkg:BadSub");
+    %     [rows, cols] = helper.matSubs({":", 2}, [3 4], "pkg:BadSub");
 
     if numel(subs) ~= 2
         error(errId, "Matrix indexing requires row and column subscripts.");

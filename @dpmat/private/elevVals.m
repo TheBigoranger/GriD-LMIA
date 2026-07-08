@@ -9,5 +9,5 @@ function vals = elevVals(obj, vals, fromDeg, toDeg, grid)
     end
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = internal.mkNest(nCell, @(subs) obj.bernElev(internal.cellGet(vals, subs), fromDeg, toDeg));
+    vals = helper.mkNest(nCell, @(subs) obj.bernElev(helper.cellGet(vals, subs), fromDeg, toDeg));
 end
