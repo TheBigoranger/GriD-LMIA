@@ -3,6 +3,14 @@ title: dpbase Storage And Inspection
 description: Inherited grid, local value, label, and coefficient inspection behavior.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpbase/">dpbase</a>
+  <span>/</span>
+  <span>storage inspection</span>
+</nav>
+
 ## Purpose
 
 Understand the inherited storage contract used by `dpmat` and `dpvar`.

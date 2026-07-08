@@ -3,6 +3,14 @@ title: dpmat Constructor
 description: Construct known finite real matrix data on a parameter grid.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <span>/</span>
+  <span>constructor</span>
+</nav>
+
 ## Purpose
 
 Create a known-data `dpmat` object over one or more parameter-grid dimensions.

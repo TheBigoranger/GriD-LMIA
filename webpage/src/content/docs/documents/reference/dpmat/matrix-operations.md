@@ -3,6 +3,14 @@ title: dpmat Matrix Operations
 description: Coefficient-backed algebra and structural operations for dpmat.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <span>/</span>
+  <span>matrix operations</span>
+</nav>
+
 ## Purpose
 
 Apply matrix and coefficient operations to known parameter-dependent matrix data.

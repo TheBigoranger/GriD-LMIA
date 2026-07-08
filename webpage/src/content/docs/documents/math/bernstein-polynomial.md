@@ -3,69 +3,91 @@ title: Bernstein Polynomial
 description: Mathematical background for cell-local Bernstein storage and coefficient-wise DP-LMI assembly.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <span>Bernstein Polynomial</span>
+</nav>
+
 The package stores parameter-dependent matrices with cell-local Bernstein coefficients. This chapter explains the convention used by `dpmat`, `dpvar`, and `dplmi`.
 
 ## One Cell And Local Coordinates
 
-On a scalar physical cell `[rho_k, rho_{k+1}]`, the local coordinate is
+On a scalar physical cell $[\rho_k,\rho_{k+1}]$, the local coordinate is
 
-```text
-alpha = (rho_{k+1} - rho) / (rho_{k+1} - rho_k),  alpha in [0, 1].
-```
+$$
+\alpha = \frac{\rho_{k+1}-\rho}{\rho_{k+1}-\rho_k},
+\qquad \alpha \in [0,1].
+$$
 
-With this convention, local label `0` selects the left physical coefficient and local label `m` selects the right physical coefficient.
+With this convention, local label $0$ selects the left physical coefficient and local label $m$ selects the right physical coefficient.
 
-The scalar degree-`m` Bernstein basis is
+The scalar degree-$m$ Bernstein basis is
 
-```text
-B_{i,m}(alpha) = nchoosek(m, i) alpha^(m-i) (1-alpha)^i,
-i = 0, ..., m.
-```
+$$
+B_{i,m}(\alpha)
+= \binom{m}{i}\alpha^{m-i}(1-\alpha)^i,
+\qquad i=0,\ldots,m.
+$$
 
 For one-dimensional degree-1 data,
 
-```text
-A(alpha) = B_{0,1}(alpha) A_0 + B_{1,1}(alpha) A_1.
-```
+$$
+A(\alpha)=B_{0,1}(\alpha)A_0+B_{1,1}(\alpha)A_1.
+$$
 
 This is the storage model behind a linear coefficient-backed `dpmat` and the default degree-1 `dpvar`.
 
-## Degree Growth Under Products
+## Why Products Become Quadratic
 
-Multiplication raises Bernstein degree. If
+The central coefficient operation is multiplication. If two scalar or matrix-valued Bernstein objects are both degree 1,
 
-```text
-P(alpha) = alpha P_0 + (1-alpha) P_1
-Q(alpha) = alpha Q_0 + (1-alpha) Q_1,
-```
+$$
+P(\alpha)=B_{0,1}(\alpha)P_0+B_{1,1}(\alpha)P_1,
+\qquad
+Q(\alpha)=B_{0,1}(\alpha)Q_0+B_{1,1}(\alpha)Q_1,
+$$
 
-then the product is degree 2:
+then the product is not degree 1. It is degree 2:
 
-```text
-P Q =
-  B_{0,2} P_0 Q_0
-  + B_{1,2} (P_0 Q_1 + P_1 Q_0) / 2
-  + B_{2,2} P_1 Q_1.
-```
+$$
+P(\alpha)Q(\alpha)
+=B_{0,2}(\alpha)R_0
++B_{1,2}(\alpha)R_1
++B_{2,2}(\alpha)R_2,
+$$
 
-For scalar degrees `n` and `m`, the product coefficient with label `k` is
+with
 
-```text
-R_k = sum_{i+j=k} P_i Q_j
-      * nchoosek(n, i) * nchoosek(m, j) / nchoosek(n+m, k).
-```
+$$
+R_0=P_0Q_0,\qquad
+R_1=\frac{P_0Q_1+P_1Q_0}{2},\qquad
+R_2=P_1Q_1.
+$$
+
+The middle coefficient is averaged because $B_{1,2}(\alpha)=2\alpha(1-\alpha)$ while the cross terms produce $\alpha(1-\alpha)(P_0Q_1+P_1Q_0)$.
+
+For scalar degrees $n$ and $m$, the product coefficient with label $k$ is
+
+$$
+R_k =
+\sum_{i+j=k}
+P_iQ_j
+\frac{\binom{n}{i}\binom{m}{j}}{\binom{n+m}{k}}.
+$$
 
 This coefficient convolution is implemented in the shared Bernstein utilities inherited by `dpmat` and `dpvar`.
 
 ## Tensor-Product Labels
 
-For `ell` scheduling dimensions, the package uses tensor-product Bernstein bases:
+For $\ell$ scheduling dimensions, the package uses tensor-product Bernstein bases:
 
-```text
-B_{i,m}(alpha) = prod_{r=1}^ell B_{i_r,m_r}(alpha_r).
-```
+$$
+B_{\mathbf{i},m}(\boldsymbol{\alpha})
+=\prod_{r=1}^{\ell} B_{i_r,m}(\alpha_r).
+$$
 
-Cell-local labels are enumerated in flat combination order over `{0, ..., m}^ell`. A two-parameter degree-1 cell has labels
+Cell-local labels are enumerated in flat combination order over $\{0,\ldots,m\}^{\ell}$. A two-parameter degree-1 cell has labels
 
 ```text
 [0 0], [0 1], [1 0], [1 1]
@@ -100,17 +122,18 @@ labels =
 
 If a residual expression on one cell is
 
-```text
-E(alpha) = sum_i B_{i,m}(alpha) E_i,
-```
+$$
+E(\alpha)=\sum_i B_{i,m}(\alpha)E_i,
+$$
 
 then the current `dplmi` path uses the sufficient direct condition
 
-```text
-E_i <= 0 for every local coefficient i.
-```
+$$
+E_i \preceq 0
+\qquad \text{for every local coefficient } i.
+$$
 
-Rate-dependent derivative expressions produced by `rhodiff` may store one coefficient row for each active `rho_dot` vertex. `dplmi` expands those rows into separate YALMIP constraints.
+Rate-dependent derivative expressions produced by `rhodiff` may store one coefficient row for each active $\dot{\rho}$ vertex. `dplmi` expands those rows into separate YALMIP constraints.
 
 ## Relaxation Boundary
 

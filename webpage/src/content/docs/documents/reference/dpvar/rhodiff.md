@@ -3,6 +3,14 @@ title: dpvar rhodiff
 description: Rate-weighted cell-local derivative of a dpvar expression.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpvar/">dpvar</a>
+  <span>/</span>
+  <span>rhodiff</span>
+</nav>
+
 ## Purpose
 
 Return a discontinuous, rate-vertex derivative expression for a `dpvar` object.

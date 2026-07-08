@@ -3,6 +3,14 @@ title: dplmi Constructor
 description: Assemble direct coefficient-wise DP-LMI constraints.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dplmi/">dplmi</a>
+  <span>/</span>
+  <span>constructor</span>
+</nav>
+
 ## Purpose
 
 Build a `dplmi` object from a square `dpvar` residual expression.

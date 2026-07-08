@@ -40,6 +40,21 @@
   background-size: 48px 48px, 48px 48px, auto;
 }
 
+.welcome-portal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.35rem;
+  align-items: center;
+  padding: 2rem;
+  border: 1px solid color-mix(in srgb, var(--sl-color-accent) 35%, var(--sl-color-gray-5));
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--sl-color-accent-low) 48%, transparent) 1px, transparent 1px),
+    linear-gradient(180deg, color-mix(in srgb, var(--sl-color-accent-low) 48%, transparent) 1px, transparent 1px),
+    linear-gradient(135deg, color-mix(in srgb, var(--sl-color-bg) 86%, #e0f2fe), var(--sl-color-gray-7));
+  background-size: 44px 44px, 44px 44px, auto;
+}
+
 .portal-kicker {
   margin: 0 0 0.7rem;
   color: var(--sl-color-text-accent);
@@ -51,6 +66,7 @@
   font-size: 2.35rem;
   line-height: 1.08;
   letter-spacing: 0;
+  max-width: 18ch;
 }
 
 .portal-copy p {
@@ -86,6 +102,68 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-block: 1rem 2rem;
+}
+
+.manual-entry-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-block: 1rem 2rem;
+}
+
+.manual-entry-list a {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.42fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  border-block-start: 1px solid var(--sl-color-gray-5);
+  padding-block: 0.8rem;
+  text-decoration: none;
+}
+
+.manual-entry-list strong {
+  color: var(--sl-color-text-accent);
+}
+
+.manual-entry-list span {
+  color: var(--sl-color-gray-2);
+}
+
+.download-strip,
+.manual-trail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.download-strip {
+  margin-block: 0.8rem 1.2rem;
+}
+
+.download-strip a,
+.manual-trail a {
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  text-decoration: none;
+  background: var(--sl-color-bg);
+}
+
+.manual-trail {
+  margin-block: 0 1.2rem;
+  color: var(--sl-color-gray-2);
+  font-size: 0.9rem;
+}
+
+.sl-markdown-content > h2 {
+  border-block-start: 1px solid var(--sl-color-gray-5);
+  padding-block-start: 1.4rem;
+  margin-block-start: 2.2rem;
+}
+
+.sl-markdown-content > h3 {
+  border-inline-start: 3px solid var(--sl-color-accent);
+  padding-inline-start: 0.7rem;
 }
 
 .jump-card {
@@ -125,6 +203,22 @@
   font-weight: 800;
 }
 
+.storage-diagram .panel-title {
+  font-size: 18px;
+  font-weight: 700;
+  fill: #1d4ed8;
+}
+
+.storage-diagram .white {
+  fill: white;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.storage-diagram .small {
+  font-size: 14px;
+}
+
 .storage-diagram .axis line,
 .storage-diagram .axis circle,
 .storage-diagram .cells rect {
@@ -144,9 +238,19 @@
   font-size: 16px;
 }
 
+.storage-diagram .arrow path {
+  fill: none;
+  stroke: #334155;
+  stroke-width: 3;
+}
+
 .storage-diagram .notes text {
   fill: #334155;
   font-size: 16px;
+}
+
+.bernstein-product {
+  max-width: 820px;
 }
 
 .method-grid {
@@ -172,8 +276,21 @@
   color: var(--sl-color-gray-2);
 }
 
+mjx-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+
+.sl-markdown-content img {
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 8px;
+  background: white;
+}
+
 @media (max-width: 820px) {
   .portal-hero,
+  .welcome-portal,
   .link-grid,
   .method-grid {
     grid-template-columns: 1fr;
@@ -185,5 +302,9 @@
 
   .portal-copy h2 {
     font-size: 1.85rem;
+  }
+
+  .manual-entry-list a {
+    grid-template-columns: 1fr;
   }
 }

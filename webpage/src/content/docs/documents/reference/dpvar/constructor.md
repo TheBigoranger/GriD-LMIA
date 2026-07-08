@@ -3,6 +3,14 @@ title: dpvar Constructor
 description: Construct continuous YALMIP-backed Bernstein decision expressions.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpvar/">dpvar</a>
+  <span>/</span>
+  <span>constructor</span>
+</nav>
+
 ## Purpose
 
 Create a continuous cell-local Bernstein decision expression backed by YALMIP coefficients.

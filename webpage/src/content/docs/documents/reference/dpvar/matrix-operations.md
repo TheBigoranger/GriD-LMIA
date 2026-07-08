@@ -3,6 +3,14 @@ title: dpvar Matrix Operations
 description: Affine algebra and structural operations for dpvar.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpvar/">dpvar</a>
+  <span>/</span>
+  <span>matrix operations</span>
+</nav>
+
 ## Purpose
 
 Operate on YALMIP-backed Bernstein decision expressions while preserving the cell-local coefficient contract.

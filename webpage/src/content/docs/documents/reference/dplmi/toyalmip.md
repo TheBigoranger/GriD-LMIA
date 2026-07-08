@@ -3,6 +3,14 @@ title: dplmi toYalmip
 description: Concatenate stored dplmi entries into YALMIP constraints.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dplmi/">dplmi</a>
+  <span>/</span>
+  <span>toYalmip</span>
+</nav>
+
 ## Purpose
 
 Convert stored coefficient-wise `dplmi` entries into a YALMIP constraint array.

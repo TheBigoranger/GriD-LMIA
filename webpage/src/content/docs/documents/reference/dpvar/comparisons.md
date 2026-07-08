@@ -3,6 +3,14 @@ title: dpvar Comparisons
 description: Create dplmi constraints using <= and >=.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpvar/">dpvar</a>
+  <span>/</span>
+  <span>comparisons</span>
+</nav>
+
 ## Purpose
 
 Convert a square `dpvar` residual into direct coefficient-wise `dplmi` constraints.

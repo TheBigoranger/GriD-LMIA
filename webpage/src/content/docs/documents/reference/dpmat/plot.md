@@ -3,6 +3,14 @@ title: dpmat plot
 description: Plot dpmat matrix entries over one or two grid dimensions.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <span>/</span>
+  <span>plot</span>
+</nav>
+
 ## Purpose
 
 Sample a `dpmat` object through `evaluate` and plot each matrix entry over one or two selected parameter dimensions.
@@ -47,6 +55,10 @@ ans =
          0    0.2500    0.5000    0.7500    1.0000
 ```
 
+![One-dimensional dpmat plot showing rho and rho squared entries](/DP-LMI-package/plots/dpmat-plot-1d.png)
+
+The first line is the sampled entry $A_{1,1}(\rho)=\rho$. The second line is $A_{1,2}(\rho)=\rho^2$.
+
 ### Two-dimensional surface
 
 ```matlab
@@ -63,6 +75,10 @@ ans =
 ans =
     0.5000
 ```
+
+![Two-dimensional dpmat surface plot showing two matrix entries over rho one and rho two](/DP-LMI-package/plots/dpmat-plot-2d.png)
+
+The two surfaces correspond to $A_{1,1}(\rho,\eta)=\rho+\eta$ and $A_{1,2}(\rho,\eta)=\rho-\eta$. `plot` creates one graphics object per matrix payload entry.
 
 ## Validation And Errors
 

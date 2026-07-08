@@ -87,6 +87,13 @@ F = toYalmip(C);
 
 `F` is a YALMIP constraint array. Use ordinary YALMIP solver calls such as `optimize(F, objective, sdpsettings(...))`.
 
+## Solver Smoke Cases
+
+The solver-facing smoke examples from [`+tests/+dplmi/test_solver_smoke.m`](https://github.com/TheBigoranger/DP-LMI-package/blob/main/%2Btests/%2Bdplmi/test_solver_smoke.m) are documented on a dedicated page:
+
+- [Parameter-dependent Lyapunov variable](/DP-LMI-package/examples/solver-smoke/#parameter-dependent-lyapunov-variable)
+- [Block DP-LMI objective](/DP-LMI-package/examples/solver-smoke/#block-dp-lmi-objective)
+
 ## Current Solver Boundary
 
 The package currently assembles direct coefficient-wise constraints. It does not provide a package-owned solver wrapper, relaxation-lemma assembler, Polya assembler, or residual diagnostic layer.

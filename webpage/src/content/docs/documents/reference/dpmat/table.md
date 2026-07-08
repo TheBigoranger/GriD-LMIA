@@ -3,6 +3,14 @@ title: dpmat table
 description: Return a command-line Bernstein coefficient table for dpmat.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <span>/</span>
+  <span>table</span>
+</nav>
+
 ## Purpose
 
 Inspect coefficient-backed `dpmat` local Bernstein data as a MATLAB table.

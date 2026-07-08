@@ -1,48 +1,46 @@
 ---
 title: DP-LMI Manual
-description: A visual portal into the DP-LMI MATLAB/YALMIP package.
+description: Portal for the DP-LMI MATLAB/YALMIP manual.
 ---
 
 import DpmatStorageDiagram from "../../components/DpmatStorageDiagram.astro";
 
-<section class="portal-hero">
+<section class="welcome-portal">
   <div class="portal-copy">
-    <p class="portal-kicker">Cell-local Bernstein documentation</p>
-    <h2>Look up DP-LMI classes, methods, and the storage model without digging through source.</h2>
+    <p class="portal-kicker">Differential parameter-dependent LMIs</p>
+    <h2>Manual, examples, and Bernstein storage notes for the DP-LMI MATLAB package.</h2>
     <p>
-      DP-LMI is a MATLAB/YALMIP package for differential parameter-dependent LMIs.
-      The current implementation centers on <code>dpmat</code>, <code>dpvar</code>,
-      <code>rhodiff</code>, and direct coefficient-wise <code>dplmi</code> assembly.
+      Start with the reference index if you know the function name. Start with the
+      Bernstein chapter if you want the coefficient model behind <code>dpmat</code>,
+      <code>dpvar</code>, <code>rhodiff</code>, and <code>dplmi</code>.
     </p>
     <div class="portal-actions">
-      <a href="/DP-LMI-package/documents/">Documents</a>
-      <a href="/DP-LMI-package/documents/reference/dpmat/constructor/">dpmat constructor</a>
-      <a href="/DP-LMI-package/documents/reference/dpvar/constructor/">dpvar constructor</a>
+      <a href="/DP-LMI-package/documents/">Open manual</a>
+      <a href="/DP-LMI-package/install/">Install / download</a>
+      <a href="/DP-LMI-package/examples/solver-smoke/">Solver examples</a>
     </div>
   </div>
   <DpmatStorageDiagram />
 </section>
 
-## Start Here
+## Manual Entrances
 
-<div class="link-grid">
-  <a class="jump-card" href="/DP-LMI-package/documents/">
-    <strong>Documents</strong>
-    <span>Reference index, math background, and MATLAB-style function pages.</span>
-  </a>
-  <a class="jump-card" href="/DP-LMI-package/examples/">
-    <strong>Examples</strong>
-    <span>Small workflows for setup, <code>dpmat</code>, <code>dpvar</code>, and <code>dplmi</code>.</span>
-  </a>
-  <a class="jump-card" href="/DP-LMI-package/documents/math/bernstein-polynomial/">
-    <strong>Bernstein Polynomial</strong>
-    <span>Local coordinates, tensor labels, convolution, and coefficient-wise constraints.</span>
-  </a>
-  <a class="jump-card" href="/DP-LMI-package/thanks/">
-    <strong>Thanks</strong>
-    <span>Runtime tools, documentation tooling, and comparison references.</span>
-  </a>
+<div class="manual-entry-list">
+  <a href="/DP-LMI-package/documents/reference-index/"><strong>Function lookup</strong><span>Scan implemented classes, constructors, methods, and tasks.</span></a>
+  <a href="/DP-LMI-package/documents/math/bernstein-polynomial/"><strong>Math foundation</strong><span>Linear factors, degree growth, tensor labels, and coefficient-wise constraints.</span></a>
+  <a href="/DP-LMI-package/documents/reference/dpmat/plot/"><strong>Plot output</strong><span>See generated MATLAB line and surface figures for <code>dpmat/plot</code>.</span></a>
+  <a href="/DP-LMI-package/examples/solver-smoke/"><strong>Solver smoke cases</strong><span>Two tested YALMIP workflows from <code>+tests/+dplmi/test_solver_smoke.m</code>.</span></a>
 </div>
+
+## Download And Install
+
+<div class="download-strip">
+  <a href="https://github.com/TheBigoranger/DP-LMI-package/archive/refs/heads/main.zip">Source ZIP</a>
+  <a href="https://github.com/TheBigoranger/DP-LMI-package/raw/main/doc/manual.pdf">PDF manual</a>
+  <a href="/DP-LMI-package/install/">Setup notes</a>
+</div>
+
+The download area is intentionally lightweight for now. It gives the site a stable place for future release archives, versioned PDFs, and installation notes once the package has formal releases.
 
 ## Current Implemented Slice
 
@@ -53,15 +51,5 @@ import DpmatStorageDiagram from "../../components/DpmatStorageDiagram.astro";
 | `dpvar` | Continuous YALMIP-backed Bernstein decision expressions with affine algebra and structural matrix operations. |
 | `rhodiff` | Discontinuous rate-vertex derivative expressions with scalar and tensor-grid rate bounds. |
 | `dplmi` | Direct coefficient-wise YALMIP constraints and `toYalmip` handoff. |
-
-## Setup Snapshot
-
-```matlab
-projectRoot = "path/to/Differential Parameter-Dependent Linear Matrix Inequality";
-addpath(genpath(projectRoot));
-rmpath(genpath(fullfile(projectRoot, "doc")));
-
-results = tests.run_all();
-```
 
 Relaxation-lemma assembly, Polya assembly, package-owned solver wrappers, strictness-margin diagnostics, and residual evidence are reserved future layers. The implemented solver-facing path documented here is direct coefficient-wise assembly through YALMIP constraints.

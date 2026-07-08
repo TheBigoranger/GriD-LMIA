@@ -3,6 +3,14 @@ title: dpmat evaluate
 description: Evaluate known dpmat data at one parameter point.
 ---
 
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <span>/</span>
+  <span>evaluate</span>
+</nav>
+
 ## Purpose
 
 Evaluate a `dpmat` object at a finite parameter point.
