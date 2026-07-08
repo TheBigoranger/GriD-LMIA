@@ -14,7 +14,7 @@ classdef dpmat < dpbase
     %
     %   Example:
     %     data = {1, 2, 3};
-    %     A = dpmat({[0 1 2]}, data, Degree=1);
+    %     A = dpmat([0 1 2], data, Degree=1);
     %     c = A.coeffs(2);
 
     properties (SetAccess = private)
@@ -24,6 +24,11 @@ classdef dpmat < dpbase
     methods
         function obj = dpmat(gridVectors, source, varargin)
             degOpt = parseOptions(varargin{:});
+            if isnumeric(gridVectors) && isvector(gridVectors) && numel(gridVectors) >= 2
+                % Accept scalar-parameter shorthand at the public entry;
+                % dpbase still receives its strict cell-vector grid contract.
+                gridVectors = {gridVectors};
+            end
 
             [sz, deg, vals, summary, fh] = mkData(gridVectors, source, degOpt);
 

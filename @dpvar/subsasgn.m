@@ -34,23 +34,18 @@ function obj = subsasgn(obj, S, rhs)
     deg = max(lhsData.Degree, rhsData.Degree);
     lhsVals = elevVals(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
     rhsVals = elevVals(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
-    nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) assignCell( ...
-        helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), rows, cols));
+    vals = zipRows(lhsVals, rhsVals, @(lhs, rhs) assignBlock(lhs, rhs, rows, cols), grid);
 
     hasDec = lhsData.ContainsDecision || rhsData.ContainsDecision;
     hasRate = lhsData.HasRateDependence || rhsData.HasRateDependence;
     if ~hasRate
         rb = [];
     end
-    obj = dpvar(mkInit(grid, obj.MatrixSize, deg, vals, hasDec, hasRate, rb, "expression"));
+    obj = dpvar(mkInit(grid, obj.MatrixSize, deg, vals, hasDec, hasRate, rb, ...
+        "expression", lhsData.IsContinuous && rhsData.IsContinuous));
 end
 
-function out = assignCell(lhs, rhs, rows, cols)
-    out = cell(size(lhs));
-    for k = 1:numel(lhs)
-        val = lhs{k};
-        val(rows, cols) = rhs{k};
-        out{k} = val;
-    end
+function out = assignBlock(lhs, rhs, rows, cols)
+    out = lhs;
+    out(rows, cols) = rhs;
 end

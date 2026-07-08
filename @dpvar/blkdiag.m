@@ -37,18 +37,17 @@ function out = blkdiag(varargin)
         rb = [];
     end
 
-    out = dpvar(mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, "expression"));
+    out = dpvar(mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, ...
+        "expression", all(arrayfun(@(d) d.IsContinuous, data))));
 end
 
 function coeffs = blkCell(data, subs)
-    nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
-    coeffs = cell(1, nCoeff);
-    for c = 1:nCoeff
-        parts = cell(1, numel(data));
-        for k = 1:numel(data)
-            one = helper.cellGet(data(k).LocalValues, subs);
-            parts{k} = one{c};
-        end
-        coeffs{c} = blkdiag(parts{:});
+    leaves = cell(1, numel(data));
+    for k = 1:numel(data)
+        leaves{k} = helper.cellGet(data(k).LocalValues, subs);
     end
+    % Block diagonal assembly follows the same rate-row broadcast contract
+    % as cat: derivative rows stay row-wise, ordinary rows expand to them.
+    coeffs = joinRows(leaves, @(parts) blkdiag(parts{:}), ...
+        "dpvar:InvalidCoefficientRows");
 end

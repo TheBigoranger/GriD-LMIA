@@ -59,6 +59,43 @@ function testDpmatPromotion(testCase)
     verifyCoeffExpr(testCase, C.coeffs(1), {cp{1} + 10, cp{2} + 20});
 end
 
+function testDerivativeAffineOperandOrders(testCase)
+    % Rate rows should work on either side of supported affine operands.
+    P = dpvar(1, {[0 1]});
+    Q = dpvar(1, {[0 1]});
+    D = rhodiff(P, [-1 2]);
+    cd = D.coeffs(1);
+    cq = Q.coeffs(1);
+    X = sdpvar(1, 1);
+    A = dpmat({[0 1]}, {10, 20}, Degree=1);
+
+    L = D + Q;
+    R = Q + D;
+    N = 5 - D;
+    S = D + 5;
+    Y = X - D;
+    K = A - D;
+
+    testCase.verifyEqual(L.Degree, 1);
+    testCase.verifyTrue(L.HasRateDependence);
+    testCase.verifyEqual(L.RateBounds, [-1 2]);
+    verifyCoeffExpr(testCase, L.coeffs(1), {
+        cd{1, 1} + cq{1}, cd{1, 1} + cq{2}
+        cd{2, 1} + cq{1}, cd{2, 1} + cq{2}
+    });
+    verifyCoeffExpr(testCase, R.coeffs(1), {
+        cq{1} + cd{1, 1}, cq{2} + cd{1, 1}
+        cq{1} + cd{2, 1}, cq{2} + cd{2, 1}
+    });
+    verifyCoeffExpr(testCase, N.coeffs(1), {5 - cd{1, 1}; 5 - cd{2, 1}});
+    verifyCoeffExpr(testCase, S.coeffs(1), {cd{1, 1} + 5; cd{2, 1} + 5});
+    verifyCoeffExpr(testCase, Y.coeffs(1), {X - cd{1, 1}; X - cd{2, 1}});
+    verifyCoeffExpr(testCase, K.coeffs(1), {
+        10 - cd{1, 1}, 20 - cd{1, 1}
+        10 - cd{2, 1}, 20 - cd{2, 1}
+    });
+end
+
 function testMixedScalarGridUsesCommonRefinement(testCase)
     % Same-bound mixed scalar grids should align on a common refinement.
     P = dpvar(1, {[0 1]});
@@ -91,6 +128,23 @@ function testRejectsUnsupportedOperands(testCase)
     testCase.verifyError(@() P + R, "dpvar:InvalidAddition");
     testCase.verifyError(@() P + F, "dpvar:FunctionOnlyAlgebra");
     testCase.verifyError(@() P + x * x, "dpvar:InvalidAddition");
+end
+
+function testRejectsUnsupportedDerivativeAffineOperands(testCase)
+    % Rate-row expressions cannot be resampled or mixed with bad operands.
+    P = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
+    D = rhodiff(P);
+    Q = dpvar(2, {[0 1]}, RateBounds=[-1 1]);
+    R = dpvar(1, {[0 1]}, RateBounds=[0 1]);
+    A = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
+    F = dpmat({[0 1]}, @(rho) rho);
+    x = sdpvar(1, 1);
+
+    testCase.verifyError(@() D + Q, "dpvar:InvalidAddition");
+    testCase.verifyError(@() D + R, "dpvar:InvalidAddition");
+    testCase.verifyError(@() D + A, "dpvar:InvalidAddition");
+    testCase.verifyError(@() D + F, "dpvar:FunctionOnlyAlgebra");
+    testCase.verifyError(@() D + x * x, "dpvar:InvalidAddition");
 end
 
 function testRateMetadataPropagatesAndChecksMismatch(testCase)

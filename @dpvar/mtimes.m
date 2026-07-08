@@ -55,17 +55,13 @@ function out = mtimes(lhs, rhs)
         error("dpvar:InvalidMultiplication", ...
             "Products may contain derivative rate vertices on exactly one known-data side.");
     end
-    if ld.MatrixSize(2) ~= rd.MatrixSize(1)
-        error("dpvar:InvalidMultiplication", ...
-            "Inner matrix dimensions must agree for dpvar multiplication.");
-    end
+    sz = prodSize(ld.MatrixSize, rd.MatrixSize);
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) prodRows(anchor, ...
         helper.cellGet(ld.LocalValues, subs), ld.Degree, ...
         helper.cellGet(rd.LocalValues, subs), rd.Degree));
 
-    sz = [ld.MatrixSize(1), rd.MatrixSize(2)];
     hasRate = ld.HasRateDependence || rd.HasRateDependence;
     if ~hasRate
         rb = [];
@@ -77,4 +73,22 @@ end
 
 function tf = isScalarNum(val)
     tf = isnumeric(val) && isscalar(val) && isreal(val) && isfinite(val);
+end
+
+function sz = prodSize(lhs, rhs)
+    lhsScalar = isequal(lhs, [1 1]);
+    rhsScalar = isequal(rhs, [1 1]);
+    if lhsScalar
+        sz = rhs;
+        return
+    end
+    if rhsScalar
+        sz = lhs;
+        return
+    end
+    if lhs(2) ~= rhs(1)
+        error("dpvar:InvalidMultiplication", ...
+            "Inner matrix dimensions must agree for dpvar multiplication.");
+    end
+    sz = [lhs(1), rhs(2)];
 end

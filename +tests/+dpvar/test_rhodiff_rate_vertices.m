@@ -122,6 +122,15 @@ function testImplicitAndInvalidRateBounds(testCase)
     testCase.verifyError(@() rhodiff(Q, [0 1; -1 1]), "dpvar:InvalidRateBounds");
 end
 
+function testRejectsRepeatedRhodiff(testCase)
+    % Rate-vertex expressions are terminal until quadratic-rate algebra exists.
+    P = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
+    D = rhodiff(P);
+
+    testCase.verifyError(@() rhodiff(D), "dpvar:InvalidDiff");
+    testCase.verifyError(@() rhodiff(D, [-1 1]), "dpvar:InvalidDiff");
+end
+
 function testDerivativeKeepsCellBoundaryDataSeparate(testCase)
     % Derivative cells should not reuse continuous boundary coefficient handles.
     P = dpvar(1, {[0 1 3]}, RateBounds=[1 1]);
@@ -191,6 +200,31 @@ function testDerivativeAdditionBroadcastsOrdinaryRows(testCase)
     verifyCoeffTable(testCase, K.coeffs(1), {
         cd{1, 1} + 10, cd{1, 1} + 20
         cd{2, 1} + 10, cd{2, 1} + 20
+    });
+end
+
+function testDerivativeRowsCombineWithEachOther(testCase)
+    % Matching rate-vertex tables should combine row-wise without broadcasting.
+    P = dpvar(1, {[0 1]}, RateBounds=[-1 2]);
+    Q = dpvar(1, {[0 1]}, RateBounds=[-1 2]);
+    Dp = rhodiff(P);
+    Dq = rhodiff(Q);
+    cp = Dp.coeffs(1);
+    cq = Dq.coeffs(1);
+
+    S = Dp + Dq;
+    R = Dp - Dq;
+
+    testCase.verifyFalse(S.IsContinuous);
+    testCase.verifyTrue(S.HasRateDependence);
+    testCase.verifyEqual(S.RateBounds, [-1 2]);
+    verifyCoeffTable(testCase, S.coeffs(1), {
+        cp{1, 1} + cq{1, 1}
+        cp{2, 1} + cq{2, 1}
+    });
+    verifyCoeffTable(testCase, R.coeffs(1), {
+        cp{1, 1} - cq{1, 1}
+        cp{2, 1} - cq{2, 1}
     });
 end
 

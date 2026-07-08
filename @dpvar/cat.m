@@ -37,7 +37,8 @@ function out = cat(dim, varargin)
         rb = [];
     end
 
-    out = dpvar(mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, "expression"));
+    out = dpvar(mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, ...
+        "expression", all(arrayfun(@(d) d.IsContinuous, data))));
     if ~isequal(size(out), sz)
         error("dpvar:InvalidConcatenation", ...
             "Internal dpvar concatenation size mismatch.");
@@ -104,14 +105,12 @@ function common = commonDim(vals, label)
 end
 
 function coeffs = catCell(dim, data, subs)
-    nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
-    coeffs = cell(1, nCoeff);
-    for c = 1:nCoeff
-        pieces = cell(1, numel(data));
-        for k = 1:numel(data)
-            one = helper.cellGet(data(k).LocalValues, subs);
-            pieces{k} = one{c};
-        end
-        coeffs{c} = cat(dim, pieces{:});
+    leaves = cell(1, numel(data));
+    for k = 1:numel(data)
+        leaves{k} = helper.cellGet(data(k).LocalValues, subs);
     end
+    % rhodiff leaves have one row per rate vertex; ordinary leaves have one
+    % row and broadcast across those vertices before block assembly.
+    coeffs = joinRows(leaves, @(parts) cat(dim, parts{:}), ...
+        "dpvar:InvalidCoefficientRows");
 end

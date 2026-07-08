@@ -51,6 +51,15 @@ function testFunctionDegreePopulatesPolynomialCoefficients(testCase)
     testCase.verifyEqual(coeffs{3}, 4, AbsTol=1e-10);
 end
 
+function testScalarGridVectorShorthand(testCase)
+    % A plain numeric vector is accepted as the one-parameter grid.
+    A = dpmat([0 1 2], {10, 20, 30}, Degree=1);
+
+    testCase.verifyEqual(A.Degree, 1);
+    testCase.verifyEqual(A.GridInfo.Vectors, {[0 1 2]});
+    testCase.verifyEqual(A.coeffs(2), {20, 30});
+end
+
 function testFunctionDoesNotSampleWholeGrid(testCase)
     % Function-only construction should probe size without sampling every node.
     A = dpmat({[0 1 2]}, @lowerOnly);

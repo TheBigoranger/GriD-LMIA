@@ -78,9 +78,10 @@ implementation uses \code{dpbase} as the backend parent for cell-local
 Bernstein coefficient storage, provides \code{dpmat} for known finite real
 matrix data on tensor grids, and provides an initial \code{dpvar} layer for
 continuous degree-1 YALMIP-backed decision expressions plus cell-local
-rate-weighted derivatives through \code{rhodiff}.  Solver-facing \code{dplmi}
-assembly, SDP solver invocation, and relaxation-lemma workflows remain future
-package layers in this repository version.
+rate-weighted derivatives through \code{rhodiff}.  It also provides the first
+\code{dplmi} layer: \code{dpvar} comparisons assemble direct coefficient-wise
+YALMIP constraints, and \code{toYalmip} exposes them to \code{optimize}.
+Relaxation-lemma and Polya workflows remain reserved future extensions.
 \end{abstract}
 
 \tableofcontents
@@ -107,9 +108,11 @@ addpath(pwd)
 
 \subsection{Run The Current Test Suite}
 
-The current verification entry point runs the non-SDP tests for
-\code{+helper}, \code{@dpbase}, \code{@dpmat}, and \code{@dpvar}.  The
-\code{@dpvar} tests require YALMIP to be available on the \matlab{} path.
+The current verification entry point runs the tests for \code{+helper},
+\code{@dpbase}, \code{@dpmat}, \code{@dpvar}, and \code{@dplmi}.  The
+\code{@dpvar} and \code{@dplmi} tests require YALMIP to be available on the
+\matlab{} path.  Solver smoke tests use installed YALMIP solvers; the MOSEK
+example is skipped unless MOSEK is available.
 
 \begin{lstlisting}[style=dpmatlab]
 results = tests.run_all;
@@ -124,11 +127,11 @@ assignment, structural transforms, and error boundaries.  It also covers the
 current \code{dpvar} constructor, continuity-by-shared-coefficients behavior,
 affine algebra, mixed known/decision products, matrix operations, indexing,
 assignment, \code{rhodiff} rate-vertex derivative storage, and validation
-boundaries.
-
-The command above does not verify \code{dplmi} assembly, SDP solver calls,
-relaxation lemma assembly, or DP-LMI feasibility workflows because those public
-layers are not implemented in this version.
+boundaries.  The \code{dplmi} tests cover comparison overloads,
+coefficient-wise constraint assembly, rate-vertex enumeration, \code{toYalmip},
+reserved relaxation/Polya option errors, and small solver-facing smoke
+examples.  Full relaxation-lemma assembly, Polya assembly, theorem residual
+margins, strictness margins, and solver diagnostics are not implemented yet.
 
 \section{Quick Start}
 
@@ -775,8 +778,8 @@ ans =
 
 \code{dpbase} validates rate bounds and rate-affine coefficient payloads, but it
 does not enumerate rate vertices or assemble LMIs.  Public derivative behavior
-currently belongs to \code{dpvar/rhodiff}; solver-facing finite LMI assembly is
-reserved for a future \code{dplmi} layer.
+belongs to \code{dpvar/rhodiff}; solver-facing finite LMI assembly belongs to
+\code{dplmi}.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = dpbase({[0 1], [10 20]}, [1 1], 0, [], ...
@@ -1217,8 +1220,9 @@ diagonal or triangular offsets, and invalid plot dimensions or
 \code{dpvar} represents continuous degree-1 Bernstein decision variables on a
 tensor grid.  Its coefficients are YALMIP \code{sdpvar} matrices stored through
 the same \code{dpbase} cell-local layout used by \code{dpmat}.  The current
-slice is an affine expression layer; it is not an inequality object and does
-not call an SDP solver.
+slice is an affine expression layer.  Comparisons such as \code{P <= 0} and
+\code{P >= Q} assemble \code{dplmi} objects, but \code{dpvar} itself does not
+choose solvers or call \code{optimize}.
 
 \subsection{Syntax}
 
@@ -1245,6 +1249,8 @@ P(rows, cols) = rhs
 C = [P, A]
 C = [P; P]
 C = blkdiag(P, 1, A)
+K = P <= 0
+K = P >= Q
 \end{lstlisting}
 
 Here \code{A} may be coefficient-backed \code{dpmat} data or compatible numeric
@@ -1480,12 +1486,230 @@ rate metadata.
 
 \subsection{Validation Boundaries}
 
-\code{dpvar} fixes \code{Degree=1}, \code{IsContinuous=true}, and
-\code{ContainsDecision=true} for the public constructor.  Attempts to pass
-\code{Degree}, \code{IsContinuous}, \code{ContainsDecision}, or
-\code{HasRateDependence} as constructor options are rejected.  A
-\code{"symmetric"} structure flag requires a square matrix.  Grid and
+\code{dpvar} constructor-created variables support \code{Degree=1} by default
+and \code{Degree=0} for parameter-independent decision expressions on the same
+grid metadata.  Constructor-created variables are continuous decision objects;
+those flags are fixed internally.  Attempts to pass the internal continuity,
+decision-content, or rate-dependence flags as constructor options are rejected.
+A \code{"symmetric"} structure flag requires a square matrix.  Grid and
 \code{RateBounds} validation follows the shared \code{dpbase} rules.
+
+\section{\texorpdfstring{\code{dplmi}}{dplmi} Assembly And Solver-Facing Use}
+
+\subsection{Purpose}
+
+\code{dplmi} wraps the finite YALMIP constraints produced from cell-local
+\code{dpvar} residuals.  In the current implementation, \code{dpvar <= rhs}
+and \code{dpvar >= rhs} first form an affine residual using the supported
+\code{dpvar} algebra, then assemble one semidefinite constraint for every
+physical cell, every local Bernstein coefficient, and every active
+\(\dot\rho\) rate-vertex row.
+
+The current \code{dplmi} layer is deliberately direct: it constrains every
+stored Bernstein coefficient.  Relaxation-lemma and Polya options are accepted
+as named options only so unsupported requests can fail clearly.
+
+\subsection{Syntax}
+
+\begin{lstlisting}[style=dpmatlab]
+C = P <= Q
+C = P <= 0
+C = P >= Q
+C = P >= eye(n)
+C = dplmi(expr, "<=")
+C = dplmi(expr, ">=", relaxLemma=false, UsePolya=false, PolyaDegree=0)
+F = toYalmip(C)
+F = C.toYalmip()
+\end{lstlisting}
+
+Here \code{expr} must be a \code{dpvar} residual.  The comparison overloads are
+usually the most convenient entry point because they reuse existing \code{dpvar}
+promotion rules for numeric constants, affine \code{sdpvar} matrices,
+coefficient-backed \code{dpmat} operands, and compatible \code{dpvar} objects.
+
+\subsection{Direct Coefficient Constraints}
+
+The simplest use is a coefficient-wise matrix inequality over a grid.
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(2, {[0 1 2]}, "symmetric");
+Cpos = P >= eye(2);
+
+class(Cpos)
+numel(Cpos.Constraints)
+Cpos.RelaxLemma
+Cpos.UsePolya
+Cpos.PolyaDegree
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+class(Cpos)           -> "dplmi"
+numel(Cpos.Constraints) -> 4
+RelaxLemma           -> false
+UsePolya             -> false
+PolyaDegree          -> 0
+\end{lstlisting}
+
+There are two physical cells and two degree-one local coefficients per cell,
+so direct assembly creates four scalar YALMIP semidefinite constraint entries.
+The entries remain inspectable in \code{Cpos.Constraints}; use
+\code{toYalmip(Cpos)} only at the solver boundary.
+
+\subsection{Rate-Vertex Assembly From \texorpdfstring{\code{rhodiff}}{rhodiff}}
+
+When the residual contains \code{rhodiff(P, rb)}, each local coefficient table
+has one row per admissible \(\dot\rho\) vertex.  \code{dplmi} constrains every
+row.
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(2, {[0 1 2]}, "symmetric", RateBounds=[-1 1]);
+D = rhodiff(P);
+Cdecay = D <= 0;
+
+D.Degree
+size(D.coeffs(1))
+numel(Cdecay.Constraints)
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+D.Degree                 -> 0
+size(D.coeffs(1))        -> [2 1]
+numel(Cdecay.Constraints)-> 4
+\end{lstlisting}
+
+The grid has two physical cells.  The scalar rate interval \([-1,1]\) has two
+vertices.  The degree-one derivative drops to degree zero, so each cell has one
+local derivative coefficient per rate vertex: \(2\) cells times \(2\) rate rows.
+
+For a two-parameter grid, the same rule applies to the tensor product of rate
+vertices:
+
+\begin{lstlisting}[style=dpmatlab]
+rb = [-1 1; -2 2];
+P = dpvar(2, {[0 1], [0 1]}, "symmetric", RateBounds=rb);
+D = rhodiff(P);
+C = D <= 0;
+
+size(D.coeffs([1 1]))
+numel(C.Constraints)
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+size(D.coeffs([1 1])) -> [4 4]
+numel(C.Constraints)  -> 16
+\end{lstlisting}
+
+There is one physical cell, four rate vertices, and four degree-one tensor
+coefficients after multivariate partial derivatives are elevated into a common
+tensor basis.
+
+\subsection{A Lyapunov-Style Solver Smoke Test}
+
+The following example mirrors the current solver smoke test.  It compares a
+constant decision matrix against a parameter-dependent one for the same
+coefficient-wise decay inequality.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, @(x) (1 - x) * [-1 -1; 1 -1] ...
+    + x * [-1 -10; 0.1 -1], Degree=1);
+opts = sdpsettings('verbose', 0);
+
+Pc = dpvar(2, {[0 1]}, Degree=0);
+Cdecay = Pc * A + A' * Pc <= -1e-10 * eye(2);
+Cpos = Pc >= eye(2);
+solConst = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
+
+Pd = dpvar(2, {[0 1]});
+Cdecay = Pd * A + A' * Pd <= -1e-10 * eye(2);
+Cpos = Pd >= eye(2);
+solDp = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
+
+[solConst.problem, solDp.problem]
+\end{lstlisting}
+
+Expected result under an available SDP solver:
+
+\begin{lstlisting}[style=dpoutput]
+[solConst.problem, solDp.problem] -> [1 0]
+\end{lstlisting}
+
+YALMIP returns \code{problem=1} for the constant-\(P\) infeasible case and
+\code{problem=0} for the degree-one parameter-dependent feasible case in the
+current local test setup.
+
+\subsection{A Block DP-LMI With A Performance Variable}
+
+This example is adapted from the root \code{test.m} case.  The test suite now
+keeps it in the \code{dplmi} solver-smoke tests.  It combines known
+parameter-dependent matrices, a rate-weighted derivative, a scalar degree-zero
+performance variable, block matrix assembly, and MOSEK-backed optimization.
+
+\begin{lstlisting}[style=dpmatlab]
+grid = linspace(0, 1, 20);
+A = dpmat(grid, @(x) [-1, 0.5; -1, -2] ...
+    + x * [-1.3, -20; 2, -10], Degree=1);
+B = dpmat(grid, @(x) [1, -4; -1, -1] ...
+    + x * [2.2, 0.5; -6, -5], Degree=1);
+C = eye(2);
+D = zeros(2);
+
+P = dpvar(2, grid);
+diffP = rhodiff(P, [-1 1]);
+gamma = dpvar(1, grid, Degree=0);
+
+E1 = [diffP + P * A + A' * P, P * B, C';
+    B' * P, -gamma * eye(2), D';
+    C, D, -gamma * eye(2)] <= 0;
+E2 = P >= 0;
+
+numel(E1.Constraints)
+numel(E2.Constraints)
+
+opts = sdpsettings('solver', 'mosek', 'verbose', 0);
+objective = gamma.LocalValues{1}{1};
+sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
+value(objective)
+\end{lstlisting}
+
+Expected structural output before the solver call:
+
+\begin{lstlisting}[style=dpoutput]
+numel(E1.Constraints) -> 114
+numel(E2.Constraints) -> 38
+\end{lstlisting}
+
+The first block inequality has \(19\) physical intervals, degree-two residual
+coefficients, and two rate vertices from \code{diffP}, so it produces
+\(19 \times 3 \times 2 = 114\) direct constraints.  The positivity constraint
+has \(19\) intervals and two degree-one coefficients, so it produces
+\(19 \times 2 = 38\) constraints.  The final numeric value depends on the
+installed solver and tolerances; the test verifies a successful MOSEK solve and
+a finite objective value when MOSEK is available.
+
+\subsection{Validation Boundaries}
+
+\code{dplmi} requires square symmetric or Hermitian coefficient matrices.
+Non-square residuals fail with \code{dplmi:InvalidMatrixSize}; non-symmetric
+residuals fail with \code{dplmi:NonSymmetricExpression}.  Unsupported
+relaxation and Polya requests fail explicitly:
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(2, {[0 1]}, "symmetric");
+
+dplmi(P, "<=", relaxLemma=true)  % dplmi:UnsupportedRelaxLemma
+dplmi(P, "<=", UsePolya=true)    % dplmi:UnsupportedPolya
+dplmi(P, "<=", PolyaDegree=1)    % dplmi:UnsupportedPolya
+\end{lstlisting}
+
+Direct coefficient-wise assembly is the only implemented route in this slice.
+Strictness margins, theorem residual margins, relaxation slacks, Polya
+lifting, diagnostics, and high-level solver wrappers remain future work.
 
 \section{Current Limits}
 
@@ -1495,21 +1719,24 @@ This repository version intentionally has a narrow public surface.
   \item The backend parent \code{dpbase}, user-facing \code{dpmat} and
         \code{dpvar} classes, \code{helper.chk}, \code{helper.scanMats}, and
         \code{helper.cell2bern} are implemented and covered by the current
-        non-SDP test entry point.
+        MATLAB test entry point.
   \item \code{dpmat} is a known-data object only.  It does not contain YALMIP
         decisions, rate dependence, exact function-handle algebra beyond
         evaluation/plot sampling, or solver-facing LMI assembly.
   \item \code{dpvar} is currently a continuous degree-1 YALMIP-backed affine
         expression object with \code{rhodiff} support for discontinuous
         cell-local rate-vertex derivatives.  It does not implement nonlinear
-        decision products, products with rate dependence on both sides,
-        inequality assembly, or solver calls.
-  \item \code{dplmi} remains a future package layer.
+        decision products, products with rate dependence on both sides, or
+        solver calls.
+  \item \code{dplmi} implements direct coefficient-wise finite YALMIP
+        constraint assembly from \code{dpvar} residuals.  It does not yet
+        implement relaxation-lemma assembly, Polya assembly, strictness
+        margins, residual evidence, diagnostics, or high-level solver wrappers.
   \item There is no public \code{dpdiff} class.  Public derivative behavior
         belongs to \code{dpvar} through \code{rhodiff}.
-  \item YALMIP modeling, SDP solver invocation, finite rate-vertex assembly,
-        and relaxation lemma workflows beyond the current affine \code{dpvar}
-        expression layer are not public behavior yet.
+  \item YALMIP solver invocation is available through ordinary YALMIP calls
+        after converting \code{dplmi} objects with \code{toYalmip}; this package
+        does not yet provide a custom solver wrapper.
   \item Private Bernstein utilities support internal tests and implementation,
         but they are not user-facing functions.
 \end{itemize}

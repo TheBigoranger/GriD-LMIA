@@ -41,6 +41,64 @@ function testNumericScalarAndMatrixProducts(testCase)
     verifyCoeffExpr(testCase, R.coeffs(1), {cp{1} * [4 5], cp{2} * [4 5]});
 end
 
+function testScalarDpvarScalesKnownMatrices(testCase)
+    % A scalar dpvar expression should scale known matrices like an sdpvar.
+    G = dpvar(1, [0 1], Degree=0);
+    cg = G.coeffs(1);
+
+    R = G * eye(2);
+    L = eye(2) * G;
+
+    testCase.verifyEqual(size(R), [2 2]);
+    testCase.verifyEqual(size(L), [2 2]);
+    testCase.verifyEqual(R.Degree, 0);
+    testCase.verifyEqual(L.Degree, 0);
+    verifyCoeffExpr(testCase, R.coeffs(1), {cg{1} * eye(2)});
+    verifyCoeffExpr(testCase, L.coeffs(1), {eye(2) * cg{1}});
+end
+
+function testDerivativeProductsPreserveRateRows(testCase)
+    % Known-data products should preserve one output row per rate vertex.
+    P = dpvar(1, {[0 1]});
+    D = rhodiff(P, [-1 2]);
+    cd = D.coeffs(1);
+    A = dpmat({[0 1]}, {10, 20}, Degree=1);
+
+    L = A * D;
+    R = D * A;
+    S = 3 * D;
+    T = D * 4;
+
+    testCase.verifyEqual(L.Degree, 1);
+    testCase.verifyTrue(L.HasRateDependence);
+    testCase.verifyEqual(L.RateBounds, [-1 2]);
+    verifyCoeffExpr(testCase, L.coeffs(1), {
+        10 * cd{1, 1}, 20 * cd{1, 1}
+        10 * cd{2, 1}, 20 * cd{2, 1}
+    });
+    verifyCoeffExpr(testCase, R.coeffs(1), {
+        cd{1, 1} * 10, cd{1, 1} * 20
+        cd{2, 1} * 10, cd{2, 1} * 20
+    });
+    verifyCoeffExpr(testCase, S.coeffs(1), {3 * cd{1, 1}; 3 * cd{2, 1}});
+    verifyCoeffExpr(testCase, T.coeffs(1), {cd{1, 1} * 4; cd{2, 1} * 4});
+end
+
+function testDerivativeNumericMatrixProducts(testCase)
+    % Numeric matrices may multiply a rate-row vector on either side.
+    V = dpvar(2, 1, {[0 1]}, "full");
+    D = rhodiff(V, [-1 1]);
+    cd = D.coeffs(1);
+
+    L = [1 2] * D;
+    R = D * [4 5];
+
+    testCase.verifyEqual(size(L), [1 1]);
+    testCase.verifyEqual(size(R), [2 2]);
+    verifyCoeffExpr(testCase, L.coeffs(1), {[1 2] * cd{1, 1}; [1 2] * cd{2, 1}});
+    verifyCoeffExpr(testCase, R.coeffs(1), {cd{1, 1} * [4 5]; cd{2, 1} * [4 5]});
+end
+
 function testMixedScalarGridUsesCommonRefinement(testCase)
     % Products on same-bound mixed grids are recomputed cell-locally.
     P = dpvar(1, {[0 1]});
@@ -100,6 +158,24 @@ function testRejectsUnsupportedProducts(testCase)
     testCase.verifyError(@() P * F, "dpvar:FunctionOnlyAlgebra");
     testCase.verifyError(@() P * A, "dpvar:MixedGrid");
     testCase.verifyError(@() V * B, "dpvar:InvalidMultiplication");
+    testCase.verifyError(@() R * 2, "dpvar:InvalidMultiplication");
+end
+
+function testRejectsUnsupportedDerivativeProducts(testCase)
+    % Rate-row products require a matching-grid known-data partner.
+    P = dpvar(1, {[0 1]});
+    D = rhodiff(P, [-1 1]);
+    Q = dpvar(1, {[0 1]});
+    R = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
+    A = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
+    B = dpmat({[0 2]}, {10, 20}, Degree=1);
+
+    testCase.verifyError(@() D * D, "dpvar:InvalidMultiplication");
+    testCase.verifyError(@() D * Q, "dpvar:InvalidMultiplication");
+    testCase.verifyError(@() Q * D, "dpvar:InvalidMultiplication");
+    testCase.verifyError(@() D * A, "dpvar:InvalidMultiplication");
+    testCase.verifyError(@() A * D, "dpvar:InvalidMultiplication");
+    testCase.verifyError(@() D * B, "dpvar:MixedGrid");
     testCase.verifyError(@() R * 2, "dpvar:InvalidMultiplication");
 end
 

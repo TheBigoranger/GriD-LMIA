@@ -33,16 +33,46 @@ function testExplicitStructureFlags(testCase)
         "dpvar:InvalidStructure");
 end
 
-function testFixedPublicDegree(testCase)
-    % Degree is fixed internally for this constructor slice.
+function testDefaultDegreeOne(testCase)
+    % The public constructor keeps the original degree-one default.
     P = dpvar(2, {[0 1 2]});
+    Q = dpvar(2, {[0 1 2]}, Degree=1);
 
     testCase.verifyEqual(P.Degree, 1);
+    testCase.verifyEqual(Q.Degree, 1);
     testCase.verifyTrue(P.IsContinuous);
     testCase.verifyTrue(P.ContainsDecision);
     testCase.verifyEqual(P.SourceSummary, "decision");
-    testCase.verifyError(@() dpvar(2, {[0 1]}, Degree=0), ...
-        "dpvar:UnsupportedOption");
+end
+
+function testDegreeZeroSharesOneDecisionAcrossGrid(testCase)
+    % Degree-zero variables are parameter-independent on the stored grid.
+    P = dpvar(1, {[0 1 2 3]}, Degree=0);
+    c1 = P.coeffs(1);
+    c2 = P.coeffs(2);
+    c3 = P.coeffs(3);
+
+    testCase.verifyEqual(P.Degree, 0);
+    testCase.verifyEqual(numel(c1), 1);
+    verifySameVars(testCase, c1{1}, c2{1});
+    verifySameVars(testCase, c1{1}, c3{1});
+end
+
+function testScalarGridVectorShorthand(testCase)
+    % A plain numeric vector is accepted as the one-parameter grid.
+    P = dpvar(2, [0 1], Degree=0);
+
+    testCase.verifyEqual(P.Degree, 0);
+    testCase.verifyEqual(P.GridInfo.Vectors, {[0 1]});
+    testCase.verifyEqual(P.npar(), 1);
+end
+
+function testDegreeValidation(testCase)
+    % Only the implemented constructor degrees are accepted publicly.
+    testCase.verifyError(@() dpvar(2, {[0 1]}, Degree=2), ...
+        "dpvar:InvalidDegree");
+    testCase.verifyError(@() dpvar(2, {[0 1]}, Degree=-1), ...
+        "dpvar:InvalidDegree");
 end
 
 function testBoundarySharing(testCase)

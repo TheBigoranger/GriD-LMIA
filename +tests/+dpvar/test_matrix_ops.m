@@ -90,6 +90,66 @@ function testCommonStructuralMethods(testCase)
     testCase.verifyFalse(isequal(P, D));
 end
 
+function testDerivativeStructuralMethodsPreserveRateRows(testCase)
+    % Unary structural transforms should keep derivative row tables intact.
+    P = dpvar(2, {[0 1]}, "full");
+    D = rhodiff(P, [-1 2]);
+    cd = D.coeffs(1);
+
+    T = D.';
+    H = D';
+    Tr = trace(D);
+    V = vec(D);
+    G = diag(D);
+    R = reshape(D, [1 4]);
+    L = tril(D);
+    U = triu(D, 1);
+    S1 = sum(D);
+    S2 = sum(D, 2);
+    Sa = sum(D, "all");
+    M1 = mean(D);
+    Ma = mean(D, "all");
+    Cs = cumsum(D, 2);
+    Fu = flipud(D);
+    Fl = fliplr(D);
+    Fp = flip(D, 2);
+    Q = rot90(D);
+    Rp = repmat(D, 1, 2);
+
+    outs = {T, H, Tr, V, G, R, L, U, S1, S2, Sa, M1, Ma, Cs, Fu, Fl, Fp, Q, Rp};
+    exp = {
+        {cd{1, 1}.'; cd{2, 1}.'}, ...
+        {cd{1, 1}'; cd{2, 1}'}, ...
+        {trace(cd{1, 1}); trace(cd{2, 1})}, ...
+        {cd{1, 1}(:); cd{2, 1}(:)}, ...
+        {diag(cd{1, 1}); diag(cd{2, 1})}, ...
+        {reshape(cd{1, 1}, [1 4]); reshape(cd{2, 1}, [1 4])}, ...
+        {tril(cd{1, 1}); tril(cd{2, 1})}, ...
+        {triu(cd{1, 1}, 1); triu(cd{2, 1}, 1)}, ...
+        {sum(cd{1, 1}); sum(cd{2, 1})}, ...
+        {sum(cd{1, 1}, 2); sum(cd{2, 1}, 2)}, ...
+        {sum(cd{1, 1}, "all"); sum(cd{2, 1}, "all")}, ...
+        {mean(cd{1, 1}); mean(cd{2, 1})}, ...
+        {mean(cd{1, 1}, "all"); mean(cd{2, 1}, "all")}, ...
+        {cumsum(cd{1, 1}, 2); cumsum(cd{2, 1}, 2)}, ...
+        {flipud(cd{1, 1}); flipud(cd{2, 1})}, ...
+        {fliplr(cd{1, 1}); fliplr(cd{2, 1})}, ...
+        {flip(cd{1, 1}, 2); flip(cd{2, 1}, 2)}, ...
+        {rot90(cd{1, 1}); rot90(cd{2, 1})}, ...
+        {repmat(cd{1, 1}, 1, 2); repmat(cd{2, 1}, 1, 2)}
+    };
+
+    testCase.verifyEqual(size(V), [4 1]);
+    testCase.verifyEqual(size(R), [1 4]);
+    testCase.verifyEqual(size(Rp), [2 4]);
+    for k = 1:numel(outs)
+        testCase.verifyTrue(outs{k}.HasRateDependence);
+        testCase.verifyEqual(outs{k}.RateBounds, [-1 2]);
+        testCase.verifyEqual(size(outs{k}.coeffs(1)), [2 1]);
+        verifyCoeffExpr(testCase, outs{k}.coeffs(1), exp{k});
+    end
+end
+
 function testDiagConstructionAndReshapeInference(testCase)
     % Vector diag and one empty reshape dimension should follow MATLAB usage.
     P = dpvar(3, 1, {[0 1]}, "full");
@@ -150,6 +210,26 @@ function testCatSdpvarBlocks(testCase)
     verifyCoeffExpr(testCase, C.coeffs(1), {[cp{1}, X], [cp{2}, X]});
 end
 
+function testCatBroadcastsDerivativeRateRows(testCase)
+    % Ordinary coefficient rows should broadcast across derivative rate vertices.
+    P = dpvar(2, 1, {[0 1]}, "full");
+    D = rhodiff(P, [-1 2]);
+    cp = P.coeffs(1);
+    cd = D.coeffs(1);
+
+    C = [D, P];
+    cc = C.coeffs(1);
+
+    testCase.verifyEqual(size(C), [2 2]);
+    testCase.verifyEqual(C.Degree, 1);
+    testCase.verifyFalse(C.IsContinuous);
+    testCase.verifyTrue(C.HasRateDependence);
+    testCase.verifyEqual(C.RateBounds, [-1 2]);
+    testCase.verifyEqual(size(cc), [2 2]);
+    verifyCoeffExpr(testCase, cc(1, :), {[cd{1, 1}, cp{1}], [cd{1, 1}, cp{2}]});
+    verifyCoeffExpr(testCase, cc(2, :), {[cd{2, 1}, cp{1}], [cd{2, 1}, cp{2}]});
+end
+
 function testBlkdiagCommonGridAndNumeric(testCase)
     % blkdiag should align grids, elevate degree, and accept numeric blocks.
     P = dpvar(1, {[0 1]});
@@ -167,6 +247,25 @@ function testBlkdiagCommonGridAndNumeric(testCase)
     verifyCoeffExpr(testCase, C.coeffs(2), { ...
         diag([pMid, 5, 20]), ...
         diag([cp{2}, 5, 30])});
+end
+
+function testBlkdiagBroadcastsDerivativeRateRows(testCase)
+    % blkdiag should preserve derivative rate rows and broadcast ordinary rows.
+    P = dpvar(1, {[0 1]});
+    D = rhodiff(P, [-1 2]);
+    cp = P.coeffs(1);
+    cd = D.coeffs(1);
+
+    B = blkdiag(D, P);
+    cb = B.coeffs(1);
+
+    testCase.verifyEqual(size(B), [2 2]);
+    testCase.verifyEqual(B.Degree, 1);
+    testCase.verifyFalse(B.IsContinuous);
+    testCase.verifyTrue(B.HasRateDependence);
+    testCase.verifyEqual(size(cb), [2 2]);
+    verifyCoeffExpr(testCase, cb(1, :), {blkdiag(cd{1, 1}, cp{1}), blkdiag(cd{1, 1}, cp{2})});
+    verifyCoeffExpr(testCase, cb(2, :), {blkdiag(cd{2, 1}, cp{1}), blkdiag(cd{2, 1}, cp{2})});
 end
 
 function testMatrixSlicingAndDotAccess(testCase)
@@ -206,6 +305,50 @@ function testSubsasgnNumericAndDpvarBlocks(testCase)
         [10 20; cp{1}(2, 1), 5], ...
         [30 40; 0.5 * cp{1}(2, 1) + 0.5 * cp{2}(2, 1), 5], ...
         [50 60; cp{2}(2, 1), 5]});
+end
+
+function testSubsasgnBroadcastsDerivativeRateRows(testCase)
+    % Assignment should use the same ordinary/rate-row broadcast as affine ops.
+    P = dpvar(2, {[0 1]}, "full");
+    D = rhodiff(dpvar(1, {[0 1]}), [-1 2]);
+    cp = P.coeffs(1);
+    cd = D.coeffs(1);
+
+    P(1, 1) = D;
+    cc = P.coeffs(1);
+
+    testCase.verifyEqual(P.Degree, 1);
+    testCase.verifyFalse(P.IsContinuous);
+    testCase.verifyTrue(P.HasRateDependence);
+    testCase.verifyEqual(size(cc), [2 2]);
+    verifyCoeffExpr(testCase, cc(1, :), { ...
+        [cd{1, 1}, cp{1}(1, 2); cp{1}(2, 1), cp{1}(2, 2)], ...
+        [cd{1, 1}, cp{2}(1, 2); cp{2}(2, 1), cp{2}(2, 2)]});
+    verifyCoeffExpr(testCase, cc(2, :), { ...
+        [cd{2, 1}, cp{1}(1, 2); cp{1}(2, 1), cp{1}(2, 2)], ...
+        [cd{2, 1}, cp{2}(1, 2); cp{2}(2, 1), cp{2}(2, 2)]});
+end
+
+function testSubsasgnIntoDerivativeRateRows(testCase)
+    % Assigning ordinary blocks into derivative rows should broadcast by row.
+    P = dpvar(2, {[0 1]}, "full");
+    D = rhodiff(P, [-1 2]);
+    cp = P.coeffs(1);
+    cd = D.coeffs(1);
+
+    D(1, 1) = P(2, 2);
+    cc = D.coeffs(1);
+
+    testCase.verifyEqual(D.Degree, 1);
+    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifyTrue(D.HasRateDependence);
+    testCase.verifyEqual(size(cc), [2 2]);
+    verifyCoeffExpr(testCase, cc(1, :), { ...
+        [cp{1}(2, 2), cd{1, 1}(1, 2); cd{1, 1}(2, 1), cd{1, 1}(2, 2)], ...
+        [cp{2}(2, 2), cd{1, 1}(1, 2); cd{1, 1}(2, 1), cd{1, 1}(2, 2)]});
+    verifyCoeffExpr(testCase, cc(2, :), { ...
+        [cp{1}(2, 2), cd{2, 1}(1, 2); cd{2, 1}(2, 1), cd{2, 1}(2, 2)], ...
+        [cp{2}(2, 2), cd{2, 1}(1, 2); cd{2, 1}(2, 1), cd{2, 1}(2, 2)]});
 end
 
 function testHigherDimensionalGridStructuralOps(testCase)
