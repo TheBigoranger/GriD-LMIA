@@ -1,4 +1,4 @@
-name: Deploy Webpage to GitHub Pages
+name: Deploy DP-LMI Manual
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Install, build, and upload Astro site
+      - name: Install, build, and upload site
         uses: withastro/action@v6
         with:
           path: webpage

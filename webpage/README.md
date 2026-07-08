@@ -1,43 +1,27 @@
-# Astro Starter Kit: Minimal
+# DP-LMI Manual Website
 
-```sh
-npm create astro@latest -- --template minimal
-```
+This directory contains the GitHub Pages documentation site for the DP-LMI MATLAB/YALMIP package. The site is built with npm, Astro, and Starlight.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Structure
 
-## 🚀 Project Structure
+- `src/content/docs/`: public manual pages.
+- `src/data/`: curated reference metadata used by scripts and pages.
+- `scripts/`: JavaScript generation and validation scripts.
+- `dist/`, `.astro/`, `.vite/`, and `node_modules/`: generated or local-only folders that should not be tracked.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Commands
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
+Run these from the repository root:
 
 | Command                   | Action                                           |
 | :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+| `npm --prefix webpage run dev` | Start the local docs server. |
+| `npm --prefix webpage run build` | Generate the reference index and build the static site. |
+| `npm --prefix webpage run preview` | Preview the built site locally. |
+| `npm --prefix webpage run check:links` | Validate built internal links and anchors under `/DP-LMI-package/`. |
 
-## 👀 Want to learn more?
+## Publishing
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+GitHub Actions builds this project from `webpage/` and publishes it to:
+
+`https://thebigoranger.github.io/DP-LMI-package/`
