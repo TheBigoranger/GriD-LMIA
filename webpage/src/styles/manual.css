@@ -40,6 +40,22 @@
   background-size: 48px 48px, 48px 48px, auto;
 }
 
+.product-walkthrough {
+  margin-block: 1.25rem 2rem;
+  padding: 1.4rem;
+  border: 1px solid color-mix(in srgb, var(--sl-color-accent) 28%, var(--sl-color-gray-5));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--sl-color-bg) 92%, var(--sl-color-accent-low));
+}
+
+.product-walkthrough p {
+  max-width: 66ch;
+}
+
+.product-walkthrough .storage-diagram {
+  margin-block-start: 1rem;
+}
+
 .welcome-portal {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -282,6 +298,16 @@ mjx-container {
   max-width: 100%;
 }
 
+.sl-markdown-content mjx-container[display="true"] {
+  margin-inline: 0;
+  padding-block: 0.25rem;
+}
+
+.sl-markdown-content pre {
+  overflow-x: auto;
+  white-space: pre;
+}
+
 .sl-markdown-content img {
   border: 1px solid var(--sl-color-gray-5);
   border-radius: 8px;
@@ -298,6 +324,11 @@ mjx-container {
 
   .portal-hero {
     padding: 1.2rem;
+  }
+
+  .product-walkthrough,
+  .welcome-portal {
+    padding: 1rem;
   }
 
   .portal-copy h2 {

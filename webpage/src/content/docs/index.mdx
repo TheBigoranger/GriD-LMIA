@@ -20,6 +20,40 @@ import DpmatStorageDiagram from "../../components/DpmatStorageDiagram.astro";
       <a href="/DP-LMI-package/examples/solver-smoke/">Solver examples</a>
     </div>
   </div>
+</section>
+
+<section class="product-walkthrough">
+  <p class="portal-kicker">One local Bernstein cell</p>
+  <p>
+    Start from two degree-1 factors on the same local coordinate
+    <code>alpha</code>. Their product is degree 2, so the code has to create
+    new local Bernstein coefficients instead of reusing the original two labels.
+  </p>
+
+$$
+\begin{aligned}
+P(\alpha) &= B_{0,1}(\alpha)P_0 + B_{1,1}(\alpha)P_1,\\
+Q(\alpha) &= B_{0,1}(\alpha)Q_0 + B_{1,1}(\alpha)Q_1,\\
+P(\alpha)Q(\alpha)
+&= B_{0,2}(\alpha)R_0
+ + B_{1,2}(\alpha)R_1
+ + B_{2,2}(\alpha)R_2 .
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+R_0 &= P_0Q_0,\\
+R_1 &= \frac{P_0Q_1 + P_1Q_0}{2},\\
+R_2 &= P_1Q_1.
+\end{aligned}
+$$
+
+  <p>
+    In code, this is coefficient convolution. The resulting degree-2
+    coefficients are stored back into each object's cell-local
+    <code>LocalValues</code> entry; the diagram below shows that storage step.
+  </p>
   <DpmatStorageDiagram />
 </section>
 
