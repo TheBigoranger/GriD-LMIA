@@ -152,6 +152,8 @@ A.SourceSummary
 A.evaluate(0.25)
 C = A + 5;
 C.coeffs(1)
+T = table(C);
+T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
 A.cells()
 A.lbls()
 \end{lstlisting}
@@ -170,6 +172,15 @@ SourceSummary =
 
 A.evaluate(0.25) -> 2.5
 C.coeffs(1)      -> {7, 9}
+
+table(C) =
+  2x4 table
+
+    TermIndex    LocalIndex      Basis        Value
+    _________    __________    _________    _______
+
+        1          {[0]}       "a"          {[7]}
+        2          {[1]}       "(1-a)"      {[9]}
 
 cells() =
      1
@@ -193,6 +204,8 @@ A.GridInfo.Points
 A.cells()
 A.lbls()
 A.coeffs([1 1])
+T = table(A);
+T(:, ["TermIndex", "CellSubscript", "LocalIndex", "Value"])
 \end{lstlisting}
 
 Expected structural outputs:
@@ -214,6 +227,17 @@ lbls() =
      1     1
 
 A.coeffs([1 1]) -> {1, 3, 5, 7}
+
+table(A) =
+  4x4 table
+
+    TermIndex    CellSubscript    LocalIndex    Value
+    _________    _____________    __________    _____
+
+        1           {[1 1]}        {[0 0]}      {[1]}
+        2           {[1 1]}        {[0 1]}      {[3]}
+        3           {[1 1]}        {[1 0]}      {[5]}
+        4           {[1 1]}        {[1 1]}      {[7]}
 \end{lstlisting}
 
 The first parameter index varies more slowly than the second.  This row order
@@ -681,22 +705,32 @@ String metadata describing the coefficient source.  The default is
 \subsection{Inherited Inspection Properties}
 
 All public properties have private set access.  Users normally inspect these
-properties through \code{dpmat} or \code{dpvar} objects; they cannot assign to
-them after construction.
+properties through \code{dpmat} or \code{dpvar} objects with ordinary dot
+access, for example \code{A.Degree}, \code{P.GridInfo.Vectors\{1\}}, or
+\code{D.LocalValues\{1\}}.  They cannot assign to these properties after
+construction.  This read-only surface is intentional: the constructor and
+algebra methods keep grid size, coefficient count, continuity metadata, and
+rate metadata synchronized, while still leaving enough state visible for
+debugging, examples, and solver handoff checks.
 
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.32\linewidth}@{\hspace{0.02\linewidth}}>{\raggedright\arraybackslash}p{0.58\linewidth}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}@{\hspace{0.02\linewidth}}>{\raggedright\arraybackslash}p{0.60\linewidth}@{}}
 \toprule
 Property & Meaning \\
 \midrule
 \code{GridInfo} &
 Struct with fields \code{Vectors}, \code{Points}, \code{Bounds}, and
-\code{NumNodes}. \\
+\code{NumNodes}.  Use \code{obj.GridInfo.Vectors\{k\}} for the \(k\)-th grid
+vector, \code{obj.GridInfo.Points} for tensor-product grid-node rows,
+\code{obj.GridInfo.Bounds(k,:)} for physical parameter bounds, and
+\code{obj.GridInfo.NumNodes(k)} for the node count in one dimension. \\
 \code{MatrixSize} & Matrix payload size stored as a \code{1x2} vector. \\
 \code{Degree} & Bernstein degree. \\
 \code{LocalValues} &
 Nested physical-cell storage.  A tensor grid uses nested brace access, for
 example \code{LocalValues\{i1\}} followed by \code{\{i2\}} and later dimensions;
-each leaf stores a flat coefficient cell. \\
+each leaf stores a flat coefficient cell, or a rate-row-by-coefficient cell
+array after \code{rhodiff}.  Prefer \code{obj.coeffs(cellSubs)} for ordinary
+coefficient inspection because it hides the nested traversal. \\
 \code{IsContinuous} & Continuity metadata flag. \\
 \code{ContainsDecision} & Decision-dependence metadata flag. \\
 \code{HasRateDependence} & True when rate metadata or rate-affine payloads are present. \\
@@ -773,6 +807,14 @@ ans =
   1x4 cell array
     {[211]}    {[212]}    {[213]}    {[214]}
 \end{lstlisting}
+
+For \code{dpmat} and ordinary constructor-created \code{dpvar} objects, one
+physical-cell leaf contains \((m+1)^\ell\) local Bernstein coefficients, where
+\(m=\code{Degree}\) and \(\ell=\code{npar(obj)}\).  For a derivative object
+returned by \code{rhodiff}, each leaf is a two-dimensional cell array with
+\(2^\ell\) rows and \((m_{\mathrm{out}}+1)^\ell\) columns.  The rows enumerate
+the lower/upper rate vertices from \code{RateBounds}; the columns enumerate
+the local Bernstein labels returned by \code{lbls(D)}.
 
 \subsection{Backend Rate Metadata}
 
@@ -927,6 +969,56 @@ metadata is:
 \end{itemize}
 Constructor options that try to override those metadata fields are rejected.
 
+\subsection{Inspection Fields}
+
+\code{dpmat} inherits the read-only \code{dpbase} inspection fields described
+above.  It has one extra field for function-backed exact evaluation.  Use dot
+access for scalar metadata and nested brace access, or preferably
+\code{coeffs}, for coefficient payloads:
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+
+A.GridInfo.Vectors{2}
+A.MatrixSize
+A.Degree
+A.SourceSummary
+A.LocalValues{1}{1}
+A.coeffs([1 1])
+T = table(A);
+T(:, ["TermIndex", "CellSubscript", "LocalIndex", "Basis", "Value"])
+A.FunctionHandle
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+GridInfo.Vectors{2} -> [10 20]
+MatrixSize          -> [1 1]
+Degree              -> 1
+SourceSummary       -> "coefficient-backed"
+LocalValues{1}{1}   -> {1, 3, 5, 7}
+coeffs([1 1])       -> {1, 3, 5, 7}
+
+table(A) =
+  4x5 table
+
+    TermIndex    CellSubscript    LocalIndex       Basis       Value
+    _________    _____________    __________    ___________    _____
+
+        1           {[1 1]}        {[0 0]}      "a1 * a2"      {[1]}
+        2           {[1 1]}        {[0 1]}      "a1 * (1-a2)"  {[3]}
+        3           {[1 1]}        {[1 0]}      "(1-a1) * a2"  {[5]}
+        4           {[1 1]}        {[1 1]}      "(1-a1) * (1-a2)" {[7]}
+
+FunctionHandle      -> []
+\end{lstlisting}
+
+\code{FunctionHandle} is nonempty only for function-backed construction.  The
+known-data metadata are stored separately from coefficient payloads so that
+coefficient algebra can reject function-only objects while \code{evaluate} can
+still call their exact handle.
+
 \subsection{Evaluation}
 
 \begin{lstlisting}[style=dpmatlab]
@@ -966,6 +1058,8 @@ C = A + B;
 
 C.Degree
 C.coeffs(1)
+T = table(C);
+T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
 \end{lstlisting}
 
 Expected output:
@@ -973,6 +1067,16 @@ Expected output:
 \begin{lstlisting}[style=dpoutput]
 C.Degree   -> 2
 C.coeffs(1)-> {11, 21.5, 32}
+
+table(C) =
+  3x4 table
+
+    TermIndex    LocalIndex       Basis         Value
+    _________    __________    ___________    ________
+
+        1          {[0]}       "a^2"          {[   11]}
+        2          {[1]}       "2a(1-a)"      {[ 21.5]}
+        3          {[2]}       "(1-a)^2"      {[   32]}
 \end{lstlisting}
 
 Multiplication raises Bernstein degree through binomial-normalized local
@@ -986,6 +1090,8 @@ K = A * B;
 K.Degree
 size(K)
 K.coeffs(1)
+T = table(K);
+T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
 \end{lstlisting}
 
 Expected output:
@@ -994,6 +1100,16 @@ Expected output:
 K.Degree   -> 2
 size(K)    -> [1 1]
 K.coeffs(1)-> {17, 31, 53}
+
+table(K) =
+  3x4 table
+
+    TermIndex    LocalIndex       Basis        Value
+    _________    __________    ___________    _______
+
+        1          {[0]}       "a^2"          {[17]}
+        2          {[1]}       "2a(1-a)"      {[31]}
+        3          {[2]}       "(1-a)^2"      {[53]}
 \end{lstlisting}
 
 Same-bound mixed scalar grids are aligned on a common refinement before
@@ -1217,12 +1333,15 @@ diagonal or triangular offsets, and invalid plot dimensions or
 
 \subsection{Purpose}
 
-\code{dpvar} represents continuous degree-1 Bernstein decision variables on a
-tensor grid.  Its coefficients are YALMIP \code{sdpvar} matrices stored through
-the same \code{dpbase} cell-local layout used by \code{dpmat}.  The current
-slice is an affine expression layer.  Comparisons such as \code{P <= 0} and
-\code{P >= Q} assemble \code{dplmi} objects, but \code{dpvar} itself does not
-choose solvers or call \code{optimize}.
+\code{dpvar} represents a parameter-dependent decision variable, not just one
+standalone YALMIP matrix.  On each physical grid cell it stores local Bernstein
+coefficient matrices in \code{LocalValues}; those coefficient matrices are
+YALMIP \code{sdpvar} objects.  The current constructor creates continuous
+degree-1 variables by default, and the shared \code{dpbase} storage layout lets
+the same algebra and LMI assembly code traverse all parameter cells.
+Comparisons such as \code{P <= 0} and \code{P >= Q} assemble \code{dplmi}
+objects, but \code{dpvar} itself does not choose solvers or call
+\code{optimize}.
 
 \subsection{Syntax}
 
@@ -1259,6 +1378,20 @@ coefficient data in supported affine operations.
 
 \subsection{Construction And Continuity}
 
+The constructor turns a grid into a symbolic function of the parameter.  In one
+parameter dimension, a default degree-one scalar entry has the local form
+\[
+  P(\rho) =
+  B_{0,1}(\alpha) P_i + B_{1,1}(\alpha) P_{i+1},
+  \qquad
+  \alpha = \frac{\rho-\rho_i}{\rho_{i+1}-\rho_i}.
+\]
+Here \(P_i\) and \(P_{i+1}\) are YALMIP coefficient matrices, not sampled
+numeric values.  The object stores the pair for each physical cell in
+\code{LocalValues}.  Adjacent cells reuse the same boundary coefficient handle,
+so continuity is represented by shared storage rather than by an additional
+equality constraint.
+
 \begin{lstlisting}[style=dpmatlab]
 P = dpvar(2, {[0 1 2]}, "symmetric");
 
@@ -1285,9 +1418,58 @@ For a square matrix, \code{dpvar(n, gridVectors)} follows YALMIP's symmetric
 default.  Use \code{"full"} when every matrix entry should be an independent
 decision variable.  Rectangular matrices are full by construction.
 
-Adjacent physical cells share the YALMIP coefficient handle at their common
-boundary.  This is how the current constructor preserves continuity; it does
-not add equality constraints.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\linewidth]{matlab-figures/dpvar-constructor-localvalues.png}
+  \caption{Schematic \code{dpvar} construction on a one-dimensional grid.  The
+  plotted line represents one scalar entry of the parameter-dependent decision
+  variable.  Each labeled \(P_i\) is actually a YALMIP matrix coefficient; each
+  physical cell stores its local coefficient pair in \code{LocalValues}.}
+  \label{fig:dpvar-constructor-localvalues}
+\end{figure}
+
+\subsection{Inspection Fields}
+
+\code{dpvar} exposes the same inherited read-only \code{dpbase} inspection
+fields as \code{dpmat}.  There is no public \code{FunctionHandle} field on
+\code{dpvar}; the coefficient payloads are YALMIP expressions stored in
+\code{LocalValues}.  Use dot access for metadata and \code{coeffs} for one
+physical cell:
+
+\begin{lstlisting}[style=dpmatlab]
+P = dpvar(2, {[0 1 2]}, "symmetric");
+
+P.GridInfo.Vectors{1}
+P.MatrixSize
+P.Degree
+P.IsContinuous
+P.ContainsDecision
+P.HasRateDependence
+P.RateBounds
+P.SourceSummary
+c = P.coeffs(1);
+numel(c)
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+GridInfo.Vectors{1} -> [0 1 2]
+MatrixSize          -> [2 2]
+Degree              -> 1
+IsContinuous        -> true
+ContainsDecision    -> true
+HasRateDependence   -> false
+RateBounds          -> []
+SourceSummary       -> "decision"
+numel(c)            -> 2
+\end{lstlisting}
+
+The fields are exposed for inspection rather than mutation.  Changing
+\code{LocalValues}, \code{Degree}, or \code{GridInfo} independently would break
+the invariant that every physical cell has exactly \((m+1)^\ell\) local
+coefficients in the label order returned by \code{lbls(P)}.  Algebra methods
+therefore create new objects instead of editing these fields in place.
 
 \subsection{Rate Metadata}
 
@@ -1343,6 +1525,17 @@ RateBounds        -> [-2 3]
 size(D.coeffs(1)) -> [2 1]
 \end{lstlisting}
 
+The \code{2} rows appear because the scalar rate bound has two vertices: the
+lower rate and the upper rate.  More generally, if \(\ell\) parameter
+dimensions have bounds in \code{RateBounds}, \code{rhodiff} forms all
+lower/upper choices
+\[
+  \{v_1^-,v_1^+\}\times\cdots\times\{v_\ell^-,v_\ell^+\},
+\]
+so each physical cell stores \(2^\ell\) rate rows.  This finite-vertex storage
+matches the later coefficient-wise LMI assembly: affine dependence on
+\(\dot\rho\) only has to be checked at the vertices of the rate box.
+
 For this scalar degree-one cell, if \code{c = P.coeffs(1)}, then the two
 stored derivative rows are
 \[
@@ -1396,6 +1589,24 @@ The local partial derivatives are accumulated after elevation into a common
 tensor Bernstein degree, so a degree-one two-parameter \code{dpvar} returns a
 degree-one derivative object with a \code{4x4} coefficient table on each
 physical cell.
+
+\begin{lstlisting}[style=dpmatlab]
+rb = [-1 2; -3 5; 0 4];
+P = dpvar(1, {[0 1], [0 1], [0 1]}, RateBounds=rb);
+D = rhodiff(P);
+
+size(D.coeffs([1 1 1]))
+\end{lstlisting}
+
+Expected structural output:
+
+\begin{lstlisting}[style=dpoutput]
+size(D.coeffs([1 1 1])) -> [8 8]
+\end{lstlisting}
+
+Here \(\ell=3\), so there are \(2^3=8\) rate rows.  Because the multivariate
+degree-one derivative is elevated back into the common tensor degree-one
+basis, there are also \((1+1)^3=8\) coefficient columns.
 
 The supported call forms are \code{rhodiff(P, rb)} and \code{rhodiff(P)}.  The
 second form requires \code{P} to carry nonempty \code{RateBounds}.  If explicit
