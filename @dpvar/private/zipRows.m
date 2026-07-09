@@ -1,5 +1,16 @@
 function vals = zipRows(lhsVals, rhsVals, fcn, grid)
     %ZIPROWS Combine ordinary rows with rate-vertex coefficient tables.
+    %
+    %   Syntax:
+    %     vals = zipRows(lhsVals, rhsVals, fcn, grid)
+    %
+    %   Example (via rate-affine algebra):
+    %     P = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
+    %     C = rhodiff(P) + P;
+    %
+    %   The physical-cell tree is traversed in lockstep. Each leaf is passed
+    %   to ZIPCELL, which applies FCN after validating coefficient columns and
+    %   broadcasting only one-row rate tables.
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) zipCell( ...
@@ -7,6 +18,13 @@ function vals = zipRows(lhsVals, rhsVals, fcn, grid)
 end
 
 function coeffs = zipCell(lhs, rhs, fcn)
+    %ZIPCELL Apply a binary coefficient operation to two row tables.
+    %
+    %   Syntax:
+    %     coeffs = zipCell(lhs, rhs, fcn)
+    %
+    %   The result has the larger row count; a one-row input is repeated by
+    %   index, while incompatible row or coefficient counts raise an error.
     nCoeff = size(lhs, 2);
     if size(rhs, 2) ~= nCoeff
         error("dpvar:InvalidCoefficientRows", ...

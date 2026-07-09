@@ -11,6 +11,7 @@
 \usepackage{array}
 \usepackage{xcolor}
 \usepackage{enumitem}
+\usepackage{needspace}
 \usepackage{titlesec}
 \usepackage{graphicx}
 \usepackage{tikz}
@@ -32,12 +33,20 @@
 
 \newcommand{\sectionbreak}{\clearpage}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\definecolor{dpblue}{RGB}{35,86,125}
+\definecolor{dpbluewash}{RGB}{239,245,250}
+\definecolor{dpinputwash}{RGB}{247,249,252}
+\definecolor{dpoutputwash}{RGB}{246,249,246}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.3em}
 \hbadness=10000
 \titleformat{\section}[display]
   {\normalfont\Huge\bfseries}
   {\thesection}
   {0.6em}
   {}
+\titlespacing*{\subsection}{0pt}{1.25\baselineskip}{0.55\baselineskip}
+\titlespacing*{\subsubsection}{0pt}{1.05\baselineskip}{0.4\baselineskip}
 
 \lstdefinestyle{dpmatlab}{
   style=Matlab-editor,
@@ -47,7 +56,13 @@
   keepspaces=true,
   showstringspaces=false,
   frame=single,
-  rulecolor=\color{black!20},
+  rulecolor=\color{dpblue!35},
+  backgroundcolor=\color{dpinputwash},
+  framesep=4pt,
+  framerule=0.45pt,
+  aboveskip=0.45\baselineskip,
+  belowskip=0.85\baselineskip,
+  title={\textcolor{dpblue}{\sffamily\bfseries\footnotesize MATLAB input}},
   numbers=none
 }
 
@@ -58,8 +73,13 @@
   keepspaces=true,
   showstringspaces=false,
   frame=single,
-  rulecolor=\color{black!20},
-  backgroundcolor=\color{black!2},
+  rulecolor=\color{dpblue!45},
+  backgroundcolor=\color{dpbluewash},
+  framesep=4pt,
+  framerule=0.55pt,
+  aboveskip=0.45\baselineskip,
+  belowskip=0.85\baselineskip,
+  title={\textcolor{dpblue}{\sffamily\bfseries\footnotesize Call forms}},
   numbers=none
 }
 
@@ -69,8 +89,13 @@
   columns=fullflexible,
   keepspaces=true,
   frame=single,
-  rulecolor=\color{black!20},
-  backgroundcolor=\color{black!3},
+  rulecolor=\color{green!35!black},
+  backgroundcolor=\color{dpoutputwash},
+  framesep=4pt,
+  framerule=0.55pt,
+  aboveskip=0.45\baselineskip,
+  belowskip=0.95\baselineskip,
+  title={\textcolor{green!35!black}{\sffamily\bfseries\footnotesize Output}},
   numbers=none
 }
 
@@ -80,20 +105,36 @@
   columns=fullflexible,
   keepspaces=true,
   frame=single,
-  rulecolor=\color{black!20},
-  backgroundcolor=\color{black!3},
+  rulecolor=\color{green!35!black},
+  backgroundcolor=\color{dpoutputwash},
+  framesep=4pt,
+  framerule=0.55pt,
+  aboveskip=0.45\baselineskip,
+  belowskip=0.95\baselineskip,
+  title={\textcolor{green!35!black}{\sffamily\bfseries\footnotesize Output}},
   numbers=none
 }
+
+% Keep short reference listings together; long transcripts may still flow
+% naturally when they exceed the remaining page height.
+\AtBeginEnvironment{lstlisting}{\needspace{6\baselineskip}}
 
 \newcommand{\pkg}{DP-LMI package}
 \newcommand{\matlab}{MATLAB}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
-\newcommand{\syntaxhead}{\par\medskip\noindent\textbf{Syntax.}\par\nopagebreak\vspace{0.25em}}
-\newcommand{\examplehead}{\par\medskip\noindent\textbf{Example.}\par\nopagebreak\vspace{0.25em}}
-\newcommand{\arghead}{\par\medskip\noindent\textbf{Arguments, options, and outputs.}\par\nopagebreak\vspace{0.25em}}
+\newcommand{\refhead}[1]{%
+  \par\addvspace{1.25\baselineskip}%
+  \needspace{4\baselineskip}%
+  \noindent\colorbox{dpbluewash}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+      \textcolor{dpblue}{\sffamily\bfseries\small #1}}}%
+  \par\vspace{0.5\baselineskip}\nopagebreak}
+\newcommand{\syntaxhead}{\refhead{Syntax}}
+\newcommand{\examplehead}{\refhead{Example}}
+\newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.1.1}
+\author{Version v0.1.3}
 \date{July 2026}
 
 \begin{document}
@@ -610,6 +651,101 @@ d = size(obj, dim)
 \code{ncell} returns \(\prod_r(N_r-1)\).  \code{ncoeff} returns
 \((m+1)^\ell\).  \code{npar} returns the parameter dimension \(\ell\).
 \code{size} returns the matrix payload size, not the physical grid size.
+
+\subsubsection{\texorpdfstring{\code{bernElev}}{bernElev}}
+\label{sec:dpbase-bernelev}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+out = bernElev(obj, coeffs, fromDeg, toDeg)
+\end{lstlisting}
+
+\arghead
+\code{bernElev} degree-elevates one flat cell-local Bernstein coefficient
+family.  The source and target degrees must be nonnegative integers with
+\code{toDeg >= fromDeg}; the coefficient-cell length must match the source
+degree and parameter dimension.  The output contains \((\code{toDeg}+1)^\ell\)
+coefficients in the same label order as \code{lbls}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {[1 2]}, Degree=1);
+B = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+C = A + B;
+C.Degree
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     2
+\end{lstlisting}
+
+The example invokes the protected helper through public addition; users do not
+call \code{bernElev} directly.
+
+\subsubsection{\texorpdfstring{\code{bernProd}}{bernProd}}
+\label{sec:dpbase-bernprod}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
+\end{lstlisting}
+
+\arghead
+\code{bernProd} computes the binomial-normalized, cell-local Bernstein
+coefficient convolution of two coefficient families.  The output degree is
+\code{lhsDeg + rhsDeg}; matrix payload multiplication follows MATLAB matrix
+product rules and is performed coefficient by coefficient.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {[1 2]}, Degree=1);
+P = A * A;
+P.Degree
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     2
+\end{lstlisting}
+
+The example invokes the protected helper through public matrix multiplication;
+users do not call \code{bernProd} directly.
+
+\subsubsection{\texorpdfstring{\code{mergeGrid}}{mergeGrid}}
+\label{sec:dpbase-mergegrid}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+grid = obj.mergeGrid(errId, other1, other2, ...)
+\end{lstlisting}
+
+\arghead
+\code{mergeGrid} builds a same-bound common refinement from gridded operands.
+It preserves the lower and upper bound in every parameter dimension and inserts
+all interior nodes.  \code{errId} is the identifier used when parameter
+dimensions or physical bounds are incompatible.  This method is primarily a
+backend utility invoked by public algebra methods.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 0.5 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 1]}, {3, 4}, Degree=1);
+C = A + B;
+C.GridInfo.Vectors{1}
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+         0    0.5000    1.0000
+\end{lstlisting}
+
+The example invokes the protected helper through public addition; users do not
+call \code{mergeGrid} directly.
+
+\subsection{See Also}
+\code{dpmat}, \code{dpvar}, \code{cells}, \code{coeffs}, \code{lbls},
+\code{ncell}, \code{ncoeff}, \code{npar}, \code{size}.
 
 \section{\texorpdfstring{\code{dpmat}}{dpmat} Reference}
 \label{sec:dpmat}
@@ -1138,6 +1274,72 @@ ans =
 These examples use the one-cell case so the coefficient vectors are visible;
 the same elevation and convolution rules apply cell by cell on tensor grids.
 
+\subsubsection{Operator-level entries}
+\label{sec:dpmat-operator-entries}
+
+\textbf{\code{plus}.} Adds two coefficient-backed objects or adds a compatible
+numeric scalar/matrix.  The supported forms are
+\code{C=A+B}, \code{C=A+M}, and \code{C=M+A}; grids are refined and degrees
+are elevated before coefficient-wise addition.  For example,
+\code{size(A+3)} returns the same matrix size as \code{A}.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+C = A + B
+C = A + M
+C = M + A
+\end{lstlisting}
+
+\textbf{\code{minus}.} Subtracts compatible known-data objects or numeric
+operands.  \code{A-M} and \code{M-A} preserve the left/right order of the
+matrix subtraction.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+C = A - B
+C = A - M
+C = M - A
+\end{lstlisting}
+
+\textbf{\code{uplus} and \code{uminus}.} Unary plus returns an equivalent
+coefficient-backed object; unary minus negates every local coefficient.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = +A
+B = -A
+\end{lstlisting}
+
+\textbf{\code{mtimes}.} Performs a matrix product, scalar product, or numeric
+matrix product.  The inner matrix dimensions must agree and the output degree
+is the sum of operand degrees for two parameter-dependent operands.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+C = A * B
+C = A * M
+C = M * A
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+class(+A)
+(-A).evaluate(0)
+(A + 3).evaluate(1)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpmat'
+
+ans =
+    -1
+
+ans =
+     5
+\end{lstlisting}
+
 \subsection{Matrix Methods}
 \label{sec:dpmat-matrix-ops}
 
@@ -1248,6 +1450,96 @@ ans =
      2     2
 \end{lstlisting}
 
+\subsubsection{Additional matrix and protocol methods}
+\label{sec:dpmat-additional-methods}
+
+\textbf{\code{transpose} and \code{ctranspose}.} \code{transpose} applies
+\code{A.'}; \code{ctranspose} applies \code{A'}.  For the finite real data
+supported by \code{dpmat}, both return the same numerical transpose.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = transpose(A)
+B = ctranspose(A)
+B = A.'
+B = A'
+\end{lstlisting}
+
+\textbf{\code{squeeze}.} Preserves the two-dimensional matrix payload while
+removing singleton dimensions according to the package's matrix convention.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = squeeze(A)
+\end{lstlisting}
+
+\textbf{\code{horzcat} and \code{vertcat}.} The bracket forms \code{[A B]} and
+\code{[A; B]} concatenate compatible coefficient payloads horizontally or
+vertically, respectively.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+C = horzcat(A, B)
+C = vertcat(A, B)
+C = [A, B]
+C = [A; B]
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+size([A, A])
+size([A; A])
+size(squeeze(A))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     1     2
+
+ans =
+     2     1
+
+ans =
+     1     1
+\end{lstlisting}
+
+\textbf{\code{subsref} and \code{subsasgn}.} \code{subsref} implements
+two-dimensional matrix indexing and dot access to public properties/methods;
+\code{subsasgn} implements in-bounds numeric or compatible \code{dpmat} block
+assignment.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = subsref(A, S)
+A = subsasgn(A, S, M)
+B = A(rows, cols)
+A(rows, cols) = M
+\end{lstlisting}
+
+\textbf{\code{end}.} Supplies the last row or column index for expressions such
+as \code{A(1:end,end)}.  The related
+\code{numArgumentsFromSubscript} method keeps subscripted results scalar so
+property and method dot access remains available.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+idx = end(A, k, n)
+n = numArgumentsFromSubscript(A, S, ctx)
+B = A(1:end, end)
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+size(A(1:end, end))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     2     1
+\end{lstlisting}
+
 \subsection{Indexing And Assignment}
 \label{sec:dpmat-indexing}
 
@@ -1304,6 +1596,10 @@ promoted to degree-one coefficient data before insertion.
         matching grid bounds.
 \end{itemize}
 
+\subsubsection{See Also}
+\code{dpmat}, \code{evaluate}, \code{bernsteinTable}, \code{plot},
+\code{dpbase}.
+
 \section{\texorpdfstring{\code{dpvar}}{dpvar} Reference}
 \label{sec:dpvar}
 
@@ -1322,6 +1618,8 @@ Task & Entry \\
 \midrule
 Construct decisions &
 \hyperref[sec:dpvar-construction]{\code{dpvar}} \\
+Inspect coefficients &
+\hyperref[sec:dpvar-table]{\code{bernsteinTable}} \\
 Differentiate rates &
 \hyperref[sec:dpvar-rhodiff]{\code{rhodiff}} \\
 Affine/mixed algebra &
@@ -1576,6 +1874,48 @@ ans =
     -2     2
 \end{lstlisting}
 
+\subsection{\texorpdfstring{\code{bernsteinTable}}{bernsteinTable}}
+\label{sec:dpvar-table}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+T = bernsteinTable(P)
+T = bernsteinTable(P, cellSubs)
+T = bernsteinTable(P, "oneLine")
+T = bernsteinTable(P, cellSubs, "oneLine")
+\end{lstlisting}
+
+\arghead
+\code{bernsteinTable} inspects the local Bernstein coefficient rows of a
+\code{dpvar}.  \code{cellSubs} selects one physical cell; omitting it lists all
+cells.  The only text option is \code{"oneLine"}.  Ordinary rows contain the
+local label, basis, physical-node flag, and symbolic or numeric value.  A
+rate-dependent derivative also includes \code{RateVertexIndex} and
+\code{RateVertex} columns.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(1, {[0 1]});
+T = bernsteinTable(P, "oneLine");
+disp(T)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+    CellSubscript       Expression
+    _____________    ________________
+
+        {[1]}        "a*internal(1) + (1-a)*internal(2)"
+\end{lstlisting}
+
+\code{bernsteinTable} is an inspection method, not a solver call.  Function
+options other than \code{"oneLine"}, invalid cell selectors, and inconsistent
+rate-vertex rows are rejected with the following error identifier:
+
+\begin{lstlisting}[style=dpsyntax]
+dpvar:InvalidBernsteinTableInput
+\end{lstlisting}
+
 \subsection{Affine And Mixed Algebra}
 \label{sec:dpvar-algebra}
 
@@ -1669,6 +2009,75 @@ ans =
 
 ans =
      2
+\end{lstlisting}
+
+\subsubsection{Operator-level entries}
+\label{sec:dpvar-operator-entries}
+
+\textbf{\code{plus}.} Forms an affine sum of compatible \code{dpvar}, numeric,
+affine \code{sdpvar}, or coefficient-backed \code{dpmat} operands.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+R = P + Q
+R = P + A
+R = A + P
+R = P + M
+R = M + P
+\end{lstlisting}
+
+\textbf{\code{minus}.} Forms an affine difference and preserves operand order;
+the same promotion and grid compatibility rules as \code{plus} apply.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+R = P - Q
+R = P - A
+R = A - P
+R = P - M
+R = M - P
+\end{lstlisting}
+
+\textbf{\code{uplus} and \code{uminus}.} Unary plus preserves the expression;
+unary minus negates every coefficient expression.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+R = +P
+R = -P
+\end{lstlisting}
+
+\textbf{\code{mtimes}.} Supports products with known numeric or coefficient
+data when decision dependence occurs on at most one side.  Products of two
+decision expressions, or products with rate dependence on both sides, are
+rejected to preserve affine modeling.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+R = A * P
+R = P * A
+R = M * P
+R = P * M
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(1, {[0 1]});
+class(+P)
+class(-P)
+size(2 * P)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+    'dpvar'
+
+ans =
+     1     1
 \end{lstlisting}
 
 \subsection{Matrix Methods}
@@ -1789,6 +2198,85 @@ ans =
      4     4
 \end{lstlisting}
 
+\subsubsection{Additional matrix and protocol methods}
+\label{sec:dpvar-additional-methods}
+
+\textbf{\code{transpose} and \code{ctranspose}.} \code{transpose} applies
+\code{P.'}; \code{ctranspose} applies \code{P'}.  They preserve the YALMIP
+coefficient graph and transpose every local payload.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Q = transpose(P)
+Q = ctranspose(P)
+Q = P.'
+Q = P'
+\end{lstlisting}
+
+\textbf{\code{squeeze}.} Applies the package's two-dimensional squeeze
+convention to every local decision payload.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Q = squeeze(P)
+\end{lstlisting}
+
+\textbf{\code{horzcat} and \code{vertcat}.} The bracket forms concatenate
+compatible \code{dpvar}, known-data, affine \code{sdpvar}, and numeric blocks
+while preserving compatible grid, degree, and rate metadata.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Q = horzcat(P, R)
+Q = vertcat(P, R)
+Q = [P, R]
+Q = [P; R]
+\end{lstlisting}
+
+\textbf{\code{subsref} and \code{subsasgn}.} \code{subsref} handles matrix
+indexing and dot access; \code{subsasgn} assigns numeric, \code{dpvar},
+coefficient-backed \code{dpmat}, or affine \code{sdpvar} blocks.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Q = subsref(P, S)
+P = subsasgn(P, S, X)
+Q = P(rows, cols)
+P(rows, cols) = X
+\end{lstlisting}
+
+\textbf{\code{end}.} Supplies the last row or column index for expressions such
+as \code{P(1:end,end)}.  The related
+\code{numArgumentsFromSubscript} method preserves scalar subscript-result
+behavior for MATLAB dot access.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+idx = end(P, k, n)
+n = numArgumentsFromSubscript(P, S, ctx)
+Q = P(1:end, end)
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "full");
+size([P, P])
+size(P(1:end, end))
+size(squeeze(P))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     2     2
+
+ans =
+     2     1
+
+ans =
+     2     2
+\end{lstlisting}
+
 \subsection{Indexing And Assignment}
 \label{sec:dpvar-indexing}
 
@@ -1895,6 +2383,10 @@ ans =
   \item \code{rhodiff} of an existing rate-vertex derivative expression is not
         part of the current public workflow.
 \end{itemize}
+
+\subsubsection{See Also}
+\code{dpvar}, \code{rhodiff}, \code{bernsteinTable}, \code{dplmi},
+\code{dpmat}.
 
 \section{\texorpdfstring{\code{dplmi}}{dplmi} Reference}
 \label{sec:dplmi}
@@ -2046,6 +2538,9 @@ ans =
 
 After this boundary, the package is no longer assembling Bernstein data; YALMIP
 owns solver choice, diagnostics, and optimization status.
+
+\subsection{See Also}
+\code{dpvar}, \code{rhodiff}, \code{toYalmip}, \code{optimize}.
 
 \subsection{Solver-Facing Use}
 \label{sec:dplmi-solver-use}

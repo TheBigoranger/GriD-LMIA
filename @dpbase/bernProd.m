@@ -1,21 +1,18 @@
 function out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
     %BERNPROD Cell-local Bernstein coefficient product.
+    %
+    %   Syntax:
+    %     out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
+    %
+    %   Example:
+    %     A = dpmat({[0 1]}, {[1 2]}, Degree=1);
+    %     lhs = A.coeffs(1);
+    %     rhs = A.coeffs(1);
+    %     product = bernProd(A, lhs, 1, rhs, 1);
 
-    lhsDeg = double(helper.chk(lhsDeg, "dpbase:InvalidDegree", ...
-        "lhsDeg must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-    rhsDeg = double(helper.chk(rhsDeg, "dpbase:InvalidDegree", ...
-        "rhsDeg must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+    %  sanity check inputs
     nPar = obj.npar();
-    lhsN = (lhsDeg + 1) ^ nPar;
-    rhsN = (rhsDeg + 1) ^ nPar;
-    helper.chk(lhs, "dpbase:InvalidCoefficientCell", ...
-        "Coefficient cell counts must match operand degrees and parameter dimension.", ...
-        "cell", "Numel", lhsN);
-    helper.chk(rhs, "dpbase:InvalidCoefficientCell", ...
-        "Coefficient cell counts must match operand degrees and parameter dimension.", ...
-        "cell", "Numel", rhsN);
+    sanCheck(lhsDeg, rhsDeg, lhs, rhs, nPar);
 
     outDeg = lhsDeg + rhsDeg;
     lhsLbls = helper.combRows(repmat({0:lhsDeg}, 1, nPar));
@@ -59,4 +56,22 @@ function out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
         out{outIdx} = acc;
     end
 
+end
+
+function sanCheck(lhsDeg, rhsDeg, lhs, rhs, nPar)
+    lhsDeg = double(helper.chk(lhsDeg, "dpbase:InvalidDegree", ...
+        "lhsDeg must be a nonnegative integer scalar.", ...
+        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+    rhsDeg = double(helper.chk(rhsDeg, "dpbase:InvalidDegree", ...
+        "rhsDeg must be a nonnegative integer scalar.", ...
+        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+
+    lhsN = (lhsDeg + 1) ^ nPar;
+    rhsN = (rhsDeg + 1) ^ nPar;
+    helper.chk(lhs, "dpbase:InvalidCoefficientCell", ...
+        "Coefficient cell counts must match operand degrees and parameter dimension.", ...
+        "cell", "Numel", lhsN);
+    helper.chk(rhs, "dpbase:InvalidCoefficientCell", ...
+        "Coefficient cell counts must match operand degrees and parameter dimension.", ...
+        "cell", "Numel", rhsN);
 end

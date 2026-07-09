@@ -31,34 +31,26 @@ function tf = isequal(varargin)
 end
 
 function tf = sameOne(a, b)
-    if ~sameMeta(a, b)
+    if ~(builtin("isequal", a.MatrixSize, b.MatrixSize) && ...
+            builtin("isequal", a.IsContinuous, b.IsContinuous) && ...
+            builtin("isequal", a.ContainsDecision, b.ContainsDecision) && ...
+            builtin("isequal", a.HasRateDependence, b.HasRateDependence) && ...
+            builtin("isequal", a.RateBounds, b.RateBounds))
         tf = false;
         return
     end
 
-    if hasEvidence(a) && hasEvidence(b)
+    % Function-only objects have placeholder LocalValues, so compare their
+    % metadata and function handles instead of treating placeholders as evidence.
+    if a.SourceSummary ~= "function" && b.SourceSummary ~= "function"
         tf = sameEvidence(a, b);
         return
     end
 
-    % Function-only objects have placeholder LocalValues, so their equality
-    % remains exact metadata/function-handle equality rather than evidence-based.
     tf = builtin("isequal", a.Degree, b.Degree) && ...
         builtin("isequal", a.GridInfo.Vectors, b.GridInfo.Vectors) && ...
         builtin("isequal", a.SourceSummary, b.SourceSummary) && ...
         builtin("isequal", a.FunctionHandle, b.FunctionHandle);
-end
-
-function tf = sameMeta(a, b)
-    tf = builtin("isequal", a.MatrixSize, b.MatrixSize) && ...
-        builtin("isequal", a.IsContinuous, b.IsContinuous) && ...
-        builtin("isequal", a.ContainsDecision, b.ContainsDecision) && ...
-        builtin("isequal", a.HasRateDependence, b.HasRateDependence) && ...
-        builtin("isequal", a.RateBounds, b.RateBounds);
-end
-
-function tf = hasEvidence(obj)
-    tf = obj.SourceSummary ~= "function";
 end
 
 function tf = sameEvidence(a, b)

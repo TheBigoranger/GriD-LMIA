@@ -1,5 +1,12 @@
 function out = unOp(obj, fcn, sz)
     %UNOP Apply a unary operation to every dpvar coefficient.
+    %
+    %   Syntax:
+    %     out = unOp(obj, fcn, sz)
+    %
+    %   Example (via public algebra):
+    %     P = dpvar(1, {[0 1]});
+    %     Q = -P;
 
     if nargin < 3 || isempty(sz)
         % Infer matrix size from one mapped coefficient, allowing trace/transpose.
@@ -20,6 +27,13 @@ function out = unOp(obj, fcn, sz)
 end
 
 function val = mapCoeff(val, fcn)
+    %MAPCOEFF Apply FCN to one ordinary or rate-affine coefficient payload.
+    %
+    %   Syntax:
+    %     val = mapCoeff(val, fcn)
+    %
+    %   Rate-affine payloads transform Constant and every Rate term but keep
+    %   their rate metadata and row ordering unchanged.
     if ~isstruct(val)
         val = fcn(val);
         return

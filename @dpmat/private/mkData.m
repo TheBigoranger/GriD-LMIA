@@ -1,5 +1,17 @@
 function [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
     %MKDATA Route dpmat constructor sources into dpbase constructor inputs.
+    %
+    %   Syntax:
+    %     [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
+    %
+    %   Example (via the public constructor):
+    %     A = dpmat({[0 1]}, {1, 2}, Degree=1);
+    %
+    %   SRC may be a function handle, a global numeric cell grid, or nested
+    %   LocalValues. The outputs contain the inferred matrix size, degree,
+    %   local coefficient tree, source summary, and optional exact evaluator.
+    %   Function-only sources are intentionally kept outside coefficient
+    %   algebra unless an explicit degree certifies Bernstein data.
 
     info = helper.mkGrid(grid, "dpmat");
     vecs = info.Vectors;
@@ -28,7 +40,16 @@ function [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
 end
 
 function [sz, deg, vals, summary, fh] = funData(fh, info, optDeg)
-    % Probe for size first; explicit Degree then requests Bernstein evidence.
+    %FUNDATA Probe a function source and optionally certify Bernstein data.
+    %
+    %   Syntax:
+    %     [sz, deg, vals, summary, fh] = funData(fh, info, optDeg)
+    %
+    %   Example (via the public constructor):
+    %     A = dpmat({[0 1]}, @(rho) rho, Degree=1);
+    %   Without an explicit degree this function only records the exact
+    %   evaluator and lower-bound size probe; with one, checkBernstein must
+    %   certify the returned function before coefficient algebra can use it.
 
     vecs = info.Vectors;
     if isempty(optDeg)
@@ -73,7 +94,13 @@ function [sz, deg, vals, summary, fh] = funData(fh, info, optDeg)
 end
 
 function [sz, deg, vals] = localData(src, vecs, optDeg)
-    % Validate explicit nested dpbase LocalValues while inferring degree.
+    %LOCALDATA Validate nested LocalValues while inferring its degree.
+    %
+    %   Syntax:
+    %     [sz, deg, vals] = localData(src, gridVectors, optDeg)
+    %   SCAN NEST also enforces one matrix size and one coefficient count for
+    %   every physical cell. Invalid nesting or inconsistent leaves are
+    %   reported with dpmat-specific errors rather than silently reshaped.
 
     nPar = numel(vecs);
     nCell = cellfun(@numel, vecs) - 1;
@@ -97,6 +124,13 @@ function [sz, deg, vals] = localData(src, vecs, optDeg)
 end
 
 function [sz, nCoeff] = scanNest(vals, nCell)
+    %SCANNEST Inspect a nested LocalValues tree without changing its layout.
+    %
+    %   Syntax:
+    %     [sz, nCoeff] = scanNest(vals, nCell)
+    %   The returned size and coefficient count are shared contracts for all
+    %   cells; recursive calls handle tensor-product grids with more than one
+    %   parameter dimension.
     helper.chk(vals, "dpmat:InvalidLocalValues", ...
         "LocalValues must match the physical nested-cell grid shape.", ...
         "cell", "Numel", nCell(1));

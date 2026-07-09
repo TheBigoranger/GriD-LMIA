@@ -1,6 +1,14 @@
 function data = asData(grid, val, reqSize, errId)
     %ASDATA Convert an operand into coefficient data on the target grid.
     %
+    %   Syntax:
+    %     data = asData(grid, val, reqSize, errId)
+    %
+    %   Example (called from an @dpmat method):
+    %     grid = {[0 1]};
+    %     data = asData(grid, 2, [1 1], "dpmat:InvalidOperand");
+    %     data.MatrixSize
+    %
     %   Numeric operands become degree-0 coefficient data on grid. Coefficient-
     %   backed dpmat operands are reused directly when their grid already matches
     %   grid, or re-expressed on grid for same-bound common-refinement algebra.

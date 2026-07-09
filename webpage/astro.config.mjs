@@ -55,6 +55,7 @@ export default defineConfig({
                 { label: "Overview", slug: "documents/reference/dpvar" },
                 { label: "Constructor", slug: "documents/reference/dpvar/constructor" },
                 { label: "rhodiff", slug: "documents/reference/dpvar/rhodiff" },
+                { label: "bernsteinTable", slug: "documents/reference/dpvar/bernsteintable" },
                 { label: "Matrix Operations", slug: "documents/reference/dpvar/matrix-operations" },
                 { label: "Comparisons", slug: "documents/reference/dpvar/comparisons" },
               ],
@@ -74,6 +75,7 @@ export default defineConfig({
                 { label: "Storage Inspection", slug: "documents/reference/dpbase/storage-inspection" },
               ],
             },
+            { label: "Bernstein Utilities", slug: "documents/reference/bernstein-utilities" },
           ],
         },
         {

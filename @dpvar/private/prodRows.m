@@ -1,5 +1,18 @@
 function coeffs = prodRows(obj, lhs, lhsDeg, rhs, rhsDeg)
     %PRODROWS Multiply ordinary Bernstein rows with one rate-vertex table.
+    %
+    %   Syntax:
+    %     coeffs = prodRows(obj, lhs, lhsDeg, rhs, rhsDeg)
+    %
+    %   Example (via public algebra):
+    %     A = dpmat({[0 1]}, {1, 2}, Degree=1);
+    %     P = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
+    %     C = rhodiff(P) * A;
+    %
+    %   At most one input may contain multiple rate rows because quadratic
+    %   rate dependence is outside the current package scope. A one-row input
+    %   is broadcast, while Bernstein coefficient products determine the
+    %   output degree and column count.
 
     lhsRate = size(lhs, 1) > 1;
     rhsRate = size(rhs, 1) > 1;

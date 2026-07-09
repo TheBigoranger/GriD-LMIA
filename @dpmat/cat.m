@@ -9,23 +9,8 @@ function out = cat(dim, varargin)
     %     A = dpmat({[0 1]}, {1, 2}, Degree=1);
     %     C = cat(2, A, A);
 
-    if ~isnumeric(dim) || ~isscalar(dim) || dim ~= fix(dim) || dim < 1
-        error("dpmat:InvalidConcatenation", "Concatenation dimension must be a positive integer scalar.");
-    end
-    if dim > 2
-        error("dpmat:UnsupportedCatDimension", "dpmat only supports cat along dimensions 1 and 2.");
-    end
-
-    anchor = [];
-    for k = 1:numel(varargin)
-        if isa(varargin{k}, "dpmat")
-            anchor = varargin{k};
-            break
-        end
-    end
-    if isempty(anchor)
-        error("dpmat:InvalidConcatenation", "At least one concatenated value must be a dpmat.");
-    end
+    % sanity check inputs and select anchor dpmat for metadata
+    anchor = sanCheck(dim, varargin);
 
     grid = anchor.mergeGrid("dpmat:MixedGrid", varargin{:});
     [data, sz] = catData(anchor, dim, varargin, grid);
@@ -42,6 +27,25 @@ function out = cat(dim, varargin)
     if ~isequal(size(out), sz)
         error("dpmat:InvalidConcatenation", "Internal dpmat concatenation size mismatch.");
     end
+end
+
+function anchor = sanCheck(dim, args)
+    %SANCHECK Validate cat dimension and select the dpmat metadata anchor.
+    if ~isnumeric(dim) || ~isscalar(dim) || dim ~= fix(dim) || dim < 1
+        error("dpmat:InvalidConcatenation", "Concatenation dimension must be a positive integer scalar.");
+    end
+    if dim > 2
+        error("dpmat:UnsupportedCatDimension", "dpmat only supports cat along dimensions 1 and 2.");
+    end
+
+    anchor = [];
+    for k = 1:numel(args)
+        if isa(args{k}, "dpmat")
+            anchor = args{k};
+            return
+        end
+    end
+    error("dpmat:InvalidConcatenation", "At least one concatenated value must be a dpmat.");
 end
 
 function [data, outSize] = catData(anchor, dim, args, grid)

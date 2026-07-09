@@ -49,6 +49,20 @@ $$
 If the expression includes rate-vertex rows from `rhodiff`, the count is
 multiplied by the number of rate vertices.
 
+## Per-symbol reference anchors
+
+### <span id="dpvar-comparison-le"></span>`le` and `<=`
+
+Forms the residual for a nonpositive inequality and returns a `dplmi` object.
+The comparison is coefficient-wise after expression promotion and symmetry
+validation.
+
+### <span id="dpvar-comparison-ge"></span>`ge` and `>=`
+
+Forms the residual for a nonnegative inequality and returns a `dplmi` object.
+The comparison is coefficient-wise after expression promotion and symmetry
+validation.
+
 ## Examples
 
 ### Positive-semidefinite comparison

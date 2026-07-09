@@ -11,7 +11,8 @@ function out = rhodiff(obj, rb)
     %
     %   rhodiff(P, rb) stores one rate-vertex row per physical hypercube.
     %   The derivative is discontinuous at shared cell boundaries because
-    %   each hypercube uses its own local Bernstein coefficients.
+    %   each hypercube uses its own local Bernstein coefficients.  Without
+    %   rb, the nonempty RateBounds carried by P are used.
 
     if nargin > 2
         error("dpvar:InvalidDiff", ...
@@ -19,8 +20,8 @@ function out = rhodiff(obj, rb)
     end
 
     nPar = obj.npar();
-    inCoeff = (obj.Degree + 1) ^ nPar;
-    if isRateRows(obj.LocalValues, obj.GridInfo.Vectors, inCoeff)
+    nCoeff = (obj.Degree + 1) ^ nPar;
+    if isRateRows(obj.LocalValues, obj.GridInfo.Vectors, nCoeff)
         error("dpvar:InvalidDiff", ...
             "rhodiff of an existing rate-vertex dpvar expression is unsupported.");
     end
@@ -32,14 +33,17 @@ function out = rhodiff(obj, rb)
         end
         rb = obj.RateBounds;
     else
-        rb = chkRateBounds(rb, nPar);
+        rb = double(helper.chk(rb, "dpvar:InvalidRateBounds", ...
+            "RateBounds must be a finite ell-by-2 matrix with lower <= upper.", ...
+            "numeric", "real", "finite", "rowbounds", "Size", [nPar, 2]));
         if ~isempty(obj.RateBounds) && ~isequal(rb, obj.RateBounds)
             error("dpvar:RateBoundsMismatch", ...
                 "Explicit RateBounds must match P.RateBounds when both are present.");
         end
     end
 
-    verts = rateVerts(rb);
+    % helper.combRows preserves the package-wide lower/upper tensor order.
+    verts = helper.combRows(num2cell(rb, 2).');
     deg = obj.Degree;
     if deg == 0 || nPar == 1
         outDeg = max(deg - 1, 0);
@@ -55,20 +59,6 @@ function out = rhodiff(obj, rb)
     hasDec = obj.ContainsDecision && deg > 0;
     out = dpvar(mkInit(grid, obj.MatrixSize, outDeg, vals, ...
         hasDec, true, rb, "derivative", false));
-end
-
-function rb = chkRateBounds(rb, nPar)
-    rb = double(helper.chk(rb, "dpvar:InvalidRateBounds", ...
-        "RateBounds must be a finite ell-by-2 matrix with lower <= upper.", ...
-        "numeric", "real", "finite", "rowbounds", "Size", [nPar, 2]));
-end
-
-function verts = rateVerts(rb)
-    vecs = cell(1, size(rb, 1));
-    for k = 1:size(rb, 1)
-        vecs{k} = rb(k, :);
-    end
-    verts = helper.combRows(vecs);
 end
 
 function coeffs = diffCell(obj, subs, verts, outDeg)
@@ -115,6 +105,7 @@ end
 function row = tensorDiff(vals, deg, h, rate, sz)
     nPar = numel(h);
     row = cell(1, (deg + 1) ^ nPar);
+    mult = (deg + 1) .^ (nPar - 1:-1:0);
 
     for dim = 1:nPar
         vecs = repmat({0:deg}, 1, nPar);
@@ -124,7 +115,8 @@ function row = tensorDiff(vals, deg, h, rate, sz)
             lbl = partLbls(k, :);
             nxt = lbl;
             nxt(dim) = nxt(dim) + 1;
-            base = (vals{lblIdx(nxt, deg)} - vals{lblIdx(lbl, deg)}) ...
+            % Mixed-radix weights flatten Bernstein labels in combRows order.
+            base = (vals{sum(nxt .* mult) + 1} - vals{sum(lbl .* mult) + 1}) ...
                 .* (deg * rate(dim) / h(dim));
 
             % Each partial has degree m-1 in this dimension; elevate the
@@ -133,7 +125,7 @@ function row = tensorDiff(vals, deg, h, rate, sz)
             for outLabel = lbl(dim):(lbl(dim) + 1)
                 out = lbl;
                 out(dim) = outLabel;
-                idx = lblIdx(out, deg);
+                idx = sum(out .* mult) + 1;
                 scale = nchoosek(deg - 1, lbl(dim)) ...
                     * nchoosek(1, outLabel - lbl(dim)) ...
                     / nchoosek(deg, outLabel);
@@ -152,9 +144,4 @@ function row = tensorDiff(vals, deg, h, rate, sz)
             row{k} = zeros(sz);
         end
     end
-end
-
-function idx = lblIdx(lbl, deg)
-    mult = (deg + 1) .^ (numel(lbl) - 1:-1:0);
-    idx = sum(lbl .* mult) + 1;
 end

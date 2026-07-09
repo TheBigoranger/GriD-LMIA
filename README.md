@@ -9,6 +9,8 @@ The current implementation provides:
 - `dpvar` for continuous YALMIP-backed Bernstein decision expressions.
 - `rhodiff` for discontinuous rate-vertex derivative expressions.
 - `dplmi` for direct coefficient-wise YALMIP constraint assembly and `toYalmip` handoff.
+- `bernsteinTable` methods on both `dpmat` and `dpvar` for command-window
+  inspection of local Bernstein coefficient rows.
 
 ## Requirements
 
@@ -55,6 +57,19 @@ MATLAB output:
         {[1]}        "a*1 + (1-a)*3"
 ```
 
+Inspect a YALMIP-backed decision expression:
+
+```matlab
+yalmip('clear')
+P = dpvar(1, {[0 1]});
+T = bernsteinTable(P, "oneLine");
+disp(T)
+```
+
+The `dpmat/bernsteinTable` and `dpvar/bernsteinTable` reference pages document
+the full table columns, physical-cell selectors, rate-vertex rows, and the
+`"oneLine"` option.
+
 YALMIP-backed decision expression and direct LMI assembly:
 
 ```matlab
@@ -73,6 +88,7 @@ F = toYalmip(C);
 - Version history: https://thebigoranger.github.io/DP-LMI-package/version-history/
 - Solver smoke examples: https://thebigoranger.github.io/DP-LMI-package/examples/solver-smoke/
 - `dpmat/plot` output examples: https://thebigoranger.github.io/DP-LMI-package/documents/reference/dpmat/plot/
+- Reference lookup table: https://thebigoranger.github.io/DP-LMI-package/documents/reference-index/
 - Local PDF manual: `doc/manual.pdf`
 - Manual source: `doc/manual.tex`
 

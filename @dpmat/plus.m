@@ -10,21 +10,21 @@ function out = plus(lhs, rhs)
     %     A = dpmat({[0 1]}, {1, 2}, Degree=1);
     %     C = A + 3;
 
-    if isa(lhs, "dpmat") && isZeroObj(lhs) && isa(rhs, "dpmat")
+    if isa(lhs, "dpmat") && helper.isZero(lhs, "obj") && isa(rhs, "dpmat")
         chkAddZero(lhs, rhs, "dpmat:InvalidAddition");
         out = rhs;
         return
     end
-    if isa(lhs, "dpmat") && isa(rhs, "dpmat") && isZeroObj(rhs)
+    if isa(lhs, "dpmat") && isa(rhs, "dpmat") && helper.isZero(rhs, "obj")
         chkAddZero(rhs, lhs, "dpmat:InvalidAddition");
         out = lhs;
         return
     end
-    if isa(lhs, "dpmat") && isZeroAdd(rhs, lhs.MatrixSize)
+    if isa(lhs, "dpmat") && helper.isZero(rhs, "add", lhs.MatrixSize)
         out = lhs;
         return
     end
-    if isa(rhs, "dpmat") && isZeroAdd(lhs, rhs.MatrixSize)
+    if isa(rhs, "dpmat") && helper.isZero(lhs, "add", rhs.MatrixSize)
         out = rhs;
         return
     end

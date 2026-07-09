@@ -1,5 +1,17 @@
 function coeffs = joinRows(leaves, fcn, errId)
     %JOINROWS Combine ordinary rows with rate-vertex coefficient tables.
+    %
+    %   Syntax:
+    %     coeffs = joinRows(leaves, fcn, errId)
+    %
+    %   Example (via rate-affine algebra):
+    %     P = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
+    %     C = rhodiff(P) + P;
+    %
+    %   LEAVES are cell tables with a common coefficient-column count. A
+    %   one-row leaf is broadcast across the largest rate-vertex row count;
+    %   any other mismatch is rejected because it would invent vertex data.
+    %   FCN receives one coefficient from each input for every output row.
 
     nCoeff = [];
     nRows = 1;

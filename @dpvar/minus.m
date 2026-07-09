@@ -10,17 +10,17 @@ function out = minus(lhs, rhs)
     %     P = dpvar(2, {[0 1]});
     %     C = eye(2) - P;
 
-    if isa(lhs, "dpvar") && isa(rhs, "dpvar") && isZeroObj(rhs)
+    if isa(lhs, "dpvar") && isa(rhs, "dpvar") && helper.isZero(rhs, "obj")
         chkAddZero(rhs, lhs, "dpvar:InvalidSubtraction");
         out = lhs;
         return
     end
-    if isa(lhs, "dpvar") && isZeroKnown(rhs)
+    if isa(lhs, "dpvar") && isa(rhs, "dpmat") && helper.isZero(rhs, "obj")
         chkAddZero(rhs, lhs, "dpvar:InvalidSubtraction");
         out = lhs;
         return
     end
-    if isa(lhs, "dpvar") && isZeroAdd(rhs, lhs.MatrixSize)
+    if isa(lhs, "dpvar") && helper.isZero(rhs, "add", lhs.MatrixSize)
         out = lhs;
         return
     end

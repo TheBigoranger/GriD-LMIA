@@ -52,7 +52,7 @@ payloads are YALMIP expressions stored in inherited `LocalValues`.
 | `npar(obj)` | Number of parameters. |
 | `size(obj)` | Matrix payload dimensions. |
 
-### cells
+### <span id="dpbase-cells"></span>`cells`
 
 ```matlab
 C = cells(obj)
@@ -60,7 +60,7 @@ C = cells(obj)
 
 Returns one row per physical cell. Each row contains tensor-grid cell subscripts.
 
-### coeffs
+### <span id="dpbase-coeffs"></span>`coeffs`
 
 ```matlab
 V = coeffs(obj, cellSubscript)
@@ -68,13 +68,50 @@ V = coeffs(obj, cellSubscript)
 
 Returns the local Bernstein coefficient family stored at one physical cell.
 
-### lbls
+### <span id="dpbase-lbls"></span>`lbls`
 
 ```matlab
 L = lbls(obj)
 ```
 
 Returns local Bernstein multi-index labels in the same flat order used by `LocalValues`.
+
+### <span id="dpbase-ncell"></span>`ncell`
+
+```matlab
+n = ncell(obj)
+```
+
+Returns the number of physical tensor-grid cells, equal to the product of
+`NumNodes(k)-1` over all parameter dimensions.
+
+### <span id="dpbase-ncoeff"></span>`ncoeff`
+
+```matlab
+n = ncoeff(obj)
+```
+
+Returns the number of local coefficient columns in one ordinary cell. For
+degree `m` and `ell` parameters, this is `(m+1)^ell`.
+
+### <span id="dpbase-npar"></span>`npar`
+
+```matlab
+n = npar(obj)
+```
+
+Returns the number of parameter-grid dimensions represented by the object.
+
+### <span id="dpbase-size"></span>`size`
+
+```matlab
+[m, n] = size(obj)
+n = size(obj, dim)
+```
+
+Reports matrix payload dimensions using MATLAB's standard `size` forms. The
+coefficient grid and matrix payload are separate: `size(obj)` describes one
+stored matrix, not the number of physical cells.
 
 ## Example
 

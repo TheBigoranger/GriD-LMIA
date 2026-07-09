@@ -13,6 +13,24 @@ function obj = subsasgn(obj, S, rhs)
         obj = builtin("subsasgn", obj, S, rhs);
         return
     end
+
+    [rows, cols] = sanCheck(obj, S, rhs);
+    grid = obj.mergeGrid("dpmat:MixedGrid", rhs);
+    lhsData = asData(grid, obj, [], "dpmat:InvalidAssignment");
+    rhsData = asData(grid, rhs, [numel(rows), numel(cols)], "dpmat:InvalidAssignment");
+
+    deg = max(lhsData.Degree, rhsData.Degree);
+    lhsVals = elevVals(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
+    rhsVals = elevVals(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
+    nCell = cellfun(@numel, grid) - 1;
+    vals = helper.mkNest(nCell, @(subs) assignCell( ...
+        helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), rows, cols));
+
+    obj = dpmat(grid, vals, Degree=deg);
+end
+
+function [rows, cols] = sanCheck(obj, S, rhs)
+    %SANCHECK Validate the assignment form before coefficient conversion.
     if numel(S) ~= 1
         error("dpmat:UnsupportedAssignment", ...
             "dpmat only supports direct two-dimensional block assignment.");
@@ -28,18 +46,6 @@ function obj = subsasgn(obj, S, rhs)
     end
     [rows, cols] = helper.matSubs(S(1).subs, obj.MatrixSize, ...
         "dpmat:InvalidAssignment");
-    grid = obj.mergeGrid("dpmat:MixedGrid", rhs);
-    lhsData = asData(grid, obj, [], "dpmat:InvalidAssignment");
-    rhsData = asData(grid, rhs, [numel(rows), numel(cols)], "dpmat:InvalidAssignment");
-
-    deg = max(lhsData.Degree, rhsData.Degree);
-    lhsVals = elevVals(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
-    rhsVals = elevVals(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
-    nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) assignCell( ...
-        helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), rows, cols));
-
-    obj = dpmat(grid, vals, Degree=deg);
 end
 
 function out = assignCell(lhs, rhs, rows, cols)

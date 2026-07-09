@@ -113,6 +113,8 @@ function testZeroProductsClearMetadataAndAvoidQuadraticGuard(testCase)
     Z4 = zeros(1, 2) * P;
     Z5 = P * zeros(1, 3);
     Z6 = Z * W;
+    Z7 = Z * 2;
+    Z8 = 2 * Z;
 
     verifyZeroDpvar(testCase, Z1, [2 1]);
     verifyZeroDpvar(testCase, Z2, [2 1]);
@@ -120,7 +122,11 @@ function testZeroProductsClearMetadataAndAvoidQuadraticGuard(testCase)
     verifyZeroDpvar(testCase, Z4, [1 1]);
     verifyZeroDpvar(testCase, Z5, [2 3]);
     verifyZeroDpvar(testCase, Z6, [1 1]);
+    verifyZeroDpvar(testCase, Z7, [1 2]);
+    verifyZeroDpvar(testCase, Z8, [1 2]);
     testCase.verifyError(@() P * zeros(2, 1), "dpvar:InvalidMultiplication");
+    testCase.verifyError(@() Z * NaN, "dpvar:InvalidMultiplication");
+    testCase.verifyError(@() complex(0, 1) * Z, "dpvar:InvalidMultiplication");
 end
 
 function testMixedScalarGridUsesCommonRefinement(testCase)

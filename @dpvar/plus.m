@@ -10,31 +10,31 @@ function out = plus(lhs, rhs)
     %     P = dpvar(2, {[0 1]});
     %     C = P + eye(2);
 
-    if isa(lhs, "dpvar") && isZeroObj(lhs) && isa(rhs, "dpvar")
+    if isa(lhs, "dpvar") && helper.isZero(lhs, "obj") && isa(rhs, "dpvar")
         chkAddZero(lhs, rhs, "dpvar:InvalidAddition");
         out = rhs;
         return
     end
-    if isa(lhs, "dpvar") && isa(rhs, "dpvar") && isZeroObj(rhs)
+    if isa(lhs, "dpvar") && isa(rhs, "dpvar") && helper.isZero(rhs, "obj")
         chkAddZero(rhs, lhs, "dpvar:InvalidAddition");
         out = lhs;
         return
     end
-    if isa(lhs, "dpvar") && isZeroKnown(rhs)
+    if isa(lhs, "dpvar") && isa(rhs, "dpmat") && helper.isZero(rhs, "obj")
         chkAddZero(rhs, lhs, "dpvar:InvalidAddition");
         out = lhs;
         return
     end
-    if isZeroKnown(lhs) && isa(rhs, "dpvar")
+    if isa(lhs, "dpmat") && helper.isZero(lhs, "obj") && isa(rhs, "dpvar")
         chkAddZero(lhs, rhs, "dpvar:InvalidAddition");
         out = rhs;
         return
     end
-    if isa(lhs, "dpvar") && isZeroAdd(rhs, lhs.MatrixSize)
+    if isa(lhs, "dpvar") && helper.isZero(rhs, "add", lhs.MatrixSize)
         out = lhs;
         return
     end
-    if isa(rhs, "dpvar") && isZeroAdd(lhs, rhs.MatrixSize)
+    if isa(rhs, "dpvar") && helper.isZero(lhs, "add", rhs.MatrixSize)
         out = rhs;
         return
     end

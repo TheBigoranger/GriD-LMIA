@@ -1,5 +1,13 @@
 function init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary, isCont)
     %MKINIT Package prepared coefficient data for the dpvar constructor.
+    %
+    %   Syntax:
+    %     init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary, isCont)
+    %
+    %   Example (via public algebra):
+    %     P = dpvar(1, {[0 1]});
+    %     Q = -P;  % Unary algebra packages data through mkInit.
+
 
     if nargin < 9
         isCont = true;

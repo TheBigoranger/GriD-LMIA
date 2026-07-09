@@ -1,22 +1,18 @@
 function out = bernElev(obj, coeffs, fromDeg, toDeg)
     %BERNELEV Degree-elevate one cell's flat Bernstein coefficients.
+    %
+    %   Syntax:
+    %     out = bernElev(obj, coeffs, fromDeg, toDeg)
+    %
+    %   Example:
+    %     A = dpmat({[0 1]}, {[1 2]}, Degree=1);
+    %     c = A.coeffs(1);
+    %     cElevated = bernElev(A, c, 1, 2);
 
-    fromDeg = double(helper.chk(fromDeg, "dpbase:InvalidDegree", ...
-        "fromDeg must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-    toDeg = double(helper.chk(toDeg, "dpbase:InvalidDegree", ...
-        "toDeg must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-    if toDeg < fromDeg
-        error("dpbase:InvalidDegreeElevation", ...
-            "Cannot degree-elevate from degree %d to lower degree %d.", fromDeg, toDeg);
-    end
-
+    % sanity check inputs
     nPar = obj.npar();
-    expected = (fromDeg + 1) ^ nPar;
-    helper.chk(coeffs, "dpbase:InvalidCoefficientCell", ...
-        "Coefficient cell count must match the source degree and parameter dimension.", ...
-        "cell", "Numel", expected);
+    sanCheck(fromDeg, toDeg, coeffs, nPar);
+
     if toDeg == fromDeg
         out = coeffs;
         return
@@ -53,4 +49,21 @@ function out = bernElev(obj, coeffs, fromDeg, toDeg)
         end
         out{outIdx} = acc;
     end
+end
+
+function sanCheck(fromDeg, toDeg, coeffs, nPar)
+    fromDeg = double(helper.chk(fromDeg, "dpbase:InvalidDegree", ...
+        "fromDeg must be a nonnegative integer scalar.", ...
+        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+    toDeg = double(helper.chk(toDeg, "dpbase:InvalidDegree", ...
+        "toDeg must be a nonnegative integer scalar.", ...
+        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+    if toDeg < fromDeg
+        error("dpbase:InvalidDegreeElevation", ...
+            "Cannot degree-elevate from degree %d to lower degree %d.", fromDeg, toDeg);
+    end
+    expected = (fromDeg + 1) ^ nPar;
+    helper.chk(coeffs, "dpbase:InvalidCoefficientCell", ...
+        "Coefficient cell count must match the source degree and parameter dimension.", ...
+        "cell", "Numel", expected);
 end

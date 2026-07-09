@@ -177,6 +177,8 @@ function testZeroFastPathsCollapseDegree(testCase)
     Z4 = 0 * A;
     Z5 = F * 0;
     Z6 = Z1 * A;
+    Z7 = Z1 * 2;
+    Z8 = 2 * Z1;
 
     verifyZeroDpmat(testCase, Z1, [1 1]);
     verifyZeroDpmat(testCase, Z2, [1 1]);
@@ -184,6 +186,8 @@ function testZeroFastPathsCollapseDegree(testCase)
     verifyZeroDpmat(testCase, Z4, [1 1]);
     verifyZeroDpmat(testCase, Z5, [2 2]);
     verifyZeroDpmat(testCase, Z6, [1 1]);
+    verifyZeroDpmat(testCase, Z7, [1 1]);
+    verifyZeroDpmat(testCase, Z8, [1 1]);
     testCase.verifyTrue(isequal(A + Z1, A));
     testCase.verifyTrue(isequal(A - Z1, A));
     testCase.verifyError(@() F + 1, "dpmat:FunctionOnlyAlgebra");

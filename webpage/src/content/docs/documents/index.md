@@ -10,7 +10,7 @@ Use this page as the lookup entry for current DP-LMI behavior. The reference pag
 | Object | Start here | Common tasks |
 | :--- | :--- | :--- |
 | `dpmat` | [`dpmat` overview](/DP-LMI-package/documents/reference/dpmat/) | [`constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/), [`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/), [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/), [`bernsteinTable`](/DP-LMI-package/documents/reference/dpmat/bernsteintable/), [`matrix operations`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/) |
-| `dpvar` | [`dpvar` overview](/DP-LMI-package/documents/reference/dpvar/) | [`constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/), [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/), [`matrix operations`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/), [`comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) |
+| `dpvar` | [`dpvar` overview](/DP-LMI-package/documents/reference/dpvar/) | [`constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/), [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/), [`bernsteinTable`](/DP-LMI-package/documents/reference/dpvar/bernsteintable/), [`matrix operations`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/), [`comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) |
 | `dplmi` | [`dplmi` overview](/DP-LMI-package/documents/reference/dplmi/) | [`constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/), [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) |
 | `dpbase` | [`dpbase` overview](/DP-LMI-package/documents/reference/dpbase/) | [`storage inspection`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/) |
 
@@ -29,6 +29,12 @@ Use this page as the lookup entry for current DP-LMI behavior. The reference pag
 
 The generated [lookup table](/DP-LMI-package/documents/reference-index/) is produced from `src/data/reference-index.js` and checked during the build workflow.
 
+The lookup table includes every public class method in the current `@dpbase`,
+`@dpmat`, `@dpvar`, and `@dplmi` folders. Grouped operator pages keep a
+separate stable anchor for each symbol; backend and `+helper` entries are
+listed explicitly as implementation context and are not recommended modeling
+entry points.
+
 ## Mathematics
 
 - [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/): local coordinates, basis labels, coefficient multiplication, tensor-product storage, and coefficient-wise constraints.
@@ -38,6 +44,7 @@ The generated [lookup table](/DP-LMI-package/documents/reference-index/) is prod
 - [Install And Download](/DP-LMI-package/install/): setup skeleton, source ZIP, and PDF manual links.
 - [Examples](/DP-LMI-package/examples/): compact workflows.
 - [Solver Smoke Cases](/DP-LMI-package/examples/solver-smoke/): two tested YALMIP examples from `+tests/+dplmi/test_solver_smoke.m`.
+- [Bernstein Backend Utilities](/DP-LMI-package/documents/reference/bernstein-utilities/): protected degree, product, and grid-refinement behavior.
 
 ## Reference Page Shape
 

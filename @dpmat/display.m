@@ -24,15 +24,7 @@ function display(obj)
     fprintf("  Degree: %d\n", obj.Degree);
     fprintf("  Physical cells: %d\n", obj.ncell());
     fprintf("  Coefficients per cell: %d\n", obj.ncoeff());
-    fprintf("  Continuous: %s\n", tfText(obj.IsContinuous));
+    fprintf("  Continuous: %s\n", string(obj.IsContinuous));
     fprintf("  Source: %s\n", obj.SourceSummary);
-    fprintf("  Function handle: %s\n", tfText(~isempty(obj.FunctionHandle)));
-end
-
-function out = tfText(tf)
-    if tf
-        out = "true";
-    else
-        out = "false";
-    end
+    fprintf("  Function handle: %s\n", string(~isempty(obj.FunctionHandle)));
 end

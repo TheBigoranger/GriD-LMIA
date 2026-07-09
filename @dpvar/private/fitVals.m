@@ -1,5 +1,16 @@
 function vals = fitVals(info, deg, sz, evalFcn)
     %FITVALS Fit local Bernstein coefficients from affine point samples.
+    %
+    %   Syntax:
+    %     vals = fitVals(gridInfo, degree, matrixSize, evalFcn)
+    %
+    %   Example (internal interpolation path):
+    %     info = helper.mkGrid({[0 1]}, "dpvar");
+    %     vals = fitVals(info, 1, [1 1], @(pt) pt(1));
+    %
+    %   The evaluator is sampled at the tensor-product Bernstein interpolation
+    %   points in every physical cell. The returned nested tree uses the
+    %   package's flat combination order and retains affine sdpvar payloads.
 
     vecs = info.Vectors;
     nPar = numel(vecs);
@@ -32,6 +43,13 @@ function vals = fitVals(info, deg, sz, evalFcn)
 end
 
 function coeffs = coeffsAt(cellSubs, vecs, alphas, W, nCoeff, sz, evalFcn)
+    %COEFFSAT Sample and solve one cell's Bernstein interpolation problem.
+    %
+    %   Syntax:
+    %     coeffs = coeffsAt(cellSubs, vecs, alphas, W, nCoeff, sz, evalFcn)
+    %
+    %   W maps ordered point samples to ordered local coefficients; the cell
+    %   bounds convert normalized alpha coordinates back to physical points.
     nPar = numel(vecs);
     bounds = zeros(nPar, 2);
     for p = 1:nPar

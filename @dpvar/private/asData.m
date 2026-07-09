@@ -1,5 +1,19 @@
 function data = asData(grid, val, reqSize, rb, errId)
     %ASDATA Convert supported operands to dpvar data on the target grid.
+    %
+    %   Syntax:
+    %     data = asData(grid, val, reqSize, rb, errId)
+    %
+    %   Example (via public algebra):
+    %     P = dpvar(1, {[0 1]});
+    %     C = P + 1;
+    %
+    %   VAL may be a dpvar, coefficient-backed dpmat, numeric matrix, or
+    %   affine real sdpvar. The returned struct carries matrix size, degree,
+    %   LocalValues, decision/rate metadata, and whether rate rows are stored.
+    %   Function-only dpmat objects, incompatible sizes/bounds, nonlinear
+    %   sdpvar values, and rate-row grid changes fail with package-specific
+    %   errors; ordinary operand validation uses ERRID.
 
     info = helper.mkGrid(grid, "dpvar");
 
@@ -56,6 +70,9 @@ function data = asData(grid, val, reqSize, rb, errId)
 end
 
 function data = pack(sz, deg, vals, hasDec, hasRate, isCont, hasRows)
+    %PACK Keep the metadata fields consumed by the dpvar constructor together.
+    %   HASROWS distinguishes ordinary coefficient leaves from rate-vertex
+    %   tables; the distinction is needed by later degree and row operations.
     data.MatrixSize = sz;
     data.Degree = deg;
     data.LocalValues = vals;
@@ -66,6 +83,10 @@ function data = pack(sz, deg, vals, hasDec, hasRate, isCont, hasRows)
 end
 
 function tf = sameGrid(info, val, errId)
+    %SAMEGRID Compare parameter vectors and reject dimension mismatches.
+    %   A false result means refinement is still possible for ordinary
+    %   coefficient data; rate-row data is rejected by the caller because its
+    %   vertex-row alignment cannot be inferred across different grids.
     if numel(info.Vectors) ~= val.npar()
         error(errId, "dpvar operands must use the same parameter dimension.");
     end
@@ -76,6 +97,9 @@ function tf = sameGrid(info, val, errId)
 end
 
 function val = evalDpvar(obj, pt)
+    %EVALDPVAR Reconstruct one dpvar expression at a physical point.
+    %   This sampling path is used only to refit ordinary coefficient data on
+    %   a common refinement grid; it preserves affine YALMIP expressions.
     [subs, alpha] = localPoint(obj, pt);
     coeffs = obj.coeffs(subs);
     lbls = obj.lbls();
@@ -92,6 +116,9 @@ function val = evalDpvar(obj, pt)
 end
 
 function [subs, alpha] = localPoint(obj, pt)
+    %LOCALPOINT Map a physical point to its cell and Bernstein coordinates.
+    %   The endpoint convention matches the package's local basis: alpha=1
+    %   is the lower face and alpha=0 is the upper face of each cell.
     nPar = obj.npar();
     subs = zeros(1, nPar);
     alpha = zeros(1, nPar);
@@ -111,6 +138,10 @@ function [subs, alpha] = localPoint(obj, pt)
 end
 
 function mat = chkMat(val, reqSize, errId)
+    %CHKMat Validate an affine sdpvar or numeric matrix operand.
+    %   Numeric scalars are expanded to REQSIZE; other numeric shapes must
+    %   already match. Nonlinear, complex, or incompatible sdpvar operands
+    %   are rejected with ERRID.
     if isa(val, "sdpvar")
         if ~ismatrix(val) || ~isreal(val) || ~islinear(val)
             error(errId, "sdpvar operands must be affine real 2-D matrices with compatible size.");

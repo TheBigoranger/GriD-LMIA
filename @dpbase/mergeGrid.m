@@ -1,5 +1,18 @@
 function grid = mergeGrid(obj, errId, varargin)
     %MERGEGRID Build a same-bound common refinement grid for gridded operands.
+    %
+    %   Syntax:
+    %     grid = obj.mergeGrid(errId, other1, other2, ...)
+    %
+    %   Example (invoked through public dpmat algebra):
+    %     A = dpmat({[0 0.5 1]}, {1, 2}, Degree=1);
+    %     B = dpmat({[0 1]}, {3, 4}, Degree=1);
+    %     C = A + B;  % Uses the common refinement [0 0.5 1].
+    %
+    %   This protected helper preserves parameter bounds and inserts interior
+    %   nodes from every dpbase operand. Different parameter dimensions or
+    %   bounds raise ERRID; non-dpbase operands are ignored here and validated
+    %   by the operation-specific conversion helper.
 
     grid = obj.GridInfo.Vectors;
     vals = [{obj}, varargin];

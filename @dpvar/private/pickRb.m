@@ -1,5 +1,16 @@
 function rb = pickRb(errId, varargin)
     %PICKRB Pick the RateBounds carried by a dpvar operation.
+    %
+    %   Syntax:
+    %     rb = pickRb(errId, operand1, operand2, ...)
+    %
+    %   Example (via public algebra):
+    %     P = dpvar(1, {[0 1]}, RateBounds=[-1 1]);
+    %     C = P + 1;
+    %
+    %   Empty metadata on numeric or ordinary operands is allowed to inherit
+    %   the nonempty bounds of a rate-dependent peer. Distinct nonempty bounds
+    %   are a hard mismatch, and rate-row data without bounds is invalid.
 
     rb = [];
     needRb = false;

@@ -100,6 +100,10 @@ end
 
 function val = evalFun(fh, pt, sz)
     %EVALFUN Evaluate and validate a dpmat function-handle payload.
+    %
+    %   PT contains one point per parameter dimension. The helper normalizes
+    %   function-handle failures and output-shape/type failures to the
+    %   dpmat:InvalidFunctionValue error used by Bernstein validation.
 
     args = num2cell(pt);
     try
