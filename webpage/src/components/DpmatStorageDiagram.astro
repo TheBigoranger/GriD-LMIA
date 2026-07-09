@@ -34,26 +34,25 @@ const formulas = {
 <figure class="storage-diagram bernstein-product" aria-label="Linear Bernstein factors multiply into a quadratic Bernstein product">
   <div class="bernstein-product-card">
     <h3>One local cell: multiply two linear Bernstein factors</h3>
-    <div class="formula-line product-result-formula" set:html={renderInlineMath(formulas.r)} />
     <div class="factor-equation">
       <div class="factor-stack">
         <section class="factor-panel factor-p" aria-label="P alpha linear factor">
           <div class="formula-line" set:html={renderInlineMath(formulas.p)} />
-          <svg viewBox="0 0 420 132" role="img">
-            <line x1="28" y1="64" x2="392" y2="64" class="grid-line" />
-            <rect x="118" y="34" width="126" height="60" rx="8" class="selected-cell" />
-            <path d="M118 34 C118 18 130 18 130 18" class="cell-brace" />
-            <path d="M244 34 C244 18 232 18 232 18" class="cell-brace" />
-            <path d="M118 84 L244 40" class="line-p" />
+          <svg viewBox="0 0 360 124" role="img">
+            <line x1="22" y1="60" x2="338" y2="60" class="grid-line" />
+            <rect x="104" y="32" width="104" height="56" rx="8" class="selected-cell" />
+            <path d="M104 32 C104 17 116 17 116 17" class="cell-brace" />
+            <path d="M208 32 C208 17 196 17 196 17" class="cell-brace" />
+            <path d="M104 78 L208 40" class="line-p" />
             <g class="grid-node">
-              <circle cx="62" cy="64" r="9" />
-              <circle cx="118" cy="64" r="9" />
-              <circle cx="244" cy="64" r="9" />
-              <circle cx="322" cy="64" r="9" />
-              <circle cx="376" cy="64" r="9" />
+              <circle cx="54" cy="60" r="9" />
+              <circle cx="104" cy="60" r="9" />
+              <circle cx="208" cy="60" r="9" />
+              <circle cx="282" cy="60" r="9" />
+              <circle cx="326" cy="60" r="9" />
             </g>
-            <circle cx="118" cy="84" r="6" class="dot-p" />
-            <circle cx="244" cy="40" r="6" class="dot-p" />
+            <circle cx="104" cy="78" r="6" class="dot-p" />
+            <circle cx="208" cy="40" r="6" class="dot-p" />
           </svg>
           <div class="rho-labels" aria-hidden="true">
             {
@@ -65,6 +64,11 @@ const formulas = {
                 />
               ))
             }
+          </div>
+          <div class="coeff-strip factor-coeff-strip" aria-label="Stored degree-one P coefficients">
+            <code>LocalValues</code>
+            <span>P0</span>
+            <span>P1</span>
           </div>
         </section>
 
@@ -72,21 +76,21 @@ const formulas = {
 
         <section class="factor-panel factor-q" aria-label="Q alpha linear factor">
           <div class="formula-line" set:html={renderInlineMath(formulas.q)} />
-          <svg viewBox="0 0 420 132" role="img">
-            <line x1="28" y1="64" x2="392" y2="64" class="grid-line" />
-            <rect x="118" y="34" width="126" height="60" rx="8" class="selected-cell" />
-            <path d="M118 34 C118 18 130 18 130 18" class="cell-brace" />
-            <path d="M244 34 C244 18 232 18 232 18" class="cell-brace" />
-            <path d="M118 40 L244 88" class="line-q" />
+          <svg viewBox="0 0 360 124" role="img">
+            <line x1="22" y1="60" x2="338" y2="60" class="grid-line" />
+            <rect x="104" y="32" width="104" height="56" rx="8" class="selected-cell" />
+            <path d="M104 32 C104 17 116 17 116 17" class="cell-brace" />
+            <path d="M208 32 C208 17 196 17 196 17" class="cell-brace" />
+            <path d="M104 40 L208 82" class="line-q" />
             <g class="grid-node">
-              <circle cx="62" cy="64" r="9" />
-              <circle cx="118" cy="64" r="9" />
-              <circle cx="244" cy="64" r="9" />
-              <circle cx="322" cy="64" r="9" />
-              <circle cx="376" cy="64" r="9" />
+              <circle cx="54" cy="60" r="9" />
+              <circle cx="104" cy="60" r="9" />
+              <circle cx="208" cy="60" r="9" />
+              <circle cx="282" cy="60" r="9" />
+              <circle cx="326" cy="60" r="9" />
             </g>
-            <circle cx="118" cy="40" r="6" class="dot-q" />
-            <circle cx="244" cy="88" r="6" class="dot-q" />
+            <circle cx="104" cy="40" r="6" class="dot-q" />
+            <circle cx="208" cy="82" r="6" class="dot-q" />
           </svg>
           <div class="rho-labels" aria-hidden="true">
             {
@@ -99,29 +103,34 @@ const formulas = {
               ))
             }
           </div>
+          <div class="coeff-strip factor-coeff-strip" aria-label="Stored degree-one Q coefficients">
+            <code>LocalValues</code>
+            <span>Q0</span>
+            <span>Q1</span>
+          </div>
         </section>
       </div>
 
       <div class="equal-mark" aria-hidden="true">=</div>
 
       <section class="result-panel" aria-label="R alpha quadratic product">
-        <div class="result-heading">R = P Q quadratic product</div>
-        <svg viewBox="0 0 520 210" role="img">
-          <line x1="36" y1="112" x2="484" y2="112" class="grid-line" />
-          <rect x="154" y="64" width="154" height="96" rx="8" class="selected-cell" />
-          <path d="M154 64 C154 34 176 34 176 34" class="cell-brace" />
-          <path d="M308 64 C308 34 286 34 286 34" class="cell-brace" />
-          <path d="M154 144 C194 42 260 42 308 144" class="curve-r" />
+        <div class="formula-line product-result-formula" set:html={renderInlineMath(formulas.r)} />
+        <svg viewBox="0 0 420 188" role="img">
+          <line x1="28" y1="108" x2="392" y2="108" class="grid-line" />
+          <rect x="126" y="62" width="126" height="84" rx="8" class="selected-cell" />
+          <path d="M126 62 C126 36 148 36 148 36" class="cell-brace" />
+          <path d="M252 62 C252 36 230 36 230 36" class="cell-brace" />
+          <path d="M126 134 C160 45 224 45 252 134" class="curve-r" />
           <g class="grid-node">
-            <circle cx="78" cy="112" r="10" />
-            <circle cx="154" cy="112" r="10" />
-            <circle cx="308" cy="112" r="10" />
-            <circle cx="396" cy="112" r="10" />
-            <circle cx="468" cy="112" r="10" />
+            <circle cx="70" cy="108" r="10" />
+            <circle cx="126" cy="108" r="10" />
+            <circle cx="252" cy="108" r="10" />
+            <circle cx="324" cy="108" r="10" />
+            <circle cx="378" cy="108" r="10" />
           </g>
-          <circle cx="154" cy="144" r="7" class="dot-r" />
-          <circle cx="231" cy="58" r="7" class="dot-r" />
-          <circle cx="308" cy="144" r="7" class="dot-r" />
+          <circle cx="126" cy="134" r="7" class="dot-r" />
+          <circle cx="189" cy="52" r="7" class="dot-r" />
+          <circle cx="252" cy="134" r="7" class="dot-r" />
         </svg>
         <div class="rho-labels result-rho-labels" aria-hidden="true">
           {
