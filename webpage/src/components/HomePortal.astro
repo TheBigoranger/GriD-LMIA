@@ -67,7 +67,7 @@ const downloadLinks = [
     </div>
 
     <aside class="lpv-visual" aria-label="LPV system to DP-LMI solver diagram">
-      <svg viewBox="0 0 560 390" role="img" aria-labelledby="lpv-title lpv-desc">
+      <svg viewBox="0 0 620 420" role="img" aria-labelledby="lpv-title lpv-desc">
         <title id="lpv-title">LPV system diagram for DP-LMI</title>
         <desc id="lpv-desc">
           Parameter trajectories and rate bounds feed an LPV system, DP-LMI
@@ -87,41 +87,41 @@ const downloadLinks = [
           </linearGradient>
         </defs>
 
-        <rect x="28" y="28" width="504" height="334" rx="28" class="lpv-shell" />
-        <path d="M64 104 C110 48 176 52 224 98 S333 155 398 96 S500 68 514 118" class="lpv-curve" />
-        <circle cx="88" cy="85" r="6" class="lpv-dot" />
-        <circle cx="226" cy="100" r="6" class="lpv-dot" />
-        <circle cx="398" cy="96" r="6" class="lpv-dot" />
+        <rect x="28" y="34" width="564" height="348" rx="30" class="lpv-shell" />
+        <path d="M70 128 C118 68 190 72 242 120 S364 178 428 118 S526 90 558 134" class="lpv-curve" />
+        <circle cx="102" cy="108" r="6" class="lpv-dot" />
+        <circle cx="242" cy="120" r="6" class="lpv-dot" />
+        <circle cx="428" cy="118" r="6" class="lpv-dot" />
 
         <g class="lpv-chip">
-          <rect x="54" y="48" width="132" height="45" rx="18" />
-          <text x="76" y="76">rho(t)</text>
+          <rect x="54" y="60" width="154" height="46" rx="18" />
+          <text x="84" y="89">rho(t)</text>
         </g>
         <g class="lpv-chip secondary">
-          <rect x="350" y="52" width="132" height="45" rx="18" />
-          <text x="370" y="80">rho_dot in [a,b]</text>
+          <rect x="374" y="62" width="170" height="46" rx="18" />
+          <text x="410" y="91">rate bounds</text>
         </g>
 
         <g class="lpv-block">
-          <rect x="70" y="158" width="166" height="92" rx="22" />
-          <text x="94" y="190">LPV dynamics</text>
-          <text x="94" y="218">x_dot = A(rho)x + B(rho)u</text>
+          <rect x="62" y="180" width="220" height="96" rx="22" />
+          <text x="90" y="214">LPV dynamics</text>
+          <text x="90" y="242" class="lpv-detail">x' = A(rho)x + B(rho)u</text>
         </g>
         <g class="lpv-block emphasis">
-          <rect x="326" y="142" width="164" height="112" rx="24" />
-          <text x="356" y="176">DP-LMI</text>
-          <text x="356" y="205">P(rho), dP/dt</text>
-          <text x="356" y="232">cell-local Bernstein</text>
+          <rect x="356" y="160" width="190" height="118" rx="24" />
+          <text x="390" y="196">DP-LMI</text>
+          <text x="390" y="226" class="lpv-detail">P(rho), dP/dt</text>
+          <text x="390" y="252" class="lpv-detail">cell-local Bernstein</text>
         </g>
         <g class="lpv-block solver">
-          <rect x="204" y="286" width="158" height="52" rx="20" />
-          <text x="232" y="318">YALMIP / SDP</text>
+          <rect x="226" y="314" width="176" height="54" rx="20" />
+          <text x="258" y="348">YALMIP / SDP</text>
         </g>
 
-        <path d="M236 204 H304" class="lpv-link" />
-        <path d="M404 254 C398 282 368 306 362 310" class="lpv-link" />
-        <path d="M150 250 C158 285 190 308 204 312" class="lpv-link muted" />
-        <path d="M420 98 V130" class="lpv-link muted" />
+        <path d="M282 228 H334" class="lpv-link" />
+        <path d="M462 278 C454 306 424 330 402 340" class="lpv-link" />
+        <path d="M154 276 C164 312 198 336 226 342" class="lpv-link muted" />
+        <path d="M458 108 V146" class="lpv-link muted" />
       </svg>
     </aside>
   </section>
@@ -425,6 +425,14 @@ const downloadLinks = [
     font-weight: 760;
   }
 
+  .lpv-chip text {
+    font-size: 16px;
+  }
+
+  .lpv-chip.secondary text {
+    font-size: 16px;
+  }
+
   .lpv-block rect {
     fill: rgb(255 255 255 / 0.8);
     stroke: rgb(30 64 175 / 0.18);
@@ -436,6 +444,10 @@ const downloadLinks = [
     fill: #334155;
     font-size: 13px;
     font-weight: 650;
+  }
+
+  .lpv-detail {
+    font-size: 13px;
   }
 
   .lpv-block.emphasis rect {
