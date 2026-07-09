@@ -17,17 +17,28 @@ Understand the inherited storage contract used by `dpmat` and `dpvar`.
 
 ## Inherited Properties
 
+`dpmat` and `dpvar` inherit these read-only public properties from `dpbase`.
+They are accessed with ordinary dot syntax, such as `A.Degree`,
+`P.GridInfo.Vectors{1}`, or `D.LocalValues{1}`. The properties have private
+set access: users can inspect them, but constructor and algebra methods are
+responsible for keeping grid metadata, coefficient counts, continuity flags,
+and rate metadata consistent.
+
 | Property | Meaning |
 | :--- | :--- |
-| `GridInfo` | Validated tensor-grid vectors, bounds, and node counts. |
+| `GridInfo` | Struct with `Vectors`, `Points`, `Bounds`, and `NumNodes`. Use `obj.GridInfo.Vectors{k}` for one parameter grid, `obj.GridInfo.Points` for tensor-product node rows, `obj.GridInfo.Bounds(k,:)` for physical parameter bounds, and `obj.GridInfo.NumNodes(k)` for the node count. |
 | `MatrixSize` | Matrix payload size for each coefficient. |
 | `Degree` | Scalar Bernstein degree. |
-| `LocalValues` | Nested physical-cell storage with flat coefficient cells inside each cell. |
+| `LocalValues` | Nested physical-cell storage. Each ordinary leaf stores a flat coefficient cell; a `rhodiff` leaf stores a rate-row-by-coefficient cell array. Prefer `coeffs(obj, cellSubscript)` for normal inspection. |
 | `IsContinuous` | Whether the object represents continuous physical-cell data. |
 | `ContainsDecision` | Whether coefficients include YALMIP decisions. |
 | `HasRateDependence` | Whether coefficients carry rate-vertex rows. |
 | `RateBounds` | `ell x 2` rate-bound table when rate metadata exists. |
 | `SourceSummary` | Short source label such as `decision`, `function`, or derivative metadata. |
+
+`dpmat` adds a read-only `FunctionHandle` property. It is nonempty only for
+function-backed construction. `dpvar` does not expose `FunctionHandle`; its
+payloads are YALMIP expressions stored in inherited `LocalValues`.
 
 ## Inspection Methods
 
@@ -69,11 +80,24 @@ Returns local Bernstein multi-index labels in the same flat order used by `Local
 
 ```matlab
 A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A.GridInfo.Vectors{2}
+A.MatrixSize
+A.LocalValues{1}{1}
 A.cells()
 A.lbls()
 ```
 
 ```text
+ans =
+    10    20
+
+ans =
+     1     1
+
+ans =
+  1x4 cell array
+    {[1]}    {[3]}    {[5]}    {[7]}
+
 ans =
      1     1
 
@@ -83,6 +107,12 @@ ans =
      1     0
      1     1
 ```
+
+For an ordinary object with Bernstein degree `m` and `ell` parameter
+dimensions, one physical-cell leaf contains `(m+1)^ell` local coefficients in
+the `lbls()` order. For a derivative object returned by `rhodiff`, one leaf is
+a two-dimensional cell array with `2^ell` rate rows and
+`(outDegree+1)^ell` coefficient columns.
 
 ## Validation Boundary
 

@@ -31,12 +31,12 @@ P = dpvar(..., Degree=1, RateBounds=rb)
 
 | Input | Description |
 | :--- | :--- |
-| `n`, `m` | Positive integer matrix dimensions. `dpvar(n, gridVectors)` creates an `n x n` object. |
-| `gridVectors` | Numeric vector shorthand for one parameter, or a cell array of grid vectors. |
-| `"full"` | Use full YALMIP matrix coefficients. |
-| `"symmetric"` | Use symmetric YALMIP matrix coefficients. Requires square dimensions. |
-| `Degree` | `0` or `1` for constructor-created variables. Default is `1`. |
-| `RateBounds` | Finite `ell x 2` lower/upper rate-bound table stored as metadata. |
+| `n`, `m` | Positive integer matrix dimensions. `dpvar(n, gridVectors)` creates an `n x n` object, such as `dpvar(2,{[0 1]})`; `dpvar(n,m,gridVectors)` creates an `n x m` object, such as `dpvar(2,3,[0 1])`. |
+| `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of grid vectors, such as `{[0 1], [10 20]}`. |
+| `"full"` | Use full YALMIP matrix coefficients, as in `dpvar(2,2,{[0 1]},"full")`. |
+| `"symmetric"` | Use symmetric YALMIP matrix coefficients, as in `dpvar(2,{[0 1]},"symmetric")`. Requires square dimensions. |
+| `Degree` | `0` or `1` for constructor-created variables. Default is `1`; use `Degree=0` for a parameter-independent decision. |
+| `RateBounds` | Finite `ell x 2` lower/upper rate-bound table stored as metadata, such as `RateBounds=[-1 1]` or `RateBounds=[-1 2; -3 4]`. |
 
 Unsupported public options: `IsContinuous`, `ContainsDecision`, and `HasRateDependence`.
 
@@ -64,12 +64,9 @@ directly in the coefficient graph instead of being enforced by a separate LMI
 constraint. Degree-0 variables reuse one symbolic coefficient over all physical
 cells while still carrying grid metadata.
 
-![Schematic dpvar constructor plot showing a parameter-dependent variable and LocalValues cell storage](/DP-LMI-package/plots/dpvar-constructor-localvalues.png)
-
-The figure is schematic: it uses a plotted line to show how one scalar entry of
-`P(rho)` varies across the grid. In the real object, each labeled endpoint is a
-YALMIP matrix coefficient, and the stored leaves are `LocalValues{1} = {P_0,
-P_1}`, `LocalValues{2} = {P_1, P_2}`, and so on.
+In the stored object, each labeled endpoint is a YALMIP matrix coefficient, and
+the stored leaves are `LocalValues{1} = {P_0, P_1}`,
+`LocalValues{2} = {P_1, P_2}`, and so on.
 
 The inherited fields are readable through dot syntax and have private set
 access:
@@ -96,6 +93,7 @@ and coefficient storage stay synchronized.
 ### Default symmetric square variable
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1 2]}, "symmetric");
 P.GridInfo.Vectors{1}
 first = P.coeffs(1);
@@ -137,6 +135,7 @@ ans =
 ### Rectangular full variable
 
 ```matlab
+yalmip('clear')
 Q = dpvar(2, 3, [0 1], "full", Degree=0);
 Q.MatrixSize
 Q.Degree
@@ -153,6 +152,7 @@ ans =
 ### Rate metadata
 
 ```matlab
+yalmip('clear')
 P = dpvar(1, {[0 1], [10 20]}, RateBounds=[-1 2; -3 4]);
 P.HasRateDependence
 P.RateBounds

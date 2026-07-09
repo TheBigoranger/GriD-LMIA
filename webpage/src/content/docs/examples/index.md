@@ -61,6 +61,7 @@ Function-backed objects without explicit `Degree` preserve the exact function ha
 ## `dpvar` And `rhodiff`
 
 ```matlab
+yalmip('clear')
 P = dpvar(1, {[0 1 2]}, RateBounds=[-1 1]);
 D = rhodiff(P);
 
@@ -80,9 +81,21 @@ ans =
 ## `dplmi.toYalmip`
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
 F = toYalmip(C);
+isa(F, "lmi") || isa(F, "constraint")
+length(F)
+```
+
+```text
+ans =
+  logical
+   1
+
+ans =
+     2
 ```
 
 `F` is a YALMIP constraint array. Use ordinary YALMIP solver calls such as `optimize(F, objective, sdpsettings(...))`.

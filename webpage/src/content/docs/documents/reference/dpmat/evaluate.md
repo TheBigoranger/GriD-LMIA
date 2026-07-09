@@ -27,35 +27,67 @@ val = A.evaluate(pt)
 | Argument | Description |
 | :--- | :--- |
 | `A` | A `dpmat` object. |
-| `pt` | Finite real vector with one entry per parameter. The point must lie inside the grid bounds. |
+| `pt` | Finite real scalar for one parameter, such as `0.25`, or a row vector with one entry per parameter, such as `[0.25 12]`. The point must lie inside the grid bounds. |
 
 ## Output
 
 `val` is a numeric matrix with size `A.MatrixSize`.
 
-## Example
+## Description
+
+For coefficient-backed data on one cell, `evaluate` applies local Bernstein
+interpolation. For degree-one scalar data on `[rho0,rho1]`,
+
+$$
+A(\rho)=aA_0+(1-a)A_1,\qquad
+a=\frac{\rho_1-\rho}{\rho_1-\rho_0}.
+$$
+
+For matrix-valued data, the same formula is applied entrywise to each stored
+coefficient matrix. Function-backed objects keep the exact MATLAB function
+handle and call it directly.
+
+## Examples
+
+### Function-call form
 
 ```matlab
-A = dpmat({[0 1]}, {1, 3}, Degree=1);
-val = A.evaluate(0.25)
+A = dpmat({[0 1]}, {2, 4}, Degree=1);
+val = evaluate(A, 0.25)
 ```
 
 ```text
 val =
-    1.5000
+    2.5000
 ```
 
-The local coordinate is `alpha = 0.75`, so the value is `0.75*1 + 0.25*3`.
+At `rho = 0.25`, the local weight is `a = 0.75`, so the value is
+`0.75*2 + 0.25*4`.
 
-## Function-Backed Evaluation
+### Dot-call form
 
 ```matlab
-F = dpmat({[0 pi]}, @(rho) sin(rho));
-F.evaluate(pi/2)
+A = dpmat({[0 1]}, {2, 4}, Degree=1);
+val = A.evaluate(0.75)
 ```
 
 ```text
-ans =
+val =
+    3.5000
+```
+
+The dot-call form is equivalent to `evaluate(A, pt)` and is often convenient in
+interactive MATLAB sessions.
+
+### Function-backed evaluation
+
+```matlab
+F = dpmat({[0 pi]}, @(rho) sin(rho));
+val = F.evaluate(pi/2)
+```
+
+```text
+val =
      1
 ```
 

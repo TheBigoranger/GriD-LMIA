@@ -35,6 +35,8 @@ Apply matrix and coefficient operations to known parameter-dependent matrix data
 A = dpmat({[0 1]}, {1, 3}, Degree=1);
 B = A + 5;
 B.evaluate(0.25)
+T = bernsteinTable(B);
+T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
 Z = A - A;
 (-A).evaluate(1)
 (+A).evaluate(0)
@@ -43,6 +45,15 @@ Z = A - A;
 ```text
 ans =
     6.5000
+
+ans =
+  2x4 table
+
+    TermIndex    LocalIndex     Basis     Value
+    _________    __________    _______    _____
+
+        1          {[0]}       "a"        {[6]}
+        2          {[1]}       "(1-a)"    {[8]}
 
 ans =
     -3
@@ -57,12 +68,23 @@ ans =
 A = dpmat({[0 1]}, {[1 0; 0 2], [2 0; 0 3]}, Degree=1);
 B = A * eye(2);
 B.evaluate(1)
+T = bernsteinTable(B);
+T(:, ["TermIndex", "LocalIndex", "Value"])
 ```
 
 ```text
 ans =
      2     0
      0     3
+
+ans =
+  2x3 table
+
+    TermIndex    LocalIndex       Value
+    _________    __________    ____________
+
+        1          {[0]}       {2x2 double}
+        2          {[1]}       {2x2 double}
 ```
 
 ### Transpose, reshape, squeeze, and vec

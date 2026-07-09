@@ -1,6 +1,6 @@
 ---
 title: Version History
-description: Current manual version and release-history skeleton for the DP-LMI documentation.
+description: Current manual version and release-history policy for the DP-LMI documentation.
 ---
 
 import { versionInfo } from "../../data/version.js";
@@ -21,16 +21,25 @@ import { historyPolicy, versionHistory } from "../../data/version-history.js";
   </p>
 </section>
 
-## History Skeleton
+## Release History
 
-The history list is intentionally small for now. It gives future rolling
-updates a stable location without inventing unreleased versions.
+Patch-only documentation updates change the current version above but do not
+create release-history rows. This list is reserved for intentional minor
+documentation/API snapshots or user-requested patch release notes.
 
 <div class="history-list">
-  {versionHistory.map((entry) => (
+  {versionHistory.length === 0 ? (
     <article>
       <div>
-        <strong>{entry.version === "current" ? versionInfo.current : entry.version}</strong>
+        <strong>No minor snapshots yet</strong>
+        <span>policy</span>
+      </div>
+      <p>The current version is synchronized from the TeX manual during build.</p>
+    </article>
+  ) : versionHistory.map((entry) => (
+    <article>
+      <div>
+        <strong>{entry.version}</strong>
         <span>{entry.status}</span>
       </div>
       <time>{entry.date}</time>

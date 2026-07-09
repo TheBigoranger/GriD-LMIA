@@ -9,7 +9,7 @@ Use this page as the lookup entry for current DP-LMI behavior. The reference pag
 
 | Object | Start here | Common tasks |
 | :--- | :--- | :--- |
-| `dpmat` | [`dpmat` overview](/DP-LMI-package/documents/reference/dpmat/) | [`constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/), [`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/), [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/), [`table`](/DP-LMI-package/documents/reference/dpmat/table/), [`matrix operations`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/) |
+| `dpmat` | [`dpmat` overview](/DP-LMI-package/documents/reference/dpmat/) | [`constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/), [`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/), [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/), [`bernsteinTable`](/DP-LMI-package/documents/reference/dpmat/bernsteintable/), [`matrix operations`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/) |
 | `dpvar` | [`dpvar` overview](/DP-LMI-package/documents/reference/dpvar/) | [`constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/), [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/), [`matrix operations`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/), [`comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) |
 | `dplmi` | [`dplmi` overview](/DP-LMI-package/documents/reference/dplmi/) | [`constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/), [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) |
 | `dpbase` | [`dpbase` overview](/DP-LMI-package/documents/reference/dpbase/) | [`storage inspection`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/) |
@@ -21,7 +21,7 @@ Use this page as the lookup entry for current DP-LMI behavior. The reference pag
 | `dpmat(...)` | [`dpmat constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/) | Create known data from coefficients, local values, or a function handle. |
 | `evaluate(A, rho)` | [`dpmat evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/) | Sample a known matrix at one parameter point. |
 | `plot(A, ...)` | [`dpmat plot`](/DP-LMI-package/documents/reference/dpmat/plot/) | Inspect one- or two-parameter data visually. |
-| `table(A)` | [`dpmat table`](/DP-LMI-package/documents/reference/dpmat/table/) | Inspect local Bernstein coefficient rows. |
+| `bernsteinTable(A)` | [`dpmat bernsteinTable`](/DP-LMI-package/documents/reference/dpmat/bernsteintable/) | Inspect local Bernstein coefficient rows. |
 | `dpvar(...)` | [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) | Create continuous YALMIP-backed Bernstein decision variables. |
 | `rhodiff(P)` | [`dpvar rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) | Build rate-vertex derivative expressions. |
 | `P <= 0`, `P >= 0` | [`dpvar comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) | Create `dplmi` constraints from residual expressions. |

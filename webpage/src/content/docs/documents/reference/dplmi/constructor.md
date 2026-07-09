@@ -18,40 +18,83 @@ Build a `dplmi` object from a square `dpvar` residual expression.
 ## Syntax
 
 ```matlab
-C = dplmi(expr, "<=")
-C = dplmi(expr, ">=", relaxLemma=false, UsePolya=false, PolyaDegree=0)
-C = expr <= rhs
-C = expr >= rhs
+C = dplmi(expr, relation)
+C = dplmi(expr, relation, relaxLemma=false, UsePolya=false, PolyaDegree=0)
+C = lhs <= rhs
+C = lhs >= rhs
 ```
 
 ## Arguments And Options
 
 | Input | Description |
 | :--- | :--- |
-| `expr` | Square `dpvar` residual expression. |
+| `expr` | Square `dpvar` residual expression, such as `P` or `diffP + P*A + A'*P`. |
 | `relation` | Either `"<="` or `">="`. |
-| `relaxLemma` | Logical option. Default `false`; `true` is reserved and currently rejected. |
-| `UsePolya` | Logical option. Default `false`; `true` is reserved and currently rejected. |
-| `PolyaDegree` | Nonnegative integer scalar. Default `0`; positive values are reserved and rejected. |
+| `relaxLemma` | Logical option. Default `false`; `relaxLemma=true` is reserved and currently rejected. |
+| `UsePolya` | Logical option. Default `false`; `UsePolya=true` is reserved and currently rejected. |
+| `PolyaDegree` | Nonnegative integer scalar. Default `0`; positive values such as `PolyaDegree=1` are reserved and rejected. |
 
 ## Output
 
 `C` is a `dplmi` object with `Constraints`, `RelaxLemma`, `UsePolya`, and `PolyaDegree` properties.
 
-## Example
+## Examples
+
+### Direct constructor form
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
-C = P >= 0;
+C = dplmi(P, ">=");
+class(C)
 numel(C.Constraints)
 ```
 
 ```text
 ans =
+    'dplmi'
+
+ans =
+     2
+```
+
+The direct constructor is useful when code already has a residual expression
+and a relation string.
+
+### Comparison-overload form
+
+```matlab
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric");
+C = P >= 0;
+class(C)
+numel(C.Constraints)
+```
+
+```text
+ans =
+    'dplmi'
+
+ans =
      2
 ```
 
 A scalar grid with one physical cell and degree 1 has two local Bernstein coefficients, so this direct constraint has two stored coefficient entries.
+
+### Reserved option rejection
+
+Relaxation-lemma and Polya options are visible as reserved defaults, but
+nondefault values are rejected in the current implementation.
+
+```matlab
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric");
+dplmi(P, "<=", relaxLemma=true)
+```
+
+The call raises `dplmi:UnsupportedRelaxLemma`. Similarly, `UsePolya=true` or
+`PolyaDegree=1` raises the reserved Polya-option errors listed in the
+validation section.
 
 ## Validation And Errors
 

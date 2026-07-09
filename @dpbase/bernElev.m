@@ -36,31 +36,21 @@ function out = bernElev(obj, coeffs, fromDeg, toDeg)
             if all(outLbl >= inLbl) && all((outLbl - inLbl) <= gap)
                 % Tensor Bernstein degree elevation scales independently along
                 % each parameter axis before accumulating into flat order.
-                scale = elevScale(inLbl, fromDeg, outLbl, toDeg);
-                acc = addTerm(acc, coeffs{inIdx} .* scale);
+                scale = 1;
+                for k = 1:nPar
+                    scale = scale ...
+                        * nchoosek(fromDeg, inLbl(k)) ...
+                        * nchoosek(gap, outLbl(k) - inLbl(k)) ...
+                        / nchoosek(toDeg, outLbl(k));
+                end
+                term = coeffs{inIdx} .* scale;
+                if isempty(acc)
+                    acc = term;
+                else
+                    acc = acc + term;
+                end
             end
         end
         out{outIdx} = acc;
-    end
-end
-
-function scale = elevScale(inLbl, inDeg, outLbl, outDeg)
-    gap = outDeg - inDeg;
-    scale = 1;
-    for k = 1:numel(inLbl)
-        % The extra degree acts like multiplying by a Bernstein partition of
-        % unity, which gives the combinatorial reweighting below.
-        scale = scale ...
-            * nchoosek(inDeg, inLbl(k)) ...
-            * nchoosek(gap, outLbl(k) - inLbl(k)) ...
-            / nchoosek(outDeg, outLbl(k));
-    end
-end
-
-function acc = addTerm(acc, term)
-    if isempty(acc)
-        acc = term;
-    else
-        acc = acc + term;
     end
 end

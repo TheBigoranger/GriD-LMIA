@@ -48,10 +48,10 @@ export const referenceEntries = [
     href: "/DP-LMI-package/documents/reference/dpmat/plot/",
   },
   {
-    name: "table",
+    name: "bernsteinTable",
     type: "dpmat method",
     task: "Inspect Bernstein coefficient rows as a MATLAB table.",
-    href: "/DP-LMI-package/documents/reference/dpmat/table/",
+    href: "/DP-LMI-package/documents/reference/dpmat/bernsteintable/",
   },
   {
     name: "dpmat matrix operations",

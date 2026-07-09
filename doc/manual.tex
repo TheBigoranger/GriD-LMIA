@@ -31,6 +31,8 @@
 }
 
 \newcommand{\sectionbreak}{\clearpage}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\hbadness=10000
 \titleformat{\section}[display]
   {\normalfont\Huge\bfseries}
   {\thesection}
@@ -49,9 +51,32 @@
   numbers=none
 }
 
-\lstdefinestyle{dpoutput}{
+\lstdefinestyle{dpsyntax}{
   basicstyle=\ttfamily\small,
   breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  rulecolor=\color{black!20},
+  backgroundcolor=\color{black!2},
+  numbers=none
+}
+
+\lstdefinestyle{dpoutput}{
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=false,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  backgroundcolor=\color{black!3},
+  numbers=none
+}
+
+\lstdefinestyle{dpwideoutput}{
+  basicstyle=\ttfamily\tiny,
+  breaklines=false,
   columns=fullflexible,
   keepspaces=true,
   frame=single,
@@ -62,10 +87,13 @@
 
 \newcommand{\pkg}{DP-LMI package}
 \newcommand{\matlab}{MATLAB}
-\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\syntaxhead}{\par\medskip\noindent\textbf{Syntax.}\par\nopagebreak\vspace{0.25em}}
+\newcommand{\examplehead}{\par\medskip\noindent\textbf{Example.}\par\nopagebreak\vspace{0.25em}}
+\newcommand{\arghead}{\par\medskip\noindent\textbf{Arguments, options, and outputs.}\par\nopagebreak\vspace{0.25em}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.1.0}
+\author{Version v0.1.1}
 \date{July 2026}
 
 \begin{document}
@@ -73,22 +101,217 @@
 \maketitle
 
 \begin{abstract}
-This manual describes the current public behavior of the \pkg.  The present
-implementation uses \code{dpbase} as the backend parent for cell-local
-Bernstein coefficient storage, provides \code{dpmat} for known finite real
-matrix data on tensor grids, and provides an initial \code{dpvar} layer for
-continuous degree-1 YALMIP-backed decision expressions plus cell-local
-rate-weighted derivatives through \code{rhodiff}.  It also provides the first
-\code{dplmi} layer: \code{dpvar} comparisons assemble direct coefficient-wise
-YALMIP constraints, and \code{toYalmip} exposes them to \code{optimize}.
-Relaxation-lemma and Polya workflows remain reserved future extensions.
+This manual describes the current public behavior of the \pkg.  The package
+uses \code{dpbase} as the backend parent for cell-local Bernstein coefficient
+storage, provides \code{dpmat} for known finite real matrix functions on tensor
+grids, provides \code{dpvar} for YALMIP-backed Bernstein decision expressions
+and \code{rhodiff} derivatives, and provides \code{dplmi} for direct
+coefficient-wise YALMIP constraint assembly.  The manual is written as a
+reference manual: conceptual Bernstein material comes first, and each class
+chapter then documents supported call forms, arguments, outputs, examples, and
+limits.
 \end{abstract}
 
 \tableofcontents
 
-\section{Installation And Verification}
+\section{Bernstein And Grid Background}
+\label{sec:bernstein}
 
-\subsection{Add The Package To The MATLAB Path}
+\subsection{Local Coordinates And Degree-Two Coefficients}
+\label{sec:bernstein-local}
+
+On one physical interval \([\rho_i,\rho_{i+1}]\), the package uses the local
+coordinate
+\[
+  a = \frac{\rho_{i+1}-\rho}{\rho_{i+1}-\rho_i}.
+\]
+Thus \(a=1\) at the lower endpoint and \(a=0\) at the upper endpoint.  A
+degree-\(m\) Bernstein polynomial on that cell is
+\[
+  P(\rho) =
+  \sum_{j=0}^{m} \binom{m}{j} a^{m-j}(1-a)^j C_j.
+\]
+
+The degree-two case is the first case where the middle Bernstein scale matters:
+\[
+  P(\rho)=a^2 C_0+2a(1-a)C_1+(1-a)^2 C_2.
+\]
+The package stores the coefficient matrices \(C_0,C_1,C_2\), not sampled values
+of the expanded monomial form.  For matrix-valued objects, each \(C_j\) is a
+finite real matrix for \code{dpmat}, or a YALMIP affine matrix expression for
+\code{dpvar}.
+
+For tensor grids, a local Bernstein coefficient label is a row vector.  For
+example, a two-parameter degree-one cell has labels
+\([0,0]\), \([0,1]\), \([1,0]\), and \([1,1]\).  Each label selects one
+tensor-product Bernstein basis term, one local index per parameter direction.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[x=1.15cm,y=1.0cm,>=Latex]
+    \draw[-{Latex}] (-0.2,0) -- (5.5,0) node[right] {\(\rho\)};
+    \draw[-{Latex}] (0,-0.2) -- (0,3.1) node[above] {value};
+    \draw[black!35] (0.7,0) -- (0.7,-0.12) node[below] {\(\rho_i\)};
+    \draw[black!35] (4.7,0) -- (4.7,-0.12) node[below] {\(\rho_{i+1}\)};
+    \draw[blue!70!black,thick] (0.7,0.8) -- (4.7,2.0)
+      node[pos=0.72,above] {\(A(\rho)\)};
+    \draw[green!50!black,thick] (0.7,2.4) -- (4.7,1.0)
+      node[pos=0.68,below] {\(B(\rho)\)};
+    \draw[red!70!black,thick,domain=0.7:4.7,smooth,variable=\x]
+      plot ({\x},{0.62 + 0.47*(\x-0.7) - 0.07*(\x-0.7)^2})
+      node[right] {\(A(\rho)B(\rho)\)};
+  \end{tikzpicture}
+  \caption{Local Bernstein multiplication raises polynomial degree.}
+  \label{fig:bernstein-product}
+\end{figure}
+
+\subsection{Multiplication, Degree Growth, And Convolution}
+\label{sec:bernstein-product}
+
+Multiplication raises Bernstein degree.  In one parameter, multiplying two
+degree-one factors gives a degree-two product:
+\[
+  \bigl(a A_0 + (1-a)A_1\bigr)
+  \bigl(a B_0 + (1-a)B_1\bigr)
+  =
+  a^2 A_0B_0
+  + a(1-a)(A_0B_1 + A_1B_0)
+  + (1-a)^2 A_1B_1.
+\]
+Because the degree-two Bernstein middle basis is \(2a(1-a)\), the stored middle
+coefficient is \((A_0B_1 + A_1B_0)/2\).
+
+This is not a special rule for linear factors.  If \(B_i^m(a)\) denotes the
+\(i\)-th Bernstein basis function of degree \(m\), then
+\[
+  B_i^m(a) B_j^n(a)
+  =
+  \frac{\binom{m}{i}\binom{n}{j}}{\binom{m+n}{i+j}}
+  B_{i+j}^{m+n}(a).
+\]
+For coefficient arrays this is a convolution over coefficient labels.  In one
+parameter,
+\[
+  C_k
+  =
+  \sum_{\substack{i+j=k\\0\le i\le m,\ 0\le j\le n}}
+  A_i B_j
+  \frac{\binom{m}{i}\binom{n}{j}}{\binom{m+n}{k}},
+  \qquad k=0,\ldots,m+n.
+\]
+In \(\ell\) parameters, replace the scalar labels \(i,j,k\) by multi-indices
+\(\alpha,\beta,\gamma\), use \(\alpha+\beta=\gamma\), and multiply the binomial
+scale over parameter directions:
+\[
+  C_\gamma =
+  \sum_{\alpha+\beta=\gamma}
+  A_\alpha B_\beta
+  \prod_{r=1}^{\ell}
+  \frac{\binom{m}{\alpha_r}\binom{n}{\beta_r}}
+       {\binom{m+n}{\gamma_r}}.
+\]
+This is the coefficient rule used by \code{dpmat * dpmat} and by supported
+known-data products involving \code{dpvar}.
+
+\subsection{Degree Elevation And Polynomial Representation}
+\label{sec:bernstein-elevation}
+
+A polynomial represented in Bernstein degree \(m\) can also be represented in
+any higher degree \(M\ge m\).  In one parameter, the elevated coefficient
+\(\widehat C_k\) of degree \(M\) is
+\[
+  \widehat C_k =
+  \sum_{i=\max(0,k-(M-m))}^{\min(m,k)}
+  C_i
+  \frac{\binom{m}{i}\binom{M-m}{k-i}}{\binom{M}{k}},
+  \qquad k=0,\ldots,M.
+\]
+Tensor grids apply the same formula by tensor product over each parameter
+direction.  The package uses degree elevation when two coefficient-backed
+objects with the same grid bounds but different Bernstein degree must be
+combined by addition, subtraction, concatenation, assignment, or other
+coefficient-wise operations.
+
+\subsection{Storage And Hypercube Traversal}
+\label{sec:bernstein-storage}
+
+The physical grid and the local Bernstein labels are separate.  For
+\(\ell\) parameters with node counts \(N_1,\ldots,N_\ell\), the number of
+physical hypercubes is
+\[
+  \prod_{r=1}^{\ell}(N_r-1).
+\]
+For Bernstein degree \(m\), each physical hypercube stores
+\[
+  (m+1)^\ell
+\]
+local coefficients.  The helper ordering used by \code{cells} and \code{lbls}
+is lexicographic with earlier dimensions varying more slowly.
+
+\examplehead
+The storage counts follow directly from the physical grid and the local
+Bernstein degree.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1 2], [10 20]}, {1 2; 3 4; 5 6}, Degree=1);
+A.ncell()
+A.ncoeff()
+A.npar()
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     2
+
+ans =
+     4
+
+ans =
+     2
+\end{lstlisting}
+
+The same object exposes the local Bernstein labels and physical-cell traversal
+order used throughout the package.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1 2], [10 20]}, {1 2; 3 4; 5 6}, Degree=1);
+A.lbls()
+A.cells()
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     0     0
+     0     1
+     1     0
+     1     1
+
+ans =
+     1     1
+     2     1
+\end{lstlisting}
+
+For a short coefficient display, \code{bernsteinTable(A, "oneLine")} prints the local
+Bernstein expression instead of every metadata column:
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {1, 3}, Degree=1);
+T = bernsteinTable(A, "oneLine");
+disp(T)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+    CellSubscript      Expression
+    _____________    _______________
+
+        {[1]}        "a*1 + (1-a)*3"
+\end{lstlisting}
+
+\section{Installation, Verification, And Lookup}
+\label{sec:setup}
+
+\subsection{Installation}
+\label{sec:installation}
 
 Start \matlab{} in the repository root, or set \code{projectRoot} to the
 absolute path of the checked-out repository.  Add the package recursively, then
@@ -100,1872 +323,1832 @@ addpath(genpath(projectRoot));
 rmpath(genpath(fullfile(projectRoot, "doc")));
 \end{lstlisting}
 
-For local development from the repository root, the shorter form is enough:
+For local work from the repository root, this package also resolves from:
 
 \begin{lstlisting}[style=dpmatlab]
 addpath(pwd)
 \end{lstlisting}
 
-\subsection{Run The Current Test Suite}
+\subsection{Verification}
+\label{sec:verification}
 
-The current verification entry point runs the tests for \code{+helper},
-\code{@dpbase}, \code{@dpmat}, \code{@dpvar}, and \code{@dplmi}.  The
-\code{@dpvar} and \code{@dplmi} tests require YALMIP to be available on the
-\matlab{} path.  Solver smoke tests use installed YALMIP solvers; they prefer
-MOSEK when available and fall back to \code{lmilab} otherwise.
+Run the current MATLAB test entry point from the repository root:
 
 \begin{lstlisting}[style=dpmatlab]
-results = tests.run_all;
-table(results)
+results = tests.run_all();
 \end{lstlisting}
 
-Expected result: all currently implemented tests pass.  The suite covers helper
-validation, \code{dpbase} construction, grid metadata, local storage, label
-ordering, rate-bound validation, and current \code{dpmat} construction,
-evaluation, algebra, display, plotting, matrix operations, indexing,
-assignment, structural transforms, and error boundaries.  It also covers the
-current \code{dpvar} constructor, continuity-by-shared-coefficients behavior,
-affine algebra, mixed known/decision products, matrix operations, indexing,
-assignment, \code{rhodiff} rate-vertex derivative storage, and validation
-boundaries.  The \code{dplmi} tests cover comparison overloads,
-coefficient-wise constraint assembly, rate-vertex enumeration, \code{toYalmip},
-reserved relaxation/Polya option errors, and small solver-facing smoke
-examples.  Full relaxation-lemma assembly, Polya assembly, theorem residual
-margins, strictness margins, and solver diagnostics are not implemented yet.
+The test entry point covers helper utilities, \code{dpbase}, \code{dpmat},
+\code{dpvar}, and \code{dplmi}.  The YALMIP-backed \code{dpvar} and
+\code{dplmi} tests require YALMIP.  Solver smoke tests additionally require an
+SDP solver.
 
-\section{Quick Start}
-
-Most users should start with \code{dpmat} for known parameter-dependent data
-and \code{dpvar} for YALMIP-backed decision expressions.  Both classes extend
-the shared \code{dpbase} backend, so they expose common grid, cell, label, and
-coefficient-inspection methods; ordinary modeling code should not need to
-construct raw \code{dpbase} objects.
-
-\subsection{A Known Matrix On A Scalar Grid}
+\subsection{Quick Start}
+\label{sec:quick-start}
 
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {2, 4}, Degree=1);
-
-A.MatrixSize
-A.Degree
-A.SourceSummary
-A.evaluate(0.25)
-C = A + 5;
-C.coeffs(1)
-T = table(C);
-T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
-A.cells()
-A.lbls()
+A = dpmat({[0 1]}, {1, 3}, Degree=1);
+T = bernsteinTable(A, "oneLine");
+disp(T)
 \end{lstlisting}
-
-Expected structural outputs:
 
 \begin{lstlisting}[style=dpoutput]
-MatrixSize =
-     1     1
+    CellSubscript      Expression
+    _____________    _______________
 
-Degree =
-     1
-
-SourceSummary =
-    "coefficient-backed"
-
-A.evaluate(0.25) -> 2.5
-C.coeffs(1)      -> {7, 9}
-
-table(C) =
-  2x4 table
-
-    TermIndex    LocalIndex     Basis     Value
-    _________    __________    _______    _____
-
-        1          {[0]}       "a"        {[7]}
-        2          {[1]}       "(1-a)"    {[9]}
-
-cells() =
-     1
-
-lbls() =
-     0
-     1
+        {[1]}        "a*1 + (1-a)*3"
 \end{lstlisting}
-
-The expression \code{A + 5} returns another coefficient-backed \code{dpmat} on
-the same grid.  The \code{cells}, \code{lbls}, and \code{coeffs} methods come
-from the shared \code{dpbase} backend, but the user-facing object remains a
-\code{dpmat}.
-
-\subsection{A Known Matrix On A Tensor Grid}
 
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
-
-A.GridInfo.Points
-A.cells()
-A.lbls()
-A.coeffs([1 1])
-T = table(A);
-T(:, ["TermIndex", "CellSubscript", "LocalIndex", "Value"])
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric");
+C = P >= 0;
+F = toYalmip(C);
 \end{lstlisting}
 
-Expected structural outputs:
+\code{F} can be passed to ordinary YALMIP calls, for example:
 
-\begin{lstlisting}[style=dpoutput]
-GridInfo.Points =
-     0    10
-     0    20
-     1    10
-     1    20
-
-cells() =
-     1     1
-
-lbls() =
-     0     0
-     0     1
-     1     0
-     1     1
-
-A.coeffs([1 1]) -> {1, 3, 5, 7}
-
-table(A) =
-  4x4 table
-
-    TermIndex    CellSubscript    LocalIndex    Value
-    _________    _____________    __________    _____
-
-        1           {[1 1]}        {[0 0]}      {[1]}
-        2           {[1 1]}        {[0 1]}      {[3]}
-        3           {[1 1]}        {[1 0]}      {[5]}
-        4           {[1 1]}        {[1 1]}      {[7]}
+\begin{lstlisting}[style=dpsyntax]
+sol = optimize(F, objective, opts);
 \end{lstlisting}
 
-The first parameter index varies more slowly than the second.  This row order
-is used consistently for physical cells and local Bernstein labels across
-\code{dpmat} and \code{dpvar}, because both inherit the same backend storage
-contract.
+\subsection{Global Function Lookup}
+\label{sec:global-lookup}
 
-\subsection{A Function-Backed Known Matrix}
+\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\toprule
+Category & Entries \\
+\midrule
+Backend &
+\hyperref[sec:dpbase]{\code{dpbase}},
+\hyperref[sec:dpbase-constructor]{constructor},
+\hyperref[sec:dpbase-inspection]{\code{cells}},
+\hyperref[sec:dpbase-inspection]{\code{lbls}},
+\hyperref[sec:dpbase-inspection]{\code{coeffs}},
+\hyperref[sec:dpbase-counts]{\code{ncell}},
+\hyperref[sec:dpbase-counts]{\code{ncoeff}},
+\hyperref[sec:dpbase-counts]{\code{npar}},
+\hyperref[sec:dpbase-counts]{\code{size}} \\
+Known data &
+\hyperref[sec:dpmat]{\code{dpmat}},
+\hyperref[sec:dpmat-construction]{construction},
+\hyperref[sec:dpmat-evaluate]{\code{evaluate}},
+\hyperref[sec:dpmat-table]{\code{bernsteinTable}},
+\hyperref[sec:dpmat-display]{\code{disp}/\code{display}},
+\hyperref[sec:dpmat-plot]{\code{plot}},
+\hyperref[sec:dpmat-algebra]{operators},
+\hyperref[sec:dpmat-matrix-ops]{matrix methods} \\
+Decision variables &
+\hyperref[sec:dpvar]{\code{dpvar}},
+\hyperref[sec:dpvar-construction]{construction},
+\hyperref[sec:dpvar-rhodiff]{\code{rhodiff}},
+\hyperref[sec:dpvar-algebra]{affine/mixed algebra},
+\hyperref[sec:dpvar-matrix-ops]{matrix methods},
+\hyperref[sec:dpvar-comparison]{comparisons} \\
+LMIs &
+\hyperref[sec:dplmi]{\code{dplmi}},
+\hyperref[sec:dplmi-construction]{construction},
+\hyperref[sec:dplmi-direct]{direct coefficient assembly},
+\hyperref[sec:dplmi-toyalmip]{\code{toYalmip}},
+\hyperref[sec:examples]{solver examples} \\
+\bottomrule
+\end{tabularx}
 
-\begin{lstlisting}[style=dpmatlab]
-F = dpmat({[0 pi]}, @(rho) sin(rho));
+\section{\texorpdfstring{\code{dpbase}}{dpbase} Backend Reference}
+\label{sec:dpbase}
 
-F.SourceSummary
-F.evaluate(pi/2)
-F.coeffs(1)
-\end{lstlisting}
+\code{dpbase} is the developer-facing backend parent for \code{dpmat} and
+\code{dpvar}.  Ordinary users should model known data with \code{dpmat} and
+decision expressions with \code{dpvar}.  This section documents \code{dpbase}
+because it explains the shared storage, traversal, and inspection contract used
+by both public modeling classes.
 
-Expected outputs:
+\subsection{Lookup}
+\label{sec:dpbase-lookup}
 
-\begin{lstlisting}[style=dpoutput]
-SourceSummary =
-    "function"
+\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\toprule
+Task & Function or field \\
+\midrule
+Create backend object &
+\hyperref[sec:dpbase-constructor]{\code{dpbase}} \\
+Inspect cells/labels &
+\hyperref[sec:dpbase-inspection]{\code{cells}},
+\hyperref[sec:dpbase-inspection]{\code{lbls}},
+\hyperref[sec:dpbase-inspection]{\code{coeffs}} \\
+Count sizes &
+\hyperref[sec:dpbase-counts]{\code{ncell}},
+\hyperref[sec:dpbase-counts]{\code{ncoeff}},
+\hyperref[sec:dpbase-counts]{\code{npar}},
+\hyperref[sec:dpbase-counts]{\code{size}} \\
+Read storage fields &
+\hyperref[sec:dpbase-fields]{\code{GridInfo}},
+\hyperref[sec:dpbase-fields]{\code{LocalValues}},
+\hyperref[sec:dpbase-fields]{metadata fields} \\
+\bottomrule
+\end{tabularx}
 
-F.evaluate(pi/2) -> 1
-F.coeffs(1)      -> {0, 0}
-\end{lstlisting}
+\subsection{\texorpdfstring{\code{dpbase}}{dpbase} Constructor}
+\label{sec:dpbase-constructor}
 
-Function-backed \code{dpmat} objects without an explicit \code{Degree} keep the
-exact function handle for evaluation.  The inherited local coefficients are
-placeholder zeros used only to satisfy shared \code{dpbase} storage; they are
-not Bernstein evidence and cannot enter coefficient algebra.
-
-\subsection{A Continuous Decision Variable}
-
-\begin{lstlisting}[style=dpmatlab]
-P = dpvar(2, {[0 1 2]}, "symmetric");
-
-P.MatrixSize
-P.Degree
-P.IsContinuous
-P.ContainsDecision
-left = P.coeffs(1);
-right = P.coeffs(2);
-isequal(getvariables(left{2}), getvariables(right{1}))
-\end{lstlisting}
-
-Expected structural outputs:
-
-\begin{lstlisting}[style=dpoutput]
-MatrixSize =
-     2     2
-
-Degree =
-     1
-
-IsContinuous    -> true
-ContainsDecision-> true
-shared boundary -> true
-\end{lstlisting}
-
-\code{dpvar} creates YALMIP decision coefficients on the global grid nodes and
-reuses the same coefficient handles in adjacent physical cells.  Continuity is
-therefore built into storage; no equality LMI is added by the constructor.
-
-\section{Bernstein And Grid Background}
-
-\subsection{One Cell, Local Coordinates}
-
-On one physical interval \([\rho_0,\rho_1]\), the package uses the normalized
-coordinate
-\[
-  \alpha = \frac{\rho_1-\rho}{\rho_1-\rho_0},
-  \qquad 0 \leq \alpha \leq 1.
-\]
-A degree-\(m\) Bernstein polynomial is written as
-\[
-  P(\alpha) = \sum_{i=0}^{m} C_i B_i^m(\alpha),
-  \qquad
-  B_i^m(\alpha) = \binom{m}{i}\alpha^{m-i}(1-\alpha)^i.
-\]
-For matrix-valued data, each coefficient \(C_i\) is a matrix with the same
-payload size.  \code{dpbase} stores those matrices as one flat coefficient
-cell for each physical grid cell.
-
-\begin{center}
-\begin{tikzpicture}[x=4.2cm,y=2.1cm,>=Latex]
-  \draw[->] (-0.05,0) -- (1.12,0) node[right] {$\rho$};
-  \draw[thick] (0,0) -- (1,0);
-  \draw[fill=black] (0,0) circle (1.3pt) node[below] {$\rho_0$};
-  \draw[fill=black] (1,0) circle (1.3pt) node[below] {$\rho_1$};
-  \draw[blue!65!black,thick] (0,0.35) -- (1,0.95);
-  \node[blue!65!black,above] at (0,0.35) {$C_0$};
-  \node[blue!65!black,above] at (1,0.95) {$C_1$};
-  \node at (0.5,-0.38) {one physical cell, two degree-1 local labels};
-\end{tikzpicture}
-\end{center}
-
-Degree one is the line-segment case.  It is useful intuition for
-piecewise-linear \code{dpmat} data and for the current degree-1 \code{dpvar}
-constructor, but Bernstein storage is not limited to splines.
-
-\subsection{Quadratic And Higher-Degree Bases}
-
-For degree two, one cell has three local labels \(0,1,2\):
-\[
-  P(\alpha) =
-  C_0\alpha^2 + 2C_1\alpha(1-\alpha) + C_2(1-\alpha)^2.
-\]
-The middle coefficient \(C_1\) controls the interior Bernstein basis function,
-not an extra physical grid node.  The physical interval still has two endpoints;
-the polynomial degree controls how many local coefficient labels live inside
-that cell.
-
-\begin{center}
-\begin{tikzpicture}[x=6.0cm,y=2.8cm,>=Latex]
-  \draw[->] (-0.04,0) -- (1.08,0) node[right] {$\alpha$};
-  \draw[->] (0,-0.04) -- (0,1.12) node[above] {$B_i^2$};
-  \draw[gray!35] (0,0) grid[xstep=0.25,ystep=0.25] (1,1);
-  \draw[blue!70!black,thick,domain=0:1,samples=80]
-    plot (\x,{(\x)^2});
-  \draw[green!45!black,thick,domain=0:1,samples=80]
-    plot (\x,{2*(\x)*(1-\x)});
-  \draw[red!70!black,thick,domain=0:1,samples=80]
-    plot (\x,{(1-\x)^2});
-  \node[blue!70!black] at (0.82,0.78) {$B_0^2$};
-  \node[green!45!black] at (0.50,0.62) {$B_1^2$};
-  \node[red!70!black] at (0.18,0.78) {$B_2^2$};
-  \node[below] at (0,0) {$0$};
-  \node[below] at (1,0) {$1$};
-\end{tikzpicture}
-\end{center}
-
-The same pattern extends to any degree \(m\).  A cubic cell stores four
-coefficient labels \(0,1,2,3\), a quartic cell stores five, and so on.  The
-labels are local to the current physical cell; adjacent cells have their own
-local coefficient cells even when continuous objects share boundary handles.
-
-\subsection{Products And Degree Growth}
-
-Multiplication is the main reason the package treats Bernstein labels as
-coefficient data rather than as samples.  On one cell, multiplying two
-degree-1 factors produces a degree-2 polynomial:
-\[
-\begin{aligned}
-  P(\alpha) &= \alpha P_0 + (1-\alpha)P_1,\\
-  Q(\alpha) &= \alpha Q_0 + (1-\alpha)Q_1,\\
-  P(\alpha)Q(\alpha)
-    &= B_0^2 P_0Q_0
-     + B_1^2 \frac{P_0Q_1 + P_1Q_0}{2}
-     + B_2^2 P_1Q_1.
-\end{aligned}
-\]
-
-\begin{center}
-\begin{tikzpicture}[x=6.2cm,y=1.85cm,>=Latex]
-  \draw[->] (-0.04,0) -- (1.08,0) node[right] {$\alpha$};
-  \draw[->] (0,-0.08) -- (0,1.55) node[above] {value};
-  \draw[gray!30] (0,0) grid[xstep=0.25,ystep=0.25] (1,1.5);
-  \draw[blue!65!black,thick] (0,0.25) -- (1,1.30);
-  \draw[orange!85!black,thick] (0,1.30) -- (1,0.25);
-  \draw[purple!70!black,very thick,domain=0:1,samples=80]
-    plot (\x,{(0.25 + 1.05*\x)*(1.30 - 1.05*\x)});
-  \draw[purple!45!black,dashed] (0,0.325) -- (0.5,0.876) -- (1,0.325);
-  \fill[purple!70!black] (0,0.325) circle (1.4pt)
-    node[left] {\scriptsize $P_1Q_1$};
-  \fill[purple!70!black] (0.5,0.876) circle (1.4pt)
-    node[above] {\scriptsize $\frac{P_0Q_1+P_1Q_0}{2}$};
-  \fill[purple!70!black] (1,0.325) circle (1.4pt)
-    node[right] {\scriptsize $P_0Q_0$};
-  \node[blue!65!black] at (0.82,1.42) {$P$};
-  \node[orange!85!black] at (0.18,1.42) {$Q$};
-  \node[purple!70!black] at (0.52,0.48) {$PQ$};
-  \node[below] at (0,0) {$0$};
-  \node[below] at (1,0) {$1$};
-\end{tikzpicture}
-\end{center}
-
-The dashed purple control polygon is not another sampled curve.  It marks the
-three degree-2 Bernstein coefficients of the product.  The middle coefficient
-is higher than the curve value at \(\alpha=1/2\) because the basis function
-\(B_1^2(\alpha)=2\alpha(1-\alpha)\) already carries a factor of two.
-
-For general scalar degrees \(n\) and \(m\),
-\[
-  P(\alpha) = \sum_i P_i B_i^n(\alpha),
-  \qquad
-  Q(\alpha) = \sum_j Q_j B_j^m(\alpha),
-\]
-and
-\[
-  P(\alpha)Q(\alpha) =
-  \sum_{k=0}^{n+m} R_k B_k^{n+m}(\alpha),
-\]
-where
-\[
-  R_k =
-  \sum_{i+j=k} P_iQ_j
-  \frac{\binom{n}{i}\binom{m}{j}}{\binom{n+m}{k}}.
-\]
-This is coefficient convolution with Bernstein binomial normalization.  An
-equivalent way to see the same rule, matching the source note
-\code{DLMI with Berstain Polynomial.pdf}, is to first absorb the binomial
-weights into the coefficient vectors:
-\[
-  \widehat P_i = \binom{n}{i}P_i,\qquad
-  \widehat Q_j = \binom{m}{j}Q_j.
-\]
-Then the weighted product coefficients are the ordinary discrete convolution
-\[
-  \widehat R_k
-  = (\widehat P * \widehat Q)_k
-  = \sum_{i+j=k}\widehat P_i\widehat Q_j,
-\]
-and the Bernstein coefficients used by the package are recovered by dividing
-back by the degree-\(n+m\) binomial weight:
-\[
-  R_k = \frac{\widehat R_k}{\binom{n+m}{k}}.
-\]
-For the linear case, the unnormalized convolution is simply
-\[
-  [P_0,P_1] * [Q_0,Q_1]
-  =
-  [P_0Q_0,\ P_0Q_1+P_1Q_0,\ P_1Q_1],
-\]
-and the middle Bernstein coefficient is divided by \(\binom{2}{1}=2\).
-For example, if \(P\) has degree two and \(Q\) has degree three, then the
-degree-five coefficient with label \(k=2\) is
-\[
-  R_2 =
-  \frac{3}{10}P_0Q_2
-  + \frac{6}{10}P_1Q_1
-  + \frac{1}{10}P_2Q_0.
-\]
-This is the binomial-normalized convolution used by coefficient-backed
-\code{dpmat} multiplication and by mixed known/decision products that remain
-affine in YALMIP variables.
-
-For tensor-product Bernstein polynomials, the same convolution happens over
-multi-indices.  If \(p\), \(q\), and \(k\) are local labels, then product
-terms contribute only when \(p+q=k\), and the one-dimensional binomial ratios
-multiply axis by axis:
-\[
-  R_k =
-  \sum_{p+q=k} P_pQ_q
-  \prod_{r=1}^{\ell}
-  \frac{\binom{n}{p_r}\binom{m}{q_r}}
-       {\binom{n+m}{k_r}}.
-\]
-Thus two multilinear \(2\times2\) coefficient arrays in two parameters become
-one \(3\times3\) degree-2 coefficient array.  This is the tensor version of
-the same coefficient convolution, not a multiplication of physical grid
-samples.
-
-\subsection{Tensor-Product Labels}
-
-For \(\ell\) parameter dimensions and scalar degree \(m\), each local label is
-an \(\ell\)-tuple in \(\{0,\ldots,m\}^{\ell}\).  The number of local
-coefficients per physical cell is
-\[
-  (m+1)^\ell.
-\]
-For example, \(\ell=2\) and \(m=1\) gives labels
-\[
-  (0,0),\ (0,1),\ (1,0),\ (1,1),
-\]
-which is exactly the order returned by \code{obj.lbls()}.
-
-\begin{center}
-\begin{tikzpicture}[x=1.45cm,y=1.15cm,>=Latex]
-  \draw[step=1,gray!50] (0,0) grid (3,2);
-  \foreach \x/\lab in {0/\rho_0,1/\rho_1,2/\rho_2,3/\rho_3} {
-    \draw[fill=black] (\x,0) circle (1pt);
-    \node[below] at (\x,0) {$\lab$};
-  }
-  \foreach \y/\lab in {0/\eta_0,1/\eta_1,2/\eta_2} {
-    \draw[fill=black] (0,\y) circle (1pt);
-    \node[left] at (0,\y) {$\lab$};
-  }
-  \node at (0.5,0.5) {$(1,1)$};
-  \node at (1.5,0.5) {$(2,1)$};
-  \node at (2.5,0.5) {$(3,1)$};
-  \node at (0.5,1.5) {$(1,2)$};
-  \node at (1.5,1.5) {$(2,2)$};
-  \node at (2.5,1.5) {$(3,2)$};
-  \node[align=center] at (1.5,-0.85) {physical tensor-grid cells};
-
-  \begin{scope}[shift={(5.0,0.25)},x=1.0cm,y=1.0cm]
-    \draw[thick] (0,0) rectangle (1,1);
-    \draw[fill=blue!70!black] (0,0) circle (1.6pt);
-    \draw[fill=blue!70!black] (0,1) circle (1.6pt);
-    \draw[fill=blue!70!black] (1,0) circle (1.6pt);
-    \draw[fill=blue!70!black] (1,1) circle (1.6pt);
-    \node[anchor=east] at (-0.08,0) {$(0,0)$};
-    \node[anchor=east] at (-0.08,1) {$(0,1)$};
-    \node[anchor=west] at (1.08,0) {$(1,0)$};
-    \node[anchor=west] at (1.08,1) {$(1,1)$};
-    \node[align=center] at (0.5,-0.55) {local labels\\inside one cell};
-  \end{scope}
-\end{tikzpicture}
-\end{center}
-
-Tensor-product multiplication adds labels component-wise.  In two dimensions,
-a label \((i_1,i_2)\) from degree \(n\) and a label \((j_1,j_2)\) from degree
-\(m\) contribute to result label
-\[
-  (k_1,k_2) = (i_1+j_1,\ i_2+j_2),
-\]
-with a scale factor that is the product of the one-dimensional binomial ratios.
-For three parameters, the same rule applies to triples such as
-\((i_1,i_2,i_3)+(j_1,j_2,j_3)\).  This is why a degree-1 object over a
-three-dimensional parameter grid has \(2^3=8\) local coefficient labels per
-physical cell.
-
-\subsection{Data Layout Seen From MATLAB}
-
-The physical grid and the local Bernstein labels are separate.  A two-parameter
-\code{dpmat} with a degree-1 global coefficient grid stores four local
-coefficients per physical cell:
-
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
-
-A.npar()
-A.ncell()
-A.ncoeff()
-A.lbls()
-A.coeffs([1 1])
-A.evaluate([0.25, 12.5])
-\end{lstlisting}
-
-Expected structural outputs:
-
-\begin{lstlisting}[style=dpoutput]
-npar()   -> 2
-ncell()  -> 1
-ncoeff() -> 4
-
-lbls() =
-     0     0
-     0     1
-     1     0
-     1     1
-
-coeffs([1 1])-> {1, 3, 5, 7}
-evaluate([0.25 12.5]) -> 2.5
-\end{lstlisting}
-
-A degree-2 scalar cell stores three coefficients and evaluates with the
-quadratic basis shown above.
-
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {1, 2, 4}, Degree=2);
-
-A.Degree
-A.ncoeff()
-A.evaluate(0.5)
-\end{lstlisting}
-
-Expected output:
-
-\begin{lstlisting}[style=dpoutput]
-Degree   -> 2
-ncoeff() -> 3
-evaluate(0.5) -> 2.25
-\end{lstlisting}
-
-The current \code{dpvar} constructor is degree one, but it uses the same
-cell-local label ordering and tensor-grid storage.
-
-\begin{lstlisting}[style=dpmatlab]
-P = dpvar(1, {[0 1], [10 20]});
-
-P.Degree
-P.ncoeff()
-P.lbls()
-\end{lstlisting}
-
-Expected structural output:
-
-\begin{lstlisting}[style=dpoutput]
-Degree   -> 1
-ncoeff() -> 4
-
-lbls() =
-     0     0
-     0     1
-     1     0
-     1     1
-\end{lstlisting}
-
-\section{\texorpdfstring{\code{dpbase}}{dpbase} Backend Architecture}
-
-\subsection{Purpose}
-
-\code{dpbase} is the shared backend parent class for gridded DP-LMI objects.
-\code{dpmat} and \code{dpvar} extend from it: \code{dpmat} adds known numeric
-data and exact evaluation, while \code{dpvar} adds YALMIP-backed decision
-coefficients and affine expression behavior.  Ordinary user workflows should
-construct \code{dpmat} and \code{dpvar}, not raw \code{dpbase} objects.
-
-The purpose of this section is architectural.  It explains why \code{dpmat}
-and \code{dpvar} expose the same grid, cell, local-label, coefficient, and
-metadata inspection behavior.  The parent class stores tensor-grid metadata,
-matrix payload size, Bernstein degree, nested physical-cell coefficient data,
-and rate-dependence metadata.
-
-\subsection{Backend Constructor Contract}
-
-The raw constructor is mainly useful for implementation, tests, and reading
-the inherited storage contract.  It is not the recommended modeling entry
-point.
-
-\begin{lstlisting}[style=dpmatlab]
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
 obj = dpbase(gridVectors, matrixSize, degree)
 obj = dpbase(gridVectors, matrixSize, degree, localValues)
-obj = dpbase(gridVectors, matrixSize, degree, localValues, Name=Value)
+obj = dpbase(..., IsContinuous=tf)
+obj = dpbase(..., ContainsDecision=tf)
+obj = dpbase(..., HasRateDependence=tf)
+obj = dpbase(..., RateBounds=rb)
+obj = dpbase(..., SourceSummary=txt)
 \end{lstlisting}
 
-\subsection{Backend Inputs}
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{gridVectors} is a cell vector with one strictly increasing node
+        vector per parameter, such as \code{\{[0 1 2], [10 20]\}}.
+  \item \code{matrixSize} is a positive two-element matrix size, such as
+        \code{[2 2]}.
+  \item \code{degree} is a nonnegative integer Bernstein degree, such as
+        \code{1}.
+  \item \code{localValues} is the nested physical-cell storage.  When omitted,
+        \code{dpbase} creates a zero coefficient-backed object.
+  \item \code{RateBounds} is empty or an \(\ell\times2\) matrix of finite lower
+        and upper rate bounds, such as \code{RateBounds=[-1 1; -2 2]}.
+\end{itemize}
 
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-Input & Description \\
-\midrule
-\code{gridVectors} &
-Nonempty cell array of grid node vectors.  Each vector must be finite, real,
-strictly increasing, numeric, and contain at least two nodes. \\
-\code{matrixSize} &
-\code{1x2} positive integer vector giving the row and column size of every
-coefficient payload. \\
-\code{degree} &
-Nonnegative integer scalar Bernstein degree. \\
-\code{localValues} &
-Optional nested cell payload.  If omitted or empty, \code{dpbase} creates zero
-numeric coefficient matrices for every local coefficient of every physical
-cell. \\
-\bottomrule
-\end{tabularx}
-
-\subsection{Backend Metadata Options}
-
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.3\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-Option & Description \\
-\midrule
-\code{IsContinuous} &
-Logical metadata flag.  \code{dpbase} records the flag but does not enforce
-boundary sharing itself.  Subclasses such as \code{dpvar} own continuity
-construction. \\
-\code{ContainsDecision} &
-Logical metadata flag used by decision-variable subclasses such as
-\code{dpvar}. \\
-\code{HasRateDependence} &
-Logical metadata flag.  If true, nonempty \code{RateBounds} must be supplied. \\
-\code{RateBounds} &
-Empty, or an \(\ell \times 2\) finite real matrix with lower bounds in column
-one and upper bounds in column two.  The number of rows must match the number
-of parameter dimensions. \\
-\code{SourceSummary} &
-String metadata describing the coefficient source.  The default is
-\code{"coefficient-backed"}. \\
-\bottomrule
-\end{tabularx}
-
-\subsection{Inherited Inspection Properties}
-
-All public properties have private set access.  Users normally inspect these
-properties through \code{dpmat} or \code{dpvar} objects with ordinary dot
-access, for example \code{A.Degree}, \code{P.GridInfo.Vectors\{1\}}, or
-\code{D.LocalValues\{1\}}.  They cannot assign to these properties after
-construction.  This read-only surface is intentional: the constructor and
-algebra methods keep grid size, coefficient count, continuity metadata, and
-rate metadata synchronized, while still leaving enough state visible for
-debugging, examples, and solver handoff checks.
-
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}@{\hspace{0.02\linewidth}}>{\raggedright\arraybackslash}p{0.60\linewidth}@{}}
-\toprule
-Property & Meaning \\
-\midrule
-\code{GridInfo} &
-Struct with fields \code{Vectors}, \code{Points}, \code{Bounds}, and
-\code{NumNodes}.  Use \code{obj.GridInfo.Vectors\{k\}} for the \(k\)-th grid
-vector, \code{obj.GridInfo.Points} for tensor-product grid-node rows,
-\code{obj.GridInfo.Bounds(k,:)} for physical parameter bounds, and
-\code{obj.GridInfo.NumNodes(k)} for the node count in one dimension. \\
-\code{MatrixSize} & Matrix payload size stored as a \code{1x2} vector. \\
-\code{Degree} & Bernstein degree. \\
-\code{LocalValues} &
-Nested physical-cell storage.  A tensor grid uses nested brace access, for
-example \code{LocalValues\{i1\}} followed by \code{\{i2\}} and later dimensions;
-each leaf stores a flat coefficient cell, or a rate-row-by-coefficient cell
-array after \code{rhodiff}.  Prefer \code{obj.coeffs(cellSubs)} for ordinary
-coefficient inspection because it hides the nested traversal. \\
-\code{IsContinuous} & Continuity metadata flag. \\
-\code{ContainsDecision} & Decision-dependence metadata flag. \\
-\code{HasRateDependence} & True when rate metadata or rate-affine payloads are present. \\
-\code{RateBounds} & Empty or an \(\ell \times 2\) finite real rate-bound table. \\
-\code{SourceSummary} & String metadata for the coefficient source. \\
-\bottomrule
-\end{tabular}
-
-\subsection{Inherited Inspection Methods}
-
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.31\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-Method & Behavior \\
-\midrule
-\code{size(obj)} &
-Return the matrix payload size.  \code{size(obj,dim)} follows ordinary matrix
-behavior for dimensions beyond two by returning one. \\
-\code{npar(obj)} & Return the number of parameter dimensions. \\
-\code{ncell(obj)} & Return the number of physical tensor-grid cells. \\
-\code{ncoeff(obj)} & Return the number of local Bernstein coefficients per cell. \\
-\code{cells(obj)} & Enumerate physical-cell subscripts in flat row order. \\
-\code{lbls(obj)} & Enumerate local Bernstein labels in flat row order. \\
-\code{coeffs(obj,cellSubs)} &
-Return the flat coefficient cell for one physical cell.  \code{cellSubs} can be
-a numeric row vector or a cell array with one physical-cell index per parameter.
-\\
-\bottomrule
-\end{tabularx}
-
-\subsection{Backend Local-Storage Example}
-
-The examples below show the parent storage contract for readers who need to
-understand inherited behavior or implementation tests.  They are not the
-recommended starting point for modeling; use \code{dpmat} for known data and
-\code{dpvar} for decision expressions.
-
-For a one-dimensional grid with two physical cells and degree two, each
-physical cell stores three local coefficients.
+\examplehead
+This backend example constructs a two-parameter parent object.  The object has
+two physical cells because the first parameter has two intervals and the second
+parameter has one interval.
 
 \begin{lstlisting}[style=dpmatlab]
-localValues = {{11, 12, 13}, {21, 22, 23}};
-obj = dpbase({[0 1 2]}, [1 1], 2, localValues);
-
-obj.coeffs(2)
-obj.coeffs({1})
+obj = dpbase({[0 1 2], [10 20]}, [2 2], 1);
+class(obj)
+obj.MatrixSize
+obj.Degree
+obj.ncell()
+obj.ncoeff()
+obj.npar()
+size(obj)
 \end{lstlisting}
-
-Expected output:
-
-\begin{lstlisting}[style=dpoutput]
-obj.coeffs(2)  -> {21, 22, 23}
-obj.coeffs({1})-> {11, 12, 13}
-\end{lstlisting}
-
-For a tensor grid, physical cells are nested one parameter dimension at a time.
-The storage contract is \code{LocalValues\{i1\}\{i2\}...}, not
-\code{LocalValues\{i1,i2,...\}}.
-
-\begin{lstlisting}[style=dpmatlab]
-mkCoeff = @(offset) {offset+1, offset+2, offset+3, offset+4};
-localValues = {
-    {mkCoeff(110), mkCoeff(120)}, ...
-    {mkCoeff(210), mkCoeff(220)}
-    };
-
-obj = dpbase({[0 1 2], [10 20 30]}, [1 1], 1, localValues);
-obj.coeffs([2 1])
-\end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
 ans =
-  1x4 cell array
-    {[211]}    {[212]}    {[213]}    {[214]}
+    'dpbase'
+
+ans =
+     2     2
+
+ans =
+     1
+
+ans =
+     2
+
+ans =
+     4
+
+ans =
+     2
+
+ans =
+     2     2
 \end{lstlisting}
 
-For \code{dpmat} and ordinary constructor-created \code{dpvar} objects, one
-physical-cell leaf contains \((m+1)^\ell\) local Bernstein coefficients, where
-\(m=\code{Degree}\) and \(\ell=\code{npar(obj)}\).  For a derivative object
-returned by \code{rhodiff}, each leaf is a two-dimensional cell array with
-\(2^\ell\) rows and \((m_{\mathrm{out}}+1)^\ell\) columns.  The rows enumerate
-the lower/upper rate vertices from \code{RateBounds}; the columns enumerate
-the local Bernstein labels returned by \code{lbls(D)}.
+The printed \code{ncoeff} value is \((1+1)^2=4\), one local Bernstein
+coefficient for each tensor-product label in the two parameter directions.
 
-\subsection{Backend Rate Metadata}
+\subsection{Storage Fields}
+\label{sec:dpbase-fields}
 
-\code{dpbase} validates rate bounds and rate-affine coefficient payloads, but it
-does not enumerate rate vertices or assemble LMIs.  Public derivative behavior
-belongs to \code{dpvar/rhodiff}; solver-facing finite LMI assembly belongs to
-\code{dplmi}.
-
-\begin{lstlisting}[style=dpmatlab]
-obj = dpbase({[0 1], [10 20]}, [1 1], 0, [], ...
-    RateBounds=[-1 1; -2 2]);
-
-obj.HasRateDependence
-obj.RateBounds
-obj.coeffs([1 1])
-\end{lstlisting}
-
-Expected result: \code{HasRateDependence} is true, \code{RateBounds} is the
-given \code{2x2} table, and the single local coefficient remains the numeric
-zero payload.
-
-Rate-affine payloads use a scalar struct with fields \code{Constant} and
-\code{Rate}.  The \code{Rate} field must be a cell array with one matrix per
-parameter dimension.
-
-\begin{lstlisting}[style=dpmatlab]
-payload = struct("Constant", eye(2), "Rate", {{ones(2), 2*ones(2)}});
-localValues = {{{payload}}};
-obj = dpbase({[0 1], [10 20]}, [2 2], 0, localValues, ...
-    RateBounds=[-1 1; -2 2]);
-\end{lstlisting}
-
-The stored coefficient represents the compact form
-\[
-  C(\dot\rho) =
-  C_0 + C_1\dot\rho_1 + C_2\dot\rho_2,
-\]
-but \code{dpbase} only stores and validates this payload.  It does not solve or
-test any inequality involving \(\dot\rho\).
-
-\subsection{Backend Validation And Error Boundaries}
-
-The parent constructor rejects malformed storage inputs early and uses
-domain-specific error identifiers.  The following examples are expected to
-error:
-
-\begin{lstlisting}[style=dpmatlab]
-dpbase([0 1], [1 1], 0)                 % dpbase:InvalidGrid
-dpbase({[0 1 1]}, [1 1], 0)             % dpbase:InvalidGridVector
-dpbase({[0 1]}, [1 0], 0)               % dpbase:InvalidMatrixSize
-dpbase({[0 1]}, [1 1], -1)              % dpbase:InvalidDegree
-dpbase({[0 1]}, [1 1], 0, [], ...
-    HasRateDependence=true)             % dpbase:InvalidRateBounds
-\end{lstlisting}
-
-Ordinary coefficient payloads at the \code{dpbase} layer must be finite, real,
-numeric matrices or real two-dimensional \code{sdpvar} matrices matching
-\code{matrixSize}.  The parent class validates storage shape only; user-facing
-symbolic algebra is defined by \code{dpvar}.
-
-\section{\texorpdfstring{\code{dpmat}}{dpmat} Reference}
-
-\subsection{Purpose}
-
-\code{dpmat} represents known finite real matrix data on a parameter grid.  It
-inherits \code{dpbase} storage and adds source handling, exact function
-evaluation, coefficient-backed algebra, matrix structural operations, and
-two-dimensional block indexing for known data.
-
-\subsection{Syntax}
-
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat(gridVectors, source)
-A = dpmat(gridVectors, source, Degree=m)
-val = A.evaluate(point)
-val = evaluate(A, point)
-C = A + B
-C = A - B
-C = -A
-C = +A
-C = A * B
-C = A * M
-C = M * A
-T = A.'
-H = A'
-C = [A, B]
-C = [A; B]
-C = cat(1, A, B)
-C = cat(2, A, B)
-B = A(rows, cols)
-A(rows, cols) = rhs
-d = length(A)
-d = height(A)
-d = width(A)
-d = numel(A)
-d = ndims(A)
-B = squeeze(A)
-tf = isequal(A, B)
-d = diag(A)
-B = diag(A, k)
-B = reshape(A, m, n)
-B = reshape(A, [], n)
-v = vec(A)
-L = tril(A)
-L = tril(A, k)
-U = triu(A)
-U = triu(A, k)
-B = blkdiag(A, M)
-disp(A)
-display(A)
-h = plot(A)
-h = plot(A, dims, SamplesPerCell=n, Name, Value)
-\end{lstlisting}
-
-\code{source} can be a function handle, a global cell grid of numeric Bernstein
-coefficients, or explicit nested \code{LocalValues} in the \code{dpbase}
-contract.
-
-\subsection{Source Modes}
-
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.28\linewidth}>{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}Y@{}}
 \toprule
-Mode & Behavior \\
+Field & Meaning \\
 \midrule
-Function handle, no \code{Degree} &
-Stores the exact \code{FunctionHandle}, probes the lower grid point only to
-infer matrix size, sets \code{Degree=1}, and leaves inherited coefficients as
-placeholder zeros.  Function-only objects use
-\code{SourceSummary="function"} and cannot enter coefficient algebra. \\
-Function handle with \code{Degree} &
-Validates that the handle is representable as local Bernstein data of that
-degree, populates \code{LocalValues}, keeps the exact \code{FunctionHandle}, and
-uses \code{SourceSummary="function-bernstein"}. \\
-Global cell grid &
-Converts overlapping global Bernstein coefficient grids into flat local
-coefficient cells.  The public helper \code{helper.cell2bern} exposes this same
-conversion for inspection.  For degree \(m\), the global cell array size must
-be \((n_{\mathrm{cell}}m)+1\) along each parameter dimension. \\
-Nested \code{LocalValues} &
-Passes explicit local coefficients through the \code{dpbase} nested-cell
-contract.  The degree is inferred from the flat coefficient count
-\((m+1)^{\ell}\) when it is not supplied explicitly. \\
+\code{GridInfo} & Grid vectors, node counts, and grid bounds. \\
+\code{MatrixSize} & Size of each matrix coefficient or matrix expression. \\
+\code{Degree} & Local Bernstein degree stored in every physical cell. \\
+\code{LocalValues} & Nested cell tree indexed by physical-cell subscript; each leaf stores coefficient cells. \\
+\code{IsContinuous} & Metadata flag; subclasses are responsible for boundary sharing if continuity is true. \\
+\code{ContainsDecision} & True when coefficient payloads include YALMIP decision variables. \\
+\code{HasRateDependence} & True when the object carries rate metadata or rate-vertex rows. \\
+\code{RateBounds} & Parameter-rate lower and upper bounds used by \code{rhodiff} and \code{dplmi}. \\
+\code{SourceSummary} & Short origin label such as \code{coefficient-backed}, \code{decision}, or \code{derivative}. \\
 \bottomrule
 \end{tabularx}
 
-All current \code{dpmat} objects are continuous known data.  Their fixed
-metadata is:
-\begin{itemize}[leftmargin=*]
-  \item \code{IsContinuous=true}
-  \item \code{ContainsDecision=false}
-  \item \code{HasRateDependence=false}
-\end{itemize}
-Constructor options that try to override those metadata fields are rejected.
+\subsection{Inspection: \texorpdfstring{\code{cells}}{cells}, \texorpdfstring{\code{lbls}}{lbls}, And \texorpdfstring{\code{coeffs}}{coeffs}}
+\label{sec:dpbase-inspection}
 
-\subsection{Inspection Fields}
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+subs = cells(obj)
+subs = obj.cells()
 
-\code{dpmat} inherits the read-only \code{dpbase} inspection fields described
-above.  It has one extra field for function-backed exact evaluation.  Use dot
-access for scalar metadata and nested brace access, or preferably
-\code{coeffs}, for coefficient payloads:
+labels = lbls(obj)
+labels = obj.lbls()
+
+c = coeffs(obj, cellSubs)
+c = obj.coeffs(cellSubs)
+\end{lstlisting}
+
+\arghead
+\code{cells} returns physical hypercube subscripts in the shared traversal
+order.  \code{lbls} returns local Bernstein labels in the shared coefficient
+order.  \code{coeffs(obj, cellSubs)} returns the flat coefficient cell array for
+one physical cell; \code{cellSubs} may be a numeric row vector such as
+\code{[2 1]} or a cell array of scalar subscripts such as \code{\{2,1\}}.
+
+\examplehead
+The label order is shared by \code{dpmat}, \code{dpvar}, and \code{dplmi}.  In
+this two-parameter degree-one object, each physical cell stores four
+coefficient entries with labels \([0,0]\), \([0,1]\), \([1,0]\), and
+\([1,1]\).
 
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
-
-A.GridInfo.Vectors{2}
-A.MatrixSize
-A.Degree
-A.SourceSummary
-A.LocalValues{1}{1}
-A.coeffs([1 1])
-T = table(A);
-T(:, ["TermIndex", "CellSubscript", "LocalIndex", "Basis", "Value"])
-A.FunctionHandle
+obj = dpbase({[0 1 2], [10 20]}, [1 1], 1);
+lbls(obj)
+cells(obj)
+c = coeffs(obj, [2 1]);
+numel(c)
 \end{lstlisting}
-
-Expected structural output:
 
 \begin{lstlisting}[style=dpoutput]
-GridInfo.Vectors{2} -> [10 20]
-MatrixSize          -> [1 1]
-Degree              -> 1
-SourceSummary       -> "coefficient-backed"
-LocalValues{1}{1}   -> {1, 3, 5, 7}
-coeffs([1 1])       -> {1, 3, 5, 7}
+ans =
+     0     0
+     0     1
+     1     0
+     1     1
 
-table(A) =
-  4x5 table
+ans =
+     1     1
+     2     1
 
-    TermIndex    CellSubscript    LocalIndex          Basis          Value
-    _________    _____________    __________    _________________    _____
-
-        1           {[1 1]}        {[0 0]}      "a1 * a2"            {[1]}
-        2           {[1 1]}        {[0 1]}      "a1 * (1-a2)"        {[3]}
-        3           {[1 1]}        {[1 0]}      "(1-a1) * a2"        {[5]}
-        4           {[1 1]}        {[1 1]}      "(1-a1) * (1-a2)" {[7]}
-
-FunctionHandle      -> []
+ans =
+     4
 \end{lstlisting}
 
-\code{FunctionHandle} is nonempty only for function-backed construction.  The
-known-data metadata are stored separately from coefficient payloads so that
-coefficient algebra can reject function-only objects while \code{evaluate} can
-still call their exact handle.
+\subsection{Counts And Shape}
+\label{sec:dpbase-counts}
 
-\subsection{Evaluation}
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+n = ncell(obj)
+n = obj.ncell()
+
+n = ncoeff(obj)
+n = obj.ncoeff()
+
+n = npar(obj)
+n = obj.npar()
+
+sz = size(obj)
+d = size(obj, dim)
+\end{lstlisting}
+
+\arghead
+\code{ncell} returns \(\prod_r(N_r-1)\).  \code{ncoeff} returns
+\((m+1)^\ell\).  \code{npar} returns the parameter dimension \(\ell\).
+\code{size} returns the matrix payload size, not the physical grid size.
+
+\section{\texorpdfstring{\code{dpmat}}{dpmat} Reference}
+\label{sec:dpmat}
+
+\code{dpmat} stores known finite real matrix data on a tensor grid.  Objects
+can be coefficient-backed, function-only, or function-backed with explicit
+Bernstein coefficient evidence.  Coefficient-backed objects participate in
+algebra.  Function-only objects evaluate exactly through the stored handle, but
+do not expose coefficient evidence for \code{bernsteinTable} or coefficient algebra.
+
+\subsection{Lookup}
+\label{sec:dpmat-lookup}
+
+\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\toprule
+Task & Entry \\
+\midrule
+Construct data &
+\hyperref[sec:dpmat-construction]{\code{dpmat}} \\
+Evaluate &
+\hyperref[sec:dpmat-evaluate]{\code{evaluate}} \\
+Inspect/display &
+\hyperref[sec:dpmat-table]{\code{bernsteinTable}},
+\hyperref[sec:dpmat-display]{\code{disp}},
+\hyperref[sec:dpmat-display]{\code{display}} \\
+Plot &
+\hyperref[sec:dpmat-plot]{\code{plot}} \\
+Arithmetic &
+\hyperref[sec:dpmat-algebra]{\code{+}},
+\hyperref[sec:dpmat-algebra]{\code{-}},
+\hyperref[sec:dpmat-algebra]{unary \code{+}/\code{-}},
+\hyperref[sec:dpmat-algebra]{\code{*}} \\
+Matrix/index methods &
+\hyperref[sec:dpmat-matrix-ops]{shape and structural methods},
+\hyperref[sec:dpmat-indexing]{indexing and assignment} \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Construction}
+\label{sec:dpmat-construction}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+A = dpmat(gridVector, source)
+A = dpmat(gridVector, source, Degree=m)
+A = dpmat(gridVectors, source)
+A = dpmat(gridVectors, source, Degree=m)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{gridVector} is a numeric vector used as a one-parameter grid
+        shorthand, such as \code{[0 1 2]}.
+  \item \code{gridVectors} is a cell vector with one numeric grid vector per
+        parameter, such as \code{\{[0 1], [10 20]\}}.
+  \item \code{source} may be a function handle, a global cell grid of numeric
+        Bernstein coefficients, or explicit nested \code{LocalValues}; for
+        example, \code{\{1, 2, 3\}} is scalar degree-two data on one cell.
+  \item \code{Degree=m} sets the local Bernstein degree.  For function handles,
+        omitting \code{Degree} creates a function-only object; passing a value
+        such as \code{Degree=2} validates and stores Bernstein coefficient
+        evidence while retaining the exact function handle for \code{evaluate}.
+\end{itemize}
+
+\examplehead
+The scalar-grid shorthand is the shortest coefficient-backed form.  The three
+numeric cells below are the global Bernstein coefficients for two physical
+cells with degree one.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat([0 1 2], {10, 20, 30}, Degree=1)
+size(A)
+A.Degree
+A.SourceSummary
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+A =
+  dpmat [1 1] over 1-D grid, degree 1, source coefficient-backed
+
+ans =
+     1     1
+
+ans =
+     1
+
+ans =
+    "coefficient-backed"
+\end{lstlisting}
+
+For tensor grids, pass one grid vector per parameter.  The source cell array
+matches the global coefficient grid implied by the two parameter directions.
+
+\begin{lstlisting}[style=dpmatlab]
+B = dpmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1)
+B.GridInfo.Vectors{2}
+B.lbls()
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+B =
+  dpmat [1 1] over 2-D grid, degree 1, source coefficient-backed
+
+ans =
+    10    20
+
+ans =
+     0     0
+     0     1
+     1     0
+     1     1
+\end{lstlisting}
+
+Use explicit nested \code{LocalValues} when each physical cell must be written
+directly.  Here each cell stores two \(1\times2\) row-vector coefficients.
+
+\begin{lstlisting}[style=dpmatlab]
+localVals = {{[1 0], [0 1]}, {[2 0], [0 2]}};
+C = dpmat({[0 1 2]}, localVals, Degree=1)
+size(C)
+C.coeffs(2)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+C =
+  dpmat [1 2] over 1-D grid, degree 1, source coefficient-backed
+
+ans =
+     1     2
+
+ans =
+  1x2 cell array
+    {[2 0]}    {[0 2]}
+\end{lstlisting}
+
+When \code{source} is a function handle and \code{Degree} is omitted, the
+object keeps the exact evaluator but does not claim coefficient evidence.
+
+\begin{lstlisting}[style=dpmatlab]
+F = dpmat({[0 1]}, @(rho) [rho rho^2])
+F.SourceSummary
+F.evaluate(0.5)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+F =
+  dpmat [1 2] over 1-D grid, degree 1, source function
+
+ans =
+    "function"
+
+ans =
+    0.5000    0.2500
+\end{lstlisting}
+
+Add \code{Degree} for a polynomial function when later coefficient inspection
+or algebra should use Bernstein evidence.  The exact function handle is still
+used for point evaluation.
+
+\begin{lstlisting}[style=dpmatlab]
+G = dpmat({[0 1]}, @(rho) rho.^2, Degree=2)
+G.SourceSummary
+G.coeffs(1)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+G =
+  dpmat [1 1] over 1-D grid, degree 2, source function-bernstein
+
+ans =
+    "function-bernstein"
+
+ans =
+  1x3 cell array
+    {[0]}    {[0]}    {[1]}
+\end{lstlisting}
+
+These forms all create finite known-data objects, but only the coefficient-
+backed and function-Bernstein forms can participate in coefficient algebra.
+
+\subsection{\texorpdfstring{\code{evaluate}}{evaluate}}
+\label{sec:dpmat-evaluate}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+val = evaluate(A, point)
+val = A.evaluate(point)
+\end{lstlisting}
+
+\arghead
+\code{point} is a scalar for a one-parameter object, such as \code{0.25}, or a
+row vector with one entry per parameter, such as \code{[0.25 12]}.  The return
+value is a numeric matrix with size
+\code{size(A)}.  Coefficient-backed objects use local Bernstein interpolation.
+Function-backed objects evaluate through their stored function handle.
+
+For a degree-one scalar coefficient-backed object on \([\rho_0,\rho_1]\),
+\[
+  A(\rho) = a A_0 + (1-a)A_1,\qquad
+  a = \frac{\rho_1-\rho}{\rho_1-\rho_0}.
+\]
+The same local-coordinate rule is applied entrywise for matrix-valued data.
+
+\examplehead
+Use the function-call form when the object is naturally one input among several
+MATLAB expressions.
 
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1]}, {2, 4}, Degree=1);
-A.evaluate(0.75)
-
-B = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
-B.evaluate([0.25, 12.5])
-
-F = dpmat({[0 pi]}, @(rho) sin(rho));
-F.evaluate(pi/2)
+val = evaluate(A, 0.25)
 \end{lstlisting}
-
-Expected outputs:
 
 \begin{lstlisting}[style=dpoutput]
-A.evaluate(0.75)        -> 3.5
-B.evaluate([0.25 12.5]) -> 2.5
-F.evaluate(pi/2)        -> 1
+val =
+    2.5000
 \end{lstlisting}
 
-Coefficient-backed objects evaluate by Bernstein interpolation on the active
-physical cell.  Function-backed objects evaluate through the retained exact
-handle.  Evaluation points must be finite, real, have one entry per parameter
-dimension, and lie inside the grid bounds.
+At \(\rho=0.25\), the local weight is \(a=0.75\), so the interpolated value is
+\(0.75\cdot2+0.25\cdot4=2.5\).
 
-\subsection{Coefficient Algebra}
+The dot-call form is equivalent and can be convenient in command-window
+exploration.
 
-\code{dpmat} supports coefficient-backed \code{+}, \code{-}, unary \code{-}, and
-matrix \code{*}.  Numeric scalars and compatible numeric matrices promote to
-constant \code{dpmat} operands.
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {2, 4}, Degree=1);
+val = A.evaluate(0.75)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+val =
+    3.5000
+\end{lstlisting}
+
+Function-backed objects route through the retained function handle, so
+non-polynomial expressions can still be evaluated exactly at a point.
+
+\begin{lstlisting}[style=dpmatlab]
+F = dpmat({[0 pi]}, @(rho) sin(rho));
+val = F.evaluate(pi/2)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+val =
+     1
+\end{lstlisting}
+
+\subsection{Visualization And Inspection}
+\label{sec:dpmat-visualization}
+
+\subsubsection{\texorpdfstring{\code{bernsteinTable}}{bernsteinTable}}
+\label{sec:dpmat-table}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+T = bernsteinTable(A)
+T = bernsteinTable(A, cellSubs)
+T = bernsteinTable(A, "oneLine")
+T = bernsteinTable(A, cellSubs, "oneLine")
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{cellSubs} selects one physical cell.
+  \item \code{"oneLine"} returns one row per selected physical cell with a
+        compact Bernstein expression.
+  \item Without \code{"oneLine"}, the full table uses seven metadata columns;
+        the output below shows their exact MATLAB names.
+\end{itemize}
+
+For one parameter, the \code{Basis} column represents
+\[
+  \binom{m}{j}a^{m-j}(1-a)^j.
+\]
+For multiple parameters, the basis is the tensor product of that expression in
+each local coordinate.  \code{LocalIndex} is the local Bernstein label.
+\code{CoeffSubscript} maps the local label back to the global coefficient
+subscript on the physical grid.  \code{IsPhysicalNode} is true when that
+coefficient lies on a physical grid node.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {[0 1], [1 2]}, Degree=1);
+T = bernsteinTable(A, 1, "oneLine");
+disp(T)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+    CellSubscript          Expression
+    _____________    _______________________
+
+        {[1]}        "a*[0 1] + (1-a)*[1 2]"
+\end{lstlisting}
+
+Use the full table when the metadata columns are the point of the example:
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+T = bernsteinTable(A);
+disp(T)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpwideoutput]
+    TermIndex    CellSubscript    CoeffSubscript    LocalIndex      Basis      IsPhysicalNode    Value
+    _________    _____________    ______________    __________    _________    ______________    _____
+
+        1            {[1]}            {[1]}           {[0]}       "a^2"            true          {[1]}
+        2            {[1]}            {[2]}           {[1]}       "2a(1-a)"        false         {[2]}
+        3            {[1]}            {[3]}           {[2]}       "(1-a)^2"        true          {[3]}
+\end{lstlisting}
+
+\subsubsection{\texorpdfstring{\code{disp}}{disp} And \texorpdfstring{\code{display}}{display}}
+\label{sec:dpmat-display}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+disp(A)
+display(A)
+A
+\end{lstlisting}
+
+\arghead
+\code{disp(A)} prints a compact one-line summary.  \code{display(A)} is the
+command-window display used when an expression is not terminated by a semicolon;
+it prints grid, degree, coefficient, and source metadata.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+disp(A)
+display(A)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+dpmat [1 1] over 1-D grid, degree 1, source coefficient-backed
+A =
+  dpmat with 1-by-1 matrix values
+  Parameters: 1
+    rho_1: [0, 1], 2 nodes
+  Degree: 1
+  Physical cells: 1
+  Coefficients per cell: 2
+  Continuous: true
+  Source: coefficient-backed
+  Function handle: false
+\end{lstlisting}
+
+\subsubsection{\texorpdfstring{\code{plot}}{plot}}
+\label{sec:dpmat-plot}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+h = plot(A)
+h = plot(A, dims)
+h = plot(A, SamplesPerCell=n)
+h = plot(A, dims, SamplesPerCell=n)
+h = plot(A, ..., Name, Value)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{dims} is one or two parameter indices.  For one-parameter
+        objects, the default is \code{1}; otherwise the default is
+        \code{[1 2]}, as in \code{plot(A, [1 2])}.
+  \item \code{SamplesPerCell} is the package-owned sampling option.  The default
+        is \code{15}; use \code{SamplesPerCell=4} for a coarse diagnostic plot.
+  \item Remaining name-value pairs pass through to MATLAB graphics.  One-
+        dimensional plots pass them to \code{plot}; two-dimensional plots pass
+        them to \code{surf}.  Examples include \code{LineWidth},
+        \code{FaceAlpha}, and \code{EdgeColor}.
+  \item The output \code{h} is the vector of graphics handles, one entry per
+        matrix element.
+\end{itemize}
+
+\examplehead
+The one-dimensional call returns one graphics handle per matrix entry.  The
+example inspects the generated sample count and line styling without relying on
+an interactive figure window.
+
+\begin{lstlisting}[style=dpmatlab]
+fig = figure('Visible','off');
+A = dpmat({[0 1]}, @(rho) [rho, rho^2]);
+h = plot(A, SamplesPerCell=4, LineWidth=2);
+numel(h)
+numel(h(1).XData)
+h(1).LineWidth
+h(1).YData([1 end])
+close(fig)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     2
+
+ans =
+     5
+
+ans =
+     2
+
+ans =
+     0     1
+\end{lstlisting}
+
+With four samples per cell on one physical interval, MATLAB stores five plotted
+node values including both endpoints.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.78\textwidth]{matlab-figures/dpmat-plot-1d.png}
+  \caption{One-dimensional \code{dpmat/plot} output generated from MATLAB.}
+  \label{fig:dpmat-plot-1d}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.78\textwidth]{matlab-figures/dpmat-plot-2d.png}
+  \caption{Two-dimensional \code{dpmat/plot} surface output generated from MATLAB.}
+  \label{fig:dpmat-plot-2d}
+\end{figure}
+
+\subsection{Algebra Operators}
+\label{sec:dpmat-algebra}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+C = A + B
+C = A + M
+C = M + A
+C = A - B
+C = A - M
+C = M - A
+C = +A
+C = -A
+C = A * B
+C = A * M
+C = M * A
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item Coefficient-backed \code{dpmat}: addition, subtraction, unary signs,
+        and multiplication use local Bernstein coefficients.
+  \item Numeric scalar, such as \code{5}, broadcasts to the \code{dpmat} matrix
+        size when needed.
+  \item Numeric matrix: accepted when the matrix size is compatible with the
+        operation, such as \code{eye(2)} for a \(2\times2\) object.
+  \item Mixed grids with same bounds: re-expressed on a common refinement.
+  \item Mixed degrees: elevated to a common degree for coefficient-wise
+        operations; multiplication produces the degree sum.
+  \item Function-only \code{dpmat}: evaluates and plots, but does not enter
+        coefficient algebra unless explicit \code{Degree} supplied coefficient
+        evidence.
+\end{itemize}
+
+For addition and subtraction, the package elevates both operands to a common
+degree before combining matching coefficients:
+\[
+  C_j = \widehat A_j + \widehat B_j.
+\]
+For multiplication, coefficient labels convolve and the output degree is the
+sum of the input degrees.
+
+\examplehead
+Addition elevates the lower-degree operand before combining coefficients.
 
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1]}, {1, 2}, Degree=1);
 B = dpmat({[0 1]}, {10, 20, 30}, Degree=2);
-C = A + B;
-
-C.Degree
-C.coeffs(1)
-T = table(C);
-T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
+S = A + B
+cS = S.coeffs(1);
+[cS{:}]
 \end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
-C.Degree   -> 2
-C.coeffs(1)-> {11, 21.5, 32}
+S =
+  dpmat [1 1] over 1-D grid, degree 2, source coefficient-backed
 
-table(C) =
-  3x4 table
-
-    TermIndex    LocalIndex      Basis         Value
-    _________    __________    _________    ___________
-
-        1          {[0]}       "a^2"        {[     11]}
-        2          {[1]}       "2a(1-a)"    {[21.5000]}
-        3          {[2]}       "(1-a)^2"    {[     32]}
+ans =
+   11.0000   21.5000   32.0000
 \end{lstlisting}
 
-Multiplication raises Bernstein degree through binomial-normalized local
-coefficient convolution.
+Multiplication raises degree from \(1\) and \(2\) to \(3\).
 
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {[1 2], [3 4]}, Degree=1);
-B = dpmat({[0 1]}, {[5; 6], [7; 8]}, Degree=1);
-K = A * B;
-
-K.Degree
-size(K)
-K.coeffs(1)
-T = table(K);
-T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 1]}, {10, 20, 30}, Degree=2);
+P = A * B
+cP = P.coeffs(1);
+[cP{:}]
 \end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
-K.Degree   -> 2
-size(K)    -> [1 1]
-K.coeffs(1)-> {17, 31, 53}
+P =
+  dpmat [1 1] over 1-D grid, degree 3, source coefficient-backed
 
-table(K) =
-  3x4 table
-
-    TermIndex    LocalIndex      Basis      Value
-    _________    __________    _________    ______
-
-        1          {[0]}       "a^2"        {[17]}
-        2          {[1]}       "2a(1-a)"    {[31]}
-        3          {[2]}       "(1-a)^2"    {[53]}
+ans =
+   10.0000   20.0000   36.6667   60.0000
 \end{lstlisting}
 
-Same-bound mixed scalar grids are aligned on a common refinement before
-coefficient algebra.  Mixed physical bounds are rejected.  Function-only
-\code{dpmat} objects are rejected by coefficient algebra until exact
-function-handle algebra is designed.
-
-\subsection{Matrix Operations And Indexing}
-
-\code{dpmat} supports transpose, conjugate transpose for real data, horizontal
-and vertical concatenation, \code{cat} along dimensions 1 and 2, two-dimensional
-matrix slicing, block assignment, matrix-payload shape inspection, and common
-structural transforms.  Row and column subscripts support \code{:}, positive
-integer vectors, full-length logical vectors, and \code{end}.
+Numeric scalars are promoted to compatible constant coefficient data.
 
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {
-    [1 2 3; 4 5 6], ...
-    [10 20 30; 40 50 60]
-    }, Degree=1);
-
-lastCol = A(:, end);
-firstRow = A([true false], :);
-
-size(lastCol)
-lastCol.coeffs(1)
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+M = 5 - A
+N = 2 * A
+cM = M.coeffs(1);
+cN = N.coeffs(1);
+[cM{:}]
+[cN{:}]
 \end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
-size(lastCol)     -> [2 1]
-lastCol.coeffs(1)-> {[3; 6], [30; 60]}
+M =
+  dpmat [1 1] over 1-D grid, degree 1, source coefficient-backed
+
+N =
+  dpmat [1 1] over 1-D grid, degree 1, source coefficient-backed
+
+ans =
+     4     3
+
+ans =
+     2     4
 \end{lstlisting}
 
-Assignment accepts numeric constants and compatible \code{dpmat} blocks.  It
-does not support deletion assignment, matrix growth, unsupported dimensions, or
-coefficient operations on function-only objects.
+These examples use the one-cell case so the coefficient vectors are visible;
+the same elevation and convolution rules apply cell by cell on tensor grids.
 
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {zeros(2), 2*ones(2)}, Degree=1);
-A(:, 2) = 5;
-A.coeffs(1)
+\subsection{Matrix Methods}
+\label{sec:dpmat-matrix-ops}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+sz = size(A)
+n = length(A)
+n = height(A)
+n = width(A)
+n = numel(A)
+n = ndims(A)
+
+B = A.'
+B = A'
+B = vec(A)
+B = diag(A)
+B = diag(A, k)
+B = reshape(A, sz)
+B = reshape(A, m, n)
+B = tril(A)
+B = triu(A)
+B = trace(A)
+B = sum(A)
+B = sum(A, dim)
+B = sum(A, "all")
+B = mean(A)
+B = mean(A, dim)
+B = mean(A, "all")
+B = cumsum(A)
+B = cumsum(A, dim)
+B = flip(A)
+B = flip(A, dim)
+B = flipud(A)
+B = fliplr(A)
+B = rot90(A)
+B = rot90(A, k)
+B = repmat(A, ...)
+B = [A, B]
+B = [A; B]
+B = cat(dim, A, B, ...)
+B = blkdiag(A, B, ...)
+tf = isequal(A, B, ...)
 \end{lstlisting}
 
-Expected output:
+\arghead
+These methods apply the corresponding MATLAB matrix operation to every local
+coefficient.  They require coefficient evidence.  Dimension arguments follow
+MATLAB conventions, such as \code{sum(A,2)} for row sums or
+\code{reshape(A,[1 4])} for a fixed output shape.  Concatenation and
+\code{blkdiag} accept compatible coefficient-backed \code{dpmat} objects and
+numeric blocks, align grids, and elevate degrees when needed.
 
-\begin{lstlisting}[style=dpoutput]
-A.coeffs(1)-> {[0 5; 0 5], [2 5; 2 5]}
-\end{lstlisting}
-
-\subsection{Shape And Structural Methods}
-
-Shape methods report the size of each matrix payload, not the number of
-physical cells or coefficients.
-
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {zeros(2, 3), ones(2, 3)}, Degree=1);
-
-length(A)
-height(A)
-width(A)
-numel(A)
-ndims(A)
-squeeze(A)
-\end{lstlisting}
-
-Expected output:
-
-\begin{lstlisting}[style=dpoutput]
-length(A) -> 3
-height(A) -> 2
-width(A)  -> 3
-numel(A)  -> 6
-ndims(A)  -> 2
-squeeze(A)-> A
-\end{lstlisting}
-
-Coefficient-backed structural transforms map the same MATLAB operation over
-every local coefficient payload.
+\examplehead
+Structural methods return new \code{dpmat} objects whose matrix size changes
+while the grid and degree metadata stay attached to the coefficient storage.
 
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
-
-vec(A).coeffs(1)
-diag(A).coeffs(1)
-reshape(A, [1 4]).coeffs(1)
-tril(A).coeffs(1)
-triu(A, 1).coeffs(1)
+V = vec(A)
+size(V)
+D = diag(A)
+size(D)
+R = reshape(A, [1 4])
+size(R)
 \end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
-vec(A).coeffs(1)        -> {[1; 3; 2; 4], [10; 30; 20; 40]}
-diag(A).coeffs(1)       -> {[1; 4], [10; 40]}
-reshape(A,[1 4]).coeffs(1) -> {[1 3 2 4], [10 30 20 40]}
-tril(A).coeffs(1)       -> {[1 0; 3 4], [10 0; 30 40]}
-triu(A,1).coeffs(1)     -> {[0 2; 0 0], [0 20; 0 0]}
+V =
+  dpmat [4 1] over 1-D grid, degree 1, source coefficient-backed
+
+ans =
+     4     1
+
+D =
+  dpmat [2 1] over 1-D grid, degree 1, source coefficient-backed
+
+ans =
+     2     1
+
+R =
+  dpmat [1 4] over 1-D grid, degree 1, source coefficient-backed
+
+ans =
+     1     4
 \end{lstlisting}
 
-For vector payloads, \code{diag(A,k)} constructs an offset diagonal matrix.
-\code{reshape} also accepts one inferred empty dimension.
+Summary and assembly methods follow the same coefficient-wise rule.
 
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {[1; 2; 3], [4; 5; 6]}, Degree=1);
-
-diag(A, 1).coeffs(1)
-reshape(A, [], 1).coeffs(1)
+A = dpmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
+Tr = trace(A)
+H = [diag(A), diag(A)]
+size(Tr)
+size(H)
 \end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
-diag(A,1).coeffs(1)      -> {[0 1 0 0; 0 0 2 0; 0 0 0 3; 0 0 0 0],
-                              [0 4 0 0; 0 0 5 0; 0 0 0 6; 0 0 0 0]}
-reshape(A,[],1).coeffs(1)-> {[1; 2; 3], [4; 5; 6]}
+Tr =
+  dpmat [1 1] over 1-D grid, degree 1, source coefficient-backed
+
+H =
+  dpmat [2 2] over 1-D grid, degree 1, source coefficient-backed
+
+ans =
+     1     1
+
+ans =
+     2     2
 \end{lstlisting}
 
-\code{blkdiag} accepts coefficient-backed \code{dpmat} operands and compatible
-numeric blocks.  It aligns same-bound grids on a common refinement and elevates
-degree as needed.
+\subsection{Indexing And Assignment}
+\label{sec:dpmat-indexing}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = A(rows, cols)
+value = A.PropertyName
+A(rows, cols) = numericValue
+A(rows, cols) = B
+\end{lstlisting}
+
+\arghead
+Matrix indexing slices every local coefficient.  Dot access exposes public
+properties and methods.  Assignment accepts numeric blocks and compatible
+coefficient-backed \code{dpmat} blocks, with degree elevation when needed.  Use
+ordinary MATLAB matrix subscripts such as \code{A(:, end)} or
+\code{A(1, 2:3)}.
+
+\examplehead
+Indexing returns a smaller \code{dpmat}; assignment updates the corresponding
+matrix entries in every local coefficient.
 
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {1, 2}, Degree=1);
-B = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
-C = blkdiag(A, 5, B);
-
-size(C)
-C.GridInfo.Vectors{1}
+A = dpmat({[0 1]}, {[1 2 3; 4 5 6], [10 20 30; 40 50 60]}, Degree=1);
+lastCol = A(:, end)
+topTail = A(1, 2:3)
+A(:, 2) = 5;
+A
 \end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
-size(C)             -> [3 3]
-C.GridInfo.Vectors  -> [0 0.5 1]
+lastCol =
+  dpmat [2 1] over 1-D grid, degree 1, source coefficient-backed
+
+topTail =
+  dpmat [1 2] over 1-D grid, degree 1, source coefficient-backed
+
+A =
+  dpmat [2 3] over 1-D grid, degree 1, source coefficient-backed
 \end{lstlisting}
 
-\subsection{Display And Plotting}
+The assignment does not change the object degree because the numeric value is
+promoted to degree-one coefficient data before insertion.
 
-\code{disp(A)} prints a compact one-line summary.  Plain command-window display
-or \code{display(A)} prints matrix size, parameter grid metadata, degree,
-physical-cell count, coefficients per cell, continuity, source, and
-function-handle status.
+\subsection{Limits}
+\label{sec:dpmat-limits}
 
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {1, 2}, Degree=1);
-disp(A)
-\end{lstlisting}
-
-Expected output contains:
-
-\begin{lstlisting}[style=dpoutput]
-dpmat [1 1] over 1-D grid, degree 1, source coefficient-backed
-\end{lstlisting}
-
-\code{plot(A)} samples \code{evaluate} over one or two selected parameter
-dimensions and labels each matrix entry in the legend.  For objects with more
-than two parameter dimensions, unselected dimensions are fixed at their lower
-grid bounds.
-
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, @(rho) [rho, rho^2]);
-h = plot(A, SamplesPerCell=4);
-numel(h)
-\end{lstlisting}
-
-Expected result: \code{numel(h)} is \code{2}, one plotted line for each matrix
-entry.  Legends use LaTeX labels such as \(\code{A}_{1,1}\) and the
-\(\rho\)-axis label uses LaTeX formatting.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.82\linewidth]{matlab-figures/dpmat-plot-1d.png}
-  \caption{One-dimensional \code{dpmat} plot generated from MATLAB.}
-  \label{fig:dpmat-plot-1d}
-\end{figure}
-
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1], [10 20]}, @(rho, eta) [rho + eta, rho - eta]);
-h = plot(A, [1 2], SamplesPerCell=2, EdgeColor="none");
-numel(h)
-\end{lstlisting}
-
-Expected result: \code{numel(h)} is \code{2}, one transparent surface for each
-matrix entry.  Two-dimensional plotting defaults to \code{FaceAlpha=0.5} unless
-the caller supplies a different value, and accepts ordinary graphics options.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.82\linewidth]{matlab-figures/dpmat-plot-2d.png}
-  \caption{Two-dimensional \code{dpmat} surface plot generated from MATLAB.}
-  \label{fig:dpmat-plot-2d}
-\end{figure}
-
-The figure files are generated by running \code{doc/generate\_plot\_figures.m}
-from the repository root.  They live under \code{doc/matlab-figures/} so the
-manual source, generated plot assets, and regeneration entry point stay in the
-same documentation tree.
-
-\subsection{Validation Boundaries}
-
-\code{dpmat} rejects unsupported source types, malformed global coefficient
-grids, malformed nested local values, non-finite or complex payloads, bad
-function arity, empty or complex function outputs, non-polynomial handles when
-explicit Bernstein evidence is requested, and functions that require a higher
-\code{Degree} than the caller supplied.  It also rejects constructor attempts to
-set \code{IsContinuous}, \code{ContainsDecision}, \code{HasRateDependence}, or
-\code{RateBounds}.
-
-Operational errors include out-of-bounds or wrong-dimensional evaluation
-points, function-only coefficient algebra or structural transforms,
-incompatible matrix sizes, mixed physical grid bounds, \code{cat} dimensions
-other than 1 or 2, deletion assignment, matrix-growth assignment, block
-assignments with incompatible payload size, invalid reshape sizes, invalid
-diagonal or triangular offsets, and invalid plot dimensions or
-\code{SamplesPerCell}.
+\begin{itemize}[leftmargin=*]
+  \item Function-only objects created without \code{Degree} do not have
+        Bernstein coefficient evidence for \code{bernsteinTable} or coefficient algebra.
+  \item Numeric operands must be finite real nonempty matrices with compatible
+        sizes, or finite real scalars that can broadcast to the required size.
+  \item Grid refinement is supported for matching parameter dimensions and
+        matching grid bounds.
+\end{itemize}
 
 \section{\texorpdfstring{\code{dpvar}}{dpvar} Reference}
+\label{sec:dpvar}
 
-\subsection{Purpose}
+\code{dpvar} creates continuous cell-local Bernstein decision expressions backed
+by YALMIP \code{sdpvar} coefficients.  It participates in supported affine and
+known-data algebra.  It does not choose solvers or call \code{optimize};
+solver-facing work happens after comparison overloads create \code{dplmi}
+objects and \code{toYalmip} converts them to YALMIP constraints.
 
-\code{dpvar} represents a parameter-dependent decision variable, not just one
-standalone YALMIP matrix.  On each physical grid cell it stores local Bernstein
-coefficient matrices in \code{LocalValues}; those coefficient matrices are
-YALMIP \code{sdpvar} objects.  The current constructor creates continuous
-degree-1 variables by default, and the shared \code{dpbase} storage layout lets
-the same algebra and LMI assembly code traverse all parameter cells.
-Comparisons such as \code{P <= 0} and \code{P >= Q} assemble \code{dplmi}
-objects, but \code{dpvar} itself does not choose solvers or call
-\code{optimize}.
+\subsection{Lookup}
+\label{sec:dpvar-lookup}
 
-\subsection{Syntax}
+\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\toprule
+Task & Entry \\
+\midrule
+Construct decisions &
+\hyperref[sec:dpvar-construction]{\code{dpvar}} \\
+Differentiate rates &
+\hyperref[sec:dpvar-rhodiff]{\code{rhodiff}} \\
+Affine/mixed algebra &
+\hyperref[sec:dpvar-algebra]{\code{+}},
+\hyperref[sec:dpvar-algebra]{\code{-}},
+\hyperref[sec:dpvar-algebra]{\code{*}} with known data \\
+Matrix/index methods &
+\hyperref[sec:dpvar-matrix-ops]{structural methods},
+\hyperref[sec:dpvar-indexing]{indexing and assignment} \\
+Build LMIs &
+\hyperref[sec:dpvar-comparison]{\code{<=}},
+\hyperref[sec:dpvar-comparison]{\code{>=}} \\
+\bottomrule
+\end{tabularx}
 
-\begin{lstlisting}[style=dpmatlab]
+\subsection{Construction}
+\label{sec:dpvar-construction}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
 P = dpvar(n, gridVectors)
 P = dpvar(n, n, gridVectors)
 P = dpvar(n, m, gridVectors)
 P = dpvar(..., "full")
 P = dpvar(..., "symmetric")
+P = dpvar(..., Degree=0)
+P = dpvar(..., Degree=1)
 P = dpvar(..., RateBounds=rb)
-D = rhodiff(P, rb)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{dpvar(n, gridVectors)} creates an \(n\times n\) square variable
+        using scalar-size shorthand; for example, \code{dpvar(2, \{[0 1]\})}.
+        Square variables default to symmetric YALMIP coefficients.
+  \item \code{dpvar(n, n, gridVectors)} is the explicit square-size form; for
+        example, \code{dpvar(2, 2, \{[0 1]\})}.  It has the same default
+        symmetric structure as the shorthand.
+  \item \code{dpvar(n, m, gridVectors)} creates an \(n\times m\) variable.
+        Rectangular variables default to full YALMIP coefficients; for example,
+        \code{dpvar(2, 3, \{[0 1]\})}.
+  \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP
+        coefficient structure.  \code{"symmetric"} requires a square size.
+  \item \code{Degree=1} is the default continuous Bernstein decision variable.
+  \item \code{Degree=0} creates a parameter-independent variable stored on the
+        grid.
+  \item \code{RateBounds=rb} stores parameter-rate metadata for later
+        \code{rhodiff(P)} calls.  Use \code{RateBounds=[-1 1]} for one
+        parameter; use a two-row matrix for two parameters, as shown in the
+        rate-metadata example below.
+\end{itemize}
+
+\examplehead
+The square shorthand creates a \(2\times2\) continuous decision object.  The
+default degree is one and the object carries no rate metadata.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+Ps = dpvar(2, {[0 1]});
+class(Ps)
+size(Ps)
+Ps.Degree
+Ps.HasRateDependence
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+     2     2
+
+ans =
+     1
+
+ans =
+  logical
+   0
+\end{lstlisting}
+
+Use two dimension arguments for a rectangular full variable.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+Pf = dpvar(2, 3, {[0 1]});
+class(Pf)
+size(Pf)
+Pf.Degree
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+     2     3
+
+ans =
+     1
+\end{lstlisting}
+
+The structure flag makes the coefficient structure explicit.  This is useful
+when a square variable should use full, not symmetric, coefficients.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+Pfull = dpvar(2, 2, {[0 1]}, "full");
+class(Pfull)
+Pfull.MatrixSize
+Pfull.Degree
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+     2     2
+
+ans =
+     1
+\end{lstlisting}
+
+Use \code{Degree=0} for a parameter-independent decision variable stored with
+grid metadata.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P0 = dpvar(1, [0 1 2], Degree=0);
+class(P0)
+P0.Degree
+P0.ncell()
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+     0
+
+ans =
+     2
+\end{lstlisting}
+
+Rate bounds are metadata for later \code{rhodiff(P)} calls.  \code{dplmi}
+constrains rate vertices only after an expression such as \code{rhodiff} has
+stored rate-vertex rows.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+Pr = dpvar(1, {[0 1], [10 20]}, RateBounds=[-1 2; -3 4]);
+class(Pr)
+Pr.HasRateDependence
+Pr.RateBounds
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+  logical
+   1
+
+ans =
+    -1     2
+    -3     4
+\end{lstlisting}
+
+\subsection{\texorpdfstring{\code{rhodiff}}{rhodiff}}
+\label{sec:dpvar-rhodiff}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
 D = rhodiff(P)
-C = P + Q
-C = P - Q
-C = -P
-C = +P
-C = P + A
-C = A * P
-C = P * A
-T = P.'
-H = P'
-B = P(rows, cols)
-P(rows, cols) = rhs
-C = [P, A]
-C = [P; P]
-C = blkdiag(P, 1, A)
-K = P <= 0
-K = P >= Q
+D = rhodiff(P, rb)
 \end{lstlisting}
 
-Here \code{A} may be coefficient-backed \code{dpmat} data or compatible numeric
-data.  Bare affine \code{sdpvar} matrices can also be promoted to constant
-coefficient data in supported affine operations.
+\arghead
+\code{rhodiff(P)} uses \code{P.RateBounds}; \code{rhodiff(P, rb)} supplies rate
+bounds at the call site, such as \code{rhodiff(P, [-1 1])}.  The output is a discontinuous \code{dpvar}
+expression with one coefficient row per rate vertex.  In one parameter, a
+degree-\(m\) derivative has degree \(m-1\), with degree zero retained as a zero
+derivative.  In multiple parameters, partial derivatives are elevated back into
+the common tensor degree used by the implementation.
 
-\subsection{Construction And Continuity}
-
-The constructor turns a grid into a symbolic function of the parameter.  In one
-parameter dimension, a default degree-one scalar entry has the local form
+For a one-parameter degree-one coefficient pair \(P_0,P_1\) on a cell of width
+\(h\), the rate-dependent derivative row is
 \[
-  P(\rho) =
-  B_{0,1}(\alpha) P_i + B_{1,1}(\alpha) P_{i+1},
-  \qquad
-  \alpha = \frac{\rho-\rho_i}{\rho_{i+1}-\rho_i}.
+  \dot P(\rho,\dot\rho) = \dot\rho\,\frac{P_1-P_0}{h}.
 \]
-Here \(P_i\) and \(P_{i+1}\) are YALMIP coefficient matrices, not sampled
-numeric values.  The object stores the pair for each physical cell in
-\code{LocalValues}.  Adjacent cells reuse the same boundary coefficient handle,
-so continuity is represented by shared storage rather than by an additional
-equality constraint.
+The implementation stores one row for each allowed rate vertex.
+
+\examplehead
+When rate bounds live on the object, \code{rhodiff(P)} uses them directly.
 
 \begin{lstlisting}[style=dpmatlab]
-P = dpvar(2, {[0 1 2]}, "symmetric");
-
-size(P)
-P.Degree
-P.SourceSummary
-first = P.coeffs(1);
-second = P.coeffs(2);
-numel(getvariables(first{1}))
-isequal(getvariables(first{2}), getvariables(second{1}))
-\end{lstlisting}
-
-Expected structural outputs:
-
-\begin{lstlisting}[style=dpoutput]
-size(P)       -> [2 2]
-Degree        -> 1
-SourceSummary -> "decision"
-variables in first endpoint -> 3
-shared boundary handle      -> true
-\end{lstlisting}
-
-For a square matrix, \code{dpvar(n, gridVectors)} follows YALMIP's symmetric
-default.  Use \code{"full"} when every matrix entry should be an independent
-decision variable.  Rectangular matrices are full by construction.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.88\linewidth]{matlab-figures/dpvar-constructor-localvalues.png}
-  \caption{Schematic \code{dpvar} construction on a one-dimensional grid.  The
-  plotted line represents one scalar entry of the parameter-dependent decision
-  variable.  Each labeled \(P_i\) is actually a YALMIP matrix coefficient; each
-  physical cell stores its local coefficient pair in \code{LocalValues}.}
-  \label{fig:dpvar-constructor-localvalues}
-\end{figure}
-
-\subsection{Inspection Fields}
-
-\code{dpvar} exposes the same inherited read-only \code{dpbase} inspection
-fields as \code{dpmat}.  There is no public \code{FunctionHandle} field on
-\code{dpvar}; the coefficient payloads are YALMIP expressions stored in
-\code{LocalValues}.  Use dot access for metadata and \code{coeffs} for one
-physical cell:
-
-\begin{lstlisting}[style=dpmatlab]
-P = dpvar(2, {[0 1 2]}, "symmetric");
-
-P.GridInfo.Vectors{1}
-P.MatrixSize
-P.Degree
-P.IsContinuous
-P.ContainsDecision
-P.HasRateDependence
-P.RateBounds
-P.SourceSummary
-c = P.coeffs(1);
-numel(c)
-\end{lstlisting}
-
-Expected structural output:
-
-\begin{lstlisting}[style=dpoutput]
-GridInfo.Vectors{1} -> [0 1 2]
-MatrixSize          -> [2 2]
-Degree              -> 1
-IsContinuous        -> true
-ContainsDecision    -> true
-HasRateDependence   -> false
-RateBounds          -> []
-SourceSummary       -> "decision"
-numel(c)            -> 2
-\end{lstlisting}
-
-The fields are exposed for inspection rather than mutation.  Changing
-\code{LocalValues}, \code{Degree}, or \code{GridInfo} independently would break
-the invariant that every physical cell has exactly \((m+1)^\ell\) local
-coefficients in the label order returned by \code{lbls(P)}.  Algebra methods
-therefore create new objects instead of editing these fields in place.
-
-\subsection{Rate Metadata}
-
-\code{RateBounds} can be supplied as metadata on a \code{dpvar}.  The table has
-one row per parameter dimension and lower/upper bounds in columns one and two.
-The constructor stores the metadata outside \code{LocalValues}; it does not
-enumerate rate vertices.
-
-\begin{lstlisting}[style=dpmatlab]
-rb = [-1 2; -3 4];
-P = dpvar(1, {[0 1], [10 20]}, RateBounds=rb);
-
-P.HasRateDependence
-P.RateBounds
-\end{lstlisting}
-
-Expected output:
-
-\begin{lstlisting}[style=dpoutput]
-HasRateDependence -> true
-RateBounds        -> [-1 2; -3 4]
-\end{lstlisting}
-
-\clearpage
-
-\subsection{\texorpdfstring{Rate-Weighted Derivatives With \code{rhodiff}}{Rate-Weighted Derivatives With rhodiff}}
-
-\code{rhodiff} differentiates a \code{dpvar} with respect to the gridded
-parameters and multiplies the local partial derivatives by bounded
-\(\dot\rho\) vertices.  The output is another \code{dpvar}, but it is
-discontinuous across physical-cell boundaries because each cell keeps its own
-local derivative evidence.  This is deliberate: derivative boundary data are
-cell-local and are not collapsed into a shared global node.
-
-\begin{lstlisting}[style=dpmatlab]
-P = dpvar(1, {[0 2]}, RateBounds=[-2 3]);
+yalmip('clear')
+P = dpvar(2, {[0 1 2]}, "symmetric", RateBounds=[-1 1]);
 D = rhodiff(P);
-
+class(D)
 D.Degree
 D.IsContinuous
-D.HasRateDependence
-D.RateBounds
 size(D.coeffs(1))
+D.RateBounds
 \end{lstlisting}
-
-Expected structural output:
 
 \begin{lstlisting}[style=dpoutput]
-Degree            -> 0
-IsContinuous      -> false
-HasRateDependence -> true
-RateBounds        -> [-2 3]
-size(D.coeffs(1)) -> [2 1]
+ans =
+    'dpvar'
+
+ans =
+     0
+
+ans =
+  logical
+   0
+
+ans =
+     2     1
+
+ans =
+    -1     1
 \end{lstlisting}
 
-The \code{2} rows appear because the scalar rate bound has two vertices: the
-lower rate and the upper rate.  More generally, if \(\ell\) parameter
-dimensions have bounds in \code{RateBounds}, \code{rhodiff} forms all
-lower/upper choices
-\[
-  \{v_1^-,v_1^+\}\times\cdots\times\{v_\ell^-,v_\ell^+\},
-\]
-so each physical cell stores \(2^\ell\) rate rows.  This finite-vertex storage
-matches the later coefficient-wise LMI assembly: affine dependence on
-\(\dot\rho\) only has to be checked at the vertices of the rate box.
-
-For this scalar degree-one cell, if \code{c = P.coeffs(1)}, then the two
-stored derivative rows are
-\[
-  -2\,\frac{c_1 - c_0}{2}
-  \quad\text{and}\quad
-  3\,\frac{c_1 - c_0}{2}.
-\]
-The denominator is the physical cell width.  In general, a scalar degree
-\(m\) cell \([\rho_i,\rho_{i+1}]\) stores
-\[
-  v\,\frac{m}{h_i}\left(c_{q+1}-c_q\right),
-  \qquad q = 0,\ldots,m-1,
-\]
-for each rate vertex \(v\).  Scalar derivatives of degree \(m>0\) therefore
-drop to degree \(m-1\); degree-zero expressions differentiate to zero rows.
-
-\begin{figure}[htbp]
-  \centering
-  \begin{tikzpicture}[x=1.5cm,y=1.0cm,>=Latex]
-    \draw[->] (0,0) -- (6.2,0) node[right] {\(\rho\)};
-    \draw[->] (0,-0.15) -- (0,2.6) node[above] {coefficient value};
-    \draw[black!35] (0.9,0) -- (0.9,-0.12) node[below] {\(\rho_i\)};
-    \draw[black!35] (3.0,0) -- (3.0,-0.12) node[below] {\(\rho_{i+1}\)};
-    \draw[black!35] (5.1,0) -- (5.1,-0.12) node[below] {\(\rho_{i+2}\)};
-    \draw[blue!70!black,thick] (0.9,0.75) -- (3.0,1.75);
-    \draw[blue!70!black,thick] (3.0,0.95) -- (5.1,2.2);
-    \fill[blue!70!black] (0.9,0.75) circle (1.6pt) node[above left] {\(c_0^{(i)}\)};
-    \fill[blue!70!black] (3.0,1.75) circle (1.6pt) node[above] {\(c_1^{(i)}\)};
-    \fill[blue!70!black] (3.0,0.95) circle (1.6pt) node[below right] {\(c_0^{(i+1)}\)};
-    \fill[blue!70!black] (5.1,2.2) circle (1.6pt) node[above] {\(c_1^{(i+1)}\)};
-    \draw[red!70!black,thick,->] (1.25,1.05) -- (2.0,1.41)
-      node[midway,above] {\(\dot\rho=v_-\)};
-    \draw[green!45!black,thick,->] (1.35,0.6) -- (2.35,1.08)
-      node[midway,below] {\(\dot\rho=v_+\)};
-    \node[align=center,draw=black!25,rounded corners=2pt,inner sep=4pt]
-      at (4.2,0.75) {each cell stores\\one row per\\rate vertex};
-  \end{tikzpicture}
-  \caption{\code{rhodiff} keeps derivative evidence local to each physical
-  cell.  The cell slope is scaled once for each admissible rate vertex, so
-  shared position coefficients need not imply shared derivative rows.}
-\end{figure}
-
-For tensor grids, \code{RateBounds} has one row per parameter dimension and
-\code{rhodiff} enumerates the Cartesian product of lower/upper bounds.  A
-two-parameter grid with bounds \([-1,2]\) and \([-3,5]\) therefore stores four
-rate rows in the order
-\[
-  (-1,-3),\quad (-1,5),\quad (2,-3),\quad (2,5).
-\]
-The local partial derivatives are accumulated after elevation into a common
-tensor Bernstein degree, so a degree-one two-parameter \code{dpvar} returns a
-degree-one derivative object with a \code{4x4} coefficient table on each
-physical cell.
+For a two-parameter object, the rate-vertex rows enumerate all lower/upper
+combinations from the two rows of \code{RateBounds}.
 
 \begin{lstlisting}[style=dpmatlab]
-rb = [-1 2; -3 5; 0 4];
-P = dpvar(1, {[0 1], [0 1], [0 1]}, RateBounds=rb);
-D = rhodiff(P);
-
-size(D.coeffs([1 1 1]))
+yalmip('clear')
+Q = dpvar(1, {[0 1], [10 20]}, RateBounds=[-1 1; -2 2]);
+E = rhodiff(Q);
+class(E)
+E.Degree
+size(E.coeffs([1 1]))
+E.RateBounds
 \end{lstlisting}
-
-Expected structural output:
 
 \begin{lstlisting}[style=dpoutput]
-size(D.coeffs([1 1 1])) -> [8 8]
+ans =
+    'dpvar'
+
+ans =
+     1
+
+ans =
+     4     4
+
+ans =
+    -1     1
+    -2     2
 \end{lstlisting}
 
-Here \(\ell=3\), so there are \(2^3=8\) rate rows.  Because the multivariate
-degree-one derivative is elevated back into the common tensor degree-one
-basis, there are also \((1+1)^3=8\) coefficient columns.
+\subsection{Affine And Mixed Algebra}
+\label{sec:dpvar-algebra}
 
-The supported call forms are \code{rhodiff(P, rb)} and \code{rhodiff(P)}.  The
-second form requires \code{P} to carry nonempty \code{RateBounds}.  If explicit
-bounds are supplied and \code{P} already carries bounds, the two tables must
-match.  Re-differentiating an existing rate-vertex expression is rejected in
-this slice.
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+R = P + Q
+R = P + A
+R = A + P
+R = P + M
+R = M + P
+R = P - Q
+R = P - A
+R = A - P
+R = +P
+R = -P
+R = A * P
+R = P * A
+R = M * P
+R = P * M
+\end{lstlisting}
 
-\subsection{Affine Algebra And Products}
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{dpvar}: affine addition and subtraction with compatible size,
+        grid, and rate metadata.
+  \item Coefficient-backed \code{dpmat}: mixed known/decision algebra for
+        ordinary \code{dpvar} expressions, including products where only one
+        side contains decisions.
+  \item Numeric scalar or matrix: promoted as constant coefficient data for
+        ordinary \code{dpvar} expressions when finite real and size-compatible.
+  \item Affine \code{sdpvar} matrix: promoted as parameter-independent affine
+        data when real, linear, and size-compatible.
+  \item Rate-vertex derivative rows: supported in the tested derivative and
+        known-data combinations used by \code{rhodiff} LMI residuals.
+  \item Metadata-only rate-dependent \code{dpvar} products are unsupported
+        until \code{rhodiff} has materialized rate-vertex rows.
+\end{itemize}
 
-\code{dpvar} supports affine coefficient operations and products where at most
-one side contains decision variables.  Products with coefficient-backed known
-data use the same Bernstein degree-growth rule as \code{dpmat}.
+\examplehead
+The affine sum with a numeric matrix keeps the same grid and degree.
 
 \begin{lstlisting}[style=dpmatlab]
-P = dpvar(1, {[0 1]});
-A = dpmat({[0 1]}, {10, 20}, Degree=1);
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric");
+S = P + eye(2);
+class(S)
+size(S)
+S.Degree
+S.ContainsDecision
+\end{lstlisting}
 
-L = A * P;
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+     2     2
+
+ans =
+     1
+
+ans =
+  logical
+   1
+\end{lstlisting}
+
+Known-data products are allowed when only one side contains decisions.  The
+product degree is the sum of the known-data degree and the decision degree.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric");
+A = dpmat({[0 1]}, {eye(2), 2*eye(2)}, Degree=1);
+K = A * P;
 R = P * A;
-
-L.Degree
+class(K)
+class(R)
+K.Degree
 R.Degree
-L.ContainsDecision
 \end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
-L.Degree        -> 2
-R.Degree        -> 2
-ContainsDecision-> true
+ans =
+    'dpvar'
+
+ans =
+    'dpvar'
+
+ans =
+     2
+
+ans =
+     2
 \end{lstlisting}
 
-Same-bound mixed scalar grids are aligned on a common refinement.  Mixed
-physical bounds are rejected.  Products such as \code{P * Q}, \code{P * x}
-where \code{x} is a bare decision variable, and products involving rate
-metadata are rejected in this slice because they would leave the supported
-affine SDP expression layer.
+\subsection{Matrix Methods}
+\label{sec:dpvar-matrix-ops}
 
-Rate-vertex derivative expressions from \code{rhodiff} may still participate
-in supported affine operations.  Ordinary \code{dpvar}, numeric, affine
-\code{sdpvar}, and coefficient-backed \code{dpmat} operands are broadcast
-across the derivative rows when the grids and matrix sizes are compatible.
-Products are allowed with numeric or coefficient-backed known data, but
-products between two rate-dependent expressions or between a rate-dependent
-expression and another decision expression are rejected.
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+sz = size(P)
+n = length(P)
+n = height(P)
+n = width(P)
+n = numel(P)
+n = ndims(P)
 
-\subsection{Matrix Operations And Indexing}
+Q = P.'
+Q = P'
+Q = vec(P)
+Q = diag(P)
+Q = diag(P, k)
+Q = reshape(P, sz)
+Q = reshape(P, m, n)
+Q = tril(P)
+Q = triu(P)
+Q = trace(P)
+Q = sum(P)
+Q = sum(P, dim)
+Q = sum(P, "all")
+Q = mean(P)
+Q = mean(P, dim)
+Q = mean(P, "all")
+Q = cumsum(P)
+Q = cumsum(P, dim)
+Q = flip(P)
+Q = flip(P, dim)
+Q = flipud(P)
+Q = fliplr(P)
+Q = rot90(P)
+Q = rot90(P, k)
+Q = repmat(P, ...)
+Q = [P, R]
+Q = [P; R]
+Q = cat(dim, P, R, ...)
+Q = blkdiag(P, R, ...)
+tf = isequal(P, R, ...)
+\end{lstlisting}
 
-Matrix-like methods report and transform the YALMIP coefficient payloads, not
-the number of physical cells.  The supported structural methods mirror the
-current \code{dpmat} coefficient-backed methods.
+\arghead
+These methods preserve Bernstein grid metadata and act coefficient-wise on the
+matrix payloads.  Dimension arguments follow MATLAB-style calls such as
+\code{sum(P,2)}, \code{reshape(P,[3 2])}, and \code{diag(P,1)}.
+Concatenation and \code{blkdiag} may combine \code{dpvar},
+coefficient-backed \code{dpmat}, affine \code{sdpvar}, and numeric blocks when
+the matrix dimensions, grid bounds, degree elevation, and rate metadata are
+compatible.
+
+\examplehead
+Shape-changing operations return new \code{dpvar} objects and preserve the
+decision-backed coefficient graph.
 
 \begin{lstlisting}[style=dpmatlab]
-P = dpvar(2, {[0 1]}, "full");
-
-length(P)
-height(P)
-width(P)
-numel(P)
-ndims(P)
-size(vec(P))
-size(diag(P))
-size(reshape(P, [1 4]))
-size(P(:, end))
+yalmip('clear')
+P = dpvar(2, 3, {[0 1]}, "full");
+Tt = P.';
+class(Tt)
+size(Tt)
+V = vec(P);
+class(V)
+size(V)
+R = reshape(P, [3 2]);
+class(R)
+size(R)
 \end{lstlisting}
-
-Expected output:
 
 \begin{lstlisting}[style=dpoutput]
-length(P)          -> 2
-height(P)          -> 2
-width(P)           -> 2
-numel(P)           -> 4
-ndims(P)           -> 2
-size(vec(P))       -> [4 1]
-size(diag(P))      -> [2 1]
-size(reshape(P,[1 4])) -> [1 4]
-size(P(:,end))     -> [2 1]
+ans =
+    'dpvar'
+
+ans =
+     3     2
+
+ans =
+    'dpvar'
+
+ans =
+     6     1
+
+ans =
+    'dpvar'
+
+ans =
+     3     2
 \end{lstlisting}
 
-Concatenation, \code{blkdiag}, structural transforms, matrix slicing, and
-matrix assignment accept numeric constants, affine \code{sdpvar} blocks, other
-compatible \code{dpvar} objects, and coefficient-backed \code{dpmat} blocks.
-They reject nonlinear YALMIP expressions, function-only \code{dpmat} operands,
-unsupported dimensions, matrix growth, deletion assignment, and incompatible
-rate metadata.
-
-\subsection{Validation Boundaries}
-
-\code{dpvar} constructor-created variables support \code{Degree=1} by default
-and \code{Degree=0} for parameter-independent decision expressions on the same
-grid metadata.  Constructor-created variables are continuous decision objects;
-those flags are fixed internally.  Attempts to pass the internal continuity,
-decision-content, or rate-dependence flags as constructor options are rejected.
-A \code{"symmetric"} structure flag requires a square matrix.  Grid and
-\code{RateBounds} validation follows the shared \code{dpbase} rules.
-
-\section{\texorpdfstring{\code{dplmi}}{dplmi} Assembly And Solver-Facing Use}
-
-\subsection{Purpose}
-
-\code{dplmi} wraps the finite YALMIP constraints produced from cell-local
-\code{dpvar} residuals.  In the current implementation, \code{dpvar <= rhs}
-and \code{dpvar >= rhs} first form an affine residual using the supported
-\code{dpvar} algebra, then assemble one semidefinite constraint for every
-physical cell, every local Bernstein coefficient, and every active
-\(\dot\rho\) rate-vertex row.
-
-The current \code{dplmi} layer is deliberately direct: it constrains every
-stored Bernstein coefficient.  Relaxation-lemma and Polya options are accepted
-as named options only so unsupported requests can fail clearly.
-
-\subsection{Syntax}
+Summary and assembly calls use the same coefficient-wise mechanism.
 
 \begin{lstlisting}[style=dpmatlab]
-C = P <= Q
+yalmip('clear')
+P = dpvar(2, 3, {[0 1]}, "full");
+S = sum(P, 2);
+B = blkdiag(P(1:2,1:2), eye(2));
+class(S)
+class(B)
+size(S)
+size(B)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+    'dpvar'
+
+ans =
+     2     1
+
+ans =
+     4     4
+\end{lstlisting}
+
+\subsection{Indexing And Assignment}
+\label{sec:dpvar-indexing}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Q = P(rows, cols)
+value = P.PropertyName
+P(rows, cols) = numericValue
+P(rows, cols) = Q
+P(rows, cols) = A
+P(rows, cols) = X
+\end{lstlisting}
+
+\arghead
+Matrix indexing slices the matrix payload across every physical cell and local
+coefficient.  Assignment accepts numeric blocks, compatible \code{dpvar}
+blocks, compatible coefficient-backed \code{dpmat} blocks, and affine
+\code{sdpvar} blocks.  Assignment may elevate degrees and propagate compatible
+rate metadata.  Use ordinary MATLAB subscripts such as \code{P(1:2,1)} or
+\code{P(:,2)=A}.
+
+\examplehead
+Indexing returns a smaller \code{dpvar}; assignment updates the selected matrix
+entries across every local coefficient.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(2, 3, {[0 1]}, "full");
+col = P(:, 2);
+P(:, 1) = 0;
+class(col)
+size(col)
+size(P)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dpvar'
+
+ans =
+     2     1
+
+ans =
+     2     3
+\end{lstlisting}
+
+\subsection{Comparisons To \texorpdfstring{\code{dplmi}}{dplmi}}
+\label{sec:dpvar-comparison}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
 C = P <= 0
-C = P >= Q
-C = P >= eye(n)
-C = dplmi(expr, "<=")
-C = dplmi(expr, ">=", relaxLemma=false, UsePolya=false, PolyaDegree=0)
+C = P >= 0
+C = lhs <= rhs
+C = lhs >= rhs
+\end{lstlisting}
+
+\arghead
+The comparison overloads construct \code{dplmi} objects.  The expression must
+be square and coefficient-wise symmetric or Hermitian after assembly.
+\code{rhs} is usually \code{0}, but compatible numeric, \code{dpmat}, affine
+\code{sdpvar}, and \code{dpvar} expressions may appear in the residual.
+\code{dpvar} comparisons do not solve an optimization problem by themselves.
+
+\examplehead
+Comparison creates a \code{dplmi} wrapper with one stored constraint for each
+physical cell and local Bernstein coefficient.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(2, {[0 0.5 1]}, "symmetric");
+Cneg = P <= 0;
+class(Cneg)
+numel(Cneg.Constraints)
+Cpos = P >= 0;
+class(Cpos)
+numel(Cpos.Constraints)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dplmi'
+
+ans =
+     4
+
+ans =
+    'dplmi'
+
+ans =
+     4
+\end{lstlisting}
+
+\subsection{Limits}
+\label{sec:dpvar-limits}
+
+\begin{itemize}[leftmargin=*]
+  \item Constructor-created \code{dpvar} objects currently support
+        \code{Degree=0} and \code{Degree=1}.
+  \item Products may contain decision variables on at most one side; nonlinear
+        decision products such as \code{P * Q} are outside this slice.
+  \item Function-only \code{dpmat} operands cannot enter \code{dpvar} algebra
+        unless they were constructed with explicit Bernstein evidence.
+  \item \code{rhodiff} of an existing rate-vertex derivative expression is not
+        part of the current public workflow.
+\end{itemize}
+
+\section{\texorpdfstring{\code{dplmi}}{dplmi} Reference}
+\label{sec:dplmi}
+
+\code{dplmi} stores direct coefficient-wise YALMIP constraints assembled from
+square symmetric \code{dpvar} expressions.  It is the package boundary between
+Bernstein coefficient objects and ordinary YALMIP solver calls.
+
+\subsection{Lookup}
+\label{sec:dplmi-lookup}
+
+\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\toprule
+Task & Entry \\
+\midrule
+Construct wrapper &
+\hyperref[sec:dplmi-construction]{\code{dplmi}},
+\hyperref[sec:dpvar-comparison]{\code{<=}/\code{>=}} \\
+Count constraints &
+\hyperref[sec:dplmi-direct]{direct coefficient constraints} \\
+Export to YALMIP &
+\hyperref[sec:dplmi-toyalmip]{\code{toYalmip}} \\
+Solve &
+\hyperref[sec:dplmi-solver-use]{solver-facing use},
+\hyperref[sec:examples]{Examples} \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Construction And Comparisons}
+\label{sec:dplmi-construction}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+C = dplmi(expr, relation)
+C = dplmi(expr, relation, relaxLemma=false, UsePolya=false, PolyaDegree=0)
+C = lhs <= rhs
+C = lhs >= rhs
+\end{lstlisting}
+
+\arghead
+\code{expr} must be a square \code{dpvar} expression whose coefficient matrices
+are symmetric or Hermitian.  The \code{relation} input is \code{"<="} or
+\code{">="}.  Comparisons such as \code{lhs >= rhs} are the ordinary
+user-facing entry point and support compatible numeric, \code{dpmat}, affine
+\code{sdpvar}, and \code{dpvar} right-hand sides.  Direct
+\code{dplmi(expr, relation)} construction is useful for advanced assembly or
+tests.  Reserved options must stay at their defaults: \code{relaxLemma=false},
+\code{UsePolya=false}, and \code{PolyaDegree=0}; nondefault values currently
+raise reserved-option errors.
+
+\examplehead
+The direct constructor is equivalent to the comparison path when the relation
+and reserved options are explicit.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric");
+C = dplmi(P, ">=", relaxLemma=false, UsePolya=false, PolyaDegree=0);
+class(C)
+numel(C.Constraints)
+C.RelaxLemma
+C.UsePolya
+C.PolyaDegree
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    'dplmi'
+
+ans =
+     2
+
+ans =
+  logical
+   0
+
+ans =
+  logical
+   0
+
+ans =
+     0
+\end{lstlisting}
+
+\subsection{Direct Coefficient Assembly}
+\label{sec:dplmi-direct}
+
+For each physical cell, local Bernstein coefficient, and rate-vertex row if
+present, \code{dplmi} creates one YALMIP semidefinite constraint.  For an
+ordinary expression with \(N_c\) physical cells and \(N_b\) Bernstein
+coefficients per cell, the number of stored constraints is \(N_cN_b\).  For a
+\code{rhodiff} expression with \(N_v\) rate vertices, the count becomes
+\(N_cN_bN_v\).
+
+\subsection{\texorpdfstring{\code{toYalmip}}{toYalmip}}
+\label{sec:dplmi-toyalmip}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
 F = toYalmip(C)
 F = C.toYalmip()
 \end{lstlisting}
 
-Here \code{expr} must be a \code{dpvar} residual.  The comparison overloads are
-usually the most convenient entry point because they reuse existing \code{dpvar}
-promotion rules for numeric constants, affine \code{sdpvar} matrices,
-coefficient-backed \code{dpmat} operands, and compatible \code{dpvar} objects.
+\arghead
+\code{toYalmip} concatenates the stored constraint cells into a YALMIP
+constraint array.  It has no package-specific options.  The output is suitable
+for \code{optimize}, concatenation with other YALMIP constraints, or ordinary
+YALMIP inspection.
 
-\subsection{Direct Coefficient Constraints}
-
-The simplest use is a coefficient-wise matrix inequality over a grid.
-
-\begin{lstlisting}[style=dpmatlab]
-P = dpvar(2, {[0 1 2]}, "symmetric");
-Cpos = P >= eye(2);
-
-class(Cpos)
-numel(Cpos.Constraints)
-Cpos.RelaxLemma
-Cpos.UsePolya
-Cpos.PolyaDegree
-\end{lstlisting}
-
-Expected structural output:
-
-\begin{lstlisting}[style=dpoutput]
-class(Cpos)           -> "dplmi"
-numel(Cpos.Constraints) -> 4
-RelaxLemma           -> false
-UsePolya             -> false
-PolyaDegree          -> 0
-\end{lstlisting}
-
-There are two physical cells and two degree-one local coefficients per cell,
-so direct assembly creates four scalar YALMIP semidefinite constraint entries.
-The entries remain inspectable in \code{Cpos.Constraints}; use
-\code{toYalmip(Cpos)} only at the solver boundary.
-
-\subsection{Rate-Vertex Assembly From \texorpdfstring{\code{rhodiff}}{rhodiff}}
-
-When the residual contains \code{rhodiff(P, rb)}, each local coefficient table
-has one row per admissible \(\dot\rho\) vertex.  \code{dplmi} constrains every
-row.
+\examplehead
+The function-call and dot-call forms return equivalent YALMIP constraint
+arrays.
 
 \begin{lstlisting}[style=dpmatlab]
-P = dpvar(2, {[0 1 2]}, "symmetric", RateBounds=[-1 1]);
-D = rhodiff(P);
-Cdecay = D <= 0;
-
-D.Degree
-size(D.coeffs(1))
-numel(Cdecay.Constraints)
-\end{lstlisting}
-
-Expected structural output:
-
-\begin{lstlisting}[style=dpoutput]
-D.Degree                 -> 0
-size(D.coeffs(1))        -> [2 1]
-numel(Cdecay.Constraints)-> 4
-\end{lstlisting}
-
-The grid has two physical cells.  The scalar rate interval \([-1,1]\) has two
-vertices.  The degree-one derivative drops to degree zero, so each cell has one
-local derivative coefficient per rate vertex: \(2\) cells times \(2\) rate rows.
-
-For a two-parameter grid, the same rule applies to the tensor product of rate
-vertices:
-
-\begin{lstlisting}[style=dpmatlab]
-rb = [-1 1; -2 2];
-P = dpvar(2, {[0 1], [0 1]}, "symmetric", RateBounds=rb);
-D = rhodiff(P);
-C = D <= 0;
-
-size(D.coeffs([1 1]))
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric");
+C = P >= 0;
+class(C)
 numel(C.Constraints)
+F1 = toYalmip(C);
+F2 = C.toYalmip();
+isa(F1, "lmi") || isa(F1, "constraint")
+length(F1)
+isa(F2, "lmi") || isa(F2, "constraint")
+length(F2)
 \end{lstlisting}
-
-Expected structural output:
 
 \begin{lstlisting}[style=dpoutput]
-size(D.coeffs([1 1])) -> [4 4]
-numel(C.Constraints)  -> 16
+ans =
+    'dplmi'
+
+ans =
+     2
+
+ans =
+  logical
+   1
+
+ans =
+     2
+
+ans =
+  logical
+   1
+
+ans =
+     2
 \end{lstlisting}
 
-There is one physical cell, four rate vertices, and four degree-one tensor
-coefficients after multivariate partial derivatives are elevated into a common
-tensor basis.
+After this boundary, the package is no longer assembling Bernstein data; YALMIP
+owns solver choice, diagnostics, and optimization status.
 
-\subsection{A Lyapunov-Style Solver Smoke Test}
+\subsection{Solver-Facing Use}
+\label{sec:dplmi-solver-use}
 
-The following example mirrors the current solver smoke test.  It compares a
-constant decision matrix against a parameter-dependent one for the same
-coefficient-wise decay inequality.
+\code{dplmi} does not own solver settings or wrap \code{optimize}.  After
+\code{toYalmip}, use ordinary YALMIP:
+
+\begin{lstlisting}[style=dpsyntax]
+opts = sdpsettings("solver", solverName, "verbose", 0);
+sol = optimize([C1.toYalmip, C2.toYalmip], objective, opts);
+\end{lstlisting}
+
+The solver selected by YALMIP must be available on the MATLAB path.  The current
+test suite prefers MOSEK when available and otherwise falls back to LMILAB for
+smoke coverage.
+
+\section{Examples}
+\label{sec:examples}
+
+\subsection{Rate-Dependent Block LMI Solver Smoke}
+\label{sec:solver-example}
+
+This example is adapted from \code{+tests/+dplmi/test_solver_smoke.m}.  The
+goal is to find a parameter-dependent \(P(\rho)\) and scalar \(\gamma\) such
+that, on every Bernstein coefficient and rate vertex,
+\[
+\begin{bmatrix}
+\dot P + PA + A^\top P & PB & C^\top\\
+B^\top P & -\gamma I & D^\top\\
+C & D & -\gamma I
+\end{bmatrix}
+\preceq 0,
+\qquad
+P(\rho)\succeq 0.
+\]
+The derivative term \(\dot P\) is built with \code{rhodiff(P, [-1 1])}.  The
+comparison operators create \code{dplmi} wrappers, and \code{toYalmip} hands
+the coefficient-wise constraints to YALMIP.
 
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, @(x) (1 - x) * [-1 -1; 1 -1] ...
-    + x * [-1 -10; 0.1 -1], Degree=1);
-opts = sdpsettings('verbose', 0);
-
-Pc = dpvar(2, {[0 1]}, Degree=0);
-Cdecay = Pc * A + A' * Pc <= -1e-10 * eye(2);
-Cpos = Pc >= eye(2);
-solConst = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
-
-Pd = dpvar(2, {[0 1]});
-Cdecay = Pd * A + A' * Pd <= -1e-10 * eye(2);
-Cpos = Pd >= eye(2);
-solDp = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
-
-[solConst.problem, solDp.problem]
-\end{lstlisting}
-
-Expected result under MOSEK:
-
-\begin{lstlisting}[style=dpoutput]
-[solConst.problem, solDp.problem] -> [1 0]
-\end{lstlisting}
-
-YALMIP returns \code{problem=1} for the constant-\(P\) infeasible case and
-\code{problem=0} for the degree-one parameter-dependent feasible case in the
-current local MOSEK test setup.  When MOSEK is unavailable, the smoke test
-falls back to \code{lmilab} and checks the solver-dispatch path without using
-LMILAB to certify this infeasibility distinction.
-
-\subsection{A Block DP-LMI With A Performance Variable}
-
-This example is adapted from the root \code{test.m} case.  The test suite keeps
-the same block structure in a reduced-grid \code{dplmi} solver-smoke test; the
-manual version below keeps the original 20-point grid.  It combines known
-parameter-dependent matrices, a rate-weighted derivative, a scalar degree-zero
-performance variable, block matrix assembly, and solver-backed optimization.
-
-\begin{lstlisting}[style=dpmatlab]
-grid = linspace(0, 1, 20);
-A = dpmat(grid, @(x) [-1, 0.5; -1, -2] ...
-    + x * [-1.3, -20; 2, -10], Degree=1);
-B = dpmat(grid, @(x) [1, -4; -1, -1] ...
-    + x * [2.2, 0.5; -6, -5], Degree=1);
-C = eye(2);
-D = zeros(2);
+yalmip('clear')
+grid = linspace(0, 1, 2);
+A = dpmat(grid, @(x) [-1, 0.5; -1, -2] + ...
+    x * [-1.3, -20; 2, -10], Degree=1);
+B = dpmat(grid, @(x) [1, -4; -1, -1] + ...
+    x * [2.2, 0.5; -6, -5], Degree=1);
+Cmat = eye(2);
+Dmat = zeros(2);
 
 P = dpvar(2, grid);
 diffP = rhodiff(P, [-1 1]);
 gamma = dpvar(1, grid, Degree=0);
-
-E1 = [diffP + P * A + A' * P, P * B, C';
-    B' * P, -gamma * eye(2), D';
-    C, D, -gamma * eye(2)] <= 0;
+E1 = [diffP + P * A + A' * P, P * B, Cmat';
+      B' * P, -gamma * eye(2), Dmat';
+      Cmat, Dmat, -gamma * eye(2)] <= 0;
 E2 = P >= 0;
+
+objective = gamma.LocalValues{1}{1};
+solver = 'lmilab';
+if exist('mosekopt', 'file') ~= 0
+    solver = 'mosek';
+end
+opts = sdpsettings('solver', solver, 'verbose', 0);
+sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
 
 numel(E1.Constraints)
 numel(E2.Constraints)
-
-if exist('mosekopt', 'file') ~= 0
-    opts = sdpsettings('solver', 'mosek', 'verbose', 0);
-else
-    opts = sdpsettings('solver', 'lmilab', 'verbose', 0);
-end
-objective = gamma.LocalValues{1}{1};
-sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
-value(objective)
+sol.problem
+isfinite(value(objective))
 \end{lstlisting}
-
-Expected structural output before the solver call:
 
 \begin{lstlisting}[style=dpoutput]
-numel(E1.Constraints) -> 114
-numel(E2.Constraints) -> 38
+ans =
+     6
+
+ans =
+     2
+
+ans =
+     0
+
+ans =
+  logical
+   1
 \end{lstlisting}
-
-The first block inequality has \(19\) physical intervals, degree-two residual
-coefficients, and two rate vertices from \code{diffP}, so it produces
-\(19 \times 3 \times 2 = 114\) direct constraints.  The positivity constraint
-has \(19\) intervals and two degree-one coefficients, so it produces
-\(19 \times 2 = 38\) constraints.  The final numeric value depends on the
-installed solver and tolerances; the test verifies a successful solve and a
-finite objective value, using MOSEK when available and \code{lmilab} otherwise.
-
-\subsection{Validation Boundaries}
-
-\code{dplmi} requires square symmetric or Hermitian coefficient matrices.
-Non-square residuals fail with \code{dplmi:InvalidMatrixSize}; non-symmetric
-residuals fail with \code{dplmi:NonSymmetricExpression}.  Unsupported
-relaxation and Polya requests fail explicitly:
-
-\begin{lstlisting}[style=dpmatlab]
-P = dpvar(2, {[0 1]}, "symmetric");
-
-dplmi(P, "<=", relaxLemma=true)  % dplmi:UnsupportedRelaxLemma
-dplmi(P, "<=", UsePolya=true)    % dplmi:UnsupportedPolya
-dplmi(P, "<=", PolyaDegree=1)    % dplmi:UnsupportedPolya
-\end{lstlisting}
-
-Direct coefficient-wise assembly is the only implemented route in this slice.
-Strictness margins, theorem residual margins, relaxation slacks, Polya
-lifting, diagnostics, and high-level solver wrappers remain future work.
 
 \section{Current Limits}
-
-This repository version intentionally has a narrow public surface.
+\label{sec:current-limits}
 
 \begin{itemize}[leftmargin=*]
-  \item The backend parent \code{dpbase}, user-facing \code{dpmat} and
-        \code{dpvar} classes, \code{helper.chk}, \code{helper.scanMats}, and
-        \code{helper.cell2bern} are implemented and covered by the current
-        MATLAB test entry point.
-  \item \code{dpmat} is a known-data object only.  It does not contain YALMIP
-        decisions, rate dependence, exact function-handle algebra beyond
-        evaluation/plot sampling, or solver-facing LMI assembly.
-  \item \code{dpvar} is currently a continuous degree-1 YALMIP-backed affine
-        expression object with \code{rhodiff} support for discontinuous
-        cell-local rate-vertex derivatives.  It does not implement nonlinear
-        decision products, products with rate dependence on both sides, or
-        solver calls.
-  \item \code{dplmi} implements direct coefficient-wise finite YALMIP
-        constraint assembly from \code{dpvar} residuals.  It does not yet
-        implement relaxation-lemma assembly, Polya assembly, strictness
-        margins, residual evidence, diagnostics, or high-level solver wrappers.
-  \item There is no public \code{dpdiff} class.  Public derivative behavior
-        belongs to \code{dpvar} through \code{rhodiff}.
-  \item YALMIP solver invocation is available through ordinary YALMIP calls
-        after converting \code{dplmi} objects with \code{toYalmip}; this package
-        does not yet provide a custom solver wrapper.
-  \item Private Bernstein utilities support internal tests and implementation,
-        but they are not user-facing functions.
+  \item \code{dplmi} currently assembles direct coefficient-wise constraints.
+        Relaxation-lemma and Polya workflows are reserved future layers, not
+        supported user workflows in this manual.
+  \item Package-owned solver wrappers, strictness-margin diagnostics, residual
+        evidence, and advanced relaxation workflows are not part of the current
+        public API.
+  \item \code{dpvar} is an affine YALMIP/Bernstein expression object.  It does
+        not support nonlinear decision products.
+  \item \code{dpmat} function-only objects evaluate exactly, but coefficient
+        algebra requires Bernstein coefficient evidence.
+  \item \code{dpbase} is documented for architecture and advanced inspection.
+        Primary modeling workflows should use \code{dpmat}, \code{dpvar}, and
+        \code{dplmi}.
 \end{itemize}
-
-\section{Style References Used For This Manual}
-
-This manual follows the organization style common in mature \matlab{} and
-control-toolbox documentation: installation first, a small runnable example,
-conceptual background, then API reference with syntax, arguments, examples,
-validation rules, and current limits.  Local LPVTools, ROLMIP, and ROMULOC
-documentation were used as style references only.  Their APIs and text are not
-dependencies of this package and are not copied here.
 
 \end{document}

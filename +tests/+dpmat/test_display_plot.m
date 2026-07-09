@@ -18,11 +18,22 @@ function testDispAndDisplayText(testCase)
     testCase.verifyTrue(contains(detail, "Coefficients per cell: 2"));
 end
 
-function testTableListsBernsteinCoefficients(testCase)
-    % table(A) should expose cell-local Bernstein metadata for the console.
-    A = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+function testMatlabTableConstructorIsNotOverloaded(testCase)
+    % table(A) should remain MATLAB's table constructor, not a dpmat method.
+    A = dpmat({[0 1]}, {1, 2}, Degree=1);
 
     T = table(A);
+
+    testCase.verifyEqual(T.Properties.VariableNames, {'A'});
+    testCase.verifyEqual(height(T), 1);
+    testCase.verifyTrue(isequal(T.A, A));
+end
+
+function testBernsteinTableListsBernsteinCoefficients(testCase)
+    % bernsteinTable(A) should expose cell-local Bernstein metadata.
+    A = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+
+    T = bernsteinTable(A);
 
     testCase.verifyEqual(T.Properties.VariableNames, {'TermIndex', ...
         'CellSubscript', 'CoeffSubscript', 'LocalIndex', 'Basis', ...
@@ -36,12 +47,43 @@ function testTableListsBernsteinCoefficients(testCase)
     testCase.verifyEqual(T.Value{3}, 3);
 end
 
-function testTableTensorGridOrderingAndFunctionOnlyRejection(testCase)
+function testBernsteinTableSelectsPhysicalCell(testCase)
+    % The optional cell selector should narrow output to one hypercube.
+    A = dpmat({[0 1 2]}, {1, 2, 3, 4, 5}, Degree=2);
+
+    T = bernsteinTable(A, 2);
+
+    testCase.verifyEqual(height(T), 3);
+    testCase.verifyEqual(T.CellSubscript{1}, 2);
+    testCase.verifyEqual(T.CoeffSubscript{1}, 3);
+    testCase.verifyEqual(T.CoeffSubscript{3}, 5);
+    testCase.verifyEqual(T.Value{1}, 3);
+    testCase.verifyEqual(T.Value{3}, 5);
+end
+
+function testBernsteinTableOneLineModeIncludesBernsteinScales(testCase)
+    % oneLine keeps the Bernstein basis multipliers, including middle terms.
+    A = dpmat({[0 1]}, {[0 1], [1 2]}, Degree=1);
+    B = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+
+    TA = bernsteinTable(A, 1, "oneLine");
+    TB = bernsteinTable(B, "oneLine");
+
+    testCase.verifyEqual(TA.Properties.VariableNames, ...
+        {'CellSubscript', 'Expression'});
+    testCase.verifyEqual(height(TA), 1);
+    testCase.verifyEqual(string(TA.Expression(1)), ...
+        "a*[0 1] + (1-a)*[1 2]");
+    testCase.verifyEqual(string(TB.Expression(1)), ...
+        "a^2*1 + 2a(1-a)*2 + (1-a)^2*3");
+end
+
+function testBernsteinTableTensorGridOrderingAndFunctionOnlyRejection(testCase)
     % Tensor rows should follow the shared local-label combination order.
     A = dpmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1);
     F = dpmat({[0 1]}, @(rho) rho);
 
-    T = table(A);
+    T = bernsteinTable(A);
 
     testCase.verifyEqual(height(T), 4);
     testCase.verifyEqual(T.CellSubscript{1}, [1 1]);
@@ -50,7 +92,10 @@ function testTableTensorGridOrderingAndFunctionOnlyRejection(testCase)
     testCase.verifyEqual(string(T.Basis(4)), "(1-a1) * (1-a2)");
     testCase.verifyEqual(T.Value{1}, 1);
     testCase.verifyEqual(T.Value{4}, 4);
-    testCase.verifyError(@() table(F), "dpmat:FunctionOnlyTable");
+    testCase.verifyError(@() bernsteinTable(F), "dpmat:FunctionOnlyBernsteinTable");
+    testCase.verifyError(@() bernsteinTable(A, [2 1]), "dpbase:InvalidCellSubs");
+    testCase.verifyError(@() bernsteinTable(A, [1 1], [1 1]), "dpmat:InvalidBernsteinTableInput");
+    testCase.verifyError(@() bernsteinTable(A, "wide"), "dpmat:InvalidBernsteinTableInput");
 end
 
 function testPlotOneDimensionalFunctionBacked(testCase)

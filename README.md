@@ -42,19 +42,23 @@ Known scalar data:
 
 ```matlab
 A = dpmat({[0 1]}, {1, 3}, Degree=1);
-val = A.evaluate(0.25)
+T = bernsteinTable(A, "oneLine");
+disp(T)
 ```
 
-Expected output:
+MATLAB output:
 
 ```text
-val =
-    1.5000
+    CellSubscript      Expression
+    _____________    _______________
+
+        {[1]}        "a*1 + (1-a)*3"
 ```
 
 YALMIP-backed decision expression and direct LMI assembly:
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
 F = toYalmip(C);
@@ -72,7 +76,10 @@ F = toYalmip(C);
 - Local PDF manual: `doc/manual.pdf`
 - Manual source: `doc/manual.tex`
 
-The GitHub Pages source lives in `webpage/` and is built with npm, Astro, and Starlight.
+The local manual is the most complete reference: Bernstein background appears
+before setup, and each class chapter starts with lookup tables before detailed
+MATLAB-style function pages. The GitHub Pages source lives in `webpage/` and is
+built with npm, Astro, and Starlight.
 
 ## Current Limitations
 

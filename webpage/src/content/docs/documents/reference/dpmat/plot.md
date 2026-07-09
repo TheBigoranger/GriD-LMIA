@@ -92,4 +92,4 @@ The two surfaces correspond to $A_{1,1}(\rho,\eta)=\rho+\eta$ and $A_{1,2}(\rho,
 
 ## See Also
 
-[`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/) · [`table`](/DP-LMI-package/documents/reference/dpmat/table/)
+[`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/) · [`bernsteinTable`](/DP-LMI-package/documents/reference/dpmat/bernsteintable/)

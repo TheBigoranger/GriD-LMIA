@@ -45,7 +45,7 @@ export default defineConfig({
                 { label: "Constructor", slug: "documents/reference/dpmat/constructor" },
                 { label: "evaluate", slug: "documents/reference/dpmat/evaluate" },
                 { label: "plot", slug: "documents/reference/dpmat/plot" },
-                { label: "table", slug: "documents/reference/dpmat/table" },
+                { label: "bernsteinTable", slug: "documents/reference/dpmat/bernsteintable" },
                 { label: "Matrix Operations", slug: "documents/reference/dpmat/matrix-operations" },
               ],
             },

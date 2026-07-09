@@ -26,21 +26,73 @@ F = C.toYalmip()
 
 | Argument | Description |
 | :--- | :--- |
-| `C` | A `dplmi` object. |
+| `C` | A `dplmi` object, such as `C = P >= 0`. |
 
 ## Output
 
 `F` is a YALMIP constraint array suitable for ordinary solver calls such as `optimize(F, objective, sdpsettings(...))`.
 
-## Example
+## Description
+
+`dplmi` stores constraints in package-owned cell-local form so the package can
+assemble one condition per physical cell, Bernstein coefficient, and rate
+vertex. `toYalmip` is the boundary where those stored entries become a regular
+YALMIP constraint array:
+
+$$
+F = [F_1,\ldots,F_{N_cN_bN_v}].
+$$
+
+It does not choose a solver, create an objective, apply relaxation margins, or
+run `optimize`.
+
+## Examples
+
+### Function-call form
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
 F = toYalmip(C);
+isa(F, "lmi") || isa(F, "constraint")
+length(F)
 ```
 
-`F` concatenates the stored cell-local coefficient constraints at the solver-facing boundary.
+```text
+ans =
+  logical
+   1
+
+ans =
+     2
+```
+
+The two YALMIP entries correspond to one physical cell and two degree-one
+Bernstein coefficients.
+
+### Dot-call form
+
+```matlab
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric");
+C = P >= 0;
+F = C.toYalmip();
+isa(F, "lmi") || isa(F, "constraint")
+length(F)
+```
+
+```text
+ans =
+  logical
+   1
+
+ans =
+     2
+```
+
+The dot-call form is equivalent and is convenient when chaining from a stored
+`dplmi` object.
 
 ## Limitations
 

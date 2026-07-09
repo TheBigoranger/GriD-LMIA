@@ -32,6 +32,7 @@ Operate on YALMIP-backed Bernstein decision expressions while preserving the cel
 ### Addition, subtraction, and unary signs
 
 ```matlab
+yalmip('clear')
 P = dpvar(1, {[0 1]});
 Q = P - P;
 R = P + 2;
@@ -60,6 +61,7 @@ ans =
 ### Known-data multiplication
 
 ```matlab
+yalmip('clear')
 A = dpmat({[0 1]}, {2, 3}, Degree=1);
 P = dpvar(1, {[0 1]});
 R = A * P;
@@ -79,6 +81,7 @@ ans =
 ### Transpose, reshape, squeeze, and vec
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
 Pt = P.';
 Ph = P';
@@ -106,6 +109,7 @@ For real affine decision payloads, `transpose` and `ctranspose` have the same nu
 ### Matrix summaries
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
 D = diag(P);
 tr = trace(P);
@@ -133,6 +137,7 @@ ans =
 ### Assembly
 
 ```matlab
+yalmip('clear')
 P = dpvar(1, {[0 1]});
 H = horzcat(P, P);
 V = vertcat(P, P);
@@ -158,6 +163,7 @@ ans =
 ### Indexing and assignment
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1]}, "full");
 entry = P(1, 2);
 P(2, 1) = 0;

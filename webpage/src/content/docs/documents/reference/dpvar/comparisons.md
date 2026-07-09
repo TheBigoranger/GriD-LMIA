@@ -26,26 +26,74 @@ C = P >= rhs
 
 | Argument | Description |
 | :--- | :--- |
-| `P` | Square `dpvar` expression or compatible expression after promotion. |
-| `rhs` | Numeric, `dpmat`, affine `sdpvar`, or `dpvar` expression that can form a residual. |
+| `P` | Square `dpvar` expression or compatible expression after promotion, such as `P` from `dpvar(2,{[0 1]},"symmetric")`. |
+| `rhs` | Numeric, `dpmat`, affine `sdpvar`, or `dpvar` expression that can form a residual; the most common value is `0`. |
 
 ## Output
 
 `C` is a [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) object.
 
-## Example
+## Description
+
+The comparison overloads do not solve an optimization problem. They assemble a
+coefficient-wise residual and wrap it in `dplmi` so it can later be converted to
+YALMIP constraints.
+
+For an ordinary continuous expression with `Nc` physical cells and `Nb`
+Bernstein coefficients per cell, the direct constraint count is
+
+$$
+N_c N_b.
+$$
+
+If the expression includes rate-vertex rows from `rhodiff`, the count is
+multiplied by the number of rate vertices.
+
+## Examples
+
+### Positive-semidefinite comparison
 
 ```matlab
+yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
-F = toYalmip(C);
+class(C)
+numel(C.Constraints)
 ```
 
-`F` is a YALMIP constraint array suitable for ordinary `optimize` calls.
+```text
+ans =
+    'dplmi'
+
+ans =
+     2
+```
+
+One physical cell with degree one has two local Bernstein coefficients, so the
+comparison stores two direct coefficient constraints.
+
+### Negative-semidefinite residual
+
+```matlab
+yalmip('clear')
+P = dpvar(2, {[0 0.5 1]}, "symmetric");
+C = P <= 0;
+numel(C.Constraints)
+```
+
+```text
+ans =
+     4
+```
+
+Two physical cells times two local degree-one coefficients gives four stored
+constraints.
 
 ## Validation And Errors
 
-Comparison residuals must produce square symmetric or Hermitian coefficient matrices before `dplmi` assembly succeeds.
+- Comparison residuals must produce square symmetric or Hermitian coefficient matrices before `dplmi` assembly succeeds.
+- Nonsquare residuals raise `dplmi:InvalidMatrixSize`.
+- Nonsymmetric residual coefficient matrices raise `dplmi:NonSymmetricExpression`.
 
 ## See Also
 

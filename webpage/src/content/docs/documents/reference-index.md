@@ -15,7 +15,7 @@ This generated page lists implemented public classes and methods that are docume
 | [`dpmat constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/) | dpmat function | Create coefficient-backed or function-backed known-data matrices. |
 | [`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/) | dpmat method | Evaluate known matrix data at one parameter point. |
 | [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/) | dpmat method | Sample one- or two-parameter known data for diagnostics. |
-| [`table`](/DP-LMI-package/documents/reference/dpmat/table/) | dpmat method | Inspect Bernstein coefficient rows as a MATLAB table. |
+| [`bernsteinTable`](/DP-LMI-package/documents/reference/dpmat/bernsteintable/) | dpmat method | Inspect Bernstein coefficient rows as a MATLAB table. |
 | [`dpmat matrix operations`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/) | dpmat methods | Use coefficient-backed algebra, transforms, summaries, assembly, and indexing. |
 | [`dpvar`](/DP-LMI-package/documents/reference/dpvar/) | Decision class | Create continuous YALMIP-backed Bernstein decision expressions. |
 | [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) | dpvar function | Create symmetric or full continuous Bernstein decision variables. |

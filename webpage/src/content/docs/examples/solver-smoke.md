@@ -40,6 +40,7 @@ $$
 With `Degree=0`, `P` is constant over the cell. With the default degree, `P` is parameter-dependent.
 
 ```matlab
+yalmip('clear')
 A = dpmat({[0 1]}, @(x) (1 - x) * [-1 -1; 1 -1] ...
     + x * [-1 -10; 0.1 -1], Degree=1);
 
@@ -105,6 +106,7 @@ C & D & -\gamma I
 $$
 
 ```matlab
+yalmip('clear')
 grid = linspace(0, 1, 2);
 A = dpmat(grid, @(x) [-1, 0.5; -1, -2] ...
     + x * [-1.3, -20; 2, -10], Degree=1);
