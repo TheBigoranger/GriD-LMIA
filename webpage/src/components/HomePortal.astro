@@ -1,0 +1,402 @@
+---
+import DpmatStorageDiagram from "./DpmatStorageDiagram.astro";
+
+const base = import.meta.env.BASE_URL;
+
+const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}`;
+
+const primaryLinks = [
+  { href: local("documents/"), label: "Open manual" },
+  { href: local("documents/reference-index/"), label: "Function lookup" },
+  { href: local("install/"), label: "Install" },
+  { href: local("examples/solver-smoke/"), label: "Solver examples" },
+];
+
+const manualLinks = [
+  {
+    href: local("documents/reference-index/"),
+    title: "Lookup by name",
+    text: "Find implemented classes, constructors, methods, and solver-facing tasks.",
+  },
+  {
+    href: local("documents/math/bernstein-polynomial/"),
+    title: "Bernstein model",
+    text: "Read how cell-local coefficients, labels, and degree growth support matrix inequalities.",
+  },
+  {
+    href: local("documents/reference/dplmi/toyalmip/"),
+    title: "YALMIP handoff",
+    text: "See how coefficient-wise constraints become YALMIP constraints for ordinary solvers.",
+  },
+  {
+    href: local("examples/solver-smoke/"),
+    title: "Runnable examples",
+    text: "Start from small workflows backed by the repository test suite.",
+  },
+];
+
+const downloadLinks = [
+  {
+    href: "https://github.com/TheBigoranger/DP-LMI-package/archive/refs/heads/main.zip",
+    label: "Source ZIP",
+  },
+  {
+    href: "https://github.com/TheBigoranger/DP-LMI-package/raw/main/doc/manual.pdf",
+    label: "PDF manual",
+  },
+  { href: local("install/"), label: "Setup notes" },
+  { href: local("version-history/"), label: "Version history" },
+];
+---
+
+<div class="home-portal">
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="home-copy">
+      <p class="home-label">DP-LMI MATLAB/YALMIP package</p>
+      <h2 id="home-title">Solve differential parameter-dependent LMIs with cell-local Bernstein models.</h2>
+      <p>
+        DP-LMI represents parameter-dependent matrices cell by cell, keeps
+        Bernstein coefficients close to the local grid geometry, and assembles
+        solver-facing LMI constraints through YALMIP.
+      </p>
+      <nav class="home-actions" aria-label="Primary documentation links">
+        {primaryLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+      </nav>
+    </div>
+
+    <div class="purpose-panel" aria-label="Package purpose">
+      <span>Purpose</span>
+      <p>
+        Build finite-dimensional SDP constraints from differential
+        parameter-dependent LMIs while preserving the Bernstein coefficient
+        structure used by <code>dpmat</code>, <code>dpvar</code>, and
+        <code>dplmi</code>.
+      </p>
+    </div>
+  </section>
+
+  <section class="product-walkthrough" aria-labelledby="product-title">
+    <div class="section-heading">
+      <p class="home-label">One local Bernstein cell</p>
+      <h2 id="product-title">Multiplication raises degree, not storage confusion.</h2>
+      <p>
+        On a selected segment, two degree-1 Bernstein factors are straight
+        lines. Their product is a degree-2 Bernstein curve, and the resulting
+        coefficients return to the same cell's <code>LocalValues</code> entry.
+      </p>
+    </div>
+
+    <div class="formula-panel" aria-label="Bernstein product coefficient formulas">
+      <div>
+        <strong>Local coordinate</strong>
+        <p>
+          <code>rho in [rho_i, rho_i_plus_1]</code>
+          <code>alpha = (rho - rho_i) / (rho_i_plus_1 - rho_i)</code>
+        </p>
+      </div>
+      <div>
+        <strong>Product coefficients</strong>
+        <p>
+          <code>R0 = P0 * Q0</code>
+          <code>R1 = (P0 * Q1 + P1 * Q0) / 2</code>
+          <code>R2 = P1 * Q1</code>
+        </p>
+      </div>
+    </div>
+
+    <DpmatStorageDiagram />
+  </section>
+
+  <section class="home-grid" aria-labelledby="manual-title">
+    <div class="section-heading">
+      <p class="home-label">Manual entrances</p>
+      <h2 id="manual-title">Jump into the online manual.</h2>
+    </div>
+    <div class="manual-entry-list">
+      {
+        manualLinks.map((link) => (
+          <a href={link.href}>
+            <strong>{link.title}</strong>
+            <span>{link.text}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="download-panel" aria-labelledby="download-title">
+    <div>
+      <p class="home-label">Download and install</p>
+      <h2 id="download-title">Use the current source package and manual.</h2>
+      <p>
+        Formal releases can land here later. For now, the portal keeps stable
+        entry points for the source archive, PDF manual, setup notes, and
+        version history.
+      </p>
+    </div>
+    <nav class="download-strip" aria-label="Download links">
+      {downloadLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+  </section>
+
+  <section class="status-strip" aria-label="Current implemented package slice">
+    <strong>Implemented slice</strong>
+    <span><code>dpbase</code> storage</span>
+    <span><code>dpmat</code> known data</span>
+    <span><code>dpvar</code> decisions</span>
+    <span><code>rhodiff</code> rate rows</span>
+    <span><code>dplmi</code> YALMIP assembly</span>
+  </section>
+</div>
+
+<style>
+  :global(.sl-container) {
+    max-width: 1180px;
+  }
+
+  :global(.sl-markdown-content) {
+    max-width: none;
+  }
+
+  :global(.sl-markdown-content > .home-portal) {
+    margin-block: -1rem 2rem;
+  }
+
+  .home-portal {
+    display: grid;
+    gap: 2rem;
+    color: var(--sl-color-text);
+  }
+
+  .home-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.34fr);
+    gap: 2rem;
+    align-items: stretch;
+    padding: clamp(1.2rem, 2.5vw, 2rem);
+    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 26%, var(--sl-color-gray-5));
+    border-radius: 8px;
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--sl-color-accent-low) 34%, transparent) 1px, transparent 1px),
+      linear-gradient(180deg, color-mix(in srgb, var(--sl-color-accent-low) 34%, transparent) 1px, transparent 1px),
+      linear-gradient(135deg, color-mix(in srgb, var(--sl-color-bg) 94%, #dbeafe), var(--sl-color-gray-7));
+    background-size: 44px 44px, 44px 44px, auto;
+  }
+
+  .home-copy {
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .home-label {
+    margin: 0;
+    color: var(--sl-color-text-accent);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .home-copy h2,
+  .section-heading h2,
+  .download-panel h2 {
+    margin: 0;
+    color: var(--sl-color-text);
+    letter-spacing: 0;
+  }
+
+  .home-copy h2 {
+    max-width: 21ch;
+    font-size: clamp(1.95rem, 3.8vw, 3.05rem);
+    line-height: 1.06;
+  }
+
+  .home-copy p:not(.home-label),
+  .section-heading p:not(.home-label),
+  .download-panel p {
+    max-width: 66ch;
+    margin: 0;
+    color: var(--sl-color-gray-2);
+    font-size: 1.04rem;
+    line-height: 1.65;
+  }
+
+  .home-actions,
+  .download-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    align-items: center;
+  }
+
+  .home-actions a,
+  .download-strip a {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 8px;
+    padding: 0.68rem 0.88rem;
+    color: var(--sl-color-text);
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+    background: var(--sl-color-bg);
+    box-shadow: 0 10px 25px rgb(15 23 42 / 0.06);
+  }
+
+  .home-actions a:first-child {
+    color: white;
+    border-color: transparent;
+    background: linear-gradient(135deg, #2563eb, #0f766e);
+  }
+
+  .purpose-panel {
+    display: grid;
+    align-content: center;
+    gap: 0.8rem;
+    min-width: 0;
+    padding: 1.2rem;
+    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 28%, var(--sl-color-gray-5));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--sl-color-bg) 88%, var(--sl-color-accent-low));
+  }
+
+  .purpose-panel span {
+    color: var(--sl-color-text-accent);
+    font-size: 0.88rem;
+    font-weight: 800;
+  }
+
+  .purpose-panel p {
+    margin: 0;
+    color: var(--sl-color-gray-2);
+    line-height: 1.55;
+  }
+
+  .product-walkthrough {
+    display: grid;
+    gap: 1.2rem;
+    padding: clamp(1rem, 2vw, 1.4rem);
+    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 22%, var(--sl-color-gray-5));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--sl-color-bg) 94%, var(--sl-color-accent-low));
+  }
+
+  .section-heading {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .section-heading h2,
+  .download-panel h2 {
+    font-size: clamp(1.55rem, 3vw, 2.3rem);
+    line-height: 1.08;
+  }
+
+  .formula-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .formula-panel > div {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.9rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 8px;
+    background: var(--sl-color-bg);
+  }
+
+  .formula-panel strong {
+    color: var(--sl-color-text-accent);
+  }
+
+  .formula-panel p {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    color: var(--sl-color-gray-2);
+  }
+
+  .formula-panel code {
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .home-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .manual-entry-list {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .manual-entry-list a {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.36fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    border-block-start: 1px solid var(--sl-color-gray-5);
+    padding-block: 0.85rem;
+    text-decoration: none;
+  }
+
+  .manual-entry-list strong {
+    color: var(--sl-color-text-accent);
+  }
+
+  .manual-entry-list span {
+    color: var(--sl-color-gray-2);
+  }
+
+  .download-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.45fr);
+    gap: 1rem;
+    align-items: center;
+    padding: clamp(1rem, 2vw, 1.4rem);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 8px;
+    background: var(--sl-color-bg);
+  }
+
+  .status-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    align-items: center;
+    color: var(--sl-color-gray-2);
+  }
+
+  .status-strip strong,
+  .status-strip span {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 8px;
+    padding: 0.42rem 0.62rem;
+    background: var(--sl-color-bg);
+  }
+
+  .status-strip strong {
+    color: var(--sl-color-text-accent);
+  }
+
+  @media (max-width: 820px) {
+    .home-hero,
+    .formula-panel,
+    .download-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .home-copy h2 {
+      max-width: 100%;
+    }
+
+    .manual-entry-list a {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
