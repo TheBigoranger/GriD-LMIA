@@ -67,11 +67,11 @@ const downloadLinks = [
 const lmiSteps = [
   {
     number: "01",
-    title: "Write the PD-LMI on the admissible parameter set",
+    title: "General DP-LMI",
     text:
-      "The starting object is a differential parameter-dependent matrix inequality. A user chooses cell-local decision matrices such as P(rho), then asks for positivity and negativity conditions that hold for every parameter value and every admissible rate.",
+      "The reference problem is not tied to one Lyapunov inequality. It starts from parameter-dependent decision functions x_i(rho), coefficient matrices R_i(rho), F_i(rho), and a rate set for rho_dot. The goal is to certify the matrix inequality on the continuous domain Theta x Phi.",
     math:
-      "\\begin{aligned}P(\\rho)&=P(\\rho)^\\top \\succ 0,\\\\\\mathcal{F}(\\rho,\\dot\\rho)&=\\operatorname{He}\\!\\left(A^\\top P\\right)+\\dot P+Q \\\\&\\prec 0.\\end{aligned}",
+      "\\mathcal{G}=\\sum_i R_i(\\rho)\\bigl(\\nabla_\\rho x_i\\cdot\\dot\\rho\\bigr)+F_0(\\rho)+\\sum_iF_i(\\rho)x_i(\\rho)\\prec0.",
   },
   {
     number: "02",
