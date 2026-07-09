@@ -88,19 +88,12 @@ const downloadLinks = [
         </defs>
 
         <rect x="28" y="34" width="564" height="348" rx="30" class="lpv-shell" />
-        <path d="M70 128 C118 68 190 72 242 120 S364 178 428 118 S526 90 558 134" class="lpv-curve" />
+        <text x="66" y="78" class="lpv-annotation">rho(t)</text>
+        <text x="424" y="78" class="lpv-annotation">rho_dot bounds</text>
+        <path d="M70 126 C122 72 190 74 242 120 S364 176 428 118 S526 92 558 132" class="lpv-curve" />
         <circle cx="102" cy="108" r="6" class="lpv-dot" />
         <circle cx="242" cy="120" r="6" class="lpv-dot" />
         <circle cx="428" cy="118" r="6" class="lpv-dot" />
-
-        <g class="lpv-chip">
-          <rect x="54" y="60" width="154" height="46" rx="18" />
-          <text x="84" y="89">rho(t)</text>
-        </g>
-        <g class="lpv-chip secondary">
-          <rect x="374" y="62" width="170" height="46" rx="18" />
-          <text x="410" y="91">rate bounds</text>
-        </g>
 
         <g class="lpv-block">
           <rect x="62" y="180" width="220" height="96" rx="22" />
@@ -407,17 +400,7 @@ const downloadLinks = [
     stroke-width: 3;
   }
 
-  .lpv-chip rect {
-    fill: rgb(37 99 235 / 0.1);
-    stroke: rgb(37 99 235 / 0.22);
-  }
-
-  .lpv-chip.secondary rect {
-    fill: rgb(15 118 110 / 0.1);
-    stroke: rgb(15 118 110 / 0.24);
-  }
-
-  .lpv-chip text,
+  .lpv-annotation,
   .lpv-block text {
     fill: #0f172a;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -425,12 +408,10 @@ const downloadLinks = [
     font-weight: 760;
   }
 
-  .lpv-chip text {
-    font-size: 16px;
-  }
-
-  .lpv-chip.secondary text {
-    font-size: 16px;
+  .lpv-annotation {
+    fill: #334155;
+    font-size: 15px;
+    font-weight: 800;
   }
 
   .lpv-block rect {
