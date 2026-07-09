@@ -40,7 +40,7 @@ const formulas = {
           <div class="formula-line" set:html={renderInlineMath(formulas.p)} />
           <svg viewBox="0 0 360 124" role="img" aria-label="Degree-one P factor on the selected Bernstein cell">
             <line x1="22" y1="60" x2="338" y2="60" class="grid-line" />
-            <rect x="96" y="18" width="120" height="84" rx="10" class="selected-cell" />
+            <rect x="96" y="24" width="120" height="66" rx="10" class="selected-cell" />
             <path d="M104 78 L208 40" class="line-p" />
             <g class="grid-node">
               <circle cx="54" cy="60" r="9" />
@@ -76,7 +76,7 @@ const formulas = {
           <div class="formula-line" set:html={renderInlineMath(formulas.q)} />
           <svg viewBox="0 0 360 124" role="img" aria-label="Degree-one Q factor on the selected Bernstein cell">
             <line x1="22" y1="60" x2="338" y2="60" class="grid-line" />
-            <rect x="96" y="18" width="120" height="84" rx="10" class="selected-cell" />
+            <rect x="96" y="24" width="120" height="66" rx="10" class="selected-cell" />
             <path d="M104 40 L208 82" class="line-q" />
             <g class="grid-node">
               <circle cx="54" cy="60" r="9" />
@@ -113,7 +113,7 @@ const formulas = {
         <div class="formula-line product-result-formula" set:html={renderInlineMath(formulas.r)} />
         <svg viewBox="0 0 420 188" role="img" aria-label="Degree-two product curve on the selected Bernstein cell">
           <line x1="28" y1="108" x2="392" y2="108" class="grid-line" />
-          <rect x="116" y="36" width="146" height="136" rx="10" class="selected-cell" />
+          <rect x="116" y="58" width="146" height="58" rx="10" class="selected-cell" />
           <path d="M126 134 C160 45 224 45 252 134" class="curve-r" />
           <g class="grid-node">
             <circle cx="70" cy="108" r="10" />
@@ -251,12 +251,12 @@ const formulas = {
     position: absolute;
     inset-inline: 0.85rem;
     inset-block-start: auto;
-    inset-block-end: 3.35rem;
+    inset-block-end: 3rem;
     min-height: 1.2rem;
   }
 
   .result-panel .rho-labels {
-    inset-block-end: 4.35rem;
+    inset-block-end: 3.95rem;
   }
 
   .rho-labels span {
@@ -349,6 +349,8 @@ const formulas = {
     fill: rgb(248 250 252 / 0.68);
     stroke: #94a3b8;
     stroke-width: 1.5;
+    transform-box: fill-box;
+    transform-origin: center;
   }
 
   .grid-node circle {
@@ -405,6 +407,22 @@ const formulas = {
     .factor-panel,
     .result-panel {
       padding-inline: 0.65rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .factor-panel .selected-cell {
+      transform: scaleY(0.72);
+    }
+
+    .coeff-strip {
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .coeff-strip span {
+      min-width: 1.95rem;
+      min-height: 1.7rem;
     }
   }
 </style>

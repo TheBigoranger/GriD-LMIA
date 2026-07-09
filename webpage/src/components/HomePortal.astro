@@ -121,13 +121,43 @@ const downloadLinks = [
 
   <section class="product-walkthrough" aria-labelledby="product-title">
     <div class="section-heading">
-      <p class="home-label">One local Bernstein cell</p>
-      <h2 id="product-title">Multiplication raises degree, not storage confusion.</h2>
+      <p class="home-label">From PD-LMI to Bernstein storage</p>
+      <h2 id="product-title">Start from the inequality, then approximate it cell by cell.</h2>
       <p>
-        On a selected segment, two degree-1 Bernstein factors are straight
-        lines. Their product is a degree-2 Bernstein curve, and the resulting
-        coefficients return to the same cell's <code>LocalValues</code> entry.
+        The package turns a differential parameter-dependent LMI into finite
+        coefficient constraints. The local Bernstein picture below is the
+        storage mechanism behind that solver-facing assembly.
       </p>
+    </div>
+
+    <div class="lmi-flow" aria-label="DP-LMI modeling steps">
+      <div>
+        <span>1</span>
+        <strong>PD-LMI target</strong>
+        <p>
+          Find <code>P(rho)=P(rho)' &gt; 0</code> so a differential LMI such as
+          <code>He(A(rho)'P(rho)) + Pdot(rho,rhodot) + Q(rho) &lt; 0</code>
+          holds for every admissible <code>rho</code> and rate bound.
+        </p>
+      </div>
+      <div>
+        <span>2</span>
+        <strong>Bernstein representation</strong>
+        <p>
+          On each cell, high-order parameter-dependent matrices can be
+          represented or approximated by Bernstein polynomials:
+          <code>M(rho) ~= sum_k B_k(alpha) M_k</code>.
+        </p>
+      </div>
+      <div>
+        <span>3</span>
+        <strong>Cell-local coefficients</strong>
+        <p>
+          Products raise polynomial degree, so the resulting coefficients are
+          stored back into the same cell's <code>LocalValues</code> block before
+          YALMIP sees the finite SDP constraints.
+        </p>
+      </div>
     </div>
 
     <div class="formula-panel" aria-label="Bernstein product coefficient formulas">
@@ -481,6 +511,56 @@ const downloadLinks = [
     line-height: 1.08;
   }
 
+  .lmi-flow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .lmi-flow > div {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid rgb(148 163 184 / 0.22);
+    border-radius: 18px;
+    background:
+      linear-gradient(145deg, rgb(255 255 255 / 0.68), rgb(239 246 255 / 0.44));
+    box-shadow:
+      0 12px 28px rgb(15 23 42 / 0.06),
+      inset 0 1px 0 rgb(255 255 255 / 0.76);
+  }
+
+  .lmi-flow span {
+    display: grid;
+    width: 1.8rem;
+    height: 1.8rem;
+    place-items: center;
+    border-radius: 999px;
+    color: white;
+    font-size: 0.86rem;
+    font-weight: 850;
+    background: linear-gradient(135deg, #2563eb, #0f766e);
+  }
+
+  .lmi-flow strong {
+    color: var(--sl-color-text);
+    font-size: 1rem;
+  }
+
+  .lmi-flow p {
+    margin: 0;
+    color: var(--sl-color-gray-2);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .lmi-flow code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .formula-panel {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -578,9 +658,15 @@ const downloadLinks = [
 
   @media (max-width: 820px) {
     .home-hero,
+    .lmi-flow,
     .formula-panel,
     .download-panel {
       grid-template-columns: 1fr;
+    }
+
+    .home-portal::before,
+    .home-portal::after {
+      inset-inline: -0.75rem;
     }
 
     .home-hero {
