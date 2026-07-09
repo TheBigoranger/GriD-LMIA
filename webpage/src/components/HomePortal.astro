@@ -50,29 +50,80 @@ const downloadLinks = [
 ---
 
 <div class="home-portal">
-  <section class="home-hero" aria-labelledby="home-title">
+  <section class="home-hero" aria-label="DP-LMI welcome portal">
     <div class="home-copy">
-      <p class="home-label">DP-LMI MATLAB/YALMIP package</p>
-      <h2 id="home-title">Solve differential parameter-dependent LMIs with cell-local Bernstein models.</h2>
-      <p>
-        DP-LMI represents parameter-dependent matrices cell by cell, keeps
-        Bernstein coefficients close to the local grid geometry, and assembles
-        solver-facing LMI constraints through YALMIP.
+      <p class="home-wordmark">DP-LMI</p>
+      <p class="home-subtitle">
+        Differential parameter-dependent LMIs for MATLAB/YALMIP.
+      </p>
+      <p class="home-summary">
+        Represent parameter-dependent matrices cell by cell, keep Bernstein
+        coefficients close to the local grid geometry, and assemble
+        solver-facing constraints for SDP solvers.
       </p>
       <nav class="home-actions" aria-label="Primary documentation links">
         {primaryLinks.map((link) => <a href={link.href}>{link.label}</a>)}
       </nav>
     </div>
 
-    <div class="purpose-panel" aria-label="Package purpose">
-      <span>Purpose</span>
-      <p>
-        Build finite-dimensional SDP constraints from differential
-        parameter-dependent LMIs while preserving the Bernstein coefficient
-        structure used by <code>dpmat</code>, <code>dpvar</code>, and
-        <code>dplmi</code>.
-      </p>
-    </div>
+    <aside class="lpv-visual" aria-label="LPV system to DP-LMI solver diagram">
+      <svg viewBox="0 0 560 390" role="img" aria-labelledby="lpv-title lpv-desc">
+        <title id="lpv-title">LPV system diagram for DP-LMI</title>
+        <desc id="lpv-desc">
+          Parameter trajectories and rate bounds feed an LPV system, DP-LMI
+          constraints, and a YALMIP SDP handoff.
+        </desc>
+        <defs>
+          <marker id="lpv-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M1 1 L8 4.5 L1 8 Z" class="lpv-arrow-head" />
+          </marker>
+          <linearGradient id="lpv-card" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.92" />
+            <stop offset="100%" stop-color="#dbeafe" stop-opacity="0.58" />
+          </linearGradient>
+          <linearGradient id="lpv-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2563eb" />
+            <stop offset="100%" stop-color="#0f766e" />
+          </linearGradient>
+        </defs>
+
+        <rect x="28" y="28" width="504" height="334" rx="28" class="lpv-shell" />
+        <path d="M64 104 C110 48 176 52 224 98 S333 155 398 96 S500 68 514 118" class="lpv-curve" />
+        <circle cx="88" cy="85" r="6" class="lpv-dot" />
+        <circle cx="226" cy="100" r="6" class="lpv-dot" />
+        <circle cx="398" cy="96" r="6" class="lpv-dot" />
+
+        <g class="lpv-chip">
+          <rect x="54" y="48" width="132" height="45" rx="18" />
+          <text x="76" y="76">rho(t)</text>
+        </g>
+        <g class="lpv-chip secondary">
+          <rect x="350" y="52" width="132" height="45" rx="18" />
+          <text x="370" y="80">rho_dot in [a,b]</text>
+        </g>
+
+        <g class="lpv-block">
+          <rect x="70" y="158" width="166" height="92" rx="22" />
+          <text x="94" y="190">LPV dynamics</text>
+          <text x="94" y="218">x_dot = A(rho)x + B(rho)u</text>
+        </g>
+        <g class="lpv-block emphasis">
+          <rect x="326" y="142" width="164" height="112" rx="24" />
+          <text x="356" y="176">DP-LMI</text>
+          <text x="356" y="205">P(rho), dP/dt</text>
+          <text x="356" y="232">cell-local Bernstein</text>
+        </g>
+        <g class="lpv-block solver">
+          <rect x="204" y="286" width="158" height="52" rx="20" />
+          <text x="232" y="318">YALMIP / SDP</text>
+        </g>
+
+        <path d="M236 204 H304" class="lpv-link" />
+        <path d="M404 254 C398 282 368 306 362 310" class="lpv-link" />
+        <path d="M150 250 C158 285 190 308 204 312" class="lpv-link muted" />
+        <path d="M420 98 V130" class="lpv-link muted" />
+      </svg>
+    </aside>
   </section>
 
   <section class="product-walkthrough" aria-labelledby="product-title">
@@ -163,31 +214,100 @@ const downloadLinks = [
   }
 
   .home-portal {
+    position: relative;
+    isolation: isolate;
     display: grid;
-    gap: 2rem;
+    gap: clamp(2rem, 4vw, 3.4rem);
     color: var(--sl-color-text);
+  }
+
+  .home-portal::before {
+    content: "";
+    position: absolute;
+    inset: -5rem -2.5rem -3rem;
+    z-index: -1;
+    border-radius: 34px;
+    background:
+      linear-gradient(115deg, color-mix(in srgb, #2563eb 18%, transparent), transparent 44%),
+      linear-gradient(245deg, color-mix(in srgb, #14b8a6 18%, transparent), transparent 52%),
+      conic-gradient(from 220deg at 72% 14%, rgb(37 99 235 / 0.18), rgb(15 118 110 / 0.16), rgb(124 58 237 / 0.12), rgb(37 99 235 / 0.18)),
+      linear-gradient(180deg, color-mix(in srgb, var(--sl-color-bg) 94%, #e0f2fe), color-mix(in srgb, var(--sl-color-bg) 96%, #ecfeff));
+    background-size: 150% 150%, 130% 130%, 140% 140%, auto;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.52);
+    opacity: 0.92;
+  }
+
+  .home-portal::after {
+    content: "";
+    position: absolute;
+    inset: -5rem -2.5rem -3rem;
+    z-index: -1;
+    border-radius: 34px;
+    background:
+      linear-gradient(90deg, rgb(37 99 235 / 0.055) 1px, transparent 1px),
+      linear-gradient(180deg, rgb(15 118 110 / 0.045) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(180deg, black, rgb(0 0 0 / 0.68), transparent);
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .home-portal::before {
+      animation: portal-gradient-shift linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    @keyframes portal-gradient-shift {
+      from {
+        background-position: 0% 0%, 100% 0%, 50% 0%, 0 0;
+      }
+
+      to {
+        background-position: 26% 18%, 72% 28%, 38% 46%, 0 0;
+      }
+    }
   }
 
   .home-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.34fr);
-    gap: 2rem;
+    grid-template-columns: minmax(0, 0.95fr) minmax(22rem, 0.82fr);
+    gap: clamp(1.6rem, 4vw, 3rem);
     align-items: stretch;
-    padding: clamp(1.2rem, 2.5vw, 2rem);
-    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 26%, var(--sl-color-gray-5));
-    border-radius: 8px;
+    min-height: 28rem;
+    padding: clamp(1.35rem, 3.4vw, 3rem);
+    border: 1px solid rgb(96 165 250 / 0.3);
+    border-radius: 28px;
     background:
-      linear-gradient(90deg, color-mix(in srgb, var(--sl-color-accent-low) 34%, transparent) 1px, transparent 1px),
-      linear-gradient(180deg, color-mix(in srgb, var(--sl-color-accent-low) 34%, transparent) 1px, transparent 1px),
-      linear-gradient(135deg, color-mix(in srgb, var(--sl-color-bg) 94%, #dbeafe), var(--sl-color-gray-7));
-    background-size: 44px 44px, 44px 44px, auto;
+      linear-gradient(135deg, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.42)),
+      linear-gradient(180deg, color-mix(in srgb, var(--sl-color-bg) 96%, #dbeafe), color-mix(in srgb, var(--sl-color-bg) 90%, #ccfbf1));
+    box-shadow:
+      0 24px 70px rgb(15 23 42 / 0.14),
+      inset 0 1px 0 rgb(255 255 255 / 0.78);
+    overflow: hidden;
   }
 
   .home-copy {
     display: grid;
     align-content: center;
-    gap: 1rem;
+    gap: 1.1rem;
     min-width: 0;
+  }
+
+  .home-wordmark {
+    margin: 0;
+    color: var(--sl-color-text);
+    font-size: clamp(4rem, 11vw, 8.4rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.9;
+  }
+
+  .home-subtitle {
+    max-width: 32ch;
+    margin: 0;
+    color: var(--sl-color-text);
+    font-size: clamp(1.25rem, 2.6vw, 2rem);
+    font-weight: 750;
+    line-height: 1.16;
   }
 
   .home-label {
@@ -195,11 +315,10 @@ const downloadLinks = [
     color: var(--sl-color-text-accent);
     font-size: 0.82rem;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
-  .home-copy h2,
   .section-heading h2,
   .download-panel h2 {
     margin: 0;
@@ -207,13 +326,7 @@ const downloadLinks = [
     letter-spacing: 0;
   }
 
-  .home-copy h2 {
-    max-width: 21ch;
-    font-size: clamp(1.95rem, 3.8vw, 3.05rem);
-    line-height: 1.06;
-  }
-
-  .home-copy p:not(.home-label),
+  .home-summary,
   .section-heading p:not(.home-label),
   .download-panel p {
     max-width: 66ch;
@@ -227,59 +340,141 @@ const downloadLinks = [
   .download-strip {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.7rem;
+    gap: 0.8rem;
     align-items: center;
   }
 
   .home-actions a,
   .download-strip a {
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 8px;
-    padding: 0.68rem 0.88rem;
+    border: 1px solid rgb(148 163 184 / 0.34);
+    border-radius: 999px;
+    padding: 0.78rem 1rem;
     color: var(--sl-color-text);
     font-size: 0.92rem;
     font-weight: 700;
     text-decoration: none;
-    background: var(--sl-color-bg);
-    box-shadow: 0 10px 25px rgb(15 23 42 / 0.06);
+    background: rgb(255 255 255 / 0.68);
+    box-shadow:
+      0 12px 30px rgb(15 23 42 / 0.08),
+      inset 0 1px 0 rgb(255 255 255 / 0.72);
+    backdrop-filter: blur(12px);
   }
 
   .home-actions a:first-child {
     color: white;
     border-color: transparent;
     background: linear-gradient(135deg, #2563eb, #0f766e);
+    box-shadow: 0 18px 36px rgb(37 99 235 / 0.22);
   }
 
-  .purpose-panel {
+  .lpv-visual {
     display: grid;
-    align-content: center;
-    gap: 0.8rem;
+    align-items: center;
     min-width: 0;
-    padding: 1.2rem;
-    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 28%, var(--sl-color-gray-5));
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--sl-color-bg) 88%, var(--sl-color-accent-low));
+    border-radius: 26px;
+    background:
+      linear-gradient(145deg, rgb(255 255 255 / 0.72), rgb(219 234 254 / 0.44)),
+      linear-gradient(180deg, rgb(255 255 255 / 0.54), rgb(240 253 250 / 0.28));
+    box-shadow:
+      0 20px 50px rgb(15 23 42 / 0.12),
+      inset 0 1px 0 rgb(255 255 255 / 0.84);
+    transform: perspective(1000px) rotateY(-3deg) rotateX(1deg);
   }
 
-  .purpose-panel span {
-    color: var(--sl-color-text-accent);
-    font-size: 0.88rem;
-    font-weight: 800;
+  .lpv-visual svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
   }
 
-  .purpose-panel p {
-    margin: 0;
-    color: var(--sl-color-gray-2);
-    line-height: 1.55;
+  .lpv-shell {
+    fill: url("#lpv-card");
+    stroke: rgb(37 99 235 / 0.18);
+    stroke-width: 1.2;
+  }
+
+  .lpv-curve {
+    fill: none;
+    stroke: url("#lpv-accent");
+    stroke-width: 4.5;
+    stroke-linecap: round;
+  }
+
+  .lpv-dot {
+    fill: #2563eb;
+    stroke: white;
+    stroke-width: 3;
+  }
+
+  .lpv-chip rect {
+    fill: rgb(37 99 235 / 0.1);
+    stroke: rgb(37 99 235 / 0.22);
+  }
+
+  .lpv-chip.secondary rect {
+    fill: rgb(15 118 110 / 0.1);
+    stroke: rgb(15 118 110 / 0.24);
+  }
+
+  .lpv-chip text,
+  .lpv-block text {
+    fill: #0f172a;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 18px;
+    font-weight: 760;
+  }
+
+  .lpv-block rect {
+    fill: rgb(255 255 255 / 0.8);
+    stroke: rgb(30 64 175 / 0.18);
+    stroke-width: 1.2;
+    filter: drop-shadow(0 12px 18px rgb(15 23 42 / 0.1));
+  }
+
+  .lpv-block text + text {
+    fill: #334155;
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .lpv-block.emphasis rect {
+    fill: rgb(239 246 255 / 0.9);
+    stroke: rgb(37 99 235 / 0.36);
+  }
+
+  .lpv-block.solver rect {
+    fill: rgb(15 118 110 / 0.1);
+    stroke: rgb(15 118 110 / 0.28);
+  }
+
+  .lpv-link {
+    fill: none;
+    stroke: #2563eb;
+    stroke-width: 3;
+    stroke-linecap: round;
+    marker-end: url("#lpv-arrow");
+  }
+
+  .lpv-link.muted {
+    stroke: #0f766e;
+    stroke-width: 2.5;
+  }
+
+  .lpv-arrow-head {
+    fill: currentColor;
+    color: #2563eb;
   }
 
   .product-walkthrough {
     display: grid;
-    gap: 1.2rem;
-    padding: clamp(1rem, 2vw, 1.4rem);
-    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 22%, var(--sl-color-gray-5));
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--sl-color-bg) 94%, var(--sl-color-accent-low));
+    gap: 1.35rem;
+    padding: clamp(1rem, 2.4vw, 1.6rem);
+    border: 1px solid rgb(148 163 184 / 0.28);
+    border-radius: 24px;
+    background: rgb(255 255 255 / 0.62);
+    box-shadow: 0 18px 52px rgb(15 23 42 / 0.09);
+    backdrop-filter: blur(14px);
   }
 
   .section-heading {
@@ -303,9 +498,9 @@ const downloadLinks = [
     display: grid;
     gap: 0.45rem;
     padding: 0.9rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 8px;
-    background: var(--sl-color-bg);
+    border: 1px solid rgb(148 163 184 / 0.24);
+    border-radius: 18px;
+    background: rgb(255 255 255 / 0.58);
   }
 
   .formula-panel strong {
@@ -340,9 +535,12 @@ const downloadLinks = [
     grid-template-columns: minmax(10rem, 0.36fr) minmax(0, 1fr);
     gap: 1rem;
     align-items: start;
-    border-block-start: 1px solid var(--sl-color-gray-5);
-    padding-block: 0.85rem;
+    border: 1px solid rgb(148 163 184 / 0.22);
+    border-radius: 18px;
+    padding: 0.95rem 1rem;
     text-decoration: none;
+    background: rgb(255 255 255 / 0.54);
+    box-shadow: 0 10px 24px rgb(15 23 42 / 0.05);
   }
 
   .manual-entry-list strong {
@@ -359,9 +557,10 @@ const downloadLinks = [
     gap: 1rem;
     align-items: center;
     padding: clamp(1rem, 2vw, 1.4rem);
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 8px;
-    background: var(--sl-color-bg);
+    border: 1px solid rgb(148 163 184 / 0.24);
+    border-radius: 24px;
+    background: rgb(255 255 255 / 0.6);
+    box-shadow: 0 16px 42px rgb(15 23 42 / 0.08);
   }
 
   .status-strip {
@@ -374,10 +573,10 @@ const downloadLinks = [
 
   .status-strip strong,
   .status-strip span {
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 8px;
+    border: 1px solid rgb(148 163 184 / 0.24);
+    border-radius: 999px;
     padding: 0.42rem 0.62rem;
-    background: var(--sl-color-bg);
+    background: rgb(255 255 255 / 0.58);
   }
 
   .status-strip strong {
@@ -391,12 +590,40 @@ const downloadLinks = [
       grid-template-columns: 1fr;
     }
 
-    .home-copy h2 {
+    .home-hero {
+      min-height: auto;
+      border-radius: 22px;
+    }
+
+    .home-wordmark,
+    .home-subtitle {
       max-width: 100%;
+    }
+
+    .lpv-visual {
+      transform: none;
     }
 
     .manual-entry-list a {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    :global(.sl-markdown-content > .home-portal) {
+      margin-block-start: -0.25rem;
+    }
+
+    .home-portal::before,
+    .home-portal::after {
+      inset-inline: -1rem;
+    }
+
+    .home-actions a,
+    .download-strip a {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
     }
   }
 </style>

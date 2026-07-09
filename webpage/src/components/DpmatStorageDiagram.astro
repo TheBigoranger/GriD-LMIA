@@ -38,11 +38,9 @@ const formulas = {
       <div class="factor-stack">
         <section class="factor-panel factor-p" aria-label="P alpha linear factor">
           <div class="formula-line" set:html={renderInlineMath(formulas.p)} />
-          <svg viewBox="0 0 360 124" role="img">
+          <svg viewBox="0 0 360 124" role="img" aria-label="Degree-one P factor on the selected Bernstein cell">
             <line x1="22" y1="60" x2="338" y2="60" class="grid-line" />
-            <rect x="104" y="32" width="104" height="56" rx="8" class="selected-cell" />
-            <path d="M116 17 C104 17 104 32 104 32 C104 44 92 44 92 60 C92 76 104 76 104 88 C104 88 104 103 116 103" class="cell-brace" />
-            <path d="M196 17 C208 17 208 32 208 32 C208 44 220 44 220 60 C220 76 208 76 208 88 C208 88 208 103 196 103" class="cell-brace" />
+            <rect x="96" y="18" width="120" height="84" rx="10" class="selected-cell" />
             <path d="M104 78 L208 40" class="line-p" />
             <g class="grid-node">
               <circle cx="54" cy="60" r="9" />
@@ -76,11 +74,9 @@ const formulas = {
 
         <section class="factor-panel factor-q" aria-label="Q alpha linear factor">
           <div class="formula-line" set:html={renderInlineMath(formulas.q)} />
-          <svg viewBox="0 0 360 124" role="img">
+          <svg viewBox="0 0 360 124" role="img" aria-label="Degree-one Q factor on the selected Bernstein cell">
             <line x1="22" y1="60" x2="338" y2="60" class="grid-line" />
-            <rect x="104" y="32" width="104" height="56" rx="8" class="selected-cell" />
-            <path d="M116 17 C104 17 104 32 104 32 C104 44 92 44 92 60 C92 76 104 76 104 88 C104 88 104 103 116 103" class="cell-brace" />
-            <path d="M196 17 C208 17 208 32 208 32 C208 44 220 44 220 60 C220 76 208 76 208 88 C208 88 208 103 196 103" class="cell-brace" />
+            <rect x="96" y="18" width="120" height="84" rx="10" class="selected-cell" />
             <path d="M104 40 L208 82" class="line-q" />
             <g class="grid-node">
               <circle cx="54" cy="60" r="9" />
@@ -115,11 +111,9 @@ const formulas = {
 
       <section class="result-panel" aria-label="R alpha quadratic product">
         <div class="formula-line product-result-formula" set:html={renderInlineMath(formulas.r)} />
-        <svg viewBox="0 0 420 188" role="img">
+        <svg viewBox="0 0 420 188" role="img" aria-label="Degree-two product curve on the selected Bernstein cell">
           <line x1="28" y1="108" x2="392" y2="108" class="grid-line" />
-          <rect x="126" y="62" width="126" height="84" rx="8" class="selected-cell" />
-          <path d="M148 36 C126 36 126 62 126 62 C126 80 108 80 108 104 C108 128 126 128 126 146 C126 146 126 172 148 172" class="cell-brace" />
-          <path d="M230 36 C252 36 252 62 252 62 C252 80 270 80 270 104 C270 128 252 128 252 146 C252 146 252 172 230 172" class="cell-brace" />
+          <rect x="116" y="36" width="146" height="136" rx="10" class="selected-cell" />
           <path d="M126 134 C160 45 224 45 252 134" class="curve-r" />
           <g class="grid-node">
             <circle cx="70" cy="108" r="10" />
@@ -345,15 +339,14 @@ const formulas = {
     background: #f97316;
   }
 
-  .grid-line,
-  .cell-brace {
+  .grid-line {
     fill: none;
     stroke: #334155;
     stroke-width: 3;
   }
 
   .selected-cell {
-    fill: #f8fafc;
+    fill: rgb(248 250 252 / 0.68);
     stroke: #94a3b8;
     stroke-width: 1.5;
   }
