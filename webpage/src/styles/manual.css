@@ -250,11 +250,243 @@
   margin: 0;
 }
 
+.bernstein-product-card {
+  display: grid;
+  gap: 1rem;
+  box-sizing: border-box;
+  max-width: 820px;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 18px 35px rgb(15 23 42 / 0.14);
+}
+
+.bernstein-product-card h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.product-grid-panel {
+  position: relative;
+  min-height: 8rem;
+  padding-block: 1.2rem 2.4rem;
+  color: #0f172a;
+}
+
+.product-grid-panel svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.product-grid-panel line,
+.product-grid-panel .cell-brace {
+  fill: none;
+  stroke: #334155;
+  stroke-width: 3;
+}
+
+.product-grid-panel strong {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  color: #1d4ed8;
+  font-size: 1rem;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.rho-labels {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 5.7rem;
+  min-height: 1.45rem;
+}
+
+.rho-labels span {
+  position: absolute;
+  inset-inline-start: var(--x);
+  transform: translateX(-50%);
+  color: #0f172a;
+  font-family: "Latin Modern Roman", "STIX Two Math", Cambria, serif;
+  font-size: 1.03rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* MathJax emits inline SVG for the rho labels; keep it out of generic chart SVG sizing. */
+.rho-labels mjx-container {
+  display: inline-block;
+  margin: 0;
+  color: #0f172a;
+}
+
+.rho-labels mjx-container svg {
+  display: inline-block;
+  width: auto;
+  height: auto;
+}
+
+.product-grid-panel p span,
+.curve-panel .axis-alpha {
+  font-family: "Latin Modern Roman", "STIX Two Math", Cambria, serif;
+  font-style: italic;
+}
+
+.product-grid-panel p {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  margin: 0;
+  color: #334155;
+  font-size: 0.92rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.product-body {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.34fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.coeff-panel,
+.curve-panel {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+}
+
+.coeff-panel {
+  display: grid;
+  align-content: center;
+  gap: 0.65rem;
+  padding: 1rem;
+  color: #0f172a;
+}
+
+.coeff-panel h4,
+.coeff-panel p {
+  margin: 0;
+}
+
+.coeff-panel h4 {
+  color: #1d4ed8;
+  font-size: 1rem;
+}
+
+.coeff-panel p {
+  color: #334155;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.coeff-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.coeff-row span {
+  display: grid;
+  min-height: 2.5rem;
+  place-items: center;
+  border-radius: 8px;
+  color: white;
+  font-weight: 800;
+  background: linear-gradient(135deg, #7c3aed, #0891b2);
+}
+
+.curve-panel {
+  position: relative;
+  min-height: 15rem;
+  padding: 1rem;
+  color: #0f172a;
+}
+
+.curve-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.9rem;
+  align-items: center;
+  margin-block: 0 0.35rem;
+  padding-inline: 0.2rem;
+}
+
+.curve-legend span {
+  position: static;
+  font-size: 0.82rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.curve-panel svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.curve-panel > span {
+  position: absolute;
+  color: #0f172a;
+  font-size: 0.85rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.curve-panel .axis-value {
+  inset-block-start: 3.2rem;
+  inset-inline-start: 1rem;
+}
+
+.curve-panel .axis-zero {
+  inset-block-end: 0.85rem;
+  inset-inline-start: 3rem;
+}
+
+.curve-panel .axis-one {
+  inset-block-end: 0.85rem;
+  inset-inline-end: 1.95rem;
+}
+
+.curve-panel .axis-alpha {
+  inset-block-end: 0.9rem;
+  inset-inline-end: 0.7rem;
+  font-size: 1rem;
+}
+
+.curve-panel .legend-p {
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.curve-panel .legend-q {
+  color: #c2410c;
+  font-weight: 800;
+}
+
+.curve-panel .legend-r {
+  color: #6d28d9;
+  font-weight: 800;
+}
+
 .storage-diagram svg {
   width: 100%;
   height: auto;
   display: block;
   filter: drop-shadow(0 18px 35px rgb(15 23 42 / 0.14));
+}
+
+.bernstein-product-card svg {
+  filter: none;
 }
 
 .storage-diagram text {
@@ -454,5 +686,68 @@ mjx-container {
 
   .manual-entry-list a {
     grid-template-columns: 1fr;
+  }
+
+  .bernstein-product-card {
+    padding: 0.8rem;
+  }
+
+  .product-body {
+    grid-template-columns: 1fr;
+  }
+
+  .product-grid-panel {
+    min-height: 8.6rem;
+    padding-block-end: 2.7rem;
+  }
+
+  .rho-labels {
+    inset-block-start: 5.25rem;
+  }
+
+  .rho-labels span {
+    font-size: 0.86rem;
+  }
+
+  .product-grid-panel p {
+    font-size: 0.82rem;
+  }
+
+  .curve-panel {
+    min-height: 13rem;
+    padding: 0.55rem;
+  }
+
+  .curve-panel span {
+    font-size: 0.76rem;
+  }
+
+  .curve-legend {
+    gap: 0.35rem 0.65rem;
+    margin-block-end: 0.2rem;
+  }
+
+  .curve-legend span {
+    font-size: 0.74rem;
+  }
+
+  .curve-panel .axis-value {
+    inset-block-start: 2.75rem;
+    inset-inline-start: 0.75rem;
+  }
+
+  .curve-panel .axis-zero {
+    inset-block-end: 0.35rem;
+    inset-inline-start: 2.3rem;
+  }
+
+  .curve-panel .axis-one {
+    inset-block-end: 0.35rem;
+    inset-inline-end: 1.55rem;
+  }
+
+  .curve-panel .axis-alpha {
+    inset-block-end: 0.4rem;
+    inset-inline-end: 0.4rem;
   }
 }

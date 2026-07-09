@@ -1,89 +1,109 @@
+---
+import { mathjax } from "mathjax-full/js/mathjax.js";
+import { liteAdaptor } from "mathjax-full/js/adaptors/liteAdaptor.js";
+import { RegisterHTMLHandler } from "mathjax-full/js/handlers/html.js";
+import { TeX } from "mathjax-full/js/input/tex.js";
+import { SVG } from "mathjax-full/js/output/svg.js";
+
+const adaptor = liteAdaptor();
+RegisterHTMLHandler(adaptor);
+
+const tex = new TeX({ packages: ["base"] });
+const svg = new SVG({ fontCache: "none" });
+const mathDoc = mathjax.document("", { InputJax: tex, OutputJax: svg });
+
+// Render the grid labels at build time so the homepage diagram stays static.
+const renderInlineMath = (src) =>
+  adaptor.outerHTML(mathDoc.convert(src, { display: false }));
+
+const rhoLabels = [
+  { x: "13%", tex: "\\rho_{i-1}" },
+  { x: "30%", tex: "\\rho_i" },
+  { x: "58%", tex: "\\rho_{i+1}" },
+  { x: "79%", tex: "\\rho_{i+2}" },
+  { x: "92%", tex: "\\rho_{i+3}" },
+];
+---
+
 <figure class="storage-diagram bernstein-product" aria-label="One grid segment with linear Bernstein factors and their quadratic product">
-  <svg viewBox="0 0 840 500" role="img">
-    <defs>
-      <linearGradient id="linA" x1="0" x2="1">
-        <stop offset="0%" stop-color="#2563eb" />
-        <stop offset="100%" stop-color="#0f766e" />
-      </linearGradient>
-      <linearGradient id="linB" x1="0" x2="1">
-        <stop offset="0%" stop-color="#f97316" />
-        <stop offset="100%" stop-color="#dc2626" />
-      </linearGradient>
-      <linearGradient id="quadA" x1="0" x2="1">
-        <stop offset="0%" stop-color="#7c3aed" />
-        <stop offset="100%" stop-color="#0891b2" />
-      </linearGradient>
-      <linearGradient id="cellFill" x1="0" x2="1">
-        <stop offset="0%" stop-color="#dbeafe" />
-        <stop offset="100%" stop-color="#ccfbf1" />
-      </linearGradient>
-    </defs>
+  <div class="bernstein-product-card">
+    <h3>One grid segment: two linear factors make a quadratic product</h3>
+    <div class="product-grid-panel" aria-label="Selected one-dimensional grid cell">
+      <svg viewBox="0 0 640 110" role="img">
+        <defs>
+          <linearGradient id="cellFill" x1="0" x2="1">
+            <stop offset="0%" stop-color="#dbeafe" />
+            <stop offset="100%" stop-color="#ccfbf1" />
+          </linearGradient>
+        </defs>
+        <line x1="28" y1="50" x2="612" y2="50" />
+        <rect x="192" y="18" width="180" height="64" rx="16" fill="url(#cellFill)" stroke="#2563eb" />
+        <path d="M192 18 C192 4 206 2 206 2" class="cell-brace" />
+        <path d="M372 18 C372 4 358 2 358 2" class="cell-brace" />
+        <g class="grid-node">
+          <circle cx="84" cy="50" r="11" />
+          <circle cx="192" cy="50" r="11" />
+          <circle cx="372" cy="50" r="11" />
+          <circle cx="508" cy="50" r="11" />
+          <circle cx="590" cy="50" r="11" />
+        </g>
+      </svg>
+      <strong>selected local cell</strong>
+      <div class="rho-labels" aria-hidden="true">
+        {
+          rhoLabels.map((label) => (
+            <span
+              class="rho-label"
+              style={`--x: ${label.x}`}
+              set:html={renderInlineMath(label.tex)}
+            />
+          ))
+        }
+      </div>
+      <p><span>α</span> moves from 0 to 1 inside this segment.</p>
+    </div>
 
-    <rect x="18" y="18" width="804" height="464" rx="18" fill="#f8fafc" stroke="#cbd5e1" />
-    <text x="46" y="58" class="diagram-title">One grid segment: two linear factors make a quadratic product</text>
+    <div class="product-body">
+      <section class="coeff-panel" aria-label="Stored degree-two coefficients">
+        <h4>code storage</h4>
+        <p><code>LocalValues</code> for one cell</p>
+        <div class="coeff-row">
+          <span>R0</span>
+          <span>R1</span>
+          <span>R2</span>
+        </div>
+        <p>R is degree 2, so three Bernstein labels are stored for the selected segment.</p>
+      </section>
 
-    <g class="coeff-panel">
-      <rect x="64" y="112" width="226" height="308" rx="14" fill="#eef6ff" stroke="#cbd5e1" />
-      <text x="88" y="148" class="panel-title">code storage</text>
-      <text x="88" y="184" class="small">LocalValues for one cell</text>
-      <rect x="88" y="216" width="54" height="42" rx="10" fill="url(#quadA)" />
-      <rect x="158" y="216" width="54" height="42" rx="10" fill="url(#quadA)" />
-      <rect x="228" y="216" width="34" height="42" rx="10" fill="url(#quadA)" />
-      <text x="103" y="243" class="white">R0</text>
-      <text x="173" y="243" class="white">R1</text>
-      <text x="237" y="243" class="white">R2</text>
-      <text x="88" y="296" class="small">R is degree 2, so</text>
-      <text x="88" y="322" class="small">three Bernstein labels</text>
-      <text x="88" y="348" class="small">are stored for the</text>
-      <text x="88" y="374" class="small">selected segment.</text>
-    </g>
+      <section class="curve-panel" aria-label="Linear factors and quadratic product">
+        <div class="curve-legend" aria-hidden="true">
+          <span class="legend-p">P linear</span>
+          <span class="legend-r">R = P Q quadratic</span>
+          <span class="legend-q">Q linear</span>
+        </div>
+        <svg viewBox="0 0 520 260" role="img">
+          <line x1="54" y1="210" x2="482" y2="210" class="axis-line" />
+          <line x1="54" y1="210" x2="54" y2="38" class="axis-line" />
+          <line x1="54" y1="210" x2="54" y2="220" class="tick" />
+          <line x1="482" y1="210" x2="482" y2="220" class="tick" />
 
-    <g class="grid-strip">
-      <line x1="342" y1="120" x2="776" y2="120" />
-      <rect x="454" y="94" width="138" height="52" rx="12" fill="url(#cellFill)" stroke="#2563eb" />
-      <text x="474" y="84" class="panel-title">selected local cell</text>
-      <g class="grid-node">
-        <circle cx="370" cy="120" r="9" />
-        <circle cx="454" cy="120" r="9" />
-        <circle cx="592" cy="120" r="9" />
-        <circle cx="690" cy="120" r="9" />
-        <circle cx="756" cy="120" r="9" />
-      </g>
-      <text x="344" y="158" class="small">rho i-1</text>
-      <text x="436" y="158" class="small">rho i</text>
-      <text x="560" y="158" class="small">rho i+1</text>
-      <text x="660" y="158" class="small">rho i+2</text>
-      <text x="728" y="158" class="small">rho i+3</text>
-      <text x="438" y="184" class="small">alpha moves from 0 to 1 inside this segment</text>
-    </g>
+          <path d="M54 154 L482 70" class="line-p" />
+          <path d="M54 88 L482 172" class="line-q" />
+          <path d="M54 142 C170 102 336 104 482 166" class="curve-r" />
 
-    <g class="plot-panel">
-      <rect x="330" y="210" width="450" height="210" rx="14" fill="white" stroke="#cbd5e1" />
-      <line x1="376" y1="378" x2="746" y2="378" class="axis-line" />
-      <line x1="376" y1="378" x2="376" y2="238" class="axis-line" />
-      <text x="730" y="402" class="small">alpha</text>
-      <text x="354" y="244" class="small">value</text>
-      <line x1="376" y1="378" x2="746" y2="378" class="tick" />
-      <line x1="376" y1="378" x2="376" y2="386" class="tick" />
-      <line x1="746" y1="378" x2="746" y2="386" class="tick" />
-      <text x="372" y="406" class="small">0</text>
-      <text x="742" y="406" class="small">1</text>
-
-      <path d="M376 338 L746 260" class="line-p" />
-      <path d="M376 282 L746 348" class="line-q" />
-      <path d="M376 326 C476 290 620 292 746 342" class="curve-r" />
-
-      <circle cx="376" cy="338" r="5" class="dot-p" />
-      <circle cx="746" cy="260" r="5" class="dot-p" />
-      <circle cx="376" cy="282" r="5" class="dot-q" />
-      <circle cx="746" cy="348" r="5" class="dot-q" />
-      <circle cx="376" cy="326" r="5" class="dot-r" />
-      <circle cx="560" cy="294" r="5" class="dot-r" />
-      <circle cx="746" cy="342" r="5" class="dot-r" />
-
-      <text x="676" y="252" class="legend-p">P linear</text>
-      <text x="642" y="365" class="legend-q">Q linear</text>
-      <text x="498" y="282" class="legend-r">R = P Q quadratic</text>
-    </g>
-  </svg>
+          <circle cx="54" cy="154" r="6" class="dot-p" />
+          <circle cx="482" cy="70" r="6" class="dot-p" />
+          <circle cx="54" cy="88" r="6" class="dot-q" />
+          <circle cx="482" cy="172" r="6" class="dot-q" />
+          <circle cx="54" cy="142" r="6" class="dot-r" />
+          <circle cx="270" cy="106" r="6" class="dot-r" />
+          <circle cx="482" cy="166" r="6" class="dot-r" />
+        </svg>
+        <span class="axis-value">value</span>
+        <span class="axis-zero">0</span>
+        <span class="axis-one">1</span>
+        <span class="axis-alpha">α</span>
+      </section>
+    </div>
+  </div>
 </figure>
