@@ -123,18 +123,18 @@
 \newcommand{\matlab}{MATLAB}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\refhead}[1]{%
-  \par\addvspace{1.25\baselineskip}%
+  \par\addvspace{1.4\baselineskip}%
   \needspace{4\baselineskip}%
-  \noindent\colorbox{dpbluewash}{%
-    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
-      \textcolor{dpblue}{\sffamily\bfseries\small #1}}}%
-  \par\vspace{0.5\baselineskip}\nopagebreak}
+  \noindent\textcolor{dpblue}{\sffamily\bfseries\normalsize #1}\par
+  \nopagebreak\vspace{0.22\baselineskip}%
+  \noindent\textcolor{dpblue}{\rule{\linewidth}{0.45pt}}\par
+  \vspace{0.48\baselineskip}\nopagebreak}
 \newcommand{\syntaxhead}{\refhead{Syntax}}
 \newcommand{\examplehead}{\refhead{Example}}
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.2.1}
+\author{Version v0.2.2}
 \date{July 2026}
 
 \begin{document}
@@ -835,11 +835,18 @@ c = obj.coeffs(cellSubs)
 \end{lstlisting}
 
 \arghead
-\code{cells} returns physical hypercube subscripts in the shared traversal
-order.  \code{lbls} returns local Bernstein labels in the shared coefficient
-order.  \code{coeffs(obj, cellSubs)} returns the flat coefficient cell array for
-one physical cell; \code{cellSubs} may be a numeric row vector such as
-\code{[2 1]} or a cell array of scalar subscripts such as \code{{2,1}}.
+\begin{itemize}[leftmargin=*]
+  \item \code{obj} is a \code{dpbase} object or a \code{dpmat}/\code{dpvar}
+        subclass instance using the shared cell-local storage convention.
+  \item \code{cellSubs} selects one physical cell for \code{coeffs}.  Supply a
+        numeric row vector such as \code{[2 1]} or a cell array of scalar
+        subscripts such as \code{{2,1}}.
+  \item \code{cells} returns physical hypercube subscripts in the shared
+        traversal order; \code{lbls} returns local Bernstein labels in the
+        shared coefficient order.
+  \item \code{c} is the flat coefficient cell array for the selected physical
+        cell, ordered consistently with \code{lbls(obj)}.
+\end{itemize}
 
 \examplehead
 The label order is shared by \code{dpmat}, \code{dpvar}, and \code{dplmi}.  In
@@ -889,12 +896,52 @@ d = size(obj, dim)
 \end{lstlisting}
 
 \arghead
-\code{ncell} returns \(\prod_r(N_r-1)\).  \code{ncoeff} returns
-\((m+1)^\ell\).  \code{npar} returns the parameter dimension \(\ell\).
-\code{size} returns the matrix payload size, not the physical grid size.
+\begin{itemize}[leftmargin=*]
+  \item \code{obj} is a \code{dpbase} object or subclass instance.
+  \item \code{dim} is a positive integer matrix dimension for \code{size}; it
+        follows MATLAB's ordinary \code{size(obj,dim)} convention.
+  \item \code{ncell} returns \(\prod_r(N_r-1)\), the number of physical
+        hypercube cells.
+  \item \code{ncoeff} returns \((m+1)^\ell\), the number of local Bernstein
+        coefficients stored per physical cell.
+  \item \code{npar} returns the parameter dimension \(\ell\).  \code{size}
+        returns the matrix payload size, never the physical grid size.
+\end{itemize}
+
+\examplehead
+For a two-parameter degree-one backend object, the first grid has two physical
+intervals and the second has one.  The matrix payload is \(2\)-by-\(3\),
+independently of the grid shape.
+
+\begin{lstlisting}[style=dpmatlab]
+obj = dpbase({[0 1 2], [10 20]}, [2 3], 1);
+fprintf('ncell = %d\n', obj.ncell());
+fprintf('ncoeff = %d\n', obj.ncoeff());
+fprintf('npar = %d\n', obj.npar());
+disp(size(obj))
+disp(size(obj, 1))
+disp(size(obj, 2))
+disp(size(obj, 3))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ncell = 2
+ncoeff = 4
+npar = 2
+     2     3
+
+     2
+
+     3
+
+     1
+\end{lstlisting}
 
 \subsubsection{\texorpdfstring{\code{bernElev}}{bernElev}}
 \label{sec:dpbase-bernelev}
+
+\textit{Internal/protected mechanism.}  This signature documents the backend
+algorithm used by public algebra; it is not a supported user call form.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -902,11 +949,14 @@ out = bernElev(obj, coeffs, fromDeg, toDeg)
 \end{lstlisting}
 
 \arghead
-\code{bernElev} degree-elevates one flat cell-local Bernstein coefficient
-family.  The source and target degrees must be nonnegative integers with
-\code{toDeg >= fromDeg}; the coefficient-cell length must match the source
-degree and parameter dimension.  The output contains \((\code{toDeg}+1)^\ell\)
-coefficients in the same label order as \code{lbls}.
+\begin{itemize}[leftmargin=*]
+  \item \code{coeffs} is a flat coefficient-cell family in the same label
+        order as \code{lbls(obj)}.
+  \item \code{fromDeg} and \code{toDeg} are nonnegative integer degrees, with
+        \code{toDeg >= fromDeg}.
+  \item \code{out} contains \((\code{toDeg}+1)^\ell\) elevated coefficients
+        in the same label order.
+\end{itemize}
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -927,16 +977,25 @@ call \code{bernElev} directly.
 \subsubsection{\texorpdfstring{\code{bernProd}}{bernProd}}
 \label{sec:dpbase-bernprod}
 
+\textit{Internal/protected mechanism.}  This signature documents the backend
+algorithm used by public matrix multiplication; it is not a supported user
+call form.
+
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
 \end{lstlisting}
 
 \arghead
-\code{bernProd} computes the binomial-normalized, cell-local Bernstein
-coefficient convolution of two coefficient families.  The output degree is
-\code{lhsDeg + rhsDeg}; matrix payload multiplication follows MATLAB matrix
-product rules and is performed coefficient by coefficient.
+\begin{itemize}[leftmargin=*]
+  \item \code{lhs} and \code{rhs} are flat coefficient-cell families whose
+        matrix payload inner dimensions are compatible for multiplication.
+  \item \code{lhsDeg} and \code{rhsDeg} are their nonnegative local Bernstein
+        degrees.
+  \item \code{out} is the binomial-normalized coefficient convolution at
+        degree \code{lhsDeg + rhsDeg}; payload products follow MATLAB matrix
+        multiplication rules.
+\end{itemize}
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -956,21 +1015,29 @@ users do not call \code{bernProd} directly.
 \subsubsection{\texorpdfstring{\code{mergeGrid}}{mergeGrid}}
 \label{sec:dpbase-mergegrid}
 
+\textit{Internal/protected mechanism.}  This signature documents the backend
+grid-refinement algorithm used by public algebra; it is not a supported user
+call form.
+
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 grid = obj.mergeGrid(errId, other1, other2, ...)
 \end{lstlisting}
 
 \arghead
-\code{mergeGrid} builds a common refinement for coefficient-backed operands,
-including function-backed data constructed with an explicit \code{Degree}.
-Operands must have the same parameter count and exactly matching first and last
-grid nodes on every parameter axis.  The helper takes the sorted union of
-interior nodes.  Public algebra then re-expresses each operand on the resulting
-physical cells before degree elevation, coefficient-wise addition, or product
-convolution.  \code{errId} is the identifier used when parameter dimensions or
-physical bounds are incompatible.  This protected method is invoked by public
-algebra methods rather than called directly by users.
+\begin{itemize}[leftmargin=*]
+  \item \code{errId} is the error identifier used when parameter counts or
+        physical bounds are incompatible.
+  \item \code{other1, other2, ...} are coefficient-backed operands, including
+        function-backed operands constructed with an explicit \code{Degree}.
+        They must have equal parameter counts and matching first and last nodes
+        on every parameter axis.
+  \item \code{grid} has the sorted union of the interior nodes.  Public
+        algebra re-expresses operands on these cells before degree elevation,
+        coefficient-wise addition, or product convolution.
+\end{itemize}
+This protected helper is invoked by public algebra methods rather than called
+directly by users.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -1181,11 +1248,16 @@ val = A.evaluate(point)
 \end{lstlisting}
 
 \arghead
-\code{point} is a scalar for a one-parameter object, such as \code{0.25}, or a
-row vector with one entry per parameter, such as \code{[0.25 12]}.  The return
-value is a numeric matrix with size
-\code{size(A)}.  Coefficient-backed objects use local Bernstein interpolation.
-Function-backed objects evaluate through their stored function handle.
+\begin{itemize}[leftmargin=*]
+  \item \code{A} is a \code{dpmat} object.
+  \item \code{point} is a finite real scalar for a one-parameter object, such
+        as \code{0.25}, or a finite real row vector with one entry per
+        parameter, such as \code{[0.25 12]}.  Every entry must lie within the
+        corresponding grid bounds.
+  \item \code{val} is a numeric matrix with \code{size(A)}.  Coefficient-backed
+        objects use local Bernstein interpolation; function-backed objects call
+        their stored function handle.
+\end{itemize}
 
 For a degree-one scalar coefficient-backed object on \([\rho_0,\rho_1]\),
 \[
@@ -1698,12 +1770,25 @@ tf = isequal(A, B, ...)
 \end{lstlisting}
 
 \arghead
-These methods apply the corresponding MATLAB matrix operation to every local
-coefficient.  They require coefficient evidence.  Dimension arguments follow
-MATLAB conventions, such as \code{sum(A,2)} for row sums or
-\code{reshape(A,[1 4])} for a fixed output shape.  Concatenation and
-\code{blkdiag} accept compatible coefficient-backed \code{dpmat} objects and
-numeric blocks, align grids, and elevate degrees when needed.
+\begin{itemize}[leftmargin=*]
+  \item \code{A} and \code{B} are coefficient-backed \code{dpmat} objects;
+        numeric blocks are accepted where the corresponding MATLAB operation
+        accepts a compatible matrix.
+  \item \code{k} is an integer diagonal offset for \code{diag} or a quarter-turn
+        count for \code{rot90}; its default is MATLAB's usual \code{0} or \code{1},
+        respectively.
+  \item \code{dim} is a valid MATLAB dimension for \code{sum}, \code{mean},
+        \code{cumsum}, \code{flip}, or \code{cat}; \code{"all"} reduces every
+        matrix entry for \code{sum} and \code{mean}.
+  \item \code{sz}, \code{m}, and \code{n} specify the reshaped matrix size and
+        must preserve the number of matrix elements.
+  \item \code{...} denotes one or more repeat or block operands.  Concatenation
+        and \code{blkdiag} align compatible grids and elevate degrees when
+        needed.
+  \item \code{tf} is the logical result of \code{isequal}; every other listed
+        transformation returns a \code{dpmat} with the operation applied to
+        each local coefficient.
+\end{itemize}
 
 \examplehead
 Structural methods return new \code{dpmat} objects whose matrix size changes
@@ -1865,11 +1950,16 @@ A(rows, cols) = B
 \end{lstlisting}
 
 \arghead
-Matrix indexing slices every local coefficient.  Dot access exposes public
-properties and methods.  Assignment accepts numeric blocks and compatible
-coefficient-backed \code{dpmat} blocks, with degree elevation when needed.  Use
-ordinary MATLAB matrix subscripts such as \code{A(:, end)} or
-\code{A(1, 2:3)}.
+\begin{itemize}[leftmargin=*]
+  \item \code{rows} and \code{cols} are ordinary MATLAB matrix subscripts,
+        such as \code{:}, \code{end}, \code{1}, or \code{2:3}.
+  \item \code{PropertyName} is a public property or method name for dot access.
+  \item \code{numericValue} is a finite real matrix with the selected block
+        size; \code{B} is a compatible coefficient-backed \code{dpmat} block.
+  \item \code{value} is the property or method result.  \code{B} is a sliced
+        \code{dpmat}; assignment updates every local coefficient and elevates
+        degrees when required.
+\end{itemize}
 
 \examplehead
 Indexing returns a smaller \code{dpmat}; assignment updates the corresponding
@@ -2113,12 +2203,19 @@ D = rhodiff(P, rb)
 \end{lstlisting}
 
 \arghead
-\code{rhodiff(P)} uses \code{P.RateBounds}; \code{rhodiff(P, rb)} supplies rate
-bounds at the call site, such as \code{rhodiff(P, [-1 1])}.  The output is a discontinuous \code{dpvar}
-expression with one coefficient row per rate vertex.  In one parameter, a
-degree-\(m\) derivative has degree \(m-1\), with degree zero retained as a zero
-derivative.  In multiple parameters, partial derivatives are elevated back into
-the common tensor degree used by the implementation.
+\begin{itemize}[leftmargin=*]
+  \item \code{P} is a \code{dpvar} without existing rate-vertex rows.
+  \item \code{rb} is a finite \(\ell\)-by-\(2\) numeric matrix of lower and
+        upper parameter-rate bounds, with each lower bound no greater than its
+        upper bound.  It must equal \code{P.RateBounds} when the object already
+        carries nonempty bounds.
+  \item Without \code{rb}, \code{rhodiff(P)} requires nonempty
+        \code{P.RateBounds}.
+  \item \code{D} is a discontinuous \code{dpvar} with one coefficient row per
+        rate vertex.  In one parameter a degree-\(m\) derivative has degree
+        \(m-1\), while a degree-zero derivative remains zero; multivariate
+        partials are elevated into the implementation's common tensor degree.
+\end{itemize}
 
 For a one-parameter degree-one coefficient pair \(P_0,P_1\) on a cell of width
 \(h\), the rate-dependent derivative row is
@@ -2199,12 +2296,15 @@ T = bernsteinTable(P, cellSubs, "oneLine")
 \end{lstlisting}
 
 \arghead
-\code{bernsteinTable} inspects the local Bernstein coefficient rows of a
-\code{dpvar}.  \code{cellSubs} selects one physical cell; omitting it lists all
-cells.  The only text option is \code{"oneLine"}.  Ordinary rows contain the
-local label, basis, physical-node flag, and symbolic or numeric value.  A
-rate-dependent derivative also includes \code{RateVertexIndex} and
-\code{RateVertex} columns.
+\begin{itemize}[leftmargin=*]
+  \item \code{P} is a \code{dpvar} object.
+  \item \code{cellSubs} selects one physical cell; omit it to list every cell.
+  \item \code{"oneLine"} is the only supported text option.  It returns one
+        compact Bernstein expression per selected cell.
+  \item \code{T} is a table.  Ordinary rows contain the local label, basis,
+        physical-node flag, and symbolic or numeric value.  A rate-dependent
+        derivative also includes \code{RateVertexIndex} and \code{RateVertex}.
+\end{itemize}
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -2438,13 +2538,23 @@ tf = isequal(P, R, ...)
 \end{lstlisting}
 
 \arghead
-These methods preserve Bernstein grid metadata and act coefficient-wise on the
-matrix payloads.  Dimension arguments follow MATLAB-style calls such as
-\code{sum(P,2)}, \code{reshape(P,[3 2])}, and \code{diag(P,1)}.
-Concatenation and \code{blkdiag} may combine \code{dpvar},
-coefficient-backed \code{dpmat}, affine \code{sdpvar}, and numeric blocks when
-the matrix dimensions, grid bounds, degree elevation, and rate metadata are
-compatible.
+\begin{itemize}[leftmargin=*]
+  \item \code{P} and \code{R} are compatible \code{dpvar} expressions;
+        coefficient-backed \code{dpmat}, affine \code{sdpvar}, and numeric
+        blocks are accepted in supported assembly operations.
+  \item \code{k} is an integer diagonal offset for \code{diag} or a quarter-turn
+        count for \code{rot90}; its default is MATLAB's usual \code{0} or \code{1},
+        respectively.
+  \item \code{dim} is a valid MATLAB dimension for \code{sum}, \code{mean},
+        \code{cumsum}, \code{flip}, or \code{cat}; \code{"all"} reduces every
+        matrix entry for \code{sum} and \code{mean}.
+  \item \code{sz}, \code{m}, and \code{n} specify a reshape that preserves the
+        number of matrix elements.  \code{...} denotes additional repeat or
+        block operands.
+  \item \code{tf} is the logical result of \code{isequal}; every other listed
+        transformation returns a \code{dpvar} with the operation applied to
+        each local payload while preserving compatible grid and rate metadata.
+\end{itemize}
 
 \examplehead
 Shape-changing operations return new \code{dpvar} objects and preserve the
@@ -2604,12 +2714,17 @@ P(rows, cols) = X
 \end{lstlisting}
 
 \arghead
-Matrix indexing slices the matrix payload across every physical cell and local
-coefficient.  Assignment accepts numeric blocks, compatible \code{dpvar}
-blocks, compatible coefficient-backed \code{dpmat} blocks, and affine
-\code{sdpvar} blocks.  Assignment may elevate degrees and propagate compatible
-rate metadata.  Use ordinary MATLAB subscripts such as \code{P(1:2,1)} or
-\code{P(:,2)=A}.
+\begin{itemize}[leftmargin=*]
+  \item \code{rows} and \code{cols} are ordinary MATLAB matrix subscripts,
+        such as \code{:}, \code{end}, \code{1}, or \code{1:2}.
+  \item \code{PropertyName} is a public property or method name for dot access.
+  \item \code{numericValue}, \code{Q}, \code{A}, and \code{X} are, respectively,
+        a finite real matrix, compatible \code{dpvar}, coefficient-backed
+        \code{dpmat}, or affine \code{sdpvar} block matching the selection.
+  \item \code{value} is the property or method result.  \code{Q} is a sliced
+        \code{dpvar}; assignment may elevate degrees and propagate compatible
+        rate metadata across every physical cell and local coefficient.
+\end{itemize}
 
 \examplehead
 Indexing returns a smaller \code{dpvar}; assignment updates the selected matrix
@@ -2648,11 +2763,14 @@ C = lhs >= rhs
 \end{lstlisting}
 
 \arghead
-The comparison overloads construct \code{dplmi} objects.  The expression must
-be square and coefficient-wise symmetric or Hermitian after assembly.
-\code{rhs} is usually \code{0}, but compatible numeric, \code{dpmat}, affine
-\code{sdpvar}, and \code{dpvar} expressions may appear in the residual.
-\code{dpvar} comparisons do not solve an optimization problem by themselves.
+\begin{itemize}[leftmargin=*]
+  \item \code{P} and \code{lhs} are square, coefficient-wise symmetric or
+        Hermitian \code{dpvar} expressions after residual assembly.
+  \item \code{rhs} is commonly \code{0}; compatible numeric, \code{dpmat},
+        affine \code{sdpvar}, and \code{dpvar} expressions are also accepted.
+  \item \code{C} is a \code{dplmi} wrapper.  The comparison creates direct
+        coefficient constraints but does not solve an optimization problem.
+\end{itemize}
 
 \examplehead
 Comparison creates a \code{dplmi} wrapper with one stored constraint for each
@@ -2740,15 +2858,22 @@ C = lhs >= rhs
 \end{lstlisting}
 
 \arghead
-\code{expr} must be a square \code{dpvar} expression whose coefficient matrices
-are symmetric or Hermitian.  The \code{relation} input is \code{"<="} or
-\code{">="}.  Comparisons such as \code{lhs >= rhs} are the ordinary
-user-facing entry point and support compatible numeric, \code{dpmat}, affine
-\code{sdpvar}, and \code{dpvar} right-hand sides.  Direct
-\code{dplmi(expr, relation)} construction is useful for advanced assembly or
-tests.  Reserved options must stay at their defaults: \code{relaxLemma=false},
-\code{UsePolya=false}, and \code{PolyaDegree=0}; nondefault values currently
-raise reserved-option errors.
+\begin{itemize}[leftmargin=*]
+  \item \code{expr} is a square \code{dpvar} expression whose coefficient
+        matrices are symmetric or Hermitian.
+  \item \code{relation} is exactly \code{"<="} or \code{">="}.
+  \item \code{relaxLemma} is a logical reserved option with default
+        \code{false}; \code{true} raises the reserved-option error
+        \par\code{dplmi:UnsupportedRelaxLemma}.
+  \item \code{UsePolya} is a logical reserved option with default
+        \code{false}; \code{true} raises \code{dplmi:UnsupportedPolya}.
+  \item \code{PolyaDegree} is a nonnegative integer reserved option with
+        default \code{0}; a positive value raises \code{dplmi:UnsupportedPolya}.
+  \item \code{C} is the direct coefficient-wise \code{dplmi} assembly.
+        Comparisons such as \code{lhs >= rhs} are the ordinary user-facing
+        entry point and accept compatible numeric, \code{dpmat}, affine
+        \code{sdpvar}, and \code{dpvar} right-hand sides.
+\end{itemize}
 
 \examplehead
 The direct constructor is equivalent to the comparison path when the relation

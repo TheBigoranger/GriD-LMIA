@@ -5,12 +5,32 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 
 `dpvar` creates gridded YALMIP-backed Bernstein decision expressions. It is method-superior to `dpmat` and `sdpvar`, so mixed known, numeric, symbolic, and decision algebra dispatches through `dpvar`.
 
-<div class="method-grid">
-  <a class="method-card" href="/DP-LMI-package/documents/reference/dpvar/constructor/"><strong>Constructor</strong><span>Create continuous degree-0 or degree-1 decision expressions.</span></a>
-  <a class="method-card" href="/DP-LMI-package/documents/reference/dpvar/rhodiff/"><strong>rhodiff</strong><span>Build discontinuous rate-vertex derivative expressions.</span></a>
-  <a class="method-card" href="/DP-LMI-package/documents/reference/dpvar/matrix-operations/"><strong>Matrix operations</strong><span>Affine algebra, products, structural transforms, indexing, and assignment.</span></a>
-  <a class="method-card" href="/DP-LMI-package/documents/reference/dpvar/comparisons/"><strong>Comparisons</strong><span>Create dplmi constraints with <= and >=.</span></a>
-</div>
+## Reference Index
+
+### Construction
+
+| Reference | Task |
+| :--- | :--- |
+| [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) | Create continuous degree-0 or degree-1 decision expressions. |
+
+### Differentiation and inspection
+
+| Reference | Task |
+| :--- | :--- |
+| [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) | Build discontinuous rate-vertex derivative expressions. |
+| [`bernsteinTable`](/DP-LMI-package/documents/reference/dpvar/bernsteintable/) | Inspect symbolic coefficient rows and rate vertices. |
+
+### Algebra and matrix operations
+
+| Reference | Task |
+| :--- | :--- |
+| [`Matrix operations`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/) | Use affine algebra, supported products, structural transforms, indexing, and assignment. |
+
+### Constraints
+
+| Reference | Task |
+| :--- | :--- |
+| [`Comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) | Create `dplmi` constraints with `<=` and `>=`. |
 
 ## Scope Boundary
 

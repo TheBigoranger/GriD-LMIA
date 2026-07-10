@@ -5,10 +5,19 @@ description: Backend parent class for DP-LMI cell-local Bernstein objects.
 
 `dpbase` is the backend parent for `dpmat` and `dpvar`. Ordinary users should model with `dpmat` and `dpvar`; this page explains inherited storage and inspection behavior.
 
-<div class="method-grid">
-  <a class="method-card" href="/DP-LMI-package/documents/reference/dpbase/storage-inspection/"><strong>Storage and inspection</strong><span>Grid metadata, LocalValues, cells, coeffs, labels, and size helpers.</span></a>
-  <a class="method-card" href="/DP-LMI-package/documents/math/bernstein-polynomial/"><strong>Bernstein background</strong><span>Local coordinates, labels, convolution, and coefficient-wise constraints.</span></a>
-</div>
+## Reference Index
+
+### Storage and inspection
+
+| Reference | Task |
+| :--- | :--- |
+| [`Storage and inspection`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/) | Inspect `GridInfo`, `MatrixSize`, `Degree`, `LocalValues`, cells, coefficients, labels, and shape counts. |
+
+### Bernstein backend context
+
+| Reference | Task |
+| :--- | :--- |
+| [`Bernstein polynomial background`](/DP-LMI-package/documents/math/bernstein-polynomial/) | Review local coordinates, labels, convolution, and coefficient-wise constraints. |
 
 ## Current Boundary
 

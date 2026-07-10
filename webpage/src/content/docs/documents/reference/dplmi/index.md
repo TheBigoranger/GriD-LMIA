@@ -5,10 +5,20 @@ description: Cell-local YALMIP constraints for DP-LMI expressions.
 
 `dplmi` stores direct coefficient-wise constraints generated from square `dpvar` residual expressions.
 
-<div class="method-grid">
-  <a class="method-card" href="/DP-LMI-package/documents/reference/dplmi/constructor/"><strong>dplmi constructor</strong><span>Assemble direct coefficient-wise constraints.</span></a>
-  <a class="method-card" href="/DP-LMI-package/documents/reference/dplmi/toyalmip/"><strong>toYalmip</strong><span>Concatenate stored constraints for YALMIP.</span></a>
-</div>
+## Reference Index
+
+### Construction and comparisons
+
+| Reference | Task |
+| :--- | :--- |
+| [`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) | Store direct coefficient-wise constraints from scalar or matrix residuals. |
+| [`dpvar comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) | Create `dplmi` constraints with `<=` and `>=`. |
+
+### YALMIP export and solver use
+
+| Reference | Task |
+| :--- | :--- |
+| [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) | Concatenate stored constraints for ordinary YALMIP `optimize` calls. |
 
 ## Current Boundary
 
