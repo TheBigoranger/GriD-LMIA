@@ -1,6 +1,6 @@
 ---
 title: Bernstein Polynomial
-description: Mathematical background for cell-local Bernstein storage and coefficient-wise DP-LMI assembly.
+description: Bernstein history, tensor-product cell storage, coefficient algebra, finite matrix certificates, and refinement boundaries for DP-LMI.
 ---
 
 <nav class="manual-trail">
@@ -9,20 +9,36 @@ description: Mathematical background for cell-local Bernstein storage and coeffi
   <span>Bernstein Polynomial</span>
 </nav>
 
-The package stores parameter-dependent matrices with cell-local Bernstein coefficients. This chapter explains the convention used by `dpmat`, `dpvar`, and `dplmi`.
+The package stores parameter-dependent matrices with cell-local Bernstein
+coefficients. This chapter explains the mathematical facts used by `dpmat`,
+`dpvar`, `rhodiff`, and `dplmi`; the [Status And Limits](/DP-LMI-package/documents/status-and-limits/)
+page separates those implemented calls from research context.
 
-## One Cell And Local Coordinates
+## From 1912 To Parameter-Dependent LMIs
 
-On a scalar physical cell with endpoints `rho_k` and `rho_{k+1}`, the local coordinate is
+Bernstein introduced the basis in 1912 for a constructive proof of the
+Weierstrass approximation theorem. The same control-point form later became
+the basis of Bezier curves and the de Casteljau evaluation and subdivision
+algorithm. [Farouki's centennial retrospective](https://doi.org/10.1016/j.cagd.2012.03.001)
+surveys that history, the basis properties, and its numerical algorithms.
+
+The bridge to DP-LMIs is not approximation alone. On a physical parameter
+cell, nonnegative basis functions that sum to one make a scalar, vector, or
+matrix polynomial a convex combination of finitely many coefficient objects.
+Exact coefficient multiplication, differentiation, and degree elevation then
+let the package assemble local matrix expressions before `dplmi` forms finite
+sufficient constraints.
+
+## Package Coordinate And Endpoint Labels
+
+On a scalar physical cell $[\rho_k,\rho_{k+1}]$, the package uses
 
 $$
 \alpha = \frac{\rho_{k+1}-\rho}{\rho_{k+1}-\rho_k},
 \qquad \alpha \in [0,1].
 $$
 
-With this convention, local label `0` selects the left physical coefficient and local label `m` selects the right physical coefficient.
-
-The scalar Bernstein basis of degree `m` is
+The scalar degree-$m$ basis is
 
 $$
 B_{i,m}(\alpha)
@@ -30,131 +46,296 @@ B_{i,m}(\alpha)
 \qquad i=0,\ldots,m.
 $$
 
-For one-dimensional degree-1 data,
+This orientation is important:
+
+- at the left endpoint $\rho=\rho_k$, $\alpha=1$ and local label `0` is selected;
+- at the right endpoint $\rho=\rho_{k+1}$, $\alpha=0$ and local label `m` is selected.
+
+Many references instead use the forward coordinate
+$t=(\rho-\rho_k)/(\rho_{k+1}-\rho_k)$. Their conventional basis is the same
+under $t=1-\alpha$, but coefficient labels must not be silently reversed when
+comparing formulas with `LocalValues`.
+
+For degree two,
 
 $$
-A(\alpha)=B_{0,1}(\alpha)A_0+B_{1,1}(\alpha)A_1.
+P(\rho)=\alpha^2C_0+2\alpha(1-\alpha)C_1+(1-\alpha)^2C_2.
 $$
 
-This is the storage model behind a linear coefficient-backed `dpmat` and the default degree-1 `dpvar`.
+The package stores $C_0,C_1,C_2$ as coefficient matrices or expressions. It
+does not treat them as arbitrary samples of a fitted curve. A function-only
+`dpmat` constructed without explicit `Degree` is different: it retains its
+exact function handle but does not claim Bernstein coefficient evidence.
 
-## Why Products Become Quadratic
+## Nonnegativity, Unit Sum, And Convex Hulls
 
-The central coefficient operation is multiplication. If two scalar or matrix-valued Bernstein objects are both degree 1,
+For $\alpha\in[0,1]$,
+
+$$
+B_{i,m}(\alpha)\ge 0,
+\qquad
+\sum_{i=0}^{m}B_{i,m}(\alpha)=1.
+$$
+
+Therefore
+
+$$
+P(\alpha)=\sum_i B_{i,m}(\alpha)P_i
+$$
+
+lies in the convex hull of its coefficients. The statement applies to several
+payload types:
+
+- scalar: $\min_i P_i\le P(\alpha)\le\max_iP_i$;
+- vector: every value lies in the convex hull of the coefficient vectors;
+- matrix: every value is a convex combination of the coefficient matrices.
+
+For symmetric matrix coefficients, if every $P_i\preceq0$, then
+$P(\alpha)\preceq0$ throughout the cell. Apply the scalar convex-combination
+argument to $x^{\mathsf T}P(\alpha)x$ for every vector $x$. Strictly negative
+coefficient matrices similarly give a strict cell-wide certificate.
+
+The converse does not generally hold. A matrix polynomial can be negative
+definite everywhere while one or more Bernstein coefficient matrices fail the
+same sign test. Coefficient-wise matrix sign conditions are therefore safe
+but potentially conservative; failure of the finite test does **not** prove
+that the continuous DP-LMI is infeasible.
+
+## Tensor Products On Hyperrectangles
+
+For $\ell$ scheduling dimensions, the package uses the tensor-product basis
+
+$$
+B_{\mathbf{i},\mathbf{m}}(\boldsymbol\alpha)
+=\prod_{r=1}^{\ell}B_{i_r,m_r}(\alpha_r).
+$$
+
+The products remain nonnegative and sum to one, so the convex-hull and matrix
+sign arguments hold on every physical hyperrectangle. Bernstein bases on
+simplices are related, but simplex storage is not the `dpbase` convention.
+Here each axis has an independent grid interval and local label.
+
+## LocalValues, Continuity, And Boundaries
+
+Physical cells are stored as a nested tree:
+
+```text
+LocalValues{i1}{i2}...{i_ell}
+```
+
+Each selected leaf is a flat coefficient cell in combination order over the
+local labels. Grid normalization happens independently on each physical cell,
+so nonuniform cell widths are supported and labels describe local basis
+positions rather than global node numbers.
+
+Continuous `dpvar` objects share symbolic coefficient handles across common
+cell faces. Continuity is thus encoded in the coefficient graph rather than by
+extra equality LMIs. Cell-local derivative objects are deliberately different:
+their boundary rows stay separate because neighboring cells can have different
+physical widths and different partial-difference data.
+
+## Differentiation
+
+For
+
+$$
+P(\alpha)=\sum_{i=0}^{m}P_iB_{i,m}(\alpha),
+$$
+
+the reversed coordinate gives the physical derivative on a cell of width
+$h=\rho_{k+1}-\rho_k$:
+
+$$
+\frac{dP}{d\rho}
+=\frac{m}{h}\sum_{i=0}^{m-1}(P_{i+1}-P_i)B_{i,m-1}(\alpha).
+$$
+
+For several parameters,
+$\dot P=\sum_r(\partial P/\partial\rho_r)\dot\rho_r$. `rhodiff` forms the
+cell-local partial differences, aligns tensor degrees as required, and stores
+one row for each active rate-box vertex. The
+[`rhodiff` reference](/DP-LMI-package/documents/reference/dpvar/rhodiff/)
+documents the supported call forms and validation rules.
+
+## Degree Elevation For Any Target Degree
+
+A degree-$m$ polynomial can be represented exactly at any degree $M\ge m$.
+For one parameter, the package-indexed coefficients are
+
+$$
+\widehat C_k=
+\sum_{i=\max(0,k-(M-m))}^{\min(m,k)}
+C_i\,
+\frac{\binom{m}{i}\binom{M-m}{k-i}}{\binom{M}{k}},
+\qquad k=0,\ldots,M.
+$$
+
+Tensor products apply the same elevation along every parameter direction.
+Elevation preserves the represented polynomial and introduces no new decision
+freedom. It is used to align compatible coefficient-backed operands of
+different degrees. This must not be confused with constructing a genuinely
+higher-degree decision parameterization, which enlarges the search space.
+
+## de Casteljau Evaluation And Exact Subdivision
+
+The de Casteljau recursion repeatedly forms affine combinations:
+
+$$
+C_j^{(r)}=\alpha C_j^{(r-1)}+(1-\alpha)C_{j+1}^{(r-1)},
+\qquad C_j^{(0)}=C_j.
+$$
+
+It evaluates the polynomial stably, and the two edge chains of its recursion
+triangle provide the exact Bernstein coefficients on the two subintervals at
+the split point. Tensor-product subdivision applies this one-dimensional
+operation one axis at a time.
+
+Subdivision is relevant to certificates because re-expressing the same
+polynomial on smaller physical cells usually tightens the local coefficient
+convex hulls. The package does not currently expose a general public de
+Casteljau or adaptive-subdivision API; this section records background, not a
+call users can make today.
+
+## Product Degree And Coefficient Convolution
+
+If two degree-one objects are
 
 $$
 \begin{aligned}
-P(\alpha)
-&=B_{0,1}(\alpha)P_0+B_{1,1}(\alpha)P_1,\\
-Q(\alpha)
-&=B_{0,1}(\alpha)Q_0+B_{1,1}(\alpha)Q_1,
+P(\alpha)&=B_{0,1}(\alpha)P_0+B_{1,1}(\alpha)P_1,\\
+Q(\alpha)&=B_{0,1}(\alpha)Q_0+B_{1,1}(\alpha)Q_1,
 \end{aligned}
 $$
 
-then the product is not degree 1. It is degree 2:
+their product has degree two:
 
 $$
 \begin{aligned}
 P(\alpha)Q(\alpha)
-&=B_{0,2}(\alpha)R_0
- +B_{1,2}(\alpha)R_1
- +B_{2,2}(\alpha)R_2,
-\end{aligned}
-$$
-
-with
-
-$$
-\begin{aligned}
+&=B_{0,2}(\alpha)R_0+B_{1,2}(\alpha)R_1+B_{2,2}(\alpha)R_2,\\
 R_0&=P_0Q_0,\\
 R_1&=\frac{P_0Q_1+P_1Q_0}{2},\\
 R_2&=P_1Q_1.
 \end{aligned}
 $$
 
-The middle coefficient is averaged because
+For arbitrary scalar degrees $n$ and $m$,
 
 $$
-\begin{aligned}
-B_{1,2}(\alpha)&=2\alpha(1-\alpha),\\
-\text{cross terms}
-&=\alpha(1-\alpha)(P_0Q_1+P_1Q_0).
-\end{aligned}
-$$
-
-For scalar degrees `n` and `m`, the product coefficient with label `k` is
-
-$$
-\begin{aligned}
-R_k
-&=\sum_{\substack{i+j=k}}
+R_k=\sum_{i+j=k}
 P_iQ_j
 \frac{\binom{n}{i}\binom{m}{j}}{\binom{n+m}{k}},
 \qquad k=0,\ldots,n+m.
-\end{aligned}
 $$
 
-This coefficient convolution is implemented in the shared Bernstein utilities inherited by `dpmat` and `dpvar`.
+For tensor-product parameters, labels add componentwise, coefficient tensors
+convolve over every matching label pair, and the scale is the product of the
+one-dimensional binomial ratios. Matrix multiplication order is preserved:
+$P_iQ_j$ cannot generally be exchanged with $Q_jP_i$.
 
-## Tensor-Product Labels
+This direct coefficient convolution is implemented by the shared Bernstein
+backend and exercised by coefficient-backed `dpmat` algebra and supported
+known-data/`dpvar` products. It is representation algebra, not a relaxation.
 
-For `ell` scheduling dimensions, the package uses tensor-product Bernstein bases:
+## Hypercube Counts And Traversal
+
+With node counts $N_1,\ldots,N_\ell$, the number of physical hypercubes is
 
 $$
-B_{\mathbf{i},m}(\boldsymbol{\alpha})
-=\prod_{r=1}^{\ell} B_{i_r,m}(\alpha_r).
+N_{\mathrm{cell}}=\prod_{r=1}^{\ell}(N_r-1).
 $$
 
-Cell-local labels are enumerated in flat combination order over `{0,...,m}^ell`. A two-parameter degree-1 cell has labels
-
-```text
-[0 0], [0 1], [1 0], [1 1]
-```
-
-and a three-parameter degree-1 cell has eight local labels.
-
-## LocalValues Layout
-
-Physical cells are stored as nested cells:
-
-```text
-LocalValues{i1}{i2}...{i_ell}
-```
-
-The selected entry is a flat cell array containing local Bernstein coefficients. For a two-parameter grid with one cell in each dimension and degree 1, the local value entry has four coefficients in tensor-product label order.
+For a common local degree $m$, each hypercube stores $(m+1)^\ell$
+coefficients. More generally, a degree vector $\mathbf m$ would have
+$\prod_r(m_r+1)$ tensor labels. The implemented package stores one scalar
+degree property and enumerates both physical cells and labels lexicographically,
+with earlier dimensions varying more slowly.
 
 ```matlab
-rho = {[0 1], [10 20]};
-grid = {1, 3; 5, 7};
-A = dpmat(rho, grid, Degree=1);
-labels = A.lbls()
+A = dpmat({[0 1 2], [10 20]}, {1 2; 3 4; 5 6}, Degree=1);
+A.ncell()
+A.ncoeff()
+A.lbls()
+A.cells()
 ```
 
 ```text
-labels =
+ans =
+     2
+
+ans =
+     4
+
+ans =
      0     0
      0     1
      1     0
      1     1
+
+ans =
+     1     1
+     2     1
 ```
 
-## Coefficient-Wise Constraints
+## Direct Matrix Certificates
 
-If a residual expression on one cell is
-
-$$
-E(\alpha)=\sum_i B_{i,m}(\alpha)E_i,
-$$
-
-then the current `dplmi` path uses the sufficient direct condition
+For a residual
 
 $$
-E_i \preceq 0
-\qquad \text{for every local coefficient } i.
+E(\boldsymbol\alpha)=
+\sum_{\mathbf i}B_{\mathbf i,m}(\boldsymbol\alpha)E_{\mathbf i},
 $$
 
-Rate-dependent derivative expressions produced by `rhodiff` may store one coefficient row for each active `rho_dot` vertex. `dplmi` expands those rows into separate YALMIP constraints.
+the implemented `dplmi` path creates one YALMIP sign constraint for every
+physical cell, local coefficient, and active rate-vertex row. Requiring all
+$E_{\mathbf i}\preceq0$ is sufficient for the whole local matrix polynomial
+to be nonpositive. `toYalmip` then hands the finite constraint array to
+ordinary YALMIP solver calls.
 
-## Relaxation Boundary
+The package does not currently expose a strictness-margin option. Users should
+not infer numerical strictness semantics beyond the constraints actually
+assembled by YALMIP.
 
-The project records a generalized Bernstein relaxation theorem, but `relaxLemma=true`, `UsePolya=true`, and `PolyaDegree>0` are currently reserved and rejected by `dplmi`. The public implemented workflow documented by this website is direct coefficient-wise assembly.
+## Four Different Refinements
+
+When a direct coefficient test fails, keep these operations distinct:
+
+1. **Pure degree elevation** re-expresses the same polynomial with different
+   coefficients and no new decision variables.
+2. **Physical subdivision or grid refinement** restricts and reparameterizes
+   the same polynomial on smaller cells, often tightening local convex hulls.
+3. **Higher decision degree** changes the decision-function parameterization
+   and enlarges the search space.
+4. **A relaxation hierarchy** changes the sufficient certificate, usually by
+   adding multipliers, slack variables, or another positivity construction.
+
+The current package implements degree alignment and common-grid coefficient
+algebra, but does not expose an adaptive certificate-refinement workflow or a
+general public subdivision command. Constructor-created `dpvar` objects allow
+`Degree=0` or `Degree=1`; supported products can create higher-degree
+expressions.
+
+## Control Literature And Scope
+
+The following references give context without becoming runtime dependencies:
+
+- [Farouki (2012)](https://doi.org/10.1016/j.cagd.2012.03.001): historical development, basis properties, degree elevation, and de Casteljau algorithms.
+- [Zettler and Garloff (1998)](https://doi.org/10.1109/9.661615): multivariate Bernstein expansion, positivity tests, and convex-hull value bounds for interval-parameter polynomial families.
+- [Masubuchi, Kume, and Shimemura (1998)](https://doi.org/10.1109/CDC.1998.758549): spline-type finite conditions and parameter-partition refinement for parameter-dependent LMIs under the paper's assumptions.
+- [Xu and Jabbari (2024)](https://doi.org/10.1109/CDC56724.2024.10886461): recent grid/spline LPV output-feedback synthesis and improved $L_2$-gain context.
+- [Chesi (2010)](https://doi.org/10.1109/TAC.2010.2046926): a broader survey of LMI techniques for optimization over polynomials in control.
+
+These papers motivate the representation and certificate landscape. They do
+not imply that every theorem, refinement, or hierarchy in that literature is
+implemented here. In particular, relaxation-lemma assembly, Polya and SOS
+machinery, adaptive refinement, package-owned strictness or residual
+certification, and diagnostics remain reserved or unsupported.
+
+## See Also
+
+[`Status And Limits`](/DP-LMI-package/documents/status-and-limits/) ·
+[`dpmat constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/) ·
+[`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) ·
+[`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) ·
+[`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) ·
+[`Bernstein backend utilities`](/DP-LMI-package/documents/reference/bernstein-utilities/)

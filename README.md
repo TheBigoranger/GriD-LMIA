@@ -12,6 +12,18 @@ The current implementation provides:
 - `bernsteinTable` methods on both `dpmat` and `dpvar` for command-window
   inspection of local Bernstein coefficient rows.
 
+## Why Bernstein Form?
+
+On each physical parameter cell, the Bernstein basis is nonnegative and sums
+to one. A matrix-valued Bernstein polynomial is therefore a convex combination
+of its local coefficient matrices, so coefficient-wise semidefinite
+inequalities give a safe finite certificate over the whole cell. The
+certificate is sufficient, not necessary: a failed coefficient test does not
+by itself prove that the continuous DP-LMI is infeasible. The manual and
+website background explain tensor-product storage, coefficient convolution,
+derivatives, degree elevation, subdivision, and the current refinement
+boundary.
+
 ## Requirements
 
 - MATLAB.
@@ -84,6 +96,7 @@ F = toYalmip(C);
 ## Documentation
 
 - Online manual: https://thebigoranger.github.io/DP-LMI-package/
+- Bernstein and DP-LMI background: https://thebigoranger.github.io/DP-LMI-package/documents/math/bernstein-polynomial/
 - Install and downloads: https://thebigoranger.github.io/DP-LMI-package/install/
 - Version history: https://thebigoranger.github.io/DP-LMI-package/version-history/
 - Solver smoke examples: https://thebigoranger.github.io/DP-LMI-package/examples/solver-smoke/

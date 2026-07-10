@@ -134,7 +134,7 @@
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.1.3}
+\author{Version v0.2.0}
 \date{July 2026}
 
 \begin{document}
@@ -158,6 +158,25 @@ limits.
 \section{Bernstein And Grid Background}
 \label{sec:bernstein}
 
+\subsection{From Approximation Theory To DP-LMIs}
+\label{sec:bernstein-history}
+
+Bernstein introduced this polynomial basis in 1912 in a constructive proof of
+the Weierstrass approximation theorem.  The same control-point representation
+later became central to B\'ezier curves and the de Casteljau algorithm
+\cite{farouki2012}.  For this package, however, the important bridge to control
+is not approximation alone.  It is the combination of four facts:
+nonnegative basis functions, a partition of unity, tensor-product coordinates
+on boxes, and exact coefficient algebra.  Together they turn a matrix
+polynomial on each physical cell into a convex combination of finitely many
+matrix coefficients.
+
+This viewpoint separates three layers that are easy to conflate.  A physical
+grid divides the scheduling domain into cells.  A Bernstein basis represents a
+polynomial exactly inside each cell.  Finally, \code{dplmi} converts a
+matrix-sign requirement into finitely many sufficient coefficient constraints.
+The first two layers are representation; the third is a certificate.
+
 \subsection{Local Coordinates And Degree-Two Coefficients}
 \label{sec:bernstein-local}
 
@@ -172,6 +191,20 @@ degree-\(m\) Bernstein polynomial on that cell is
   P(\rho) =
   \sum_{j=0}^{m} \binom{m}{j} a^{m-j}(1-a)^j C_j.
 \]
+Write
+\[
+  B_j^m(a)=\binom{m}{j}a^{m-j}(1-a)^j.
+\]
+On \(0\le a\le1\), every \(B_j^m(a)\) is nonnegative and
+\[
+  \sum_{j=0}^{m}B_j^m(a)=(a+(1-a))^m=1.
+\]
+Thus the Bernstein basis is a nonnegative partition of unity.  It also
+interpolates the cell endpoints in the package ordering:
+\(P(\rho_i)=C_0\) and \(P(\rho_{i+1})=C_m\).  Many references instead use
+\(t=(\rho-\rho_i)/(\rho_{i+1}-\rho_i)=1-a\).  Their forward-index formulas
+describe the same basis, but endpoint labels must be reversed before comparing
+coefficients with \code{LocalValues}.
 
 The degree-two case is the first case where the middle Bernstein scale matters:
 \[
@@ -186,6 +219,20 @@ For tensor grids, a local Bernstein coefficient label is a row vector.  For
 example, a two-parameter degree-one cell has labels
 \([0,0]\), \([0,1]\), \([1,0]\), and \([1,1]\).  Each label selects one
 tensor-product Bernstein basis term, one local index per parameter direction.
+
+For \(\ell\) parameters, the tensor-product basis is
+\[
+  B_{\boldsymbol j}^{m}(\boldsymbol a)
+  =\prod_{r=1}^{\ell}B_{j_r}^{m}(a_r).
+\]
+Its terms are again nonnegative and sum to one because
+\[
+  \sum_{\boldsymbol j}B_{\boldsymbol j}^{m}(\boldsymbol a)
+  =\prod_{r=1}^{\ell}\sum_{j_r=0}^{m}B_{j_r}^{m}(a_r)=1.
+\]
+The package uses this box, or hyperrectangular, tensor product.  Bernstein
+bases on simplices are mathematically related, but they are not the storage
+convention implemented by \code{dpbase}.
 
 \begin{figure}[htbp]
   \centering
@@ -205,6 +252,41 @@ tensor-product Bernstein basis term, one local index per parameter direction.
   \caption{Local Bernstein multiplication raises polynomial degree.}
   \label{fig:bernstein-product}
 \end{figure}
+
+\subsection{Convex Hulls And Matrix Sign Certificates}
+\label{sec:bernstein-convex-hull}
+
+The partition-of-unity identity makes every value a convex combination of its
+coefficient data:
+\[
+  P(\boldsymbol a)=
+  \sum_{\boldsymbol j}B_{\boldsymbol j}^{m}(\boldsymbol a)C_{\boldsymbol j}
+  \in \operatorname{conv}\{C_{\boldsymbol j}\}.
+\]
+For a scalar polynomial this gives the range enclosure
+\[
+  \min_{\boldsymbol j}C_{\boldsymbol j}
+  \le P(\boldsymbol a)\le
+  \max_{\boldsymbol j}C_{\boldsymbol j}.
+\]
+For symmetric matrices, apply the same identity to an arbitrary vector \(x\):
+\[
+  x^{\mathsf T}P(\boldsymbol a)x
+  =\sum_{\boldsymbol j}B_{\boldsymbol j}^{m}(\boldsymbol a)
+    x^{\mathsf T}C_{\boldsymbol j}x.
+\]
+Consequently, \(C_{\boldsymbol j}\preceq0\) for every local label is sufficient
+for \(P(\boldsymbol a)\preceq0\) throughout the cell; the positive-semidefinite
+statement is analogous.  If all finitely many coefficients are strictly
+negative definite, their smallest eigenvalue margins also give a uniform
+strict certificate on the cell.
+
+The implication is one-way.  A matrix polynomial may be negative definite at
+every point even though one Bernstein coefficient is not.  A failed direct
+coefficient test therefore does not establish infeasibility of the continuous
+DP-LMI.  This distinction is the central source of conservatism in direct
+Bernstein assembly and is already present in Bernstein range tests used for
+interval-parameter robustness \cite{zettler1998}.
 
 \subsection{Multiplication, Degree Growth, And Convolution}
 \label{sec:bernstein-product}
@@ -252,7 +334,10 @@ scale over parameter directions:
        {\binom{m+n}{\gamma_r}}.
 \]
 This is the coefficient rule used by \code{dpmat * dpmat} and by supported
-known-data products involving \code{dpvar}.
+known-data products involving \code{dpvar}.  Matrix order is preserved inside
+every convolution term: in general \(A_\alpha B_\beta\neq
+B_\beta A_\alpha\), so exchanging the operands changes both the algebra and the
+resulting coefficient matrices.
 
 \subsection{Degree Elevation And Polynomial Representation}
 \label{sec:bernstein-elevation}
@@ -273,6 +358,52 @@ objects with the same grid bounds but different Bernstein degree must be
 combined by addition, subtraction, concatenation, assignment, or other
 coefficient-wise operations.
 
+Degree elevation does not change the polynomial or add decision freedom.  Each
+elevated coefficient is a convex combination of old coefficients, and repeated
+elevation makes the coefficient polygon track the represented function more
+closely \cite{farouki2012}.  This is different from constructing a new decision
+function with a higher degree.  The current public \code{dpvar} constructor
+accepts only \code{Degree=0} and \code{Degree=1}; products may nevertheless
+produce higher-degree expressions, which are aligned internally by
+\code{bernElev}.
+
+\subsection{Differentiation And de Casteljau Subdivision}
+\label{sec:bernstein-differentiation}
+
+The reversed local coordinate changes the intermediate sign in a derivative.
+For cell width \(h=\rho_{i+1}-\rho_i\), the two sign reversals combine to give
+the forward physical difference
+\[
+  \frac{dP}{d\rho}
+  =\frac{m}{h}\sum_{j=0}^{m-1}
+    (C_{j+1}-C_j)B_j^{m-1}(a).
+\]
+This is the scalar-cell formula behind \code{rhodiff}.  In several scheduling
+dimensions, the directional rate term is
+\(
+  \dot P=\sum_{r=1}^{\ell}(\partial P/\partial\rho_r)\dot\rho_r
+\).
+The implementation forms each cell-local partial difference, elevates partials
+to a common tensor degree when necessary, and evaluates the affine rate
+dependence at all active \(\dot\rho\)-box vertices.  Derivative boundary rows
+remain cell-local rather than sharing the continuous coefficient handles of
+the original \code{dpvar}.
+
+The de Casteljau recursion evaluates the same polynomial through neighboring
+affine combinations:
+\[
+  C_j^{(r)}=aC_j^{(r-1)}+(1-a)C_{j+1}^{(r-1)},
+  \qquad C_j^{(0)}=C_j.
+\]
+Its edge chains also give exact Bernstein coefficients on the two subintervals
+created at the split point.  Applying this one-dimensional operation along
+each parameter axis gives exact tensor-product subdivision.  Subdivision is
+therefore a useful certificate-refinement idea: the polynomial is unchanged,
+but its convex hulls are recomputed on smaller physical cells.  The current
+package does not expose a general public de Casteljau or adaptive-subdivision
+API; these facts explain the representation and future refinement direction,
+not an implemented call form.
+
 \subsection{Storage And Hypercube Traversal}
 \label{sec:bernstein-storage}
 
@@ -288,6 +419,16 @@ For Bernstein degree \(m\), each physical hypercube stores
 \]
 local coefficients.  The helper ordering used by \code{cells} and \code{lbls}
 is lexicographic with earlier dimensions varying more slowly.
+
+Physical cells are stored as nested \code{LocalValues} entries, indexed by one
+physical-cell subscript per scheduling dimension.  The selected entry is a
+flat coefficient cell in local label order.
+For a continuous \code{dpvar}, adjacent cells reuse the symbolic handles on
+their common face; continuity is therefore encoded by coefficient sharing,
+not by adding equality LMIs.  Known \code{dpmat} data follow the same
+cell-local layout.  Discontinuous derivative objects intentionally keep
+separate boundary entries so each cell retains its own physical-width and
+rate-vertex derivative data.
 
 \examplehead
 The storage counts follow directly from the physical grid and the local
@@ -347,6 +488,61 @@ disp(T)
 
         {[1]}        "a*1 + (1-a)*3"
 \end{lstlisting}
+
+\subsection{Conservatism And Refinement Hierarchy}
+\label{sec:bernstein-refinement}
+
+When a coefficient-wise LMI fails, the following distinctions keep the next
+modeling step precise:
+
+\begin{enumerate}[leftmargin=*]
+  \item The failure proves only that the present sufficient certificate did
+        not succeed; it does not prove the continuous DP-LMI infeasible.
+  \item Physical cell subdivision restricts and reparameterizes the same
+        polynomial on smaller cells, usually tightening local convex hulls.
+  \item Pure degree elevation preserves exactly the same polynomial and
+        decision variables.  A genuinely higher-degree decision
+        parameterization instead enlarges the search space.
+  \item Vertex-pair, Polya, or sum-of-squares constructions are different
+        sufficient hierarchies.  They require their own theorems, auxiliary
+        variables, options, and tests.
+\end{enumerate}
+
+Spline-type parameter-dependent LMI methods give important motivation for
+partition refinement.  Masubuchi, Kume, and Shimemura derived finite local LMI
+conditions and an asymptotic refinement result under the assumptions of their
+formulation \cite{masubuchi1998}.  Xu and Jabbari continued the grid/spline
+line in parameter-varying output-feedback synthesis and improved
+\(L_2\)-gain computation \cite{xu2024}.  These results motivate the package's
+cell-local architecture, but they are not a blanket completeness theorem for
+every package mode.
+
+\subsection{Control Context And The Implemented Boundary}
+\label{sec:bernstein-control-context}
+
+The literature places this representation among several complementary
+polynomial-control certificates.  Zettler and Garloff used multivariate
+Bernstein expansion and convex-hull bounds for robustness analysis of
+polynomial families with interval parameters \cite{zettler1998}.  Chesi's
+survey situates coefficient tests beside broader LMI techniques for polynomial
+optimization in control, including homogeneous and sum-of-squares approaches
+\cite{chesi2010}.  The present package is related to that lineage, but its
+cell-local tensor storage and rate-vertex assembly are project-specific.
+
+The implemented public boundary is deliberately narrower than this background:
+
+\begin{itemize}[leftmargin=*]
+  \item \code{dpbase} provides backend Bernstein storage, degree elevation,
+        and product convolution used by \code{dpmat} and \code{dpvar}.
+  \item \code{rhodiff} forms the implemented rate-affine derivative rows, and
+        \code{dplmi} directly constrains every active rate row and local
+        coefficient before \code{toYalmip} hands the model to YALMIP.
+  \item Relaxation-lemma assembly, Polya assembly, sum-of-squares machinery,
+        adaptive subdivision, package-owned strictness margins, residual
+        certificates, and diagnostic hierarchies are not current public APIs.
+        Reserved nondefault \code{dplmi} options are rejected rather than
+        silently approximated.
+\end{itemize}
 
 \section{Installation, Verification, And Lookup}
 \label{sec:setup}
@@ -2597,7 +2793,13 @@ E1 = [diffP + P * A + A' * P, P * B, Cmat';
       B' * P, -gamma * eye(2), Dmat';
       Cmat, Dmat, -gamma * eye(2)] <= 0;
 E2 = P >= 0;
+\end{lstlisting}
 
+\needspace{27\baselineskip}
+\begin{lstlisting}[
+  style=dpmatlab,
+  title={\textcolor{dpblue}{\sffamily\bfseries\footnotesize MATLAB input (continued)}}
+]
 objective = gamma.LocalValues{1}{1};
 solver = 'lmilab';
 if exist('mosekopt', 'file') ~= 0
@@ -2645,5 +2847,51 @@ ans =
         Primary modeling workflows should use \code{dpmat}, \code{dpvar}, and
         \code{dplmi}.
 \end{itemize}
+
+\clearpage
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{9}
+
+\bibitem{farouki2012}
+R.~T. Farouki,
+``The Bernstein polynomial basis: A centennial retrospective,''
+\emph{Computer Aided Geometric Design}, vol.~29, no.~6, pp.~379--419, 2012.
+\href{https://doi.org/10.1016/j.cagd.2012.03.001}
+     {doi:10.1016/j.cagd.2012.03.001}.
+
+\bibitem{zettler1998}
+M. Zettler and J. Garloff,
+``Robustness analysis of polynomials with polynomial parameter dependency
+using Bernstein expansion,''
+\emph{IEEE Transactions on Automatic Control}, vol.~43, no.~3,
+pp.~425--431, 1998.
+\href{https://doi.org/10.1109/9.661615}{doi:10.1109/9.661615}.
+
+\bibitem{masubuchi1998}
+I. Masubuchi, A. Kume, and E. Shimemura,
+``Spline-type solution to parameter-dependent LMIs,''
+in \emph{Proceedings of the 37th IEEE Conference on Decision and Control},
+vol.~2, 1998.
+\href{https://doi.org/10.1109/CDC.1998.758549}
+     {doi:10.1109/CDC.1998.758549}.
+
+\bibitem{xu2024}
+Y. Xu and F. Jabbari,
+``Spline-based parameter varying output feedback synthesis with improved
+\(L_2\) gain,''
+in \emph{2024 IEEE 63rd Conference on Decision and Control},
+pp.~1455--1460, 2024.
+\href{https://doi.org/10.1109/CDC56724.2024.10886461}
+     {doi:10.1109/CDC56724.2024.10886461}.
+
+\bibitem{chesi2010}
+G. Chesi,
+``LMI techniques for optimization over polynomials in control: a survey,''
+\emph{IEEE Transactions on Automatic Control}, vol.~55, no.~11,
+pp.~2500--2510, 2010.
+\href{https://doi.org/10.1109/TAC.2010.2046926}
+     {doi:10.1109/TAC.2010.2046926}.
+
+\end{thebibliography}
 
 \end{document}

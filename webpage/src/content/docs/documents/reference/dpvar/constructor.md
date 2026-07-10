@@ -55,7 +55,7 @@ $$
 P(\rho) =
 B_{0,1}(\alpha)P_i + B_{1,1}(\alpha)P_{i+1},
 \qquad
-\alpha = \frac{\rho-\rho_i}{\rho_{i+1}-\rho_i}.
+\alpha = \frac{\rho_{i+1}-\rho}{\rho_{i+1}-\rho_i}.
 $$
 
 Here `P_i` and `P_{i+1}` stand for YALMIP matrix coefficients. Adjacent
@@ -63,6 +63,12 @@ degree-1 cells share the boundary coefficient handle, so continuity is stored
 directly in the coefficient graph instead of being enforced by a separate LMI
 constraint. Degree-0 variables reuse one symbolic coefficient over all physical
 cells while still carrying grid metadata.
+
+This is the package's reversed-coordinate convention: `alpha=1` at the left
+endpoint, so local label `0` selects `P_i`; `alpha=0` at the right endpoint,
+so local label `1` selects `P_{i+1}`. References that use the forward
+coordinate `t=(rho-rho_i)/(rho_{i+1}-rho_i)` describe the same basis after
+the substitution `t=1-alpha`.
 
 In the stored object, each labeled endpoint is a YALMIP matrix coefficient, and
 the stored leaves are `LocalValues{1} = {P_0, P_1}`,

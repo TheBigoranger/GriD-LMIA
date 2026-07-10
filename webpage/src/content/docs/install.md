@@ -1,18 +1,25 @@
 ---
 title: Install And Download
-description: Setup skeleton, source download, and manual download links for DP-LMI.
+description: Download the v0.2.0 release, install DP-LMI, and verify the MATLAB/YALMIP package.
 ---
 
-This page is a stable installation and download entry. It is intentionally short until the package has tagged releases.
+Use the tagged `v0.2.0` release for a reproducible package snapshot. The
+`main` branch and its manual remain useful as the current development snapshot.
 
 ## Downloads
 
 | Item | Link |
 | :--- | :--- |
-| Source archive | [Download `main` as ZIP](https://github.com/TheBigoranger/DP-LMI-package/archive/refs/heads/main.zip) |
-| PDF manual | [Download `doc/manual.pdf`](https://github.com/TheBigoranger/DP-LMI-package/raw/main/doc/manual.pdf) |
+| v0.2.0 release | [Open the GitHub release](https://github.com/TheBigoranger/DP-LMI-package/releases/tag/v0.2.0) |
+| v0.2.0 source archive | [Download the tagged ZIP](https://github.com/TheBigoranger/DP-LMI-package/archive/refs/tags/v0.2.0.zip) |
+| Current manual snapshot | [Open `doc/manual.pdf` from `main`](https://github.com/TheBigoranger/DP-LMI-package/raw/main/doc/manual.pdf) |
+| Current source snapshot | [Download `main` as ZIP](https://github.com/TheBigoranger/DP-LMI-package/archive/refs/heads/main.zip) |
 | GitHub repository | [TheBigoranger/DP-LMI-package](https://github.com/TheBigoranger/DP-LMI-package) |
 | Version history | [Open version history](/DP-LMI-package/version-history/) |
+
+The release page is the stable download entry. The project does not currently
+publish the PDF manual as a separately named release asset, so the manual link
+above is explicitly the current `main` snapshot.
 
 ## Requirements
 
@@ -40,3 +47,4 @@ results = tests.run_all();
 - [dpmat constructor](/DP-LMI-package/documents/reference/dpmat/constructor/)
 - [dpvar constructor](/DP-LMI-package/documents/reference/dpvar/constructor/)
 - [Solver smoke examples](/DP-LMI-package/examples/solver-smoke/)
+- [Status and limits](/DP-LMI-package/documents/status-and-limits/)

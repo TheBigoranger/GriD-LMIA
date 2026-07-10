@@ -49,16 +49,25 @@ const manualLinks = [
     title: "Runnable examples",
     text: "Start from small workflows backed by the repository test suite.",
   },
+  {
+    href: local("documents/status-and-limits/"),
+    title: "Status and limits",
+    text: "Separate implemented coefficient assembly from reserved relaxation and diagnostic layers.",
+  },
 ];
 
 const downloadLinks = [
   {
-    href: "https://github.com/TheBigoranger/DP-LMI-package/archive/refs/heads/main.zip",
-    label: "Source ZIP",
+    href: "https://github.com/TheBigoranger/DP-LMI-package/releases/tag/v0.2.0",
+    label: "v0.2.0 release",
+  },
+  {
+    href: "https://github.com/TheBigoranger/DP-LMI-package/archive/refs/tags/v0.2.0.zip",
+    label: "v0.2.0 source ZIP",
   },
   {
     href: "https://github.com/TheBigoranger/DP-LMI-package/raw/main/doc/manual.pdf",
-    label: "PDF manual",
+    label: "Current manual snapshot",
   },
   { href: local("install/"), label: "Setup notes" },
   { href: local("version-history/"), label: "Version history" },
@@ -75,11 +84,11 @@ const lmiSteps = [
   },
   {
     number: "02",
-    title: "Represent each high-order matrix polynomial locally",
+    title: "Represent each matrix polynomial exactly on its cell",
     text:
-      "On a grid cell, the physical parameter rho is mapped to a local coordinate alpha. Known matrices and YALMIP-backed decision matrices are then stored through Bernstein coefficients, so approximation, inspection, and constraint assembly use the same local geometry.",
+      "On a grid cell, the physical parameter rho is mapped to the package's reversed local coordinate alpha. When Bernstein coefficient evidence is present, known matrices and YALMIP-backed decision expressions are represented exactly by those coefficients; inspection and constraint assembly use the same local geometry.",
     math:
-      "\\begin{aligned}\\rho\\in[\\rho_i,\\rho_{i+1}],\\qquad \\alpha&=\\frac{\\rho-\\rho_i}{\\rho_{i+1}-\\rho_i},\\\\M(\\rho)\\approx M_i(\\alpha)&=\\sum_{k=0}^{d} B_{k,d}(\\alpha)\\,M_{i,k}.\\end{aligned}",
+      "\\begin{aligned}\\rho\\in[\\rho_i,\\rho_{i+1}],\\qquad \\alpha&=\\frac{\\rho_{i+1}-\\rho}{\\rho_{i+1}-\\rho_i},\\\\M(\\rho)=M_i(\\alpha)&=\\sum_{k=0}^{d} B_{k,d}(\\alpha)\\,M_{i,k}.\\end{aligned}",
   },
   {
     number: "03",
@@ -165,11 +174,12 @@ const lmiSteps = [
   <section class="product-walkthrough" aria-labelledby="product-title">
     <div class="section-heading">
       <p class="home-label">From PD-LMI to Bernstein storage</p>
-      <h2 id="product-title">Start from the inequality, then approximate it cell by cell.</h2>
+      <h2 id="product-title">Start from the inequality, then represent it cell by cell.</h2>
       <p>
         The package turns a differential parameter-dependent LMI into finite
-        coefficient constraints. The local Bernstein picture below is the
-        storage mechanism behind that solver-facing assembly.
+        sufficient coefficient constraints. The local Bernstein picture below
+        is the exact coefficient-storage mechanism behind that solver-facing
+        assembly when coefficient evidence is available.
       </p>
     </div>
 
@@ -193,7 +203,8 @@ const lmiSteps = [
         <strong>Local coordinate</strong>
         <p>
           <code>rho in [rho_i, rho_i_plus_1]</code>
-          <code>alpha = (rho - rho_i) / (rho_i_plus_1 - rho_i)</code>
+          <code>alpha = (rho_i_plus_1 - rho) / (rho_i_plus_1 - rho_i)</code>
+          <code>label 0 = left; label m = right</code>
         </p>
       </div>
       <div>
@@ -231,9 +242,9 @@ const lmiSteps = [
       <p class="home-label">Download and install</p>
       <h2 id="download-title">Use the current source package and manual.</h2>
       <p>
-        Formal releases can land here later. For now, the portal keeps stable
-        entry points for the source archive, PDF manual, setup notes, and
-        version history.
+        Start from the tagged v0.2.0 release or its immutable source archive.
+        The PDF link follows the current manual snapshot on <code>main</code>;
+        setup notes and version history explain the local installation path.
       </p>
     </div>
     <nav class="download-strip" aria-label="Download links">
@@ -248,6 +259,7 @@ const lmiSteps = [
     <span><code>dpvar</code> decisions</span>
     <span><code>rhodiff</code> rate rows</span>
     <span><code>dplmi</code> YALMIP assembly</span>
+    <a href={local("documents/status-and-limits/")}>Full status and limits</a>
   </section>
 </div>
 
@@ -689,7 +701,8 @@ const lmiSteps = [
   }
 
   .status-strip strong,
-  .status-strip span {
+  .status-strip span,
+  .status-strip a {
     border: 1px solid rgb(148 163 184 / 0.24);
     border-radius: 999px;
     padding: 0.42rem 0.62rem;
@@ -698,6 +711,12 @@ const lmiSteps = [
 
   .status-strip strong {
     color: var(--sl-color-text-accent);
+  }
+
+  .status-strip a {
+    color: var(--sl-color-text-accent);
+    font-weight: 700;
+    text-decoration: none;
   }
 
   @media (max-width: 820px) {

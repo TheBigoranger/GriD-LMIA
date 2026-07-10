@@ -37,11 +37,12 @@ entry points.
 
 ## Mathematics
 
-- [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/): local coordinates, basis labels, coefficient multiplication, tensor-product storage, and coefficient-wise constraints.
+- [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/): history, reversed local coordinates, convex-hull certificates, tensor-product storage, derivatives, elevation, subdivision, multiplication, traversal, and refinement boundaries.
+- [Status And Limits](/DP-LMI-package/documents/status-and-limits/): centralized implemented-versus-reserved boundary for modeling, constraints, solvers, and refinement ideas.
 
 ## Install And Examples
 
-- [Install And Download](/DP-LMI-package/install/): setup skeleton, source ZIP, and PDF manual links.
+- [Install And Download](/DP-LMI-package/install/): v0.2.0 release, tagged source ZIP, current manual snapshot, and MATLAB path setup.
 - [Examples](/DP-LMI-package/examples/): compact workflows.
 - [Solver Smoke Cases](/DP-LMI-package/examples/solver-smoke/): two tested YALMIP examples from `+tests/+dplmi/test_solver_smoke.m`.
 - [Bernstein Backend Utilities](/DP-LMI-package/documents/reference/bernstein-utilities/): protected degree, product, and grid-refinement behavior.

@@ -1,4 +1,12 @@
-export const versionHistory = [];
+export const versionHistory = [
+  {
+    version: "v0.2.0",
+    date: "2026-07-09",
+    status: "current",
+    summary:
+      "Expanded the Bernstein and DP-LMI background, synchronized the TeX and online manuals, and consolidated the implemented dpmat, dpvar, and dplmi reference surface.",
+  },
+];
 
 export const historyPolicy = {
   sourceOfTruth: "doc/manual.tex",
