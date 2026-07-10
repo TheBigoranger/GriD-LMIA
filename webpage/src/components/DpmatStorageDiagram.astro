@@ -111,7 +111,7 @@ const formulas = {
 
       <section class="result-panel" aria-label="R alpha quadratic product">
         <div class="formula-line product-result-formula" set:html={renderInlineMath(formulas.r)} />
-        <svg viewBox="0 0 420 188" role="img" aria-label="Degree-two product curve on the selected Bernstein cell">
+        <svg viewBox="0 0 420 216" role="img" aria-label="Degree-two product curve on the selected Bernstein cell">
           <line x1="28" y1="108" x2="392" y2="108" class="grid-line" />
           <rect x="116" y="58" width="146" height="58" rx="10" class="selected-cell" />
           <path d="M126 134 C160 45 224 45 252 134" class="curve-r" />
@@ -200,7 +200,7 @@ const formulas = {
   }
 
   .result-panel {
-    padding: 0.7rem 0.8rem 0.85rem;
+    padding: 0.7rem 0.8rem 1.1rem;
   }
 
   .formula-line {
@@ -244,6 +244,11 @@ const formulas = {
     width: 100%;
     height: auto;
     overflow: visible;
+  }
+
+  .factor-panel > svg,
+  .result-panel > svg {
+    overflow: hidden;
   }
 
   .factor-panel .rho-labels,
@@ -342,7 +347,7 @@ const formulas = {
   .grid-line {
     fill: none;
     stroke: #334155;
-    stroke-width: 3;
+    stroke-width: 2;
   }
 
   .selected-cell {
@@ -364,7 +369,7 @@ const formulas = {
   .curve-r {
     fill: none;
     stroke-linecap: round;
-    stroke-width: 6;
+    stroke-width: 4;
   }
 
   .line-p {
