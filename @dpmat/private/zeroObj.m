@@ -3,5 +3,5 @@ function out = zeroObj(grid, sz)
 
     info = helper.mkGrid(grid, "dpmat");
     vals = helper.mkNest(info.NumNodes - 1, @(~) {zeros(sz)});
-    out = dpmat(grid, vals, Degree=0);
+    out = mkObj(grid, vals, 0);
 end

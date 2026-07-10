@@ -52,9 +52,12 @@ sizes. `dpmat` and `dpvar` expose this behavior through their `mtimes` methods.
 
 ### Purpose
 
-Find a common physical tensor grid for compatible coefficient-backed objects.
-The algebra layer uses the result to refine cell-local storage before it
-combines coefficient rows.
+Find a common physical tensor grid for compatible coefficient-backed operands.
+This includes function-backed `dpmat` objects constructed with an explicit
+`Degree`, because those objects carry validated Bernstein coefficient evidence.
+Operands must have the same parameter count, and the first and last grid node
+must match exactly on every parameter axis. The result is the per-axis sorted
+union of all interior nodes together with the shared endpoints.
 
 ### Syntax
 
@@ -62,16 +65,19 @@ combines coefficient rows.
 grid = mergeGrid(obj, errorId, otherGrid1, otherGrid2, ...)
 ```
 
-The method is protected and validates compatible bounds and grid points. Grid
-refinement does not make function-only `dpmat` objects coefficient evidence.
+After the union grid is formed, each operand is re-expressed on every physical
+cell of that grid. Public algebra then performs degree elevation and addition,
+or tensor Bernstein product convolution, on the aligned cell-local data. A
+function-only `dpmat` constructed without explicit `Degree` has no coefficient
+evidence and cannot enter this coefficient algebra.
 
 ## Example
 
 The helpers are exercised through public algebra methods:
 
 ```matlab
-A = dpmat({[0 0.5 1]}, {1, 2}, Degree=1);
-B = dpmat({[0 1]}, {3, 4}, Degree=1);
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
 C = A + B;
 C.GridInfo.Vectors{1}
 

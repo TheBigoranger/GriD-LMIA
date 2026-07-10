@@ -134,7 +134,7 @@
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.2.0}
+\author{Version v0.2.1}
 \date{July 2026}
 
 \begin{document}
@@ -338,6 +338,51 @@ known-data products involving \code{dpvar}.  Matrix order is preserved inside
 every convolution term: in general \(A_\alpha B_\beta\neq
 B_\beta A_\alpha\), so exchanging the operands changes both the algebra and the
 resulting coefficient matrices.
+
+\subsubsection{Weighted Value-Grid Convolution}
+\label{sec:bernstein-weighted-convolution}
+
+The same rule can be read as an ordinary \(\ell\)-dimensional discrete
+convolution.  First reshape one cell's flat coefficient lists into value grids
+indexed by \(\boldsymbol\alpha\in\{0,\ldots,m\}^\ell\) and
+\(\boldsymbol\beta\in\{0,\ldots,n\}^\ell\), using the same order as
+\code{lbls}.  Restore the binomial weights carried by the Bernstein basis:
+\[
+  \widetilde A_{\boldsymbol\alpha}
+  =
+  A_{\boldsymbol\alpha}
+  \prod_{r=1}^{\ell}\binom{m}{\alpha_r},
+  \qquad
+  \widetilde B_{\boldsymbol\beta}
+  =
+  B_{\boldsymbol\beta}
+  \prod_{r=1}^{\ell}\binom{n}{\beta_r}.
+\]
+These weighted value grids multiply by ordered discrete convolution:
+\[
+  \widetilde C_{\boldsymbol\gamma}
+  =
+  \bigl(\widetilde A *_\ell \widetilde B\bigr)_{\boldsymbol\gamma}
+  =
+  \sum_{\boldsymbol\alpha+\boldsymbol\beta=\boldsymbol\gamma}
+  \widetilde A_{\boldsymbol\alpha}
+  \widetilde B_{\boldsymbol\beta}.
+\]
+Finally, divide out the degree-\(m+n\) Bernstein weights to return to stored
+coefficients:
+\[
+  C_{\boldsymbol\gamma}
+  =
+  \frac{\widetilde C_{\boldsymbol\gamma}}
+       {\displaystyle\prod_{r=1}^{\ell}
+        \binom{m+n}{\gamma_r}}.
+\]
+Combining these three lines recovers the binomial-scaled coefficient formula
+above.  On a tensor grid, multiplication raises the common Bernstein
+\code{Degree} from \(m\) and \(n\) to \(m+n\) in every local parameter
+direction, so one cell contains \((m+n+1)^\ell\) output coefficients.  For
+matrix values, \(*_\ell\) is an ordered convolution: the left grid entry always
+multiplies the right grid entry in that order.
 
 \subsection{Degree Elevation And Polynomial Representation}
 \label{sec:bernstein-elevation}
@@ -702,7 +747,7 @@ obj = dpbase(..., SourceSummary=txt)
 \arghead
 \begin{itemize}[leftmargin=*]
   \item \code{gridVectors} is a cell vector with one strictly increasing node
-        vector per parameter, such as \code{\{[0 1 2], [10 20]\}}.
+        vector per parameter, such as \code{{[0 1 2], [10 20]}}.
   \item \code{matrixSize} is a positive two-element matrix size, such as
         \code{[2 2]}.
   \item \code{degree} is a nonnegative integer Bernstein degree, such as
@@ -794,7 +839,7 @@ c = obj.coeffs(cellSubs)
 order.  \code{lbls} returns local Bernstein labels in the shared coefficient
 order.  \code{coeffs(obj, cellSubs)} returns the flat coefficient cell array for
 one physical cell; \code{cellSubs} may be a numeric row vector such as
-\code{[2 1]} or a cell array of scalar subscripts such as \code{\{2,1\}}.
+\code{[2 1]} or a cell array of scalar subscripts such as \code{{2,1}}.
 
 \examplehead
 The label order is shared by \code{dpmat}, \code{dpvar}, and \code{dplmi}.  In
@@ -917,16 +962,20 @@ grid = obj.mergeGrid(errId, other1, other2, ...)
 \end{lstlisting}
 
 \arghead
-\code{mergeGrid} builds a same-bound common refinement from gridded operands.
-It preserves the lower and upper bound in every parameter dimension and inserts
-all interior nodes.  \code{errId} is the identifier used when parameter
-dimensions or physical bounds are incompatible.  This method is primarily a
-backend utility invoked by public algebra methods.
+\code{mergeGrid} builds a common refinement for coefficient-backed operands,
+including function-backed data constructed with an explicit \code{Degree}.
+Operands must have the same parameter count and exactly matching first and last
+grid nodes on every parameter axis.  The helper takes the sorted union of
+interior nodes.  Public algebra then re-expresses each operand on the resulting
+physical cells before degree elevation, coefficient-wise addition, or product
+convolution.  \code{errId} is the identifier used when parameter dimensions or
+physical bounds are incompatible.  This protected method is invoked by public
+algebra methods rather than called directly by users.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 0.5 1]}, {1, 2}, Degree=1);
-B = dpmat({[0 1]}, {3, 4}, Degree=1);
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
 C = A + B;
 C.GridInfo.Vectors{1}
 \end{lstlisting}
@@ -996,10 +1045,10 @@ A = dpmat(gridVectors, source, Degree=m)
   \item \code{gridVector} is a numeric vector used as a one-parameter grid
         shorthand, such as \code{[0 1 2]}.
   \item \code{gridVectors} is a cell vector with one numeric grid vector per
-        parameter, such as \code{\{[0 1], [10 20]\}}.
+        parameter, such as \code{{[0 1], [10 20]}}.
   \item \code{source} may be a function handle, a global cell grid of numeric
         Bernstein coefficients, or explicit nested \code{LocalValues}; for
-        example, \code{\{1, 2, 3\}} is scalar degree-two data on one cell.
+        example, \code{{1, 2, 3}} is scalar degree-two data on one cell.
   \item \code{Degree=m} sets the local Bernstein degree.  For function handles,
         omitting \code{Degree} creates a function-only object; passing a value
         such as \code{Degree=2} validates and stores Bernstein coefficient
@@ -1423,6 +1472,36 @@ ans =
    11.0000   21.5000   32.0000
 \end{lstlisting}
 
+Operands with the same bounds but different node densities are independently
+re-expressed on the union grid before their coefficients are combined.
+
+\begin{lstlisting}[style=dpmatlab]
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
+S = A + B;
+c1 = S.coeffs(1);
+c2 = S.coeffs(2);
+fprintf('Merged grid:\n');
+disp(S.GridInfo.Vectors{1})
+fprintf('Degree: %d\n', S.Degree);
+fprintf('Cell 1 coefficients:\n');
+disp([c1{:}])
+fprintf('Cell 2 coefficients:\n');
+disp([c2{:}])
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+Merged grid:
+         0    0.5000    1.0000
+
+Degree: 1
+Cell 1 coefficients:
+   11.0000   21.5000
+
+Cell 2 coefficients:
+   21.5000   32.0000
+\end{lstlisting}
+
 Multiplication raises degree from \(1\) and \(2\) to \(3\).
 
 \begin{lstlisting}[style=dpmatlab]
@@ -1467,8 +1546,9 @@ ans =
      2     4
 \end{lstlisting}
 
-These examples use the one-cell case so the coefficient vectors are visible;
-the same elevation and convolution rules apply cell by cell on tensor grids.
+These scalar-cell examples expose degree elevation, refinement, and numeric
+promotion separately.  Tensor multiplication is shown under \code{mtimes}
+below.
 
 \subsubsection{Operator-level entries}
 \label{sec:dpmat-operator-entries}
@@ -1518,6 +1598,43 @@ C = M * A
 \end{lstlisting}
 
 \examplehead
+For a two-parameter cell, multiplying two degree-one scalar value grids raises
+\code{Degree} to 2 and produces \((2+1)^2=9\) tensor coefficients.
+
+\begin{lstlisting}[style=dpmatlab]
+grid = {[0 1], [10 20]};
+A = dpmat(grid, {1 2; 3 4}, Degree=1);
+B = dpmat(grid, {5 6; 7 8}, Degree=1);
+K = A * B;
+cK = K.coeffs([1 1]);
+fprintf('Tensor product degree: %d\n', K.Degree);
+fprintf('Tensor labels:\n');
+disp(K.lbls())
+fprintf('Tensor coefficients:\n');
+disp([cK{:}])
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+Tensor product degree: 2
+Tensor labels:
+     0     0
+     0     1
+     0     2
+     1     0
+     1     1
+     1     2
+     2     0
+     2     1
+     2     2
+
+Tensor coefficients:
+     5     8    12    11    15    20    21    26    32
+\end{lstlisting}
+
+\examplehead
+Unary signs and numeric addition preserve the implemented \code{dpmat} type
+and evaluation behavior.
+
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1]}, {1, 2}, Degree=1);
 class(+A)
@@ -1849,14 +1966,14 @@ P = dpvar(..., RateBounds=rb)
 \arghead
 \begin{itemize}[leftmargin=*]
   \item \code{dpvar(n, gridVectors)} creates an \(n\times n\) square variable
-        using scalar-size shorthand; for example, \code{dpvar(2, \{[0 1]\})}.
+        using scalar-size shorthand; for example, \code{dpvar(2, {[0 1]})}.
         Square variables default to symmetric YALMIP coefficients.
   \item \code{dpvar(n, n, gridVectors)} is the explicit square-size form; for
-        example, \code{dpvar(2, 2, \{[0 1]\})}.  It has the same default
+        example, \code{dpvar(2, 2, {[0 1]})}.  It has the same default
         symmetric structure as the shorthand.
   \item \code{dpvar(n, m, gridVectors)} creates an \(n\times m\) variable.
         Rectangular variables default to full YALMIP coefficients; for example,
-        \code{dpvar(2, 3, \{[0 1]\})}.
+        \code{dpvar(2, 3, {[0 1]})}.
   \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP
         coefficient structure.  \code{"symmetric"} requires a square size.
   \item \code{Degree=1} is the default continuous Bernstein decision variable.

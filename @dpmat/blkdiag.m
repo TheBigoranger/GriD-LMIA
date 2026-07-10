@@ -36,7 +36,7 @@ function out = blkdiag(varargin)
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) blkCell(data, subs));
-    out = dpmat(grid, vals, Degree=deg);
+    out = mkObj(grid, vals, deg);
 end
 
 function coeffs = blkCell(data, subs)

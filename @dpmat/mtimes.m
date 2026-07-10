@@ -88,7 +88,7 @@ function out = mtimes(lhs, rhs)
         return
     end
 
-    out = dpmat(grid, vals, Degree = ld.Degree + rd.Degree);
+    out = mkObj(grid, vals, ld.Degree + rd.Degree);
 end
 
 function sz = zeroProdSize(lhs, rhs, errId)

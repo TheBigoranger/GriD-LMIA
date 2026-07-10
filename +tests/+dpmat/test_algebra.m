@@ -166,6 +166,21 @@ function testFunctionBernsteinCanEnterAlgebra(testCase)
     verifyCoeff(testCase, C, 1, {1, 2});
 end
 
+function testDiscontinuousInputRewrapStaysSilent(testCase)
+    % Algebra should preserve discontinuity without repeating constructor warnings.
+    localValues = {{1, 2}, {3, 4}};
+    A = constructWithWarning(testCase, ...
+        @() dpmat({[0 1 2]}, localValues, Degree=1), ...
+        "dpmat:DiscontinuousLocalValues");
+
+    C = constructWarningFree(testCase, @() A + 1);
+
+    testCase.verifyFalse(A.IsContinuous);
+    testCase.verifyFalse(C.IsContinuous);
+    verifyCoeff(testCase, C, 1, {2, 3});
+    verifyCoeff(testCase, C, 2, {4, 5});
+end
+
 function testZeroFastPathsCollapseDegree(testCase)
     % Provably zero arithmetic should return compact degree-zero data.
     A = dpmat({[0 1]}, {1, 3}, Degree=1);
@@ -264,4 +279,24 @@ function verifyZeroDpmat(testCase, obj, sz)
     coeffs = obj.coeffs(ones(1, obj.npar()));
     testCase.verifyEqual(numel(coeffs), 1);
     testCase.verifyEqual(coeffs{1}, zeros(sz));
+end
+
+function obj = constructWithWarning(testCase, fcn, warningId)
+    % Capture one direct-construction warning while retaining its result.
+    obj = [];
+    testCase.verifyWarning(@construct, warningId);
+
+    function construct
+        obj = fcn();
+    end
+end
+
+function obj = constructWarningFree(testCase, fcn)
+    % Capture an algebra result while asserting its internal rewrap is silent.
+    obj = [];
+    testCase.verifyWarningFree(@construct);
+
+    function construct
+        obj = fcn();
+    end
 end

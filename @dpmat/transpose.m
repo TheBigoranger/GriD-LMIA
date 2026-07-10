@@ -15,5 +15,5 @@ function out = transpose(obj)
     nCell = obj.GridInfo.NumNodes - 1;
     vals = helper.mkNest(nCell, @(subs) cellfun(@(a) a.', ...
         helper.cellGet(obj.LocalValues, subs), UniformOutput=false));
-    out = dpmat(obj.GridInfo.Vectors, vals, Degree=obj.Degree);
+    out = mkObj(obj.GridInfo.Vectors, vals, obj.Degree);
 end

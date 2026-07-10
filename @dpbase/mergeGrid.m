@@ -5,8 +5,8 @@ function grid = mergeGrid(obj, errId, varargin)
     %     grid = obj.mergeGrid(errId, other1, other2, ...)
     %
     %   Example (invoked through public dpmat algebra):
-    %     A = dpmat({[0 0.5 1]}, {1, 2}, Degree=1);
-    %     B = dpmat({[0 1]}, {3, 4}, Degree=1);
+    %     A = dpmat({[0 1]}, {1, 2}, Degree=1);
+    %     B = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
     %     C = A + B;  % Uses the common refinement [0 0.5 1].
     %
     %   This protected helper preserves parameter bounds and inserts interior

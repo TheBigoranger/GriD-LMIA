@@ -39,31 +39,50 @@ stable per-symbol lookup targets used by the generated reference index.
 
 ## Examples
 
-### Addition, subtraction, and unary signs
+### Numeric scalar promotion
 
 ```matlab
 A = dpmat({[0 1]}, {1, 3}, Degree=1);
 B = A + 5;
 B.evaluate(0.25)
-T = bernsteinTable(B);
-T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
+```
+
+```text
+ans =
+    6.5000
+```
+
+### Degree elevation before addition
+
+```matlab
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 1]}, {10, 20, 30}, Degree=2);
+S = A + B;
+cS = S.coeffs(1);
+S.Degree
+disp([cS{:}])
+```
+
+```text
+ans =
+     2
+
+   11.0000   21.5000   32.0000
+```
+
+### Subtraction and unary signs
+
+```matlab
+A = dpmat({[0 1]}, {1, 3}, Degree=1);
 Z = A - A;
+Z.Degree
 (-A).evaluate(1)
 (+A).evaluate(0)
 ```
 
 ```text
 ans =
-    6.5000
-
-ans =
-  2x4 table
-
-    TermIndex    LocalIndex     Basis     Value
-    _________    __________    _______    _____
-
-        1          {[0]}       "a"        {[6]}
-        2          {[1]}       "(1-a)"    {[8]}
+     0
 
 ans =
     -3
@@ -72,7 +91,40 @@ ans =
      1
 ```
 
-### Matrix multiplication
+### Common refinement on different grid densities
+
+Coefficient-backed operands with the same physical bounds may use different
+interior nodes. The operation forms their sorted-union grid, re-expresses both
+operands on its physical cells, and then combines the aligned coefficients.
+This is independent of degree elevation, numeric promotion, and product degree
+growth.
+
+```matlab
+A = dpmat({[0 1]}, {1, 2}, Degree=1);
+B = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
+S = A + B;
+c1 = S.coeffs(1);
+c2 = S.coeffs(2);
+fprintf('Merged grid:\n');
+disp(S.GridInfo.Vectors{1})
+fprintf('Degree: %d\n', S.Degree);
+fprintf('Cell 1 coefficients:\n');
+disp([c1{:}])
+fprintf('Cell 2 coefficients:\n');
+disp([c2{:}])
+```
+
+```text
+Merged grid:
+         0    0.5000    1.0000
+Degree: 1
+Cell 1 coefficients:
+   11.0000   21.5000
+Cell 2 coefficients:
+   21.5000   32.0000
+```
+
+### Numeric matrix multiplication
 
 ```matlab
 A = dpmat({[0 1]}, {[1 0; 0 2], [2 0; 0 3]}, Degree=1);
@@ -95,6 +147,42 @@ ans =
 
         1          {[0]}       {2x2 double}
         2          {[1]}       {2x2 double}
+```
+
+### Two-dimensional tensor Bernstein multiplication
+
+This example isolates multiplication of two parameter-dependent operands on a
+two-axis tensor grid. Two degree-one factors produce common tensor degree two,
+so the single physical cell stores $(2+1)^2=9$ coefficients in `lbls` order.
+
+```matlab
+grid = {[0 1], [10 20]};
+A = dpmat(grid, {1 2; 3 4}, Degree=1);
+B = dpmat(grid, {5 6; 7 8}, Degree=1);
+K = A * B;
+cK = K.coeffs([1 1]);
+fprintf('Tensor product degree: %d\n', K.Degree);
+fprintf('Tensor labels:\n');
+disp(K.lbls())
+fprintf('Tensor coefficients:\n');
+disp([cK{:}])
+```
+
+```text
+Tensor product degree: 2
+Tensor labels:
+     0     0
+     0     1
+     0     2
+     1     0
+     1     1
+     1     2
+     2     0
+     2     1
+     2     2
+
+Tensor coefficients:
+     5     8    12    11    15    20    21    26    32
 ```
 
 ### Transpose, reshape, squeeze, and vec
@@ -245,8 +333,11 @@ documented separately below.
 
 ### <span id="dpmat-mtimes"></span>`mtimes` and `*`
 
-Performs matrix multiplication coefficient by coefficient, with Bernstein
-degree growth handled by the shared backend. Numeric scalar and matrix
+Performs a binomial-normalized, ordered tensor Bernstein convolution over
+cell-local coefficient labels. Label multi-indices add componentwise, and the
+output degree is the sum of the operand degrees on every parameter axis.
+Matrix-product order is preserved in each term: a left coefficient multiplies
+the matching right coefficient, not the reverse. Numeric scalar and matrix
 operands follow the implemented MATLAB-compatible forms.
 
 ### <span id="dpmat-uminus"></span>`uminus` and unary `-`

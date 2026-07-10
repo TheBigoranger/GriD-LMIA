@@ -7,6 +7,9 @@ classdef dpmat < dpbase
     %
     %   source may be a function handle, a global cell grid of numeric
     %   Bernstein coefficients, or nested LocalValues in the dpbase contract.
+    %   Nested LocalValues with mismatched shared faces produce a
+    %   dpmat:DiscontinuousLocalValues warning and IsContinuous=false;
+    %   their cell-local coefficient data is left unchanged.
     %   Function-backed objects without Degree only probe the lower grid
     %   point for size; inherited LocalValues are placeholder zeros, not
     %   coefficient evidence. Function handles with explicit Degree are
@@ -23,25 +26,45 @@ classdef dpmat < dpbase
 
     methods
         function obj = dpmat(gridVectors, source, varargin)
-            degOpt = parseOptions(varargin{:});
-            if isnumeric(gridVectors) && isvector(gridVectors) && numel(gridVectors) >= 2
-                % Accept scalar-parameter shorthand at the public entry;
-                % dpbase still receives its strict cell-vector grid contract.
-                gridVectors = {gridVectors};
-            end
+            if nargin == 1 && isstruct(gridVectors) && isfield(gridVectors, "DpmatInternal")
+                % Private algebra helpers supply validated metadata so an
+                % internal rewrap never repeats a user-facing warning.
+                init = gridVectors;
+                grid = init.Grid;
+                sz = init.MatrixSize;
+                deg = init.Degree;
+                vals = init.LocalValues;
+                isCont = init.IsContinuous;
+                summary = init.SourceSummary;
+                fh = init.FunctionHandle;
+                warnCont = false;
+            else
+                degOpt = parseOptions(varargin{:});
+                if isnumeric(gridVectors) && isvector(gridVectors) && numel(gridVectors) >= 2
+                    % Accept scalar-parameter shorthand at the public entry;
+                    % dpbase still receives its strict cell-vector grid contract.
+                    gridVectors = {gridVectors};
+                end
 
-            [sz, deg, vals, summary, fh] = mkData(gridVectors, source, degOpt);
+                grid = gridVectors;
+                [sz, deg, vals, isCont, summary, fh] = mkData(grid, source, degOpt);
+                warnCont = ~isCont;
+            end
 
             % All dpmat sources are known numeric data in this first pass:
             % no YALMIP decisions and no rho_dot dependence enter the parent.
-            obj@dpbase(gridVectors, sz, deg, vals, ...
-                IsContinuous=true, ...
+            obj@dpbase(grid, sz, deg, vals, ...
+                IsContinuous=isCont, ...
                 ContainsDecision= false, ...
                 HasRateDependence=false, ...
                 RateBounds=[], ...
                 SourceSummary=summary);
 
             obj.FunctionHandle = fh;
+            if warnCont
+                warning("dpmat:DiscontinuousLocalValues", ...
+                    "Nested LocalValues have mismatched shared Bernstein faces; IsContinuous is false.");
+            end
         end
     end
 

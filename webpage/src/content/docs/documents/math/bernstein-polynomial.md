@@ -237,6 +237,53 @@ This direct coefficient convolution is implemented by the shared Bernstein
 backend and exercised by coefficient-backed `dpmat` algebra and supported
 known-data/`dpvar` products. It is representation algebra, not a relaxation.
 
+### Weighted Value-Grid Convolution
+
+The same product rule can be evaluated as an ordinary ordered
+$\ell$-dimensional discrete convolution. Within one physical cell, reshape the
+flat coefficient lists into value grids indexed by
+$\boldsymbol\alpha\in\{0,\ldots,m\}^{\ell}$ and
+$\boldsymbol\beta\in\{0,\ldots,n\}^{\ell}$, preserving the package's `lbls`
+order. First restore the binomial weights carried by the tensor Bernstein
+basis:
+
+$$
+\widetilde A_{\boldsymbol\alpha}
+=A_{\boldsymbol\alpha}
+\prod_{r=1}^{\ell}\binom{m}{\alpha_r},
+\qquad
+\widetilde B_{\boldsymbol\beta}
+=B_{\boldsymbol\beta}
+\prod_{r=1}^{\ell}\binom{n}{\beta_r}.
+$$
+
+Next convolve the two weighted value grids over all componentwise label sums:
+
+$$
+\widetilde C_{\boldsymbol\gamma}
+=\bigl(\widetilde A *_\ell \widetilde B\bigr)_{\boldsymbol\gamma}
+=\sum_{\boldsymbol\alpha+\boldsymbol\beta=\boldsymbol\gamma}
+\widetilde A_{\boldsymbol\alpha}\widetilde B_{\boldsymbol\beta}.
+$$
+
+Finally remove the degree-$(m+n)$ Bernstein weights to recover the stored
+coefficients:
+
+$$
+C_{\boldsymbol\gamma}
+=\frac{\widetilde C_{\boldsymbol\gamma}}
+{\displaystyle\prod_{r=1}^{\ell}\binom{m+n}{\gamma_r}}.
+$$
+
+These three steps are algebraically equivalent to the binomial-scaled formula
+above. The product has common tensor `Degree` $m+n$ and each physical cell has
+$(m+n+1)^{\ell}$ coefficients. For matrix-valued grids, the convolution is
+ordered: every term is
+$\widetilde A_{\boldsymbol\alpha}\widetilde B_{\boldsymbol\beta}$ in that
+left-to-right matrix order. The package's reversed local coordinate and
+reversed-alpha endpoint-label convention are unchanged; only coefficient
+weights are temporarily restored and removed.
+
 ## Hypercube Counts And Traversal
 
 With node counts $N_1,\ldots,N_\ell$, the number of physical hypercubes is

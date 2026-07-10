@@ -26,7 +26,7 @@ function obj = subsasgn(obj, S, rhs)
     vals = helper.mkNest(nCell, @(subs) assignCell( ...
         helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), rows, cols));
 
-    obj = dpmat(grid, vals, Degree=deg);
+    obj = mkObj(grid, vals, deg);
 end
 
 function [rows, cols] = sanCheck(obj, S, rhs)

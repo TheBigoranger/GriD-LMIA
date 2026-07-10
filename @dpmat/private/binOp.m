@@ -37,5 +37,5 @@ function out = binOp(lhs, rhs, fcn, errId)
         return
     end
 
-    out = dpmat(grid, vals, Degree=deg);
+    out = mkObj(grid, vals, deg);
 end

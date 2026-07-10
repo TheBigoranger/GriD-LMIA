@@ -22,7 +22,7 @@ function out = cat(dim, varargin)
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) catCell(dim, data, subs));
-    out = dpmat(grid, vals, Degree=deg);
+    out = mkObj(grid, vals, deg);
 
     if ~isequal(size(out), sz)
         error("dpmat:InvalidConcatenation", "Internal dpmat concatenation size mismatch.");

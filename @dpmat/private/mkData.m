@@ -1,15 +1,17 @@
-function [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
+function [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
     %MKDATA Route dpmat constructor sources into dpbase constructor inputs.
     %
     %   Syntax:
-    %     [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
+    %     [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
     %
     %   Example (via the public constructor):
     %     A = dpmat({[0 1]}, {1, 2}, Degree=1);
     %
     %   SRC may be a function handle, a global numeric cell grid, or nested
     %   LocalValues. The outputs contain the inferred matrix size, degree,
-    %   local coefficient tree, source summary, and optional exact evaluator.
+    %   local coefficient tree, inferred continuity, source summary, and optional
+    %   exact evaluator. Only explicit nested LocalValues need face checks;
+    %   global Bernstein grids and function sources are continuous by construction.
     %   Function-only sources are intentionally kept outside coefficient
     %   algebra unless an explicit degree certifies Bernstein data.
 
@@ -22,6 +24,7 @@ function [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
     end
     if isa(src, "function_handle")
         [sz, deg, vals, summary, fh] = funData(src, info, optDeg);
+        isCont = true;
         return
     end
 
@@ -34,8 +37,9 @@ function [sz, deg, vals, summary, fh] = mkData(grid, src, optDeg)
     summary = "coefficient-backed";
     if ~isempty(src) && all(cellfun(@isnumeric, src(:)))
         [sz, deg, vals] = helper.gridToLocal(src, vecs, optDeg, "dpmat");
+        isCont = true;
     else
-        [sz, deg, vals] = localData(src, vecs, optDeg);
+        [sz, deg, vals, isCont] = localData(src, vecs, optDeg);
     end
 end
 
@@ -93,11 +97,11 @@ function [sz, deg, vals, summary, fh] = funData(fh, info, optDeg)
     summary = "function-bernstein";
 end
 
-function [sz, deg, vals] = localData(src, vecs, optDeg)
+function [sz, deg, vals, isCont] = localData(src, vecs, optDeg)
     %LOCALDATA Validate nested LocalValues while inferring its degree.
     %
     %   Syntax:
-    %     [sz, deg, vals] = localData(src, gridVectors, optDeg)
+    %     [sz, deg, vals, isCont] = localData(src, gridVectors, optDeg)
     %   SCAN NEST also enforces one matrix size and one coefficient count for
     %   every physical cell. Invalid nesting or inconsistent leaves are
     %   reported with dpmat-specific errors rather than silently reshaped.
@@ -121,6 +125,9 @@ function [sz, deg, vals] = localData(src, vecs, optDeg)
     end
 
     vals = src;
+    % Explicit local leaves may represent discontinuous known data, unlike a
+    % global coefficient grid whose shared nodes already enforce continuity.
+    isCont = chkCont(vals, nCell, deg);
 end
 
 function [sz, nCoeff] = scanNest(vals, nCell)

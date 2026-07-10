@@ -16,5 +16,5 @@ function out = unOp(obj, fcn)
             "Function-backed dpmat objects need explicit Bernstein coefficient evidence for this operation.");
     end
     vals = helper.mapVals(obj.LocalValues, fcn, obj.GridInfo.Vectors);
-    out = dpmat(obj.GridInfo.Vectors, vals, Degree=obj.Degree);
+    out = mkObj(obj.GridInfo.Vectors, vals, obj.Degree);
 end

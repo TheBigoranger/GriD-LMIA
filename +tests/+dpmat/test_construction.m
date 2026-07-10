@@ -110,19 +110,71 @@ function testTensorGlobalCellGrid(testCase)
 end
 
 function testExplicitNestedLocalValues(testCase)
-    % Explicit nested LocalValues should pass through as local coefficients.
+    % Misaligned nested LocalValues should warn without changing their data.
     localValues = {
         {mkCoeff(100)}, ...
         {mkCoeff(200)}
         };
 
-    A = dpmat({[0 1 2], [10 20]}, localValues);
+    A = constructWithWarning(testCase, ...
+        @() dpmat({[0 1 2], [10 20]}, localValues), ...
+        "dpmat:DiscontinuousLocalValues");
 
     testCase.verifyEqual(A.Degree, 1);
     testCase.verifyEqual(A.MatrixSize, [1 2]);
-    testCase.verifyTrue(A.IsContinuous);
+    testCase.verifyFalse(A.IsContinuous);
+    testCase.verifyEqual(A.LocalValues{1}{1}, mkCoeff(100));
     testCase.verifyEqual(A.LocalValues{2}{1}, mkCoeff(200));
     testCase.verifyEqual(A.coeffs([1 1]), mkCoeff(100));
+end
+
+function testTwoDimensionalGlobalBernsteinData(testCase)
+    % A 3-by-3 global degree-one grid should share faces in both directions.
+    grid = {[0 1 2], [10 20 30]};
+    data = cell(3, 3);
+    for i = 1:3
+        for j = 1:3
+            data{i, j} = 10 * i + j;
+        end
+    end
+
+    A = constructWarningFree(testCase, @() dpmat(grid, data, Degree=1));
+    c11 = A.coeffs([1 1]);
+    c21 = A.coeffs([2 1]);
+    c12 = A.coeffs([1 2]);
+
+    testCase.verifyTrue(A.IsContinuous);
+    testCase.verifyEqual(c11, {11, 12, 21, 22});
+    testCase.verifyEqual(A.coeffs([2 2]), {22, 23, 32, 33});
+    testCase.verifyEqual(c11([3 4]), c21([1 2]));
+    testCase.verifyEqual(c11([2 4]), c12([1 3]));
+end
+
+function testTwoDimensionalAlignedNestedLocalValues(testCase)
+    % Explicit tensor local values remain continuous when every face agrees.
+    grid = {[0 1 2], [10 20 30]};
+    localValues = mkAligned2DLocalValues();
+
+    A = constructWarningFree(testCase, @() dpmat(grid, localValues, Degree=1));
+
+    testCase.verifyTrue(A.IsContinuous);
+    testCase.verifyEqual(A.LocalValues{2}{1}, {21, 22, 31, 32});
+    testCase.verifyEqual(A.LocalValues{1}{2}, {12, 13, 22, 23});
+    testCase.verifyEqual(A.coeffs([1 1]), {11, 12, 21, 22});
+end
+
+function testNestedLocalValuesContinuityTolerance(testCase)
+    % Shared faces use the package's scale-aware numerical tolerance.
+    grid = {[0 1 2]};
+    withinTol = {{1, 2}, {2 + 1e-10, 3}};
+    beyondTol = {{1, 2}, {2 + 1e-6, 3}};
+
+    A = constructWarningFree(testCase, @() dpmat(grid, withinTol, Degree=1));
+    B = constructWithWarning(testCase, @() dpmat(grid, beyondTol, Degree=1), ...
+        "dpmat:DiscontinuousLocalValues");
+
+    testCase.verifyTrue(A.IsContinuous);
+    testCase.verifyFalse(B.IsContinuous);
 end
 
 function c = mkCoeff(offset)
@@ -133,6 +185,34 @@ function c = mkCoeff(offset)
         [offset + 5, offset + 6], ...
         [offset + 7, offset + 8]
         };
+end
+
+function vals = mkAligned2DLocalValues()
+    % Keep tensor labels ordered as [0 0], [0 1], [1 0], [1 1].
+    vals = {
+        {{11, 12, 21, 22}, {12, 13, 22, 23}}, ...
+        {{21, 22, 31, 32}, {22, 23, 32, 33}}
+        };
+end
+
+function obj = constructWithWarning(testCase, fcn, warningId)
+    % Capture one direct-construction warning while retaining its result.
+    obj = [];
+    testCase.verifyWarning(@construct, warningId);
+
+    function construct
+        obj = fcn();
+    end
+end
+
+function obj = constructWarningFree(testCase, fcn)
+    % Capture a construction result while asserting no warning escapes.
+    obj = [];
+    testCase.verifyWarningFree(@construct);
+
+    function construct
+        obj = fcn();
+    end
 end
 
 function out = lowerOnly(rho)
