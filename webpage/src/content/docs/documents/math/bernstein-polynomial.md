@@ -14,6 +14,10 @@ coefficients. This chapter explains the mathematical facts used by `dpmat`,
 `dpvar`, `rhodiff`, and `dplmi`; the [Status And Limits](/DP-LMI-package/documents/status-and-limits/)
 page separates those implemented calls from research context.
 
+For a diagram-led walkthrough of the actual one- and two-dimensional input
+shapes, cell traversal, and the distinction between physical gridding and
+Bernstein `Degree`, see [Gridding And Bernstein Degree](/DP-LMI-package/documents/math/gridding-and-degree/).
+
 ## From 1912 To Parameter-Dependent LMIs
 
 Bernstein introduced the basis in 1912 for a constructive proof of the

@@ -90,6 +90,24 @@ function testCommonStructuralMethods(testCase)
     testCase.verifyFalse(isequal(P, D));
 end
 
+function testConstructorHighDegreeStructuralMapping(testCase)
+    % Structural methods map every constructor-created high-degree payload.
+    P = dpvar(2, 3, {[0 1]}, "full", Degree=3);
+    cp = P.coeffs(1);
+
+    T = P.';
+    V = vec(P);
+
+    testCase.verifyEqual(T.Degree, 3);
+    testCase.verifyEqual(V.Degree, 3);
+    testCase.verifyEqual(size(T), [3 2]);
+    testCase.verifyEqual(size(V), [6 1]);
+    verifyCoeffExpr(testCase, T.coeffs(1), ...
+        cellfun(@transpose, cp, UniformOutput=false));
+    verifyCoeffExpr(testCase, V.coeffs(1), ...
+        cellfun(@(x) x(:), cp, UniformOutput=false));
+end
+
 function testDerivativeStructuralMethodsPreserveRateRows(testCase)
     % Unary structural transforms should keep derivative row tables intact.
     P = dpvar(2, {[0 1]}, "full");

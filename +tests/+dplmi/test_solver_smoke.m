@@ -10,7 +10,8 @@ end
 
 function testParameterDependentPBeatsConstantP(testCase)
     % This example is feasible only after P is allowed to depend on rho.
-    A = dpmat({[0 1]}, @(x) (1 - x) * [-1 -1; 1 -1] ...
+    grid = {[0 1]};
+    A = dpmat(grid, @(x) (1 - x) * [-1 -1; 1 -1] ...
         + x * [-1 -10; 0.1 -1], Degree=1);
     useMosek = exist('mosekopt', 'file') ~= 0;
     solver = 'lmilab';
@@ -19,12 +20,12 @@ function testParameterDependentPBeatsConstantP(testCase)
     end
     opts = sdpsettings('solver', solver, 'verbose', 0);
 
-    Pc = dpvar(2, {[0 1]}, Degree=0);
+    Pc = dpvar(2, grid, Degree=0);
     Cdecay = Pc * A + A' * Pc <= -1e-10 * eye(2);
     Cpos = Pc >= eye(2);
     solConst = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
 
-    Pd = dpvar(2, {[0 1]});
+    Pd = dpvar(2, grid);
     Cdecay = Pd * A + A' * Pd <= -1e-10 * eye(2);
     Cpos = Pd >= eye(2);
     solDp = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
@@ -37,6 +38,14 @@ function testParameterDependentPBeatsConstantP(testCase)
         testCase.verifyTrue(any(solConst.problem == [0 1]), solConst.info);
     end
     testCase.verifyEqual(solDp.problem, 0, solDp.info);
+
+    % Convert solved symbolic Bernstein coefficients to known data so the
+    % existing dpmat plotter can show the parameter-dependent certificate.
+    Pplot = value(Pd);
+    figure(Name="Parameter-dependent Lyapunov matrix");
+    h = plot(Pplot, SamplesPerCell=40, LineWidth=1.5);
+    title("Solved parameter-dependent Lyapunov matrix");
+    testCase.verifyEqual(numel(h), 4);
 end
 
 function testUserBlockLmiSolverExample(testCase)
@@ -71,5 +80,7 @@ function testUserBlockLmiSolverExample(testCase)
     sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
 
     testCase.verifyEqual(sol.problem, 0, sol.info);
-    testCase.verifyTrue(isfinite(value(objective)));
+    gammaValue = value(objective);
+    testCase.verifyTrue(isfinite(gammaValue));
+    fprintf("Optimal H-infinity gamma: %.6g\n", gammaValue);
 end

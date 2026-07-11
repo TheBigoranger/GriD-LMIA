@@ -8,8 +8,13 @@ classdef (InferiorClasses = {?dpmat, ?sdpvar}) dpvar < dpbase
     %     P = dpvar(..., "full")
     %     P = dpvar(..., "symmetric", Degree=0, RateBounds=rb)
     %
+    %   Degree accepts any finite nonnegative integer scalar and defaults to
+    %   1.  Degree 0 creates one parameter-independent decision matrix shared
+    %   across the grid.  Degree d >= 1 creates continuous piecewise Bernstein
+    %   data whose adjacent cells share complete faces of control matrices.
+    %
     %   Example:
-    %     P = dpvar(2, [0 1 2], "symmetric");
+    %     P = dpvar(2, [0 1 2], "symmetric", Degree=2);
     %     c = P.coeffs(1);
     %
     %   dpvar is method-superior to dpmat and sdpvar so mixed known,
@@ -61,12 +66,16 @@ function [grid, sz, deg, vals, hasRate, rb] = ctorArgs(varargin)
         val = sdpvar(sz(1), sz(2), char(typ));
         vals = helper.mkNest(nCell, @(~) {val});
     else
-        nodes = helper.mkNest(info.NumNodes, @(~) sdpvar(sz(1), sz(2), char(typ)));
-        lbls = helper.combRows(repmat({0:1}, 1, numel(info.Vectors)));
+        % A degree-d piecewise polynomial has d new control positions per
+        % physical cell.  Reusing this global lattice shares complete faces,
+        % edges, and corners without adding continuity equality constraints.
+        nCtrl = nCell .* deg + 1;
+        nodes = helper.mkNest(nCtrl, @(~) sdpvar(sz(1), sz(2), char(typ)));
+        lbls = helper.combRows(repmat({0:deg}, 1, numel(info.Vectors)));
 
         % The global node tree is reused by every adjacent physical cell, which
         % makes continuity a shared-handle property rather than an equality LMI.
-        vals = helper.mkNest(nCell, @(subs) cellVals(nodes, subs, lbls));
+        vals = helper.mkNest(nCell, @(subs) cellVals(nodes, subs, lbls, deg));
     end
     hasRate = ~isempty(rb);
 end
@@ -149,12 +158,8 @@ function [sz, grid, info, typ, deg, rb] = parseArgs(varargin)
                 rb = val;
             case "Degree"
                 deg = double(helper.chk(val, "dpvar:InvalidDegree", ...
-                    "Degree must be 0 or 1 for constructor-created dpvar variables.", ...
+                    "Degree must be a nonnegative integer scalar.", ...
                     "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-                if ~any(deg == [0 1])
-                    error("dpvar:InvalidDegree", ...
-                        "Degree must be 0 or 1 for constructor-created dpvar variables.");
-                end
             case {"IsContinuous", "ContainsDecision", "HasRateDependence"}
                 error("dpvar:UnsupportedOption", ...
                     "%s is fixed internally for dpvar and is not a constructor option.", name);
@@ -172,10 +177,11 @@ function [sz, grid, info, typ, deg, rb] = parseArgs(varargin)
     info = helper.mkGrid(grid, "dpvar");
 end
 
-function coeffs = cellVals(nodes, subs, lbls)
+function coeffs = cellVals(nodes, subs, lbls, deg)
     nCoeff = size(lbls, 1);
     coeffs = cell(1, nCoeff);
     for k = 1:nCoeff
-        coeffs{k} = helper.cellGet(nodes, subs + lbls(k, :));
+        idx = (subs - 1) .* deg + lbls(k, :) + 1;
+        coeffs{k} = helper.cellGet(nodes, idx);
     end
 end

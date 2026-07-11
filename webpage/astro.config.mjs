@@ -38,6 +38,7 @@ export default defineConfig({
             { label: "Manual Index", slug: "documents" },
             { label: "Lookup Table", slug: "documents/reference-index" },
             { label: "Bernstein Polynomial", slug: "documents/math/bernstein-polynomial" },
+            { label: "Gridding And Bernstein Degree", slug: "documents/math/gridding-and-degree" },
             { label: "Status And Limits", slug: "documents/status-and-limits" },
             {
               label: "dpmat",

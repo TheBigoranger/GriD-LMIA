@@ -20,8 +20,8 @@ function obj = subsasgn(obj, S, rhs)
     rhsData = asData(grid, rhs, [numel(rows), numel(cols)], "dpmat:InvalidAssignment");
 
     deg = max(lhsData.Degree, rhsData.Degree);
-    lhsVals = elevVals(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
-    rhsVals = elevVals(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
+    lhsVals = elevLocalValues(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
+    rhsVals = elevLocalValues(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) assignCell( ...
         helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), rows, cols));

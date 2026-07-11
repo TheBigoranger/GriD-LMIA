@@ -34,6 +34,10 @@ A = dpmat(gridVectors, source, Degree=m)
 
 Unsupported options: `IsContinuous`, `ContainsDecision`, `HasRateDependence`, and `RateBounds`.
 
+For diagrams of one- and two-parameter grid inputs, the global
+coefficient-grid shape, and the separate role of Bernstein `Degree`, see
+[Gridding And Bernstein Degree](/DP-LMI-package/documents/math/gridding-and-degree/).
+
 ## Returned Object
 
 `A` is a `dpmat < dpbase` object. All inherited `dpbase` properties are
@@ -45,7 +49,7 @@ readable through dot syntax and have private set access:
 | `MatrixSize` | `A.MatrixSize` | Matrix size of each numeric payload. |
 | `Degree` | `A.Degree` | Local Bernstein degree. |
 | `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | Cell-local numeric Bernstein coefficients. |
-| `IsContinuous` | `A.IsContinuous` | Always `true` for current `dpmat` construction. |
+| `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces; otherwise the constructor warns and returns `false`. |
 | `ContainsDecision` | `A.ContainsDecision` | Always `false`; no YALMIP decisions are stored. |
 | `HasRateDependence` | `A.HasRateDependence` | Always `false`; rate dependence belongs to `dpvar`/`rhodiff`. |
 | `RateBounds` | `A.RateBounds` | Always empty for `dpmat`. |

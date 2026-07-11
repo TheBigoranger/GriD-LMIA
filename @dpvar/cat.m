@@ -25,7 +25,7 @@ function out = cat(dim, varargin)
     deg = max(arrayfun(@(d) d.Degree, data));
 
     for k = 1:numel(data)
-        data(k).LocalValues = elevVals(anchor, data(k).LocalValues, ...
+        data(k).LocalValues = elevLocalValues(anchor, data(k).LocalValues, ...
             data(k).Degree, deg, grid);
     end
 

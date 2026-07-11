@@ -41,7 +41,8 @@ With `Degree=0`, `P` is constant over the cell. With the default degree, `P` is 
 
 ```matlab
 yalmip('clear')
-A = dpmat({[0 1]}, @(x) (1 - x) * [-1 -1; 1 -1] ...
+grid = {[0 1]};
+A = dpmat(grid, @(x) (1 - x) * [-1 -1; 1 -1] ...
     + x * [-1 -10; 0.1 -1], Degree=1);
 
 solver = "lmilab";
@@ -50,18 +51,27 @@ if exist("mosekopt", "file") ~= 0
 end
 opts = sdpsettings("solver", solver, "verbose", 0);
 
-Pc = dpvar(2, {[0 1]}, Degree=0);
+Pc = dpvar(2, grid, Degree=0);
 Cdecay = Pc * A + A' * Pc <= -1e-10 * eye(2);
 Cpos = Pc >= eye(2);
 solConst = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
 
-Pd = dpvar(2, {[0 1]});
+Pd = dpvar(2, grid);
 Cdecay = Pd * A + A' * Pd <= -1e-10 * eye(2);
 Cpos = Pd >= eye(2);
 solDp = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
+
+% Convert the solved symbolic Bernstein coefficients into known data for plotting.
+Pplot = dpmat(grid, {cellfun(@value, Pd.LocalValues{1}, ...
+    UniformOutput=false)}, Degree=Pd.Degree);
+figure(Name="Parameter-dependent Lyapunov matrix");
+plot(Pplot, SamplesPerCell=40, LineWidth=1.5);
+title("Solved parameter-dependent Lyapunov matrix");
 ```
 
 In the regression, MOSEK reports the constant case as infeasible and the parameter-dependent case as feasible. `lmilab` is used only as a fallback smoke path, not as the certificate for the infeasibility distinction.
+
+After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `dpmat` (`Pplot`) before calling [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
 
 ## Block DP-LMI Objective
 
@@ -131,6 +141,9 @@ if exist("mosekopt", "file") ~= 0
 end
 opts = sdpsettings("solver", solver, "verbose", 0);
 sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
+
+gammaValue = value(objective);
+fprintf("Optimal H-infinity gamma: %.6g\n", gammaValue);
 ```
 
 The regression verifies that the assembled constraint counts are stable:
@@ -148,7 +161,13 @@ ans =
      2
 ```
 
-The solver smoke path checks `sol.problem == 0` and that `value(objective)` is finite.
+The solver smoke path checks `sol.problem == 0`, verifies that `gammaValue` is finite, and prints the attained objective in this format:
+
+```text
+Optimal H-infinity gamma: <solver result>
+```
+
+The numeric value is solver- and tolerance-dependent, so the manual does not present a fixed value as a regression target.
 
 ## Boundary
 

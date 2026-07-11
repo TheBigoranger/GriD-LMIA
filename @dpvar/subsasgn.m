@@ -32,8 +32,8 @@ function obj = subsasgn(obj, S, rhs)
         rb, "dpvar:InvalidAssignment");
 
     deg = max(lhsData.Degree, rhsData.Degree);
-    lhsVals = elevVals(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
-    rhsVals = elevVals(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
+    lhsVals = elevLocalValues(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
+    rhsVals = elevLocalValues(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
     vals = zipRows(lhsVals, rhsVals, @(lhs, rhs) assignBlock(lhs, rhs, rows, cols), grid);
 
     hasDec = lhsData.ContainsDecision || rhsData.ContainsDecision;

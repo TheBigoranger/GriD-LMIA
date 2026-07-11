@@ -59,6 +59,27 @@ function testDpmatPromotion(testCase)
     verifyCoeffExpr(testCase, C.coeffs(1), {cp{1} + 10, cp{2} + 20});
 end
 
+function testConstructorHighDegreeAlignment(testCase)
+    % Arbitrary-degree constructor values participate in exact elevation.
+    P = dpvar(1, {[0 1]}, Degree=2);
+    Q = dpvar(1, {[0 1]}, Degree=3);
+    cp = P.coeffs(1);
+    cq = Q.coeffs(1);
+
+    S = P + 5;
+    D = P - Q;
+
+    testCase.verifyEqual(S.Degree, 2);
+    verifyCoeffExpr(testCase, S.coeffs(1), ...
+        {cp{1} + 5, cp{2} + 5, cp{3} + 5});
+    testCase.verifyEqual(D.Degree, 3);
+    verifyCoeffExpr(testCase, D.coeffs(1), { ...
+        cp{1} - cq{1}, ...
+        (cp{1} + 2 * cp{2}) / 3 - cq{2}, ...
+        (2 * cp{2} + cp{3}) / 3 - cq{3}, ...
+        cp{3} - cq{4}});
+end
+
 function testDerivativeAffineOperandOrders(testCase)
     % Rate rows should work on either side of supported affine operands.
     P = dpvar(1, {[0 1]});

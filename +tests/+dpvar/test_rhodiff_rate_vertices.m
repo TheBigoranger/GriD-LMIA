@@ -29,10 +29,8 @@ function testScalarDegreeOneFormulaAndMetadata(testCase)
 end
 
 function testScalarDegreeTwoFormula(testCase)
-    % Scalar degree-two derivatives should drop to degree-one coefficients.
-    P = dpvar(1, {[0 1]});
-    A = dpmat({[0 1]}, {10, 20}, Degree=1);
-    C = P * A;
+    % Constructor-created scalar quadratics drop to degree-one derivatives.
+    C = dpvar(1, {[0 1]}, Degree=2);
     cc = C.coeffs(1);
 
     D = rhodiff(C, [-1 2]);
@@ -83,12 +81,10 @@ function testTensorDegreeOneFormulaAndRateOrder(testCase)
 end
 
 function testTensorDegreeTwoFormula(testCase)
-    % Tensor degree-two derivatives should elevate partials to common degree.
+    % Constructor-created tensor quadratics elevate partials to common degree.
     grid = {[0 2], [10 14]};
     rb = [-1 2; -3 5];
-    P = dpvar(1, grid);
-    A = dpmat(grid, {10 20; 30 40}, Degree=1);
-    C = P * A;
+    C = dpvar(1, grid, Degree=2);
     cc = C.coeffs([1 1]);
 
     D = rhodiff(C, rb);

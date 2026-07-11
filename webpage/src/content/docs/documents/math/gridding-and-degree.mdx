@@ -1,0 +1,178 @@
+---
+title: Gridding And Bernstein Degree
+description: Read parameter-grid inputs, global coefficient grids, cell-local storage, and the common Bernstein degree without conflating them.
+---
+
+import GriddingDiagram from "../../../../components/GriddingDiagram.astro";
+
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/math/bernstein-polynomial/">Bernstein Polynomial</a>
+  <span>/</span>
+  <span>Gridding And Bernstein Degree</span>
+</nav>
+
+## The Two Independent Choices
+
+Every coefficient-backed object has two related but different discretizations:
+
+- the **physical parameter grid** partitions the scheduling domain into cells;
+- the scalar **Bernstein `Degree`** chooses how many local coefficient matrices
+  represent the polynomial in every cell.
+
+Adding a grid node makes more physical cells. Raising `Degree` makes more
+Bernstein labels inside each existing cell. Neither action is a shorthand for
+the other.
+
+<GriddingDiagram />
+
+## One-Dimensional Input
+
+For one scheduling parameter, `dpmat` and `dpvar` accept a numeric vector as
+shorthand for a one-element cell array. The vector must be finite, strictly
+increasing, and have at least two entries.
+
+```matlab
+rhoGrid = [0 1 2];
+data = {10, 11, 12, 13, 14};
+A = dpmat(rhoGrid, data, Degree=2);
+
+A.ncell()
+A.ncoeff()
+A.coeffs(1)
+A.coeffs(2)
+```
+
+```text
+ans =
+     2
+
+ans =
+     3
+
+ans =
+  1x3 cell array
+    {[10]}    {[11]}    {[12]}
+
+ans =
+  1x3 cell array
+    {[12]}    {[13]}    {[14]}
+```
+
+Here `rhoGrid` has three nodes, so it creates two physical intervals. Degree
+2 gives the three local labels `0`, `1`, and `2`, hence three coefficients per
+interval. The global input has five entries because its required length is
+
+$$
+(N_1-1)m+1=(3-1)2+1=5.
+$$
+
+The shared value `12` is the common boundary coefficient of the two global
+degree-two cells. It is a Bernstein coefficient, not an extra physical grid
+node and not necessarily a sampled function value.
+
+## Two-Dimensional Input
+
+For two scheduling parameters, pass one node vector per axis. A global
+coefficient source is a MATLAB cell array whose dimensions follow the two
+axes:
+
+```matlab
+grid = {[0 1 2], [10 20 30]};
+data = {11, 12, 13; 21, 22, 23; 31, 32, 33};
+A = dpmat(grid, data, Degree=1);
+
+A.ncell()
+A.ncoeff()
+A.coeffs([1 1])
+A.coeffs([2 2])
+A.LocalValues{2}{1}
+```
+
+```text
+ans =
+     4
+
+ans =
+     4
+
+ans =
+  1x4 cell array
+    {[11]}    {[12]}    {[21]}    {[22]}
+
+ans =
+  1x4 cell array
+    {[22]}    {[23]}    {[32]}    {[33]}
+
+ans =
+  1x4 cell array
+    {[21]}    {[22]}    {[31]}    {[32]}
+```
+
+There are $2\times2=4$ physical rectangles. The common degree is 1 along
+both axes, so each rectangle has $(1+1)^2=4$ local tensor coefficients. Their
+flat package order is the row order returned by `A.lbls()`:
+
+```text
+     0     0
+     0     1
+     1     0
+     1     1
+```
+
+The same order explains `A.coeffs([1 1])`. The first grid dimension varies
+more slowly in that local-label order. Physical cells, in contrast, are stored
+as a nested tree: `LocalValues{i1}{i2}`. Thus `A.LocalValues{2}{1}` selects
+the second cell along the first axis and the first cell along the second.
+
+For this degree-one example, each global coefficient-grid dimension is
+
+$$
+(N_r-1)m+1=(3-1)1+1=3,
+$$
+
+which is why `data` is a 3-by-3 cell array. For a global coefficient-backed
+`dpmat`, every axis must satisfy this shape rule.
+
+## The \(\ell\)-Dimensional Case
+
+The same convention extends directly to \(\ell\) scheduling parameters:
+
+```matlab
+gridVectors = {rho1Nodes, rho2Nodes, ..., rhoEllNodes};
+```
+
+If axis `r` has `N_r` nodes and the common scalar degree is `m`, the package
+has
+
+$$
+N_{\mathrm{cell}}=\prod_{r=1}^{\ell}(N_r-1),
+\qquad
+N_{\mathrm{coeff/cell}}=(m+1)^\ell.
+$$
+
+The physical-cell tree is `LocalValues{i1}{i2}...{i_ell}`. Its leaf is a flat
+cell array whose label rows come from `lbls()`; labels range independently
+from `0` through `m` in each coordinate. A global coefficient-backed `dpmat`
+uses one source-array dimension per parameter, of length
+`(N_r - 1) * m + 1` on axis `r`.
+
+`Degree` is a single scalar property in the implemented package, not a
+per-axis degree vector. `dpmat` accepts any nonnegative integer degree;
+constructor-created `dpvar` accepts `Degree=0` or `Degree=1`. Products may
+create higher-degree expressions through coefficient algebra.
+
+## Do Not Conflate These Operations
+
+| Operation | Changes physical cells? | Changes coefficients per cell? | Current package boundary |
+| :--- | :---: | :---: | :--- |
+| Add grid nodes | Yes | No, for a fixed degree | Common-grid algebra is supported; there is no general public adaptive-subdivision command. |
+| Raise or align Bernstein degree | No | Yes | Exact degree elevation aligns compatible coefficient-backed operands. |
+| Choose a higher `dpvar` decision degree | No | Yes | Constructor-created `dpvar` is limited to degree 0 or 1. |
+
+The [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/)
+chapter gives the basis, local coordinate, degree-elevation formula, and
+coefficient-product rule. The [`dpmat` constructor](/DP-LMI-package/documents/reference/dpmat/constructor/)
+reference lists the accepted source forms, and the [`dpvar` constructor](/DP-LMI-package/documents/reference/dpvar/constructor/)
+lists its decision-variable forms.

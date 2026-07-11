@@ -8,6 +8,7 @@ classdef dpbase
     %   Example:
     %     obj = dpbase({[0 1 2]}, [2 2], 1);
     %     c = obj.coeffs(1);
+    %     elevated = obj.elevVals(1);
 
     properties (SetAccess = private)
         GridInfo
@@ -89,10 +90,13 @@ classdef dpbase
             obj.RateBounds = rb;
             obj.SourceSummary = options.SourceSummary;
         end
+
+        vals = elevVals(obj, degreeIncrement)
     end
 
     methods (Access = protected)
         out = bernElev(obj, coeffs, fromDeg, toDeg)
+        vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
         out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
         grid = mergeGrid(obj, errId, varargin)
     end

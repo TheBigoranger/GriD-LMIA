@@ -164,14 +164,11 @@
   color: var(--sl-color-gray-2);
 }
 
-mjx-container {
+.sl-markdown-content mjx-container[display="true"] {
+  display: block;
   overflow-x: auto;
   overflow-y: hidden;
   max-width: 100%;
-}
-
-.sl-markdown-content mjx-container[display="true"] {
-  display: block;
   margin-inline: auto;
   padding-block: 0.25rem;
   text-align: center;
@@ -179,6 +176,13 @@ mjx-container {
 
 .sl-markdown-content mjx-container[display="true"] svg {
   display: inline-block;
+}
+
+.sl-markdown-content mjx-container:not([display="true"]) {
+  display: inline-block;
+  overflow: visible;
+  max-width: none;
+  white-space: nowrap;
 }
 
 .sl-markdown-content pre {

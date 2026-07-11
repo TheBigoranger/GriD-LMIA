@@ -123,18 +123,18 @@
 \newcommand{\matlab}{MATLAB}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\refhead}[1]{%
-  \par\addvspace{1.4\baselineskip}%
+  \par\addvspace{0.75\baselineskip}%
   \needspace{4\baselineskip}%
-  \noindent\textcolor{dpblue}{\sffamily\bfseries\normalsize #1}\par
+  \noindent\textcolor{black!75}{\sffamily\bfseries\normalsize #1}\par
   \nopagebreak\vspace{0.22\baselineskip}%
-  \noindent\textcolor{dpblue}{\rule{\linewidth}{0.45pt}}\par
+  \noindent\textcolor{black!55}{\rule{\linewidth}{0.45pt}}\par
   \vspace{0.48\baselineskip}\nopagebreak}
 \newcommand{\syntaxhead}{\refhead{Syntax}}
 \newcommand{\examplehead}{\refhead{Example}}
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.2.2}
+\author{Version v0.2.7}
 \date{July 2026}
 
 \begin{document}
@@ -233,6 +233,117 @@ Its terms are again nonnegative and sum to one because
 The package uses this box, or hyperrectangular, tensor product.  Bernstein
 bases on simplices are mathematically related, but they are not the storage
 convention implemented by \code{dpbase}.
+
+\subsection{Reading A Gridding Input}
+\label{sec:bernstein-gridding-input}
+
+The word ``grid'' has two independent meanings in a Bernstein model, and it
+is important not to exchange them.  The input grid vectors choose the physical
+cell boundaries; \code{Degree=m} chooses the polynomial degree \emph{inside
+every one} of those cells.  Thus, a one-dimensional vector
+\code{[0 0.4 1]} creates two physical intervals, regardless of whether
+\code{Degree} is zero, one, two, or higher.  With \(q_r=N_r-1\) physical
+cells in parameter direction \(r\), a continuous global coefficient grid for
+degree \(m\) has
+\[
+  q_r m+1
+\]
+coefficient payloads in that direction.  These payloads are Bernstein
+coefficients, not automatically samples of the represented function.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[x=1.25cm,y=0.72cm,>=Latex,
+      coeff/.style={circle,draw=dpblue!80!black,fill=dpbluewash,inner sep=1.7pt,font=\scriptsize}]
+    \draw[-{Latex}] (-0.28,0) -- (5.58,0) node[right] {\(\rho\)};
+    \foreach \x/\lab in {0/0,2/0.4,5/1} {
+      \draw[black!55] (\x,-0.14) -- (\x,0.14) node[below=8pt] {\(\lab\)};
+    }
+    \draw[dpblue,very thick] (0,0) -- (2,0);
+    \draw[dpblue,very thick] (2,0) -- (5,0);
+    \node[above=7pt,font=\small] at (1,0) {physical cell 1};
+    \node[above=7pt,font=\small] at (3.5,0) {physical cell 2};
+    \foreach \x/\lab in {0/C_0,1/C_1,2/C_2,3.5/C_3,5/C_4} {
+      \node[coeff] at (\x,-1.20) {\(\lab\)};
+      \draw[dpblue!60] (\x,-1.00) -- (\x,-0.18);
+    }
+    \node[align=center,font=\small] at (2.5,-2.18)
+      {two physical cells; degree \(m=2\); five global coefficients};
+  \end{tikzpicture}
+  \caption{One parameter: \code{[0 0.4 1]} sets two physical cells, while
+  \code{Degree=2} supplies three local Bernstein coefficients per cell.  The
+  boundary coefficient \(C_2\) is shared.}
+  \label{fig:grid-input-1d}
+\end{figure}
+
+For the \cref{fig:grid-input-1d} example, a coefficient-backed \code{dpmat}
+can therefore be written as follows.  The five-entry global source has length
+\(2\mathbin{\cdot}2+1\), and its two local coefficient lists are
+\(\{C_0,C_1,C_2\}\) and \(\{C_2,C_3,C_4\}\), in the package's lower-to-upper
+endpoint ordering.
+
+\begin{lstlisting}[style=dpmatlab]
+grid = [0 0.4 1];                 % two physical cells
+A = dpmat(grid, {10, 11, 12, 13, 14}, Degree=2);
+% A.coeffs(1) is {10, 11, 12}; A.coeffs(2) is {12, 13, 14}
+\end{lstlisting}
+
+An explicitly cell-local alternative has one coefficient cell per physical
+cell, for example \code{{{10, 11, 12}, {12, 13, 14}}}.  It is useful when
+cell-local data must be written directly.  Matching boundary values make the
+result continuous; mismatches are retained but reported as discontinuous
+\code{dpmat} data.  For decision variables, the public \code{dpvar}
+constructor deliberately supports only \code{Degree=0} and \code{Degree=1};
+in particular, \code{dpvar(1, grid)} creates the continuous degree-one
+decision function over the same two physical cells.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[x=1.05cm,y=0.66cm,>=Latex,
+      coeff/.style={circle,draw=dpblue!80!black,fill=dpbluewash,inner sep=1.5pt,font=\scriptsize}]
+    \fill[dpbluewash] (0,0) rectangle (2,2);
+    \draw[step=2,black!55] (0,0) grid (4,4);
+    \draw[-{Latex}] (-0.25,0) -- (4.55,0) node[right] {\(\rho_1\)};
+    \draw[-{Latex}] (0,-0.25) -- (0,4.55) node[above] {\(\rho_2\)};
+    \foreach \x/\lab in {0/0,2/1,4/2}
+      \node[below=8pt] at (\x,0) {\(\lab\)};
+    \foreach \y/\lab in {0/10,2/20,4/30}
+      \node[left=8pt] at (0,\y) {\(\lab\)};
+    \foreach \x/\i in {0/0,2/1,4/2}
+      \foreach \y/\j in {0/0,2/1,4/2}
+        \node[coeff] at (\x,\y) {\(C_{\i\j}\)};
+    \node[font=\scriptsize,align=center,fill=white,inner sep=1pt] at (-1.28,2.95)
+      {selected physical cell\\\([1,1]\)};
+    \draw[dpblue!75!black,thick,-{Latex}] (-0.63,2.72) -- (0.58,1.48);
+  \end{tikzpicture}
+  \caption{Two parameters: the vectors \code{{[0 1 2], [10 20 30]}} form a
+  \(2\)-by-\(2\) physical-cell grid.  At degree one, the 3-by-3 global
+  coefficient cell array shares every horizontal and vertical cell face.}
+  \label{fig:grid-input-2d}
+\end{figure}
+
+In the two-dimensional example in \cref{fig:grid-input-2d}, the global
+degree-one input is a 3-by-3 MATLAB cell array, with the first cell-array
+dimension corresponding to \(\rho_1\) and the second to \(\rho_2\):
+
+\begin{lstlisting}[style=dpmatlab]
+grid = {[0 1 2], [10 20 30]};    % 2-by-2 physical cells
+data = {11 12 13; 21 22 23; 31 32 33};
+A = dpmat(grid, data, Degree=1);
+% A.coeffs([1 1]) is {11, 12, 21, 22}
+\end{lstlisting}
+
+More generally, an \(\ell\)-parameter input is a cell vector containing one
+strictly increasing physical node vector per parameter.  It defines
+\(\prod_{r=1}^{\ell}(N_r-1)\) hyperrectangular physical cells.  A common
+degree \(m\) creates \((m+1)^\ell\) local Bernstein coefficients in each
+cell, while a continuous global coefficient array has size
+\([\,(N_1-1)m+1,\ldots,(N_\ell-1)m+1\,]\).  The package enumerates local
+labels such as \([0,0,\ldots,0]\) and \([m,m,\ldots,m]\) in tensor order;
+the global array shares the corresponding coefficients on every common cell
+face.  Increasing the number of physical cells refines the parameter domain;
+increasing \code{Degree} increases the polynomial order within each cell.
+Neither operation should be interpreted as the other.
 
 \begin{figure}[htbp]
   \centering
@@ -818,6 +929,43 @@ Field & Meaning \\
 \code{SourceSummary} & Short origin label such as \code{coefficient-backed}, \code{decision}, or \code{derivative}. \\
 \bottomrule
 \end{tabularx}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[>=Latex,
+      store/.style={draw=dpblue!80!black,rounded corners=2pt,fill=dpbluewash,
+        align=center,font=\small,inner sep=4pt},
+      leaf/.style={draw=black!55,rounded corners=2pt,fill=white,
+        align=center,font=\scriptsize,inner sep=4pt}]
+    \node[store] (root) at (0,0) {\texttt{LocalValues}};
+    \node[store] (first) at (2.55,1.15) {first physical\\cell index \texttt{\{1\}}};
+    \node[store] (second) at (2.55,-1.15) {first physical\\cell index \texttt{\{2\}}};
+    \node[leaf] (leafone) at (6.0,1.15) {\texttt{LocalValues\{1\}\{1\}}\\[2pt]
+      \(\{C_{00},C_{01},C_{10},C_{11}\}\)};
+    \node[leaf] (leaftwo) at (6.0,-1.15) {\texttt{LocalValues\{2\}\{1\}}\\[2pt]
+      \(\{D_{00},D_{01},D_{10},D_{11}\}\)};
+    \draw[->,dpblue!75!black,thick] (root.east) -- (first.west);
+    \draw[->,dpblue!75!black,thick] (root.east) -- (second.west);
+    \draw[->,dpblue!75!black,thick] (first.east) -- (leafone.west);
+    \draw[->,dpblue!75!black,thick] (second.east) -- (leaftwo.west);
+    \node[align=center,font=\scriptsize] at (3.1,2.0)
+      {second physical index is \texttt{\{1\}} in both leaves};
+  \end{tikzpicture}
+  \caption{Nested cell-local storage for a two-parameter, degree-one object
+  on \code{{[0 1 2], [10 20]}}.  There are two physical cells, \([1,1]\)
+  and \([2,1]\).  Each leaf is a flat local coefficient cell in \code{lbls}
+  order: \([0,0]\), \([0,1]\), \([1,0]\), \([1,1]\).}
+  \label{fig:localvalues-tree}
+\end{figure}
+
+The nesting follows physical-cell subscripts, not the Bernstein labels.  Start
+with \code{LocalValues\{i1\}}, then take one cell index per remaining
+parameter; this selects physical cell \([i_1,i_2,\ldots,i_\ell]\).  Only
+after that selection does the leaf's flat cell array enumerate the
+\((m+1)^\ell\) local Bernstein coefficients.
+Thus \code{coeffs(obj, [2 1])} returns the lower leaf in
+\cref{fig:localvalues-tree}, while \code{lbls(obj)} explains the order inside
+that leaf.
 
 \subsection{Inspection: \texorpdfstring{\code{cells}}{cells}, \texorpdfstring{\code{lbls}}{lbls}, And \texorpdfstring{\code{coeffs}}{coeffs}}
 \label{sec:dpbase-inspection}
@@ -1728,71 +1876,72 @@ ans =
 \subsection{Matrix Methods}
 \label{sec:dpmat-matrix-ops}
 
+Matrix methods act on every local Bernstein matrix coefficient; they do not
+rearrange the scheduling grid.  Structural operations require coefficient
+evidence.  A function-only \code{dpmat} can still use \code{evaluate},
+\code{plot}, \code{uplus}, \code{squeeze}, shape inspection, and equality;
+other structural operations reject it with \code{dpmat:FunctionOnlyAlgebra}.
+The following families separate matrix shape from the Bernstein grid that
+remains attached to the result.
+
+\needspace{7\baselineskip}
+\subsubsection{Shape Inspection And Identity}
+\label{sec:dpmat-matrix-shape}
+
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 sz = size(A)
+sz = size(A, dim)
 n = length(A)
 n = height(A)
 n = width(A)
 n = numel(A)
 n = ndims(A)
-
-B = A.'
-B = A'
-B = vec(A)
-B = diag(A)
-B = diag(A, k)
-B = reshape(A, sz)
-B = reshape(A, m, n)
-B = tril(A)
-B = triu(A)
-B = trace(A)
-B = sum(A)
-B = sum(A, dim)
-B = sum(A, "all")
-B = mean(A)
-B = mean(A, dim)
-B = mean(A, "all")
-B = cumsum(A)
-B = cumsum(A, dim)
-B = flip(A)
-B = flip(A, dim)
-B = flipud(A)
-B = fliplr(A)
-B = rot90(A)
-B = rot90(A, k)
-B = repmat(A, ...)
-B = [A, B]
-B = [A; B]
-B = cat(dim, A, B, ...)
-B = blkdiag(A, B, ...)
+B = +A
 tf = isequal(A, B, ...)
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{A} and \code{B} are coefficient-backed \code{dpmat} objects;
-        numeric blocks are accepted where the corresponding MATLAB operation
-        accepts a compatible matrix.
-  \item \code{k} is an integer diagonal offset for \code{diag} or a quarter-turn
-        count for \code{rot90}; its default is MATLAB's usual \code{0} or \code{1},
-        respectively.
-  \item \code{dim} is a valid MATLAB dimension for \code{sum}, \code{mean},
-        \code{cumsum}, \code{flip}, or \code{cat}; \code{"all"} reduces every
-        matrix entry for \code{sum} and \code{mean}.
-  \item \code{sz}, \code{m}, and \code{n} specify the reshaped matrix size and
-        must preserve the number of matrix elements.
-  \item \code{...} denotes one or more repeat or block operands.  Concatenation
-        and \code{blkdiag} align compatible grids and elevate degrees when
-        needed.
-  \item \code{tf} is the logical result of \code{isequal}; every other listed
-        transformation returns a \code{dpmat} with the operation applied to
-        each local coefficient.
+  \item All shape queries report the two-dimensional matrix payload, never the
+        physical-cell grid.  In particular, \code{ndims(A)} is \code{2}.
+  \item Unary \code{+} returns an equivalent \code{dpmat}; it does not alter
+        the stored coefficient evidence.
+  \item \code{isequal} returns a logical scalar.  Coefficient-backed objects
+        are compared after compatible grid refinement and degree elevation;
+        function-only objects compare their stored metadata and handle.
 \end{itemize}
 
+\needspace{7\baselineskip}
+\subsubsection{Transpose, Vectorization, Diagonals, And Reshape}
+\label{sec:dpmat-matrix-transform}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = transpose(A)
+B = ctranspose(A)
+B = A.'
+B = A'
+B = vec(A)
+B = diag(A)
+B = diag(A, k)
+B = reshape(A, [m n])
+B = reshape(A, m, n)
+B = squeeze(A)
+\end{lstlisting}
+
+For finite real payloads, \code{transpose} and \code{ctranspose} have the same
+numerical effect.  \code{vec} uses MATLAB column-major vectorization.
+\code{diag} extracts a diagonal, or constructs a square diagonal matrix from a
+vector payload; its finite integer \code{k} may not select an empty diagonal.
+\code{reshape} accepts exactly two positive dimensions, with at most one
+inferred \code{[]} dimension, and preserves the matrix element count.
+\code{squeeze} retains the package's two-dimensional matrix convention.
+
 \examplehead
-Structural methods return new \code{dpmat} objects whose matrix size changes
-while the grid and degree metadata stay attached to the coefficient storage.
+These structural methods return new \code{dpmat} objects whose matrix size
+changes while the grid and degree metadata remain attached to the coefficient
+storage.
 
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
@@ -1824,7 +1973,35 @@ ans =
      1     4
 \end{lstlisting}
 
-Summary and assembly methods follow the same coefficient-wise rule.
+\needspace{7\baselineskip}
+\subsubsection{Triangular Parts And Reductions}
+\label{sec:dpmat-matrix-reductions}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = tril(A)
+B = tril(A, k)
+B = triu(A)
+B = triu(A, k)
+B = trace(A)
+B = sum(A)
+B = sum(A, dim)
+B = sum(A, "all")
+B = mean(A)
+B = mean(A, dim)
+B = mean(A, "all")
+B = cumsum(A)
+B = cumsum(A, dim)
+\end{lstlisting}
+
+\code{tril} and \code{triu} retain the lower or upper part of each payload;
+\code{k} is a finite integer diagonal offset.  \code{trace} returns a
+\(1\)-by-\(1\) \code{dpmat}.  For \code{sum}, \code{mean}, and \code{cumsum},
+\code{dim} is a positive integer matrix dimension; \code{"all"} is additionally
+accepted by \code{sum} and \code{mean}.
+
+\examplehead
+Summary methods follow the same coefficient-wise rule.
 
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
@@ -1848,47 +2025,57 @@ ans =
      2     2
 \end{lstlisting}
 
-\subsubsection{Additional matrix and protocol methods}
-\label{sec:dpmat-additional-methods}
-
-\textbf{\code{transpose} and \code{ctranspose}.} \code{transpose} applies
-\code{A.'}; \code{ctranspose} applies \code{A'}.  For the finite real data
-supported by \code{dpmat}, both return the same numerical transpose.
+\needspace{7\baselineskip}
+\subsubsection{Reordering And Repetition}
+\label{sec:dpmat-matrix-reorder}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
-B = transpose(A)
-B = ctranspose(A)
-B = A.'
-B = A'
+B = flip(A)
+B = flip(A, dim)
+B = flipud(A)
+B = fliplr(A)
+B = rot90(A)
+B = rot90(A, k)
+B = repmat(A, m)
+B = repmat(A, m, n)
+B = repmat(A, [m n])
 \end{lstlisting}
 
-\textbf{\code{squeeze}.} Preserves the two-dimensional matrix payload while
-removing singleton dimensions according to the package's matrix convention.
+\code{flip} uses MATLAB's first nonsingleton matrix dimension by default;
+\code{flipud} and \code{fliplr} select rows and columns.  \code{rot90}
+defaults to one quarter-turn and accepts finite integer \code{k}.  \code{repmat}
+accepts a positive scalar \code{m}, expanded to \code{[m m]}, two positive
+integer repetition counts, or a two-element count vector.  These transformations
+leave the physical grid and Bernstein degree unchanged.
+
+\needspace{7\baselineskip}
+\subsubsection{Block Assembly}
+\label{sec:dpmat-matrix-assembly}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
-B = squeeze(A)
-\end{lstlisting}
-
-\textbf{\code{horzcat} and \code{vertcat}.} The bracket forms \code{[A B]} and
-\code{[A; B]} concatenate compatible coefficient payloads horizontally or
-vertically, respectively.
-
-\syntaxhead
-\begin{lstlisting}[style=dpsyntax]
-C = horzcat(A, B)
-C = vertcat(A, B)
+C = horzcat(A, B, ...)
+C = vertcat(A, B, ...)
 C = [A, B]
 C = [A; B]
+C = cat(dim, A, B, ...)
+C = blkdiag(A, B, ...)
 \end{lstlisting}
+
+The bracket forms call \code{horzcat} and \code{vertcat}; \code{cat} supports
+only dimensions 1 and 2.  Every nonnumeric operand must be coefficient-backed,
+and at least one operand of \code{cat} or \code{blkdiag} must be a
+\code{dpmat}.  Finite real numeric blocks are promoted on the common grid.
+Compatible grids with the same bounds are merged and lower-degree operands are
+elevated before their coefficient payloads are assembled.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 A = dpmat({[0 1]}, {1, 2}, Degree=1);
 size([A, A])
 size([A; A])
-size(squeeze(A))
+size(blkdiag(A, 5))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
@@ -1899,43 +2086,25 @@ ans =
      2     1
 
 ans =
-     1     1
+     2     2
 \end{lstlisting}
 
-\textbf{\code{subsref} and \code{subsasgn}.} \code{subsref} implements
-two-dimensional matrix indexing and dot access to public properties/methods;
-\code{subsasgn} implements in-bounds numeric or compatible \code{dpmat} block
-assignment.
+\needspace{7\baselineskip}
+\subsubsection{Equality And MATLAB Indexing Protocol}
+\label{sec:dpmat-matrix-protocol}
+
+\code{isequal(A,B,...)} compares coefficient evidence rather than point
+samples.  The \code{end(A,k,n)} and \code{numArgumentsFromSubscript(A,S,ctx)}
+methods support ordinary two-index expressions and dot access.  Matrix slicing
+and assignment are documented in \cref{sec:dpmat-indexing}; \code{subsref} and
+\code{subsasgn} are MATLAB protocol methods, not a second storage API.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
-B = subsref(A, S)
-A = subsasgn(A, S, M)
-B = A(rows, cols)
-A(rows, cols) = M
-\end{lstlisting}
-
-\textbf{\code{end}.} Supplies the last row or column index for expressions such
-as \code{A(1:end,end)}.  The related
-\code{numArgumentsFromSubscript} method keeps subscripted results scalar so
-property and method dot access remains available.
-
-\syntaxhead
-\begin{lstlisting}[style=dpsyntax]
+tf = isequal(A, B, ...)
 idx = end(A, k, n)
 n = numArgumentsFromSubscript(A, S, ctx)
 B = A(1:end, end)
-\end{lstlisting}
-
-\examplehead
-\begin{lstlisting}[style=dpmatlab]
-A = dpmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
-size(A(1:end, end))
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-ans =
-     2     1
 \end{lstlisting}
 
 \subsection{Indexing And Assignment}
@@ -2496,65 +2665,65 @@ ans =
 \subsection{Matrix Methods}
 \label{sec:dpvar-matrix-ops}
 
+Matrix methods act on each local YALMIP-backed payload while preserving
+compatible grid, degree, and rate metadata.  This is matrix structure, not
+parameter-grid manipulation.  The families below use the same organization as
+the \code{dpmat} reference, but their outputs remain \code{dpvar} expressions
+and supported assembly may additionally use coefficient-backed \code{dpmat},
+affine \code{sdpvar}, and numeric blocks.
+
+\needspace{18\baselineskip}
+\subsubsection{Shape Inspection And Identity}
+\label{sec:dpvar-matrix-shape}
+
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 sz = size(P)
+sz = size(P, dim)
 n = length(P)
 n = height(P)
 n = width(P)
 n = numel(P)
 n = ndims(P)
-
-Q = P.'
-Q = P'
-Q = vec(P)
-Q = diag(P)
-Q = diag(P, k)
-Q = reshape(P, sz)
-Q = reshape(P, m, n)
-Q = tril(P)
-Q = triu(P)
-Q = trace(P)
-Q = sum(P)
-Q = sum(P, dim)
-Q = sum(P, "all")
-Q = mean(P)
-Q = mean(P, dim)
-Q = mean(P, "all")
-Q = cumsum(P)
-Q = cumsum(P, dim)
-Q = flip(P)
-Q = flip(P, dim)
-Q = flipud(P)
-Q = fliplr(P)
-Q = rot90(P)
-Q = rot90(P, k)
-Q = repmat(P, ...)
-Q = [P, R]
-Q = [P; R]
-Q = cat(dim, P, R, ...)
-Q = blkdiag(P, R, ...)
+Q = +P
 tf = isequal(P, R, ...)
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{P} and \code{R} are compatible \code{dpvar} expressions;
-        coefficient-backed \code{dpmat}, affine \code{sdpvar}, and numeric
-        blocks are accepted in supported assembly operations.
-  \item \code{k} is an integer diagonal offset for \code{diag} or a quarter-turn
-        count for \code{rot90}; its default is MATLAB's usual \code{0} or \code{1},
-        respectively.
-  \item \code{dim} is a valid MATLAB dimension for \code{sum}, \code{mean},
-        \code{cumsum}, \code{flip}, or \code{cat}; \code{"all"} reduces every
-        matrix entry for \code{sum} and \code{mean}.
-  \item \code{sz}, \code{m}, and \code{n} specify a reshape that preserves the
-        number of matrix elements.  \code{...} denotes additional repeat or
-        block operands.
-  \item \code{tf} is the logical result of \code{isequal}; every other listed
-        transformation returns a \code{dpvar} with the operation applied to
-        each local payload while preserving compatible grid and rate metadata.
+  \item Shape queries report the two-dimensional matrix payload, never the
+        physical-cell grid.  In particular, \code{ndims(P)} is \code{2}.
+  \item Unary \code{+} preserves the decision expression and its coefficient
+        graph.
+  \item \code{isequal} returns a logical scalar only when the grid, degree,
+        matrix size, metadata, and local YALMIP payloads are identical; it does
+        not merge grids or elevate degrees.
 \end{itemize}
+
+\needspace{7\baselineskip}
+\subsubsection{Transpose, Vectorization, Diagonals, And Reshape}
+\label{sec:dpvar-matrix-transform}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Q = transpose(P)
+Q = ctranspose(P)
+Q = P.'
+Q = P'
+Q = vec(P)
+Q = diag(P)
+Q = diag(P, k)
+Q = reshape(P, [m n])
+Q = reshape(P, m, n)
+Q = squeeze(P)
+\end{lstlisting}
+
+\code{transpose} and \code{ctranspose} transpose every local decision payload
+without breaking its YALMIP coefficient graph.  \code{vec}, \code{diag}, and
+\code{reshape} have the same matrix meanings as their \code{dpmat}
+counterparts: \code{k} is a finite integer diagonal offset, and reshape uses
+exactly two positive dimensions with at most one inferred \code{[]} dimension.
+\code{squeeze} retains the two-dimensional matrix convention.
 
 \examplehead
 Shape-changing operations return new \code{dpvar} objects and preserve the
@@ -2594,7 +2763,34 @@ ans =
      3     2
 \end{lstlisting}
 
-Summary and assembly calls use the same coefficient-wise mechanism.
+\needspace{7\baselineskip}
+\subsubsection{Triangular Parts And Reductions}
+\label{sec:dpvar-matrix-reductions}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Q = tril(P)
+Q = tril(P, k)
+Q = triu(P)
+Q = triu(P, k)
+Q = trace(P)
+Q = sum(P)
+Q = sum(P, dim)
+Q = sum(P, "all")
+Q = mean(P)
+Q = mean(P, dim)
+Q = mean(P, "all")
+Q = cumsum(P)
+Q = cumsum(P, dim)
+\end{lstlisting}
+
+\code{tril} and \code{triu} use a finite integer diagonal offset.  \code{trace}
+returns a \(1\)-by-\(1\) decision expression.  For \code{sum}, \code{mean},
+and \code{cumsum}, \code{dim} is a positive integer matrix dimension;
+\code{"all"} is additionally accepted by \code{sum} and \code{mean}.
+
+\examplehead
+Summary methods use the same local-payload mechanism.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -2621,83 +2817,88 @@ ans =
      4     4
 \end{lstlisting}
 
-\subsubsection{Additional matrix and protocol methods}
-\label{sec:dpvar-additional-methods}
-
-\textbf{\code{transpose} and \code{ctranspose}.} \code{transpose} applies
-\code{P.'}; \code{ctranspose} applies \code{P'}.  They preserve the YALMIP
-coefficient graph and transpose every local payload.
+\needspace{7\baselineskip}
+\subsubsection{Reordering And Repetition}
+\label{sec:dpvar-matrix-reorder}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
-Q = transpose(P)
-Q = ctranspose(P)
-Q = P.'
-Q = P'
+Q = flip(P)
+Q = flip(P, dim)
+Q = flipud(P)
+Q = fliplr(P)
+Q = rot90(P)
+Q = rot90(P, k)
+Q = repmat(P, m)
+Q = repmat(P, m, n)
+Q = repmat(P, [m n])
 \end{lstlisting}
 
-\textbf{\code{squeeze}.} Applies the package's two-dimensional squeeze
-convention to every local decision payload.
+\code{flip} defaults to MATLAB's first nonsingleton matrix dimension;
+\code{flipud} and \code{fliplr} select rows and columns.  \code{rot90}
+accepts a finite integer quarter-turn count, and \code{repmat} accepts a
+positive scalar \code{m}, expanded to \code{[m m]}, two positive integer
+repetition counts, or a two-element count vector.  These methods preserve the
+local decision expressions and compatible parameter metadata.
+
+\needspace{7\baselineskip}
+\subsubsection{Block Assembly}
+\label{sec:dpvar-matrix-assembly}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
-Q = squeeze(P)
-\end{lstlisting}
-
-\textbf{\code{horzcat} and \code{vertcat}.} The bracket forms concatenate
-compatible \code{dpvar}, known-data, affine \code{sdpvar}, and numeric blocks
-while preserving compatible grid, degree, and rate metadata.
-
-\syntaxhead
-\begin{lstlisting}[style=dpsyntax]
-Q = horzcat(P, R)
-Q = vertcat(P, R)
+Q = horzcat(P, R, ...)
+Q = vertcat(P, R, ...)
 Q = [P, R]
 Q = [P; R]
+Q = cat(dim, P, R, ...)
+Q = blkdiag(P, R, ...)
 \end{lstlisting}
 
-\textbf{\code{subsref} and \code{subsasgn}.} \code{subsref} handles matrix
-indexing and dot access; \code{subsasgn} assigns numeric, \code{dpvar},
-coefficient-backed \code{dpmat}, or affine \code{sdpvar} blocks.
-
-\syntaxhead
-\begin{lstlisting}[style=dpsyntax]
-Q = subsref(P, S)
-P = subsasgn(P, S, X)
-Q = P(rows, cols)
-P(rows, cols) = X
-\end{lstlisting}
-
-\textbf{\code{end}.} Supplies the last row or column index for expressions such
-as \code{P(1:end,end)}.  The related
-\code{numArgumentsFromSubscript} method preserves scalar subscript-result
-behavior for MATLAB dot access.
-
-\syntaxhead
-\begin{lstlisting}[style=dpsyntax]
-idx = end(P, k, n)
-n = numArgumentsFromSubscript(P, S, ctx)
-Q = P(1:end, end)
-\end{lstlisting}
+The bracket forms concatenate compatible \code{dpvar}, coefficient-backed
+\code{dpmat}, affine \code{sdpvar}, and finite real numeric blocks.  \code{cat}
+supports only matrix dimensions 1 and 2.  The operands are aligned on a
+compatible grid, and degree/rate metadata are propagated only when that
+combination remains valid for an affine decision expression.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = dpvar(2, {[0 1]}, "full");
 size([P, P])
-size(P(1:end, end))
-size(squeeze(P))
+size([P; P])
+size(blkdiag(P, eye(2)))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
 ans =
-     2     2
+     2     4
 
 ans =
-     2     1
+     4     2
 
 ans =
-     2     2
+     4     4
+\end{lstlisting}
+
+\needspace{7\baselineskip}
+\subsubsection{Equality And MATLAB Indexing Protocol}
+\label{sec:dpvar-matrix-protocol}
+
+\code{isequal(P,R,...)} is an exact identity check: it requires equal grid,
+degree, matrix size, metadata, and local YALMIP payloads, without grid merging
+or degree elevation.  \code{end(P,k,n)} and
+\code{numArgumentsFromSubscript(P,S,ctx)} support ordinary two-index matrix
+expressions and dot access.  Matrix slicing and assignment are documented in
+\cref{sec:dpvar-indexing}; \code{subsref} and \code{subsasgn} implement that
+MATLAB protocol rather than an additional storage interface.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+tf = isequal(P, R, ...)
+idx = end(P, k, n)
+n = numArgumentsFromSubscript(P, S, ctx)
+Q = P(1:end, end)
 \end{lstlisting}
 
 \subsection{Indexing And Assignment}
@@ -2998,6 +3199,57 @@ smoke coverage.
 \section{Examples}
 \label{sec:examples}
 
+\subsection{Parameter-Dependent Lyapunov Solver Smoke}
+\label{sec:parameter-dependent-lyapunov-smoke}
+
+The first solver smoke test in \code{+tests/+dplmi/test_solver_smoke.m}
+contrasts a constant Lyapunov matrix with a degree-one, parameter-dependent
+one.  It solves the same decay and positivity constraints in both cases.  The
+degree-one solution is then materialized as known \code{dpmat} data and
+plotted.  \code{dpvar} is a decision-expression class and does not itself
+provide \code{plot}; applying \code{value} to its local YALMIP payloads after
+a successful solve supplies the numeric Bernstein coefficients for
+\code{dpmat}.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+grid = {[0 1]};
+A = dpmat(grid, @(x) (1 - x) * [-1 -1; 1 -1] + ...
+    x * [-1 -10; 0.1 -1], Degree=1);
+solver = 'lmilab';
+if exist('mosekopt', 'file') ~= 0
+    solver = 'mosek';
+end
+opts = sdpsettings('solver', solver, 'verbose', 0);
+
+Pc = dpvar(2, grid, Degree=0);
+CconstantDecay = Pc * A + A' * Pc <= -1e-10 * eye(2);
+CconstantPositive = Pc >= eye(2);
+solConstant = optimize([CconstantDecay.toYalmip, ...
+    CconstantPositive.toYalmip], [], opts);
+
+Pd = dpvar(2, grid);
+CdependentDecay = Pd * A + A' * Pd <= -1e-10 * eye(2);
+CdependentPositive = Pd >= eye(2);
+solDependent = optimize([CdependentDecay.toYalmip, ...
+    CdependentPositive.toYalmip], [], opts);
+assert(solDependent.problem == 0, solDependent.info)
+
+Pplot = dpmat(grid, ...
+    {cellfun(@value, Pd.LocalValues{1}, UniformOutput=false)}, ...
+    Degree=Pd.Degree);
+figure(Name="Parameter-dependent Lyapunov matrix")
+plot(Pplot, SamplesPerCell=40, LineWidth=1.5)
+title("Solved parameter-dependent Lyapunov matrix")
+\end{lstlisting}
+
+The figure contains one curve for each entry of the solved \(2\)-by-\(2\)
+matrix \(P(\rho)\), sampled on the parameter interval.  It is a diagnostic
+visualization of the feasible solution, not a certificate beyond the
+coefficient-wise constraints supplied to the solver.  The constant-case result
+is retained to exercise the comparison in the smoke test; only a MOSEK solve
+is used there to certify its intended infeasibility distinction.
+
 \subsection{Rate-Dependent Block LMI Solver Smoke}
 \label{sec:solver-example}
 
@@ -3037,7 +3289,6 @@ E1 = [diffP + P * A + A' * P, P * B, Cmat';
 E2 = P >= 0;
 \end{lstlisting}
 
-\needspace{27\baselineskip}
 \begin{lstlisting}[
   style=dpmatlab,
   title={\textcolor{dpblue}{\sffamily\bfseries\footnotesize MATLAB input (continued)}}
@@ -3049,27 +3300,18 @@ if exist('mosekopt', 'file') ~= 0
 end
 opts = sdpsettings('solver', solver, 'verbose', 0);
 sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
+assert(sol.problem == 0, sol.info)
+gammaValue = value(objective);
+assert(isfinite(gammaValue))
+fprintf("Optimal H-infinity gamma: %.6g\n", gammaValue)
 
 numel(E1.Constraints)
 numel(E2.Constraints)
-sol.problem
-isfinite(value(objective))
 \end{lstlisting}
 
-\begin{lstlisting}[style=dpoutput]
-ans =
-     6
-
-ans =
-     2
-
-ans =
-     0
-
-ans =
-  logical
-   1
-\end{lstlisting}
+The \code{fprintf} call prints the actual numeric \(\gamma\), whose value is
+solver- and tolerance-dependent; the final two commands report six and two
+constraints.
 
 \section{Current Limits}
 \label{sec:current-limits}

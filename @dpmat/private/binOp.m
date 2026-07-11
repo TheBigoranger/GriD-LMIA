@@ -27,8 +27,8 @@ function out = binOp(lhs, rhs, fcn, errId)
 
     % Elevate both operands before applying the cell-local coefficient operation.
     deg = max(ld.Degree, rd.Degree);
-    lhsVals = elevVals(anchor, ld.LocalValues, ld.Degree, deg, grid);
-    rhsVals = elevVals(anchor, rd.LocalValues, rd.Degree, deg, grid);
+    lhsVals = elevLocalValues(anchor, ld.LocalValues, ld.Degree, deg, grid);
+    rhsVals = elevLocalValues(anchor, rd.LocalValues, rd.Degree, deg, grid);
     vals = helper.zipVals(lhsVals, rhsVals, fcn, grid);
 
     if helper.isZero(vals, "vals")

@@ -41,6 +41,25 @@ function testNumericScalarAndMatrixProducts(testCase)
     verifyCoeffExpr(testCase, R.coeffs(1), {cp{1} * [4 5], cp{2} * [4 5]});
 end
 
+function testConstructorDegreeTwoTimesKnownDegreeOne(testCase)
+    % Known multiplication keeps arbitrary-degree decisions affine.
+    P = dpvar(1, {[0 1]}, Degree=2);
+    A = dpmat({[0 1]}, {2, 5}, Degree=1);
+    cp = P.coeffs(1);
+
+    C = P * A;
+
+    testCase.verifyEqual(C.Degree, 3);
+    testCase.verifyTrue(C.ContainsDecision);
+    verifyCoeffExpr(testCase, C.coeffs(1), { ...
+        2 * cp{1}, ...
+        (5 * cp{1} + 4 * cp{2}) / 3, ...
+        (10 * cp{2} + 2 * cp{3}) / 3, ...
+        5 * cp{3}});
+    testCase.verifyError(@() P * dpvar(1, {[0 1]}, Degree=2), ...
+        "dpvar:InvalidMultiplication");
+end
+
 function testScalarDpvarScalesKnownMatrices(testCase)
     % A scalar dpvar expression should scale known matrices like an sdpvar.
     G = dpvar(1, [0 1], Degree=0);
