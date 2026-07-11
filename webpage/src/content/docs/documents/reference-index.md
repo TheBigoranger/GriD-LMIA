@@ -12,6 +12,7 @@ This generated page lists implemented public classes and methods that are docume
 | [`cells`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/#dpbase-cells) | dpbase method | Enumerate physical tensor-grid cells. |
 | [`coeffs`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/#dpbase-coeffs) | dpbase method | Read local Bernstein coefficient families. |
 | [`lbls`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/#dpbase-lbls) | dpbase method | Inspect flat local Bernstein labels. |
+| [`elevVals`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/#dpbase-elevVals) | dpbase method | Degree-elevate every cell-local coefficient family. |
 | [`ncell`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/#dpbase-ncell) | dpbase method | Count physical cells. |
 | [`ncoeff`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/#dpbase-ncoeff) | dpbase method | Count coefficients in one local cell. |
 | [`npar`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/#dpbase-npar) | dpbase method | Count parameter dimensions. |
@@ -64,6 +65,7 @@ This generated page lists implemented public classes and methods that are docume
 | [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) | dpvar function | Create symmetric or full continuous Bernstein decision variables. |
 | [`bernsteinTable`](/DP-LMI-package/documents/reference/dpvar/bernsteintable/) | dpvar method | Inspect symbolic coefficient rows and rate vertices. |
 | [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) | dpvar method | Build rate-vertex derivative expressions. |
+| [`value`](/DP-LMI-package/documents/reference/dpvar/value/) | dpvar method | Convert assigned symbolic coefficients to known dpmat data. |
 | [`plus`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/#dpvar-plus) | dpvar method | Add affine decision expressions and compatible constants. |
 | [`minus`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/#dpvar-minus) | dpvar method | Subtract affine decision expressions and compatible constants. |
 | [`mtimes`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/#dpvar-mtimes) | dpvar method | Multiply while keeping decision dependence on one side. |
@@ -106,6 +108,7 @@ This generated page lists implemented public classes and methods that are docume
 | [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) | Constraint class | Store direct coefficient-wise YALMIP constraints. |
 | [`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) | dplmi function | Store coefficient-wise scalar or matrix residual constraints. |
 | [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) | dplmi method | Concatenate stored constraints for YALMIP optimize calls. |
+| [`applyPolya`](/DP-LMI-package/documents/reference/dplmi/applypolya/) | dplmi method | Rebuild a residual with a selected Pólya degree increment. |
 | [`bernElev`](/DP-LMI-package/documents/reference/bernstein-utilities/#bernElev) | dpbase backend method | Elevate Bernstein degree for compatible coefficient payloads. |
 | [`bernProd`](/DP-LMI-package/documents/reference/bernstein-utilities/#bernProd) | dpbase backend method | Multiply local Bernstein coefficient families by label convolution. |
 | [`mergeGrid`](/DP-LMI-package/documents/reference/bernstein-utilities/#mergeGrid) | dpbase backend method | Refine compatible physical grids before coefficient algebra. |

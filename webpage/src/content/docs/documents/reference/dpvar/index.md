@@ -11,7 +11,7 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 
 | Reference | Task |
 | :--- | :--- |
-| [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) | Create continuous degree-0 or degree-1 decision expressions. |
+| [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) | Create continuous decision expressions of any nonnegative Bernstein degree. |
 
 ### Differentiation and inspection
 
@@ -19,6 +19,7 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 | :--- | :--- |
 | [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) | Build discontinuous rate-vertex derivative expressions. |
 | [`bernsteinTable`](/DP-LMI-package/documents/reference/dpvar/bernsteintable/) | Inspect symbolic coefficient rows and rate vertices. |
+| [`value`](/DP-LMI-package/documents/reference/dpvar/value/) | Convert assigned coefficients to known `dpmat` data. |
 
 ### Algebra and matrix operations
 

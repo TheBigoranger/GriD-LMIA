@@ -89,10 +89,10 @@ Bernstein labels, not a particular internal `sdpvar` name.
 
 ## Limitations
 
-`dpvar` is currently restricted to constructor degrees `0` and `1`; products
-may elevate coefficient degree internally, but `bernsteinTable` only reports
-the resulting stored rows. This page documents inspection, not a serialization
-format for the internal coefficient tree.
+`dpvar` accepts any nonnegative constructor degree, and products may elevate
+coefficient degree further. `bernsteinTable` reports the resulting stored rows;
+it is an inspection aid, not a serialization format for the internal
+coefficient tree.
 
 ## See Also
 

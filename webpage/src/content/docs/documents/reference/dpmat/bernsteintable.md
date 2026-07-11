@@ -124,7 +124,7 @@ coefficient algebra and `dplmi` assembly.
 
 ## Validation And Errors
 
-- Function-only objects without Bernstein coefficient evidence raise `dpmat:FunctionOnlyBernsteinTable`.
+- Function-only objects without Bernstein coefficient evidence raise `dpmat:FunctionOnlyBernsteinTable` when calling `bernsteinTable`; backend degree elevation instead raises `dpbase:MissingCoefficientEvidence`.
 - Invalid cell subscripts raise `dpbase:InvalidCellSubs`.
 - Unknown display modes, such as `"wide"`, raise `dpmat:InvalidBernsteinTableInput`.
 

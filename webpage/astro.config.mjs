@@ -56,6 +56,7 @@ export default defineConfig({
               items: [
                 { label: "Overview", slug: "documents/reference/dpvar" },
                 { label: "Constructor", slug: "documents/reference/dpvar/constructor" },
+                { label: "value", slug: "documents/reference/dpvar/value" },
                 { label: "rhodiff", slug: "documents/reference/dpvar/rhodiff" },
                 { label: "bernsteinTable", slug: "documents/reference/dpvar/bernsteintable" },
                 { label: "Matrix Operations", slug: "documents/reference/dpvar/matrix-operations" },
@@ -67,6 +68,7 @@ export default defineConfig({
               items: [
                 { label: "Overview", slug: "documents/reference/dplmi" },
                 { label: "Constructor", slug: "documents/reference/dplmi/constructor" },
+                { label: "applyPolya", slug: "documents/reference/dplmi/applypolya" },
                 { label: "toYalmip", slug: "documents/reference/dplmi/toyalmip" },
               ],
             },

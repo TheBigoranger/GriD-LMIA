@@ -47,6 +47,7 @@ payloads are YALMIP expressions stored in inherited `LocalValues`.
 | `cells(obj)` | Physical cell subscripts. |
 | `coeffs(obj, cellSubscript)` | Local Bernstein coefficient family for one physical cell. |
 | `lbls(obj)` | Local Bernstein labels in flat row order. |
+| `elevVals(obj, degreeIncrement)` | Return temporary cell-local values elevated by a nonnegative degree increment. |
 | `ncell(obj)` | Number of physical cells. |
 | `ncoeff(obj)` | Number of local coefficients per cell. |
 | `npar(obj)` | Number of parameters. |
@@ -75,6 +76,17 @@ L = lbls(obj)
 ```
 
 Returns local Bernstein multi-index labels in the same flat order used by `LocalValues`.
+
+### <span id="dpbase-elevVals"></span>`elevVals`
+
+```matlab
+values = elevVals(obj, degreeIncrement)
+```
+
+Returns an elevated nested `LocalValues` tree without changing `obj`. The
+increment must be a finite nonnegative integer scalar. `dplmi` uses this
+backend method for Pólya assembly; ordinary users normally select it through
+`dplmi(..., UsePolya=true, PolyaDegree=d)` or `C.applyPolya(d)`.
 
 ### <span id="dpbase-ncell"></span>`ncell`
 
@@ -153,7 +165,7 @@ a two-dimensional cell array with `2^ell` rate rows and
 
 ## Validation Boundary
 
-`dpbase` validates grid monotonicity, matrix size, coefficient count, local storage shape, rate metadata, and matrix payload compatibility. User-facing validation is normally reached through `dpmat`, `dpvar`, or `dplmi`.
+`dpbase` validates grid monotonicity, matrix size, coefficient count, local storage shape, rate metadata, and matrix payload compatibility. `elevVals` rejects invalid increments with `dpbase:InvalidDegreeIncrement`; function-only `dpmat` objects have no stored coefficient evidence and raise `dpbase:MissingCoefficientEvidence`. User-facing validation is normally reached through `dpmat`, `dpvar`, or `dplmi`.
 
 ## See Also
 

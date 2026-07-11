@@ -19,7 +19,9 @@ Build a `dplmi` object from a square `dpvar` residual expression.
 
 ```matlab
 C = dplmi(expr, relation)
-C = dplmi(expr, relation, relaxLemma=false, UsePolya=false, PolyaDegree=0)
+C = dplmi(expr, relation, "UsePolya")
+C = dplmi(expr, relation, UsePolya=true, PolyaDegree=d)
+C = dplmi(expr, relation, "UsePolya", "PolyaDegree", d)
 C = lhs <= rhs
 C = lhs >= rhs
 ```
@@ -31,8 +33,8 @@ C = lhs >= rhs
 | `expr` | Square `dpvar` residual expression, such as `P` or `diffP + P*A + A'*P`. |
 | `relation` | Either `"<="` or `">="`. |
 | `relaxLemma` | Logical option. Default `false`; `relaxLemma=true` is reserved and currently rejected. |
-| `UsePolya` | Logical option. Default `false`; `UsePolya=true` is reserved and currently rejected. |
-| `PolyaDegree` | Nonnegative integer scalar. Default `0`; positive values such as `PolyaDegree=1` are reserved and rejected. |
+| `UsePolya` | Logical option. Default `false`. The bare flag `"UsePolya"` enables Pólya assembly with increment one. |
+| `PolyaDegree` | Finite nonnegative integer scalar. Default `0`. Supplying it without `UsePolya` enables Pólya and warns `dplmi:ImplicitUsePolya`. |
 
 ## Output
 
@@ -81,29 +83,30 @@ ans =
 
 A scalar grid with one physical cell and degree 1 has two local Bernstein coefficients, so this direct constraint has two stored coefficient entries.
 
-### Reserved option rejection
-
-Relaxation-lemma and Polya options are visible as reserved defaults, but
-nondefault values are rejected in the current implementation.
+### Pólya option forms
 
 ```matlab
 yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
-dplmi(P, "<=", relaxLemma=true)
+one = dplmi(P, "<=", "UsePolya");
+two = dplmi(P, "<=", UsePolya=true, PolyaDegree=2);
+implicit = dplmi(P, "<=", PolyaDegree=2);
 ```
 
-The call raises `dplmi:UnsupportedRelaxLemma`. Similarly, `UsePolya=true` or
-`PolyaDegree=1` raises the reserved Polya-option errors listed in the
-validation section.
+`one` uses an increment of one. `two` uses two, while `implicit` also uses two
+and emits `dplmi:ImplicitUsePolya`. Pólya assembly rebuilds the stored residual
+at the selected degree, constraining every elevated coefficient and active
+rate-vertex row. It does not mutate the input expression.
 
 ## Validation And Errors
 
 - Nonsquare residual coefficient matrices raise `dplmi:InvalidMatrixSize`.
 - Nonsymmetric or non-Hermitian coefficient matrices raise `dplmi:NonSymmetricExpression`.
 - Nondefault relaxation raises `dplmi:UnsupportedRelaxLemma`.
-- `UsePolya=true` or `PolyaDegree>0` raises `dplmi:UnsupportedPolya`.
 - Invalid Polya degree values raise `dplmi:InvalidPolyaDegree`.
+- `UsePolya=false` with a positive `PolyaDegree` raises `dplmi:ConflictingPolyaOptions`.
+- Malformed, duplicate, or unknown options raise `dplmi:InvalidOptions`, `dplmi:DuplicateOption`, or `dplmi:UnknownOption`.
 
 ## See Also
 
-[`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) · [`dpvar comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/)
+[`applyPolya`](/DP-LMI-package/documents/reference/dplmi/applypolya/) · [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) · [`dpvar comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/)

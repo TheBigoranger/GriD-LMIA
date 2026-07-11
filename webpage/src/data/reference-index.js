@@ -11,6 +11,7 @@ const dpbaseMethods = [
   ["cells", "Enumerate physical tensor-grid cells."],
   ["coeffs", "Read local Bernstein coefficient families."],
   ["lbls", "Inspect flat local Bernstein labels."],
+  ["elevVals", "Degree-elevate every cell-local coefficient family."],
   ["ncell", "Count physical cells."],
   ["ncoeff", "Count coefficients in one local cell."],
   ["npar", "Count parameter dimensions."],
@@ -65,6 +66,7 @@ const dpmatMethods = [
 const dpvarMethods = [
   ["bernsteinTable", "Inspect symbolic coefficient rows and rate vertices.", "bernsteinTable"],
   ["rhodiff", "Build rate-vertex derivative expressions.", "rhodiff"],
+  ["value", "Convert assigned symbolic coefficients to known dpmat data.", "value"],
   ["plus", "Add affine decision expressions and compatible constants."],
   ["minus", "Subtract affine decision expressions and compatible constants."],
   ["mtimes", "Multiply while keeping decision dependence on one side."],
@@ -163,6 +165,12 @@ export const referenceEntries = [
     type: "dplmi method",
     task: "Concatenate stored constraints for YALMIP optimize calls.",
     href: "/DP-LMI-package/documents/reference/dplmi/toyalmip/",
+  },
+  {
+    name: "applyPolya",
+    type: "dplmi method",
+    task: "Rebuild a residual with a selected Pólya degree increment.",
+    href: "/DP-LMI-package/documents/reference/dplmi/applypolya/",
   },
   entry("bernElev", "dpbase backend method", "Elevate Bernstein degree for compatible coefficient payloads.", "documents/reference/bernstein-utilities", "bernElev"),
   entry("bernProd", "dpbase backend method", "Multiply local Bernstein coefficient families by label convolution.", "documents/reference/bernstein-utilities", "bernProd"),

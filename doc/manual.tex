@@ -122,6 +122,7 @@
 \newcommand{\pkg}{DP-LMI package}
 \newcommand{\matlab}{MATLAB}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\codeerr}[2]{\code{#1:}\allowbreak\code{#2}}
 \newcommand{\refhead}[1]{%
   \par\addvspace{0.75\baselineskip}%
   \needspace{4\baselineskip}%
@@ -134,7 +135,7 @@
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.2.7}
+\author{Version v0.2.8}
 \date{July 2026}
 
 \begin{document}
@@ -293,9 +294,10 @@ cell, for example \code{{{10, 11, 12}, {12, 13, 14}}}.  It is useful when
 cell-local data must be written directly.  Matching boundary values make the
 result continuous; mismatches are retained but reported as discontinuous
 \code{dpmat} data.  For decision variables, the public \code{dpvar}
-constructor deliberately supports only \code{Degree=0} and \code{Degree=1};
-in particular, \code{dpvar(1, grid)} creates the continuous degree-one
-decision function over the same two physical cells.
+constructor accepts every nonnegative integer \code{Degree}; in particular,
+\code{dpvar(1, grid)} creates the continuous degree-one decision function over
+the same two physical cells, while higher degrees share every control matrix on
+each common cell face.
 
 \begin{figure}[htbp]
   \centering
@@ -518,10 +520,9 @@ Degree elevation does not change the polynomial or add decision freedom.  Each
 elevated coefficient is a convex combination of old coefficients, and repeated
 elevation makes the coefficient polygon track the represented function more
 closely \cite{farouki2012}.  This is different from constructing a new decision
-function with a higher degree.  The current public \code{dpvar} constructor
-accepts only \code{Degree=0} and \code{Degree=1}; products may nevertheless
-produce higher-degree expressions, which are aligned internally by
-\code{bernElev}.
+function with a higher degree.  The public \code{dpvar} constructor accepts
+every nonnegative integer degree; products may produce still higher-degree
+expressions, which are aligned internally by \code{bernElev}.
 
 \subsection{Differentiation And de Casteljau Subdivision}
 \label{sec:bernstein-differentiation}
@@ -659,9 +660,10 @@ modeling step precise:
   \item Pure degree elevation preserves exactly the same polynomial and
         decision variables.  A genuinely higher-degree decision
         parameterization instead enlarges the search space.
-  \item Vertex-pair, Polya, or sum-of-squares constructions are different
-        sufficient hierarchies.  They require their own theorems, auxiliary
-        variables, options, and tests.
+  \item The optional cell-local Polya mode is degree elevation followed by the
+        same coefficient-wise constraints.  It does not introduce auxiliary
+        variables or change the stored residual; broader vertex-pair and
+        sum-of-squares constructions remain separate sufficient hierarchies.
 \end{enumerate}
 
 Spline-type parameter-dependent LMI methods give important motivation for
@@ -693,11 +695,12 @@ The implemented public boundary is deliberately narrower than this background:
   \item \code{rhodiff} forms the implemented rate-affine derivative rows, and
         \code{dplmi} directly constrains every active rate row and local
         coefficient before \code{toYalmip} hands the model to YALMIP.
-  \item Relaxation-lemma assembly, Polya assembly, sum-of-squares machinery,
-        adaptive subdivision, package-owned strictness margins, residual
-        certificates, and diagnostic hierarchies are not current public APIs.
-        Reserved nondefault \code{dplmi} options are rejected rather than
-        silently approximated.
+  \item \code{dplmi} also implements opt-in cell-local P\'olya degree
+        elevation before coefficient assembly. Relaxation-lemma assembly,
+        sum-of-squares machinery, adaptive subdivision, package-owned
+        strictness margins, residual certificates, and diagnostic hierarchies
+        are not current public APIs. In particular, \code{relaxLemma=true} is
+        rejected rather than silently approximated.
 \end{itemize}
 
 \section{Installation, Verification, And Lookup}
@@ -834,6 +837,8 @@ Count sizes &
 \hyperref[sec:dpbase-counts]{\code{ncoeff}},
 \hyperref[sec:dpbase-counts]{\code{npar}},
 \hyperref[sec:dpbase-counts]{\code{size}} \\
+Elevate stored coefficients &
+\hyperref[sec:dpbase-elevvals]{\code{elevVals}} \\
 Read storage fields &
 \hyperref[sec:dpbase-fields]{\code{GridInfo}},
 \hyperref[sec:dpbase-fields]{\code{LocalValues}},
@@ -1085,6 +1090,40 @@ npar = 2
      1
 \end{lstlisting}
 
+\subsubsection{\texorpdfstring{\code{elevVals}}{elevVals}}
+\label{sec:dpbase-elevvals}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+vals = obj.elevVals(degreeIncrement)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{degreeIncrement} is a finite nonnegative integer scalar.  It is
+        added to \code{obj.Degree} in every parameter direction; zero returns
+        coefficient evidence at the current degree.
+\end{itemize}
+
+\refhead{Output}
+\code{vals} is a nested \code{LocalValues}-shaped cell tree.  Each physical
+cell contains coefficients of degree \code{obj.Degree + degreeIncrement}, with
+the represented polynomial, physical-cell tree, and any rate-row ordering
+preserved.  The method does not modify \code{obj} or its stored coefficient
+evidence.
+
+\refhead{Validation and errors}
+An invalid increment raises \code{dpbase:InvalidDegreeIncrement}.  A
+function-only \code{dpmat} has no stored Bernstein coefficient evidence, so
+this method raises \code{dpbase:MissingCoefficientEvidence}.
+
+\textit{Relationship to backend and public algebra.}  Unlike protected
+\code{bernElev}, which elevates one flat cell coefficient family for internal
+alignment, \code{elevVals} is a public whole-object query returning elevated
+\code{LocalValues}.  Public coefficient algebra uses \code{bernElev}
+internally when compatible operands need degree alignment; it does not mutate
+either operand.
+
 \subsubsection{\texorpdfstring{\code{bernElev}}{bernElev}}
 \label{sec:dpbase-bernelev}
 
@@ -1205,7 +1244,8 @@ call \code{mergeGrid} directly.
 
 \subsection{See Also}
 \code{dpmat}, \code{dpvar}, \code{cells}, \code{coeffs}, \code{lbls},
-\code{ncell}, \code{ncoeff}, \code{npar}, \code{size}.
+\code{ncell}, \code{ncoeff}, \code{npar}, \code{size}, \code{elevVals},
+\code{bernElev}.
 
 \section{\texorpdfstring{\code{dpmat}}{dpmat} Reference}
 \label{sec:dpmat}
@@ -2192,6 +2232,8 @@ Construct decisions &
 \hyperref[sec:dpvar-construction]{\code{dpvar}} \\
 Inspect coefficients &
 \hyperref[sec:dpvar-table]{\code{bernsteinTable}} \\
+Convert assigned coefficients &
+\hyperref[sec:dpvar-value]{\code{value}} \\
 Differentiate rates &
 \hyperref[sec:dpvar-rhodiff]{\code{rhodiff}} \\
 Affine/mixed algebra &
@@ -2219,6 +2261,7 @@ P = dpvar(..., "full")
 P = dpvar(..., "symmetric")
 P = dpvar(..., Degree=0)
 P = dpvar(..., Degree=1)
+P = dpvar(..., Degree=d)
 P = dpvar(..., RateBounds=rb)
 \end{lstlisting}
 
@@ -2236,8 +2279,10 @@ P = dpvar(..., RateBounds=rb)
   \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP
         coefficient structure.  \code{"symmetric"} requires a square size.
   \item \code{Degree=1} is the default continuous Bernstein decision variable.
-  \item \code{Degree=0} creates a parameter-independent variable stored on the
-        grid.
+        Every finite nonnegative integer \code{Degree=d} is supported.
+        \code{Degree=0} creates one parameter-independent decision matrix
+        shared across the grid; \code{d >= 1} creates continuous piecewise
+        Bernstein data whose neighboring cells share complete control faces.
   \item \code{RateBounds=rb} stores parameter-rate metadata for later
         \code{rhodiff(P)} calls.  Use \code{RateBounds=[-1 1]} for one
         parameter; use a two-row matrix for two parameters, as shown in the
@@ -2952,6 +2997,40 @@ ans =
      2     3
 \end{lstlisting}
 
+\subsection{\texorpdfstring{\code{value}}{value}}
+\label{sec:dpvar-value}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+A = value(P)
+rows = value(rhodiff(P))
+\end{lstlisting}
+
+\code{value} converts assigned \code{dpvar} coefficients into known,
+coefficient-backed \code{dpmat} data.  An ordinary expression returns one
+\code{dpmat}, preserving its grid, matrix size, degree, local coefficient
+order, and continuity metadata.  A rate-vertex expression created by
+\code{rhodiff} returns a \(1\)-by-\(2^\ell\) cell array of \code{dpmat}
+objects in \code{helper.combRows(RateBounds)} lower/upper vertex order.  The
+returned \code{dpmat} objects do not carry rate metadata.  Every symbolic
+coefficient must have an assigned finite real YALMIP value; otherwise the
+method raises \code{dpvar:UnassignedValue}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(1, [0 1], Degree=2);
+c = P.coeffs(1);
+assign([c{:}], [1 2 4]);
+A = value(P);
+A.coeffs(1)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+    {[1]}    {[2]}    {[4]}
+\end{lstlisting}
+
 \subsection{Comparisons To \texorpdfstring{\code{dplmi}}{dplmi}}
 \label{sec:dpvar-comparison}
 
@@ -3006,8 +3085,9 @@ ans =
 \label{sec:dpvar-limits}
 
 \begin{itemize}[leftmargin=*]
-  \item Constructor-created \code{dpvar} objects currently support
-        \code{Degree=0} and \code{Degree=1}.
+  \item Constructor-created \code{dpvar} objects support every finite
+        nonnegative integer degree.  Higher degree increases the number of
+        Bernstein control matrices per cell.
   \item Products may contain decision variables on at most one side; nonlinear
         decision products such as \code{P * Q} are outside this slice.
   \item Function-only \code{dpmat} operands cannot enter \code{dpvar} algebra
@@ -3039,6 +3119,8 @@ Construct wrapper &
 \hyperref[sec:dpvar-comparison]{\code{<=}/\code{>=}} \\
 Count constraints &
 \hyperref[sec:dplmi-direct]{direct coefficient constraints} \\
+Select P\'olya elevation &
+\hyperref[sec:dplmi-polya]{\code{UsePolya}, \code{PolyaDegree}, and \code{applyPolya}} \\
 Export to YALMIP &
 \hyperref[sec:dplmi-toyalmip]{\code{toYalmip}} \\
 Solve &
@@ -3053,7 +3135,9 @@ Solve &
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 C = dplmi(expr, relation)
-C = dplmi(expr, relation, relaxLemma=false, UsePolya=false, PolyaDegree=0)
+C = dplmi(expr, relation, "UsePolya")
+C = dplmi(expr, relation, UsePolya=true, PolyaDegree=d)
+C = dplmi(expr, relation, "UsePolya", "PolyaDegree", d)
 C = lhs <= rhs
 C = lhs >= rhs
 \end{lstlisting}
@@ -3061,24 +3145,29 @@ C = lhs >= rhs
 \arghead
 \begin{itemize}[leftmargin=*]
   \item \code{expr} is a square \code{dpvar} expression whose coefficient
-        matrices are symmetric or Hermitian.
-  \item \code{relation} is exactly \code{"<="} or \code{">="}.
+        matrices are symmetric or Hermitian; \code{relation} is exactly
+        \code{"<="} or \code{">="}.
   \item \code{relaxLemma} is a logical reserved option with default
-        \code{false}; \code{true} raises the reserved-option error
-        \par\code{dplmi:UnsupportedRelaxLemma}.
-  \item \code{UsePolya} is a logical reserved option with default
-        \code{false}; \code{true} raises \code{dplmi:UnsupportedPolya}.
-  \item \code{PolyaDegree} is a nonnegative integer reserved option with
-        default \code{0}; a positive value raises \code{dplmi:UnsupportedPolya}.
-  \item \code{C} is the direct coefficient-wise \code{dplmi} assembly.
-        Comparisons such as \code{lhs >= rhs} are the ordinary user-facing
-        entry point and accept compatible numeric, \code{dpmat}, affine
-        \code{sdpvar}, and \code{dpvar} right-hand sides.
+        \code{false}; \code{true} raises\linebreak[4]
+        \code{dplmi:UnsupportedRelaxLemma}.
+  \item \code{UsePolya} is a logical scalar option with default
+        \code{false}. Its bare form, \code{"UsePolya"}, and
+        \code{UsePolya=true} without a degree select increment one.
+  \item \code{PolyaDegree=d} is a finite nonnegative integer scalar. It
+        elevates the residual by \code{d} in every parameter direction before
+        assembling constraints. Supplying it without \code{UsePolya} enables
+        P\'olya and issues \codeerr{dplmi}{ImplicitUsePolya};
+        \code{UsePolya=false} with positive \code{d} raises
+        \codeerr{dplmi}{ConflictingPolyaOptions}.
+  \item \code{C} is direct coefficient-wise assembly unless the opt-in
+        P\'olya option is selected. Comparisons such as \code{lhs >= rhs} are
+        the ordinary user-facing entry point and accept compatible numeric,
+        \code{dpmat}, affine \code{sdpvar}, and \code{dpvar} right-hand sides.
 \end{itemize}
 
 \examplehead
 The direct constructor is equivalent to the comparison path when the relation
-and reserved options are explicit.
+and options are explicit.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -3119,6 +3208,56 @@ ordinary expression with \(N_c\) physical cells and \(N_b\) Bernstein
 coefficients per cell, the number of stored constraints is \(N_cN_b\).  For a
 \code{rhodiff} expression with \(N_v\) rate vertices, the count becomes
 \(N_cN_bN_v\).
+
+\subsection{Opt-In P\'olya Assembly And \texorpdfstring{\code{applyPolya}}{applyPolya}}
+\label{sec:dplmi-polya}
+
+With \code{UsePolya=true}, \code{dplmi} first elevates the stored residual by
+\code{PolyaDegree} in every parameter direction, then constrains every
+elevated local coefficient and every active rate row. Thus, if the original
+degree is \(m\), the count is
+\(N_c (m+d+1)^\ell\) for ordinary expressions and
+\(N_c (m+d+1)^\ell N_v\) for rate-vertex expressions. An increment of zero is
+valid and has the same coefficient count as direct assembly.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Cpolya = C.applyPolya()
+Cpolya = C.applyPolya(d)
+\end{lstlisting}
+
+\code{applyPolya} is a value-class method: it returns a new \code{dplmi},
+leaves \code{C} unchanged, and rebuilds from \code{C.Residual}. Selecting a
+new increment therefore replaces rather than compounds a previous selection.
+The no-argument form uses one; an invalid increment raises
+\code{dplmi:InvalidPolyaDegree}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(1, {[0 1]}, Degree=1);
+direct = P >= 0;
+polya = direct.applyPolya(2);
+direct.PolyaDegree
+polya.UsePolya
+polya.PolyaDegree
+numel(polya.Constraints)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+ans =
+     0
+
+ans =
+  logical
+   1
+
+ans =
+     2
+
+ans =
+     4
+\end{lstlisting}
 
 \subsection{\texorpdfstring{\code{toYalmip}}{toYalmip}}
 \label{sec:dplmi-toyalmip}
@@ -3317,9 +3456,9 @@ constraints.
 \label{sec:current-limits}
 
 \begin{itemize}[leftmargin=*]
-  \item \code{dplmi} currently assembles direct coefficient-wise constraints.
-        Relaxation-lemma and Polya workflows are reserved future layers, not
-        supported user workflows in this manual.
+  \item \code{dplmi} assembles direct coefficient-wise constraints by default
+        and supports opt-in cell-local P\'olya degree elevation. The
+        relaxation-lemma workflow remains reserved and unsupported.
   \item Package-owned solver wrappers, strictness-margin diagnostics, residual
         evidence, and advanced relaxation workflows are not part of the current
         public API.

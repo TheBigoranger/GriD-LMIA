@@ -35,7 +35,7 @@ P = dpvar(..., Degree=1, RateBounds=rb)
 | `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of grid vectors, such as `{[0 1], [10 20]}`. |
 | `"full"` | Use full YALMIP matrix coefficients, as in `dpvar(2,2,{[0 1]},"full")`. |
 | `"symmetric"` | Use symmetric YALMIP matrix coefficients, as in `dpvar(2,{[0 1]},"symmetric")`. Requires square dimensions. |
-| `Degree` | `0` or `1` for constructor-created variables. Default is `1`; use `Degree=0` for a parameter-independent decision. |
+| `Degree` | Finite nonnegative integer scalar. Default is `1`; use `Degree=0` for a parameter-independent decision, or higher degrees for continuous piecewise Bernstein decision data. |
 | `RateBounds` | Finite `ell x 2` lower/upper rate-bound table stored as metadata, such as `RateBounds=[-1 1]` or `RateBounds=[-1 2; -3 4]`. |
 
 Unsupported public options: `IsContinuous`, `ContainsDecision`, and `HasRateDependence`.
@@ -81,7 +81,7 @@ access:
 | :--- | :--- | :--- |
 | `GridInfo` | `P.GridInfo.Vectors{1}`, `P.GridInfo.Points`, `P.GridInfo.Bounds` | Tensor-grid metadata inherited from `dpbase`. |
 | `MatrixSize` | `P.MatrixSize` | Matrix size of each YALMIP coefficient payload. |
-| `Degree` | `P.Degree` | Constructor-created objects use `0` or `1`; algebra can raise degree. |
+| `Degree` | `P.Degree` | Constructor-created objects accept every nonnegative integer degree; algebra can also raise degree. |
 | `LocalValues` | `P.LocalValues{1}` or `P.coeffs(1)` | Cell-local YALMIP coefficient payloads. |
 | `IsContinuous` | `P.IsContinuous` | `true` for constructor-created variables; `rhodiff` outputs are discontinuous. |
 | `ContainsDecision` | `P.ContainsDecision` | `true` unless algebra proves a zero/nondecision result. |
@@ -178,7 +178,7 @@ ans =
 
 - Missing dimensions or grid vectors raise `dpvar:InvalidInput`.
 - Nonsquare `"symmetric"` variables raise `dpvar:InvalidStructure`.
-- Constructor degrees other than `0` or `1` raise `dpvar:InvalidDegree`.
+- Negative, noninteger, nonscalar, or nonfinite constructor degrees raise `dpvar:InvalidDegree`.
 - Invalid rate metadata raises `dpvar:InvalidRateBounds` or inherited `dpbase:InvalidRateBounds`.
 - Unknown options raise `dpvar:UnknownOption`; internal metadata options raise `dpvar:UnsupportedOption`.
 
