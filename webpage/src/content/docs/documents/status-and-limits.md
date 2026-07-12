@@ -22,13 +22,26 @@ source for call forms, options, examples, and validation errors.
 | Exact coefficient algebra | Supported coefficient-backed operations use degree elevation, common-grid refinement, and binomial-scaled Bernstein convolution. | [Bernstein utilities](/DP-LMI-package/documents/reference/bernstein-utilities/) |
 | Decision expressions | `dpvar` creates continuous YALMIP-backed degree-0 or degree-1 Bernstein decisions; supported affine and known-data algebra can produce higher degrees. | [`dpvar`](/DP-LMI-package/documents/reference/dpvar/) |
 | Rate derivatives | `rhodiff` creates discontinuous cell-local derivative expressions with scalar or tensor-grid rate-vertex rows and explicit or stored `RateBounds`. | [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) |
-| Finite LMI assembly | `dplmi` directly constrains every active physical-cell, Bernstein-coefficient, and rate-vertex row, with optional Pólya degree elevation. | [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) |
+| Finite LMI assembly | `dplmi` directly constrains every active physical-cell, Bernstein-coefficient, and rate-vertex row. Pólya degree elevation is opt-in through `UsePolya`/`PolyaDegree` or `applyPolya`. | [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) |
 | Solver handoff | `toYalmip` returns the assembled YALMIP constraints for ordinary `optimize` calls. | [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) |
 | Inspection and plots | `bernsteinTable`, `evaluate`, and one-/two-parameter `dpmat/plot` behavior are documented and tested. | [Reference lookup](/DP-LMI-package/documents/reference-index/) |
 
+## Independent Julia Comparison Oracle
+
+The repository's optional
+[`julia_sos/`](https://github.com/TheBigoranger/DP-LMI-package/tree/main/julia_sos)
+environment is a small, independent Julia oracle for scalar SOS and interval
+nonnegativity comparisons. It supports one interval and dense PSD Gram
+matrices, and is not required for normal package use. It is neither called by
+the MATLAB/YALMIP runtime nor a public `dplmi` certificate, solver, or
+data-exchange path. Matrix polynomials, multivariate domains, and production
+SOS assembly remain outside that comparison baseline.
+
 ## Unsupported Public Layers
 
-- Sum-of-squares positivity hierarchies.
+- MATLAB/YALMIP sum-of-squares positivity hierarchies or production SOS
+  assembly. The independent Julia comparison oracle above does not change this
+  boundary.
 - A public de Casteljau subdivision or adaptive grid-refinement command.
 - Package-owned strictness margins or strict-inequality options.
 - Residual-bound certificates, post-solve certificate diagnostics, or an
@@ -55,8 +68,8 @@ documented public call; research context is not an executable package feature.
 
 ## Solver Boundary
 
-`dplmi` owns direct and Pólya-elevated coefficient assembly. After `toYalmip`, YALMIP owns
-constraint combination, solver selection, `optimize`, and solver status. The
+`dplmi` owns direct and opt-in Pólya-elevated coefficient assembly. After
+`toYalmip`, YALMIP owns constraint combination, solver selection, `optimize`, and solver status. The
 package's solver smoke tests prefer MOSEK when available and otherwise use
 `lmilab`, but that test fallback is not a package-owned solver policy.
 

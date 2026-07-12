@@ -5,8 +5,9 @@ description: Reference-first entry point for DP-LMI classes, methods, and mathem
 
 Use this page as the lookup entry for current DP-LMI behavior. The reference
 pages document implemented code only, including direct and opt-in Pólya
-assembly; future SOS certificate work is listed as a limitation rather than a
-supported workflow.
+assembly. An optional Julia SOS oracle is available only as an independent
+comparison baseline; it is not a MATLAB/YALMIP workflow or a package
+certificate API.
 
 ## Reference Index
 
@@ -43,6 +44,11 @@ entry points.
 - [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/): history, reversed local coordinates, convex-hull certificates, tensor-product storage, derivatives, elevation, subdivision, multiplication, traversal, and refinement boundaries.
 - [Gridding And Bernstein Degree](/DP-LMI-package/documents/math/gridding-and-degree/): diagram-led one- and two-parameter inputs, global coefficient-grid shapes, nested `LocalValues`, and the \(\ell\)-dimensional count rules.
 - [Status And Limits](/DP-LMI-package/documents/status-and-limits/): centralized implemented-versus-reserved boundary for modeling, constraints, solvers, and refinement ideas.
+
+The repository also contains an optional, isolated
+[Julia SOS comparison baseline](https://github.com/TheBigoranger/DP-LMI-package/tree/main/julia_sos).
+It is useful for small scalar interval comparisons, but does not exchange data
+with MATLAB or extend the public DP-LMI API.
 
 ## Install And Examples
 

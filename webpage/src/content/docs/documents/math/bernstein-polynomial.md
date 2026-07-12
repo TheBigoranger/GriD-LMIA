@@ -378,9 +378,12 @@ The following references give context without becoming runtime dependencies:
 
 These papers motivate the representation and certificate landscape. They do
 not imply that every theorem, refinement, or hierarchy in that literature is
-implemented here. In particular, SOS machinery, adaptive refinement,
-package-owned strictness or residual
-certification, and diagnostics remain reserved or unsupported.
+implemented in the MATLAB/YALMIP package. In particular, production SOS
+assembly, adaptive refinement, package-owned strictness or residual
+certification, and diagnostics remain reserved or unsupported. The repository
+does include an optional [independent Julia SOS comparison baseline](https://github.com/TheBigoranger/DP-LMI-package/tree/main/julia_sos)
+for small scalar interval cases; it is not a MATLAB runtime feature or a public
+DP-LMI certificate path.
 
 ## See Also
 
