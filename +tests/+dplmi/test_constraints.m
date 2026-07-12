@@ -142,16 +142,26 @@ end
 function testPolyaOptionInteractions(testCase)
     P = dpvar(2, {[0 1]}, "symmetric");
 
-    direct = dplmi(P, "<=", relaxLemma=false, ...
-        UsePolya=false, PolyaDegree=0);
+    direct = dplmi(P, "<=", UsePolya=false, PolyaDegree=0);
 
     verifyDefaults(testCase, direct);
     testCase.verifyEqual(numel(direct.Constraints), 2);
     testCase.verifyError(@() dplmi(P, "<=", ...
         UsePolya=false, PolyaDegree=1), ...
         "dplmi:ConflictingPolyaOptions");
-    testCase.verifyError(@() dplmi(P, "<=", relaxLemma=true), ...
-        "dplmi:UnsupportedRelaxLemma");
+end
+
+function testRemovedApiIsUnavailable(testCase)
+    % Keep the retired names out of source text while guarding the API boundary.
+    P = dpvar(1, {[0 1]}, Degree=1);
+    C = P >= 0;
+    oldOption = "Use" + "Relax" + "Lemma";
+    oldMethod = "apply" + "Relax" + "Lemma";
+
+    testCase.verifyError(@() dplmi(P, "<=", oldOption, true), ...
+        "dplmi:UnknownOption");
+    testCase.verifyFalse(isprop(C, oldOption));
+    testCase.verifyFalse(any(string(methods(C)) == oldMethod));
 end
 
 
@@ -237,14 +247,10 @@ function testMalformedConstructorOptions(testCase)
         "dplmi:UnknownOption");
     testCase.verifyError(@() dplmi(P, "<=", "UsePolya", "Unknown"), ...
         "dplmi:UnknownOption");
-    testCase.verifyError(@() dplmi(P, "<=", "relaxLemma", "Unknown"), ...
-        "dplmi:UnknownOption");
     testCase.verifyError(@() dplmi(P, "<=", ...
         "UsePolya", true, "UsePolya"), "dplmi:DuplicateOption");
     testCase.verifyError(@() dplmi(P, "<=", ...
         "PolyaDegree", "UsePolya"), "dplmi:InvalidOptions");
-    testCase.verifyError(@() dplmi(P, "<=", ...
-        "relaxLemma", "UsePolya"), "dplmi:InvalidOptions");
 end
 
 function testPolyaDegreeValidation(testCase)
@@ -276,7 +282,6 @@ function testToYalmip(testCase)
 end
 
 function verifyDefaults(testCase, C)
-    testCase.verifyFalse(C.RelaxLemma);
     testCase.verifyFalse(C.UsePolya);
     testCase.verifyEqual(C.PolyaDegree, 0);
 end

@@ -17,9 +17,9 @@ classdef dplmi
     %   Residual retains the original dpvar expression and Relation stores
     %   "<=" or ">=". applyPolya rebuilds from that residual, so selecting a
     %   new increment does not compound an earlier elevation or mutate C.
-    %   relaxLemma=true raises dplmi:UnsupportedRelaxLemma. A positive degree
-    %   with UsePolya=false raises dplmi:ConflictingPolyaOptions; malformed,
-    %   duplicate, unknown, or invalid-degree options also fail explicitly.
+    %   A positive degree with UsePolya=false raises
+    %   dplmi:ConflictingPolyaOptions; malformed, duplicate, unknown, or
+    %   invalid options also fail explicitly.
     %
     %   Example:
     %     P = dpvar(2, {[0 1]}, "symmetric");
@@ -31,7 +31,6 @@ classdef dplmi
         Constraints
         Residual
         Relation
-        RelaxLemma
         UsePolya
         PolyaDegree
     end
@@ -54,14 +53,8 @@ classdef dplmi
             end
 
             opts = parseOptions(varargin{:});
-            if opts.relaxLemma
-                error("dplmi:UnsupportedRelaxLemma", ...
-                    "relaxLemma=true is reserved but unsupported in this dplmi slice.");
-            end
-
             obj.Residual = expr;
             obj.Relation = relation;
-            obj.RelaxLemma = opts.relaxLemma;
             obj.UsePolya = opts.UsePolya;
             obj.PolyaDegree = opts.PolyaDegree;
             obj.Constraints = buildConstraints(expr, relation, ...
@@ -73,10 +66,8 @@ classdef dplmi
 end
 
 function opts = parseOptions(varargin)
-    opts = struct("relaxLemma", false, "UsePolya", false, ...
-        "PolyaDegree", 0);
-    seen = struct("relaxLemma", false, "UsePolya", false, ...
-        "PolyaDegree", false);
+    opts = struct("UsePolya", false, "PolyaDegree", 0);
+    seen = struct("UsePolya", false, "PolyaDegree", false);
     k = 1;
     while k <= numel(varargin)
         rawName = varargin{k};
@@ -86,7 +77,7 @@ function opts = parseOptions(varargin)
                 "dplmi option names must be strings or character vectors.");
         end
         name = string(rawName);
-        if ~any(name == ["relaxLemma", "UsePolya", "PolyaDegree"])
+        if ~any(name == ["UsePolya", "PolyaDegree"])
             error("dplmi:UnknownOption", "Unsupported dplmi option: %s.", name);
         end
         if seen.(char(name))
@@ -115,7 +106,7 @@ function opts = parseOptions(varargin)
                 (isstring(varargin{k + 1}) && isscalar(varargin{k + 1}) && ...
                 ~ismissing(varargin{k + 1}))
             nextName = string(varargin{k + 1});
-            if any(nextName == ["relaxLemma", "UsePolya", "PolyaDegree"])
+            if any(nextName == ["UsePolya", "PolyaDegree"])
                 error("dplmi:InvalidOptions", ...
                     "dplmi option %s requires a value.", name);
             end
@@ -124,12 +115,6 @@ function opts = parseOptions(varargin)
         end
         val = varargin{k + 1};
         switch name
-            case "relaxLemma"
-                if ~islogical(val) || ~isscalar(val)
-                    error("dplmi:InvalidRelaxLemma", ...
-                        "relaxLemma must be a logical scalar.");
-                end
-                opts.relaxLemma = val;
             case "UsePolya"
                 if ~islogical(val) || ~isscalar(val)
                     error("dplmi:InvalidUsePolya", ...
@@ -170,6 +155,7 @@ function cons = buildConstraints(expr, relation, usePolya, pDeg)
     else
         vals = expr.LocalValues;
     end
+
     cells = expr.cells();
     cons = {};
     zero = zeros(expr.MatrixSize);

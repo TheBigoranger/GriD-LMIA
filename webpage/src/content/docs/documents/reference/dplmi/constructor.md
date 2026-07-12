@@ -32,13 +32,12 @@ C = lhs >= rhs
 | :--- | :--- |
 | `expr` | Square `dpvar` residual expression, such as `P` or `diffP + P*A + A'*P`. |
 | `relation` | Either `"<="` or `">="`. |
-| `relaxLemma` | Logical option. Default `false`; `relaxLemma=true` is reserved and currently rejected. |
 | `UsePolya` | Logical option. Default `false`. The bare flag `"UsePolya"` enables Pólya assembly with increment one. |
 | `PolyaDegree` | Finite nonnegative integer scalar. Default `0`. Supplying it without `UsePolya` enables Pólya and warns `dplmi:ImplicitUsePolya`. |
 
 ## Output
 
-`C` is a `dplmi` object with `Constraints`, `RelaxLemma`, `UsePolya`, and `PolyaDegree` properties.
+`C` is a `dplmi` object with `Constraints`, `Residual`, `Relation`, `UsePolya`, and `PolyaDegree` properties.
 
 ## Examples
 
@@ -102,7 +101,6 @@ rate-vertex row. It does not mutate the input expression.
 
 - Nonsquare residual coefficient matrices raise `dplmi:InvalidMatrixSize`.
 - Nonsymmetric or non-Hermitian coefficient matrices raise `dplmi:NonSymmetricExpression`.
-- Nondefault relaxation raises `dplmi:UnsupportedRelaxLemma`.
 - Invalid Polya degree values raise `dplmi:InvalidPolyaDegree`.
 - `UsePolya=false` with a positive `PolyaDegree` raises `dplmi:ConflictingPolyaOptions`.
 - Malformed, duplicate, or unknown options raise `dplmi:InvalidOptions`, `dplmi:DuplicateOption`, or `dplmi:UnknownOption`.

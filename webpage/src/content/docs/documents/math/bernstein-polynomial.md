@@ -378,8 +378,8 @@ The following references give context without becoming runtime dependencies:
 
 These papers motivate the representation and certificate landscape. They do
 not imply that every theorem, refinement, or hierarchy in that literature is
-implemented here. In particular, relaxation-lemma assembly, Polya and SOS
-machinery, adaptive refinement, package-owned strictness or residual
+implemented here. In particular, SOS machinery, adaptive refinement,
+package-owned strictness or residual
 certification, and diagnostics remain reserved or unsupported.
 
 ## See Also

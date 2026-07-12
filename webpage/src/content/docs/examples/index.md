@@ -109,4 +109,4 @@ The solver-facing smoke examples from [`+tests/+dplmi/test_solver_smoke.m`](http
 
 ## Current Solver Boundary
 
-The package currently assembles direct coefficient-wise constraints. It does not provide a package-owned solver wrapper, relaxation-lemma assembler, Polya assembler, or residual diagnostic layer.
+The package currently assembles direct or Pólya-elevated coefficient-wise constraints. It does not provide a package-owned solver wrapper or residual diagnostic layer.

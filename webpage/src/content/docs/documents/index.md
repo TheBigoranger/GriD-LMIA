@@ -3,7 +3,10 @@ title: Documents
 description: Reference-first entry point for DP-LMI classes, methods, and mathematical background.
 ---
 
-Use this page as the lookup entry for current DP-LMI behavior. The reference pages document implemented code only; reserved relaxation and Polya options are listed as limitations rather than supported workflows.
+Use this page as the lookup entry for current DP-LMI behavior. The reference
+pages document implemented code only, including direct and opt-in Pólya
+assembly; future SOS certificate work is listed as a limitation rather than a
+supported workflow.
 
 ## Reference Index
 

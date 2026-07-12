@@ -135,7 +135,7 @@
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.2.8}
+\author{Version v0.2.9}
 \date{July 2026}
 
 \begin{document}
@@ -662,8 +662,8 @@ modeling step precise:
         parameterization instead enlarges the search space.
   \item The optional cell-local Polya mode is degree elevation followed by the
         same coefficient-wise constraints.  It does not introduce auxiliary
-        variables or change the stored residual; broader vertex-pair and
-        sum-of-squares constructions remain separate sufficient hierarchies.
+        variables or change the stored residual; sum-of-squares constructions
+        remain a separate sufficient hierarchy.
 \end{enumerate}
 
 Spline-type parameter-dependent LMI methods give important motivation for
@@ -696,11 +696,9 @@ The implemented public boundary is deliberately narrower than this background:
         \code{dplmi} directly constrains every active rate row and local
         coefficient before \code{toYalmip} hands the model to YALMIP.
   \item \code{dplmi} also implements opt-in cell-local P\'olya degree
-        elevation before coefficient assembly. Relaxation-lemma assembly,
-        sum-of-squares machinery, adaptive subdivision, package-owned
-        strictness margins, residual certificates, and diagnostic hierarchies
-        are not current public APIs. In particular, \code{relaxLemma=true} is
-        rejected rather than silently approximated.
+        elevation before coefficient assembly. Sum-of-squares machinery,
+        adaptive subdivision, package-owned strictness margins, residual
+        certificates, and diagnostic hierarchies are not current public APIs.
 \end{itemize}
 
 \section{Installation, Verification, And Lookup}
@@ -3147,9 +3145,6 @@ C = lhs >= rhs
   \item \code{expr} is a square \code{dpvar} expression whose coefficient
         matrices are symmetric or Hermitian; \code{relation} is exactly
         \code{"<="} or \code{">="}.
-  \item \code{relaxLemma} is a logical reserved option with default
-        \code{false}; \code{true} raises\linebreak[4]
-        \code{dplmi:UnsupportedRelaxLemma}.
   \item \code{UsePolya} is a logical scalar option with default
         \code{false}. Its bare form, \code{"UsePolya"}, and
         \code{UsePolya=true} without a degree select increment one.
@@ -3172,10 +3167,9 @@ and options are explicit.
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
-C = dplmi(P, ">=", relaxLemma=false, UsePolya=false, PolyaDegree=0);
+C = dplmi(P, ">=", UsePolya=false, PolyaDegree=0);
 class(C)
 numel(C.Constraints)
-C.RelaxLemma
 C.UsePolya
 C.PolyaDegree
 \end{lstlisting}
@@ -3186,10 +3180,6 @@ ans =
 
 ans =
      2
-
-ans =
-  logical
-   0
 
 ans =
   logical
@@ -3457,8 +3447,7 @@ constraints.
 
 \begin{itemize}[leftmargin=*]
   \item \code{dplmi} assembles direct coefficient-wise constraints by default
-        and supports opt-in cell-local P\'olya degree elevation. The
-        relaxation-lemma workflow remains reserved and unsupported.
+        and supports opt-in cell-local P\'olya degree elevation.
   \item Package-owned solver wrappers, strictness-margin diagnostics, residual
         evidence, and advanced relaxation workflows are not part of the current
         public API.

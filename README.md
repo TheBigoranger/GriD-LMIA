@@ -8,7 +8,8 @@ The current implementation provides:
 - `dpmat` for known finite real matrix data from coefficient grids, explicit local values, or exact function handles.
 - `dpvar` for continuous YALMIP-backed Bernstein decision expressions.
 - `rhodiff` for discontinuous rate-vertex derivative expressions.
-- `dplmi` for direct coefficient-wise YALMIP constraint assembly and `toYalmip` handoff.
+- `dplmi` for direct or Pólya-elevated YALMIP constraint assembly and
+  `toYalmip` handoff.
 - `bernsteinTable` methods on both `dpmat` and `dpvar` for command-window
   inspection of local Bernstein coefficient rows.
 
@@ -93,6 +94,27 @@ F = toYalmip(C);
 
 `F` can be used with ordinary YALMIP calls such as `optimize(F, objective, sdpsettings(...))`.
 
+## Opt-in Pólya Certificate
+
+Direct coefficient-wise assembly remains the default. `UsePolya` elevates the
+stored residual by `PolyaDegree` in every parameter direction before applying
+the same coefficient-wise constraints; the bare flag selects an increment of
+one.
+
+```matlab
+yalmip('clear')
+P = dpvar(2, {[0 1]}, "symmetric", Degree=2);
+direct = P <= 0;
+polya = direct.applyPolya(1);
+```
+
+The same selection can be supplied to `dplmi` as a bare or logical option,
+for example `dplmi(P, "<=", "UsePolya")` or
+`dplmi(P, "<=", UsePolya=true, PolyaDegree=1)`.
+`applyPolya()` returns a new value object and rebuilds from the original
+residual, so repeated calls replace rather than compound the selected
+increment. This is a sufficient certificate, not an infeasibility test.
+
 ## Documentation
 
 - Online manual: https://thebigoranger.github.io/DP-LMI-package/
@@ -112,7 +134,9 @@ built with npm, Astro, and Starlight.
 
 ## Current Limitations
 
-- Relaxation-lemma assembly and Polya assembly are reserved but unsupported in the current `dplmi` slice.
-- Package-owned solver wrappers, strictness-margin diagnostics, residual evidence, and advanced relaxation workflows are future layers.
+- Direct and Pólya assembly are sufficient finite certificates;
+  a failed certificate does not prove continuous DP-LMI infeasibility.
+- Package-owned solver wrappers, strictness-margin diagnostics, residual
+  evidence, SOS, and additional relaxation variants are future layers.
 - `dpbase` is backend architecture context, not the primary modeling API.
 - Function-only `dpmat` objects without explicit Bernstein evidence do not enter coefficient algebra.

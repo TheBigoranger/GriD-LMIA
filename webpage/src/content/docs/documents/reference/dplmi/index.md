@@ -24,9 +24,9 @@ description: Cell-local YALMIP constraints for DP-LMI expressions.
 ## Current Boundary
 
 Direct coefficient-wise assembly is the default. Pólya degree elevation is
-available through the constructor options and `applyPolya`; relaxation-lemma
-workflows, strictness margins, residual evidence, diagnostics, and
-package-owned solver wrappers remain outside this slice.
+available through the constructor options and `applyPolya`; strictness margins,
+residual evidence, diagnostics, and package-owned solver wrappers remain
+outside this slice.
 
 ## See Also
 

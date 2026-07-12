@@ -57,9 +57,8 @@ The increment must be a finite nonnegative integer scalar. Invalid values raise
 
 ## Limitations
 
-Pólya assembly does not enable `relaxLemma`; `relaxLemma=true` remains
-unsupported and raises `dplmi:UnsupportedRelaxLemma`. The residual must still
-meet the ordinary `dplmi` square and symmetric/Hermitian requirements.
+The residual must still meet the ordinary `dplmi` square and
+symmetric/Hermitian requirements.
 
 ## See Also
 
