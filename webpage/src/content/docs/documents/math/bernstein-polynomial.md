@@ -347,6 +347,21 @@ The package does not currently expose a strictness-margin option. Users should
 not infer numerical strictness semantics beyond the constraints actually
 assembled by YALMIP.
 
+## Fixed-Order Full Box Preordering
+
+The opt-in [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/)
+path replaces coefficient-wise sign tests with a cell-local Bernstein-Gram
+representation. It uses the parity-specific Markov-Lukács form in one
+parameter and every subset product of the box generators
+$\alpha_s(1-\alpha_s)$ in multiple parameters. PSD Gram blocks are
+independent across physical cells and rate rows, and exact identities match
+the represented polynomial coefficients.
+
+This is a fixed-order certificate on the local parameter box. It is distinct
+from a general Putinar certificate, a general-domain SOS interface, or an
+automatically selected hierarchy. The dedicated method page documents order
+selection, constraint ordering, relation signs, examples, and errors.
+
 ## Four Different Refinements
 
 When a direct coefficient test fails, keep these operations distinct:
@@ -378,12 +393,12 @@ The following references give context without becoming runtime dependencies:
 
 These papers motivate the representation and certificate landscape. They do
 not imply that every theorem, refinement, or hierarchy in that literature is
-implemented in the MATLAB/YALMIP package. In particular, production SOS
+implemented in the MATLAB/YALMIP package. In particular, general SOS
 assembly, adaptive refinement, package-owned strictness or residual
-certification, and diagnostics remain reserved or unsupported. The repository
-does include an optional [independent Julia SOS comparison baseline](https://github.com/TheBigoranger/DP-LMI-package/tree/main/julia_sos)
-for small scalar interval cases; it is not a MATLAB runtime feature or a public
-DP-LMI certificate path.
+certification, and diagnostics remain reserved or unsupported. The supported
+SOS-family feature is the fixed-order full box preordering certificate. The
+repository also includes an optional [independent SOS validation suite](https://github.com/TheBigoranger/DP-LMI-package/tree/main/sos_validation)
+for cross-backend evidence; it is not a MATLAB runtime dependency.
 
 ## See Also
 
@@ -392,4 +407,5 @@ DP-LMI certificate path.
 [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) ·
 [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) ·
 [`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) ·
+[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) ·
 [`Bernstein backend utilities`](/DP-LMI-package/documents/reference/bernstein-utilities/)

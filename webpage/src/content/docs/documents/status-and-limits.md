@@ -23,25 +23,24 @@ source for call forms, options, examples, and validation errors.
 | Decision expressions | `dpvar` creates continuous YALMIP-backed degree-0 or degree-1 Bernstein decisions; supported affine and known-data algebra can produce higher degrees. | [`dpvar`](/DP-LMI-package/documents/reference/dpvar/) |
 | Rate derivatives | `rhodiff` creates discontinuous cell-local derivative expressions with scalar or tensor-grid rate-vertex rows and explicit or stored `RateBounds`. | [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) |
 | Finite LMI assembly | `dplmi` directly constrains every active physical-cell, Bernstein-coefficient, and rate-vertex row. Pólya degree elevation is opt-in through `UsePolya`/`PolyaDegree` or `applyPolya`. | [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) |
+| Full box preordering assembly | `applyFullBoxPreorder([order])` is an opt-in dense Gram certificate: parity-specific Markov-Lukács blocks in one parameter and the complete subset-product box preordering in multiple parameters. | [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) |
 | Solver handoff | `toYalmip` returns the assembled YALMIP constraints for ordinary `optimize` calls. | [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) |
 | Inspection and plots | `bernsteinTable`, `evaluate`, and one-/two-parameter `dpmat/plot` behavior are documented and tested. | [Reference lookup](/DP-LMI-package/documents/reference-index/) |
 
-## Independent Julia Comparison Oracle
+## Independent SOS Comparison Suite
 
 The repository's optional
-[`julia_sos/`](https://github.com/TheBigoranger/DP-LMI-package/tree/main/julia_sos)
-environment is a small, independent Julia oracle for scalar SOS and interval
-nonnegativity comparisons. It supports one interval and dense PSD Gram
-matrices, and is not required for normal package use. It is neither called by
-the MATLAB/YALMIP runtime nor a public `dplmi` certificate, solver, or
-data-exchange path. Matrix polynomials, multivariate domains, and production
-SOS assembly remain outside that comparison baseline.
+[`sos_validation/`](https://github.com/TheBigoranger/DP-LMI-package/tree/main/sos_validation)
+suite compares the implemented certificate using SumOfSquares.jl 0.8.0,
+explicit YALMIP, isolated SOSTOOLS 4.00, and the package assembler. It is not
+required for normal package use and is not loaded by the MATLAB runtime.
 
 ## Unsupported Public Layers
 
-- MATLAB/YALMIP sum-of-squares positivity hierarchies or production SOS
-  assembly. The independent Julia comparison oracle above does not change this
-  boundary.
+- General-purpose MATLAB/YALMIP sum-of-squares hierarchies, automatic hierarchy
+  selection, and package-owned solver wrappers remain unsupported. The fixed
+  full box preordering certificate listed above is the supported opt-in
+  SOS-family feature.
 - A public de Casteljau subdivision or adaptive grid-refinement command.
 - Package-owned strictness margins or strict-inequality options.
 - Residual-bound certificates, post-solve certificate diagnostics, or an
@@ -68,8 +67,9 @@ documented public call; research context is not an executable package feature.
 
 ## Solver Boundary
 
-`dplmi` owns direct and opt-in Pólya-elevated coefficient assembly. After
-`toYalmip`, YALMIP owns constraint combination, solver selection, `optimize`, and solver status. The
+`dplmi` owns direct and opt-in Pólya-elevated coefficient assembly plus the
+opt-in fixed-order full box preordering. After `toYalmip`, YALMIP owns
+constraint combination, solver selection, `optimize`, and solver status. The
 package's solver smoke tests prefer MOSEK when available and otherwise use
 `lmilab`, but that test fallback is not a package-owned solver policy.
 
@@ -78,4 +78,5 @@ package's solver smoke tests prefer MOSEK when available and otherwise use
 [`Reference lookup`](/DP-LMI-package/documents/reference-index/) ·
 [`Install And Download`](/DP-LMI-package/install/) ·
 [`Bernstein Polynomial`](/DP-LMI-package/documents/math/bernstein-polynomial/) ·
+[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) ·
 [`Solver smoke examples`](/DP-LMI-package/examples/solver-smoke/)

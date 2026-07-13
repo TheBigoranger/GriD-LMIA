@@ -62,4 +62,4 @@ symmetric/Hermitian requirements.
 
 ## See Also
 
-[`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) · [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) · [`dpbase storage and inspection`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/)
+[`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) · [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) · [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) · [`dpbase storage and inspection`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/)

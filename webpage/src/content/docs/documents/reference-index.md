@@ -105,10 +105,11 @@ This generated page lists implemented public classes and methods that are docume
 | [`height`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/#dpvar-height) | dpvar method | Report the first payload dimension. |
 | [`width`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/#dpvar-width) | dpvar method | Report the second payload dimension. |
 | [`size`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/#dpvar-size) | dpvar method | Inspect matrix payload dimensions. |
-| [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) | Constraint class | Store direct coefficient-wise YALMIP constraints. |
-| [`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) | dplmi function | Store coefficient-wise scalar or matrix residual constraints. |
+| [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) | Constraint class | Store direct, Pólya-elevated, or full-box YALMIP constraints. |
+| [`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) | dplmi function | Select direct, Pólya-elevated, or fixed-order full-box assembly. |
 | [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) | dplmi method | Concatenate stored constraints for YALMIP optimize calls. |
 | [`applyPolya`](/DP-LMI-package/documents/reference/dplmi/applypolya/) | dplmi method | Rebuild a residual with a selected Pólya degree increment. |
+| [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) | dplmi method | Rebuild a residual with a fixed-order full box Bernstein-Gram certificate. |
 | [`bernElev`](/DP-LMI-package/documents/reference/bernstein-utilities/#bernElev) | dpbase backend method | Elevate Bernstein degree for compatible coefficient payloads. |
 | [`bernProd`](/DP-LMI-package/documents/reference/bernstein-utilities/#bernProd) | dpbase backend method | Multiply local Bernstein coefficient families by label convolution. |
 | [`mergeGrid`](/DP-LMI-package/documents/reference/bernstein-utilities/#mergeGrid) | dpbase backend method | Refine compatible physical grids before coefficient algebra. |

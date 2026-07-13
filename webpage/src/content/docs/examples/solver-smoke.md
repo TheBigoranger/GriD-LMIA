@@ -171,4 +171,7 @@ The numeric value is solver- and tolerance-dependent, so the manual does not pre
 
 ## Boundary
 
-These examples do not call a package-owned solver wrapper. They document the current boundary: DP-LMI builds coefficient-wise YALMIP constraints, and users call `optimize` directly.
+These examples do not call a package-owned solver wrapper. They document the
+current boundary: DP-LMI builds direct, Pólya-elevated, or
+[`full-box`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/)
+YALMIP constraints, and users call `optimize` directly.

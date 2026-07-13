@@ -151,13 +151,13 @@ export const referenceEntries = [
   {
     name: "dplmi",
     type: "Constraint class",
-    task: "Store direct coefficient-wise YALMIP constraints.",
+    task: "Store direct, Pólya-elevated, or full-box YALMIP constraints.",
     href: "/DP-LMI-package/documents/reference/dplmi/",
   },
   {
     name: "dplmi constructor",
     type: "dplmi function",
-    task: "Store coefficient-wise scalar or matrix residual constraints.",
+    task: "Select direct, Pólya-elevated, or fixed-order full-box assembly.",
     href: "/DP-LMI-package/documents/reference/dplmi/constructor/",
   },
   {
@@ -171,6 +171,12 @@ export const referenceEntries = [
     type: "dplmi method",
     task: "Rebuild a residual with a selected Pólya degree increment.",
     href: "/DP-LMI-package/documents/reference/dplmi/applypolya/",
+  },
+  {
+    name: "applyFullBoxPreorder",
+    type: "dplmi method",
+    task: "Rebuild a residual with a fixed-order full box Bernstein-Gram certificate.",
+    href: "/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/",
   },
   entry("bernElev", "dpbase backend method", "Elevate Bernstein degree for compatible coefficient payloads.", "documents/reference/bernstein-utilities", "bernElev"),
   entry("bernProd", "dpbase backend method", "Multiply local Bernstein coefficient families by label convolution.", "documents/reference/bernstein-utilities", "bernProd"),

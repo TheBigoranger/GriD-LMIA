@@ -4,10 +4,10 @@ description: Reference-first entry point for DP-LMI classes, methods, and mathem
 ---
 
 Use this page as the lookup entry for current DP-LMI behavior. The reference
-pages document implemented code only, including direct and opt-in Pólya
-assembly. An optional Julia SOS oracle is available only as an independent
-comparison baseline; it is not a MATLAB/YALMIP workflow or a package
-certificate API.
+pages document implemented code only, including direct, opt-in Pólya, and
+opt-in full box preordering assembly. The separate `sos_validation/` tree
+contains Julia, YALMIP, SOSTOOLS, and package oracles; it is not a MATLAB
+runtime dependency or a replacement for the public API.
 
 ## Reference Index
 
@@ -15,7 +15,7 @@ certificate API.
 | :--- | :--- | :--- |
 | `dpmat` | [`dpmat` overview](/DP-LMI-package/documents/reference/dpmat/) | [`constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/), [`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/), [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/), [`bernsteinTable`](/DP-LMI-package/documents/reference/dpmat/bernsteintable/), [`matrix operations`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/) |
 | `dpvar` | [`dpvar` overview](/DP-LMI-package/documents/reference/dpvar/) | [`constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/), [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/), [`bernsteinTable`](/DP-LMI-package/documents/reference/dpvar/bernsteintable/), [`matrix operations`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/), [`comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) |
-| `dplmi` | [`dplmi` overview](/DP-LMI-package/documents/reference/dplmi/) | [`constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/), [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) |
+| `dplmi` | [`dplmi` overview](/DP-LMI-package/documents/reference/dplmi/) | [`constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/), [`applyPolya`](/DP-LMI-package/documents/reference/dplmi/applypolya/), [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/), [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) |
 | `dpbase` | [`dpbase` overview](/DP-LMI-package/documents/reference/dpbase/) | [`storage inspection`](/DP-LMI-package/documents/reference/dpbase/storage-inspection/) |
 
 ## Function Pages
@@ -29,6 +29,8 @@ certificate API.
 | `dpvar(...)` | [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) | Create continuous YALMIP-backed Bernstein decision variables. |
 | `rhodiff(P)` | [`dpvar rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) | Build rate-vertex derivative expressions. |
 | `P <= 0`, `P >= 0` | [`dpvar comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/) | Create `dplmi` constraints from residual expressions. |
+| `C.applyPolya([d])` | [`dplmi applyPolya`](/DP-LMI-package/documents/reference/dplmi/applypolya/) | Rebuild from the stored residual with a selected degree increment. |
+| `C.applyFullBoxPreorder([r])` | [`dplmi applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) | Select the minimum or an explicit absolute full-box order. |
 | `toYalmip(C)` | [`dplmi toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) | Hand assembled constraints to YALMIP `optimize`. |
 
 The generated [lookup table](/DP-LMI-package/documents/reference-index/) is produced from `src/data/reference-index.js` and checked during the build workflow.
@@ -46,9 +48,9 @@ entry points.
 - [Status And Limits](/DP-LMI-package/documents/status-and-limits/): centralized implemented-versus-reserved boundary for modeling, constraints, solvers, and refinement ideas.
 
 The repository also contains an optional, isolated
-[Julia SOS comparison baseline](https://github.com/TheBigoranger/DP-LMI-package/tree/main/julia_sos).
-It is useful for small scalar interval comparisons, but does not exchange data
-with MATLAB or extend the public DP-LMI API.
+[SOS validation suite](https://github.com/TheBigoranger/DP-LMI-package/tree/main/sos_validation).
+It exchanges versioned benchmark evidence across the independent backends but
+does not extend the public DP-LMI API.
 
 ## Install And Examples
 

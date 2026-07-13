@@ -34,14 +34,20 @@ F = C.toYalmip()
 
 ## Description
 
-`dplmi` stores constraints in package-owned cell-local form so the package can
-assemble one condition per physical cell, Bernstein coefficient, and rate
-vertex. `toYalmip` is the boundary where those stored entries become a regular
-YALMIP constraint array:
+`dplmi` stores constraints in package-owned cell-local form. Direct and Pólya
+objects store one sign condition per physical cell, Bernstein coefficient, and
+rate vertex. Full-box objects instead store PSD Gram-block conditions followed
+by exact coefficient identities for every cell and rate row. `toYalmip` is the
+boundary where the stored entries become a regular YALMIP constraint array:
 
 $$
-F = [F_1,\ldots,F_{N_cN_bN_v}].
+F = [F_1,\ldots,F_N].
 $$
+
+For direct and Pólya objects, $N$ is the number of physical cells times the
+number of active rate rows times the number of assembled Bernstein
+coefficients. For full-box objects, $N$ instead counts every stored PSD Gram
+condition and exact coefficient identity across those cells and rows.
 
 It does not choose a solver, create an objective, apply relaxation margins, or
 run `optimize`.
@@ -100,4 +106,4 @@ The dot-call form is equivalent and is convenient when chaining from a stored
 
 ## See Also
 
-[`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) · [`dpvar comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/)
+[`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) · [`applyPolya`](/DP-LMI-package/documents/reference/dplmi/applypolya/) · [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) · [`dpvar comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/)

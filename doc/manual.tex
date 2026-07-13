@@ -135,7 +135,7 @@
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.2.11}
+\author{Version v0.2.12}
 \date{July 2026}
 
 \begin{document}
@@ -148,10 +148,10 @@ uses \code{dpbase} as the backend parent for cell-local Bernstein coefficient
 storage, provides \code{dpmat} for known finite real matrix functions on tensor
 grids, provides \code{dpvar} for YALMIP-backed Bernstein decision expressions
 and \code{rhodiff} derivatives, and provides \code{dplmi} for direct
-coefficient-wise YALMIP constraint assembly.  The manual is written as a
-reference manual: conceptual Bernstein material comes first, and each class
-chapter then documents supported call forms, arguments, outputs, examples, and
-limits.
+coefficient-wise assembly, opt-in P\'olya elevation, and an opt-in cell-local
+full box Bernstein--Gram preordering.  The manual is written as a reference
+manual: conceptual Bernstein material comes first, and each class chapter then
+documents supported call forms, arguments, outputs, examples, and limits.
 \end{abstract}
 
 \tableofcontents
@@ -660,10 +660,14 @@ modeling step precise:
   \item Pure degree elevation preserves exactly the same polynomial and
         decision variables.  A genuinely higher-degree decision
         parameterization instead enlarges the search space.
-  \item The optional cell-local Polya mode is degree elevation followed by the
+  \item The optional cell-local P\'olya mode is degree elevation followed by the
         same coefficient-wise constraints.  It does not introduce auxiliary
-        variables or change the stored residual; sum-of-squares constructions
-        remain a separate sufficient hierarchy.
+        variables or change the stored residual.
+  \item The optional full box mode instead represents the signed residual by
+        cell-local positive-semidefinite Gram blocks and exact Bernstein
+        coefficient identities.  Its order is an absolute certificate order,
+        not a degree increment.  It is the implemented box-specific
+        preordering, not a general-domain or full-space SOS hierarchy.
 \end{enumerate}
 
 Spline-type parameter-dependent LMI methods give important motivation for
@@ -696,9 +700,13 @@ The implemented public boundary is deliberately narrower than this background:
         \code{dplmi} directly constrains every active rate row and local
         coefficient before \code{toYalmip} hands the model to YALMIP.
   \item \code{dplmi} also implements opt-in cell-local P\'olya degree
-        elevation before coefficient assembly. Sum-of-squares machinery,
-        adaptive subdivision, package-owned strictness margins, residual
-        certificates, and diagnostic hierarchies are not current public APIs.
+        elevation before coefficient assembly and an opt-in full box
+        Bernstein--Gram preordering.  The latter creates independent Gram
+        variables for every physical cell and active rate row.  It is not a
+        general Putinar, general-domain, or full-space SOS interface.
+  \item Adaptive subdivision, package-owned strictness margins, residual
+        diagnostics, and general or adaptive SOS hierarchies are not current
+        public APIs.
 \end{itemize}
 
 \section{Installation, Verification, And Lookup}
@@ -733,9 +741,11 @@ results = tests.run_all();
 \end{lstlisting}
 
 The test entry point covers helper utilities, \code{dpbase}, \code{dpmat},
-\code{dpvar}, and \code{dplmi}.  The YALMIP-backed \code{dpvar} and
-\code{dplmi} tests require YALMIP.  Solver smoke tests additionally require an
-SDP solver.
+\code{dpvar}, and ordinary \code{dplmi} behavior.  The YALMIP-backed
+\code{dpvar} and \code{dplmi} tests require YALMIP.  Solver smoke tests
+additionally require an SDP solver.  The optional cross-validation material in
+\code{sos_validation/}, including its full-box package oracle, is not loaded by
+\code{tests.run_all} and is not an ordinary package runtime dependency.
 
 \subsection{Quick Start}
 \label{sec:quick-start}
@@ -758,9 +768,13 @@ yalmip('clear')
 P = dpvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
 F = toYalmip(C);
+Cbox = C.applyFullBoxPreorder();
+Fbox = toYalmip(Cbox);
 \end{lstlisting}
 
-\code{F} can be passed to ordinary YALMIP calls, for example:
+\code{F} is the direct coefficient certificate; \code{Fbox} is the default
+full-box certificate for the same stored residual.  Either can be passed to
+ordinary YALMIP calls, for example:
 
 \begin{lstlisting}[style=dpsyntax]
 sol = optimize(F, objective, opts);
@@ -803,6 +817,8 @@ LMIs &
 \hyperref[sec:dplmi]{\code{dplmi}},
 \hyperref[sec:dplmi-construction]{construction},
 \hyperref[sec:dplmi-direct]{direct coefficient assembly},
+\hyperref[sec:dplmi-polya]{\code{applyPolya}},
+\hyperref[sec:dplmi-full-box]{\code{applyFullBoxPreorder}},
 \hyperref[sec:dplmi-toyalmip]{\code{toYalmip}},
 \hyperref[sec:examples]{solver examples} \\
 \bottomrule
@@ -837,6 +853,11 @@ Count sizes &
 \hyperref[sec:dpbase-counts]{\code{size}} \\
 Elevate stored coefficients &
 \hyperref[sec:dpbase-elevvals]{\code{elevVals}} \\
+Backend algebra mechanisms &
+\hyperref[sec:dpbase-elevlocalvalues]{\code{elevLocalValues}},
+\hyperref[sec:dpbase-bernelev]{\code{bernElev}},
+\hyperref[sec:dpbase-bernprod]{\code{bernProd}},
+\hyperref[sec:dpbase-mergegrid]{\code{mergeGrid}} \\
 Read storage fields &
 \hyperref[sec:dpbase-fields]{\code{GridInfo}},
 \hyperref[sec:dpbase-fields]{\code{LocalValues}},
@@ -1122,6 +1143,30 @@ alignment, \code{elevVals} is a public whole-object query returning elevated
 internally when compatible operands need degree alignment; it does not mutate
 either operand.
 
+\subsubsection{\texorpdfstring{\code{elevLocalValues}}{elevLocalValues}}
+\label{sec:dpbase-elevlocalvalues}
+
+\textit{Internal/protected mechanism.}  This method elevates a temporary
+nested coefficient tree after public algebra has remapped operands to a common
+physical grid.  It is documented as backend context, not as a supported user
+call form.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+vals = elevLocalValues(obj, vals, fromDeg, toDeg)
+vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
+\end{lstlisting}
+
+Each leaf must be a cell array with one column per degree-\code{fromDeg}
+Bernstein label.  The method elevates each rate-vertex row independently to
+\code{toDeg}; it never mixes rows.  The optional \code{grid} supplies the
+temporary physical-cell layout, and otherwise defaults to
+\code{obj.GridInfo.Vectors}.  Equal source and target degrees return the input
+tree unchanged.  A malformed leaf raises
+\code{dpbase:InvalidCoefficientCell}.  Public users encounter this behavior
+through grid merging, assignment, concatenation, and arithmetic rather than by
+calling the protected method directly.
+
 \subsubsection{\texorpdfstring{\code{bernElev}}{bernElev}}
 \label{sec:dpbase-bernelev}
 
@@ -1243,7 +1288,7 @@ call \code{mergeGrid} directly.
 \subsection{See Also}
 \code{dpmat}, \code{dpvar}, \code{cells}, \code{coeffs}, \code{lbls},
 \code{ncell}, \code{ncoeff}, \code{npar}, \code{size}, \code{elevVals},
-\code{bernElev}.
+\code{elevLocalValues}, \code{bernElev}, \code{bernProd}, \code{mergeGrid}.
 
 \section{\texorpdfstring{\code{dpmat}}{dpmat} Reference}
 \label{sec:dpmat}
@@ -3101,9 +3146,11 @@ ans =
 \section{\texorpdfstring{\code{dplmi}}{dplmi} Reference}
 \label{sec:dplmi}
 
-\code{dplmi} stores direct coefficient-wise YALMIP constraints assembled from
-square symmetric \code{dpvar} expressions.  It is the package boundary between
-Bernstein coefficient objects and ordinary YALMIP solver calls.
+\code{dplmi} stores YALMIP constraints assembled from square symmetric
+\code{dpvar} expressions.  Direct coefficient-wise assembly is the default;
+cell-local P\'olya elevation and the full box Bernstein--Gram preordering are
+explicit alternatives.  It is the package boundary between Bernstein objects
+and ordinary YALMIP solver calls.
 
 \subsection{Lookup}
 \label{sec:dplmi-lookup}
@@ -3119,6 +3166,9 @@ Count constraints &
 \hyperref[sec:dplmi-direct]{direct coefficient constraints} \\
 Select P\'olya elevation &
 \hyperref[sec:dplmi-polya]{\code{UsePolya}, \code{PolyaDegree}, and \code{applyPolya}} \\
+Select full box preordering &
+\hyperref[sec:dplmi-full-box]{\code{UseFullBoxPreorder}, \code{FullBoxOrder},
+and \code{applyFullBoxPreorder}} \\
 Export to YALMIP &
 \hyperref[sec:dplmi-toyalmip]{\code{toYalmip}} \\
 Solve &
@@ -3136,6 +3186,11 @@ C = dplmi(expr, relation)
 C = dplmi(expr, relation, "UsePolya")
 C = dplmi(expr, relation, UsePolya=true, PolyaDegree=d)
 C = dplmi(expr, relation, "UsePolya", "PolyaDegree", d)
+C = dplmi(expr, relation, "UseFullBoxPreorder")
+C = dplmi(expr, relation, UseFullBoxPreorder=true)
+C = dplmi(expr, relation, FullBoxOrder=r)
+C = dplmi(expr, relation, UseFullBoxPreorder=true, FullBoxOrder=r)
+C = dplmi(expr, relation, UseFullBoxPreorder=false, FullBoxOrder=r)
 C = lhs <= rhs
 C = lhs >= rhs
 \end{lstlisting}
@@ -3154,11 +3209,34 @@ C = lhs >= rhs
         P\'olya and issues \codeerr{dplmi}{ImplicitUsePolya};
         \code{UsePolya=false} with positive \code{d} raises
         \codeerr{dplmi}{ConflictingPolyaOptions}.
-  \item \code{C} is direct coefficient-wise assembly unless the opt-in
-        P\'olya option is selected. Comparisons such as \code{lhs >= rhs} are
-        the ordinary user-facing entry point and accept compatible numeric,
-        \code{dpmat}, affine \code{sdpvar}, and \code{dpvar} right-hand sides.
+  \item \code{UseFullBoxPreorder} is a logical scalar option with default
+        \code{false}.  Its bare form and the explicit value \code{true} select
+        full-box assembly at the smallest admissible order.
+  \item \code{FullBoxOrder=r} is a finite nonnegative integer scalar and is an
+        absolute order, not a degree increment.  Supplying it without
+        \code{UseFullBoxPreorder} enables full-box assembly.  When full-box
+        assembly is enabled, the minimum is \(\lfloor m/2\rfloor\) for a
+        one-parameter residual of degree \(m\), and \(\lceil m/2\rceil\) for
+        two or more parameters.  Explicitly pairing
+        \code{UseFullBoxPreorder=false} with \code{FullBoxOrder=r} suppresses
+        that automatic selection: \code{C} remains direct and records \code{r}
+        only as inspectable metadata; the order is not applied to assembly.
+  \item P\'olya and full-box selection are mutually exclusive.  Enabling both
+        raises \codeerr{dplmi}{Conflicting}\allowbreak\code{Relaxations}.
+  \item \code{C} is direct coefficient-wise assembly unless one opt-in mode is
+        selected. Comparisons such as \code{lhs >= rhs} are the ordinary
+        user-facing entry point and accept compatible numeric, \code{dpmat},
+        affine \code{sdpvar}, and \code{dpvar} right-hand sides.
 \end{itemize}
+
+The inspectable properties \code{UsePolya}, \code{PolyaDegree},
+\code{UseFullBoxPreorder}, and \code{FullBoxOrder} report the selected mode and
+order metadata.  Their set access is private.  Comparison-created direct
+objects, and direct constructor calls that omit \code{FullBoxOrder}, have both
+selectors false and both numeric properties zero.  The explicit-false
+combination described above is the exception: it retains \code{FullBoxOrder=r}
+while \code{UseFullBoxPreorder} remains false and the stored constraints remain
+direct.
 
 \examplehead
 The direct constructor is equivalent to the comparison path when the relation
@@ -3172,6 +3250,8 @@ class(C)
 numel(C.Constraints)
 C.UsePolya
 C.PolyaDegree
+C.UseFullBoxPreorder
+C.FullBoxOrder
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
@@ -3187,7 +3267,31 @@ ans =
 
 ans =
      0
+
+ans =
+  logical
+   0
+
+ans =
+     0
 \end{lstlisting}
+
+\refhead{Validation and errors}
+The constructor rejects a non-\code{dpvar} residual with
+\codeerr{dplmi}{InvalidExpression}, a relation other than \code{"<="} or
+\code{">="} with \codeerr{dplmi}{InvalidRelation}, and malformed, unknown, or
+duplicate options with \codeerr{dplmi}{InvalidOptions},
+\codeerr{dplmi}{UnknownOption}, or \codeerr{dplmi}{DuplicateOption}.
+Nonlogical selectors raise \codeerr{dplmi}{InvalidUsePolya} or
+\codeerr{dplmi}{InvalidUseFullBoxPreorder}.  Malformed P\'olya increments and
+full-box orders raise \codeerr{dplmi}{InvalidPolyaDegree} and
+\codeerr{dplmi}{InvalidFullBoxOrder}, respectively.  When full-box assembly is
+enabled, a valid integer order below the dimension-dependent minimum instead
+raises \codeerr{dplmi}{FullBoxOrderTooLow}.  An explicitly false selector keeps
+assembly direct, so this admissibility minimum is not applied to its retained
+order metadata.  Every assembly path retains the square and symmetry checks,
+which raise \codeerr{dplmi}{InvalidMatrixSize} and
+\codeerr{dplmi}{NonSymmetricExpression}.
 
 \subsection{Direct Coefficient Assembly}
 \label{sec:dplmi-direct}
@@ -3249,6 +3353,89 @@ ans =
      4
 \end{lstlisting}
 
+\subsection{Full Box Bernstein--Gram Preordering And
+\texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}}
+\label{sec:dplmi-full-box}
+
+The full-box mode is a cell-local positive-semidefinite representation in the
+local coordinates \(a_s\in[0,1]\).  It is a box-specific Bernstein--Gram
+preordering, not a general Putinar certificate, general-domain SOS interface,
+or full-space SOS representation.  It adds no implicit positivity margin.
+
+\needspace{10\baselineskip}
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Cbox = C.applyFullBoxPreorder()
+Cbox = C.applyFullBoxPreorder(r)
+\end{lstlisting}
+
+The no-argument form selects the smallest admissible absolute order.  The
+explicit form selects \code{r}; it does not add \code{r} to the residual
+degree.  Both forms are value-class selectors: they return a new \code{dplmi},
+leave \code{C} unchanged, and rebuild from \code{C.Residual}.  Reapplication
+therefore replaces an earlier full-box order or a P\'olya selection rather than
+compounding it.
+
+For a one-parameter residual of degree \(m\), the minimum and matching target
+degree are parity-specific:
+\[
+  r_{\min}=\left\lfloor\frac{m}{2}\right\rfloor,
+  \qquad
+  m_{\mathrm{target}}=
+  \begin{cases}
+    2r, & m\text{ even},\\
+    2r+1, & m\text{ odd}.
+  \end{cases}
+\]
+Writing \(\mathcal Z_q\) for the degree-\(q\) Bernstein basis lifted by the
+matrix identity, the positive-semidefinite target has the even-degree form
+\[
+  \mathcal Z_r^{\mathsf T}Q_0\mathcal Z_r
+  +a(1-a)\mathcal Z_{r-1}^{\mathsf T}Q_1\mathcal Z_{r-1},
+\]
+where the second block is omitted at order zero.  For odd degree it has the
+form
+\[
+  a\mathcal Z_r^{\mathsf T}Q_0\mathcal Z_r
+  +(1-a)\mathcal Z_r^{\mathsf T}Q_1\mathcal Z_r.
+\]
+Every present Gram matrix \(Q_i\) is constrained positive semidefinite.
+
+For \(\ell>1\) parameters, the minimum is
+\(r_{\min}=\lceil m/2\rceil\), and the target has tensor degree \(2r\) in
+every direction.  One term is included for every mask
+\(\boldsymbol\mu\in\{0,1\}^{\ell}\):
+\[
+  \sum_{\boldsymbol\mu\in\{0,1\}^{\ell}}
+  \left(\prod_{s=1}^{\ell}
+    [a_s(1-a_s)]^{\mu_s}\right)
+  \mathcal Z_{r\boldsymbol 1-\boldsymbol\mu}^{\mathsf T}
+  Q_{\boldsymbol\mu}
+  \mathcal Z_{r\boldsymbol 1-\boldsymbol\mu}.
+\]
+A term whose tensor Gram degree has a negative component is omitted.  For an
+\(n\)-by-\(n\) residual, a present mask has Gram dimension
+\(n\prod_s(r-\mu_s+1)\).
+
+Assembly is independent for every physical cell and every active rate-vertex
+row; Gram variables are not shared across either boundary.  For \code{>=}, the
+method represents the residual.  For \code{<=}, it negates the target before
+forming the positive-semidefinite representation.  Within each cell and row,
+the stored constraints are ordered as all PSD Gram blocks followed by exact
+equalities matching every Bernstein coefficient.  Consequently, the number of
+stored constraints is not the direct coefficient count.
+
+\refhead{Validation and errors}
+Malformed orders raise \codeerr{dplmi}{InvalidFullBoxOrder}; an admissible
+integer below the minimum raises \codeerr{dplmi}{FullBoxOrderTooLow}.  The
+constructor rejects malformed selectors with
+\codeerr{dplmi}{InvalidUse}\allowbreak\code{FullBox}\allowbreak\code{Preorder},
+and simultaneous
+P\'olya and full-box selection raises\newline
+\codeerr{dplmi}{Conflicting}\allowbreak\code{Relaxations}.  The usual
+expression, relation, option, square-matrix, and symmetry checks described in
+\cref{sec:dplmi-construction} apply unchanged.
+
 \subsection{\texorpdfstring{\code{toYalmip}}{toYalmip}}
 \label{sec:dplmi-toyalmip}
 
@@ -3260,9 +3447,10 @@ F = C.toYalmip()
 
 \arghead
 \code{toYalmip} concatenates the stored constraint cells into a YALMIP
-constraint array.  It has no package-specific options.  The output is suitable
-for \code{optimize}, concatenation with other YALMIP constraints, or ordinary
-YALMIP inspection.
+constraint array for direct, P\'olya, and full-box objects.  It has no
+package-specific options and does not add a solver wrapper, objective, margin,
+or diagnostic layer.  The output is suitable for \code{optimize},
+concatenation with other YALMIP constraints, or ordinary YALMIP inspection.
 
 \examplehead
 The function-call and dot-call forms return equivalent YALMIP constraint
@@ -3308,7 +3496,8 @@ After this boundary, the package is no longer assembling Bernstein data; YALMIP
 owns solver choice, diagnostics, and optimization status.
 
 \subsection{See Also}
-\code{dpvar}, \code{rhodiff}, \code{toYalmip}, \code{optimize}.
+\code{dpvar}, \code{rhodiff}, \code{applyPolya},
+\code{applyFullBoxPreorder}, \code{toYalmip}, \code{optimize}.
 
 \subsection{Solver-Facing Use}
 \label{sec:dplmi-solver-use}
@@ -3327,6 +3516,52 @@ smoke coverage.
 
 \section{Examples}
 \label{sec:examples}
+
+\subsection{Deterministic Full-Box Selection}
+\label{sec:full-box-example}
+
+This example selects the default and an explicit full-box order without solving
+an optimization problem.  The reported values depend only on the public
+assembly contract, not on incidental YALMIP decision-variable identifiers.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = dpvar(1, {[0 1]}, Degree=2);
+direct = P >= 0;
+boxDefault = direct.applyFullBoxPreorder();
+boxHigher = boxDefault.applyFullBoxPreorder(2);
+polya = direct.applyPolya(1);
+boxFromPolya = polya.applyFullBoxPreorder();
+Fbox = toYalmip(boxDefault);
+
+fprintf("direct: fullBox=%d, order=%d, constraints=%d\n", ...
+    direct.UseFullBoxPreorder, direct.FullBoxOrder, ...
+    numel(direct.Constraints));
+fprintf("default: fullBox=%d, order=%d, constraints=%d\n", ...
+    boxDefault.UseFullBoxPreorder, boxDefault.FullBoxOrder, ...
+    numel(boxDefault.Constraints));
+fprintf("higher: order=%d, constraints=%d\n", ...
+    boxHigher.FullBoxOrder, numel(boxHigher.Constraints));
+fprintf("replacement: polya=%d, fullBox=%d, order=%d\n", ...
+    boxFromPolya.UsePolya, boxFromPolya.UseFullBoxPreorder, ...
+    boxFromPolya.FullBoxOrder);
+fprintf("exported constraints=%d\n", length(Fbox));
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+direct: fullBox=0, order=0, constraints=3
+default: fullBox=1, order=1, constraints=5
+higher: order=2, constraints=7
+replacement: polya=0, fullBox=1, order=1
+exported constraints=5
+\end{lstlisting}
+
+For the degree-two scalar residual, order one uses two PSD Gram blocks followed
+by three exact coefficient identities.  Order two matches a degree-four target
+and stores two PSD blocks followed by five identities.  The original
+\code{direct} object remains unchanged, and the selection made from
+\code{polya} replaces P\'olya rather than elevating its already assembled
+constraints.
 
 \subsection{Parameter-Dependent Lyapunov Solver Smoke}
 \label{sec:parameter-dependent-lyapunov-smoke}
@@ -3448,13 +3683,18 @@ constraints.
 \begin{itemize}[leftmargin=*]
   \item \code{dplmi} assembles direct coefficient-wise constraints by default
         and supports opt-in cell-local P\'olya degree elevation or the fixed
-        full box preordering certificate.
+        absolute-order full box Bernstein--Gram preordering.  Full-box Gram
+        blocks are independent per physical cell and rate row; no implicit
+        positivity margin is added.
   \item Package-owned solver wrappers, strictness-margin diagnostics, residual
         evidence, and advanced relaxation workflows are not part of the current
         public API.  The opt-in full box preordering certificate is a
         callable \code{dplmi} feature; its Julia, YALMIP, and isolated
-        SOSTOOLS comparisons live under \code{sos\_validation/} and are not
-        MATLAB runtime dependencies.
+        SOSTOOLS comparisons live under \code{sos_validation/} and are not
+        MATLAB runtime dependencies or part of \code{tests.run_all}.
+  \item Full-box support is specific to the local tensor box generators
+        \(a_s(1-a_s)\).  The package does not promise a general Putinar,
+        general-domain, full-space, residual-driven, or adaptive SOS hierarchy.
   \item \code{dpvar} is an affine YALMIP/Bernstein expression object.  It does
         not support nonlinear decision products.
   \item \code{dpmat} function-only objects evaluate exactly, but coefficient
