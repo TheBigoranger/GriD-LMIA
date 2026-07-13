@@ -137,6 +137,8 @@ built with npm, Astro, and Starlight.
 - Direct and Pólya assembly are sufficient finite certificates;
   a failed certificate does not prove continuous DP-LMI infeasibility.
 - Package-owned solver wrappers, strictness-margin diagnostics, residual
-  evidence, SOS, and additional relaxation variants are future layers.
+  evidence, and general SOS hierarchies remain future layers. The implemented
+  opt-in full box preordering certificate is documented separately and is
+  cross-validated outside the ordinary runtime suite.
 - `dpbase` is backend architecture context, not the primary modeling API.
 - Function-only `dpmat` objects without explicit Bernstein evidence do not enter coefficient algebra.

@@ -14,6 +14,15 @@ classdef dplmi
     %   Supplying PolyaDegree without UsePolya enables Pólya and issues
     %   warning dplmi:ImplicitUsePolya.
     %
+    %   applyFullBoxPreorder selects an opt-in full box preordering in each
+    %   cell's local Bernstein basis. In one parameter it uses the
+    %   parity-specific Markov-Lukacs form; in multiple parameters it includes
+    %   one Gram block for every subset product of alpha_s(1-alpha_s). This is
+    %   the box-specific preordering, not a general Putinar or general-domain
+    %   SOS relaxation. FullBoxOrder is an absolute order, not a degree
+    %   increment. Gram variables are independent across physical cells and
+    %   active rate rows, and no implicit margin is added.
+    %
     %   Residual retains the original dpvar expression and Relation stores
     %   "<=" or ">=". applyPolya rebuilds from that residual, so selecting a
     %   new increment does not compound an earlier elevation or mutate C.
@@ -26,6 +35,8 @@ classdef dplmi
     %     direct = dplmi(P, "<=");
     %     polya1 = dplmi(P, "<=", "UsePolya");
     %     polya2 = direct.applyPolya(2);
+    %     directPos = P >= 0;
+    %     preorder = directPos.applyFullBoxPreorder();
 
     properties (SetAccess = private)
         Constraints
@@ -33,6 +44,8 @@ classdef dplmi
         Relation
         UsePolya
         PolyaDegree
+        UseFullBoxPreorder
+        FullBoxOrder
     end
 
     methods
@@ -57,17 +70,38 @@ classdef dplmi
             obj.Relation = relation;
             obj.UsePolya = opts.UsePolya;
             obj.PolyaDegree = opts.PolyaDegree;
-            obj.Constraints = buildConstraints(expr, relation, ...
-                opts.UsePolya, opts.PolyaDegree);
+            obj.UseFullBoxPreorder = opts.UseFullBoxPreorder;
+            obj.FullBoxOrder = opts.FullBoxOrder;
+            if opts.UseFullBoxPreorder
+                if ~opts.FullBoxOrderSpecified
+                    if numel(expr.GridInfo.Vectors) == 1
+                        opts.FullBoxOrder = floor(expr.Degree / 2);
+                    else
+                        opts.FullBoxOrder = ceil(expr.Degree / 2);
+                    end
+                end
+                opts.FullBoxOrder = validateFullBoxOrder(expr, ...
+                    opts.FullBoxOrder);
+                obj.FullBoxOrder = opts.FullBoxOrder;
+                obj.Constraints = buildFullBoxPreorderConstraints(expr, ...
+                    relation, opts.FullBoxOrder);
+            else
+                obj.Constraints = buildConstraints(expr, relation, ...
+                    opts.UsePolya, opts.PolyaDegree);
+            end
         end
 
         out = applyPolya(obj, degreeIncrement)
+        out = applyFullBoxPreorder(obj, order)
     end
 end
 
 function opts = parseOptions(varargin)
-    opts = struct("UsePolya", false, "PolyaDegree", 0);
-    seen = struct("UsePolya", false, "PolyaDegree", false);
+    opts = struct("UsePolya", false, "PolyaDegree", 0, ...
+        "UseFullBoxPreorder", false, "FullBoxOrder", 0, ...
+        "FullBoxOrderSpecified", false);
+    seen = struct("UsePolya", false, "PolyaDegree", false, ...
+        "UseFullBoxPreorder", false, "FullBoxOrder", false);
     k = 1;
     while k <= numel(varargin)
         rawName = varargin{k};
@@ -77,7 +111,8 @@ function opts = parseOptions(varargin)
                 "dplmi option names must be strings or character vectors.");
         end
         name = string(rawName);
-        if ~any(name == ["UsePolya", "PolyaDegree"])
+        if ~any(name == ["UsePolya", "PolyaDegree", ...
+                "UseFullBoxPreorder", "FullBoxOrder"])
             error("dplmi:UnknownOption", "Unsupported dplmi option: %s.", name);
         end
         if seen.(char(name))
@@ -86,14 +121,14 @@ function opts = parseOptions(varargin)
         end
         seen.(char(name)) = true;
 
-        % UsePolya is the only flag that may appear without an explicit value.
-        if name == "UsePolya" && ...
+        % Relaxation selector flags may appear without an explicit value.
+        if any(name == ["UsePolya", "UseFullBoxPreorder"]) && ...
                 (k == numel(varargin) || ...
                 ((ischar(varargin{k + 1}) && isrow(varargin{k + 1}) && ...
                 ~isempty(varargin{k + 1})) || ...
                 (isstring(varargin{k + 1}) && isscalar(varargin{k + 1}) && ...
                 ~ismissing(varargin{k + 1}))))
-            opts.UsePolya = true;
+            opts.(char(name)) = true;
             k = k + 1;
             continue
         end
@@ -106,7 +141,8 @@ function opts = parseOptions(varargin)
                 (isstring(varargin{k + 1}) && isscalar(varargin{k + 1}) && ...
                 ~ismissing(varargin{k + 1}))
             nextName = string(varargin{k + 1});
-            if any(nextName == ["UsePolya", "PolyaDegree"])
+            if any(nextName == ["UsePolya", "PolyaDegree", ...
+                    "UseFullBoxPreorder", "FullBoxOrder"])
                 error("dplmi:InvalidOptions", ...
                     "dplmi option %s requires a value.", name);
             end
@@ -126,7 +162,20 @@ function opts = parseOptions(varargin)
                     "dplmi:InvalidPolyaDegree", ...
                     "PolyaDegree must be a finite nonnegative integer scalar.", ...
                     "numeric", "real", "finite", "integer", ...
+                        "nonnegative", "scalar"));
+            case "UseFullBoxPreorder"
+                if ~islogical(val) || ~isscalar(val)
+                    error("dplmi:InvalidUseFullBoxPreorder", ...
+                        "UseFullBoxPreorder must be a logical scalar.");
+                end
+                opts.UseFullBoxPreorder = val;
+            case "FullBoxOrder"
+                opts.FullBoxOrder = double(helper.chk(val, ...
+                    "dplmi:InvalidFullBoxOrder", ...
+                    "FullBoxOrder must be a finite nonnegative integer scalar.", ...
+                    "numeric", "real", "finite", "integer", ...
                     "nonnegative", "scalar"));
+                opts.FullBoxOrderSpecified = true;
         end
         k = k + 2;
     end
@@ -142,13 +191,17 @@ function opts = parseOptions(varargin)
         error("dplmi:ConflictingPolyaOptions", ...
             "UsePolya=false conflicts with a positive PolyaDegree.");
     end
+    if seen.FullBoxOrder && ~seen.UseFullBoxPreorder
+        opts.UseFullBoxPreorder = true;
+    end
+    if opts.UsePolya && opts.UseFullBoxPreorder
+        error("dplmi:ConflictingRelaxations", ...
+            "Pólya and full box preordering cannot be enabled together.");
+    end
 end
 
 function cons = buildConstraints(expr, relation, usePolya, pDeg)
-    if expr.MatrixSize(1) ~= expr.MatrixSize(2)
-        error("dplmi:InvalidMatrixSize", ...
-            "DP-LMI constraints require square dpvar coefficient matrices.");
-    end
+    validateDplmiMatrix(zeros(expr.MatrixSize));
 
     if usePolya
         vals = expr.elevVals(pDeg);
@@ -164,19 +217,7 @@ function cons = buildConstraints(expr, relation, usePolya, pDeg)
         for row = 1:size(coeffs, 1)
             for k = 1:size(coeffs, 2)
                 mat = coeffs{row, k};
-                if ~isequal(size(mat, 1), size(mat, 2))
-                    error("dplmi:InvalidMatrixSize", ...
-                        "DP-LMI constraints require square coefficient matrices.");
-                end
-                if isa(mat, "sdpvar")
-                    if ~ishermitian(mat)
-                        error("dplmi:NonSymmetricExpression", ...
-                            "DP-LMI constraints require symmetric or Hermitian coefficient matrices.");
-                    end
-                elseif norm(mat - mat', inf) > 1e-10
-                    error("dplmi:NonSymmetricExpression", ...
-                        "DP-LMI constraints require symmetric or Hermitian coefficient matrices.");
-                end
+                validateDplmiMatrix(mat);
                 % Each row is a rate vertex when rhodiff produced rate rows;
                 % ordinary expressions simply have one row.
                 if relation == "<="

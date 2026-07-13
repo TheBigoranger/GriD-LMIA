@@ -12,6 +12,9 @@ function rows = combRows(vecs)
         blk = prod(n(dim + 1:end));
         rep = prod(n(1:dim - 1));
         col = repelem(reshape(vecs{dim}, [], 1), blk);
+        % MATLAB may preserve a row orientation when a singleton axis is
+        % repeated; flatten explicitly so every tensor axis fills one column.
+        col = col(:);
         rows(:, dim) = repmat(col, rep, 1);
     end
 end

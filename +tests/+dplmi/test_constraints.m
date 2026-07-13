@@ -284,11 +284,15 @@ end
 function verifyDefaults(testCase, C)
     testCase.verifyFalse(C.UsePolya);
     testCase.verifyEqual(C.PolyaDegree, 0);
+    testCase.verifyFalse(C.UseFullBoxPreorder);
+    testCase.verifyEqual(C.FullBoxOrder, 0);
 end
 
 function verifyPolya(testCase, C, degree, count)
     testCase.verifyTrue(C.UsePolya);
     testCase.verifyEqual(C.PolyaDegree, degree);
+    testCase.verifyFalse(C.UseFullBoxPreorder);
+    testCase.verifyEqual(C.FullBoxOrder, 0);
     testCase.verifyEqual(numel(C.Constraints), count);
     verifyConstraintCells(testCase, C);
 end

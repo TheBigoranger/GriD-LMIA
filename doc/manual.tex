@@ -135,7 +135,7 @@
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.2.10}
+\author{Version v0.2.11}
 \date{July 2026}
 
 \begin{document}
@@ -3447,13 +3447,14 @@ constraints.
 
 \begin{itemize}[leftmargin=*]
   \item \code{dplmi} assembles direct coefficient-wise constraints by default
-        and supports opt-in cell-local P\'olya degree elevation.
+        and supports opt-in cell-local P\'olya degree elevation or the fixed
+        full box preordering certificate.
   \item Package-owned solver wrappers, strictness-margin diagnostics, residual
         evidence, and advanced relaxation workflows are not part of the current
-        public API.  The separately implemented Julia SOS oracle is reserved
-        for future cross-validation of small mathematical instances; it is not
-        a MATLAB runtime API, a callable package feature, or an example
-        workflow.
+        public API.  The opt-in full box preordering certificate is a
+        callable \code{dplmi} feature; its Julia, YALMIP, and isolated
+        SOSTOOLS comparisons live under \code{sos\_validation/} and are not
+        MATLAB runtime dependencies.
   \item \code{dpvar} is an affine YALMIP/Bernstein expression object.  It does
         not support nonlinear decision products.
   \item \code{dpmat} function-only objects evaluate exactly, but coefficient
