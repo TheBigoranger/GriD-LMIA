@@ -135,7 +135,7 @@
 \newcommand{\arghead}{\refhead{Arguments and options}}
 
 \title{\pkg\\User Manual}
-\author{Version v0.2.12}
+\author{Version v0.2.13}
 \date{July 2026}
 
 \begin{document}
@@ -181,38 +181,45 @@ The first two layers are representation; the third is a certificate.
 \subsection{Local Coordinates And Degree-Two Coefficients}
 \label{sec:bernstein-local}
 
-On one physical interval \([\rho_i,\rho_{i+1}]\), the package uses the local
-coordinate
+On one physical interval \([\rho_k,\rho_{k+1}]\), use the standard forward
+local coordinate
 \[
-  a = \frac{\rho_{i+1}-\rho}{\rho_{i+1}-\rho_i}.
+  \alpha = \frac{\rho-\rho_k}{\rho_{k+1}-\rho_k}.
 \]
-Thus \(a=1\) at the lower endpoint and \(a=0\) at the upper endpoint.  A
+Thus \(\alpha=0\) at the lower endpoint and \(\alpha=1\) at the upper
+endpoint.  A
 degree-\(m\) Bernstein polynomial on that cell is
 \[
   P(\rho) =
-  \sum_{j=0}^{m} \binom{m}{j} a^{m-j}(1-a)^j C_j.
+  \sum_{i=0}^{m} \binom{m}{i}(1-\alpha)^{m-i}\alpha^i C_i.
 \]
 Write
 \[
-  B_j^m(a)=\binom{m}{j}a^{m-j}(1-a)^j.
+  B_i^m(\alpha)=\binom{m}{i}(1-\alpha)^{m-i}\alpha^i,
+  \qquad i=0,\ldots,m.
 \]
-On \(0\le a\le1\), every \(B_j^m(a)\) is nonnegative and
+The powers therefore occur in the familiar order
+\((1-\alpha)^m,(1-\alpha)^{m-1}\alpha,\ldots,\alpha^m\), with the
+binomial factors retained in \(B_i^m\).  On \(0\le\alpha\le1\), every
+\(B_i^m(\alpha)\) is nonnegative and
 \[
-  \sum_{j=0}^{m}B_j^m(a)=(a+(1-a))^m=1.
+  \sum_{i=0}^{m}B_i^m(\alpha)=((1-\alpha)+\alpha)^m=1.
 \]
 Thus the Bernstein basis is a nonnegative partition of unity.  It also
 interpolates the cell endpoints in the package ordering:
-\(P(\rho_i)=C_0\) and \(P(\rho_{i+1})=C_m\).  Many references instead use
-\(t=(\rho-\rho_i)/(\rho_{i+1}-\rho_i)=1-a\).  Their forward-index formulas
-describe the same basis, but endpoint labels must be reversed before comparing
-coefficients with \code{LocalValues}.
+\(P(\rho_k)=C_0\) and \(P(\rho_{k+1})=C_m\).  This forward coordinate and
+forward coefficient order are the public notation used throughout this manual.
+The diagnostic text emitted by \code{bernsteinTable} retains the runtime's
+internal symbol \(a=1-\alpha\); its displayed coefficients remain in the same
+lower-to-upper order and require no relabeling.
 
 The degree-two case is the first case where the middle Bernstein scale matters:
 \[
-  P(\rho)=a^2 C_0+2a(1-a)C_1+(1-a)^2 C_2.
+  P(\rho)=(1-\alpha)^2 C_0
+  +2(1-\alpha)\alpha C_1+\alpha^2 C_2.
 \]
 The package stores the coefficient matrices \(C_0,C_1,C_2\), not sampled values
-of the expanded monomial form.  For matrix-valued objects, each \(C_j\) is a
+of the expanded monomial form.  For matrix-valued objects, each \(C_i\) is a
 finite real matrix for \code{dpmat}, or a YALMIP affine matrix expression for
 \code{dpvar}.
 
@@ -223,13 +230,14 @@ tensor-product Bernstein basis term, one local index per parameter direction.
 
 For \(\ell\) parameters, the tensor-product basis is
 \[
-  B_{\boldsymbol j}^{m}(\boldsymbol a)
-  =\prod_{r=1}^{\ell}B_{j_r}^{m}(a_r).
+  B_{\boldsymbol i}^{m}(\boldsymbol\alpha)
+  =\prod_{r=1}^{\ell}B_{i_r}^{m}(\alpha_r),
+  \qquad \boldsymbol i\in\{0,\ldots,m\}^{\ell}.
 \]
 Its terms are again nonnegative and sum to one because
 \[
-  \sum_{\boldsymbol j}B_{\boldsymbol j}^{m}(\boldsymbol a)
-  =\prod_{r=1}^{\ell}\sum_{j_r=0}^{m}B_{j_r}^{m}(a_r)=1.
+  \sum_{\boldsymbol i}B_{\boldsymbol i}^{m}(\boldsymbol\alpha)
+  =\prod_{r=1}^{\ell}\sum_{i_r=0}^{m}B_{i_r}^{m}(\alpha_r)=1.
 \]
 The package uses this box, or hyperrectangular, tensor product.  Bernstein
 bases on simplices are mathematically related, but they are not the storage
@@ -372,24 +380,24 @@ Neither operation should be interpreted as the other.
 The partition-of-unity identity makes every value a convex combination of its
 coefficient data:
 \[
-  P(\boldsymbol a)=
-  \sum_{\boldsymbol j}B_{\boldsymbol j}^{m}(\boldsymbol a)C_{\boldsymbol j}
-  \in \operatorname{conv}\{C_{\boldsymbol j}\}.
+  P(\boldsymbol\alpha)=
+  \sum_{\boldsymbol i}B_{\boldsymbol i}^{m}(\boldsymbol\alpha)C_{\boldsymbol i}
+  \in \operatorname{conv}\{C_{\boldsymbol i}\}.
 \]
 For a scalar polynomial this gives the range enclosure
 \[
-  \min_{\boldsymbol j}C_{\boldsymbol j}
-  \le P(\boldsymbol a)\le
-  \max_{\boldsymbol j}C_{\boldsymbol j}.
+  \min_{\boldsymbol i}C_{\boldsymbol i}
+  \le P(\boldsymbol\alpha)\le
+  \max_{\boldsymbol i}C_{\boldsymbol i}.
 \]
 For symmetric matrices, apply the same identity to an arbitrary vector \(x\):
 \[
-  x^{\mathsf T}P(\boldsymbol a)x
-  =\sum_{\boldsymbol j}B_{\boldsymbol j}^{m}(\boldsymbol a)
-    x^{\mathsf T}C_{\boldsymbol j}x.
+  x^{\mathsf T}P(\boldsymbol\alpha)x
+  =\sum_{\boldsymbol i}B_{\boldsymbol i}^{m}(\boldsymbol\alpha)
+    x^{\mathsf T}C_{\boldsymbol i}x.
 \]
-Consequently, \(C_{\boldsymbol j}\preceq0\) for every local label is sufficient
-for \(P(\boldsymbol a)\preceq0\) throughout the cell; the positive-semidefinite
+Consequently, \(C_{\boldsymbol i}\preceq0\) for every local label is sufficient
+for \(P(\boldsymbol\alpha)\preceq0\) throughout the cell; the positive-semidefinite
 statement is analogous.  If all finitely many coefficients are strictly
 negative definite, their smallest eigenvalue margins also give a uniform
 strict certificate on the cell.
@@ -407,23 +415,23 @@ interval-parameter robustness \cite{zettler1998}.
 Multiplication raises Bernstein degree.  In one parameter, multiplying two
 degree-one factors gives a degree-two product:
 \[
-  \bigl(a A_0 + (1-a)A_1\bigr)
-  \bigl(a B_0 + (1-a)B_1\bigr)
+  \bigl((1-\alpha) A_0 + \alpha A_1\bigr)
+  \bigl((1-\alpha) B_0 + \alpha B_1\bigr)
   =
-  a^2 A_0B_0
-  + a(1-a)(A_0B_1 + A_1B_0)
-  + (1-a)^2 A_1B_1.
+  (1-\alpha)^2 A_0B_0
+  + (1-\alpha)\alpha(A_0B_1 + A_1B_0)
+  + \alpha^2 A_1B_1.
 \]
-Because the degree-two Bernstein middle basis is \(2a(1-a)\), the stored middle
+Because the degree-two Bernstein middle basis is \(2(1-\alpha)\alpha\), the stored middle
 coefficient is \((A_0B_1 + A_1B_0)/2\).
 
-This is not a special rule for linear factors.  If \(B_i^m(a)\) denotes the
+This is not a special rule for linear factors.  If \(B_i^m(\alpha)\) denotes the
 \(i\)-th Bernstein basis function of degree \(m\), then
 \[
-  B_i^m(a) B_j^n(a)
+  B_i^m(\alpha) B_j^n(\alpha)
   =
   \frac{\binom{m}{i}\binom{n}{j}}{\binom{m+n}{i+j}}
-  B_{i+j}^{m+n}(a).
+  B_{i+j}^{m+n}(\alpha).
 \]
 For coefficient arrays this is a convolution over coefficient labels.  In one
 parameter,
@@ -436,20 +444,21 @@ parameter,
   \qquad k=0,\ldots,m+n.
 \]
 In \(\ell\) parameters, replace the scalar labels \(i,j,k\) by multi-indices
-\(\alpha,\beta,\gamma\), use \(\alpha+\beta=\gamma\), and multiply the binomial
+\(\boldsymbol p,\boldsymbol q,\boldsymbol\kappa\), use
+\(\boldsymbol p+\boldsymbol q=\boldsymbol\kappa\), and multiply the binomial
 scale over parameter directions:
 \[
-  C_\gamma =
-  \sum_{\alpha+\beta=\gamma}
-  A_\alpha B_\beta
+  C_{\boldsymbol\kappa} =
+  \sum_{\boldsymbol p+\boldsymbol q=\boldsymbol\kappa}
+  A_{\boldsymbol p} B_{\boldsymbol q}
   \prod_{r=1}^{\ell}
-  \frac{\binom{m}{\alpha_r}\binom{n}{\beta_r}}
-       {\binom{m+n}{\gamma_r}}.
+  \frac{\binom{m}{p_r}\binom{n}{q_r}}
+       {\binom{m+n}{\kappa_r}}.
 \]
 This is the coefficient rule used by \code{dpmat * dpmat} and by supported
 known-data products involving \code{dpvar}.  Matrix order is preserved inside
-every convolution term: in general \(A_\alpha B_\beta\neq
-B_\beta A_\alpha\), so exchanging the operands changes both the algebra and the
+every convolution term: in general \(A_{\boldsymbol p}B_{\boldsymbol q}\neq
+B_{\boldsymbol q}A_{\boldsymbol p}\), so exchanging the operands changes both the algebra and the
 resulting coefficient matrices.
 
 \subsubsection{Weighted Value-Grid Convolution}
@@ -457,38 +466,38 @@ resulting coefficient matrices.
 
 The same rule can be read as an ordinary \(\ell\)-dimensional discrete
 convolution.  First reshape one cell's flat coefficient lists into value grids
-indexed by \(\boldsymbol\alpha\in\{0,\ldots,m\}^\ell\) and
-\(\boldsymbol\beta\in\{0,\ldots,n\}^\ell\), using the same order as
+indexed by \(\boldsymbol p\in\{0,\ldots,m\}^\ell\) and
+\(\boldsymbol q\in\{0,\ldots,n\}^\ell\), using the same order as
 \code{lbls}.  Restore the binomial weights carried by the Bernstein basis:
 \[
-  \widetilde A_{\boldsymbol\alpha}
+  \widetilde A_{\boldsymbol p}
   =
-  A_{\boldsymbol\alpha}
-  \prod_{r=1}^{\ell}\binom{m}{\alpha_r},
+  A_{\boldsymbol p}
+  \prod_{r=1}^{\ell}\binom{m}{p_r},
   \qquad
-  \widetilde B_{\boldsymbol\beta}
+  \widetilde B_{\boldsymbol q}
   =
-  B_{\boldsymbol\beta}
-  \prod_{r=1}^{\ell}\binom{n}{\beta_r}.
+  B_{\boldsymbol q}
+  \prod_{r=1}^{\ell}\binom{n}{q_r}.
 \]
 These weighted value grids multiply by ordered discrete convolution:
 \[
-  \widetilde C_{\boldsymbol\gamma}
+  \widetilde C_{\boldsymbol\kappa}
   =
-  \bigl(\widetilde A *_\ell \widetilde B\bigr)_{\boldsymbol\gamma}
+  \bigl(\widetilde A *_\ell \widetilde B\bigr)_{\boldsymbol\kappa}
   =
-  \sum_{\boldsymbol\alpha+\boldsymbol\beta=\boldsymbol\gamma}
-  \widetilde A_{\boldsymbol\alpha}
-  \widetilde B_{\boldsymbol\beta}.
+  \sum_{\boldsymbol p+\boldsymbol q=\boldsymbol\kappa}
+  \widetilde A_{\boldsymbol p}
+  \widetilde B_{\boldsymbol q}.
 \]
 Finally, divide out the degree-\(m+n\) Bernstein weights to return to stored
 coefficients:
 \[
-  C_{\boldsymbol\gamma}
+  C_{\boldsymbol\kappa}
   =
-  \frac{\widetilde C_{\boldsymbol\gamma}}
+  \frac{\widetilde C_{\boldsymbol\kappa}}
        {\displaystyle\prod_{r=1}^{\ell}
-        \binom{m+n}{\gamma_r}}.
+        \binom{m+n}{\kappa_r}}.
 \]
 Combining these three lines recovers the binomial-scaled coefficient formula
 above.  On a tensor grid, multiplication raises the common Bernstein
@@ -527,13 +536,12 @@ expressions, which are aligned internally by \code{bernElev}.
 \subsection{Differentiation And de Casteljau Subdivision}
 \label{sec:bernstein-differentiation}
 
-The reversed local coordinate changes the intermediate sign in a derivative.
-For cell width \(h=\rho_{i+1}-\rho_i\), the two sign reversals combine to give
-the forward physical difference
+For cell width \(h=\rho_{k+1}-\rho_k\), differentiation in the forward local
+coordinate gives the forward physical difference
 \[
   \frac{dP}{d\rho}
-  =\frac{m}{h}\sum_{j=0}^{m-1}
-    (C_{j+1}-C_j)B_j^{m-1}(a).
+  =\frac{m}{h}\sum_{i=0}^{m-1}
+    (C_{i+1}-C_i)B_i^{m-1}(\alpha).
 \]
 This is the scalar-cell formula behind \code{rhodiff}.  In several scheduling
 dimensions, the directional rate term is
@@ -549,8 +557,8 @@ the original \code{dpvar}.
 The de Casteljau recursion evaluates the same polynomial through neighboring
 affine combinations:
 \[
-  C_j^{(r)}=aC_j^{(r-1)}+(1-a)C_{j+1}^{(r-1)},
-  \qquad C_j^{(0)}=C_j.
+  C_i^{(r)}=(1-\alpha)C_i^{(r-1)}+\alpha C_{i+1}^{(r-1)},
+  \qquad C_i^{(0)}=C_i.
 \]
 Its edge chains also give exact Bernstein coefficients on the two subintervals
 created at the split point.  Applying this one-dimensional operation along
@@ -645,6 +653,10 @@ disp(T)
 
         {[1]}        "a*1 + (1-a)*3"
 \end{lstlisting}
+
+This transcript is literal runtime output.  In diagnostic strings only,
+\(a=1-\alpha\), so the first coefficient still multiplies
+\(1-\alpha\) and the last multiplies \(\alpha\).
 
 \subsection{Conservatism And Refinement Hierarchy}
 \label{sec:bernstein-refinement}
@@ -762,6 +774,9 @@ disp(T)
 
         {[1]}        "a*1 + (1-a)*3"
 \end{lstlisting}
+
+This is literal runtime output; its internal diagnostic symbol satisfies
+\(a=1-\alpha\).
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -1492,8 +1507,8 @@ val = A.evaluate(point)
 
 For a degree-one scalar coefficient-backed object on \([\rho_0,\rho_1]\),
 \[
-  A(\rho) = a A_0 + (1-a)A_1,\qquad
-  a = \frac{\rho_1-\rho}{\rho_1-\rho_0}.
+  A(\rho) = (1-\alpha)A_0+\alpha A_1,\qquad
+  \alpha = \frac{\rho-\rho_0}{\rho_1-\rho_0}.
 \]
 The same local-coordinate rule is applied entrywise for matrix-valued data.
 
@@ -1511,8 +1526,8 @@ val =
     2.5000
 \end{lstlisting}
 
-At \(\rho=0.25\), the local weight is \(a=0.75\), so the interpolated value is
-\(0.75\cdot2+0.25\cdot4=2.5\).
+At \(\rho=0.25\), the public local coordinate is \(\alpha=0.25\), so the
+interpolated value is \(0.75\cdot2+0.25\cdot4=2.5\).
 
 The dot-call form is equivalent and can be convenient in command-window
 exploration.
@@ -1563,12 +1578,16 @@ T = bernsteinTable(A, cellSubs, "oneLine")
         the output below shows their exact MATLAB names.
 \end{itemize}
 
-For one parameter, the \code{Basis} column represents
+For one parameter, the \code{Basis} column reports the runtime's internal
+diagnostic notation
 \[
   \binom{m}{j}a^{m-j}(1-a)^j.
 \]
-For multiple parameters, the basis is the tensor product of that expression in
-each local coordinate.  \code{LocalIndex} is the local Bernstein label.
+Here \(a=1-\alpha\), so this is exactly
+\(B_j^m(\alpha)=\binom{m}{j}(1-\alpha)^{m-j}\alpha^j\), not a different
+basis or coefficient ordering.  For multiple parameters, the basis is the
+tensor product of that expression in each local coordinate.
+\code{LocalIndex} is the local Bernstein label.
 \code{CoeffSubscript} maps the local label back to the global coefficient
 subscript on the physical grid.  \code{IsPhysicalNode} is true when that
 coefficient lies on a physical grid node.
@@ -1603,6 +1622,10 @@ disp(T)
         2            {[1]}            {[2]}           {[1]}       "2a(1-a)"        false         {[2]}
         3            {[1]}            {[3]}           {[2]}       "(1-a)^2"        true          {[3]}
 \end{lstlisting}
+
+The \code{Basis} strings above are preserved verbatim from
+\code{bernsteinTable}; substitute \(a=1-\alpha\) when reading them in the
+public notation.
 
 \subsubsection{\texorpdfstring{\code{disp}}{disp} And \texorpdfstring{\code{display}}{display}}
 \label{sec:dpmat-display}
@@ -2578,6 +2601,10 @@ disp(T)
         {[1]}        "a*internal(1) + (1-a)*internal(2)"
 \end{lstlisting}
 
+This is also literal diagnostic output: the displayed internal symbol satisfies
+\(a=1-\alpha\), while \code{LocalIndex} and coefficient order remain
+lower-to-upper.
+
 \code{bernsteinTable} is an inspection method, not a solver call.  Function
 options other than \code{"oneLine"}, invalid cell selectors, and inconsistent
 rate-vertex rows are rejected with the following error identifier:
@@ -3358,7 +3385,7 @@ ans =
 \label{sec:dplmi-full-box}
 
 The full-box mode is a cell-local positive-semidefinite representation in the
-local coordinates \(a_s\in[0,1]\).  It is a box-specific Bernstein--Gram
+forward local coordinates \(\alpha_s\in[0,1]\).  It is a box-specific Bernstein--Gram
 preordering, not a general Putinar certificate, general-domain SOS interface,
 or full-space SOS representation.  It adds no implicit positivity margin.
 
@@ -3387,31 +3414,42 @@ degree are parity-specific:
     2r+1, & m\text{ odd}.
   \end{cases}
 \]
-Writing \(\mathcal Z_q\) for the degree-\(q\) Bernstein basis lifted by the
-matrix identity, the positive-semidefinite target has the even-degree form
+For an \(n\)-by-\(n\) residual, define the lifted, binomially normalized basis
+in forward index order by
 \[
-  \mathcal Z_r^{\mathsf T}Q_0\mathcal Z_r
-  +a(1-a)\mathcal Z_{r-1}^{\mathsf T}Q_1\mathcal Z_{r-1},
+  \mathcal Z_q(\alpha)=
+  \begin{bmatrix}
+    B_0^q(\alpha)I_n & \cdots & B_q^q(\alpha)I_n
+  \end{bmatrix}^{\mathsf T}.
+\]
+The positive-semidefinite target has the even-degree form
+\[
+  \mathcal Z_r(\alpha)^{\mathsf T}Q_0\mathcal Z_r(\alpha)
+  +\alpha(1-\alpha)\mathcal Z_{r-1}(\alpha)^{\mathsf T}
+    Q_1\mathcal Z_{r-1}(\alpha),
 \]
 where the second block is omitted at order zero.  For odd degree it has the
 form
 \[
-  a\mathcal Z_r^{\mathsf T}Q_0\mathcal Z_r
-  +(1-a)\mathcal Z_r^{\mathsf T}Q_1\mathcal Z_r.
+  (1-\alpha)\mathcal Z_r(\alpha)^{\mathsf T}Q_0\mathcal Z_r(\alpha)
+  +\alpha\mathcal Z_r(\alpha)^{\mathsf T}Q_1\mathcal Z_r(\alpha).
 \]
 Every present Gram matrix \(Q_i\) is constrained positive semidefinite.
 
 For \(\ell>1\) parameters, the minimum is
 \(r_{\min}=\lceil m/2\rceil\), and the target has tensor degree \(2r\) in
-every direction.  One term is included for every mask
+every direction.  For a tensor multi-degree \(\boldsymbol d\),
+\(\mathcal Z_{\boldsymbol d}(\boldsymbol\alpha)\) denotes the tensor product of
+the normalized one-dimensional bases above, lifted by \(I_n\) in the same
+forward label order.  One term is included for every mask
 \(\boldsymbol\mu\in\{0,1\}^{\ell}\):
 \[
   \sum_{\boldsymbol\mu\in\{0,1\}^{\ell}}
   \left(\prod_{s=1}^{\ell}
-    [a_s(1-a_s)]^{\mu_s}\right)
-  \mathcal Z_{r\boldsymbol 1-\boldsymbol\mu}^{\mathsf T}
+    [\alpha_s(1-\alpha_s)]^{\mu_s}\right)
+  \mathcal Z_{r\boldsymbol 1-\boldsymbol\mu}(\boldsymbol\alpha)^{\mathsf T}
   Q_{\boldsymbol\mu}
-  \mathcal Z_{r\boldsymbol 1-\boldsymbol\mu}.
+  \mathcal Z_{r\boldsymbol 1-\boldsymbol\mu}(\boldsymbol\alpha).
 \]
 A term whose tensor Gram degree has a negative component is omitted.  For an
 \(n\)-by-\(n\) residual, a present mask has Gram dimension
@@ -3693,7 +3731,7 @@ constraints.
         SOSTOOLS comparisons live under \code{sos_validation/} and are not
         MATLAB runtime dependencies or part of \code{tests.run_all}.
   \item Full-box support is specific to the local tensor box generators
-        \(a_s(1-a_s)\).  The package does not promise a general Putinar,
+        \(\alpha_s(1-\alpha_s)\).  The package does not promise a general Putinar,
         general-domain, full-space, residual-driven, or adaptive SOS hierarchy.
   \item \code{dpvar} is an affine YALMIP/Bernstein expression object.  It does
         not support nonlinear decision products.

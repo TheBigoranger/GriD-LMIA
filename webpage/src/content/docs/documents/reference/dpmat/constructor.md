@@ -97,6 +97,11 @@ ans =
         2          {[1]}       "(1-a)"    {[3]}
 ```
 
+The table is a literal runtime diagnostic and uses `a=1-alpha`, where
+$\alpha=(\rho-\rho_0)/(\rho_1-\rho_0)$ is the public forward coordinate.
+Therefore the two displayed basis rows are $(1-\alpha)$ and $\alpha$ from
+local label `0` to local label `1`.
+
 ### Tensor-grid coefficient ordering
 
 ```matlab

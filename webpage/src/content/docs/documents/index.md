@@ -43,7 +43,7 @@ entry points.
 
 ## Mathematics
 
-- [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/): history, reversed local coordinates, convex-hull certificates, tensor-product storage, derivatives, elevation, subdivision, multiplication, traversal, and refinement boundaries.
+- [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/): history, the standard forward local coordinate, convex-hull certificates, tensor-product storage, derivatives, elevation, subdivision, multiplication, traversal, and refinement boundaries.
 - [Gridding And Bernstein Degree](/DP-LMI-package/documents/math/gridding-and-degree/): diagram-led one- and two-parameter inputs, global coefficient-grid shapes, nested `LocalValues`, and the \(\ell\)-dimensional count rules.
 - [Status And Limits](/DP-LMI-package/documents/status-and-limits/): centralized implemented-versus-reserved boundary for modeling, constraints, solvers, and refinement ideas.
 

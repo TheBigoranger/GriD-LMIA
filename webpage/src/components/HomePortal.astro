@@ -86,9 +86,9 @@ const lmiSteps = [
     number: "02",
     title: "Represent each matrix polynomial exactly on its cell",
     text:
-      "On a grid cell, the physical parameter rho is mapped to the package's reversed local coordinate alpha. When Bernstein coefficient evidence is present, known matrices and YALMIP-backed decision expressions are represented exactly by those coefficients; inspection and constraint assembly use the same local geometry.",
+      "On a grid cell, the physical parameter rho is mapped to the standard forward coordinate alpha. When Bernstein coefficient evidence is present, known matrices and YALMIP-backed decision expressions are represented exactly by those coefficients; inspection and constraint assembly use the same local geometry.",
     math:
-      "\\begin{aligned}\\rho\\in[\\rho_i,\\rho_{i+1}],\\qquad \\alpha&=\\frac{\\rho_{i+1}-\\rho}{\\rho_{i+1}-\\rho_i},\\\\M(\\rho)=M_i(\\alpha)&=\\sum_{k=0}^{d} B_{k,d}(\\alpha)\\,M_{i,k}.\\end{aligned}",
+      "\\begin{aligned}\\rho\\in[\\rho_i,\\rho_{i+1}],\\qquad \\alpha&=\\frac{\\rho-\\rho_i}{\\rho_{i+1}-\\rho_i},\\\\B_k^d(\\alpha)&=\\binom{d}{k}(1-\\alpha)^{d-k}\\alpha^k,\\\\M(\\rho)=M_i(\\alpha)&=\\sum_{k=0}^{d} B_k^d(\\alpha)\\,M_{i,k}.\\end{aligned}",
   },
   {
     number: "03",
@@ -96,7 +96,7 @@ const lmiSteps = [
     text:
       "Multiplication raises the Bernstein degree, but it does not change the cell where the data belongs. The package keeps the new coefficients in the same LocalValues block and hands the resulting finite SDP constraints to YALMIP.",
     math:
-      "\\begin{aligned}P(\\alpha)Q(\\alpha)&=\\sum_{s=0}^{m+n} B_{s,m+n}(\\alpha)\\,R_s,\\\\R_s&=\\sum_{i+j=s} \\frac{\\binom{m}{i}\\binom{n}{j}}{\\binom{m+n}{s}}\\,P_iQ_j.\\end{aligned}",
+      "\\begin{aligned}P(\\alpha)Q(\\alpha)&=\\sum_{s=0}^{m+n} B_s^{m+n}(\\alpha)\\,R_s,\\\\R_s&=\\sum_{i+j=s} \\frac{\\binom{m}{i}\\binom{n}{j}}{\\binom{m+n}{s}}\\,P_iQ_j.\\end{aligned}",
   },
 ];
 ---
@@ -203,7 +203,7 @@ const lmiSteps = [
         <strong>Local coordinate</strong>
         <p>
           <code>rho in [rho_i, rho_i_plus_1]</code>
-          <code>alpha = (rho_i_plus_1 - rho) / (rho_i_plus_1 - rho_i)</code>
+          <code>alpha = (rho - rho_i) / (rho_i_plus_1 - rho_i)</code>
           <code>label 0 = left; label m = right</code>
         </p>
       </div>

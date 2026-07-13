@@ -46,14 +46,18 @@ T = bernsteinTable(A, cellSubs, "oneLine")
 | `IsPhysicalNode` | Whether the coefficient lies on a physical grid node. |
 | `Value` | Stored numeric matrix coefficient. |
 
-For one parameter and degree `m`, the `Basis` column displays terms of the form
+Public formulas use the forward coordinate
+$\alpha=(\rho-\rho_k)/(\rho_{k+1}-\rho_k)$ and the normalized factors
 
 $$
-\binom{m}{j}a^{m-j}(1-a)^j.
+B_j^m(\alpha)=\binom{m}{j}(1-\alpha)^{m-j}\alpha^j.
 $$
 
-For multiple parameters, the basis text is the tensor product of the
-corresponding one-parameter factors.
+The literal diagnostic output below remains in the runtime helper's variable
+`a`, where `a=1-alpha`. Thus its rows `a^2`, `2a(1-a)`, and `(1-a)^2`
+correspond, in public forward-coordinate order, to $(1-\alpha)^2$,
+$2(1-\alpha)\alpha$, and $\alpha^2$. For multiple parameters, the basis text
+is the tensor product of the corresponding one-parameter factors.
 
 ## Examples
 
@@ -76,7 +80,8 @@ disp(T)
 ```
 
 The compact expression is useful for quick coefficient checks in the MATLAB
-Command Window.
+Command Window. Its diagnostic `a` is $1-\alpha$, so the unchanged expression
+is $(1-\alpha)[0\;1]+\alpha[1\;2]$ in the public coordinate.
 
 ### Full degree-two metadata
 

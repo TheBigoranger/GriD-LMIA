@@ -39,8 +39,8 @@ For coefficient-backed data on one cell, `evaluate` applies local Bernstein
 interpolation. For degree-one scalar data on `[rho0,rho1]`,
 
 $$
-A(\rho)=aA_0+(1-a)A_1,\qquad
-a=\frac{\rho_1-\rho}{\rho_1-\rho_0}.
+A(\rho)=(1-\alpha)A_0+\alpha A_1,\qquad
+\alpha=\frac{\rho-\rho_0}{\rho_1-\rho_0}.
 $$
 
 For matrix-valued data, the same formula is applied entrywise to each stored
@@ -61,7 +61,7 @@ val =
     2.5000
 ```
 
-At `rho = 0.25`, the local weight is `a = 0.75`, so the value is
+At `rho = 0.25`, the public forward coordinate is `alpha = 0.25`, so the value is
 `0.75*2 + 0.25*4`.
 
 ### Dot-call form

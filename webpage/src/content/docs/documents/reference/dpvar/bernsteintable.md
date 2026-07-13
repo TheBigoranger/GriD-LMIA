@@ -76,7 +76,11 @@ disp(T)
 
 The exact symbolic labels depend on the current YALMIP variable allocation;
 the stable contract is the row structure and the association with local
-Bernstein labels, not a particular internal `sdpvar` name.
+Bernstein labels, not a particular internal `sdpvar` name. This literal
+runtime diagnostic uses `a=1-alpha`, where
+$\alpha=(\rho-\rho_k)/(\rho_{k+1}-\rho_k)$ is the public forward coordinate.
+Accordingly, the unchanged transcript represents
+$(1-\alpha)\,\texttt{internal(1)}+\alpha\,\texttt{internal(2)}$.
 
 ## Validation And Errors
 

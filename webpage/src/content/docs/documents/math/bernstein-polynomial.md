@@ -33,37 +33,43 @@ Exact coefficient multiplication, differentiation, and degree elevation then
 let the package assemble local matrix expressions before `dplmi` forms finite
 sufficient constraints.
 
-## Package Coordinate And Endpoint Labels
+## Local Coordinate, Basis Order, And Endpoint Labels
 
 On a scalar physical cell $[\rho_k,\rho_{k+1}]$, the package uses
 
 $$
-\alpha = \frac{\rho_{k+1}-\rho}{\rho_{k+1}-\rho_k},
+\alpha = \frac{\rho-\rho_k}{\rho_{k+1}-\rho_k},
 \qquad \alpha \in [0,1].
 $$
 
 The scalar degree-$m$ basis is
 
 $$
-B_{i,m}(\alpha)
-= \binom{m}{i}\alpha^{m-i}(1-\alpha)^i,
+B_i^m(\alpha)
+= \binom{m}{i}(1-\alpha)^{m-i}\alpha^i,
 \qquad i=0,\ldots,m.
 $$
 
-This orientation is important:
+Thus labels run from left to right in the standard order. Before normalization,
+the ordered factor pattern is
 
-- at the left endpoint $\rho=\rho_k$, $\alpha=1$ and local label `0` is selected;
-- at the right endpoint $\rho=\rho_{k+1}$, $\alpha=0$ and local label `m` is selected.
+$$
+(1-\alpha)^m,\quad
+(1-\alpha)^{m-1}\alpha,\quad
+\ldots,\quad
+\alpha^m.
+$$
 
-Many references instead use the forward coordinate
-$t=(\rho-\rho_k)/(\rho_{k+1}-\rho_k)$. Their conventional basis is the same
-under $t=1-\alpha$, but coefficient labels must not be silently reversed when
-comparing formulas with `LocalValues`.
+The normalized Bernstein basis factors include the binomial coefficients
+$\binom{m}{i}$ shown in the definition above. The endpoint labels are:
+
+- at the left endpoint $\rho=\rho_k$, $\alpha=0$ and local label `0` is selected;
+- at the right endpoint $\rho=\rho_{k+1}$, $\alpha=1$ and local label `m` is selected.
 
 For degree two,
 
 $$
-P(\rho)=\alpha^2C_0+2\alpha(1-\alpha)C_1+(1-\alpha)^2C_2.
+P(\rho)=(1-\alpha)^2C_0+2(1-\alpha)\alpha C_1+\alpha^2C_2.
 $$
 
 The package stores $C_0,C_1,C_2$ as coefficient matrices or expressions. It
@@ -76,15 +82,15 @@ exact function handle but does not claim Bernstein coefficient evidence.
 For $\alpha\in[0,1]$,
 
 $$
-B_{i,m}(\alpha)\ge 0,
+B_i^m(\alpha)\ge 0,
 \qquad
-\sum_{i=0}^{m}B_{i,m}(\alpha)=1.
+\sum_{i=0}^{m}B_i^m(\alpha)=1.
 $$
 
 Therefore
 
 $$
-P(\alpha)=\sum_i B_{i,m}(\alpha)P_i
+P(\alpha)=\sum_i B_i^m(\alpha)P_i
 $$
 
 lies in the convex hull of its coefficients. The statement applies to several
@@ -110,8 +116,8 @@ that the continuous DP-LMI is infeasible.
 For $\ell$ scheduling dimensions, the package uses the tensor-product basis
 
 $$
-B_{\mathbf{i},\mathbf{m}}(\boldsymbol\alpha)
-=\prod_{r=1}^{\ell}B_{i_r,m_r}(\alpha_r).
+B_{\mathbf{i}}^{\mathbf{m}}(\boldsymbol\alpha)
+=\prod_{r=1}^{\ell}B_{i_r}^{m_r}(\alpha_r).
 $$
 
 The products remain nonnegative and sum to one, so the convex-hull and matrix
@@ -143,15 +149,15 @@ physical widths and different partial-difference data.
 For
 
 $$
-P(\alpha)=\sum_{i=0}^{m}P_iB_{i,m}(\alpha),
+P(\alpha)=\sum_{i=0}^{m}P_iB_i^m(\alpha),
 $$
 
-the reversed coordinate gives the physical derivative on a cell of width
+the forward coordinate gives the physical derivative on a cell of width
 $h=\rho_{k+1}-\rho_k$:
 
 $$
 \frac{dP}{d\rho}
-=\frac{m}{h}\sum_{i=0}^{m-1}(P_{i+1}-P_i)B_{i,m-1}(\alpha).
+=\frac{m}{h}\sum_{i=0}^{m-1}(P_{i+1}-P_i)B_i^{m-1}(\alpha).
 $$
 
 For several parameters,
@@ -185,7 +191,7 @@ higher-degree decision parameterization, which enlarges the search space.
 The de Casteljau recursion repeatedly forms affine combinations:
 
 $$
-C_j^{(r)}=\alpha C_j^{(r-1)}+(1-\alpha)C_{j+1}^{(r-1)},
+C_j^{(r)}=(1-\alpha)C_j^{(r-1)}+\alpha C_{j+1}^{(r-1)},
 \qquad C_j^{(0)}=C_j.
 $$
 
@@ -206,8 +212,8 @@ If two degree-one objects are
 
 $$
 \begin{aligned}
-P(\alpha)&=B_{0,1}(\alpha)P_0+B_{1,1}(\alpha)P_1,\\
-Q(\alpha)&=B_{0,1}(\alpha)Q_0+B_{1,1}(\alpha)Q_1,
+P(\alpha)&=B_0^1(\alpha)P_0+B_1^1(\alpha)P_1,\\
+Q(\alpha)&=B_0^1(\alpha)Q_0+B_1^1(\alpha)Q_1,
 \end{aligned}
 $$
 
@@ -216,7 +222,7 @@ their product has degree two:
 $$
 \begin{aligned}
 P(\alpha)Q(\alpha)
-&=B_{0,2}(\alpha)R_0+B_{1,2}(\alpha)R_1+B_{2,2}(\alpha)R_2,\\
+&=B_0^2(\alpha)R_0+B_1^2(\alpha)R_1+B_2^2(\alpha)R_2,\\
 R_0&=P_0Q_0,\\
 R_1&=\frac{P_0Q_1+P_1Q_0}{2},\\
 R_2&=P_1Q_1.
@@ -245,48 +251,48 @@ known-data/`dpvar` products. It is representation algebra, not a relaxation.
 
 The same product rule can be evaluated as an ordinary ordered
 $\ell$-dimensional discrete convolution. Within one physical cell, reshape the
-flat coefficient lists into value grids indexed by
-$\boldsymbol\alpha\in\{0,\ldots,m\}^{\ell}$ and
-$\boldsymbol\beta\in\{0,\ldots,n\}^{\ell}$, preserving the package's `lbls`
+flat coefficient lists into value grids indexed by coefficient multi-indices
+$\mathbf p\in\{0,\ldots,m\}^{\ell}$ and
+$\mathbf q\in\{0,\ldots,n\}^{\ell}$, preserving the package's `lbls`
 order. First restore the binomial weights carried by the tensor Bernstein
 basis:
 
 $$
-\widetilde A_{\boldsymbol\alpha}
-=A_{\boldsymbol\alpha}
-\prod_{r=1}^{\ell}\binom{m}{\alpha_r},
+\widetilde A_{\mathbf p}
+=A_{\mathbf p}
+\prod_{r=1}^{\ell}\binom{m}{p_r},
 \qquad
-\widetilde B_{\boldsymbol\beta}
-=B_{\boldsymbol\beta}
-\prod_{r=1}^{\ell}\binom{n}{\beta_r}.
+\widetilde B_{\mathbf q}
+=B_{\mathbf q}
+\prod_{r=1}^{\ell}\binom{n}{q_r}.
 $$
 
 Next convolve the two weighted value grids over all componentwise label sums:
 
 $$
-\widetilde C_{\boldsymbol\gamma}
-=\bigl(\widetilde A *_\ell \widetilde B\bigr)_{\boldsymbol\gamma}
-=\sum_{\boldsymbol\alpha+\boldsymbol\beta=\boldsymbol\gamma}
-\widetilde A_{\boldsymbol\alpha}\widetilde B_{\boldsymbol\beta}.
+\widetilde C_{\boldsymbol\kappa}
+=\bigl(\widetilde A *_\ell \widetilde B\bigr)_{\boldsymbol\kappa}
+=\sum_{\mathbf p+\mathbf q=\boldsymbol\kappa}
+\widetilde A_{\mathbf p}\widetilde B_{\mathbf q}.
 $$
 
 Finally remove the degree-$(m+n)$ Bernstein weights to recover the stored
 coefficients:
 
 $$
-C_{\boldsymbol\gamma}
-=\frac{\widetilde C_{\boldsymbol\gamma}}
-{\displaystyle\prod_{r=1}^{\ell}\binom{m+n}{\gamma_r}}.
+C_{\boldsymbol\kappa}
+=\frac{\widetilde C_{\boldsymbol\kappa}}
+{\displaystyle\prod_{r=1}^{\ell}\binom{m+n}{\kappa_r}}.
 $$
 
 These three steps are algebraically equivalent to the binomial-scaled formula
 above. The product has common tensor `Degree` $m+n$ and each physical cell has
 $(m+n+1)^{\ell}$ coefficients. For matrix-valued grids, the convolution is
 ordered: every term is
-$\widetilde A_{\boldsymbol\alpha}\widetilde B_{\boldsymbol\beta}$ in that
-left-to-right matrix order. The package's reversed local coordinate and
-reversed-alpha endpoint-label convention are unchanged; only coefficient
-weights are temporarily restored and removed.
+$\widetilde A_{\mathbf p}\widetilde B_{\mathbf q}$ in that left-to-right
+matrix order. The coefficient labels follow the same forward-coordinate
+endpoint order throughout; only binomial weights are temporarily restored and
+removed.
 
 ## Hypercube Counts And Traversal
 
@@ -334,7 +340,7 @@ For a residual
 
 $$
 E(\boldsymbol\alpha)=
-\sum_{\mathbf i}B_{\mathbf i,m}(\boldsymbol\alpha)E_{\mathbf i},
+\sum_{\mathbf i}B_{\mathbf i}^{m}(\boldsymbol\alpha)E_{\mathbf i},
 $$
 
 the implemented `dplmi` path creates one YALMIP sign constraint for every
