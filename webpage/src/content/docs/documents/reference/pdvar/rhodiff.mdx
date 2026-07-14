@@ -3,6 +3,8 @@ title: pdvar rhodiff
 description: Rate-weighted cell-local derivative of a pdvar expression.
 ---
 
+import BernsteinConceptDiagram from "../../../../../components/BernsteinConceptDiagram.astro";
+
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -42,6 +44,12 @@ Each physical cell stores one coefficient row per active `rho_dot` vertex. If
 `rhodiff` forms the Cartesian product of those choices and stores `2^ell`
 rate rows. The coefficient columns still follow the Bernstein label order
 returned by `D.lbls()`.
+
+<BernsteinConceptDiagram kind="derivative" />
+
+The forward differences stay inside physical cell $c$. Rate rows are neither
+new cells nor new local Bernstein labels; they enumerate the vertices needed
+because the derivative expression is affine in $\dot{\boldsymbol\rho}$.
 
 ## Example
 

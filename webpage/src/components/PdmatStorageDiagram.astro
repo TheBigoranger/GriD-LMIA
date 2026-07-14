@@ -17,17 +17,17 @@ const renderInlineMath = (src) =>
   adaptor.outerHTML(mathDoc.convert(src, { display: false }));
 
 const rhoLabels = [
-  { x: "10%", tex: "\\rho_{i-1}" },
-  { x: "28%", tex: "\\rho_i" },
-  { x: "58%", tex: "\\rho_{i+1}" },
-  { x: "78%", tex: "\\rho_{i+2}" },
-  { x: "92%", tex: "\\rho_{i+3}" },
+  { x: "10%", tex: "\\rho_0" },
+  { x: "28%", tex: "\\rho_1" },
+  { x: "58%", tex: "\\rho_2" },
+  { x: "78%", tex: "\\rho_3" },
+  { x: "92%", tex: "\\rho_4" },
 ];
 
 const formulas = {
-  p: "P(\\alpha)=(1-\\alpha)P_0+\\alpha P_1",
-  q: "Q(\\alpha)=(1-\\alpha)Q_0+\\alpha Q_1",
-  r: "R(\\alpha)=(1-\\alpha)^2R_0+2(1-\\alpha)\\alpha R_1+\\alpha^2R_2",
+  p: "P_c(\\alpha)=(1-\\alpha)P^{(c)}[0]+\\alpha P^{(c)}[1]",
+  q: "Q_c(\\alpha)=(1-\\alpha)Q^{(c)}[0]+\\alpha Q^{(c)}[1]",
+  r: "R_c(\\alpha)=(1-\\alpha)^2R^{(c)}[0]+2(1-\\alpha)\\alpha R^{(c)}[1]+\\alpha^2R^{(c)}[2]",
 };
 ---
 
@@ -65,8 +65,8 @@ const formulas = {
           </div>
           <div class="coeff-strip factor-coeff-strip" aria-label="Stored degree-one P coefficients">
             <code>LocalValues</code>
-            <span>P0</span>
-            <span>P1</span>
+            <span>P⁽ᶜ⁾[0]</span>
+            <span>P⁽ᶜ⁾[1]</span>
           </div>
         </section>
 
@@ -101,8 +101,8 @@ const formulas = {
           </div>
           <div class="coeff-strip factor-coeff-strip" aria-label="Stored degree-one Q coefficients">
             <code>LocalValues</code>
-            <span>Q0</span>
-            <span>Q1</span>
+            <span>Q⁽ᶜ⁾[0]</span>
+            <span>Q⁽ᶜ⁾[1]</span>
           </div>
         </section>
       </div>
@@ -139,9 +139,9 @@ const formulas = {
         </div>
         <div class="coeff-strip" aria-label="Stored degree-two coefficients">
           <code>LocalValues</code>
-          <span>R0</span>
-          <span>R1</span>
-          <span>R2</span>
+          <span>R⁽ᶜ⁾[0]</span>
+          <span>R⁽ᶜ⁾[1]</span>
+          <span>R⁽ᶜ⁾[2]</span>
         </div>
       </section>
     </div>

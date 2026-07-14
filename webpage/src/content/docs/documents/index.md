@@ -5,9 +5,8 @@ description: Reference-first entry point for DP-LMI classes, methods, and mathem
 
 Use this page as the lookup entry for current DP-LMI behavior. The reference
 pages document implemented code only, including direct, opt-in Pólya, and
-opt-in full box preordering assembly. The separate `sos_validation/` tree
-contains Julia, YALMIP, SOSTOOLS, and package oracles; it is not a MATLAB
-runtime dependency or a replacement for the public API.
+fixed-order full-box preordering assembly. Validation and limitations appear
+beside the constructor or method they affect.
 
 ## Reference Index
 
@@ -46,12 +45,6 @@ entry points.
 - [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/): history, the standard forward local coordinate, convex-hull certificates, tensor-product storage, derivatives, elevation, subdivision, multiplication, traversal, and refinement boundaries.
 - [Gridding And Bernstein Degree](/DP-LMI-package/documents/math/gridding-and-degree/): diagram-led one- and two-parameter inputs, global coefficient-grid shapes, nested `LocalValues`, and the \(\ell\)-dimensional count rules.
 - [SOS Certificates On A Hypercube](/DP-LMI-package/documents/math/sos-certificates/): full-space SOS, direct Bernstein evidence, Pólya elevation, Putinar quadratic modules, Schmüdgen preorderings, one-dimensional Markov–Lukács forms, and the exact software boundary.
-- [Status And Limits](/DP-LMI-package/documents/status-and-limits/): centralized implemented-versus-reserved boundary for modeling, constraints, solvers, and refinement ideas.
-
-The repository also contains an optional, isolated
-[SOS validation suite](https://github.com/TheBigoranger/DP-LMI-package/tree/main/sos_validation).
-It exchanges versioned benchmark evidence across the independent backends but
-does not extend the public DP-LMI API.
 
 ## Install And Examples
 

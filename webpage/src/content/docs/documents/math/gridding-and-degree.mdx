@@ -79,20 +79,20 @@ coefficient source is a MATLAB cell array whose dimensions follow the two
 axes:
 
 ```matlab
-grid = {[0 1 2], [10 20 30]};
-data = {11, 12, 13; 21, 22, 23; 31, 32, 33};
+grid = {[0 1 2 3], [10 20 30]};
+data = {11, 12, 13; 21, 22, 23; 31, 32, 33; 41, 42, 43};
 A = pdmat(grid, data, Degree=1);
 
 A.ncell()
 A.ncoeff()
 A.coeffs([1 1])
-A.coeffs([2 2])
+A.coeffs([3 2])
 A.LocalValues{2}{1}
 ```
 
 ```text
 ans =
-     4
+     6
 
 ans =
      4
@@ -103,14 +103,15 @@ ans =
 
 ans =
   1x4 cell array
-    {[22]}    {[23]}    {[32]}    {[33]}
+    {[32]}    {[33]}    {[42]}    {[43]}
 
 ans =
   1x4 cell array
     {[21]}    {[22]}    {[31]}    {[32]}
 ```
 
-There are $2\times2=4$ physical rectangles. The common degree is 1 along
+There are $3\times2=6$ physical rectangles. The axes deliberately use
+different node counts. The common degree is 1 along
 both axes, so each rectangle has $(1+1)^2=4$ local tensor coefficients. Their
 flat package order is the row order returned by `A.lbls()`:
 
@@ -123,16 +124,18 @@ flat package order is the row order returned by `A.lbls()`:
 
 The same order explains `A.coeffs([1 1])`. The first grid dimension varies
 more slowly in that local-label order. Physical cells, in contrast, are stored
-as a nested tree: `LocalValues{i1}{i2}`. Thus `A.LocalValues{2}{1}` selects
+as a nested tree: `LocalValues{c1}{c2}`. Thus `A.LocalValues{2}{1}` selects
 the second cell along the first axis and the first cell along the second.
 
-For this degree-one example, each global coefficient-grid dimension is
+For this degree-one example, the global coefficient-grid dimensions are
 
 $$
-(N_r-1)m+1=(3-1)1+1=3,
+(N_1-1)m+1=(4-1)1+1=4,
+\qquad
+(N_2-1)m+1=(3-1)1+1=3,
 $$
 
-which is why `data` is a 3-by-3 cell array. For a global coefficient-backed
+which is why `data` is a 4-by-3 cell array. For a global coefficient-backed
 `pdmat`, every axis must satisfy this shape rule.
 
 ## The ell-Dimensional Case
@@ -152,7 +155,7 @@ N_{\mathrm{cell}}=\prod_{r=1}^{\ell}(N_r-1),
 N_{\mathrm{coeff/cell}}=(m+1)^\ell.
 $$
 
-The physical-cell tree is `LocalValues{i1}{i2}...{i_ell}`. Its leaf is a flat
+The physical-cell tree is `LocalValues{c1}{c2}...{c_ell}`. Its leaf is a flat
 cell array whose label rows come from `lbls()`; labels range independently
 from `0` through `m` in each coordinate. A global coefficient-backed `pdmat`
 uses one source-array dimension per parameter, of length

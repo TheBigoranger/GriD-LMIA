@@ -3,6 +3,8 @@ title: SOS Certificates On A Hypercube
 description: Mathematical map from global SOS and Bernstein tests to Pólya, Putinar, Schmüdgen, and Markov–Lukács certificates.
 ---
 
+import CertificateDiagram from "../../../../components/CertificateDiagram.astro";
+
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -42,6 +44,36 @@ defines the forward coordinate and exact coefficient algebra. The
 [`pdlmi` overview](/DP-LMI-package/documents/reference/pdlmi/) documents which
 rows of this table are callable.
 
+<CertificateDiagram kind="map" />
+
+## A Tiny Example: Positive Polynomial, Failed Direct Test
+
+Consider
+
+$$
+p(\alpha)=(\alpha-\tfrac12)^2+0.1
+=\alpha^2-\alpha+0.35.
+$$
+
+It is strictly positive on `[0,1]`, with minimum `0.1`. Its degree-two
+Bernstein representation is
+
+$$
+p(\alpha)=0.35B_0^2(\alpha)-0.15B_1^2(\alpha)+0.35B_2^2(\alpha).
+$$
+
+The negative middle coefficient means the direct Bernstein test cannot prove
+positivity. It does **not** mean the polynomial is negative. A stronger box
+certificate can use the identity
+
+$$
+p(\alpha)=(\alpha-\tfrac12)^2+0.1
+$$
+
+as a sum of squares with a positive constant. This one example explains why
+the package separates the stored polynomial from the certificate selected for
+it.
+
 ## Full-Space SOS
 
 The simplest Gram certificate ignores the box and proves global
@@ -63,17 +95,17 @@ The package has no full-space SOS constructor.
 On a local box, write
 
 $$
-S(\boldsymbol\alpha)=
+S_c(\boldsymbol\alpha)=
 \sum_{\boldsymbol i}
-B_{\boldsymbol i}^{m}(\boldsymbol\alpha)C_{\boldsymbol i}.
+B_{\boldsymbol i}^{m}(\boldsymbol\alpha)C^{(c)}[\boldsymbol i].
 $$
 
 Because the tensor Bernstein basis is nonnegative and sums to one,
 
 $$
-C_{\boldsymbol i}\succeq0\quad\text{for every }\boldsymbol i
+C^{(c)}[\boldsymbol i]\succeq0\quad\text{for every }\boldsymbol i
 \quad\Longrightarrow\quad
-S(\boldsymbol\alpha)\succeq0
+S_c(\boldsymbol\alpha)\succeq0
 \quad\text{on the box}.
 $$
 
@@ -81,6 +113,8 @@ This is the default [`pdlmi` constructor](/DP-LMI-package/documents/reference/pd
 certificate after residual and rate-vertex assembly. It introduces no Gram
 matrices. The converse is false: an indefinite coefficient defeats this
 certificate, not the continuous inequality.
+
+<CertificateDiagram kind="direct" />
 
 ## <span id="polya-type-coefficient-relaxation"></span>Pólya-Type Coefficient Relaxation
 
@@ -105,6 +139,8 @@ coefficient test. It does not search for an exponent, add a margin, or create
 SOS multipliers. Failure at one increment is inconclusive. Quantitative Pólya
 bounds also retain strict-positivity assumptions; see
 [Powers and Reznick (2001)](https://doi.org/10.1016/S0022-4049(00)00155-9).
+
+<CertificateDiagram kind="polya" />
 
 ## Putinar Quadratic Modules
 
@@ -155,6 +191,8 @@ creates independent Gram blocks for every physical cell and active rate row,
 then matches the resulting Bernstein coefficients exactly. This is not a
 general-domain Schmüdgen interface.
 
+<CertificateDiagram kind="fullbox" />
+
 ## One-Dimensional Markov–Lukács Forms
 
 On $[0,1]$, interval nonnegativity has exact parity-specific forms. For
@@ -189,9 +227,8 @@ their Bernstein-basis matrix-Gram counterpart.
 4. **Higher Gram order** enlarges a positivity certificate.
 
 Only the second operation is performed by `applyPolya`; only the fourth is
-selected by `applyFullBoxPreorder`. The
-[status page](/DP-LMI-package/documents/status-and-limits/) records the
-unsupported adaptive and general-purpose layers.
+selected by `applyFullBoxPreorder`. Their method pages place unsupported
+adaptive and general-purpose boundaries beside the callable syntax.
 
 ## Exact Software Boundary
 
@@ -208,8 +245,7 @@ automatic strictness margins, and post-solve residual certificates are
 mathematical background, not public package APIs. The no-argument
 `applyFullBoxPreorder()` call does have a deterministic public default: it
 selects $\lfloor m/2\rfloor$ in one parameter and $\lceil m/2\rceil$ in two
-or more parameters. The isolated `sos_validation/` programs compare
-formulations; they are not runtime dependencies.
+or more parameters.
 
 ## See Also
 
@@ -217,5 +253,4 @@ formulations; they are not runtime dependencies.
 [`pdlmi`](/DP-LMI-package/documents/reference/pdlmi/) ·
 [`applyPolya`](/DP-LMI-package/documents/reference/pdlmi/applypolya/) ·
 [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
-[`Status And Limits`](/DP-LMI-package/documents/status-and-limits/) ·
 [`Solver Examples`](/DP-LMI-package/examples/solver-smoke/)

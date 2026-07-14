@@ -1,5 +1,6 @@
 ---
 import PdmatStorageDiagram from "./PdmatStorageDiagram.astro";
+import WorkflowStepDiagram from "./WorkflowStepDiagram.astro";
 import { mathjax } from "mathjax-full/js/mathjax.js";
 import { liteAdaptor } from "mathjax-full/js/adaptors/liteAdaptor.js";
 import { RegisterHTMLHandler } from "mathjax-full/js/handlers/html.js";
@@ -50,20 +51,16 @@ const manualLinks = [
     text: "Start from small workflows backed by the repository test suite.",
   },
   {
-    href: local("documents/status-and-limits/"),
-    title: "Status and limits",
-    text: "Separate implemented direct/Pólya/full box preordering assembly from the independent SOS validation suite.",
+    href: local("documents/reference/pdlmi/"),
+    title: "Choose a certificate",
+    text: "Compare direct, Pólya, and full-box assembly, then follow the matching API page.",
   },
 ];
 
 const downloadLinks = [
   {
-    href: "https://github.com/TheBigoranger/DP-LMI-package/releases/tag/v0.2.0",
-    label: "v0.2.0 release",
-  },
-  {
-    href: "https://github.com/TheBigoranger/DP-LMI-package/archive/refs/tags/v0.2.0.zip",
-    label: "v0.2.0 source ZIP",
+    href: "https://github.com/TheBigoranger/DP-LMI-package",
+    label: "Current source",
   },
   {
     href: "https://github.com/TheBigoranger/DP-LMI-package/raw/main/doc/manual.pdf",
@@ -78,25 +75,45 @@ const lmiSteps = [
     number: "01",
     title: "General DP-LMI",
     text:
-      "The reference problem is not tied to one Lyapunov inequality. It starts from parameter-dependent decision functions x_i(rho), coefficient matrices R_i(rho), F_i(rho), and a rate set for rho_dot. The goal is to certify the matrix inequality on the continuous domain Theta x Phi.",
+      "Known matrices R_i(rho) and F_i(rho), differentiable decision functions x_i(rho), and a rate box for rho_dot define a continuous matrix inequality. If the derivative term is absent, the same expression is an ordinary parameter-dependent LMI.",
     math:
       "\\mathcal{G}=\\sum_i R_i(\\rho)\\bigl(\\nabla_\\rho x_i\\cdot\\dot\\rho\\bigr)+F_0(\\rho)+\\sum_iF_i(\\rho)x_i(\\rho)\\prec0.",
+    kind: null,
+    code: null,
+    output: null,
   },
   {
     number: "02",
-    title: "Represent each matrix polynomial exactly on its cell",
+    title: "Store known data and decisions cell by cell",
     text:
-      "On a grid cell, the physical parameter rho is mapped to the standard forward coordinate alpha. When Bernstein coefficient evidence is present, known matrices and YALMIP-backed decision expressions are represented exactly by those coefficients; inspection and constraint assembly use the same local geometry.",
+      "Physical-node subscripts identify only grid nodes. A cell has its own identity c, and bracketed labels [i] identify local Bernstein coefficients. pdmat stores known data; pdvar creates decision matrices on the same grid.",
     math:
-      "\\begin{aligned}\\rho\\in[\\rho_i,\\rho_{i+1}],\\qquad \\alpha&=\\frac{\\rho-\\rho_i}{\\rho_{i+1}-\\rho_i},\\\\B_k^d(\\alpha)&=\\binom{d}{k}(1-\\alpha)^{d-k}\\alpha^k,\\\\M(\\rho)=M_i(\\alpha)&=\\sum_{k=0}^{d} B_k^d(\\alpha)\\,M_{i,k}.\\end{aligned}",
+      "M_c(\\alpha)=\\sum_{i=0}^{m}B_i^m(\\alpha)\\,C^{(c)}[i],\\qquad \\alpha=\\frac{\\rho-\\rho_{c-1}}{\\rho_c-\\rho_{c-1}}.",
+    kind: "store",
+    code: "grid = {[0 1]};\nA = pdmat(grid, @(rho) [1 rho; rho 2], Degree=1);\nP = pdvar(2, grid, \"symmetric\");\n[A.ncell(), A.ncoeff(), P.Degree]",
+    output: "ans =\n     1     2     1",
   },
   {
     number: "03",
-    title: "Reduce products to finite coefficient operations",
+    title: "Build the differential residual",
     text:
-      "Multiplication raises the Bernstein degree, but it does not change the cell where the data belongs. The package keeps the new coefficients in the same LocalValues block and hands the resulting finite SDP constraints to YALMIP.",
+      "Matrix products are exact Bernstein coefficient convolutions, not products of a few samples. rhodiff forms physical forward differences and creates a separate row for every rate-box vertex.",
     math:
-      "\\begin{aligned}P(\\alpha)Q(\\alpha)&=\\sum_{s=0}^{m+n} B_s^{m+n}(\\alpha)\\,R_s,\\\\R_s&=\\sum_{i+j=s} \\frac{\\binom{m}{i}\\binom{n}{j}}{\\binom{m+n}{s}}\\,P_iQ_j.\\end{aligned}",
+      "R^{(c)}[k]=\\sum_{i+j=k}\\frac{\\binom mi\\binom nj}{\\binom{m+n}{k}}P^{(c)}[i]A^{(c)}[j].",
+    kind: "assemble",
+    code: "D = rhodiff(P, [-1 1]);\nresidual = D + P*A + A'*P;\n[size(D.coeffs(1),1), residual.Degree]",
+    output: "ans =\n     2     2",
+  },
+  {
+    number: "04",
+    title: "Certify, solve, and inspect",
+    text:
+      "A comparison constructs pdlmi and uses the direct coefficient certificate by default. toYalmip exports the finite constraints; ordinary YALMIP selects the solver. Opt-in Pólya and full-box choices change the certificate, not the stored residual.",
+    math:
+      "R^{(c)}[k]\\preceq0\\;\\forall(c,k,\\dot\\rho_v)\\quad\\Longrightarrow\\quad R(\\rho,\\dot\\rho)\\preceq0.",
+    kind: "solve",
+    code: "C = residual <= -1e-6*eye(2);\nF = C.toYalmip();\nsol = optimize(F, [], sdpsettings('verbose',0));\nsol.problem",
+    output: "ans =\n     0",
   },
 ];
 ---
@@ -176,43 +193,52 @@ const lmiSteps = [
       <p class="home-label">From PD-LMI to Bernstein storage</p>
       <h2 id="product-title">Start from the inequality, then represent it cell by cell.</h2>
       <p>
-        The package turns a differential parameter-dependent LMI into finite
-        sufficient coefficient constraints. The local Bernstein picture below
-        is the exact coefficient-storage mechanism behind that solver-facing
-        assembly when coefficient evidence is available.
+        Follow one model from its continuous inequality to stored matrix
+        coefficients, a differential residual, and ordinary YALMIP solver
+        calls. Each stage keeps the formula, MATLAB operation, output, and
+        geometry together.
       </p>
     </div>
 
     <div class="lmi-narrative" aria-label="DP-LMI modeling steps">
       {
         lmiSteps.map((step) => (
-          <section class="lmi-step">
+          <section class:list={["lmi-step", { illustrated: step.kind }]}>
             <div class="step-number" aria-hidden="true">{step.number}</div>
-            <div class="step-copy">
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
-              <div class="math-strip" set:html={renderDisplayMath(step.math)} />
+            <div class="step-content">
+              <div class="step-copy">
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+                <div class="math-strip" set:html={renderDisplayMath(step.math)} />
+                {step.code && (
+                  <div class="step-example" aria-label={`${step.title} MATLAB example and output`}>
+                    <pre><code>{step.code}</code></pre>
+                    <pre class="step-output"><code>{step.output}</code></pre>
+                  </div>
+                )}
+              </div>
+              {step.kind && <WorkflowStepDiagram kind={step.kind} />}
             </div>
           </section>
         ))
       }
     </div>
 
-    <div class="formula-panel" aria-label="Bernstein product coefficient formulas">
+    <div class="formula-panel" aria-label="A concrete Bernstein matrix product">
       <div>
         <strong>Local coordinate</strong>
         <p>
-          <code>rho in [rho_i, rho_i_plus_1]</code>
-          <code>alpha = (rho - rho_i) / (rho_i_plus_1 - rho_i)</code>
-          <code>label 0 = left; label m = right</code>
+          <code>rho_k: physical node only</code>
+          <code>c: physical cell</code>
+          <code>[i]: local coefficient label</code>
         </p>
       </div>
       <div>
         <strong>Product coefficients</strong>
         <p>
-          <code>R0 = P0 * Q0</code>
-          <code>R1 = (P0 * Q1 + P1 * Q0) / 2</code>
-          <code>R2 = P1 * Q1</code>
+          <code>R^(c)[0] = P^(c)[0] * Q^(c)[0]</code>
+          <code>R^(c)[1] = (P^(c)[0] * Q^(c)[1] + P^(c)[1] * Q^(c)[0]) / 2</code>
+          <code>R^(c)[2] = P^(c)[1] * Q^(c)[1]</code>
         </p>
       </div>
     </div>
@@ -242,9 +268,9 @@ const lmiSteps = [
       <p class="home-label">Download and install</p>
       <h2 id="download-title">Use the current source package and manual.</h2>
       <p>
-        Start from the tagged v0.2.0 release or its immutable source archive.
-        The PDF link follows the current manual snapshot on <code>main</code>;
-        setup notes and version history explain the local installation path.
+        Use the current repository source together with the printable manual.
+        Setup notes show the recursive MATLAB path, and version history records
+        the published manual releases without inventing a source tag.
       </p>
     </div>
     <nav class="download-strip" aria-label="Download links">
@@ -252,14 +278,14 @@ const lmiSteps = [
     </nav>
   </section>
 
-  <section class="status-strip" aria-label="Current implemented package slice">
-    <strong>Implemented slice</strong>
+  <section class="status-strip" aria-label="Main package entry points">
+    <strong>Modeling path</strong>
     <span><code>pdbase</code> storage</span>
     <span><code>pdmat</code> known data</span>
     <span><code>pdvar</code> decisions</span>
     <span><code>rhodiff</code> rate rows</span>
     <span><code>pdlmi</code> YALMIP assembly</span>
-    <a href={local("documents/status-and-limits/")}>Full status and limits</a>
+    <a href={local("documents/reference-index/")}>Look up an API</a>
   </section>
 </div>
 
@@ -653,6 +679,38 @@ const lmiSteps = [
     min-width: 0;
   }
 
+  .step-content {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .lmi-step.illustrated .step-content {
+    grid-template-columns: minmax(0, 1fr) minmax(19rem, 0.82fr);
+    align-items: center;
+  }
+
+  .step-example {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(8rem, 0.65fr);
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  .step-example pre {
+    min-width: 0;
+    margin: 0;
+    border: 1px solid var(--home-border);
+    border-radius: 9px;
+    padding: 0.65rem;
+    overflow-x: auto;
+    background: var(--home-surface-control);
+  }
+
+  .step-example .step-output {
+    border-color: color-mix(in srgb, #0f766e 45%, var(--home-border));
+  }
+
   .step-copy h3 {
     margin: 0;
     color: var(--sl-color-text);
@@ -800,6 +858,11 @@ const lmiSteps = [
     .lmi-step {
       grid-template-columns: 1fr;
       gap: 0.55rem;
+    }
+
+    .lmi-step.illustrated .step-content,
+    .step-example {
+      grid-template-columns: 1fr;
     }
 
     .step-number {

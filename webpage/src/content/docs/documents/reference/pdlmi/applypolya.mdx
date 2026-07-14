@@ -3,6 +3,8 @@ title: pdlmi applyPolya
 description: Rebuild a DP-LMI residual with a Pólya degree increment.
 ---
 
+import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
+
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -33,6 +35,12 @@ method is value-like: it returns a new object and leaves `C` unchanged.
 Each call rebuilds from `C.Residual`, rather than compounding a previous
 elevation. Thus `C.applyPolya(2)` and `C.applyPolya().applyPolya(2)` both use
 an increment of two from the original residual.
+
+<CertificateDiagram kind="polya" />
+
+The diagram's first and second boxes represent the same residual polynomial.
+Only its Bernstein coefficient row is longer. The final arrow is the ordinary
+direct sign test; no multiplier search occurs.
 
 ## Example
 

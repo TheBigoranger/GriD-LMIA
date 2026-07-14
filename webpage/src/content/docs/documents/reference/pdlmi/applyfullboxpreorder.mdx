@@ -3,6 +3,8 @@ title: pdlmi applyFullBoxPreorder
 description: Rebuild a DP-LMI residual with a fixed-order full box Bernstein-Gram certificate.
 ---
 
+import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
+
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -48,6 +50,14 @@ semidefinite, then exact identities match every Bernstein coefficient. For a
 `<=` relation, the target coefficients are negated before positive-
 semidefinite matching; for `>=`, the residual is matched directly. No implicit
 positivity margin is added.
+
+<CertificateDiagram kind="fullbox" />
+
+For two parameters the four illustrated blocks correspond to the empty
+subset, each single generator, and their product. In $\ell$ parameters the
+same pattern has up to $2^\ell$ subset products. The
+[SOS certificate chapter](/DP-LMI-package/documents/math/sos-certificates/)
+develops the Gram and Markov–Lukács background step by step.
 
 ## Arguments And Options
 
@@ -119,8 +129,7 @@ it does not use the already elevated constraints.
 This method implements the fixed-order full box preordering on each local
 parameter box. It is not a general Putinar certificate, a general-domain SOS
 interface, a full-space SOS representation, or an automatic hierarchy
-selector. The independent `sos_validation/` suite supplies cross-backend
-evidence; it is not a MATLAB runtime dependency.
+selector.
 
 ## See Also
 
@@ -128,5 +137,4 @@ evidence; it is not a MATLAB runtime dependency.
 [`applyPolya`](/DP-LMI-package/documents/reference/pdlmi/applypolya/) ·
 [`toYalmip`](/DP-LMI-package/documents/reference/pdlmi/toyalmip/) ·
 [`Bernstein Polynomial`](/DP-LMI-package/documents/math/bernstein-polynomial/) ·
-[`SOS Certificates`](/DP-LMI-package/documents/math/sos-certificates/) ·
-[`Status And Limits`](/DP-LMI-package/documents/status-and-limits/)
+[`SOS Certificates`](/DP-LMI-package/documents/math/sos-certificates/)

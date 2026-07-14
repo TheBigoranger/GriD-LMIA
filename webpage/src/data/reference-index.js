@@ -110,12 +110,6 @@ const pdvarMethods = [
 
 export const referenceEntries = [
   {
-    name: "Status and limits",
-    type: "Guide",
-    task: "Check what is implemented, reserved, or unsupported before choosing a workflow.",
-    href: "/DP-LMI-package/documents/status-and-limits/",
-  },
-  {
     name: "pdbase",
     type: "Backend class",
     task: "Inspect cell-local Bernstein storage shared by pdmat and pdvar.",

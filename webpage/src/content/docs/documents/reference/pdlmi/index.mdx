@@ -3,6 +3,8 @@ title: pdlmi
 description: Cell-local YALMIP constraints for DP-LMI expressions.
 ---
 
+import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
+
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -13,6 +15,15 @@ description: Cell-local YALMIP constraints for DP-LMI expressions.
 residual expressions. Direct coefficient assembly is the default; Pólya
 degree elevation and fixed-order full box Bernstein-Gram preordering are
 explicit alternatives.
+
+<CertificateDiagram kind="map" />
+
+The three paths begin with the same stored residual. **Direct** tests every
+local coefficient and is the default. **Pólya** exactly elevates that residual
+before repeating the direct test. **Full box** introduces PSD Gram blocks and
+matches an exact box-polynomial identity. The
+[SOS certificate chapter](/DP-LMI-package/documents/math/sos-certificates/)
+derives these ideas; the API pages below stay focused on callable syntax.
 
 ## Reference Index
 

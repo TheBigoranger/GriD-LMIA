@@ -7,7 +7,6 @@ This generated page lists implemented public classes and methods that are docume
 
 | Name | Type | Lookup Task |
 | :--- | :--- | :--- |
-| [`Status and limits`](/DP-LMI-package/documents/status-and-limits/) | Guide | Check what is implemented, reserved, or unsupported before choosing a workflow. |
 | [`pdbase`](/DP-LMI-package/documents/reference/pdbase/) | Backend class | Inspect cell-local Bernstein storage shared by pdmat and pdvar. |
 | [`cells`](/DP-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-cells) | pdbase method | Enumerate physical tensor-grid cells. |
 | [`coeffs`](/DP-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-coeffs) | pdbase method | Read local Bernstein coefficient families. |

@@ -1,0 +1,264 @@
+---
+title: pdmat Matrix Operations
+description: Interleaved examples, outputs, and diagrams for coefficient-backed pdmat algebra and structural operations.
+---
+
+import MatrixOperationDiagram from "../../../../../components/MatrixOperationDiagram.astro";
+
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <span>/</span>
+  <span>matrix operations</span>
+</nav>
+
+## How To Read This Page
+
+Every operation acts on the matrix payload stored at each local Bernstein
+label. The examples below therefore keep one cluster together: meaning,
+MATLAB code, immediate output, and a diagram of the result. Physical nodes
+remain $\rho_k$; a physical cell is $c$; its stored coefficient is
+$C^{(c)}[\mathbf i]$.
+
+| Family | Operations |
+| :--- | :--- |
+| Coefficient algebra | `plus`, `minus`, `uplus`, `uminus`, `mtimes` |
+| Shape transforms | `transpose`, `ctranspose`, `reshape`, `squeeze`, `vec` |
+| Matrix summaries | `diag`, `trace`, `sum`, `mean`, `cumsum`, `tril`, `triu` |
+| Assembly | `cat`, `horzcat`, `vertcat`, `blkdiag`, `repmat` |
+| Reordering | `flip`, `fliplr`, `flipud`, `rot90` |
+| Selection | `subsref`, `subsasgn`, `end` |
+| Inspection | `size`, `length`, `numel`, `ndims`, `height`, `width`, `isequal`, `disp`, `display` |
+
+## <span id="pdmat-plus"></span><span id="pdmat-minus"></span><span id="pdmat-uplus"></span><span id="pdmat-uminus"></span>Add, Subtract, And Align Coefficients
+
+`plus`/`+` and `minus`/`-` first align compatible physical grids and elevate
+the lower Bernstein degree exactly. Numeric constants are promoted to the
+matrix payload size. `uplus` preserves the object and `uminus` negates every
+stored coefficient.
+
+```matlab
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
+S = A + B;
+cS = S.coeffs(1);
+Z = A - A;
+N = -A;
+U = +A;
+fprintf('degree=%d\n', S.Degree);
+disp([cS{:}])
+fprintf('minus=%g, uminus=%g, uplus=%g\n', ...
+    Z.evaluate(0.5), N.evaluate(1), U.evaluate(0));
+```
+
+```text
+degree=2
+   11.0000   21.5000   32.0000
+minus=0, uminus=-2, uplus=1
+```
+
+<MatrixOperationDiagram kind="align" caption="Degree elevation changes the coefficient representation, not the represented polynomial; addition then combines aligned local labels." />
+
+If two coefficient-backed operands have compatible bounds but different
+interior nodes, the operation uses their sorted-union physical grid. Grid
+refinement and degree elevation are independent alignment steps.
+
+## <span id="pdmat-mtimes"></span>Multiply In Bernstein Coefficient Space
+
+`mtimes`/`*` performs an ordered, binomial-normalized tensor convolution. On
+one cell,
+
+$$
+R^{(c)}[\mathbf k]=
+\sum_{\mathbf i+\mathbf j=\mathbf k}
+\prod_{s=1}^{\ell}
+\frac{\binom m{i_s}\binom n{j_s}}{\binom{m+n}{k_s}}
+P^{(c)}[\mathbf i]Q^{(c)}[\mathbf j].
+$$
+
+Matrix order is preserved. Numeric scalars and matrices use the corresponding
+MATLAB-compatible left or right product. Two degree-one tensor factors produce
+degree two and nine local labels in two parameters.
+
+```matlab
+grid = {[0 1], [10 20]};
+A = pdmat(grid, {1 2; 3 4}, Degree=1);
+B = pdmat(grid, {5 6; 7 8}, Degree=1);
+K = A * B;
+cK = K.coeffs([1 1]);
+fprintf('degree=%d, coefficients=%d\n', K.Degree, K.ncoeff());
+disp([cK{:}])
+```
+
+```text
+degree=2, coefficients=9
+     5     8    12    11    15    20    21    26    32
+```
+
+<MatrixOperationDiagram kind="product" caption="Two degree-one coefficient rows convolve into one degree-two row; the middle coefficient combines two ordered products." />
+
+## <span id="pdmat-transpose"></span><span id="pdmat-ctranspose"></span><span id="pdmat-reshape"></span><span id="pdmat-squeeze"></span><span id="pdmat-vec"></span>Transpose And Reshape Each Matrix Payload
+
+`transpose`/`.'` and `ctranspose`/`'` act coefficient by coefficient.
+`reshape` preserves the number of payload elements, `squeeze` removes
+singleton payload dimensions, and `vec` makes a column using MATLAB column
+order. For real coefficients the two transpose operations have the same
+numeric effect.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+At = A.';
+r = reshape(A, [1 4]);
+s = squeeze(A);
+v = vec(A);
+fprintf('transpose=%d-by-%d, reshape=%d-by-%d, vec=%d-by-%d\n', ...
+    size(At,1), size(At,2), size(r,1), size(r,2), size(v,1), size(v,2));
+disp(v.evaluate(0))
+```
+
+```text
+transpose=2-by-2, reshape=1-by-4, vec=4-by-1
+     1
+     3
+     2
+     4
+```
+
+<MatrixOperationDiagram kind="transform" caption="Reshape changes the payload dimensions; vec reads each local matrix in MATLAB column order." />
+
+## <span id="pdmat-diag"></span><span id="pdmat-trace"></span><span id="pdmat-sum"></span><span id="pdmat-mean"></span><span id="pdmat-cumsum"></span><span id="pdmat-tril"></span><span id="pdmat-triu"></span>Extract, Reduce, And Triangularize
+
+`diag(A,k)`, `tril(A,k)`, and `triu(A,k)` use MATLAB's optional diagonal
+offset. `trace` requires square payloads. `sum`, `mean`, and `cumsum` operate
+along a requested matrix dimension; they never reduce the physical-cell or
+Bernstein-label axes.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+D = diag(A); tr = trace(A); colsum = sum(A,1);
+avg = mean(A,2); running = cumsum(A,2);
+lo = tril(A); hi = triu(A);
+disp(D.evaluate(0))
+fprintf('trace=%g\n', tr.evaluate(0));
+disp(colsum.evaluate(0))
+disp(lo.evaluate(0) + hi.evaluate(0) - diag(diag(A.evaluate(0))))
+```
+
+```text
+     1
+     4
+trace=5
+     4     6
+     1     2
+     3     4
+```
+
+<MatrixOperationDiagram kind="summary" caption="diag extracts a coefficient-wise diagonal, while trace reduces it to a scalar at every local label." />
+
+## <span id="pdmat-horzcat"></span><span id="pdmat-vertcat"></span><span id="pdmat-cat"></span><span id="pdmat-blkdiag"></span><span id="pdmat-repmat"></span>Assemble Larger Matrices
+
+`horzcat`, `vertcat`, and `cat(dim,...)` concatenate compatible payloads.
+`blkdiag` creates block-diagonal payloads; `repmat` repeats them. Operands must
+have compatible physical grids and coefficient degrees after alignment.
+
+```matlab
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+H = [A A]; V = [A; A]; C = cat(2,A,A);
+B = blkdiag(A,A); R = repmat(A,2,3);
+fprintf('H=%d-by-%d, V=%d-by-%d, cat=%d-by-%d\n', ...
+    size(H,1),size(H,2),size(V,1),size(V,2),size(C,1),size(C,2));
+fprintf('blkdiag=%d-by-%d, repmat=%d-by-%d\n', ...
+    size(B,1),size(B,2),size(R,1),size(R,2));
+```
+
+```text
+H=1-by-2, V=2-by-1, cat=1-by-2
+blkdiag=2-by-2, repmat=2-by-3
+```
+
+<MatrixOperationDiagram kind="assemble" caption="blkdiag places the same parameter-dependent payload on diagonal blocks; each block keeps the common grid and local labels." />
+
+## <span id="pdmat-flip"></span><span id="pdmat-fliplr"></span><span id="pdmat-flipud"></span><span id="pdmat-rot90"></span>Flip And Rotate Matrix Entries
+
+`flip(A,dim)`, `fliplr`, `flipud`, and `rot90(A,k)` reorder entries inside
+every coefficient matrix. They do not reverse physical grids or relabel
+Bernstein coefficients.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+disp(fliplr(A).evaluate(0))
+disp(flipud(A).evaluate(0))
+disp(rot90(A).evaluate(0))
+```
+
+```text
+     2     1
+     4     3
+     3     4
+     1     2
+     2     4
+     1     3
+```
+
+<MatrixOperationDiagram kind="reorder" caption="Reordering changes positions inside each stored matrix; the physical cell and local Bernstein label stay fixed." />
+
+## <span id="pdmat-subsref"></span><span id="pdmat-subsasgn"></span><span id="pdmat-end"></span>Index And Assign Blocks
+
+Two-dimensional `subsref` selects matrix entries. `subsasgn` accepts numeric
+or compatible `pdmat` blocks and preserves the grid contract. `end` resolves
+against payload dimensions, not the number of physical cells.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+entry = A(1,end);
+A(2,1) = pdmat({[0 1]}, {9,10}, Degree=1);
+fprintf('entry=%d-by-%d\n', size(entry,1), size(entry,2));
+disp(A.evaluate(1))
+```
+
+```text
+entry=1-by-1
+     5     6
+    10     8
+```
+
+<MatrixOperationDiagram kind="index" caption="Indexing selects the same matrix position from every local coefficient; assignment replaces that coefficient-wise block." />
+
+## <span id="pdmat-size"></span><span id="pdmat-numel"></span><span id="pdmat-ndims"></span><span id="pdmat-length"></span><span id="pdmat-height"></span><span id="pdmat-width"></span><span id="pdmat-isequal"></span><span id="pdmat-disp"></span><span id="pdmat-display"></span><span id="pdmat-numArgumentsFromSubscript"></span>Inspect Shape, Equality, And Display
+
+`size`, `length`, `numel`, `ndims`, `height`, and `width` report the matrix
+payload shape at one parameter location. `isequal` compares normalized grid,
+metadata, shape, and coefficient evidence. `disp`/`display` print an object
+summary; use `bernsteinTable` for coefficient rows. `numArgumentsFromSubscript`
+is the MATLAB dispatch hook that keeps indexed results scalar for dot access.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+fprintf('size=%d-by-%d, length=%d, numel=%d, ndims=%d\n', ...
+    height(A), width(A), length(A), numel(A), ndims(A));
+fprintf('isequal(A,A)=%d\n', isequal(A,A));
+```
+
+```text
+size=2-by-2, length=2, numel=4, ndims=2
+isequal(A,A)=1
+```
+
+<MatrixOperationDiagram kind="shape" caption="Shape methods describe one matrix payload; use ncell and ncoeff for physical-cell and local-label counts." />
+
+## Validation And Limitations
+
+- Function-only objects without Bernstein coefficient evidence are rejected by
+  coefficient algebra and most structural coefficient operations.
+- Physical bounds must be compatible before common-refinement algebra.
+- Matrix dimensions and offsets must satisfy the corresponding MATLAB call.
+- `mtimes` is matrix multiplication; element-wise parameter-dependent products
+  are not documented as a public substitute.
+
+## See Also
+
+[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) ·
+[`evaluate`](/DP-LMI-package/documents/reference/pdmat/evaluate/) ·
+[`bernsteinTable`](/DP-LMI-package/documents/reference/pdmat/bernsteintable/) ·
+[`pdvar matrix operations`](/DP-LMI-package/documents/reference/pdvar/matrix-operations/)

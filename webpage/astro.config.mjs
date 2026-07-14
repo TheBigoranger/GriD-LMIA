@@ -40,7 +40,6 @@ export default defineConfig({
             { label: "Bernstein Polynomial", slug: "documents/math/bernstein-polynomial" },
             { label: "Gridding And Bernstein Degree", slug: "documents/math/gridding-and-degree" },
             { label: "SOS Certificates On A Hypercube", slug: "documents/math/sos-certificates" },
-            { label: "Status And Limits", slug: "documents/status-and-limits" },
             {
               label: "pdmat",
               items: [

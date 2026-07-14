@@ -28,47 +28,47 @@
         <rect x="138" y="149" width="64" height="35" rx="5" />
         <rect x="204" y="149" width="64" height="35" rx="5" />
         <rect x="270" y="149" width="64" height="35" rx="5" />
-        <text x="170" y="172" text-anchor="middle">C₀</text>
-        <text x="236" y="172" text-anchor="middle">C₁</text>
-        <text x="302" y="172" text-anchor="middle">C₂</text>
+        <text x="170" y="172" text-anchor="middle">C⁽¹⁾[0]</text>
+        <text x="236" y="172" text-anchor="middle">C⁽¹⁾[1]</text>
+        <text x="302" y="172" text-anchor="middle">C⁽¹⁾[2]</text>
         <rect x="426" y="149" width="64" height="35" rx="5" />
         <rect x="492" y="149" width="64" height="35" rx="5" />
         <rect x="558" y="149" width="64" height="35" rx="5" />
-        <text x="458" y="172" text-anchor="middle">C₂</text>
-        <text x="524" y="172" text-anchor="middle">C₃</text>
-        <text x="590" y="172" text-anchor="middle">C₄</text>
+        <text x="458" y="172" text-anchor="middle">C⁽²⁾[0]</text>
+        <text x="524" y="172" text-anchor="middle">C⁽²⁾[1]</text>
+        <text x="590" y="172" text-anchor="middle">C⁽²⁾[2]</text>
       </g>
     </svg>
     <p>
       Three grid nodes create <strong>two physical cells</strong>. Degree 2
       gives <strong>three local Bernstein labels</strong> per cell; it does
       not add grid nodes. A global coefficient grid shares the boundary
-      coefficient <code>C₂</code>.
+      handle, so <code>C^(1)[2] = C^(2)[0]</code> at the interface.
     </p>
   </section>
 
   <section class="diagram-panel">
-    <h3>Two parameters: four cells, degree 1</h3>
-    <svg viewBox="0 0 760 320" role="img" aria-label="A two-dimensional three by three node grid creates four physical rectangular cells. The highlighted cell contains four degree-one tensor Bernstein coefficient labels.">
+    <h3>Two parameters: unequal node counts, degree 1</h3>
+    <svg viewBox="0 0 760 320" role="img" aria-label="A two-dimensional four by three node grid creates six physical rectangular cells. The highlighted cell contains four degree-one tensor Bernstein coefficient labels.">
       <text x="250" y="25" text-anchor="middle" class="caption">physical tensor grid</text>
       <g class="grid2d">
         <rect x="82" y="55" width="336" height="204" class="cell" />
         <line x1="194" y1="55" x2="194" y2="259" />
         <line x1="306" y1="55" x2="306" y2="259" />
-        <line x1="82" y1="123" x2="418" y2="123" />
-        <line x1="82" y1="191" x2="418" y2="191" />
-        <rect x="194" y="123" width="112" height="68" class="selected" />
+        <line x1="82" y1="157" x2="418" y2="157" />
+        <rect x="194" y="157" width="112" height="102" class="selected" />
       </g>
       <g class="math-label">
         <text x="82" y="282" text-anchor="middle">ρ₁,₀</text>
         <text x="194" y="282" text-anchor="middle">ρ₁,₁</text>
         <text x="306" y="282" text-anchor="middle">ρ₁,₂</text>
+        <text x="418" y="282" text-anchor="middle">ρ₁,₃</text>
         <text x="63" y="60" text-anchor="end">ρ₂,₂</text>
-        <text x="63" y="128" text-anchor="end">ρ₂,₁</text>
-        <text x="63" y="196" text-anchor="end">ρ₂,₀</text>
+        <text x="63" y="162" text-anchor="end">ρ₂,₁</text>
+        <text x="63" y="264" text-anchor="end">ρ₂,₀</text>
       </g>
-      <text x="250" y="162" text-anchor="middle" class="cell-label">cell [2, 2]</text>
-      <path d="M322 157 H454" class="guide" />
+      <text x="250" y="214" text-anchor="middle" class="cell-label">cell c = [2, 1]</text>
+      <path d="M322 208 H454" class="guide" />
       <text x="578" y="25" text-anchor="middle" class="caption">one selected cell: local labels</text>
       <g class="local-cell">
         <rect x="500" y="55" width="156" height="156" />
@@ -82,7 +82,8 @@
       <text x="578" y="242" text-anchor="middle" class="caption">(Degree + 1)² = 4 coefficients</text>
     </svg>
     <p>
-      A 3-by-3 node grid makes 2-by-2 physical cells. Degree 1 is applied in
+      A 4-by-3 node grid makes 3-by-2 physical cells, showing that axis node
+      counts need not match. Degree 1 is applied in
       <em>each</em> parameter direction, so a selected cell stores the four
       tensor labels <code>[0 0]</code>, <code>[0 1]</code>,
       <code>[1 0]</code>, and <code>[1 1]</code> in package order.

@@ -47,4 +47,3 @@ results = tests.run_all();
 - [pdmat constructor](/DP-LMI-package/documents/reference/pdmat/constructor/)
 - [pdvar constructor](/DP-LMI-package/documents/reference/pdvar/constructor/)
 - [Solver smoke examples](/DP-LMI-package/examples/solver-smoke/)
-- [Status and limits](/DP-LMI-package/documents/status-and-limits/)

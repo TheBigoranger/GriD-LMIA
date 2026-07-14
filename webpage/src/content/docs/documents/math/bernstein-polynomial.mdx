@@ -3,6 +3,8 @@ title: Bernstein Polynomial
 description: Bernstein history, tensor-product cell storage, coefficient algebra, finite matrix certificates, and refinement boundaries for DP-LMI.
 ---
 
+import BernsteinConceptDiagram from "../../../../components/BernsteinConceptDiagram.astro";
+
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -11,12 +13,34 @@ description: Bernstein history, tensor-product cell storage, coefficient algebra
 
 The package stores parameter-dependent matrices with cell-local Bernstein
 coefficients. This chapter explains the mathematical facts used by `pdmat`,
-`pdvar`, `rhodiff`, and `pdlmi`; the [Status And Limits](/DP-LMI-package/documents/status-and-limits/)
-page separates those implemented calls from research context.
+`pdvar`, `rhodiff`, and `pdlmi`. Each API page places validation and
+limitations beside the call they affect.
 
 For a diagram-led walkthrough of the actual one- and two-dimensional input
 shapes, cell traversal, and the distinction between physical gridding and
 Bernstein `Degree`, see [Gridding And Bernstein Degree](/DP-LMI-package/documents/math/gridding-and-degree/).
+
+## Begin With One Polynomial
+
+Take the ordinary polynomial
+
+$$
+p(\alpha)=1+2\alpha+3\alpha^2,
+\qquad \alpha\in[0,1].
+$$
+
+The same polynomial in the degree-two Bernstein basis is
+
+$$
+p(\alpha)=1B_0^2(\alpha)+2B_1^2(\alpha)+6B_2^2(\alpha).
+$$
+
+The coefficient row `[1, 2, 6]` is another exact representation of the
+polynomial. These are not three new physical grid nodes and are not, in
+general, three sampled values. The package applies the same change of basis to
+full matrices on every physical cell.
+
+<BernsteinConceptDiagram kind="basis" />
 
 ## From 1912 To Parameter-Dependent LMIs
 
@@ -69,10 +93,13 @@ $\binom{m}{i}$ shown in the definition above. The endpoint labels are:
 For degree two,
 
 $$
-P(\rho)=(1-\alpha)^2C_0+2(1-\alpha)\alpha C_1+\alpha^2C_2.
+P_c(\alpha)=(1-\alpha)^2C^{(c)}[0]
++2(1-\alpha)\alpha C^{(c)}[1]+\alpha^2C^{(c)}[2].
 $$
 
-The package stores $C_0,C_1,C_2$ as coefficient matrices or expressions. It
+On physical cell $c$, write the stored objects as
+$C^{(c)}[0],C^{(c)}[1],C^{(c)}[2]$. The package stores them as coefficient
+matrices or expressions. It
 does not treat them as arbitrary samples of a fitted curve. A function-only
 `pdmat` constructed without explicit `Degree` is different: it retains its
 exact function handle but does not claim Bernstein coefficient evidence.
@@ -90,20 +117,22 @@ $$
 Therefore
 
 $$
-P(\alpha)=\sum_i B_i^m(\alpha)P_i
+P_c(\alpha)=\sum_i B_i^m(\alpha)P^{(c)}[i]
 $$
 
 lies in the convex hull of its coefficients. The statement applies to several
 payload types:
 
-- scalar: $\min_i P_i\le P(\alpha)\le\max_iP_i$;
+- scalar: $\min_i P^{(c)}[i]\le P_c(\alpha)\le\max_iP^{(c)}[i]$;
 - vector: every value lies in the convex hull of the coefficient vectors;
 - matrix: every value is a convex combination of the coefficient matrices.
 
-For symmetric matrix coefficients, if every $P_i\preceq0$, then
-$P(\alpha)\preceq0$ throughout the cell. Apply the scalar convex-combination
-argument to $x^{\mathsf T}P(\alpha)x$ for every vector $x$. Strictly negative
+For symmetric matrix coefficients, if every $P^{(c)}[i]\preceq0$, then
+$P_c(\alpha)\preceq0$ throughout the cell. Apply the scalar convex-combination
+argument to $x^{\mathsf T}P_c(\alpha)x$ for every vector $x$. Strictly negative
 coefficient matrices similarly give a strict cell-wide certificate.
+
+<BernsteinConceptDiagram kind="convex" />
 
 The converse does not generally hold. A matrix polynomial can be negative
 definite everywhere while one or more Bernstein coefficient matrices fail the
@@ -125,12 +154,21 @@ sign arguments hold on every physical hyperrectangle. Bernstein bases on
 simplices are related, but simplex storage is not the `pdbase` convention.
 Here each axis has an independent grid interval and local label.
 
+<BernsteinConceptDiagram kind="tensor" />
+
+The tensor picture deliberately uses four physical nodes on the first axis
+and three on the second: axis node counts need not match. In $\ell$
+dimensions, a physical node has vector subscript
+$\mathbf k=(k_1,\ldots,k_\ell)$, a cell has identity $\mathbf c$, and a local
+Bernstein label is $\mathbf i=(i_1,\ldots,i_\ell)$. A stored matrix is
+therefore $C^{(\mathbf c)}[\mathbf i]$.
+
 ## LocalValues, Continuity, And Boundaries
 
 Physical cells are stored as a nested tree:
 
 ```text
-LocalValues{i1}{i2}...{i_ell}
+LocalValues{c1}{c2}...{c_ell}
 ```
 
 Each selected leaf is a flat coefficient cell in combination order over the
@@ -149,15 +187,16 @@ physical widths and different partial-difference data.
 For
 
 $$
-P(\alpha)=\sum_{i=0}^{m}P_iB_i^m(\alpha),
+P_c(\alpha)=\sum_{i=0}^{m}P^{(c)}[i]B_i^m(\alpha),
 $$
 
 the forward coordinate gives the physical derivative on a cell of width
 $h=\rho_{k+1}-\rho_k$:
 
 $$
-\frac{dP}{d\rho}
-=\frac{m}{h}\sum_{i=0}^{m-1}(P_{i+1}-P_i)B_i^{m-1}(\alpha).
+\frac{dP_c}{d\rho}
+=\frac{m}{h_c}\sum_{i=0}^{m-1}
+\bigl(P^{(c)}[i+1]-P^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
 $$
 
 For several parameters,
@@ -167,15 +206,17 @@ one row for each active rate-box vertex. The
 [`rhodiff` reference](/DP-LMI-package/documents/reference/pdvar/rhodiff/)
 documents the supported call forms and validation rules.
 
+<BernsteinConceptDiagram kind="derivative" />
+
 ## Degree Elevation For Any Target Degree
 
 A degree-$m$ polynomial can be represented exactly at any degree $M\ge m$.
 For one parameter, the package-indexed coefficients are
 
 $$
-\widehat C_k=
+\widehat C^{(c)}[k]=
 \sum_{i=\max(0,k-(M-m))}^{\min(m,k)}
-C_i\,
+C^{(c)}[i]\,
 \frac{\binom{m}{i}\binom{M-m}{k-i}}{\binom{M}{k}},
 \qquad k=0,\ldots,M.
 $$
@@ -191,8 +232,8 @@ higher-degree decision parameterization, which enlarges the search space.
 The de Casteljau recursion repeatedly forms affine combinations:
 
 $$
-C_j^{(r)}=(1-\alpha)C_j^{(r-1)}+\alpha C_{j+1}^{(r-1)},
-\qquad C_j^{(0)}=C_j.
+C^{(r)}[j]=(1-\alpha)C^{(r-1)}[j]+\alpha C^{(r-1)}[j+1],
+\qquad C^{(0)}[j]=C^{(c)}[j].
 $$
 
 It evaluates the polynomial stably, and the two edge chains of its recursion
@@ -212,8 +253,8 @@ If two degree-one objects are
 
 $$
 \begin{aligned}
-P(\alpha)&=B_0^1(\alpha)P_0+B_1^1(\alpha)P_1,\\
-Q(\alpha)&=B_0^1(\alpha)Q_0+B_1^1(\alpha)Q_1,
+P_c(\alpha)&=B_0^1(\alpha)P^{(c)}[0]+B_1^1(\alpha)P^{(c)}[1],\\
+Q_c(\alpha)&=B_0^1(\alpha)Q^{(c)}[0]+B_1^1(\alpha)Q^{(c)}[1],
 \end{aligned}
 $$
 
@@ -221,19 +262,20 @@ their product has degree two:
 
 $$
 \begin{aligned}
-P(\alpha)Q(\alpha)
-&=B_0^2(\alpha)R_0+B_1^2(\alpha)R_1+B_2^2(\alpha)R_2,\\
-R_0&=P_0Q_0,\\
-R_1&=\frac{P_0Q_1+P_1Q_0}{2},\\
-R_2&=P_1Q_1.
+P_c(\alpha)Q_c(\alpha)
+&=B_0^2(\alpha)R^{(c)}[0]+B_1^2(\alpha)R^{(c)}[1]
++B_2^2(\alpha)R^{(c)}[2],\\
+R^{(c)}[0]&=P^{(c)}[0]Q^{(c)}[0],\\
+R^{(c)}[1]&=\frac{P^{(c)}[0]Q^{(c)}[1]+P^{(c)}[1]Q^{(c)}[0]}{2},\\
+R^{(c)}[2]&=P^{(c)}[1]Q^{(c)}[1].
 \end{aligned}
 $$
 
 For arbitrary scalar degrees $n$ and $m$,
 
 $$
-R_k=\sum_{i+j=k}
-P_iQ_j
+R^{(c)}[k]=\sum_{i+j=k}
+P^{(c)}[i]Q^{(c)}[j]
 \frac{\binom{n}{i}\binom{m}{j}}{\binom{n+m}{k}},
 \qquad k=0,\ldots,n+m.
 $$
@@ -241,7 +283,8 @@ $$
 For tensor-product parameters, labels add componentwise, coefficient tensors
 convolve over every matching label pair, and the scale is the product of the
 one-dimensional binomial ratios. Matrix multiplication order is preserved:
-$P_iQ_j$ cannot generally be exchanged with $Q_jP_i$.
+$P^{(c)}[i]Q^{(c)}[j]$ cannot generally be exchanged with
+$Q^{(c)}[j]P^{(c)}[i]$.
 
 This direct coefficient convolution is implemented by the shared Bernstein
 backend and exercised by coefficient-backed `pdmat` algebra and supported
@@ -339,13 +382,13 @@ ans =
 For a residual
 
 $$
-E(\boldsymbol\alpha)=
-\sum_{\mathbf i}B_{\mathbf i}^{m}(\boldsymbol\alpha)E_{\mathbf i},
+E_c(\boldsymbol\alpha)=
+\sum_{\mathbf i}B_{\mathbf i}^{m}(\boldsymbol\alpha)E^{(c)}[\mathbf i],
 $$
 
 the implemented `pdlmi` path creates one YALMIP sign constraint for every
 physical cell, local coefficient, and active rate-vertex row. Requiring all
-$E_{\mathbf i}\preceq0$ is sufficient for the whole local matrix polynomial
+$E^{(c)}[\mathbf i]\preceq0$ is sufficient for the whole local matrix polynomial
 to be nonpositive. `toYalmip` then hands the finite constraint array to
 ordinary YALMIP solver calls.
 
@@ -402,13 +445,10 @@ not imply that every theorem, refinement, or hierarchy in that literature is
 implemented in the MATLAB/YALMIP package. In particular, general SOS
 assembly, adaptive refinement, package-owned strictness or residual
 certification, and diagnostics remain reserved or unsupported. The supported
-SOS-family feature is the fixed-order full box preordering certificate. The
-repository also includes an optional [independent SOS validation suite](https://github.com/TheBigoranger/DP-LMI-package/tree/main/sos_validation)
-for cross-backend evidence; it is not a MATLAB runtime dependency.
+SOS-family feature is the fixed-order full box preordering certificate.
 
 ## See Also
 
-[`Status And Limits`](/DP-LMI-package/documents/status-and-limits/) ·
 [`SOS Certificates On A Hypercube`](/DP-LMI-package/documents/math/sos-certificates/) ·
 [`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) ·
 [`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/) ·
