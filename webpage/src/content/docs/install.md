@@ -12,7 +12,7 @@ Use the tagged `v0.2.0` release for a reproducible package snapshot. The
 | :--- | :--- |
 | v0.2.0 release | [Open the GitHub release](https://github.com/TheBigoranger/DP-LMI-package/releases/tag/v0.2.0) |
 | v0.2.0 source archive | [Download the tagged ZIP](https://github.com/TheBigoranger/DP-LMI-package/archive/refs/tags/v0.2.0.zip) |
-| Current manual snapshot | [Open `doc/manual.pdf` from `main`](https://github.com/TheBigoranger/DP-LMI-package/raw/main/doc/manual.pdf) |
+| Current manual snapshot | [Open the printable manual](/DP-LMI-package/manual.pdf) |
 | Current source snapshot | [Download `main` as ZIP](https://github.com/TheBigoranger/DP-LMI-package/archive/refs/heads/main.zip) |
 | GitHub repository | [TheBigoranger/DP-LMI-package](https://github.com/TheBigoranger/DP-LMI-package) |
 | Version history | [Open version history](/DP-LMI-package/version-history/) |

@@ -1,5 +1,6 @@
 # build output
 dist/
+public/manual.pdf
 # generated types
 .astro/
 .vite/
