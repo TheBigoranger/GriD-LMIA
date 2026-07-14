@@ -4,9 +4,9 @@ description: Convert assigned symbolic coefficients to known pdmat data.
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
+  <a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>value</span>
 </nav>
@@ -58,9 +58,9 @@ Unassigned, nonnumeric, nonreal, nonfinite, or unavailable values raise
 ## Limitations
 
 `value` evaluates stored coefficients, not an arbitrary parameter point. Use
-[`pdmat evaluate`](/DP-LMI-package/documents/reference/pdmat/evaluate/) after
+[`pdmat evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) after
 conversion when an exact point evaluation is needed.
 
 ## See Also
 
-[`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) · [`pdmat`](/DP-LMI-package/documents/reference/pdmat/) · [`bernsteinTable`](/DP-LMI-package/documents/reference/pdvar/bernsteintable/)
+[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) · [`pdmat`](/PD-LMI-package/documents/reference/pdmat/) · [`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/)

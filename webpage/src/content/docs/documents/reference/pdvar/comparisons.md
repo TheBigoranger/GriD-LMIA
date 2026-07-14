@@ -4,9 +4,9 @@ description: Create pdlmi constraints using <= and >=.
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
+  <a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>comparisons</span>
 </nav>
@@ -31,7 +31,7 @@ C = P >= rhs
 
 ## Output
 
-`C` is a [`pdlmi`](/DP-LMI-package/documents/reference/pdlmi/) object.
+`C` is a [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) object.
 
 ## Description
 
@@ -111,4 +111,4 @@ constraints.
 
 ## See Also
 
-[`pdlmi`](/DP-LMI-package/documents/reference/pdlmi/) · [`toYalmip`](/DP-LMI-package/documents/reference/pdlmi/toyalmip/)
+[`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)

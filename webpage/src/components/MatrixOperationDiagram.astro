@@ -1,4 +1,6 @@
 ---
+import DiagramFrame from "./DiagramFrame.astro";
+
 interface Props {
   kind: "align" | "product" | "transform" | "summary" | "assemble" | "index" | "reorder" | "shape";
   caption: string;
@@ -7,156 +9,74 @@ interface Props {
 const { kind, caption } = Astro.props;
 ---
 
-<figure class="operation-diagram">
-  <div class="operation-scene" role="img" aria-label={caption}>
-    <div class="operation-track">
-      {kind === "align" && (
-        <>
-        <div class="stack"><span>degree 1</span><code>[1, 2]</code></div>
-        <b class="arrow">＋</b>
-        <div class="stack"><span>degree 2</span><code>[10, 20, 30]</code></div>
-        <b class="arrow">→</b>
-        <div class="stack result"><span>aligned degree 2</span><code>[11, 21.5, 32]</code></div>
-        </>
-      )}
-      {kind === "product" && (
-        <>
-        <div class="coeffs"><span>P⁽ᶜ⁾[0]</span><span>P⁽ᶜ⁾[1]</span></div>
-        <b class="arrow">×</b>
-        <div class="coeffs warm"><span>Q⁽ᶜ⁾[0]</span><span>Q⁽ᶜ⁾[1]</span></div>
-        <b class="arrow">→</b>
-        <div class="coeffs result"><span>R⁽ᶜ⁾[0]</span><span>R⁽ᶜ⁾[1]</span><span>R⁽ᶜ⁾[2]</span></div>
-        </>
-      )}
-      {kind === "transform" && (
-        <>
-        <div class="matrix"><span>1</span><span>2</span><span>3</span><span>4</span></div>
-        <b class="arrow">reshape / vec →</b>
-        <div class="vector"><span>1</span><span>3</span><span>2</span><span>4</span></div>
-        </>
-      )}
-      {kind === "summary" && (
-        <>
-        <div class="matrix"><span>1</span><span>2</span><span>3</span><span>4</span></div>
-        <b class="arrow">diag / trace →</b>
-        <div class="coeffs result"><span>[1; 4]</span><span>5</span></div>
-        </>
-      )}
-      {kind === "assemble" && (
-        <>
-        <div class="matrix one"><span>A</span></div>
-        <b class="arrow">blkdiag →</b>
-        <div class="matrix"><span>A</span><span>0</span><span>0</span><span>A</span></div>
-        </>
-      )}
-      {kind === "index" && (
-        <>
-        <div class="matrix"><span>1</span><span class="focus">2</span><span>3</span><span>4</span></div>
-        <b class="arrow">A(1,2) →</b>
-        <div class="coeffs result"><span>2</span></div>
-        </>
-      )}
-      {kind === "reorder" && (
-        <>
-        <div class="matrix"><span>1</span><span>2</span><span>3</span><span>4</span></div>
-        <b class="arrow">flip / rot90 →</b>
-        <div class="matrix result"><span>2</span><span>4</span><span>1</span><span>3</span></div>
-        </>
-      )}
-      {kind === "shape" && (
-        <>
-        <div class="matrix"><span>•</span><span>•</span><span>•</span><span>•</span></div>
-        <b class="arrow">inspect →</b>
-        <div class="stack result"><code>size = [2 2]</code><code>numel = 4</code></div>
-        </>
-      )}
-    </div>
+<DiagramFrame caption={caption} class="operation-diagram">
+  <div class:list={["operation-flow", `operation-flow--${kind}`]}>
+    {kind === "align" && (
+      <><div class="operation-card"><small>degree 1</small><code>[1, 2]</code></div><b>+</b><div class="operation-card"><small>degree 2</small><code>[10, 20, 30]</code></div><b>→</b><div class="operation-card operation-card--result"><small>aligned degree 2</small><code>[11, 21.5, 32]</code></div></>
+    )}
+    {kind === "product" && (
+      <><div class="coefficient-line coefficient-line--first"><span>P⁽ᶜ⁾[0]</span><span>P⁽ᶜ⁾[1]</span></div><b>×</b><div class="coefficient-line coefficient-line--second"><span>Q⁽ᶜ⁾[0]</span><span>Q⁽ᶜ⁾[1]</span></div><b>→</b><div class="coefficient-line operation-card--result"><span>R⁽ᶜ⁾[0]</span><span>R⁽ᶜ⁾[1]</span><span>R⁽ᶜ⁾[2]</span></div></>
+    )}
+    {kind === "transform" && (
+      <><div class="matrix"><span>1</span><span>2</span><span>3</span><span>4</span></div><b>reshape / vec →</b><div class="vector"><span>1</span><span>3</span><span>2</span><span>4</span></div></>
+    )}
+    {kind === "summary" && (
+      <><div class="matrix"><span>1</span><span>2</span><span>3</span><span>4</span></div><b>diag / trace →</b><div class="operation-card operation-card--result"><code>[1; 4]</code><code>5</code></div></>
+    )}
+    {kind === "assemble" && (
+      <><div class="matrix matrix--one"><span>A</span></div><b>blkdiag →</b><div class="matrix operation-card--result"><span>A</span><span>0</span><span>0</span><span>A</span></div></>
+    )}
+    {kind === "index" && (
+      <><div class="matrix"><span>1</span><span class="focus">2</span><span>3</span><span>4</span></div><b>A(1,2) →</b><div class="operation-card operation-card--result"><code>2</code></div></>
+    )}
+    {kind === "reorder" && (
+      <><div class="matrix"><span>1</span><span>2</span><span>3</span><span>4</span></div><b>flip / rot90 →</b><div class="matrix operation-card--result"><span>2</span><span>4</span><span>1</span><span>3</span></div></>
+    )}
+    {kind === "shape" && (
+      <><div class="matrix"><span>•</span><span>•</span><span>•</span><span>•</span></div><b>inspect →</b><div class="operation-card operation-card--result"><code>size = [2 2]</code><code>numel = 4</code></div></>
+    )}
   </div>
-  <figcaption>{caption}</figcaption>
-</figure>
+</DiagramFrame>
 
 <style>
-  .operation-diagram {
-    margin: 0.9rem 0 1.6rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--sl-color-accent-low) 22%, var(--sl-color-bg));
-    overflow: hidden;
-  }
-
-  .operation-scene {
-    width: 100%;
-    min-width: 0;
-    overflow-x: auto;
-  }
-
-  .operation-track {
+  .operation-flow {
     display: flex;
-    min-width: 32rem;
-    min-height: 8.5rem;
-    box-sizing: border-box;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    min-width: 0;
+    min-height: 6rem;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.5rem, 2vw, 1rem);
-    padding: 1rem;
   }
 
-  figcaption {
-    margin: 0;
-    border-block-start: 1px solid var(--sl-color-gray-5);
-    padding: 0.7rem 0.9rem;
-    color: var(--sl-color-gray-2);
-    font-size: 0.86rem;
-  }
-
-  .stack,
-  .coeffs {
-    display: grid;
-    gap: 0.4rem;
-    place-items: center;
-  }
-
-  .coeffs {
-    display: flex;
-  }
-
-  .stack span,
-  .coeffs span,
-  .vector span {
-    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 50%, var(--sl-color-gray-4));
-    border-radius: 8px;
-    padding: 0.45rem 0.6rem;
-    background: var(--sl-color-bg);
-  }
-
-  .warm span {
-    border-color: #f97316;
-  }
-
-  .result span,
-  .result code,
-  .matrix.result span {
-    border-color: #0f766e;
-    background: color-mix(in srgb, #0f766e 12%, var(--sl-color-bg));
-  }
-
-  .arrow {
+  .operation-flow > b {
     color: var(--sl-color-text-accent);
     white-space: nowrap;
   }
 
-  .matrix {
+  .operation-card {
     display: grid;
-    grid-template-columns: repeat(2, 2.5rem);
-    gap: 0.2rem;
-    border: 2px solid var(--sl-color-text);
-    border-block: 0;
-    padding: 0.35rem;
+    gap: 0.3rem;
+    place-items: center;
+    border: 1px solid var(--diagram-border);
+    border-radius: 9px;
+    padding: 0.55rem 0.7rem;
+    text-align: center;
+    background: var(--sl-color-bg);
   }
 
-  .matrix.one {
-    grid-template-columns: 2.5rem;
+  .operation-card small { color: var(--sl-color-gray-2); }
+  .operation-card--result { color: var(--diagram-result); }
+
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(2, 2.35rem);
+    gap: 0.18rem;
+    border-inline: 2px solid var(--sl-color-text);
+    padding: 0.3rem;
   }
+
+  .matrix--one { grid-template-columns: 2.35rem; }
 
   .matrix span,
   .vector span {
@@ -167,19 +87,11 @@ const { kind, caption } = Astro.props;
     background: var(--sl-color-bg);
   }
 
-  .matrix .focus {
-    color: white;
-    background: var(--sl-color-accent);
-  }
-
-  .vector {
-    display: grid;
-    gap: 0.2rem;
-  }
+  .matrix .focus { color: white; background: var(--sl-color-accent); }
+  .vector { display: grid; gap: 0.18rem; }
 
   @media (max-width: 520px) {
-    .operation-diagram {
-      margin-inline: -0.25rem;
-    }
+    .operation-flow { flex-direction: column; }
+    .operation-flow > b { white-space: normal; text-align: center; }
   }
 </style>

@@ -5,6 +5,16 @@
   --sl-color-accent-high: #172554;
   --sl-color-text-accent: #1d4ed8;
   --sl-color-bg-sidebar: #f8fafc;
+  --diagram-input: #2563eb;
+  --diagram-second: #c2410c;
+  --diagram-contribution: #b45309;
+  --diagram-result: #0f766e;
+  --diagram-certificate: #9a3412;
+  --diagram-warning: #b91c1c;
+  --diagram-surface: color-mix(in srgb, var(--sl-color-bg) 94%, var(--sl-color-accent-low));
+  --diagram-border: color-mix(in srgb, var(--sl-color-accent) 28%, var(--sl-color-gray-5));
+  --diagram-radius: 14px;
+  --diagram-gap: clamp(0.7rem, 2vw, 1rem);
 }
 
 [data-theme="dark"] {
@@ -173,8 +183,6 @@
 
 .sl-markdown-content mjx-container[display="true"] {
   display: block;
-  overflow-x: auto;
-  overflow-y: hidden;
   max-width: 100%;
   margin-inline: auto;
   padding-block: 0.25rem;
@@ -183,6 +191,8 @@
 
 .sl-markdown-content mjx-container[display="true"] svg {
   display: inline-block;
+  max-width: 100%;
+  height: auto;
 }
 
 .sl-markdown-content mjx-container:not([display="true"]) {
@@ -195,6 +205,170 @@
 .sl-markdown-content pre {
   overflow-x: auto;
   white-space: pre;
+}
+
+.sl-markdown-content .mobile-stack-table {
+  display: table;
+  width: 100%;
+  overflow: visible;
+  white-space: normal;
+}
+
+.mobile-stack-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.diagram-frame {
+  margin: 1.1rem 0 1.6rem;
+  border: 1px solid var(--diagram-border);
+  border-radius: var(--diagram-radius);
+  background: var(--diagram-surface);
+  box-shadow: 0 12px 28px rgb(15 23 42 / 0.06);
+  overflow: hidden;
+}
+
+.diagram-frame__body {
+  min-width: 0;
+  padding: clamp(0.75rem, 2vw, 1rem);
+}
+
+.diagram-frame > figcaption {
+  margin: 0;
+  border-block-start: 1px solid var(--diagram-border);
+  padding: 0.72rem 0.9rem;
+  color: var(--sl-color-gray-2);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.diagram-frame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.diagram-panels {
+  display: grid;
+  gap: var(--diagram-gap);
+}
+
+.diagram-panels--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.diagram-panel {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--diagram-border);
+  border-radius: calc(var(--diagram-radius) - 4px);
+  padding: 0.85rem;
+  background: var(--sl-color-bg);
+}
+
+.diagram-panel h3,
+.diagram-panel p {
+  margin: 0;
+}
+
+.diagram-panel h3 {
+  padding-inline-end: 2rem;
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.diagram-panel p {
+  margin-block-start: 0.7rem;
+  color: var(--sl-color-gray-2);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.diagram-step {
+  position: absolute;
+  inset-block-start: 0.65rem;
+  inset-inline-end: 0.65rem;
+  display: grid;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  border-radius: 999px;
+  color: white;
+  background: var(--sl-color-accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.diagram-panel--input { border-color: color-mix(in srgb, var(--diagram-input) 48%, var(--sl-color-gray-5)); }
+.diagram-panel--contribution { border-color: color-mix(in srgb, var(--diagram-contribution) 48%, var(--sl-color-gray-5)); }
+.diagram-panel--result { border-color: color-mix(in srgb, var(--diagram-result) 48%, var(--sl-color-gray-5)); }
+.diagram-panel--contribution .diagram-step { background: var(--diagram-contribution); }
+.diagram-panel--result .diagram-step { background: var(--diagram-result); }
+
+.coefficient-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-block-start: 0.65rem;
+}
+
+.coefficient-line b {
+  width: 1.3rem;
+}
+
+.coefficient-line span,
+.result-list span {
+  border: 1px solid currentColor;
+  border-radius: 7px;
+  padding: 0.35rem 0.45rem;
+  background: color-mix(in srgb, currentColor 8%, var(--sl-color-bg));
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.coefficient-line--first { color: var(--diagram-input); }
+.coefficient-line--second { color: var(--diagram-second); }
+
+.contribution-list,
+.result-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.65rem 0 0;
+}
+
+.contribution-list div {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  gap: 0.4rem;
+  align-items: baseline;
+}
+
+.contribution-list dt,
+.contribution-list dd {
+  margin: 0;
+  font-size: 0.77rem;
+}
+
+.contribution-list dt {
+  color: var(--diagram-contribution);
+  font-weight: 800;
+}
+
+.result-list span {
+  color: var(--diagram-result);
+  overflow-wrap: anywhere;
+}
+
+.result-list--formula span {
+  font-size: 0.72rem;
 }
 
 .sl-markdown-content img {
@@ -227,4 +401,80 @@
     padding: 1.2rem;
   }
 
+}
+
+@media (max-width: 700px) {
+  .diagram-panels--three {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .sl-markdown-content .mobile-stack-table,
+  .mobile-stack-table tbody,
+  .mobile-stack-table tr,
+  .mobile-stack-table th[data-label],
+  .mobile-stack-table td {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .mobile-stack-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .mobile-stack-table tbody {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .mobile-stack-table tr {
+    box-sizing: border-box;
+    border: 1px solid var(--diagram-border);
+    border-radius: 10px;
+    padding: 0.3rem 0.7rem;
+    background: var(--diagram-surface);
+  }
+
+  .mobile-stack-table th[data-label],
+  .mobile-stack-table td {
+    box-sizing: border-box;
+    border: 0;
+    border-block-end: 1px solid var(--diagram-border);
+    padding: 0.55rem 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    text-align: start;
+  }
+
+  .mobile-stack-table tr > :last-child {
+    border-block-end: 0;
+  }
+
+  .mobile-stack-table th[data-label]::before,
+  .mobile-stack-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-block-end: 0.18rem;
+    color: var(--sl-color-text-accent);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 390px) {
+  .diagram-frame__body {
+    padding: 0.65rem;
+  }
 }

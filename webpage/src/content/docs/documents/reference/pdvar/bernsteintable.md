@@ -4,9 +4,9 @@ description: Inspect symbolic Bernstein coefficients and rate-vertex rows.
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
+  <a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>bernsteinTable</span>
 </nav>
@@ -15,7 +15,7 @@ description: Inspect symbolic Bernstein coefficients and rate-vertex rows.
 
 Inspect a `pdvar` object's local Bernstein coefficient rows. This is a diagnostic
 view for checking tensor labels, symbolic payloads, and the rate rows produced
-by [`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/). It does not
+by [`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/). It does not
 change the decision expression or send anything to YALMIP's optimizer.
 
 ## Syntax
@@ -98,6 +98,6 @@ coefficient tree.
 
 ## See Also
 
-[`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/) ·
-[`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) ·
-[`pdmat bernsteinTable`](/DP-LMI-package/documents/reference/pdmat/bernsteintable/)
+[`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/) ·
+[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
+[`pdmat bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/)

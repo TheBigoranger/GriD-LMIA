@@ -1,4 +1,6 @@
 ---
+import DiagramFrame from "./DiagramFrame.astro";
+
 interface Props {
   kind: "store" | "assemble" | "solve";
 }
@@ -6,197 +8,118 @@ interface Props {
 const { kind } = Astro.props;
 
 const descriptions = {
-  store: "A physical interval bounded by rho zero and rho one is normalized to alpha in zero to one, then stores two matrix coefficients with local labels zero and one.",
-  assemble: "Known matrix coefficients and decision matrix coefficients combine into a cell-local residual, while two rate vertices create two residual rows.",
-  solve: "Cell-local coefficient constraints pass through pdlmi and toYalmip to an SDP solver, then solved coefficient values can be inspected.",
+  store: "Two physical cells store three quadratic coefficients each; the interface value is shared, leaving five global matrix controls.",
+  assemble: "A cubic algebraic residual combines two cubic products with the degree-one cell-local derivative, elevated exactly for addition at two rate vertices.",
+  solve: "Direct certification visits two cells, two rate rows, and four cubic labels for 16 decay constraints; positivity contributes six more.",
 };
 ---
 
-<figure class="workflow-diagram" role="img" aria-label={descriptions[kind]}>
+<DiagramFrame caption={descriptions[kind]} class="workflow-diagram">
   {kind === "store" && (
-    <div class="store-scene">
-      <div class="physical-axis">
-        <span class="node"><b>ρ₀</b></span>
-        <span class="cell">physical cell <b>c = 1</b><small>α ∈ [0, 1]</small></span>
-        <span class="node"><b>ρ₁</b></span>
-      </div>
-      <span class="flow-arrow" aria-hidden="true">↓</span>
-      <div class="coefficient-row">
-        <code>LocalValues&#123;1&#125;</code>
-        <span>C⁽¹⁾[0]</span>
-        <span>C⁽¹⁾[1]</span>
-      </div>
+    <div class="workflow-grid workflow-grid--store">
+      <section class="flow-card flow-card--neutral">
+        <b>Physical grid</b>
+        <span>[0, 0.5]</span>
+        <span>[0.5, 1]</span>
+      </section>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <section class="flow-card flow-card--decision">
+        <b>Quadratic P(ρ)</b>
+        <span>3 local controls/cell</span>
+        <span>shared interface face</span>
+      </section>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <section class="flow-card flow-card--result">
+        <b>Global controls</b>
+        <span>P₀, P₁, P₂, P₃, P₄</span>
+        <span>5 full symmetric matrices</span>
+      </section>
     </div>
   )}
 
   {kind === "assemble" && (
-    <div class="assemble-scene">
-      <div class="source-stack">
-        <span><b>A⁽ᶜ⁾[j]</b><small>known pdmat</small></span>
-        <span><b>P⁽ᶜ⁾[i]</b><small>pdvar decision</small></span>
-      </div>
-      <span class="flow-arrow horizontal" aria-hidden="true">→</span>
-      <div class="residual-box"><b>R⁽ᶜ⁾[k]</b><small>Bernstein convolution</small></div>
-      <span class="split-arrow" aria-hidden="true">↗<br />↘</span>
-      <div class="rate-stack">
-        <span><b>ρ̇ = −1</b><small>rate row 1</small></span>
-        <span><b>ρ̇ = +1</b><small>rate row 2</small></span>
-      </div>
+    <div class="workflow-grid workflow-grid--assemble">
+      <section class="flow-card flow-card--decision"><b>P·A</b><span>degree 2 + 1 = 3</span></section>
+      <section class="flow-card flow-card--input"><b>Aᵀ·P</b><span>degree 1 + 2 = 3</span></section>
+      <section class="flow-card flow-card--contribution"><b>rhodiff(P)</b><span>degree 1, two rate rows</span></section>
+      <section class="flow-card flow-card--result"><b>Aligned residual</b><span>degree 3 at ρ̇ = −1, +1</span></section>
     </div>
   )}
 
   {kind === "solve" && (
-    <div class="solve-scene">
-      <span class="stage"><b>pdlmi</b><small>finite certificate</small></span>
-      <span class="flow-arrow horizontal" aria-hidden="true">→</span>
-      <span class="stage"><b>toYalmip</b><small>constraint array</small></span>
-      <span class="flow-arrow horizontal" aria-hidden="true">→</span>
-      <span class="stage accent"><b>SDP solver</b><small>optimize</small></span>
-      <span class="flow-arrow horizontal" aria-hidden="true">→</span>
-      <span class="stage"><b>value(P)</b><small>inspect result</small></span>
+    <div class="workflow-grid workflow-grid--solve">
+      <section class="flow-card flow-card--certificate"><b>pdlmi direct</b><span>cell-local coefficient test</span></section>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <section class="flow-card flow-card--neutral"><b>toYalmip</b><span>16 decay + 6 positivity</span></section>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <section class="flow-card flow-card--result"><b>SDP solver</b><span>ordinary YALMIP handoff</span></section>
     </div>
   )}
-  <figcaption>{descriptions[kind]}</figcaption>
-</figure>
+</DiagramFrame>
 
 <style>
-  .workflow-diagram {
+  .workflow-grid {
     display: grid;
+    gap: 0.65rem;
+    align-items: center;
+  }
+
+  .workflow-grid--store,
+  .workflow-grid--solve {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .workflow-grid--assemble {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .workflow-grid--assemble .flow-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .flow-card {
+    display: grid;
+    gap: 0.25rem;
     min-width: 0;
-    margin: 0;
-    padding: clamp(0.85rem, 2vw, 1.2rem);
-    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 32%, var(--sl-color-gray-5));
-    border-radius: 16px;
-    background:
-      linear-gradient(135deg, color-mix(in srgb, var(--sl-color-accent-low) 36%, transparent), transparent),
-      var(--sl-color-bg);
-    overflow-x: auto;
-  }
-
-  figcaption {
-    margin-block-start: 0.75rem;
-    border-block-start: 1px solid var(--sl-color-gray-5);
-    padding-block-start: 0.65rem;
-    color: var(--sl-color-gray-2);
-    font-size: 0.8rem;
-    line-height: 1.45;
-  }
-
-  .store-scene,
-  .assemble-scene,
-  .solve-scene {
-    display: flex;
-    min-width: 29rem;
-    align-items: center;
-    justify-content: center;
-    gap: 0.7rem;
-  }
-
-  .store-scene {
-    flex-direction: column;
-    min-width: 20rem;
-  }
-
-  .physical-axis {
-    display: grid;
-    grid-template-columns: auto minmax(11rem, 1fr) auto;
-    width: min(100%, 28rem);
-    align-items: center;
-  }
-
-  .node {
-    display: grid;
-    width: 2.4rem;
-    height: 2.4rem;
     place-items: center;
-    border: 3px solid var(--sl-color-bg);
-    border-radius: 50%;
-    color: white;
-    background: var(--sl-color-text);
-    box-shadow: 0 0 0 1px var(--sl-color-gray-4);
-  }
-
-  .cell,
-  .stage,
-  .source-stack span,
-  .rate-stack span,
-  .residual-box {
-    display: grid;
-    gap: 0.18rem;
-    place-items: center;
-    border: 1px solid var(--sl-color-gray-4);
+    border: 1px solid var(--diagram-border);
     border-radius: 10px;
-    padding: 0.65rem;
+    padding: 0.7rem;
     text-align: center;
-    background: color-mix(in srgb, var(--sl-color-accent-low) 55%, var(--sl-color-bg));
+    background: var(--sl-color-bg);
   }
 
-  .cell {
-    border-radius: 0;
-    border-inline: 0;
-  }
-
-  small {
+  .flow-card span {
     color: var(--sl-color-gray-2);
-    font-size: 0.72rem;
+    font-size: 0.74rem;
   }
 
-  .coefficient-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    align-items: center;
-    justify-content: center;
-  }
+  .flow-card--input { border-color: var(--diagram-input); }
+  .flow-card--decision { border-color: #7c3aed; }
+  .flow-card--contribution { border-color: var(--diagram-contribution); }
+  .flow-card--result { border-color: var(--diagram-result); }
+  .flow-card--certificate { border-color: var(--diagram-certificate); }
 
-  .coefficient-row span {
-    border-radius: 8px;
-    padding: 0.45rem 0.65rem;
-    color: white;
-    font-weight: 750;
-    background: var(--sl-color-accent);
-  }
-
-  .source-stack,
-  .rate-stack {
-    display: grid;
-    gap: 0.45rem;
-  }
-
-  .residual-box {
-    border-color: var(--sl-color-accent);
-    background: color-mix(in srgb, var(--sl-color-accent-low) 78%, var(--sl-color-bg));
-  }
-
-  .flow-arrow,
-  .split-arrow {
+  .flow-arrow {
     color: var(--sl-color-text-accent);
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     font-weight: 900;
-    line-height: 1;
   }
 
-  .split-arrow {
-    line-height: 1.45;
-  }
+  @media (max-width: 620px) {
+    .workflow-grid--store,
+    .workflow-grid--solve,
+    .workflow-grid--assemble {
+      grid-template-columns: 1fr;
+    }
 
-  .stage {
-    min-width: 7rem;
-  }
+    .workflow-grid--assemble .flow-card:last-child {
+      grid-column: auto;
+    }
 
-  .stage.accent {
-    color: white;
-    border-color: transparent;
-    background: linear-gradient(135deg, #2563eb, #0f766e);
-  }
-
-  .stage.accent small {
-    color: rgb(255 255 255 / 0.82);
-  }
-
-  @media (max-width: 520px) {
-    .workflow-diagram {
-      margin-inline: -0.25rem;
+    .flow-arrow {
+      transform: rotate(90deg);
+      justify-self: center;
     }
   }
 </style>

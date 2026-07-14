@@ -4,7 +4,7 @@ description: Two solver-facing examples mirrored from +tests/+pdlmi/test_solver_
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/examples/">Examples</a>
+  <a href="/PD-LMI-package/examples/">Examples</a>
   <span>/</span>
   <span>Solver Smoke Cases</span>
 </nav>
@@ -71,9 +71,9 @@ title("Solved parameter-dependent Lyapunov matrix");
 
 In the regression, MOSEK reports the constant case as infeasible and the parameter-dependent case as feasible. `lmilab` is used only as a fallback smoke path, not as the certificate for the infeasibility distinction.
 
-After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `pdmat` (`Pplot`) before calling [`plot`](/DP-LMI-package/documents/reference/pdmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
+After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `pdmat` (`Pplot`) before calling [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
 
-## Block DP-LMI Objective
+## Block PD-LMI Objective
 
 The second smoke test assembles a block residual with a rate-dependent derivative term. The parameter-dependent matrices are
 
@@ -172,6 +172,6 @@ The numeric value is solver- and tolerance-dependent, so the manual does not pre
 ## Boundary
 
 These examples do not call a package-owned solver wrapper. They document the
-current boundary: DP-LMI builds direct, Pólya-elevated, or
-[`full-box`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
+current boundary: PD-LMI builds direct, Pólya-elevated, or
+[`full-box`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
 YALMIP constraints, and users call `optimize` directly.

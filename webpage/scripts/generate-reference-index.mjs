@@ -12,7 +12,7 @@ function row(entry) {
 
 const body = `---
 title: Reference Lookup Table
-description: Generated lookup table for implemented DP-LMI classes and methods.
+description: Generated lookup table for implemented PD-LMI classes and methods.
 ---
 
 This generated page lists implemented public classes and methods that are documented in the online manual. The source data lives in \`src/data/reference-index.js\`; regenerate this page with \`npm --prefix webpage run generate:index\`.

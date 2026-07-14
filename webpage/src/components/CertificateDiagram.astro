@@ -1,49 +1,73 @@
 ---
-interface Props {
-  kind?: "map" | "direct" | "polya" | "fullbox";
-}
+import DiagramFrame from "./DiagramFrame.astro";
+
+interface Props { kind?: "map" | "direct" | "polya" | "fullbox"; }
 const { kind = "map" } = Astro.props;
 const descriptions = {
-  map: "One stored residual branches to direct coefficient testing, Pólya degree elevation followed by coefficient testing, or full-box Gram blocks and coefficient identities.",
-  direct: "Nonnegative Bernstein weights combine coefficient matrices, so coefficient-wise positive semidefiniteness certifies the whole cell.",
-  polya: "Pólya relaxation elevates the same polynomial to a higher Bernstein degree before applying the direct coefficient test.",
-  fullbox: "Full-box relaxation combines positive semidefinite Gram blocks with box-generator products and exact coefficient matching.",
+  map: "One stored residual supports three finite sufficient certificates: direct coefficient testing, Pólya elevation followed by that test, or full-box Gram identities.",
+  direct: "Nonnegative Bernstein weights combine coefficient matrices, so coefficient-wise semidefiniteness certifies the whole cell.",
+  polya: "Pólya relaxation exactly elevates the stored polynomial before applying the direct coefficient test.",
+  fullbox: "The full-box certificate combines positive-semidefinite Gram blocks with box generators and exact coefficient matching.",
 };
 ---
 
-<figure class="certificate-diagram">
-  <div class="certificate-scene" role="img" aria-label={descriptions[kind]}>
-    <div class="certificate-track">
-      {kind === "map" && (
-        <>
-        <span class="residual"><b>stored residual</b><small>cells × rate rows</small></span>
-        <b class="branch">↗<br />→<br />↘</b>
-        <div class="choices"><span><b>Direct</b><small>test every coefficient</small></span><span><b>Pólya</b><small>elevate, then test</small></span><span><b>Full box</b><small>Gram blocks + identities</small></span></div>
-        </>
-      )}
-      {kind === "direct" && (
-        <><div class="coeffs"><span>C⁽ᶜ⁾[0] ⪰ 0</span><span>C⁽ᶜ⁾[1] ⪰ 0</span><span>C⁽ᶜ⁾[2] ⪰ 0</span></div><b>＋ nonnegative weights →</b><span class="residual"><b>S(α) ⪰ 0</b><small>for the whole cell</small></span></>
-      )}
-      {kind === "polya" && (
-        <><span class="residual"><b>degree m</b><small>same residual</small></span><b>exact elevation →</b><span class="residual"><b>degree m + r</b><small>more coefficients</small></span><b>→ direct test</b></>
-      )}
-      {kind === "fullbox" && (
-        <><div class="coeffs"><span>Q∅ ⪰ 0</span><span>Q&#123;1&#125; ⪰ 0</span><span>Q&#123;2&#125; ⪰ 0</span><span>Q&#123;1,2&#125; ⪰ 0</span></div><b>× box generators →</b><span class="residual"><b>exact identity</b><small>match every coefficient</small></span></>
-      )}
+<DiagramFrame caption={descriptions[kind]} class="certificate-diagram">
+  {kind === "map" && (
+    <div class="certificate-map">
+      <section class="certificate-card certificate-card--residual"><b>Stored residual</b><span>cells × rate rows</span></section>
+      <div class="certificate-choices">
+        <section class="certificate-card certificate-card--certificate"><b>Direct</b><span>test every coefficient</span></section>
+        <section class="certificate-card certificate-card--certificate"><b>Pólya</b><span>elevate, then test</span></section>
+        <section class="certificate-card certificate-card--certificate"><b>Full box</b><span>Gram blocks + identities</span></section>
+      </div>
     </div>
-  </div>
-  <figcaption>{descriptions[kind]}</figcaption>
-</figure>
+  )}
+  {kind === "direct" && (
+    <div class="certificate-flow"><section class="coefficient-set"><span>C⁽ᶜ⁾[0] ⪰ 0</span><span>C⁽ᶜ⁾[1] ⪰ 0</span><span>C⁽ᶜ⁾[2] ⪰ 0</span></section><b>nonnegative weights →</b><section class="certificate-card certificate-card--result"><b>S(α) ⪰ 0</b><span>throughout the cell</span></section></div>
+  )}
+  {kind === "polya" && (
+    <div class="certificate-flow"><section class="certificate-card"><b>Degree m</b><span>stored residual</span></section><b>exact elevation →</b><section class="certificate-card certificate-card--result"><b>Degree m + r</b><span>more coefficients</span></section><b>→ direct test</b></div>
+  )}
+  {kind === "fullbox" && (
+    <div class="certificate-flow"><section class="coefficient-set"><span>Q∅ ⪰ 0</span><span>Q&#123;1&#125; ⪰ 0</span><span>Q&#123;2&#125; ⪰ 0</span><span>Q&#123;1,2&#125; ⪰ 0</span></section><b>box generators →</b><section class="certificate-card certificate-card--result"><b>Exact identity</b><span>match every coefficient</span></section></div>
+  )}
+</DiagramFrame>
 
 <style>
-  .certificate-diagram { margin:1.1rem 0 1.6rem; border:1px solid var(--sl-color-gray-5); border-radius:12px; background:color-mix(in srgb,var(--sl-color-accent-low) 22%,var(--sl-color-bg)); overflow:hidden; }
-  .certificate-scene { width:100%; min-width:0; overflow-x:auto; }
-  .certificate-track { display:flex; min-width:34rem; min-height:9rem; box-sizing:border-box; align-items:center; justify-content:center; gap:.85rem; padding:1rem; }
-  .residual,.choices span,.coeffs span { display:grid; gap:.2rem; place-items:center; border:1px solid var(--sl-color-accent); border-radius:9px; padding:.55rem .7rem; text-align:center; background:var(--sl-color-bg); }
-  .choices,.coeffs { display:grid; gap:.4rem; }
-  .coeffs { grid-template-columns:repeat(2,minmax(7rem,1fr)); }
-  small { color:var(--sl-color-gray-2); font-size:.72rem; }
-  .branch { color:var(--sl-color-text-accent); font-size:1.25rem; line-height:1.6; }
-  figcaption { border-block-start:1px solid var(--sl-color-gray-5); padding:.7rem .9rem; color:var(--sl-color-gray-2); font-size:.86rem; }
-  @media(max-width:520px){.certificate-diagram{margin-inline:-.25rem}}
+  .certificate-map,
+  .certificate-flow {
+    display: grid;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .certificate-map { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); }
+  .certificate-flow { grid-template-columns: repeat(3, max-content); justify-content: center; }
+  .certificate-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; }
+
+  .certificate-card,
+  .coefficient-set span {
+    display: grid;
+    gap: 0.2rem;
+    place-items: center;
+    border: 1px solid var(--diagram-border);
+    border-radius: 9px;
+    padding: 0.6rem;
+    text-align: center;
+    background: var(--sl-color-bg);
+  }
+
+  .certificate-card span { color: var(--sl-color-gray-2); font-size: 0.73rem; }
+  .certificate-card--certificate { border-color: var(--diagram-certificate); }
+  .certificate-card--result { border-color: var(--diagram-result); }
+  .coefficient-set { display: grid; grid-template-columns: repeat(2, minmax(5rem, 1fr)); gap: 0.4rem; }
+  .coefficient-set span { border-color: var(--diagram-input); font-size: 0.78rem; }
+  .certificate-flow > b { color: var(--sl-color-text-accent); text-align: center; }
+
+  @media (max-width: 650px) {
+    .certificate-map,
+    .certificate-flow,
+    .certificate-choices { grid-template-columns: 1fr; }
+    .certificate-flow { justify-content: stretch; }
+  }
 </style>

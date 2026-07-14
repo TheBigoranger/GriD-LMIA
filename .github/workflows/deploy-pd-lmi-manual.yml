@@ -1,11 +1,11 @@
-name: Deploy DP-LMI Manual
+name: Deploy PD-LMI Manual
 
 on:
   push:
     branches: [main]
     paths:
       - "webpage/**"
-      - ".github/workflows/deploy-webpage.yml"
+      - ".github/workflows/deploy-pd-lmi-manual.yml"
   workflow_dispatch:
 
 permissions:

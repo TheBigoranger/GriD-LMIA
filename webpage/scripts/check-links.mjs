@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const base = "/DP-LMI-package";
+const base = "/PD-LMI-package";
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = resolve(here, "../dist");
 const htmlFiles = [];

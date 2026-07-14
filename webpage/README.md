@@ -1,6 +1,6 @@
-# DP-LMI Manual Website
+# PD-LMI Manual Website
 
-This directory contains the GitHub Pages documentation site for the DP-LMI MATLAB/YALMIP package. The site is built with npm, Astro, and Starlight.
+This directory contains the GitHub Pages documentation site for the PD-LMI (parameter-dependent LMI) MATLAB/YALMIP package. The site is built with npm, Astro, Starlight, and build-time MathJax rendering.
 
 ## Structure
 
@@ -18,10 +18,10 @@ Run these from the repository root:
 | `npm --prefix webpage run dev` | Start the local docs server. |
 | `npm --prefix webpage run build` | Generate the reference index and build the static site. |
 | `npm --prefix webpage run preview` | Preview the built site locally. |
-| `npm --prefix webpage run check:links` | Validate built internal links and anchors under `/DP-LMI-package/`. |
+| `npm --prefix webpage run check:links` | Validate built internal links and anchors under `/PD-LMI-package/`. |
 
 ## Publishing
 
 GitHub Actions builds this project from `webpage/` and publishes it to:
 
-`https://thebigoranger.github.io/DP-LMI-package/`
+`https://thebigoranger.github.io/PD-LMI-package/`

@@ -1,12 +1,13 @@
 ---
 title: Bernstein Polynomial
-description: Bernstein history, tensor-product cell storage, coefficient algebra, finite matrix certificates, and refinement boundaries for DP-LMI.
+description: Bernstein history, tensor-product cell storage, coefficient algebra, finite matrix certificates, and refinement boundaries for PD-LMI.
 ---
 
 import BernsteinConceptDiagram from "../../../../components/BernsteinConceptDiagram.astro";
+import ConvolutionDiagram from "../../../../components/ConvolutionDiagram.astro";
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
   <span>Bernstein Polynomial</span>
 </nav>
@@ -18,7 +19,7 @@ limitations beside the call they affect.
 
 For a diagram-led walkthrough of the actual one- and two-dimensional input
 shapes, cell traversal, and the distinction between physical gridding and
-Bernstein `Degree`, see [Gridding And Bernstein Degree](/DP-LMI-package/documents/math/gridding-and-degree/).
+Bernstein `Degree`, see [Gridding And Bernstein Degree](/PD-LMI-package/documents/math/gridding-and-degree/).
 
 ## Begin With One Polynomial
 
@@ -50,7 +51,7 @@ the basis of Bezier curves and the de Casteljau evaluation and subdivision
 algorithm. [Farouki's centennial retrospective](https://doi.org/10.1016/j.cagd.2012.03.001)
 surveys that history, the basis properties, and its numerical algorithms.
 
-The bridge to DP-LMIs is not approximation alone. On a physical parameter
+The bridge to PD-LMIs is not approximation alone. On a physical parameter
 cell, nonnegative basis functions that sum to one make a scalar, vector, or
 matrix polynomial a convex combination of finitely many coefficient objects.
 Exact coefficient multiplication, differentiation, and degree elevation then
@@ -138,7 +139,7 @@ The converse does not generally hold. A matrix polynomial can be negative
 definite everywhere while one or more Bernstein coefficient matrices fail the
 same sign test. Coefficient-wise matrix sign conditions are therefore safe
 but potentially conservative; failure of the finite test does **not** prove
-that the continuous DP-LMI is infeasible.
+that the continuous PD-LMI is infeasible.
 
 ## Tensor Products On Hyperrectangles
 
@@ -203,7 +204,7 @@ For several parameters,
 $\dot P=\sum_r(\partial P/\partial\rho_r)\dot\rho_r$. `rhodiff` forms the
 cell-local partial differences, aligns tensor degrees as required, and stores
 one row for each active rate-box vertex. The
-[`rhodiff` reference](/DP-LMI-package/documents/reference/pdvar/rhodiff/)
+[`rhodiff` reference](/PD-LMI-package/documents/reference/pdvar/rhodiff/)
 documents the supported call forms and validation rules.
 
 <BernsteinConceptDiagram kind="derivative" />
@@ -249,36 +250,67 @@ call users can make today.
 
 ## Product Degree And Coefficient Convolution
 
-If two degree-one objects are
+### Basic idea
+
+Multiplication creates every ordered pair of input coefficients. Pairs with
+the same label sum $k=i+j$ contribute to the same output coefficient. The
+product degree is the sum of the input degrees; no extra physical grid nodes
+are created.
+
+### Formula
+
+On a fixed physical cell, let
 
 $$
 \begin{aligned}
-P_c(\alpha)&=B_0^1(\alpha)P^{(c)}[0]+B_1^1(\alpha)P^{(c)}[1],\\
-Q_c(\alpha)&=B_0^1(\alpha)Q^{(c)}[0]+B_1^1(\alpha)Q^{(c)}[1],
+P_c(\alpha)&=\sum_{i=0}^{m}B_i^m(\alpha)P^{(c)}[i],\\
+Q_c(\alpha)&=\sum_{j=0}^{n}B_j^n(\alpha)Q^{(c)}[j].
 \end{aligned}
 $$
 
-their product has degree two:
+The basis-product identity is
 
 $$
-\begin{aligned}
-P_c(\alpha)Q_c(\alpha)
-&=B_0^2(\alpha)R^{(c)}[0]+B_1^2(\alpha)R^{(c)}[1]
-+B_2^2(\alpha)R^{(c)}[2],\\
-R^{(c)}[0]&=P^{(c)}[0]Q^{(c)}[0],\\
-R^{(c)}[1]&=\frac{P^{(c)}[0]Q^{(c)}[1]+P^{(c)}[1]Q^{(c)}[0]}{2},\\
-R^{(c)}[2]&=P^{(c)}[1]Q^{(c)}[1].
-\end{aligned}
+B_i^mB_j^n=
+\frac{\binom mi\binom nj}{\binom{m+n}{i+j}}B_{i+j}^{m+n},
 $$
 
-For arbitrary scalar degrees $n$ and $m$,
+so the arbitrary-degree weighted convolution is
 
 $$
 R^{(c)}[k]=\sum_{i+j=k}
 P^{(c)}[i]Q^{(c)}[j]
-\frac{\binom{n}{i}\binom{m}{j}}{\binom{n+m}{k}},
-\qquad k=0,\ldots,n+m.
+\frac{\binom{m}{i}\binom{n}{j}}{\binom{m+n}{k}},
+\qquad k=0,\ldots,m+n.
 $$
+
+### Microexample: quadratic times affine
+
+Take $P=[1,2,6]$ and $Q=[2,4]$. The four anti-diagonal groups give
+
+$$
+R[0]=2,\qquad R[1]=4,\qquad R[2]=\frac{28}{3},\qquad R[3]=24.
+$$
+
+```matlab
+P = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
+Q = pdmat({[0 1]}, {2, 4}, Degree=1);
+R = P * Q;
+c = R.coeffs(1);
+fprintf("product degree=%d\n", R.Degree);
+disp([c{:}])
+```
+
+```text
+product degree=3
+    2.0000    4.0000    9.3333   24.0000
+```
+
+These are four cubic Bernstein coefficients, not four point samples.
+
+### Visual conclusion
+
+<ConvolutionDiagram example="numeric" />
 
 For tensor-product parameters, labels add componentwise, coefficient tensors
 convolve over every matching label pair, and the scale is the product of the
@@ -289,6 +321,10 @@ $Q^{(c)}[j]P^{(c)}[i]$.
 This direct coefficient convolution is implemented by the shared Bernstein
 backend and exercised by coefficient-backed `pdmat` algebra and supported
 known-data/`pdvar` products. It is representation algebra, not a relaxation.
+The supported decision boundary is equally important: known or numeric data
+may multiply one affine `pdvar` from either side, while decision-by-decision
+products and rate-dependent-by-decision products are rejected because they
+would leave the implemented affine model class.
 
 ### Weighted Value-Grid Convolution
 
@@ -398,7 +434,7 @@ assembled by YALMIP.
 
 ## Fixed-Order Full Box Preordering
 
-The opt-in [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
+The opt-in [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
 path replaces coefficient-wise sign tests with a cell-local Bernstein-Gram
 representation. It uses the parity-specific Markov-Lukács form in one
 parameter and every subset product of the box generators
@@ -449,10 +485,10 @@ SOS-family feature is the fixed-order full box preordering certificate.
 
 ## See Also
 
-[`SOS Certificates On A Hypercube`](/DP-LMI-package/documents/math/sos-certificates/) ·
-[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) ·
-[`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/) ·
-[`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) ·
-[`pdlmi constructor`](/DP-LMI-package/documents/reference/pdlmi/constructor/) ·
-[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
-[`Bernstein backend utilities`](/DP-LMI-package/documents/reference/bernstein-utilities/)
+[`SOS Certificates On A Hypercube`](/PD-LMI-package/documents/math/sos-certificates/) ·
+[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) ·
+[`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/) ·
+[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
+[`Bernstein backend utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/)

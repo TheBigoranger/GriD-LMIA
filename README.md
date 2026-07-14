@@ -1,12 +1,16 @@
-# DP-LMI Package
+# PD-LMI Package
 
-DP-LMI is a MATLAB/YALMIP research package for differential parameter-dependent LMIs using cell-local Bernstein polynomial storage.
+PD-LMI is a MATLAB/YALMIP research package for parameter-dependent LMIs.
+It represents continuous piecewise-polynomial decision matrices in cell-local
+tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
+models are called differentiable parameter-dependent LMIs (DPD-LMIs).
 
 The current implementation provides:
 
 - `pdbase` as the backend parent for tensor-grid metadata, nested `LocalValues`, local Bernstein labels, and coefficient inspection.
 - `pdmat` for known finite real matrix data from coefficient grids, explicit local values, or exact function handles.
-- `pdvar` for continuous YALMIP-backed Bernstein decision expressions.
+- `pdvar` for arbitrary-degree continuous YALMIP-backed Bernstein decision
+  expressions whose neighboring cells share boundary values.
 - `rhodiff` for discontinuous rate-vertex derivative expressions.
 - `pdlmi` for direct, Pólya-elevated, or full-box-preordering YALMIP constraint
   assembly and `toYalmip` handoff.
@@ -20,7 +24,7 @@ to one. A matrix-valued Bernstein polynomial is therefore a convex combination
 of its local coefficient matrices, so coefficient-wise semidefinite
 inequalities give a safe finite certificate over the whole cell. The
 certificate is sufficient, not necessary: a failed coefficient test does not
-by itself prove that the continuous DP-LMI is infeasible. The manual and
+by itself prove that the continuous PD-LMI is infeasible. The manual and
 website background explain tensor-product storage, coefficient convolution,
 derivatives, degree elevation, subdivision, and the current refinement
 boundary.
@@ -36,7 +40,7 @@ boundary.
 From MATLAB, add the package root recursively and remove the documentation folder from the path:
 
 ```matlab
-projectRoot = "path/to/Differential Parameter-Dependent Linear Matrix Inequality";
+projectRoot = "path/to/PD-LMI-package";
 addpath(genpath(projectRoot));
 rmpath(genpath(fullfile(projectRoot, "doc")));
 ```
@@ -134,13 +138,13 @@ F = preorder.toYalmip();
 
 ## Documentation
 
-- Online manual: https://thebigoranger.github.io/DP-LMI-package/
-- Bernstein and DP-LMI background: https://thebigoranger.github.io/DP-LMI-package/documents/math/bernstein-polynomial/
-- Install and downloads: https://thebigoranger.github.io/DP-LMI-package/install/
-- Version history: https://thebigoranger.github.io/DP-LMI-package/version-history/
-- Solver smoke examples: https://thebigoranger.github.io/DP-LMI-package/examples/solver-smoke/
-- `pdmat/plot` output examples: https://thebigoranger.github.io/DP-LMI-package/documents/reference/pdmat/plot/
-- Reference lookup table: https://thebigoranger.github.io/DP-LMI-package/documents/reference-index/
+- Online manual: https://thebigoranger.github.io/PD-LMI-package/
+- Bernstein and PD-LMI background: https://thebigoranger.github.io/PD-LMI-package/documents/math/bernstein-polynomial/
+- Install and downloads: https://thebigoranger.github.io/PD-LMI-package/install/
+- Version history: https://thebigoranger.github.io/PD-LMI-package/version-history/
+- Solver smoke examples: https://thebigoranger.github.io/PD-LMI-package/examples/solver-smoke/
+- `pdmat/plot` output examples: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdmat/plot/
+- Reference lookup table: https://thebigoranger.github.io/PD-LMI-package/documents/reference-index/
 - Local PDF manual: `doc/manual.pdf`
 - Manual source: `doc/manual.tex`
 
@@ -152,7 +156,7 @@ built with npm, Astro, and Starlight.
 ## Scope Boundaries
 
 - Direct and Pólya assembly are sufficient finite certificates;
-  a failed certificate does not prove continuous DP-LMI infeasibility.
+  a failed certificate does not prove continuous PD-LMI infeasibility.
 - Package-owned solver wrappers, strictness-margin diagnostics, residual
   evidence, and general SOS hierarchies remain future layers. The implemented
   opt-in full box preordering certificate is documented separately and is

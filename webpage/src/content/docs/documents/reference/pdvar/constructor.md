@@ -4,9 +4,9 @@ description: Construct continuous YALMIP-backed Bernstein decision expressions.
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
+  <a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>constructor</span>
 </nav>
@@ -187,4 +187,4 @@ ans =
 
 ## See Also
 
-[`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) · [`pdvar matrix operations`](/DP-LMI-package/documents/reference/pdvar/matrix-operations/) · [`pdbase`](/DP-LMI-package/documents/reference/pdbase/)
+[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) · [`pdvar matrix operations`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/) · [`pdbase`](/PD-LMI-package/documents/reference/pdbase/)

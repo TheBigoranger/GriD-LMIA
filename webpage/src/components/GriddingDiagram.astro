@@ -1,7 +1,11 @@
-<figure class="gridding-diagram" aria-labelledby="gridding-diagram-title">
-  <figcaption id="gridding-diagram-title">
-    Physical grid cells and local Bernstein coefficient labels
-  </figcaption>
+---
+import DiagramFrame from "./DiagramFrame.astro";
+---
+
+<DiagramFrame
+  caption="Physical grid cells and local Bernstein coefficient labels. Degree controls labels inside each cell; it does not add physical grid nodes."
+  class="gridding-diagram"
+>
 
   <section class="diagram-panel">
     <h3>One parameter: two cells, degree 2</h3>
@@ -89,7 +93,7 @@
       <code>[1 0]</code>, and <code>[1 1]</code> in package order.
     </p>
   </section>
-</figure>
+</DiagramFrame>
 
 <style>
   .gridding-diagram {
@@ -99,16 +103,10 @@
     margin: 1.5rem auto;
   }
 
-  figcaption {
-    color: var(--sl-color-text-accent);
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
-
   .diagram-panel {
     padding: 1rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 8px;
+    border: 1px solid var(--diagram-border);
+    border-radius: 10px;
     background: var(--sl-color-bg);
   }
 

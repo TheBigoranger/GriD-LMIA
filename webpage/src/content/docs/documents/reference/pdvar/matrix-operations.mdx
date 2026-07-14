@@ -4,11 +4,12 @@ description: Interleaved examples, outputs, and diagrams for affine YALMIP-backe
 ---
 
 import MatrixOperationDiagram from "../../../../../components/MatrixOperationDiagram.astro";
+import ConvolutionDiagram from "../../../../../components/ConvolutionDiagram.astro";
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
+  <a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>matrix operations</span>
 </nav>
@@ -56,6 +57,8 @@ R=1-by-1, S=1-by-1, uplus=1-by-1
 
 ## <span id="pdvar-mtimes"></span>Multiply By Known Data
 
+### Basic idea
+
 `mtimes`/`*` is permitted when decision dependence occurs on at most one
 converted operand. Numeric and coefficient-backed `pdmat` known data may
 multiply a decision-dependent `pdvar` on a dimensionally valid side. An affine
@@ -65,10 +68,25 @@ Products for which both converted operands have `ContainsDecision=true` are
 nonlinear and rejected. Products with rate dependence on both sides are also
 rejected.
 
+### Formula
+
+For a quadratic decision $P$ and affine known factor $A$ on one cell,
+
+$$
+(PA)[k]=\sum_{i+j=k}
+\frac{\binom2i\binom1j}{\binom3k}P[i]A[j],
+\qquad k=0,1,2,3.
+$$
+
+The written order is part of every term: $P[i]A[j]$ is not silently exchanged
+with $A[j]P[i]$.
+
+### Microexample
+
 ```matlab
 yalmip('clear')
 A = pdmat({[0 1]}, {2, 3}, Degree=1);
-P = pdvar(1, {[0 1]});
+P = pdvar(1, {[0 1]}, Degree=2);
 L = A * P;
 R = P * A;
 fprintf('left=%d-by-%d degree=%d\n', size(L,1),size(L,2),L.Degree);
@@ -76,11 +94,21 @@ fprintf('right=%d-by-%d degree=%d\n', size(R,1),size(R,2),R.Degree);
 ```
 
 ```text
-left=1-by-1 degree=2
-right=1-by-1 degree=2
+left=1-by-1 degree=3
+right=1-by-1 degree=3
 ```
 
 <MatrixOperationDiagram kind="product" caption="Known and decision coefficient rows convolve exactly; keeping decision dependence on one side preserves affine optimization variables." />
+
+### Visual conclusion
+
+<ConvolutionDiagram />
+
+Known `pdmat` or finite numeric data may appear on either side of one affine
+decision expression. `P*Q` for two decision-bearing `pdvar` objects, `P*x`
+for a decision `sdpvar x`, a derivative times an ordinary decision, and
+products with rate dependence on both sides are rejected. Numeric or known
+data may multiply a derivative object while preserving each rate row.
 
 ## <span id="pdvar-transpose"></span><span id="pdvar-ctranspose"></span><span id="pdvar-reshape"></span><span id="pdvar-squeeze"></span><span id="pdvar-vec"></span>Transpose And Reshape Symbolic Payloads
 
@@ -236,7 +264,7 @@ isequal(P,P)=1
 
 ## See Also
 
-[`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/) ·
-[`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) ·
-[`comparisons`](/DP-LMI-package/documents/reference/pdvar/comparisons/) ·
-[`pdmat matrix operations`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/)
+[`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/) ·
+[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
+[`comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) ·
+[`pdmat matrix operations`](/PD-LMI-package/documents/reference/pdmat/matrix-operations/)

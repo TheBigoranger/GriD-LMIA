@@ -1,114 +1,83 @@
 ---
-interface Props {
-  kind: "basis" | "tensor" | "derivative" | "convex";
-}
+import DiagramFrame from "./DiagramFrame.astro";
 
+interface Props { kind: "basis" | "tensor" | "derivative" | "convex"; }
 const { kind } = Astro.props;
-
 const labels = {
   basis: "Three nonnegative degree-two Bernstein basis functions sum to one across a local cell.",
-  tensor: "A four-by-three physical node grid creates three-by-two cells, and one degree-one cell stores four local tensor labels.",
-  derivative: "Adjacent Bernstein coefficients form forward differences, then rate-box vertices create separate rows.",
-  convex: "Nonnegative Bernstein weights combine coefficient matrices into a matrix value inside their convex hull.",
+  tensor: "A four-by-three physical node grid creates three-by-two cells; one degree-one tensor cell stores four local labels.",
+  derivative: "Cell-local forward differences lower degree by one; rate-box vertices create separate rows without asserting derivative continuity across cells.",
+  convex: "Nonnegative Bernstein weights combine coefficient matrices into a value inside their convex hull.",
 };
 ---
 
-<figure class="bernstein-concept">
-  <div class="concept-scene" role="img" aria-label={labels[kind]}>
-    <div class="concept-track">
-      {kind === "basis" && (
-        <svg viewBox="0 0 640 230" aria-hidden="true">
-        <line x1="70" y1="188" x2="580" y2="188" class="axis" />
-        <line x1="70" y1="188" x2="70" y2="32" class="axis" />
-        <path d="M70 38 C190 56 270 112 580 188" class="curve blue" />
-        <path d="M70 188 C220 42 430 42 580 188" class="curve teal" />
-        <path d="M70 188 C380 112 500 56 580 38" class="curve violet" />
-        <text x="75" y="215">α = 0</text><text x="535" y="215">α = 1</text>
-        <text x="126" y="55">B₀²</text><text x="305" y="78">B₁²</text><text x="520" y="55">B₂²</text>
-        </svg>
-      )}
-      {kind === "tensor" && (
-        <div class="tensor-scene">
-        <svg class="physical-grid" viewBox="0 0 420 225" aria-hidden="true">
-          <text x="200" y="20" text-anchor="middle">4 × 3 physical nodes → 3 × 2 cells</text>
-          <rect x="130" y="40" width="110" height="70" class="selected-cell" />
-          <g class="grid-lines">
-            <line x1="40" y1="40" x2="360" y2="40" />
-            <line x1="40" y1="110" x2="360" y2="110" />
-            <line x1="40" y1="180" x2="360" y2="180" />
-            <line x1="40" y1="40" x2="40" y2="180" />
-            <line x1="130" y1="40" x2="130" y2="180" />
-            <line x1="240" y1="40" x2="240" y2="180" />
-            <line x1="360" y1="40" x2="360" y2="180" />
-          </g>
-          <g class="node-dots">
-            {[40,130,240,360].flatMap((x) => [40,110,180].map((y) => <circle cx={x} cy={y} r="5" />))}
-          </g>
-          <text x="40" y="208" text-anchor="middle">ρ₁,₀</text>
-          <text x="360" y="208" text-anchor="middle">ρ₁,₃</text>
-          <text x="18" y="45" text-anchor="middle">ρ₂,₂</text>
-          <text x="18" y="185" text-anchor="middle">ρ₂,₀</text>
-        </svg>
-        <b class="arrow">selected cell →</b>
-        <div class="grid local">
-          <span>[0,1]</span><span>[1,1]</span><span>[0,0]</span><span>[1,0]</span>
-        </div>
-        </div>
-      )}
-      {kind === "derivative" && (
-        <div class="difference-scene">
-        <div class="coeff-row"><span>P⁽ᶜ⁾[0]</span><span>P⁽ᶜ⁾[1]</span><span>P⁽ᶜ⁾[2]</span></div>
-        <b class="arrow">forward differences →</b>
-        <div class="coeff-row diff"><span>ΔP⁽ᶜ⁾[0]</span><span>ΔP⁽ᶜ⁾[1]</span></div>
-        <b class="split">↗<br />↘</b>
-        <div class="rate"><span>ρ̇ lower</span><span>ρ̇ upper</span></div>
-        </div>
-      )}
-      {kind === "convex" && (
-        <div class="convex-scene">
-        <div class="coeff-row"><span>C⁽ᶜ⁾[0]</span><span>C⁽ᶜ⁾[1]</span><span>C⁽ᶜ⁾[2]</span></div>
-        <div class="weights"><span>B₀ ≥ 0</span><span>B₁ ≥ 0</span><span>B₂ ≥ 0</span><b>sum = 1</b></div>
-        <b class="arrow">→</b>
-        <div class="value">P(α)<small>inside coefficient hull</small></div>
-        </div>
-      )}
+<DiagramFrame caption={labels[kind]} class="bernstein-concept">
+  {kind === "basis" && (
+    <svg viewBox="0 0 640 230" aria-hidden="true">
+      <line x1="70" y1="188" x2="580" y2="188" class="axis" /><line x1="70" y1="188" x2="70" y2="32" class="axis" />
+      <path d="M70 38 C190 56 270 112 580 188" class="curve curve--first" />
+      <path d="M70 188 C220 42 430 42 580 188" class="curve curve--result" />
+      <path d="M70 188 C380 112 500 56 580 38" class="curve curve--decision" />
+      <text x="75" y="215">α = 0</text><text x="535" y="215">α = 1</text>
+      <text x="126" y="55">B₀²</text><text x="305" y="78">B₁²</text><text x="520" y="55">B₂²</text>
+    </svg>
+  )}
+  {kind === "tensor" && (
+    <div class="concept-flow concept-flow--tensor">
+      <svg viewBox="0 0 420 225" aria-hidden="true">
+        <text x="200" y="20" text-anchor="middle">4 × 3 physical nodes → 3 × 2 cells</text>
+        <rect x="130" y="40" width="110" height="70" class="selected-cell" />
+        <g class="grid-lines"><line x1="40" y1="40" x2="360" y2="40" /><line x1="40" y1="110" x2="360" y2="110" /><line x1="40" y1="180" x2="360" y2="180" /><line x1="40" y1="40" x2="40" y2="180" /><line x1="130" y1="40" x2="130" y2="180" /><line x1="240" y1="40" x2="240" y2="180" /><line x1="360" y1="40" x2="360" y2="180" /></g>
+        <text x="40" y="208" text-anchor="middle">ρ₁,₀</text><text x="360" y="208" text-anchor="middle">ρ₁,₃</text>
+      </svg>
+      <b>selected cell →</b>
+      <div class="local-grid"><span>[0,1]</span><span>[1,1]</span><span>[0,0]</span><span>[1,0]</span></div>
     </div>
-  </div>
-  <figcaption>{labels[kind]}</figcaption>
-</figure>
+  )}
+  {kind === "derivative" && (
+    <div class="concept-flow">
+      <div class="coefficient-line coefficient-line--first"><span>P⁽ᶜ⁾[0]</span><span>P⁽ᶜ⁾[1]</span><span>P⁽ᶜ⁾[2]</span></div>
+      <b>forward differences →</b>
+      <div class="coefficient-line contribution"><span>ΔP⁽ᶜ⁾[0]</span><span>ΔP⁽ᶜ⁾[1]</span></div>
+      <b>rate vertices →</b>
+      <div class="rate-stack"><span>ρ̇ = −1</span><span>ρ̇ = +1</span></div>
+    </div>
+  )}
+  {kind === "convex" && (
+    <div class="concept-flow">
+      <div class="coefficient-line coefficient-line--first"><span>C⁽ᶜ⁾[0]</span><span>C⁽ᶜ⁾[1]</span><span>C⁽ᶜ⁾[2]</span></div>
+      <div class="weight-stack"><span>B₀ ≥ 0</span><span>B₁ ≥ 0</span><span>B₂ ≥ 0</span><b>sum = 1</b></div>
+      <b>→</b>
+      <div class="value-card"><b>P(α)</b><span>inside coefficient hull</span></div>
+    </div>
+  )}
+</DiagramFrame>
 
 <style>
-  .bernstein-concept {
-    margin: 1.2rem 0 1.6rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--sl-color-accent-low) 20%, var(--sl-color-bg));
-    overflow: hidden;
-  }
-  .concept-scene { width:100%; min-width:0; overflow-x:auto; }
-  .concept-track { min-width:31rem; box-sizing:border-box; padding:1rem; }
-  .concept-scene svg { display: block; width: 100%; height: auto; }
-  .axis { stroke: var(--sl-color-gray-3); stroke-width: 2; }
+  .axis,
+  .grid-lines line { stroke: var(--sl-color-gray-3); stroke-width: 2; }
   .curve { fill: none; stroke-width: 4; stroke-linecap: round; }
-  .blue { stroke: #2563eb; } .teal { stroke: #0f766e; } .violet { stroke: #7c3aed; }
+  .curve--first { stroke: var(--diagram-input); }
+  .curve--result { stroke: var(--diagram-result); }
+  .curve--decision { stroke: #7c3aed; }
   text { fill: var(--sl-color-text); font: 18px system-ui, sans-serif; }
-  figcaption { border-block-start: 1px solid var(--sl-color-gray-5); padding: 0.7rem 0.9rem; color: var(--sl-color-gray-2); font-size: 0.86rem; }
-  .tensor-scene,.difference-scene,.convex-scene { display:flex; min-height:9rem; align-items:center; justify-content:center; gap:0.8rem; }
-  .grid { display:grid; border:2px solid var(--sl-color-gray-3); }
-  .grid.local { grid-template-columns:repeat(2,4.2rem); grid-template-rows:repeat(2,3.2rem); }
-  .grid span { display:grid; place-items:center; border:1px solid var(--sl-color-gray-4); background:var(--sl-color-bg); font-size:.8rem; }
-  .grid span.selected { background:var(--sl-color-accent-low); box-shadow:inset 0 0 0 2px var(--sl-color-accent); }
-  .physical-grid { width:24rem; flex:0 0 24rem; }
-  .grid-lines line { stroke:var(--sl-color-gray-3); stroke-width:2; }
-  .node-dots circle { fill:var(--sl-color-text); stroke:var(--sl-color-bg); stroke-width:2; }
-  .selected-cell { fill:var(--sl-color-accent-low); stroke:var(--sl-color-accent); stroke-width:3; }
-  .physical-grid text { font-size:13px; }
-  .arrow,.split { color:var(--sl-color-text-accent); white-space:nowrap; }
-  .coeff-row,.weights,.rate { display:flex; gap:.35rem; }
-  .coeff-row span,.weights span,.rate span,.value { border:1px solid var(--sl-color-accent); border-radius:8px; padding:.55rem; background:var(--sl-color-bg); text-align:center; }
-  .coeff-row.diff span,.rate span { border-color:#0f766e; }
-  .rate,.weights { flex-direction:column; }
-  .value { display:grid; gap:.2rem; font-weight:750; }
-  .value small { color:var(--sl-color-gray-2); font-weight:400; }
-  @media (max-width:520px){.bernstein-concept{margin-inline:-.25rem}}
+  .concept-flow { display: flex; flex-wrap: wrap; gap: 0.75rem; min-width: 0; align-items: center; justify-content: center; }
+  .concept-flow--tensor svg { flex: 1 1 18rem; max-width: 28rem; }
+  .concept-flow > b { color: var(--sl-color-text-accent); text-align: center; }
+  .selected-cell { fill: var(--sl-color-accent-low); stroke: var(--sl-color-accent); stroke-width: 3; }
+  .local-grid { display: grid; grid-template-columns: repeat(2, 4rem); }
+  .local-grid span { display: grid; min-height: 3rem; place-items: center; border: 1px solid var(--diagram-border); background: var(--sl-color-bg); font-size: 0.78rem; }
+  .contribution { color: var(--diagram-contribution); }
+  .rate-stack,
+  .weight-stack,
+  .value-card { display: grid; gap: 0.3rem; }
+  .rate-stack span,
+  .weight-stack span,
+  .value-card { border: 1px solid var(--diagram-result); border-radius: 8px; padding: 0.48rem; text-align: center; background: var(--sl-color-bg); }
+  .value-card span { color: var(--sl-color-gray-2); font-size: 0.72rem; }
+
+  @media (max-width: 560px) {
+    .concept-flow { flex-direction: column; }
+    .concept-flow--tensor svg { width: 100%; flex-basis: auto; }
+  }
 </style>

@@ -1,12 +1,12 @@
 ---
 title: pdlmi
-description: Cell-local YALMIP constraints for DP-LMI expressions.
+description: Cell-local YALMIP constraints for PD-LMI expressions.
 ---
 
 import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
   <span>pdlmi</span>
 </nav>
@@ -22,7 +22,7 @@ The three paths begin with the same stored residual. **Direct** tests every
 local coefficient and is the default. **Pólya** exactly elevates that residual
 before repeating the direct test. **Full box** introduces PSD Gram blocks and
 matches an exact box-polynomial identity. The
-[SOS certificate chapter](/DP-LMI-package/documents/math/sos-certificates/)
+[SOS certificate chapter](/PD-LMI-package/documents/math/sos-certificates/)
 derives these ideas; the API pages below stay focused on callable syntax.
 
 ## Reference Index
@@ -31,16 +31,16 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 | Reference | Task |
 | :--- | :--- |
-| [`pdlmi constructor`](/DP-LMI-package/documents/reference/pdlmi/constructor/) | Select direct, Pólya-elevated, or fixed-order full-box assembly. |
-| [`pdvar comparisons`](/DP-LMI-package/documents/reference/pdvar/comparisons/) | Create `pdlmi` constraints with `<=` and `>=`. |
-| [`applyPolya`](/DP-LMI-package/documents/reference/pdlmi/applypolya/) | Rebuild the original residual with a selected Pólya degree increment. |
-| [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
+| [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) | Select direct, Pólya-elevated, or fixed-order full-box assembly. |
+| [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) | Create `pdlmi` constraints with `<=` and `>=`. |
+| [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) | Rebuild the original residual with a selected Pólya degree increment. |
+| [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
 
 ### YALMIP export and solver use
 
 | Reference | Task |
 | :--- | :--- |
-| [`toYalmip`](/DP-LMI-package/documents/reference/pdlmi/toyalmip/) | Concatenate stored constraints for ordinary YALMIP `optimize` calls. |
+| [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) | Concatenate stored constraints for ordinary YALMIP `optimize` calls. |
 
 ## Current Boundary
 
@@ -52,11 +52,11 @@ box certificate, not a general-domain SOS interface or automatic hierarchy.
 Strictness margins, residual evidence, diagnostics, and package-owned solver
 wrappers remain outside this slice.
 
-The [SOS certificate map](/DP-LMI-package/documents/math/sos-certificates/)
+The [SOS certificate map](/PD-LMI-package/documents/math/sos-certificates/)
 explains how the implemented direct, Pólya, and full-box paths relate to
 full-space SOS, Putinar quadratic modules, Schmüdgen preorderings, and the
 one-dimensional Markov–Lukács theorem.
 
 ## See Also
 
-[`pdlmi constructor`](/DP-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/DP-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/DP-LMI-package/documents/math/sos-certificates/) · [`pdvar comparisons`](/DP-LMI-package/documents/reference/pdvar/comparisons/) · [`toYalmip`](/DP-LMI-package/documents/reference/pdlmi/toyalmip/)
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/PD-LMI-package/documents/math/sos-certificates/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)

@@ -1,6 +1,6 @@
 ---
 title: pdbase
-description: Backend parent class for DP-LMI cell-local Bernstein objects.
+description: Backend parent class for PD-LMI cell-local Bernstein objects.
 ---
 
 `pdbase` is the backend parent for `pdmat` and `pdvar`. Ordinary users should model with `pdmat` and `pdvar`; this page explains inherited storage and inspection behavior.
@@ -11,13 +11,13 @@ description: Backend parent class for DP-LMI cell-local Bernstein objects.
 
 | Reference | Task |
 | :--- | :--- |
-| [`Storage and inspection`](/DP-LMI-package/documents/reference/pdbase/storage-inspection/) | Inspect `GridInfo`, `MatrixSize`, `Degree`, `LocalValues`, cells, coefficients, labels, and shape counts. |
+| [`Storage and inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/) | Inspect `GridInfo`, `MatrixSize`, `Degree`, `LocalValues`, cells, coefficients, labels, and shape counts. |
 
 ### Bernstein backend context
 
 | Reference | Task |
 | :--- | :--- |
-| [`Bernstein polynomial background`](/DP-LMI-package/documents/math/bernstein-polynomial/) | Review local coordinates, labels, convolution, and coefficient-wise constraints. |
+| [`Bernstein polynomial background`](/PD-LMI-package/documents/math/bernstein-polynomial/) | Review local coordinates, labels, convolution, and coefficient-wise constraints. |
 
 ## Current Boundary
 
@@ -25,4 +25,4 @@ Do not treat `pdbase` as a primary modeling API or solver API. Rate-dependent al
 
 ## See Also
 
-[`pdmat`](/DP-LMI-package/documents/reference/pdmat/) · [`pdvar`](/DP-LMI-package/documents/reference/pdvar/)
+[`pdmat`](/PD-LMI-package/documents/reference/pdmat/) · [`pdvar`](/PD-LMI-package/documents/reference/pdvar/)

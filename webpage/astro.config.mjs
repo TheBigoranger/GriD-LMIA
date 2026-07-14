@@ -8,7 +8,7 @@ import rehypeMathjax from "rehype-mathjax";
 // https://astro.build/config
 export default defineConfig({
   site: "https://thebigoranger.github.io",
-  base: "/DP-LMI-package",
+  base: "/PD-LMI-package",
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath],
@@ -17,15 +17,15 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: "DP-LMI Manual",
+      title: "PD-LMI Manual",
       description:
-        "Reference-first manual for the DP-LMI MATLAB/YALMIP package.",
+        "Reference-first manual for the PD-LMI MATLAB/YALMIP package.",
       customCss: ["./src/styles/manual.css"],
       social: [
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/thebigoranger/DP-LMI-package",
+          href: "https://github.com/thebigoranger/PD-LMI-package",
         },
       ],
       sidebar: [

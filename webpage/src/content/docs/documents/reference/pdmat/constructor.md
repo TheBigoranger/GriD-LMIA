@@ -4,9 +4,9 @@ description: Construct known finite real matrix data on a parameter grid.
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>constructor</span>
 </nav>
@@ -36,7 +36,7 @@ Unsupported options: `IsContinuous`, `ContainsDecision`, `HasRateDependence`, an
 
 For diagrams of one- and two-parameter grid inputs, the global
 coefficient-grid shape, and the separate role of Bernstein `Degree`, see
-[Gridding And Bernstein Degree](/DP-LMI-package/documents/math/gridding-and-degree/).
+[Gridding And Bernstein Degree](/PD-LMI-package/documents/math/gridding-and-degree/).
 
 ## Returned Object
 
@@ -219,4 +219,4 @@ coefficient evidence while retaining the exact function handle for evaluation.
 
 ## See Also
 
-[`evaluate`](/DP-LMI-package/documents/reference/pdmat/evaluate/) · [`bernsteinTable`](/DP-LMI-package/documents/reference/pdmat/bernsteintable/) · [`pdbase`](/DP-LMI-package/documents/reference/pdbase/)
+[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) · [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/) · [`pdbase`](/PD-LMI-package/documents/reference/pdbase/)

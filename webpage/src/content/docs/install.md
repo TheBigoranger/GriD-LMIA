@@ -1,25 +1,26 @@
 ---
 title: Install And Download
-description: Download the v0.2.0 release, install DP-LMI, and verify the MATLAB/YALMIP package.
+description: Install the PD-LMI package, open the synchronized v0.3.2 manual, and verify the MATLAB/YALMIP setup.
 ---
 
-Use the tagged `v0.2.0` release for a reproducible package snapshot. The
-`main` branch and its manual remain useful as the current development snapshot.
+The online and printable manuals describe documentation version `v0.3.2`.
+Use the current `main` source snapshot for that interface. The older tagged
+`v0.2.0` release remains available when an immutable historical package
+snapshot is required.
 
 ## Downloads
 
 | Item | Link |
 | :--- | :--- |
-| v0.2.0 release | [Open the GitHub release](https://github.com/TheBigoranger/DP-LMI-package/releases/tag/v0.2.0) |
-| v0.2.0 source archive | [Download the tagged ZIP](https://github.com/TheBigoranger/DP-LMI-package/archive/refs/tags/v0.2.0.zip) |
-| Current manual snapshot | [Open the printable manual](/DP-LMI-package/manual.pdf) |
-| Current source snapshot | [Download `main` as ZIP](https://github.com/TheBigoranger/DP-LMI-package/archive/refs/heads/main.zip) |
-| GitHub repository | [TheBigoranger/DP-LMI-package](https://github.com/TheBigoranger/DP-LMI-package) |
-| Version history | [Open version history](/DP-LMI-package/version-history/) |
+| v0.3.2 manual | [Open the synchronized printable manual](/PD-LMI-package/manual.pdf) |
+| Current source snapshot | [Download `main` as ZIP](https://github.com/TheBigoranger/PD-LMI-package/archive/refs/heads/main.zip) |
+| GitHub repository | [TheBigoranger/PD-LMI-package](https://github.com/TheBigoranger/PD-LMI-package) |
+| Version history | [Open version history](/PD-LMI-package/version-history/) |
+| Historical v0.2.0 tag | [Open the immutable release](https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v0.2.0) |
 
-The release page is the stable download entry. The project does not currently
-publish the PDF manual as a separately named release asset, so the manual link
-above is explicitly the current `main` snapshot.
+The project does not publish the PDF manual as a separately named release
+asset, so the manual link above is explicitly the current synchronized site
+snapshot.
 
 ## Requirements
 
@@ -30,7 +31,7 @@ above is explicitly the current `main` snapshot.
 ## Path Setup
 
 ```matlab
-projectRoot = "path/to/DP-LMI-package";
+projectRoot = "path/to/PD-LMI-package";
 addpath(genpath(projectRoot));
 rmpath(genpath(fullfile(projectRoot, "doc")));
 ```
@@ -43,7 +44,7 @@ results = tests.run_all();
 
 ## First Lookup
 
-- [Reference lookup table](/DP-LMI-package/documents/reference-index/)
-- [pdmat constructor](/DP-LMI-package/documents/reference/pdmat/constructor/)
-- [pdvar constructor](/DP-LMI-package/documents/reference/pdvar/constructor/)
-- [Solver smoke examples](/DP-LMI-package/examples/solver-smoke/)
+- [Reference lookup table](/PD-LMI-package/documents/reference-index/)
+- [pdmat constructor](/PD-LMI-package/documents/reference/pdmat/constructor/)
+- [pdvar constructor](/PD-LMI-package/documents/reference/pdvar/constructor/)
+- [Solver smoke examples](/PD-LMI-package/examples/solver-smoke/)

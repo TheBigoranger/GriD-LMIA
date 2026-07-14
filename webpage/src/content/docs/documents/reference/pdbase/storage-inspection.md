@@ -4,9 +4,9 @@ description: Inherited grid, local value, label, and coefficient inspection beha
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdbase/">pdbase</a>
+  <a href="/PD-LMI-package/documents/reference/pdbase/">pdbase</a>
   <span>/</span>
   <span>storage inspection</span>
 </nav>
@@ -169,4 +169,4 @@ a two-dimensional cell array with `2^ell` rate rows and
 
 ## See Also
 
-[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) · [`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/)
+[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) · [`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/)

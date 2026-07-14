@@ -4,7 +4,7 @@ description: Backend degree, product, and grid-refinement operations.
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
   <span>Bernstein backend utilities</span>
 </nav>
@@ -100,6 +100,6 @@ of calling these methods directly.
 
 ## See Also
 
-[`pdmat matrix operations`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/) ·
-[`pdvar matrix operations`](/DP-LMI-package/documents/reference/pdvar/matrix-operations/) ·
-[`pdbase storage inspection`](/DP-LMI-package/documents/reference/pdbase/storage-inspection/)
+[`pdmat matrix operations`](/PD-LMI-package/documents/reference/pdmat/matrix-operations/) ·
+[`pdvar matrix operations`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/) ·
+[`pdbase storage inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/)

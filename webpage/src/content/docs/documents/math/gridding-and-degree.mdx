@@ -6,9 +6,9 @@ description: Read parameter-grid inputs, global coefficient grids, cell-local st
 import GriddingDiagram from "../../../../components/GriddingDiagram.astro";
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/math/bernstein-polynomial/">Bernstein Polynomial</a>
+  <a href="/PD-LMI-package/documents/math/bernstein-polynomial/">Bernstein Polynomial</a>
   <span>/</span>
   <span>Gridding And Bernstein Degree</span>
 </nav>
@@ -23,7 +23,9 @@ Every coefficient-backed object has two related but different discretizations:
 
 Adding a grid node makes more physical cells. Raising `Degree` makes more
 Bernstein labels inside each existing cell. Neither action is a shorthand for
-the other.
+the other. Degree 1 is the simplest affine case, not the package target:
+finite nonnegative degrees represent continuous piecewise-polynomial data on
+the same physical partition.
 
 <GriddingDiagram />
 
@@ -70,7 +72,10 @@ $$
 
 The shared value `12` is the common boundary coefficient of the two global
 degree-two cells. It is a Bernstein coefficient, not an extra physical grid
-node and not necessarily a sampled function value.
+node and not necessarily a sampled function value. Adjacent `pdvar` cells
+share this complete face value, but their cell-local derivatives need not
+match. This is value continuity, not a B-spline or a global differentiability
+claim.
 
 ## Two-Dimensional Input
 
@@ -168,14 +173,40 @@ create higher-degree expressions through coefficient algebra.
 
 ## Do Not Conflate These Operations
 
-| Operation | Changes physical cells? | Changes coefficients per cell? | Current package boundary |
-| :--- | :---: | :---: | :--- |
-| Add grid nodes | Yes | No, for a fixed degree | Common-grid algebra is supported; there is no general public adaptive-subdivision command. |
-| Raise or align Bernstein degree | No | Yes | Exact degree elevation aligns compatible coefficient-backed operands. |
-| Choose a higher `pdvar` decision degree | No | Yes | Constructor-created `pdvar` accepts every finite nonnegative integer degree. |
+<table class="mobile-stack-table">
+  <caption>Effects of grid, representation-degree, and decision-degree changes</caption>
+  <thead>
+    <tr>
+      <th scope="col">Operation</th>
+      <th scope="col">Changes physical cells?</th>
+      <th scope="col">Changes coefficients per cell?</th>
+      <th scope="col">Current package boundary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" data-label="Operation">Add grid nodes</th>
+      <td data-label="Physical cells">Yes</td>
+      <td data-label="Coefficients per cell">No, for a fixed degree</td>
+      <td data-label="Package boundary">Common-grid algebra is supported; there is no general public adaptive-subdivision command.</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Operation">Raise or align Bernstein degree</th>
+      <td data-label="Physical cells">No</td>
+      <td data-label="Coefficients per cell">Yes</td>
+      <td data-label="Package boundary">Exact degree elevation aligns compatible coefficient-backed operands.</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Operation">Choose a higher <code>pdvar</code> decision degree</th>
+      <td data-label="Physical cells">No</td>
+      <td data-label="Coefficients per cell">Yes</td>
+      <td data-label="Package boundary">Constructor-created <code>pdvar</code> accepts every finite nonnegative integer degree.</td>
+    </tr>
+  </tbody>
+</table>
 
-The [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/)
+The [Bernstein Polynomial](/PD-LMI-package/documents/math/bernstein-polynomial/)
 chapter gives the basis, local coordinate, degree-elevation formula, and
-coefficient-product rule. The [`pdmat` constructor](/DP-LMI-package/documents/reference/pdmat/constructor/)
-reference lists the accepted source forms, and the [`pdvar` constructor](/DP-LMI-package/documents/reference/pdvar/constructor/)
+coefficient-product rule. The [`pdmat` constructor](/PD-LMI-package/documents/reference/pdmat/constructor/)
+reference lists the accepted source forms, and the [`pdvar` constructor](/PD-LMI-package/documents/reference/pdvar/constructor/)
 lists its decision-variable forms.

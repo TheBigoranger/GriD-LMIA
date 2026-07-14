@@ -4,9 +4,9 @@ description: Return a command-line Bernstein coefficient table for pdmat.
 ---
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>bernsteinTable</span>
 </nav>
@@ -133,4 +133,4 @@ coefficient algebra and `pdlmi` assembly.
 
 ## See Also
 
-[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) · [`plot`](/DP-LMI-package/documents/reference/pdmat/plot/)
+[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) · [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/)

@@ -6,9 +6,9 @@ description: Mathematical map from global SOS and Bernstein tests to Pólya, Put
 import CertificateDiagram from "../../../../components/CertificateDiagram.astro";
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/math/bernstein-polynomial/">Bernstein Mathematics</a>
+  <a href="/PD-LMI-package/documents/math/bernstein-polynomial/">Bernstein Mathematics</a>
   <span>/</span>
   <span>SOS Certificates</span>
 </nav>
@@ -30,18 +30,59 @@ the residual; the package does not insert one.
 
 ## Certificate Map
 
-| Certificate | Domain used by the proof | Central hypothesis | Package status |
-| :--- | :--- | :--- | :--- |
-| Full-space SOS | All of $\mathbb R^\ell$ | A positive-semidefinite Gram representation exists | Mathematical background |
-| Direct Bernstein coefficients | One local hypercube | Every Bernstein coefficient matrix has the required sign | Implemented default |
-| Pólya-type coefficient test | Simplex pairs $(1-\alpha_s,\alpha_s)$ | Classical convergence uses strict positivity | Implemented as fixed elevation plus the direct test |
-| Putinar quadratic module | Basic closed semialgebraic set | Strict positivity and an Archimedean quadratic module | Mathematical background |
-| Schmüdgen preordering | Compact basic closed semialgebraic set | Strict positivity and compactness | Box-specific full preordering implemented |
-| Markov–Lukács | One closed interval | Degree-parity Gram form | Implemented by the one-parameter full-box path |
+<table class="mobile-stack-table">
+  <caption>Certificate domains, hypotheses, and implementation status</caption>
+  <thead>
+    <tr>
+      <th scope="col">Certificate</th>
+      <th scope="col">Domain used by the proof</th>
+      <th scope="col">Central hypothesis</th>
+      <th scope="col">Package status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" data-label="Certificate">Full-space SOS</th>
+      <td data-label="Proof domain">All of ℝ<sup>ℓ</sup></td>
+      <td data-label="Central hypothesis">A positive-semidefinite Gram representation exists</td>
+      <td data-label="Package status">Mathematical background</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Direct Bernstein coefficients</th>
+      <td data-label="Proof domain">One local hypercube</td>
+      <td data-label="Central hypothesis">Every Bernstein coefficient matrix has the required sign</td>
+      <td data-label="Package status">Implemented default</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Pólya-type coefficient test</th>
+      <td data-label="Proof domain">Simplex pairs (1 − α<sub>s</sub>, α<sub>s</sub>)</td>
+      <td data-label="Central hypothesis">Classical convergence uses strict positivity</td>
+      <td data-label="Package status">Implemented as fixed elevation plus the direct test</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Putinar quadratic module</th>
+      <td data-label="Proof domain">Basic closed semialgebraic set</td>
+      <td data-label="Central hypothesis">Strict positivity and an Archimedean quadratic module</td>
+      <td data-label="Package status">Mathematical background</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Schmüdgen preordering</th>
+      <td data-label="Proof domain">Compact basic closed semialgebraic set</td>
+      <td data-label="Central hypothesis">Strict positivity and compactness</td>
+      <td data-label="Package status">Box-specific full preordering implemented</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Markov–Lukács</th>
+      <td data-label="Proof domain">One closed interval</td>
+      <td data-label="Central hypothesis">Degree-parity Gram form</td>
+      <td data-label="Package status">Implemented by the one-parameter full-box path</td>
+    </tr>
+  </tbody>
+</table>
 
-The [Bernstein page](/DP-LMI-package/documents/math/bernstein-polynomial/)
+The [Bernstein page](/PD-LMI-package/documents/math/bernstein-polynomial/)
 defines the forward coordinate and exact coefficient algebra. The
-[`pdlmi` overview](/DP-LMI-package/documents/reference/pdlmi/) documents which
+[`pdlmi` overview](/PD-LMI-package/documents/reference/pdlmi/) documents which
 rows of this table are callable.
 
 <CertificateDiagram kind="map" />
@@ -109,7 +150,7 @@ S_c(\boldsymbol\alpha)\succeq0
 \quad\text{on the box}.
 $$
 
-This is the default [`pdlmi` constructor](/DP-LMI-package/documents/reference/pdlmi/constructor/)
+This is the default [`pdlmi` constructor](/PD-LMI-package/documents/reference/pdlmi/constructor/)
 certificate after residual and rate-vertex assembly. It introduces no Gram
 matrices. The converse is false: an indefinite coefficient defeats this
 certificate, not the continuous inequality.
@@ -133,7 +174,7 @@ changes only the tensor Bernstein degree, not the residual. A higher degree
 can expose coefficient positivity that was not visible at the original
 degree.
 
-[`applyPolya(r)`](/DP-LMI-package/documents/reference/pdlmi/applypolya/)
+[`applyPolya(r)`](/PD-LMI-package/documents/reference/pdlmi/applypolya/)
 implements one selected elevation increment followed by the same direct
 coefficient test. It does not search for an exponent, add a margin, or create
 SOS multipliers. Failure at one increment is inconclusive. Quantitative Pólya
@@ -186,7 +227,7 @@ For the hypercube, the package uses the $\ell$ generators
 $h_s=\alpha_s(1-\alpha_s)$. Their nonnegative set is exactly
 $[0,1]^\ell$, and the $2^\ell$ subset products form the implemented
 box-specific full preordering. At a selected absolute order,
-[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
 creates independent Gram blocks for every physical cell and active rate row,
 then matches the resulting Bernstein coefficients exactly. This is not a
 general-domain Schmüdgen interface.
@@ -249,8 +290,8 @@ or more parameters.
 
 ## See Also
 
-[`Bernstein Polynomial`](/DP-LMI-package/documents/math/bernstein-polynomial/) ·
-[`pdlmi`](/DP-LMI-package/documents/reference/pdlmi/) ·
-[`applyPolya`](/DP-LMI-package/documents/reference/pdlmi/applypolya/) ·
-[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
-[`Solver Examples`](/DP-LMI-package/examples/solver-smoke/)
+[`Bernstein Polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
+[`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) ·
+[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
+[`Solver Examples`](/PD-LMI-package/examples/solver-smoke/)

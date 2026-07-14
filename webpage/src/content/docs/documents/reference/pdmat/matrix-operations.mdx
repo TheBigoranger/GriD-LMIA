@@ -4,11 +4,12 @@ description: Interleaved examples, outputs, and diagrams for coefficient-backed 
 ---
 
 import MatrixOperationDiagram from "../../../../../components/MatrixOperationDiagram.astro";
+import ConvolutionDiagram from "../../../../../components/ConvolutionDiagram.astro";
 
 <nav class="manual-trail">
-  <a href="/DP-LMI-package/documents/">Documents</a>
+  <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>matrix operations</span>
 </nav>
@@ -66,8 +67,16 @@ refinement and degree elevation are independent alignment steps.
 
 ## <span id="pdmat-mtimes"></span>Multiply In Bernstein Coefficient Space
 
-`mtimes`/`*` performs an ordered, binomial-normalized tensor convolution. On
-one cell,
+### Basic idea
+
+`mtimes`/`*` multiplies coefficient-backed functions exactly, not at a few
+sample points. Input labels form ordered pairs, pairs are grouped by
+$\mathbf k=\mathbf i+\mathbf j$, and the group is normalized in the degree-sum
+Bernstein basis.
+
+### Formula
+
+On one cell,
 
 $$
 R^{(c)}[\mathbf k]=
@@ -80,6 +89,8 @@ $$
 Matrix order is preserved. Numeric scalars and matrices use the corresponding
 MATLAB-compatible left or right product. Two degree-one tensor factors produce
 degree two and nine local labels in two parameters.
+
+### Microexample
 
 ```matlab
 grid = {[0 1], [10 20]};
@@ -97,6 +108,18 @@ degree=2, coefficients=9
 ```
 
 <MatrixOperationDiagram kind="product" caption="Two degree-one coefficient rows convolve into one degree-two row; the middle coefficient combines two ordered products." />
+
+For a quadratic-by-affine scalar example, the same rule exposes all four
+anti-diagonals without a crossing arrow fan:
+
+<ConvolutionDiagram example="numeric" />
+
+### Visual conclusion
+
+Degrees add, labels add componentwise, binomial normalization recovers the
+stored Bernstein coefficients, and matrix payloads remain in written
+left-to-right order. In several parameters, apply the same rule independently
+along every tensor direction.
 
 ## <span id="pdmat-transpose"></span><span id="pdmat-ctranspose"></span><span id="pdmat-reshape"></span><span id="pdmat-squeeze"></span><span id="pdmat-vec"></span>Transpose And Reshape Each Matrix Payload
 
@@ -258,7 +281,7 @@ isequal(A,A)=1
 
 ## See Also
 
-[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) ·
-[`evaluate`](/DP-LMI-package/documents/reference/pdmat/evaluate/) ·
-[`bernsteinTable`](/DP-LMI-package/documents/reference/pdmat/bernsteintable/) ·
-[`pdvar matrix operations`](/DP-LMI-package/documents/reference/pdvar/matrix-operations/)
+[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) ·
+[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
+[`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/) ·
+[`pdvar matrix operations`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/)
