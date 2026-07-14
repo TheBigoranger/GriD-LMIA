@@ -1,5 +1,5 @@
 function tf = isZero(val, mode, varargin)
-    %ISZERO Classify zero evidence used by dpmat and dpvar algebra.
+    %ISZERO Classify zero evidence used by pdmat and pdvar algebra.
     %
     %   Syntax:
     %     tf = helper.isZero(val, "num")
@@ -9,13 +9,13 @@ function tf = isZero(val, mode, varargin)
     %
     %   Example:
     %     tf = helper.isZero(zeros(2), "add", [2 2]);
-    %     A = dpmat({[0 1]}, {0, 0}, Degree=1);
+    %     A = pdmat({[0 1]}, {0, 0}, Degree=1);
     %     tf = helper.isZero(A, "obj");
     %
     %   Modes separate the four zero notions required by algebra: finite real
     %   numeric arrays ("num"), shape-compatible additive identities ("add"),
-    %   nested coefficient payloads ("vals"), and coefficient-backed dpmat or
-    %   dpvar objects ("obj").
+    %   nested coefficient payloads ("vals"), and coefficient-backed pdmat or
+    %   pdvar objects ("obj").
 
     if ~(ischar(mode) || (isstring(mode) && isscalar(mode)))
         error("helper:InvalidZeroMode", "Zero-classification mode must be text.");
@@ -81,10 +81,10 @@ function tf = isVals(vals)
 end
 
 function tf = isObj(obj)
-    if isa(obj, "dpmat")
-        % Function-only dpmat objects expose placeholder zeros, not coefficient evidence.
+    if isa(obj, "pdmat")
+        % Function-only pdmat objects expose placeholder zeros, not coefficient evidence.
         tf = obj.SourceSummary ~= "function" && isVals(obj.LocalValues);
-    elseif isa(obj, "dpvar")
+    elseif isa(obj, "pdvar")
         tf = isVals(obj.LocalValues);
     else
         tf = false;

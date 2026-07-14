@@ -1,5 +1,5 @@
 function tests = test_bernstein_table
-    %TEST_BERNSTEIN_TABLE Shared Bernstein table behavior for dpmat and dpvar.
+    %TEST_BERNSTEIN_TABLE Shared Bernstein table behavior for pdmat and pdvar.
     tests = functiontests(localfunctions);
 end
 
@@ -8,9 +8,9 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testDpmatListsBernsteinCoefficients(testCase)
+function testPdmatListsBernsteinCoefficients(testCase)
     % bernsteinTable(A) should expose cell-local Bernstein metadata.
-    A = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+    A = pdmat({[0 1]}, {1, 2, 3}, Degree=2);
 
     T = bernsteinTable(A);
 
@@ -21,14 +21,16 @@ function testDpmatListsBernsteinCoefficients(testCase)
     testCase.verifyEqual(T.CellSubscript{1}, 1);
     testCase.verifyEqual(T.CoeffSubscript{2}, 2);
     testCase.verifyEqual(T.LocalIndex{2}, 1);
-    testCase.verifyEqual(string(T.Basis(2)), "2a(1-a)");
+    testCase.verifyEqual(string(T.Basis(1)), "(1-alpha)^2");
+    testCase.verifyEqual(string(T.Basis(2)), "2(1-alpha)alpha");
+    testCase.verifyEqual(string(T.Basis(3)), "alpha^2");
     testCase.verifyFalse(T.IsPhysicalNode(2));
     testCase.verifyEqual(T.Value{3}, 3);
 end
 
-function testDpmatSelectsPhysicalCell(testCase)
+function testPdmatSelectsPhysicalCell(testCase)
     % The optional cell selector should narrow output to one hypercube.
-    A = dpmat({[0 1 2]}, {1, 2, 3, 4, 5}, Degree=2);
+    A = pdmat({[0 1 2]}, {1, 2, 3, 4, 5}, Degree=2);
 
     T = bernsteinTable(A, 2);
 
@@ -40,10 +42,10 @@ function testDpmatSelectsPhysicalCell(testCase)
     testCase.verifyEqual(T.Value{3}, 5);
 end
 
-function testDpmatOneLineModeIncludesBernsteinScales(testCase)
+function testPdmatOneLineModeIncludesBernsteinScales(testCase)
     % oneLine keeps the Bernstein basis multipliers, including middle terms.
-    A = dpmat({[0 1]}, {[0 1], [1 2]}, Degree=1);
-    B = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+    A = pdmat({[0 1]}, {[0 1], [1 2]}, Degree=1);
+    B = pdmat({[0 1]}, {1, 2, 3}, Degree=2);
 
     TA = bernsteinTable(A, 1, "oneLine");
     TB = bernsteinTable(B, "oneLine");
@@ -52,15 +54,15 @@ function testDpmatOneLineModeIncludesBernsteinScales(testCase)
         {'CellSubscript', 'Expression'});
     testCase.verifyEqual(height(TA), 1);
     testCase.verifyEqual(string(TA.Expression(1)), ...
-        "a*[0 1] + (1-a)*[1 2]");
+        "(1-alpha)*[0 1] + alpha*[1 2]");
     testCase.verifyEqual(string(TB.Expression(1)), ...
-        "a^2*1 + 2a(1-a)*2 + (1-a)^2*3");
+        "(1-alpha)^2*1 + 2(1-alpha)alpha*2 + alpha^2*3");
 end
 
-function testDpmatTensorGridOrderingAndInvalidInputs(testCase)
+function testPdmatTensorGridOrderingAndInvalidInputs(testCase)
     % Tensor rows should follow the shared local-label combination order.
-    A = dpmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1);
-    F = dpmat({[0 1]}, @(rho) rho);
+    A = pdmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1);
+    F = pdmat({[0 1]}, @(rho) rho);
 
     T = bernsteinTable(A);
 
@@ -68,20 +70,22 @@ function testDpmatTensorGridOrderingAndInvalidInputs(testCase)
     testCase.verifyEqual(T.CellSubscript{1}, [1 1]);
     testCase.verifyEqual(T.LocalIndex{1}, [0 0]);
     testCase.verifyEqual(T.CoeffSubscript{4}, [2 2]);
-    testCase.verifyEqual(string(T.Basis(4)), "(1-a1) * (1-a2)");
+    testCase.verifyEqual(string(T.Basis(1)), ...
+        "(1-alpha1) * (1-alpha2)");
+    testCase.verifyEqual(string(T.Basis(4)), "alpha1 * alpha2");
     testCase.verifyEqual(T.Value{1}, 1);
     testCase.verifyEqual(T.Value{4}, 4);
-    testCase.verifyError(@() bernsteinTable(F), "dpmat:FunctionOnlyBernsteinTable");
-    testCase.verifyError(@() bernsteinTable(A, [2 1]), "dpbase:InvalidCellSubs");
+    testCase.verifyError(@() bernsteinTable(F), "pdmat:FunctionOnlyBernsteinTable");
+    testCase.verifyError(@() bernsteinTable(A, [2 1]), "pdbase:InvalidCellSubs");
     testCase.verifyError(@() bernsteinTable(A, [1 1], [1 1]), ...
-        "dpmat:InvalidBernsteinTableInput");
+        "pdmat:InvalidBernsteinTableInput");
     testCase.verifyError(@() bernsteinTable(A, "wide"), ...
-        "dpmat:InvalidBernsteinTableInput");
+        "pdmat:InvalidBernsteinTableInput");
 end
 
-function testDpvarOrdinaryTableUsesSdisplayStrings(testCase)
-    % dpvar rows share dpmat metadata but stringify symbolic coefficients.
-    P = dpvar(1, {[0 1 2]});
+function testPdvarOrdinaryTableUsesSdisplayStrings(testCase)
+    % pdvar rows share pdmat metadata but stringify symbolic coefficients.
+    P = pdvar(1, {[0 1 2]});
     cp = P.coeffs(1);
 
     T = bernsteinTable(P);
@@ -94,15 +98,16 @@ function testDpvarOrdinaryTableUsesSdisplayStrings(testCase)
     testCase.verifyEqual(T.CellSubscript{3}, 2);
     testCase.verifyEqual(T.CoeffSubscript{2}, 2);
     testCase.verifyEqual(T.LocalIndex{2}, 1);
-    testCase.verifyEqual(string(T.Basis(1)), "a");
+    testCase.verifyEqual(string(T.Basis(1)), "(1-alpha)");
+    testCase.verifyEqual(string(T.Basis(2)), "alpha");
     testCase.verifyTrue(isstring(T.Value{1}));
     testCase.verifyEqual(T.Value{1}, sdpText(cp{1}));
     testCase.verifyEqual(T.Value{2}, sdpText(cp{2}));
 end
 
-function testDpvarMatrixCoefficientDisplayIsCompact(testCase)
+function testPdvarMatrixCoefficientDisplayIsCompact(testCase)
     % Matrix-valued sdpvar coefficients should still occupy one table cell.
-    P = dpvar(2, 1, {[0 1]}, "full");
+    P = pdvar(2, 1, {[0 1]}, "full");
     cp = P.coeffs(1);
 
     T = bernsteinTable(P, 1);
@@ -113,9 +118,9 @@ function testDpvarMatrixCoefficientDisplayIsCompact(testCase)
     testCase.verifyEqual(T.Value{1}, sdpText(cp{1}));
 end
 
-function testDpvarOneLineModeIncludesSymbolicBernsteinTerms(testCase)
+function testPdvarOneLineModeIncludesSymbolicBernsteinTerms(testCase)
     % oneLine should combine Bernstein basis text with sdisplay output.
-    P = dpvar(1, {[0 1]});
+    P = pdvar(1, {[0 1]});
     cp = P.coeffs(1);
 
     T = bernsteinTable(P, "oneLine");
@@ -124,24 +129,25 @@ function testDpvarOneLineModeIncludesSymbolicBernsteinTerms(testCase)
         {'CellSubscript', 'Expression'});
     testCase.verifyEqual(height(T), 1);
     testCase.verifyEqual(string(T.Expression(1)), ...
-        "a*" + sdpText(cp{1}) + " + (1-a)*" + sdpText(cp{2}));
+        "(1-alpha)*" + sdpText(cp{1}) + " + alpha*" + sdpText(cp{2}));
 end
 
-function testDpvarOneLineModeIncludesDegreeTwoScale(testCase)
+function testPdvarOneLineModeIncludesDegreeTwoScale(testCase)
     % Shared helper text should keep Bernstein scales after degree elevation.
-    P = dpvar(1, {[0 1]});
-    A = dpmat({[0 1]}, {10, 20, 30}, Degree=2);
+    P = pdvar(1, {[0 1]});
+    A = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
     C = P + A;
 
     T = bernsteinTable(C, "oneLine");
 
     testCase.verifyEqual(C.Degree, 2);
-    testCase.verifyTrue(contains(string(T.Expression(1)), "2a(1-a)*"));
+    testCase.verifyTrue(contains(string(T.Expression(1)), ...
+        "2(1-alpha)alpha*"));
 end
 
-function testDpvarDerivativeTableAddsRateVertexColumns(testCase)
+function testPdvarDerivativeTableAddsRateVertexColumns(testCase)
     % rhodiff leaves store one coefficient row per active rho_dot vertex.
-    P = dpvar(1, {[0 1]});
+    P = pdvar(1, {[0 1]});
     D = rhodiff(P, [-1 2]);
     cd = D.coeffs(1);
 
@@ -159,9 +165,9 @@ function testDpvarDerivativeTableAddsRateVertexColumns(testCase)
     testCase.verifyEqual(T.Value{2}, sdpText(cd{2, 1}));
 end
 
-function testDpvarDerivativeOneLineAddsRateVertexColumns(testCase)
+function testPdvarDerivativeOneLineAddsRateVertexColumns(testCase)
     % oneLine keeps a separate expression for each rate vertex row.
-    P = dpvar(1, {[0 1]});
+    P = pdvar(1, {[0 1]});
     D = rhodiff(P, [-1 2]);
 
     T = bernsteinTable(D, "oneLine");
@@ -173,16 +179,16 @@ function testDpvarDerivativeOneLineAddsRateVertexColumns(testCase)
     testCase.verifyEqual(T.RateVertex{2}, 2);
 end
 
-function testDpvarInvalidInputsFailClearly(testCase)
-    % Option validation should match the dpmat bernsteinTable surface.
-    P = dpvar(1, {[0 1]});
+function testPdvarInvalidInputsFailClearly(testCase)
+    % Option validation should match the pdmat bernsteinTable surface.
+    P = pdvar(1, {[0 1]});
 
     testCase.verifyError(@() bernsteinTable(P, "wide"), ...
-        "dpvar:InvalidBernsteinTableInput");
+        "pdvar:InvalidBernsteinTableInput");
     testCase.verifyError(@() bernsteinTable(P, 1, 1), ...
-        "dpvar:InvalidBernsteinTableInput");
+        "pdvar:InvalidBernsteinTableInput");
     testCase.verifyError(@() bernsteinTable(P, 2), ...
-        "dpbase:InvalidCellSubs");
+        "pdbase:InvalidCellSubs");
 end
 
 function txt = sdpText(val)

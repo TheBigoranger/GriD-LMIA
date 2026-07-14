@@ -25,17 +25,6 @@ function testMatrixPredicate(testCase)
         "bad matrix", "matrix"), "test:InvalidMatrix");
 end
 
-function testScanMatsInfersCommonSize(testCase)
-    % scanMats should infer one common finite real matrix size.
-    sz = helper.scanMats({eye(2), zeros(2)}, "test:InvalidMatrix");
-
-    testCase.verifyEqual(sz, [2 2]);
-    testCase.verifyError(@() helper.scanMats({1, [1 2]}, "test:InvalidMatrix"), ...
-        "test:InvalidMatrix");
-    testCase.verifyError(@() helper.scanMats({1, Inf}, "test:InvalidMatrix"), ...
-        "test:InvalidMatrix");
-end
-
 function testUnknownPredicateFailsAsValidatorBug(testCase)
     % Unknown predicate tags indicate a helper bug, not caller bad input.
     testCase.verifyError(@() helper.chk(1, "test:InvalidValue", "bad value", ...

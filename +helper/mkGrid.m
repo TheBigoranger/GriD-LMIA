@@ -2,7 +2,7 @@ function info = mkGrid(grid, owner)
     %MKGRID Validate tensor-grid vectors and build GridInfo.
 
     if nargin < 2
-        owner = "dpbase";
+        owner = "pdbase";
     end
 
     helper.chk(grid, owner + ":InvalidGrid", ...

@@ -7,9 +7,12 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
     %     T = helper.bernTbl(..., "oneLine")
     %
     %   Example:
-    %     A = dpmat({[0 1]}, {1, 2}, Degree=1);
+    %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     T = helper.bernTbl(A, "demo:Invalid", @(x) x, ...
     %         @(x) string(mat2str(x)), []);
+    %
+    %   Basis text uses alpha=(rho-lo)/(hi-lo). Local labels count powers of
+    %   alpha, so label 0 is the lower/left endpoint in every cell.
 
     [cells, oneLine] = parseArgs(obj, errId, varargin{:});
     lbls = obj.lbls();
@@ -25,9 +28,9 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
         parts = strings(1, nPar);
         for p = 1:nPar
             if nPar == 1
-                name = "a";
+                name = "alpha";
             else
-                name = "a" + string(p);
+                name = "alpha" + string(p);
             end
             parts(p) = oneBasis(name, obj.Degree, loc(p));
         end
@@ -73,7 +76,7 @@ function tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn)
         end
     end
 
-    % Use MATLAB's ordinary table constructor; no dpmat/dpvar operands are passed.
+    % Use MATLAB's ordinary table constructor; no pdmat/pdvar operands are passed.
     tbl = table(termIdx, cellSubs, coeffSubs, locIdx, basisCol, isNode, valsCol, ...
         'VariableNames', {'TermIndex', 'CellSubscript', ...
         'CoeffSubscript', 'LocalIndex', 'Basis', ...
@@ -228,24 +231,24 @@ function [cells, oneLine] = parseArgs(obj, errId, varargin)
 end
 
 function txt = oneBasis(name, deg, idx)
-    % lbls() uses local indices 0:deg; keep text in that storage order.
-    powA = deg - idx;
-    powB = idx;
+    % Labels count alpha powers, preserving lower-to-upper storage order.
+    powOneMinus = deg - idx;
+    powAlpha = idx;
     parts = strings(1, 0);
     scale = nchoosek(deg, idx);
-    if powA > 0
-        if powA == 1
-            parts(end + 1) = name;
-        else
-            parts(end + 1) = name + "^" + string(powA);
-        end
-    end
-    if powB > 0
+    if powOneMinus > 0
         base = "(1-" + name + ")";
-        if powB == 1
+        if powOneMinus == 1
             parts(end + 1) = base;
         else
-            parts(end + 1) = base + "^" + string(powB);
+            parts(end + 1) = base + "^" + string(powOneMinus);
+        end
+    end
+    if powAlpha > 0
+        if powAlpha == 1
+            parts(end + 1) = name;
+        else
+            parts(end + 1) = name + "^" + string(powAlpha);
         end
     end
 

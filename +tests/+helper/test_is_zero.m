@@ -4,7 +4,7 @@ function tests = test_is_zero
 end
 
 function setupOnce(~)
-    % Keep YALMIP coefficient bases deterministic for the dpvar object route.
+    % Keep YALMIP coefficient bases deterministic for the pdvar object route.
     yalmip("clear");
 end
 
@@ -35,10 +35,10 @@ function testValuesModeHandlesNestedAndRateAffinePayloads(testCase)
 end
 
 function testObjectModeDistinguishesExplicitAndPlaceholderEvidence(testCase)
-    % Function-only dpmat placeholder zeros are not algebra evidence.
-    A = dpmat({[0 1]}, {0, 0}, Degree=1);
-    F = dpmat({[0 1]}, @(rho) 0);
-    P = dpvar(1, {[0 1]});
+    % Function-only pdmat placeholder zeros are not algebra evidence.
+    A = pdmat({[0 1]}, {0, 0}, Degree=1);
+    F = pdmat({[0 1]}, @(rho) 0);
+    P = pdvar(1, {[0 1]});
     Z = P - P;
 
     testCase.verifyTrue(helper.isZero(A, "obj"));
