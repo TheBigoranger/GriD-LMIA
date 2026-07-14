@@ -1,0 +1,71 @@
+---
+title: pdlmi applyPolya
+description: Rebuild a DP-LMI residual with a Pólya degree increment.
+---
+
+<nav class="manual-trail">
+  <a href="/DP-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/DP-LMI-package/documents/reference/pdlmi/">pdlmi</a>
+  <span>/</span>
+  <span>applyPolya</span>
+</nav>
+
+## Purpose
+
+Create a new `pdlmi` using the original stored residual and a selected Pólya
+degree increment.
+
+## Syntax
+
+```matlab
+Cpolya = C.applyPolya()
+Cpolya = C.applyPolya(degreeIncrement)
+```
+
+## Description
+
+The no-argument form selects increment one. A finite nonnegative integer
+increment elevates the residual in every parameter direction before `pdlmi`
+constrains every elevated coefficient and every active rate-vertex row. The
+method is value-like: it returns a new object and leaves `C` unchanged.
+
+Each call rebuilds from `C.Residual`, rather than compounding a previous
+elevation. Thus `C.applyPolya(2)` and `C.applyPolya().applyPolya(2)` both use
+an increment of two from the original residual.
+
+## Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, [0 1], Degree=1);
+direct = P >= 0;
+one = direct.applyPolya();
+two = one.applyPolya(2);
+[direct.PolyaDegree one.PolyaDegree two.PolyaDegree]
+```
+
+```text
+ans =
+     0     1     2
+```
+
+## Validation And Errors
+
+The increment must be a finite nonnegative integer scalar. Invalid values raise
+`pdlmi:InvalidPolyaDegree`.
+
+## Limitations
+
+The residual must still meet the ordinary `pdlmi` square and
+symmetric/Hermitian requirements.
+
+Pólya elevation is an exact re-expression of the stored residual followed by
+the direct coefficient test. It does not search for a successful exponent,
+insert a strict margin, or create SOS multipliers. See the
+[certificate map](/DP-LMI-package/documents/math/sos-certificates/#polya-type-coefficient-relaxation)
+for the theorem's strict-positivity setting and the narrower runtime contract.
+
+## See Also
+
+[`pdlmi constructor`](/DP-LMI-package/documents/reference/pdlmi/constructor/) · [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/DP-LMI-package/documents/math/sos-certificates/) · [`toYalmip`](/DP-LMI-package/documents/reference/pdlmi/toyalmip/) · [`pdbase storage and inspection`](/DP-LMI-package/documents/reference/pdbase/storage-inspection/)

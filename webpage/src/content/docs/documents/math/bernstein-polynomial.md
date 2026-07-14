@@ -10,8 +10,8 @@ description: Bernstein history, tensor-product cell storage, coefficient algebra
 </nav>
 
 The package stores parameter-dependent matrices with cell-local Bernstein
-coefficients. This chapter explains the mathematical facts used by `dpmat`,
-`dpvar`, `rhodiff`, and `dplmi`; the [Status And Limits](/DP-LMI-package/documents/status-and-limits/)
+coefficients. This chapter explains the mathematical facts used by `pdmat`,
+`pdvar`, `rhodiff`, and `pdlmi`; the [Status And Limits](/DP-LMI-package/documents/status-and-limits/)
 page separates those implemented calls from research context.
 
 For a diagram-led walkthrough of the actual one- and two-dimensional input
@@ -30,7 +30,7 @@ The bridge to DP-LMIs is not approximation alone. On a physical parameter
 cell, nonnegative basis functions that sum to one make a scalar, vector, or
 matrix polynomial a convex combination of finitely many coefficient objects.
 Exact coefficient multiplication, differentiation, and degree elevation then
-let the package assemble local matrix expressions before `dplmi` forms finite
+let the package assemble local matrix expressions before `pdlmi` forms finite
 sufficient constraints.
 
 ## Local Coordinate, Basis Order, And Endpoint Labels
@@ -74,7 +74,7 @@ $$
 
 The package stores $C_0,C_1,C_2$ as coefficient matrices or expressions. It
 does not treat them as arbitrary samples of a fitted curve. A function-only
-`dpmat` constructed without explicit `Degree` is different: it retains its
+`pdmat` constructed without explicit `Degree` is different: it retains its
 exact function handle but does not claim Bernstein coefficient evidence.
 
 ## Nonnegativity, Unit Sum, And Convex Hulls
@@ -122,7 +122,7 @@ $$
 
 The products remain nonnegative and sum to one, so the convex-hull and matrix
 sign arguments hold on every physical hyperrectangle. Bernstein bases on
-simplices are related, but simplex storage is not the `dpbase` convention.
+simplices are related, but simplex storage is not the `pdbase` convention.
 Here each axis has an independent grid interval and local label.
 
 ## LocalValues, Continuity, And Boundaries
@@ -138,7 +138,7 @@ local labels. Grid normalization happens independently on each physical cell,
 so nonuniform cell widths are supported and labels describe local basis
 positions rather than global node numbers.
 
-Continuous `dpvar` objects share symbolic coefficient handles across common
+Continuous `pdvar` objects share symbolic coefficient handles across common
 cell faces. Continuity is thus encoded in the coefficient graph rather than by
 extra equality LMIs. Cell-local derivative objects are deliberately different:
 their boundary rows stay separate because neighboring cells can have different
@@ -164,7 +164,7 @@ For several parameters,
 $\dot P=\sum_r(\partial P/\partial\rho_r)\dot\rho_r$. `rhodiff` forms the
 cell-local partial differences, aligns tensor degrees as required, and stores
 one row for each active rate-box vertex. The
-[`rhodiff` reference](/DP-LMI-package/documents/reference/dpvar/rhodiff/)
+[`rhodiff` reference](/DP-LMI-package/documents/reference/pdvar/rhodiff/)
 documents the supported call forms and validation rules.
 
 ## Degree Elevation For Any Target Degree
@@ -244,8 +244,8 @@ one-dimensional binomial ratios. Matrix multiplication order is preserved:
 $P_iQ_j$ cannot generally be exchanged with $Q_jP_i$.
 
 This direct coefficient convolution is implemented by the shared Bernstein
-backend and exercised by coefficient-backed `dpmat` algebra and supported
-known-data/`dpvar` products. It is representation algebra, not a relaxation.
+backend and exercised by coefficient-backed `pdmat` algebra and supported
+known-data/`pdvar` products. It is representation algebra, not a relaxation.
 
 ### Weighted Value-Grid Convolution
 
@@ -309,7 +309,7 @@ degree property and enumerates both physical cells and labels lexicographically,
 with earlier dimensions varying more slowly.
 
 ```matlab
-A = dpmat({[0 1 2], [10 20]}, {1 2; 3 4; 5 6}, Degree=1);
+A = pdmat({[0 1 2], [10 20]}, {1 2; 3 4; 5 6}, Degree=1);
 A.ncell()
 A.ncoeff()
 A.lbls()
@@ -343,7 +343,7 @@ E(\boldsymbol\alpha)=
 \sum_{\mathbf i}B_{\mathbf i}^{m}(\boldsymbol\alpha)E_{\mathbf i},
 $$
 
-the implemented `dplmi` path creates one YALMIP sign constraint for every
+the implemented `pdlmi` path creates one YALMIP sign constraint for every
 physical cell, local coefficient, and active rate-vertex row. Requiring all
 $E_{\mathbf i}\preceq0$ is sufficient for the whole local matrix polynomial
 to be nonpositive. `toYalmip` then hands the finite constraint array to
@@ -355,7 +355,7 @@ assembled by YALMIP.
 
 ## Fixed-Order Full Box Preordering
 
-The opt-in [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/)
+The opt-in [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
 path replaces coefficient-wise sign tests with a cell-local Bernstein-Gram
 representation. It uses the parity-specific Markov-Lukács form in one
 parameter and every subset product of the box generators
@@ -383,9 +383,9 @@ When a direct coefficient test fails, keep these operations distinct:
 
 The current package implements degree alignment and common-grid coefficient
 algebra, but does not expose an adaptive certificate-refinement workflow or a
-general public subdivision command. Constructor-created `dpvar` objects allow
-`Degree=0` or `Degree=1`; supported products can create higher-degree
-expressions.
+general public subdivision command. Constructor-created `pdvar` objects accept
+every finite nonnegative integer degree; supported products can raise the
+stored degree further.
 
 ## Control Literature And Scope
 
@@ -409,9 +409,10 @@ for cross-backend evidence; it is not a MATLAB runtime dependency.
 ## See Also
 
 [`Status And Limits`](/DP-LMI-package/documents/status-and-limits/) ·
-[`dpmat constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/) ·
-[`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) ·
-[`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) ·
-[`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) ·
-[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) ·
+[`SOS Certificates On A Hypercube`](/DP-LMI-package/documents/math/sos-certificates/) ·
+[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) ·
+[`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/) ·
+[`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) ·
+[`pdlmi constructor`](/DP-LMI-package/documents/reference/pdlmi/constructor/) ·
+[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
 [`Bernstein backend utilities`](/DP-LMI-package/documents/reference/bernstein-utilities/)

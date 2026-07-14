@@ -1,19 +1,19 @@
 ---
-title: dplmi toYalmip
-description: Concatenate stored dplmi entries into YALMIP constraints.
+title: pdlmi toYalmip
+description: Concatenate stored pdlmi entries into YALMIP constraints.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dplmi/">dplmi</a>
+  <a href="/DP-LMI-package/documents/reference/pdlmi/">pdlmi</a>
   <span>/</span>
   <span>toYalmip</span>
 </nav>
 
 ## Purpose
 
-Convert stored coefficient-wise `dplmi` entries into a YALMIP constraint array.
+Convert stored coefficient-wise `pdlmi` entries into a YALMIP constraint array.
 
 ## Syntax
 
@@ -26,7 +26,7 @@ F = C.toYalmip()
 
 | Argument | Description |
 | :--- | :--- |
-| `C` | A `dplmi` object, such as `C = P >= 0`. |
+| `C` | A `pdlmi` object, such as `C = P >= 0`. |
 
 ## Output
 
@@ -34,7 +34,7 @@ F = C.toYalmip()
 
 ## Description
 
-`dplmi` stores constraints in package-owned cell-local form. Direct and Pólya
+`pdlmi` stores constraints in package-owned cell-local form. Direct and Pólya
 objects store one sign condition per physical cell, Bernstein coefficient, and
 rate vertex. Full-box objects instead store PSD Gram-block conditions followed
 by exact coefficient identities for every cell and rate row. `toYalmip` is the
@@ -58,7 +58,7 @@ run `optimize`.
 
 ```matlab
 yalmip('clear')
-P = dpvar(2, {[0 1]}, "symmetric");
+P = pdvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
 F = toYalmip(C);
 isa(F, "lmi") || isa(F, "constraint")
@@ -81,7 +81,7 @@ Bernstein coefficients.
 
 ```matlab
 yalmip('clear')
-P = dpvar(2, {[0 1]}, "symmetric");
+P = pdvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
 F = C.toYalmip();
 isa(F, "lmi") || isa(F, "constraint")
@@ -98,7 +98,7 @@ ans =
 ```
 
 The dot-call form is equivalent and is convenient when chaining from a stored
-`dplmi` object.
+`pdlmi` object.
 
 ## Limitations
 
@@ -106,4 +106,4 @@ The dot-call form is equivalent and is convenient when chaining from a stored
 
 ## See Also
 
-[`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) · [`applyPolya`](/DP-LMI-package/documents/reference/dplmi/applypolya/) · [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) · [`dpvar comparisons`](/DP-LMI-package/documents/reference/dpvar/comparisons/)
+[`pdlmi constructor`](/DP-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/DP-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`pdvar comparisons`](/DP-LMI-package/documents/reference/pdvar/comparisons/)

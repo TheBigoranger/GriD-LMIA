@@ -1,12 +1,12 @@
 ---
-title: dpmat Matrix Operations
-description: Coefficient-backed algebra and structural operations for dpmat.
+title: pdmat Matrix Operations
+description: Coefficient-backed algebra and structural operations for pdmat.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <a href="/DP-LMI-package/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>matrix operations</span>
 </nav>
@@ -23,26 +23,26 @@ Apply matrix and coefficient operations to known parameter-dependent matrix data
 | Transforms | `transpose`, `ctranspose`, `reshape`, `squeeze`, `vec` |
 | Matrix summaries | `diag`, `trace`, `sum`, `mean`, `cumsum`, `tril`, `triu` |
 | Assembly | `horzcat`, `vertcat`, `cat`, `blkdiag`, `repmat` |
-| Indexing | Two-dimensional `subsref` and numeric or `dpmat` block assignment |
+| Indexing | Two-dimensional `subsref` and numeric or `pdmat` block assignment |
 | Shape inspection | `size`, `length`, `height`, `width`, `numel`, `ndims` |
 | Equality | `isequal` over normalized Bernstein coefficient evidence |
 
 The family table is a navigation summary. The following anchors are the
 stable per-symbol lookup targets used by the generated reference index.
 
-- [`plus`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-plus) · [`minus`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-minus) · [`mtimes`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-mtimes)
-- [`transpose`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-transpose) · [`ctranspose`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-ctranspose) · [`reshape`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-reshape) · [`squeeze`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-squeeze) · [`vec`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-vec)
-- [`diag`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-diag) · [`trace`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-trace) · [`sum`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-sum) · [`mean`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-mean) · [`cumsum`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-cumsum) · [`tril`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-tril) · [`triu`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-triu)
-- [`horzcat`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-horzcat) · [`vertcat`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-vertcat) · [`cat`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-cat) · [`blkdiag`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-blkdiag) · [`repmat`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-repmat)
-- [`flip`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-flip) · [`fliplr`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-fliplr) · [`flipud`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-flipud) · [`rot90`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-rot90) · [`subsref`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-subsref) · [`subsasgn`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-subsasgn)
-- [`disp`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-disp) · [`display`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-display) · [`isequal`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-isequal) · [`end`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-end) · [`size`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-size) · [`numel`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-numel) · [`ndims`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-ndims) · [`length`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-length) · [`height`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-height) · [`width`](/DP-LMI-package/documents/reference/dpmat/matrix-operations/#dpmat-width)
+- [`plus`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-plus) · [`minus`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-minus) · [`mtimes`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-mtimes)
+- [`transpose`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-transpose) · [`ctranspose`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-ctranspose) · [`reshape`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-reshape) · [`squeeze`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-squeeze) · [`vec`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-vec)
+- [`diag`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-diag) · [`trace`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-trace) · [`sum`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-sum) · [`mean`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-mean) · [`cumsum`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-cumsum) · [`tril`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-tril) · [`triu`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-triu)
+- [`horzcat`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-horzcat) · [`vertcat`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-vertcat) · [`cat`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-cat) · [`blkdiag`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-blkdiag) · [`repmat`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-repmat)
+- [`flip`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-flip) · [`fliplr`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-fliplr) · [`flipud`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-flipud) · [`rot90`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-rot90) · [`subsref`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-subsref) · [`subsasgn`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-subsasgn)
+- [`disp`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-disp) · [`display`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-display) · [`isequal`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-isequal) · [`end`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-end) · [`size`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-size) · [`numel`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-numel) · [`ndims`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-ndims) · [`length`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-length) · [`height`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-height) · [`width`](/DP-LMI-package/documents/reference/pdmat/matrix-operations/#pdmat-width)
 
 ## Examples
 
 ### Numeric scalar promotion
 
 ```matlab
-A = dpmat({[0 1]}, {1, 3}, Degree=1);
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
 B = A + 5;
 B.evaluate(0.25)
 ```
@@ -55,8 +55,8 @@ ans =
 ### Degree elevation before addition
 
 ```matlab
-A = dpmat({[0 1]}, {1, 2}, Degree=1);
-B = dpmat({[0 1]}, {10, 20, 30}, Degree=2);
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
 S = A + B;
 cS = S.coeffs(1);
 S.Degree
@@ -73,7 +73,7 @@ ans =
 ### Subtraction and unary signs
 
 ```matlab
-A = dpmat({[0 1]}, {1, 3}, Degree=1);
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
 Z = A - A;
 Z.Degree
 (-A).evaluate(1)
@@ -100,8 +100,8 @@ This is independent of degree elevation, numeric promotion, and product degree
 growth.
 
 ```matlab
-A = dpmat({[0 1]}, {1, 2}, Degree=1);
-B = dpmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+B = pdmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
 S = A + B;
 c1 = S.coeffs(1);
 c2 = S.coeffs(2);
@@ -127,7 +127,7 @@ Cell 2 coefficients:
 ### Numeric matrix multiplication
 
 ```matlab
-A = dpmat({[0 1]}, {[1 0; 0 2], [2 0; 0 3]}, Degree=1);
+A = pdmat({[0 1]}, {[1 0; 0 2], [2 0; 0 3]}, Degree=1);
 B = A * eye(2);
 B.evaluate(1)
 T = bernsteinTable(B);
@@ -157,8 +157,8 @@ so the single physical cell stores $(2+1)^2=9$ coefficients in `lbls` order.
 
 ```matlab
 grid = {[0 1], [10 20]};
-A = dpmat(grid, {1 2; 3 4}, Degree=1);
-B = dpmat(grid, {5 6; 7 8}, Degree=1);
+A = pdmat(grid, {1 2; 3 4}, Degree=1);
+B = pdmat(grid, {5 6; 7 8}, Degree=1);
 K = A * B;
 cK = K.coeffs([1 1]);
 fprintf('Tensor product degree: %d\n', K.Degree);
@@ -188,7 +188,7 @@ Tensor coefficients:
 ### Transpose, reshape, squeeze, and vec
 
 ```matlab
-A = dpmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
 At = A.';
 Ah = A';
 r = reshape(A, [1 4]);
@@ -215,7 +215,7 @@ For real coefficient payloads, `transpose` and `ctranspose` have the same numeri
 ### Matrix summaries
 
 ```matlab
-A = dpmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
 D = diag(A);
 tr = trace(A);
 colsum = sum(A, 1);
@@ -242,7 +242,7 @@ ans =
 ### Assembly
 
 ```matlab
-A = dpmat({[0 1]}, {1, 2}, Degree=1);
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
 H = horzcat(A, A);
 V = vertcat(A, A);
 C = cat(2, A, A);
@@ -267,9 +267,9 @@ ans =
 ### Indexing and assignment
 
 ```matlab
-A = dpmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
 entry = A(1, 2);
-A(2, 1) = dpmat({[0 1]}, {9, 10}, Degree=1);
+A(2, 1) = pdmat({[0 1]}, {9, 10}, Degree=1);
 entry.MatrixSize
 A.evaluate(1)
 ```
@@ -286,7 +286,7 @@ ans =
 ### Shape inspection and equality
 
 ```matlab
-A = dpmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
 size(A)
 height(A)
 width(A)
@@ -320,18 +320,18 @@ ans =
 
 ## Per-symbol reference anchors
 
-### <span id="dpmat-plus"></span>`plus` and `+`
+### <span id="pdmat-plus"></span>`plus` and `+`
 
-Adds two coefficient-backed `dpmat` objects after grid/degree alignment, or
+Adds two coefficient-backed `pdmat` objects after grid/degree alignment, or
 adds a compatible numeric constant. Scalar numeric constants are promoted to
 the matrix payload size.
 
-### <span id="dpmat-minus"></span>`minus` and `-`
+### <span id="pdmat-minus"></span>`minus` and `-`
 
 Subtracts two compatible objects or a numeric constant. Unary minus is
 documented separately below.
 
-### <span id="dpmat-mtimes"></span>`mtimes` and `*`
+### <span id="pdmat-mtimes"></span>`mtimes` and `*`
 
 Performs a binomial-normalized, ordered tensor Bernstein convolution over
 cell-local coefficient labels. Label multi-indices add componentwise, and the
@@ -340,116 +340,116 @@ Matrix-product order is preserved in each term: a left coefficient multiplies
 the matching right coefficient, not the reverse. Numeric scalar and matrix
 operands follow the implemented MATLAB-compatible forms.
 
-### <span id="dpmat-uminus"></span>`uminus` and unary `-`
+### <span id="pdmat-uminus"></span>`uminus` and unary `-`
 
 Negates every stored coefficient while preserving grid, degree, and source
 metadata.
 
-### <span id="dpmat-uplus"></span>`uplus` and unary `+`
+### <span id="pdmat-uplus"></span>`uplus` and unary `+`
 
 Returns a coefficient-backed object with the same represented data.
 
-### <span id="dpmat-transpose"></span>`transpose` and `.'`
+### <span id="pdmat-transpose"></span>`transpose` and `.'`
 
 Transposes each coefficient matrix. For real data this is the same numerical
 operation as `ctranspose`.
 
-### <span id="dpmat-ctranspose"></span>`ctranspose` and `'`
+### <span id="pdmat-ctranspose"></span>`ctranspose` and `'`
 
 Conjugate-transposes each coefficient matrix.
 
-### <span id="dpmat-reshape"></span>`reshape`
+### <span id="pdmat-reshape"></span>`reshape`
 
 Reshapes each coefficient matrix using MATLAB's size forms; the number of
 payload elements must be preserved.
 
-### <span id="dpmat-squeeze"></span>`squeeze`
+### <span id="pdmat-squeeze"></span>`squeeze`
 
 Removes singleton payload dimensions while retaining parameter metadata.
 
-### <span id="dpmat-vec"></span>`vec`
+### <span id="pdmat-vec"></span>`vec`
 
 Vectorizes every coefficient matrix into a column payload.
 
-### <span id="dpmat-diag"></span>`diag`
+### <span id="pdmat-diag"></span>`diag`
 
 Extracts a diagonal or creates a diagonal matrix according to the implemented
 `diag` call form and offset `k`.
 
-### <span id="dpmat-trace"></span>`trace`
+### <span id="pdmat-trace"></span>`trace`
 
 Computes a coefficient-wise trace of square matrix payloads.
 
-### <span id="dpmat-sum"></span>`sum`
+### <span id="pdmat-sum"></span>`sum`
 
 Sums coefficient matrices along a requested matrix dimension.
 
-### <span id="dpmat-mean"></span>`mean`
+### <span id="pdmat-mean"></span>`mean`
 
 Computes coefficient-wise means along a requested matrix dimension.
 
-### <span id="dpmat-cumsum"></span>`cumsum`
+### <span id="pdmat-cumsum"></span>`cumsum`
 
 Computes cumulative sums along a requested matrix dimension.
 
-### <span id="dpmat-tril"></span>`tril`
+### <span id="pdmat-tril"></span>`tril`
 
 Keep the lower triangular coefficient entries, with the optional diagonal
 offset `k` following MATLAB's convention.
 
-### <span id="dpmat-triu"></span>`triu`
+### <span id="pdmat-triu"></span>`triu`
 
 Keep the upper triangular coefficient entries, with the optional diagonal
 offset `k` following MATLAB's convention.
 
-### <span id="dpmat-horzcat"></span>`horzcat`, <span id="dpmat-vertcat"></span>`vertcat`, and <span id="dpmat-cat"></span>`cat`
+### <span id="pdmat-horzcat"></span>`horzcat`, <span id="pdmat-vertcat"></span>`vertcat`, and <span id="pdmat-cat"></span>`cat`
 
 Concatenate compatible coefficient-backed payloads horizontally, vertically,
 or along an explicit dimension. Physical grids and coefficient degrees must
 be compatible.
 
-### <span id="dpmat-blkdiag"></span>`blkdiag`
+### <span id="pdmat-blkdiag"></span>`blkdiag`
 
-Builds a block-diagonal coefficient matrix from compatible `dpmat` operands.
+Builds a block-diagonal coefficient matrix from compatible `pdmat` operands.
 
-### <span id="dpmat-repmat"></span>`repmat`
+### <span id="pdmat-repmat"></span>`repmat`
 
 Repeats coefficient payloads using MATLAB's repetition-size forms.
 
-### <span id="dpmat-flip"></span>`flip`, <span id="dpmat-fliplr"></span>`fliplr`, and <span id="dpmat-flipud"></span>`flipud`
+### <span id="pdmat-flip"></span>`flip`, <span id="pdmat-fliplr"></span>`fliplr`, and <span id="pdmat-flipud"></span>`flipud`
 
 Flip coefficient payloads along a dimension, left-to-right, or up-to-down.
 
-### <span id="dpmat-rot90"></span>`rot90`
+### <span id="pdmat-rot90"></span>`rot90`
 
 Rotates matrix payloads by quarter turns using the optional integer `k`.
 
-### <span id="dpmat-subsref"></span>`subsref` and <span id="dpmat-subsasgn"></span>`subsasgn`
+### <span id="pdmat-subsref"></span>`subsref` and <span id="pdmat-subsasgn"></span>`subsasgn`
 
 Support two-dimensional indexing and compatible block assignment. Assignment
 must preserve the grid and matrix-shape contract; use the constructor page for
 creating a new grid or source object.
 
-### <span id="dpmat-disp"></span>`disp` and <span id="dpmat-display"></span>`display`
+### <span id="pdmat-disp"></span>`disp` and <span id="pdmat-display"></span>`display`
 
 Print a concise object summary and dispatch MATLAB's display behavior. These
 methods are inspection conveniences; they do not print every local coefficient
 unless `bernsteinTable` is requested.
 
-### <span id="dpmat-isequal"></span>`isequal`
+### <span id="pdmat-isequal"></span>`isequal`
 
 Compares normalized grid, metadata, payload shape, and coefficient evidence.
 
-### <span id="dpmat-end"></span>`end`
+### <span id="pdmat-end"></span>`end`
 
 Resolves `end` in matrix indexing expressions.
 
-### <span id="dpmat-numArgumentsFromSubscript"></span>`numArgumentsFromSubscript`
+### <span id="pdmat-numArgumentsFromSubscript"></span>`numArgumentsFromSubscript`
 
 Keeps subscripted results scalar so MATLAB property and method dot access
 continues to dispatch correctly.
 
-### <span id="dpmat-size"></span>`size`, <span id="dpmat-numel"></span>`numel`, <span id="dpmat-ndims"></span>`ndims`, <span id="dpmat-length"></span>`length`, <span id="dpmat-height"></span>`height`, and <span id="dpmat-width"></span>`width`
+### <span id="pdmat-size"></span>`size`, <span id="pdmat-numel"></span>`numel`, <span id="pdmat-ndims"></span>`ndims`, <span id="pdmat-length"></span>`length`, <span id="pdmat-height"></span>`height`, and <span id="pdmat-width"></span>`width`
 
 Report MATLAB-style matrix payload shape and element counts. These dimensions
 refer to the stored matrix at one parameter location, not the tensor-grid
@@ -457,4 +457,4 @@ cell count.
 
 ## See Also
 
-[`dpmat constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/) · [`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/) · [`dpvar matrix operations`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/)
+[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) · [`evaluate`](/DP-LMI-package/documents/reference/pdmat/evaluate/) · [`pdvar matrix operations`](/DP-LMI-package/documents/reference/pdvar/matrix-operations/)

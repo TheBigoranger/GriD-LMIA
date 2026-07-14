@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --sl-color-accent-low: #e0f2fe;
   --sl-color-accent: #2563eb;
   --sl-color-accent-high: #172554;
@@ -7,10 +8,16 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --sl-color-accent-low: #172554;
   --sl-color-accent: #60a5fa;
   --sl-color-accent-high: #dbeafe;
   --sl-color-bg-sidebar: #0f172a;
+}
+
+[data-theme="dark"] .sl-skip-link:focus {
+  color: white;
+  background-color: #1d4ed8;
 }
 
 .sidebar-content a[aria-current="page"],
@@ -194,6 +201,20 @@
   border: 1px solid var(--sl-color-gray-5);
   border-radius: 8px;
   background: white;
+  color-scheme: light;
+}
+
+/* Keep automatic mobile night mode readable before Starlight restores the
+   saved theme attribute. Explicit light mode remains authoritative. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --sl-color-accent-low: #172554;
+    --sl-color-accent: #60a5fa;
+    --sl-color-accent-high: #dbeafe;
+    --sl-color-text-accent: #93c5fd;
+    --sl-color-bg-sidebar: #0f172a;
+  }
 }
 
 @media (max-width: 820px) {

@@ -1,21 +1,21 @@
 ---
-title: dpvar bernsteinTable
+title: pdvar bernsteinTable
 description: Inspect symbolic Bernstein coefficients and rate-vertex rows.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpvar/">dpvar</a>
+  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>bernsteinTable</span>
 </nav>
 
 ## Purpose
 
-Inspect a `dpvar` object's local Bernstein coefficient rows. This is a diagnostic
+Inspect a `pdvar` object's local Bernstein coefficient rows. This is a diagnostic
 view for checking tensor labels, symbolic payloads, and the rate rows produced
-by [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/). It does not
+by [`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/). It does not
 change the decision expression or send anything to YALMIP's optimizer.
 
 ## Syntax
@@ -45,7 +45,7 @@ box becomes finite vertex rows.
 
 | Input | Meaning |
 | :--- | :--- |
-| `P` | A `dpvar` object. |
+| `P` | A `pdvar` object. |
 | `cellSubscript` | Optional tensor-cell subscript accepted by `P.coeffs(...)`. Omit it to inspect all cells. |
 | `"oneLine"` | Optional display mode that prints one compact expression per local row. The default is the expanded table. |
 
@@ -62,7 +62,7 @@ snapshot of the object state; editing it does not edit `P`.
 
 ```matlab
 yalmip('clear')
-P = dpvar(1, {[0 1]}, "symmetric");
+P = pdvar(1, {[0 1]}, "symmetric");
 T = bernsteinTable(P, "oneLine");
 disp(T)
 ```
@@ -71,20 +71,18 @@ disp(T)
     CellSubscript       Expression
     _____________    ________________
 
-        {[1]}        "a*internal(1) + (1-a)*internal(2)"
+        {[1]}        "(1-alpha)*internal(1) + alpha*internal(2)"
 ```
 
 The exact symbolic labels depend on the current YALMIP variable allocation;
 the stable contract is the row structure and the association with local
-Bernstein labels, not a particular internal `sdpvar` name. This literal
-runtime diagnostic uses `a=1-alpha`, where
-$\alpha=(\rho-\rho_k)/(\rho_{k+1}-\rho_k)$ is the public forward coordinate.
-Accordingly, the unchanged transcript represents
-$(1-\alpha)\,\texttt{internal(1)}+\alpha\,\texttt{internal(2)}$.
+Bernstein labels, not a particular internal `sdpvar` name. The diagnostic uses
+the public forward coordinate directly, so local label `0` multiplies
+`(1-alpha)` and local label `1` multiplies `alpha`.
 
 ## Validation And Errors
 
-- The object must be a `dpvar` instance.
+- The object must be a `pdvar` instance.
 - A requested cell must exist in the tensor grid.
 - Rate-row inspection requires the derivative object's rate metadata to be
   present and internally consistent.
@@ -93,13 +91,13 @@ $(1-\alpha)\,\texttt{internal(1)}+\alpha\,\texttt{internal(2)}$.
 
 ## Limitations
 
-`dpvar` accepts any nonnegative constructor degree, and products may elevate
+`pdvar` accepts any nonnegative constructor degree, and products may elevate
 coefficient degree further. `bernsteinTable` reports the resulting stored rows;
 it is an inspection aid, not a serialization format for the internal
 coefficient tree.
 
 ## See Also
 
-[`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) ·
-[`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) ·
-[`dpmat bernsteinTable`](/DP-LMI-package/documents/reference/dpmat/bernsteintable/)
+[`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/) ·
+[`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) ·
+[`pdmat bernsteinTable`](/DP-LMI-package/documents/reference/pdmat/bernsteintable/)

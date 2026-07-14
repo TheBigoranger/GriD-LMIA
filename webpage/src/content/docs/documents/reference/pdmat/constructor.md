@@ -1,27 +1,27 @@
 ---
-title: dpmat Constructor
+title: pdmat Constructor
 description: Construct known finite real matrix data on a parameter grid.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <a href="/DP-LMI-package/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>constructor</span>
 </nav>
 
 ## Purpose
 
-Create a known-data `dpmat` object over one or more parameter-grid dimensions.
+Create a known-data `pdmat` object over one or more parameter-grid dimensions.
 
 ## Syntax
 
 ```matlab
-A = dpmat(gridVector, source)
-A = dpmat(gridVector, source, Degree=m)
-A = dpmat(gridVectors, source)
-A = dpmat(gridVectors, source, Degree=m)
+A = pdmat(gridVector, source)
+A = pdmat(gridVector, source, Degree=m)
+A = pdmat(gridVectors, source)
+A = pdmat(gridVectors, source, Degree=m)
 ```
 
 ## Arguments
@@ -40,10 +40,10 @@ coefficient-grid shape, and the separate role of Bernstein `Degree`, see
 
 ## Returned Object
 
-`A` is a `dpmat < dpbase` object. All inherited `dpbase` properties are
+`A` is a `pdmat < pdbase` object. All inherited `pdbase` properties are
 readable through dot syntax and have private set access:
 
-| Field | How to inspect it | Meaning for `dpmat` |
+| Field | How to inspect it | Meaning for `pdmat` |
 | :--- | :--- | :--- |
 | `GridInfo` | `A.GridInfo.Vectors{1}`, `A.GridInfo.Points`, `A.GridInfo.Bounds` | Validated tensor-grid metadata. |
 | `MatrixSize` | `A.MatrixSize` | Matrix size of each numeric payload. |
@@ -51,8 +51,8 @@ readable through dot syntax and have private set access:
 | `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | Cell-local numeric Bernstein coefficients. |
 | `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces; otherwise the constructor warns and returns `false`. |
 | `ContainsDecision` | `A.ContainsDecision` | Always `false`; no YALMIP decisions are stored. |
-| `HasRateDependence` | `A.HasRateDependence` | Always `false`; rate dependence belongs to `dpvar`/`rhodiff`. |
-| `RateBounds` | `A.RateBounds` | Always empty for `dpmat`. |
+| `HasRateDependence` | `A.HasRateDependence` | Always `false`; rate dependence belongs to `pdvar`/`rhodiff`. |
+| `RateBounds` | `A.RateBounds` | Always empty for `pdmat`. |
 | `SourceSummary` | `A.SourceSummary` | Source label such as `coefficient-backed`, `function`, or `function-bernstein`. |
 | `FunctionHandle` | `A.FunctionHandle` | Exact evaluator for function-backed objects; empty for coefficient-backed data. |
 
@@ -65,7 +65,7 @@ consistent; direct assignment would break the coefficient-label contract.
 ### Coefficient-backed scalar data
 
 ```matlab
-A = dpmat({[0 1]}, {1, 3}, Degree=1);
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
 A.MatrixSize
 A.Degree
 A.SourceSummary
@@ -93,19 +93,18 @@ ans =
     TermIndex    LocalIndex     Basis     Value
     _________    __________    _______    _____
 
-        1          {[0]}       "a"        {[1]}
-        2          {[1]}       "(1-a)"    {[3]}
+        1          {[0]}       "(1-alpha)"    {[1]}
+        2          {[1]}       "alpha"        {[3]}
 ```
 
-The table is a literal runtime diagnostic and uses `a=1-alpha`, where
-$\alpha=(\rho-\rho_0)/(\rho_1-\rho_0)$ is the public forward coordinate.
-Therefore the two displayed basis rows are $(1-\alpha)$ and $\alpha$ from
-local label `0` to local label `1`.
+The runtime diagnostic uses the same public forward coordinate
+$\alpha=(\rho-\rho_0)/(\rho_1-\rho_0)$. The rows therefore run directly from
+$(1-\alpha)$ at local label `0` to $\alpha$ at local label `1`.
 
 ### Tensor-grid coefficient ordering
 
 ```matlab
-A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
 A.GridInfo.Vectors{2}
 A.coeffs([1 1])
 A.lbls()
@@ -142,7 +141,7 @@ ans =
 ### Function-backed exact evaluator
 
 ```matlab
-F = dpmat({[0 pi]}, @(rho) sin(rho));
+F = pdmat({[0 pi]}, @(rho) sin(rho));
 F.evaluate(pi/2)
 ```
 
@@ -157,7 +156,7 @@ Function-backed objects route evaluation through the retained function handle.
 
 ```matlab
 localVals = {{[1 0], [0 1]}, {[2 0], [0 2]}};
-C = dpmat({[0 1 2]}, localVals, Degree=1);
+C = pdmat({[0 1 2]}, localVals, Degree=1);
 C.MatrixSize
 C.coeffs(2)
 ```
@@ -177,7 +176,7 @@ coefficient matrices.
 ### Function-backed Bernstein evidence
 
 ```matlab
-G = dpmat({[0 1]}, @(rho) rho.^2, Degree=2);
+G = pdmat({[0 1]}, @(rho) rho.^2, Degree=2);
 G.SourceSummary
 G.coeffs(1)
 ```
@@ -196,10 +195,22 @@ coefficient evidence while retaining the exact function handle for evaluation.
 
 ## Validation And Errors
 
-- Unknown options raise `dpmat:UnknownOption`.
-- Internal metadata options raise `dpmat:UnsupportedOption`.
-- Function-handle probing or validation may raise `dpmat:InvalidFunctionHandle` or `dpmat:InvalidFunctionOutput`.
-- Numeric coefficient payloads must be nonempty finite real matrices with consistent size.
+- Malformed option sequences raise `pdmat:InvalidOptions`.
+- Unknown options raise `pdmat:UnknownOption`.
+- Internal metadata options raise `pdmat:UnsupportedOption`.
+- Function-handle probing or validation may raise `pdmat:InvalidFunctionHandle` or `pdmat:InvalidFunctionOutput`.
+- Unsupported source forms raise `pdmat:InvalidSource`; inconsistent global
+  coefficient grids raise `pdmat:InvalidData`.
+- Invalid degrees and malformed nested storage raise `pdmat:InvalidDegree` and
+  `pdmat:InvalidLocalValues`.
+- Malformed explicit coefficient-leaf counts or shapes raise
+  `pdmat:InvalidCoefficientCell`; invalid, nonfinite, nonreal, or wrong-size
+  payloads raise `pdmat:InvalidCoefficientPayload`.
+- A function that is not representable at an explicit degree raises
+  `pdmat:NonBernsteinPolynomial`; a failed or size-inconsistent validation
+  probe raises `pdmat:InvalidFunctionValue`.
+- Mismatched shared faces are retained as discontinuous local data and emit
+  `pdmat:DiscontinuousLocalValues`.
 
 ## Limitations
 
@@ -208,4 +219,4 @@ coefficient evidence while retaining the exact function handle for evaluation.
 
 ## See Also
 
-[`evaluate`](/DP-LMI-package/documents/reference/dpmat/evaluate/) · [`bernsteinTable`](/DP-LMI-package/documents/reference/dpmat/bernsteintable/) · [`dpbase`](/DP-LMI-package/documents/reference/dpbase/)
+[`evaluate`](/DP-LMI-package/documents/reference/pdmat/evaluate/) · [`bernsteinTable`](/DP-LMI-package/documents/reference/pdmat/bernsteintable/) · [`pdbase`](/DP-LMI-package/documents/reference/pdbase/)

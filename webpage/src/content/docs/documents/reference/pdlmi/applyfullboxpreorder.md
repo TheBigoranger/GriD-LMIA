@@ -1,19 +1,19 @@
 ---
-title: dplmi applyFullBoxPreorder
+title: pdlmi applyFullBoxPreorder
 description: Rebuild a DP-LMI residual with a fixed-order full box Bernstein-Gram certificate.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dplmi/">dplmi</a>
+  <a href="/DP-LMI-package/documents/reference/pdlmi/">pdlmi</a>
   <span>/</span>
   <span>applyFullBoxPreorder</span>
 </nav>
 
 ## Purpose
 
-Create a new `dplmi` that represents the stored residual with the implemented
+Create a new `pdlmi` that represents the stored residual with the implemented
 cell-local full box Bernstein-Gram preordering.
 
 ## Syntax
@@ -53,12 +53,12 @@ positivity margin is added.
 
 | Input | Description |
 | :--- | :--- |
-| `C` | Any `dplmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
+| `C` | Any `pdlmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
 | `order` | Optional finite nonnegative integer scalar. It is an absolute full-box order and must meet the dimension-dependent minimum. |
 
 ## Returned Object
 
-`Cbox` is a new `dplmi` with `UsePolya=false`,
+`Cbox` is a new `pdlmi` with `UsePolya=false`,
 `UseFullBoxPreorder=true`, and `FullBoxOrder` equal to the selected order.
 Within each cell and rate row, `Constraints` stores all PSD Gram-block
 conditions before the exact coefficient identities. `toYalmip(Cbox)` returns
@@ -68,7 +68,7 @@ those stored constraints in the same order.
 
 ```matlab
 yalmip('clear')
-P = dpvar(1, {[0 1]}, Degree=2);
+P = pdvar(1, {[0 1]}, Degree=2);
 direct = P >= 0;
 boxDefault = direct.applyFullBoxPreorder();
 boxHigher = boxDefault.applyFullBoxPreorder(2);
@@ -105,14 +105,14 @@ it does not use the already elevated constraints.
 
 ## Validation And Errors
 
-- A malformed `order` raises `dplmi:InvalidFullBoxOrder`.
-- A valid integer below the applicable minimum raises `dplmi:FullBoxOrderTooLow`.
-- Rebuilding retains the ordinary `dplmi` expression, relation, square-matrix,
+- A malformed `order` raises `pdlmi:InvalidFullBoxOrder`.
+- A valid integer below the applicable minimum raises `pdlmi:FullBoxOrderTooLow`.
+- Rebuilding retains the ordinary `pdlmi` expression, relation, square-matrix,
   and symmetry checks.
 - Constructor selection errors are documented on the
-  [`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/)
-  page, including `dplmi:InvalidUseFullBoxPreorder` and
-  `dplmi:ConflictingRelaxations`.
+  [`pdlmi constructor`](/DP-LMI-package/documents/reference/pdlmi/constructor/)
+  page, including `pdlmi:InvalidUseFullBoxPreorder` and
+  `pdlmi:ConflictingRelaxations`.
 
 ## Limitations
 
@@ -124,8 +124,9 @@ evidence; it is not a MATLAB runtime dependency.
 
 ## See Also
 
-[`dplmi constructor`](/DP-LMI-package/documents/reference/dplmi/constructor/) ·
-[`applyPolya`](/DP-LMI-package/documents/reference/dplmi/applypolya/) ·
-[`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) ·
+[`pdlmi constructor`](/DP-LMI-package/documents/reference/pdlmi/constructor/) ·
+[`applyPolya`](/DP-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`toYalmip`](/DP-LMI-package/documents/reference/pdlmi/toyalmip/) ·
 [`Bernstein Polynomial`](/DP-LMI-package/documents/math/bernstein-polynomial/) ·
+[`SOS Certificates`](/DP-LMI-package/documents/math/sos-certificates/) ·
 [`Status And Limits`](/DP-LMI-package/documents/status-and-limits/)

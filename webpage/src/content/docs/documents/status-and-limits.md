@@ -17,15 +17,15 @@ source for call forms, options, examples, and validation errors.
 
 | Area | Current behavior | Reference |
 | :--- | :--- | :--- |
-| Cell-local backend | `dpbase` stores tensor-grid metadata, nested `LocalValues`, local labels, counts, and coefficient inspection. | [`dpbase`](/DP-LMI-package/documents/reference/dpbase/) |
-| Known matrix data | `dpmat` supports coefficient grids, explicit local values, function-only evaluation, and function handles with validated Bernstein evidence. | [`dpmat`](/DP-LMI-package/documents/reference/dpmat/) |
+| Cell-local backend | `pdbase` stores tensor-grid metadata, nested `LocalValues`, local labels, counts, and coefficient inspection. | [`pdbase`](/DP-LMI-package/documents/reference/pdbase/) |
+| Known matrix data | `pdmat` supports coefficient grids, explicit local values, function-only evaluation, and function handles with validated Bernstein evidence. | [`pdmat`](/DP-LMI-package/documents/reference/pdmat/) |
 | Exact coefficient algebra | Supported coefficient-backed operations use degree elevation, common-grid refinement, and binomial-scaled Bernstein convolution. | [Bernstein utilities](/DP-LMI-package/documents/reference/bernstein-utilities/) |
-| Decision expressions | `dpvar` creates continuous YALMIP-backed degree-0 or degree-1 Bernstein decisions; supported affine and known-data algebra can produce higher degrees. | [`dpvar`](/DP-LMI-package/documents/reference/dpvar/) |
-| Rate derivatives | `rhodiff` creates discontinuous cell-local derivative expressions with scalar or tensor-grid rate-vertex rows and explicit or stored `RateBounds`. | [`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) |
-| Finite LMI assembly | `dplmi` directly constrains every active physical-cell, Bernstein-coefficient, and rate-vertex row. Pólya degree elevation is opt-in through `UsePolya`/`PolyaDegree` or `applyPolya`. | [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) |
-| Full box preordering assembly | `applyFullBoxPreorder([order])` is an opt-in dense Gram certificate: parity-specific Markov-Lukács blocks in one parameter and the complete subset-product box preordering in multiple parameters. | [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) |
-| Solver handoff | `toYalmip` returns the assembled YALMIP constraints for ordinary `optimize` calls. | [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/) |
-| Inspection and plots | `bernsteinTable`, `evaluate`, and one-/two-parameter `dpmat/plot` behavior are documented and tested. | [Reference lookup](/DP-LMI-package/documents/reference-index/) |
+| Decision expressions | `pdvar` accepts every finite nonnegative constructor degree. Degree zero is parameter-independent; every positive degree shares complete coefficient faces across adjacent cells. | [`pdvar`](/DP-LMI-package/documents/reference/pdvar/) |
+| Rate derivatives | `rhodiff` creates discontinuous cell-local derivative expressions with scalar or tensor-grid rate-vertex rows and explicit or stored `RateBounds`. | [`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) |
+| Finite LMI assembly | `pdlmi` directly constrains every active physical-cell, Bernstein-coefficient, and rate-vertex row. Pólya degree elevation is opt-in through `UsePolya`/`PolyaDegree` or `applyPolya`. | [`pdlmi`](/DP-LMI-package/documents/reference/pdlmi/) |
+| Full box preordering assembly | `applyFullBoxPreorder([order])` is an opt-in dense Gram certificate: parity-specific Markov-Lukács blocks in one parameter and the complete subset-product box preordering in multiple parameters. | [`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) |
+| Solver handoff | `toYalmip` returns the assembled YALMIP constraints for ordinary `optimize` calls. | [`toYalmip`](/DP-LMI-package/documents/reference/pdlmi/toyalmip/) |
+| Inspection and plots | `bernsteinTable`, `evaluate`, and one-/two-parameter `pdmat/plot` behavior are documented and tested. | [Reference lookup](/DP-LMI-package/documents/reference-index/) |
 
 ## Independent SOS Comparison Suite
 
@@ -65,9 +65,14 @@ distinguishes pure degree elevation, physical subdivision, higher decision
 degree, and a different relaxation hierarchy. Only use a refinement through a
 documented public call; research context is not an executable package feature.
 
+For the mathematical relationships among global SOS, Bernstein coefficient
+tests, Pólya elevation, Putinar modules, Schmüdgen preorderings, and exact
+one-dimensional interval forms, use
+[SOS Certificates On A Hypercube](/DP-LMI-package/documents/math/sos-certificates/).
+
 ## Solver Boundary
 
-`dplmi` owns direct and opt-in Pólya-elevated coefficient assembly plus the
+`pdlmi` owns direct and opt-in Pólya-elevated coefficient assembly plus the
 opt-in fixed-order full box preordering. After `toYalmip`, YALMIP owns
 constraint combination, solver selection, `optimize`, and solver status. The
 package's solver smoke tests prefer MOSEK when available and otherwise use
@@ -78,5 +83,6 @@ package's solver smoke tests prefer MOSEK when available and otherwise use
 [`Reference lookup`](/DP-LMI-package/documents/reference-index/) ·
 [`Install And Download`](/DP-LMI-package/install/) ·
 [`Bernstein Polynomial`](/DP-LMI-package/documents/math/bernstein-polynomial/) ·
-[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/) ·
+[`SOS Certificates`](/DP-LMI-package/documents/math/sos-certificates/) ·
+[`applyFullBoxPreorder`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
 [`Solver smoke examples`](/DP-LMI-package/examples/solver-smoke/)

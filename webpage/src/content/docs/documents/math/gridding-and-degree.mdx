@@ -29,14 +29,14 @@ the other.
 
 ## One-Dimensional Input
 
-For one scheduling parameter, `dpmat` and `dpvar` accept a numeric vector as
+For one scheduling parameter, `pdmat` and `pdvar` accept a numeric vector as
 shorthand for a one-element cell array. The vector must be finite, strictly
 increasing, and have at least two entries.
 
 ```matlab
 rhoGrid = [0 1 2];
 data = {10, 11, 12, 13, 14};
-A = dpmat(rhoGrid, data, Degree=2);
+A = pdmat(rhoGrid, data, Degree=2);
 
 A.ncell()
 A.ncoeff()
@@ -81,7 +81,7 @@ axes:
 ```matlab
 grid = {[0 1 2], [10 20 30]};
 data = {11, 12, 13; 21, 22, 23; 31, 32, 33};
-A = dpmat(grid, data, Degree=1);
+A = pdmat(grid, data, Degree=1);
 
 A.ncell()
 A.ncoeff()
@@ -133,11 +133,11 @@ $$
 $$
 
 which is why `data` is a 3-by-3 cell array. For a global coefficient-backed
-`dpmat`, every axis must satisfy this shape rule.
+`pdmat`, every axis must satisfy this shape rule.
 
-## The \(\ell\)-Dimensional Case
+## The ell-Dimensional Case
 
-The same convention extends directly to \(\ell\) scheduling parameters:
+The same convention extends directly to $\ell$ scheduling parameters:
 
 ```matlab
 gridVectors = {rho1Nodes, rho2Nodes, ..., rhoEllNodes};
@@ -154,13 +154,13 @@ $$
 
 The physical-cell tree is `LocalValues{i1}{i2}...{i_ell}`. Its leaf is a flat
 cell array whose label rows come from `lbls()`; labels range independently
-from `0` through `m` in each coordinate. A global coefficient-backed `dpmat`
+from `0` through `m` in each coordinate. A global coefficient-backed `pdmat`
 uses one source-array dimension per parameter, of length
 `(N_r - 1) * m + 1` on axis `r`.
 
 `Degree` is a single scalar property in the implemented package, not a
-per-axis degree vector. `dpmat` accepts any nonnegative integer degree;
-constructor-created `dpvar` accepts `Degree=0` or `Degree=1`. Products may
+per-axis degree vector. `pdmat` accepts any nonnegative integer degree;
+constructor-created `pdvar` accepts every finite nonnegative integer degree. Products may
 create higher-degree expressions through coefficient algebra.
 
 ## Do Not Conflate These Operations
@@ -169,10 +169,10 @@ create higher-degree expressions through coefficient algebra.
 | :--- | :---: | :---: | :--- |
 | Add grid nodes | Yes | No, for a fixed degree | Common-grid algebra is supported; there is no general public adaptive-subdivision command. |
 | Raise or align Bernstein degree | No | Yes | Exact degree elevation aligns compatible coefficient-backed operands. |
-| Choose a higher `dpvar` decision degree | No | Yes | Constructor-created `dpvar` is limited to degree 0 or 1. |
+| Choose a higher `pdvar` decision degree | No | Yes | Constructor-created `pdvar` accepts every finite nonnegative integer degree. |
 
 The [Bernstein Polynomial](/DP-LMI-package/documents/math/bernstein-polynomial/)
 chapter gives the basis, local coordinate, degree-elevation formula, and
-coefficient-product rule. The [`dpmat` constructor](/DP-LMI-package/documents/reference/dpmat/constructor/)
-reference lists the accepted source forms, and the [`dpvar` constructor](/DP-LMI-package/documents/reference/dpvar/constructor/)
+coefficient-product rule. The [`pdmat` constructor](/DP-LMI-package/documents/reference/pdmat/constructor/)
+reference lists the accepted source forms, and the [`pdvar` constructor](/DP-LMI-package/documents/reference/pdvar/constructor/)
 lists its decision-variable forms.

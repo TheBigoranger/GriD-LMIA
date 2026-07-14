@@ -15,12 +15,12 @@ rmpath(genpath(fullfile(projectRoot, "doc")));
 results = tests.run_all();
 ```
 
-The test entry point runs helper, `dpbase`, `dpmat`, `dpvar`, and `dplmi` tests. `dpvar` and `dplmi` workflows require YALMIP on the MATLAB path.
+The test entry point runs helper, `pdbase`, `pdmat`, `pdvar`, and `pdlmi` tests. `pdvar` and `pdlmi` workflows require YALMIP on the MATLAB path.
 
-## Scalar `dpmat`
+## Scalar `pdmat`
 
 ```matlab
-A = dpmat({[0 1]}, {1, 3}, Degree=1);
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
 val = A.evaluate(0.25)
 ```
 
@@ -29,10 +29,10 @@ val =
     1.5000
 ```
 
-## Tensor-Grid `dpmat`
+## Tensor-Grid `pdmat`
 
 ```matlab
-A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
 A.lbls()
 ```
 
@@ -44,10 +44,10 @@ ans =
      1     1
 ```
 
-## Function-Backed `dpmat`
+## Function-Backed `pdmat`
 
 ```matlab
-F = dpmat({[0 pi]}, @(rho) sin(rho));
+F = pdmat({[0 pi]}, @(rho) sin(rho));
 F.evaluate(pi/2)
 ```
 
@@ -58,11 +58,11 @@ ans =
 
 Function-backed objects without explicit `Degree` preserve the exact function handle and are not coefficient evidence for algebra.
 
-## `dpvar` And `rhodiff`
+## `pdvar` And `rhodiff`
 
 ```matlab
 yalmip('clear')
-P = dpvar(1, {[0 1 2]}, RateBounds=[-1 1]);
+P = pdvar(1, {[0 1 2]}, RateBounds=[-1 1]);
 D = rhodiff(P);
 
 D.HasRateDependence
@@ -78,11 +78,11 @@ ans =
     -1     1
 ```
 
-## `dplmi.toYalmip`
+## `pdlmi.toYalmip`
 
 ```matlab
 yalmip('clear')
-P = dpvar(2, {[0 1]}, "symmetric");
+P = pdvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
 F = toYalmip(C);
 isa(F, "lmi") || isa(F, "constraint")
@@ -102,14 +102,14 @@ ans =
 
 ## Deterministic Full-Box Selection
 
-The [`applyFullBoxPreorder` reference](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/#deterministic-transcript-example)
+The [`applyFullBoxPreorder` reference](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/#deterministic-transcript-example)
 contains a solver-independent transcript that compares direct assembly, the
 minimum full-box order, an explicit higher order, replacement of a Pólya
 selection, and `toYalmip` export counts.
 
 ## Solver Smoke Cases
 
-The solver-facing smoke examples from [`+tests/+dplmi/test_solver_smoke.m`](https://github.com/TheBigoranger/DP-LMI-package/blob/main/%2Btests/%2Bdplmi/test_solver_smoke.m) are documented on a dedicated page:
+The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](https://github.com/TheBigoranger/DP-LMI-package/blob/main/%2Btests/%2Bpdlmi/test_solver_smoke.m) are documented on a dedicated page:
 
 - [Parameter-dependent Lyapunov variable](/DP-LMI-package/examples/solver-smoke/#parameter-dependent-lyapunov-variable)
 - [Block DP-LMI objective](/DP-LMI-package/examples/solver-smoke/#block-dp-lmi-objective)

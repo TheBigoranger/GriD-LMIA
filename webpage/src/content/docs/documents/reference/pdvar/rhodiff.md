@@ -1,19 +1,19 @@
 ---
-title: dpvar rhodiff
-description: Rate-weighted cell-local derivative of a dpvar expression.
+title: pdvar rhodiff
+description: Rate-weighted cell-local derivative of a pdvar expression.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpvar/">dpvar</a>
+  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>rhodiff</span>
 </nav>
 
 ## Purpose
 
-Return a discontinuous, rate-vertex derivative expression for a `dpvar` object.
+Return a discontinuous, rate-vertex derivative expression for a `pdvar` object.
 
 ## Syntax
 
@@ -26,12 +26,12 @@ D = rhodiff(P)
 
 | Argument | Description |
 | :--- | :--- |
-| `P` | A `dpvar` expression that is not already a rate-vertex derivative expression. |
+| `P` | A `pdvar` expression that is not already a rate-vertex derivative expression. |
 | `rb` | Finite `ell x 2` rate-bound table, such as `[-1 1]` or `[-1 2; -3 5]`. Required unless `P` already carries matching `RateBounds`. |
 
 ## Output
 
-`D` is a `dpvar` with `HasRateDependence=true`, `IsContinuous=false`, and
+`D` is a `pdvar` with `HasRateDependence=true`, `IsContinuous=false`, and
 `SourceSummary="derivative"`. It inherits the usual read-only fields
 (`GridInfo`, `MatrixSize`, `Degree`, `LocalValues`, `ContainsDecision`,
 `RateBounds`, and the rest) and is inspected with ordinary dot syntax or
@@ -47,7 +47,7 @@ returned by `D.lbls()`.
 
 ```matlab
 yalmip('clear')
-P = dpvar(1, {[0 1 2]}, RateBounds=[-1 1]);
+P = pdvar(1, {[0 1 2]}, RateBounds=[-1 1]);
 D = rhodiff(P);
 D.Degree
 D.IsContinuous
@@ -95,7 +95,7 @@ Three parameters give `2^3 = 8` rows:
 ```matlab
 yalmip('clear')
 rb = [-1 2; -3 5; 0 4];
-P = dpvar(1, {[0 1], [0 1], [0 1]}, RateBounds=rb);
+P = pdvar(1, {[0 1], [0 1], [0 1]}, RateBounds=rb);
 D = rhodiff(P);
 size(D.coeffs([1 1 1]))
 ```
@@ -108,15 +108,15 @@ ans =
 The first `8` is the number of rate vertices. The second `8` is
 `(D.Degree+1)^3`; multivariate derivatives are elevated into a common tensor
 degree basis before the rate-weighted sum is stored. This design keeps
-derivative evidence cell-local and lets `dplmi` later check affine
+derivative evidence cell-local and lets `pdlmi` later check affine
 `rho_dot` dependence by finite rate-box vertices.
 
 ## Validation And Errors
 
-- `rhodiff(P)` without stored rate bounds raises `dpvar:MissingRateBounds`.
-- Explicit bounds with the wrong shape or invalid lower/upper order raise `dpvar:InvalidRateBounds`.
-- Explicit bounds that do not match existing object bounds raise `dpvar:RateBoundsMismatch`.
-- Re-differentiating an existing rate-vertex expression raises `dpvar:InvalidDiff`.
+- `rhodiff(P)` without stored rate bounds raises `pdvar:MissingRateBounds`.
+- Explicit bounds with the wrong shape or invalid lower/upper order raise `pdvar:InvalidRateBounds`.
+- Explicit bounds that do not match existing object bounds raise `pdvar:RateBoundsMismatch`.
+- Re-differentiating an existing rate-vertex expression raises `pdvar:InvalidDiff`.
 
 ## Limitations
 
@@ -125,4 +125,4 @@ derivative evidence cell-local and lets `dplmi` later check affine
 
 ## See Also
 
-[`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/) · [`dplmi`](/DP-LMI-package/documents/reference/dplmi/)
+[`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/) · [`pdlmi`](/DP-LMI-package/documents/reference/pdlmi/)

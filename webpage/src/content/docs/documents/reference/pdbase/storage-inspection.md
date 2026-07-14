@@ -1,23 +1,23 @@
 ---
-title: dpbase Storage And Inspection
+title: pdbase Storage And Inspection
 description: Inherited grid, local value, label, and coefficient inspection behavior.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpbase/">dpbase</a>
+  <a href="/DP-LMI-package/documents/reference/pdbase/">pdbase</a>
   <span>/</span>
   <span>storage inspection</span>
 </nav>
 
 ## Purpose
 
-Understand the inherited storage contract used by `dpmat` and `dpvar`.
+Understand the inherited storage contract used by `pdmat` and `pdvar`.
 
 ## Inherited Properties
 
-`dpmat` and `dpvar` inherit these read-only public properties from `dpbase`.
+`pdmat` and `pdvar` inherit these read-only public properties from `pdbase`.
 They are accessed with ordinary dot syntax, such as `A.Degree`,
 `P.GridInfo.Vectors{1}`, or `D.LocalValues{1}`. The properties have private
 set access: users can inspect them, but constructor and algebra methods are
@@ -36,8 +36,8 @@ and rate metadata consistent.
 | `RateBounds` | `ell x 2` rate-bound table when rate metadata exists. |
 | `SourceSummary` | Short source label such as `decision`, `function`, or derivative metadata. |
 
-`dpmat` adds a read-only `FunctionHandle` property. It is nonempty only for
-function-backed construction. `dpvar` does not expose `FunctionHandle`; its
+`pdmat` adds a read-only `FunctionHandle` property. It is nonempty only for
+function-backed construction. `pdvar` does not expose `FunctionHandle`; its
 payloads are YALMIP expressions stored in inherited `LocalValues`.
 
 ## Inspection Methods
@@ -53,7 +53,7 @@ payloads are YALMIP expressions stored in inherited `LocalValues`.
 | `npar(obj)` | Number of parameters. |
 | `size(obj)` | Matrix payload dimensions. |
 
-### <span id="dpbase-cells"></span>`cells`
+### <span id="pdbase-cells"></span>`cells`
 
 ```matlab
 C = cells(obj)
@@ -61,7 +61,7 @@ C = cells(obj)
 
 Returns one row per physical cell. Each row contains tensor-grid cell subscripts.
 
-### <span id="dpbase-coeffs"></span>`coeffs`
+### <span id="pdbase-coeffs"></span>`coeffs`
 
 ```matlab
 V = coeffs(obj, cellSubscript)
@@ -69,7 +69,7 @@ V = coeffs(obj, cellSubscript)
 
 Returns the local Bernstein coefficient family stored at one physical cell.
 
-### <span id="dpbase-lbls"></span>`lbls`
+### <span id="pdbase-lbls"></span>`lbls`
 
 ```matlab
 L = lbls(obj)
@@ -77,18 +77,18 @@ L = lbls(obj)
 
 Returns local Bernstein multi-index labels in the same flat order used by `LocalValues`.
 
-### <span id="dpbase-elevVals"></span>`elevVals`
+### <span id="pdbase-elevVals"></span>`elevVals`
 
 ```matlab
 values = elevVals(obj, degreeIncrement)
 ```
 
 Returns an elevated nested `LocalValues` tree without changing `obj`. The
-increment must be a finite nonnegative integer scalar. `dplmi` uses this
+increment must be a finite nonnegative integer scalar. `pdlmi` uses this
 backend method for Pólya assembly; ordinary users normally select it through
-`dplmi(..., UsePolya=true, PolyaDegree=d)` or `C.applyPolya(d)`.
+`pdlmi(..., UsePolya=true, PolyaDegree=d)` or `C.applyPolya(d)`.
 
-### <span id="dpbase-ncell"></span>`ncell`
+### <span id="pdbase-ncell"></span>`ncell`
 
 ```matlab
 n = ncell(obj)
@@ -97,7 +97,7 @@ n = ncell(obj)
 Returns the number of physical tensor-grid cells, equal to the product of
 `NumNodes(k)-1` over all parameter dimensions.
 
-### <span id="dpbase-ncoeff"></span>`ncoeff`
+### <span id="pdbase-ncoeff"></span>`ncoeff`
 
 ```matlab
 n = ncoeff(obj)
@@ -106,7 +106,7 @@ n = ncoeff(obj)
 Returns the number of local coefficient columns in one ordinary cell. For
 degree `m` and `ell` parameters, this is `(m+1)^ell`.
 
-### <span id="dpbase-npar"></span>`npar`
+### <span id="pdbase-npar"></span>`npar`
 
 ```matlab
 n = npar(obj)
@@ -114,7 +114,7 @@ n = npar(obj)
 
 Returns the number of parameter-grid dimensions represented by the object.
 
-### <span id="dpbase-size"></span>`size`
+### <span id="pdbase-size"></span>`size`
 
 ```matlab
 [m, n] = size(obj)
@@ -128,7 +128,7 @@ stored matrix, not the number of physical cells.
 ## Example
 
 ```matlab
-A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
 A.GridInfo.Vectors{2}
 A.MatrixSize
 A.LocalValues{1}{1}
@@ -165,8 +165,8 @@ a two-dimensional cell array with `2^ell` rate rows and
 
 ## Validation Boundary
 
-`dpbase` validates grid monotonicity, matrix size, coefficient count, local storage shape, rate metadata, and matrix payload compatibility. `elevVals` rejects invalid increments with `dpbase:InvalidDegreeIncrement`; function-only `dpmat` objects have no stored coefficient evidence and raise `dpbase:MissingCoefficientEvidence`. User-facing validation is normally reached through `dpmat`, `dpvar`, or `dplmi`.
+`pdbase` validates grid monotonicity, matrix size, coefficient count, local storage shape, rate metadata, and matrix payload compatibility. `elevVals` rejects invalid increments with `pdbase:InvalidDegreeIncrement`; function-only `pdmat` objects have no stored coefficient evidence and raise `pdbase:MissingCoefficientEvidence`. User-facing validation is normally reached through `pdmat`, `pdvar`, or `pdlmi`.
 
 ## See Also
 
-[`dpmat constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/) · [`dpvar constructor`](/DP-LMI-package/documents/reference/dpvar/constructor/)
+[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) · [`pdvar constructor`](/DP-LMI-package/documents/reference/pdvar/constructor/)

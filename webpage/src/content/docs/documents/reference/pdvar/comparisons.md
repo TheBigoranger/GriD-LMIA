@@ -1,19 +1,19 @@
 ---
-title: dpvar Comparisons
-description: Create dplmi constraints using <= and >=.
+title: pdvar Comparisons
+description: Create pdlmi constraints using <= and >=.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpvar/">dpvar</a>
+  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>comparisons</span>
 </nav>
 
 ## Purpose
 
-Convert a square `dpvar` residual into direct coefficient-wise `dplmi` constraints.
+Convert a square `pdvar` residual into direct coefficient-wise `pdlmi` constraints.
 
 ## Syntax
 
@@ -26,17 +26,17 @@ C = P >= rhs
 
 | Argument | Description |
 | :--- | :--- |
-| `P` | Square `dpvar` expression or compatible expression after promotion, such as `P` from `dpvar(2,{[0 1]},"symmetric")`. |
-| `rhs` | Numeric, `dpmat`, affine `sdpvar`, or `dpvar` expression that can form a residual; the most common value is `0`. |
+| `P` | Square `pdvar` expression or compatible expression after promotion, such as `P` from `pdvar(2,{[0 1]},"symmetric")`. |
+| `rhs` | Numeric, `pdmat`, affine `sdpvar`, or `pdvar` expression that can form a residual; the most common value is `0`. |
 
 ## Output
 
-`C` is a [`dplmi`](/DP-LMI-package/documents/reference/dplmi/) object.
+`C` is a [`pdlmi`](/DP-LMI-package/documents/reference/pdlmi/) object.
 
 ## Description
 
 The comparison overloads do not solve an optimization problem. They assemble a
-coefficient-wise residual and wrap it in `dplmi` so it can later be converted to
+coefficient-wise residual and wrap it in `pdlmi` so it can later be converted to
 YALMIP constraints.
 
 For an ordinary continuous expression with `Nc` physical cells and `Nb`
@@ -51,15 +51,15 @@ multiplied by the number of rate vertices.
 
 ## Per-symbol reference anchors
 
-### <span id="dpvar-comparison-le"></span>`le` and `<=`
+### <span id="pdvar-comparison-le"></span>`le` and `<=`
 
-Forms the residual for a nonpositive inequality and returns a `dplmi` object.
+Forms the residual for a nonpositive inequality and returns a `pdlmi` object.
 The comparison is coefficient-wise after expression promotion and symmetry
 validation.
 
-### <span id="dpvar-comparison-ge"></span>`ge` and `>=`
+### <span id="pdvar-comparison-ge"></span>`ge` and `>=`
 
-Forms the residual for a nonnegative inequality and returns a `dplmi` object.
+Forms the residual for a nonnegative inequality and returns a `pdlmi` object.
 The comparison is coefficient-wise after expression promotion and symmetry
 validation.
 
@@ -69,7 +69,7 @@ validation.
 
 ```matlab
 yalmip('clear')
-P = dpvar(2, {[0 1]}, "symmetric");
+P = pdvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
 class(C)
 numel(C.Constraints)
@@ -77,7 +77,7 @@ numel(C.Constraints)
 
 ```text
 ans =
-    'dplmi'
+    'pdlmi'
 
 ans =
      2
@@ -90,7 +90,7 @@ comparison stores two direct coefficient constraints.
 
 ```matlab
 yalmip('clear')
-P = dpvar(2, {[0 0.5 1]}, "symmetric");
+P = pdvar(2, {[0 0.5 1]}, "symmetric");
 C = P <= 0;
 numel(C.Constraints)
 ```
@@ -105,10 +105,10 @@ constraints.
 
 ## Validation And Errors
 
-- Comparison residuals must produce square symmetric or Hermitian coefficient matrices before `dplmi` assembly succeeds.
-- Nonsquare residuals raise `dplmi:InvalidMatrixSize`.
-- Nonsymmetric residual coefficient matrices raise `dplmi:NonSymmetricExpression`.
+- Comparison residuals must produce square symmetric or Hermitian coefficient matrices before `pdlmi` assembly succeeds.
+- Nonsquare residuals raise `pdlmi:InvalidMatrixSize`.
+- Nonsymmetric residual coefficient matrices raise `pdlmi:NonSymmetricExpression`.
 
 ## See Also
 
-[`dplmi`](/DP-LMI-package/documents/reference/dplmi/) · [`toYalmip`](/DP-LMI-package/documents/reference/dplmi/toyalmip/)
+[`pdlmi`](/DP-LMI-package/documents/reference/pdlmi/) · [`toYalmip`](/DP-LMI-package/documents/reference/pdlmi/toyalmip/)

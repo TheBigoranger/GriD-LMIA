@@ -1,19 +1,19 @@
 ---
-title: dpmat evaluate
-description: Evaluate known dpmat data at one parameter point.
+title: pdmat evaluate
+description: Evaluate known pdmat data at one parameter point.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <a href="/DP-LMI-package/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>evaluate</span>
 </nav>
 
 ## Purpose
 
-Evaluate a `dpmat` object at a finite parameter point.
+Evaluate a `pdmat` object at a finite parameter point.
 
 ## Syntax
 
@@ -26,7 +26,7 @@ val = A.evaluate(pt)
 
 | Argument | Description |
 | :--- | :--- |
-| `A` | A `dpmat` object. |
+| `A` | A `pdmat` object. |
 | `pt` | Finite real scalar for one parameter, such as `0.25`, or a row vector with one entry per parameter, such as `[0.25 12]`. The point must lie inside the grid bounds. |
 
 ## Output
@@ -52,7 +52,7 @@ handle and call it directly.
 ### Function-call form
 
 ```matlab
-A = dpmat({[0 1]}, {2, 4}, Degree=1);
+A = pdmat({[0 1]}, {2, 4}, Degree=1);
 val = evaluate(A, 0.25)
 ```
 
@@ -67,7 +67,7 @@ At `rho = 0.25`, the public forward coordinate is `alpha = 0.25`, so the value i
 ### Dot-call form
 
 ```matlab
-A = dpmat({[0 1]}, {2, 4}, Degree=1);
+A = pdmat({[0 1]}, {2, 4}, Degree=1);
 val = A.evaluate(0.75)
 ```
 
@@ -82,7 +82,7 @@ interactive MATLAB sessions.
 ### Function-backed evaluation
 
 ```matlab
-F = dpmat({[0 pi]}, @(rho) sin(rho));
+F = pdmat({[0 pi]}, @(rho) sin(rho));
 val = F.evaluate(pi/2)
 ```
 
@@ -95,10 +95,10 @@ Function-backed objects route evaluation through the retained function handle.
 
 ## Validation And Errors
 
-- Bad point shape or nonfinite values raise `dpmat:InvalidPoint`.
-- Points outside grid bounds raise `dpmat:PointOutOfBounds`.
-- Function-handle failures during evaluation raise `dpmat:InvalidFunctionValue`.
+- Bad point shape or nonfinite values raise `pdmat:InvalidPoint`.
+- Points outside grid bounds raise `pdmat:PointOutOfBounds`.
+- Function-handle failures during evaluation raise `pdmat:InvalidFunctionValue`.
 
 ## See Also
 
-[`dpmat constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/) · [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/)
+[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) · [`plot`](/DP-LMI-package/documents/reference/pdmat/plot/)

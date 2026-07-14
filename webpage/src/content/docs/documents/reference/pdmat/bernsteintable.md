@@ -1,19 +1,19 @@
 ---
-title: dpmat bernsteinTable
-description: Return a command-line Bernstein coefficient table for dpmat.
+title: pdmat bernsteinTable
+description: Return a command-line Bernstein coefficient table for pdmat.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpmat/">dpmat</a>
+  <a href="/DP-LMI-package/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>bernsteinTable</span>
 </nav>
 
 ## Purpose
 
-Inspect coefficient-backed `dpmat` local Bernstein data as a MATLAB table.
+Inspect coefficient-backed `pdmat` local Bernstein data as a MATLAB table.
 
 ## Syntax
 
@@ -28,7 +28,7 @@ T = bernsteinTable(A, cellSubs, "oneLine")
 
 | Argument | Description |
 | :--- | :--- |
-| `A` | A coefficient-backed `dpmat` object. |
+| `A` | A coefficient-backed `pdmat` object. |
 | `cellSubs` | Physical-cell subscript to inspect, such as `1` for a one-parameter grid or `[1 1]` for a tensor grid. |
 | `"oneLine"` | Compact mode that returns one row per selected physical cell with a readable Bernstein expression. |
 
@@ -53,11 +53,10 @@ $$
 B_j^m(\alpha)=\binom{m}{j}(1-\alpha)^{m-j}\alpha^j.
 $$
 
-The literal diagnostic output below remains in the runtime helper's variable
-`a`, where `a=1-alpha`. Thus its rows `a^2`, `2a(1-a)`, and `(1-a)^2`
-correspond, in public forward-coordinate order, to $(1-\alpha)^2$,
-$2(1-\alpha)\alpha$, and $\alpha^2$. For multiple parameters, the basis text
-is the tensor product of the corresponding one-parameter factors.
+The diagnostic uses the same public `alpha` name. Its rows are
+`(1-alpha)^2`, `2(1-alpha)alpha`, and `alpha^2` in forward-coordinate order.
+For multiple parameters, the basis text is the tensor product of the
+corresponding one-parameter factors.
 
 ## Examples
 
@@ -67,7 +66,7 @@ Use `"oneLine"` when the goal is to see the Bernstein expression rather than
 the full metadata table.
 
 ```matlab
-A = dpmat({[0 1]}, {[0 1], [1 2]}, Degree=1);
+A = pdmat({[0 1]}, {[0 1], [1 2]}, Degree=1);
 T = bernsteinTable(A, 1, "oneLine");
 disp(T)
 ```
@@ -76,17 +75,16 @@ disp(T)
     CellSubscript          Expression
     _____________    _______________________
 
-        {[1]}        "a*[0 1] + (1-a)*[1 2]"
+        {[1]}        "(1-alpha)*[0 1] + alpha*[1 2]"
 ```
 
 The compact expression is useful for quick coefficient checks in the MATLAB
-Command Window. Its diagnostic `a` is $1-\alpha$, so the unchanged expression
-is $(1-\alpha)[0\;1]+\alpha[1\;2]$ in the public coordinate.
+Command Window and reads directly in the public forward coordinate.
 
 ### Full degree-two metadata
 
 ```matlab
-A = dpmat({[0 1]}, {1, 2, 3}, Degree=2);
+A = pdmat({[0 1]}, {1, 2, 3}, Degree=2);
 T = bernsteinTable(A);
 disp(T)
 ```
@@ -95,9 +93,9 @@ disp(T)
     TermIndex    CellSubscript    CoeffSubscript    LocalIndex      Basis      IsPhysicalNode    Value
     _________    _____________    ______________    __________    _________    ______________    _____
 
-        1            {[1]}            {[1]}           {[0]}       "a^2"            true          {[1]}
-        2            {[1]}            {[2]}           {[1]}       "2a(1-a)"        false         {[2]}
-        3            {[1]}            {[3]}           {[2]}       "(1-a)^2"        true          {[3]}
+        1            {[1]}            {[1]}           {[0]}       "(1-alpha)^2"         true          {[1]}
+        2            {[1]}            {[2]}           {[1]}       "2(1-alpha)alpha"      false         {[2]}
+        3            {[1]}            {[3]}           {[2]}       "alpha^2"             true          {[3]}
 ```
 
 The middle row is not a physical grid node for degree two; it is the middle
@@ -106,7 +104,7 @@ Bernstein coefficient for the single physical cell.
 ### Tensor-grid label order
 
 ```matlab
-A = dpmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
 T = bernsteinTable(A, [1 1]);
 T(:, ["TermIndex", "LocalIndex", "Value"])
 ```
@@ -125,14 +123,14 @@ ans =
 ```
 
 The tensor-grid order matches `A.lbls()` and is the same order used by
-coefficient algebra and `dplmi` assembly.
+coefficient algebra and `pdlmi` assembly.
 
 ## Validation And Errors
 
-- Function-only objects without Bernstein coefficient evidence raise `dpmat:FunctionOnlyBernsteinTable` when calling `bernsteinTable`; backend degree elevation instead raises `dpbase:MissingCoefficientEvidence`.
-- Invalid cell subscripts raise `dpbase:InvalidCellSubs`.
-- Unknown display modes, such as `"wide"`, raise `dpmat:InvalidBernsteinTableInput`.
+- Function-only objects without Bernstein coefficient evidence raise `pdmat:FunctionOnlyBernsteinTable` when calling `bernsteinTable`; backend degree elevation instead raises `pdbase:MissingCoefficientEvidence`.
+- Invalid cell subscripts raise `pdbase:InvalidCellSubs`.
+- Unknown display modes, such as `"wide"`, raise `pdmat:InvalidBernsteinTableInput`.
 
 ## See Also
 
-[`dpmat constructor`](/DP-LMI-package/documents/reference/dpmat/constructor/) · [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/)
+[`pdmat constructor`](/DP-LMI-package/documents/reference/pdmat/constructor/) · [`plot`](/DP-LMI-package/documents/reference/pdmat/plot/)

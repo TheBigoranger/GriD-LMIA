@@ -1,10 +1,17 @@
 export const versionHistory = [
   {
-    version: "v0.2.0",
-    date: "2026-07-09",
+    version: "v0.3.0",
+    date: "2026-07-13",
     status: "current",
     summary:
-      "Expanded the Bernstein and DP-LMI background, synchronized the TeX and online manuals, and consolidated the implemented dpmat, dpvar, and dplmi reference surface.",
+      "Renamed the public MATLAB API to pdbase, pdmat, pdvar, and pdlmi; tightened helper ownership; and expanded the manual and website with hypercube SOS certificate mathematics.",
+  },
+  {
+    version: "v0.2.0",
+    date: "2026-07-09",
+    status: "previous",
+    summary:
+      "Expanded the Bernstein and DP-LMI background, synchronized the TeX and online manuals, and consolidated the implemented pdmat, pdvar, and pdlmi reference surface.",
   },
 ];
 

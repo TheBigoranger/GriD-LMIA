@@ -1,6 +1,6 @@
 ---
 title: Solver Smoke Cases
-description: Two solver-facing examples mirrored from +tests/+dplmi/test_solver_smoke.m.
+description: Two solver-facing examples mirrored from +tests/+pdlmi/test_solver_smoke.m.
 ---
 
 <nav class="manual-trail">
@@ -9,7 +9,7 @@ description: Two solver-facing examples mirrored from +tests/+dplmi/test_solver_
   <span>Solver Smoke Cases</span>
 </nav>
 
-These examples mirror the tested solver-facing workflows in `+tests/+dplmi/test_solver_smoke.m`. They use the package to assemble YALMIP constraints; solver selection and execution still happen through ordinary YALMIP calls.
+These examples mirror the tested solver-facing workflows in `+tests/+pdlmi/test_solver_smoke.m`. They use the package to assemble YALMIP constraints; solver selection and execution still happen through ordinary YALMIP calls.
 
 ## Parameter-Dependent Lyapunov Variable
 
@@ -42,7 +42,7 @@ With `Degree=0`, `P` is constant over the cell. With the default degree, `P` is 
 ```matlab
 yalmip('clear')
 grid = {[0 1]};
-A = dpmat(grid, @(x) (1 - x) * [-1 -1; 1 -1] ...
+A = pdmat(grid, @(x) (1 - x) * [-1 -1; 1 -1] ...
     + x * [-1 -10; 0.1 -1], Degree=1);
 
 solver = "lmilab";
@@ -51,18 +51,18 @@ if exist("mosekopt", "file") ~= 0
 end
 opts = sdpsettings("solver", solver, "verbose", 0);
 
-Pc = dpvar(2, grid, Degree=0);
+Pc = pdvar(2, grid, Degree=0);
 Cdecay = Pc * A + A' * Pc <= -1e-10 * eye(2);
 Cpos = Pc >= eye(2);
 solConst = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
 
-Pd = dpvar(2, grid);
+Pd = pdvar(2, grid);
 Cdecay = Pd * A + A' * Pd <= -1e-10 * eye(2);
 Cpos = Pd >= eye(2);
 solDp = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
 
 % Convert the solved symbolic Bernstein coefficients into known data for plotting.
-Pplot = dpmat(grid, {cellfun(@value, Pd.LocalValues{1}, ...
+Pplot = pdmat(grid, {cellfun(@value, Pd.LocalValues{1}, ...
     UniformOutput=false)}, Degree=Pd.Degree);
 figure(Name="Parameter-dependent Lyapunov matrix");
 plot(Pplot, SamplesPerCell=40, LineWidth=1.5);
@@ -71,7 +71,7 @@ title("Solved parameter-dependent Lyapunov matrix");
 
 In the regression, MOSEK reports the constant case as infeasible and the parameter-dependent case as feasible. `lmilab` is used only as a fallback smoke path, not as the certificate for the infeasibility distinction.
 
-After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `dpmat` (`Pplot`) before calling [`plot`](/DP-LMI-package/documents/reference/dpmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
+After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `pdmat` (`Pplot`) before calling [`plot`](/DP-LMI-package/documents/reference/pdmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
 
 ## Block DP-LMI Objective
 
@@ -118,16 +118,16 @@ $$
 ```matlab
 yalmip('clear')
 grid = linspace(0, 1, 2);
-A = dpmat(grid, @(x) [-1, 0.5; -1, -2] ...
+A = pdmat(grid, @(x) [-1, 0.5; -1, -2] ...
     + x * [-1.3, -20; 2, -10], Degree=1);
-B = dpmat(grid, @(x) [1, -4; -1, -1] ...
+B = pdmat(grid, @(x) [1, -4; -1, -1] ...
     + x * [2.2, 0.5; -6, -5], Degree=1);
 C = eye(2);
 D = zeros(2);
 
-P = dpvar(2, grid);
+P = pdvar(2, grid);
 diffP = rhodiff(P, [-1 1]);
-gamma = dpvar(1, grid, Degree=0);
+gamma = pdvar(1, grid, Degree=0);
 
 E1 = [diffP + P * A + A' * P, P * B, C';
       B' * P, -gamma * eye(2), D';
@@ -173,5 +173,5 @@ The numeric value is solver- and tolerance-dependent, so the manual does not pre
 
 These examples do not call a package-owned solver wrapper. They document the
 current boundary: DP-LMI builds direct, Pólya-elevated, or
-[`full-box`](/DP-LMI-package/documents/reference/dplmi/applyfullboxpreorder/)
+[`full-box`](/DP-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
 YALMIP constraints, and users call `optimize` directly.

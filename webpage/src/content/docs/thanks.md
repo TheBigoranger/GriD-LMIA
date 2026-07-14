@@ -10,7 +10,7 @@ This package and manual are built around MATLAB and YALMIP workflows. The public
 | Tool | Role |
 | :--- | :--- |
 | MATLAB | Host environment for package classes and tests. |
-| YALMIP | Modeling layer and solver gateway used by `dpvar` and `dplmi`. |
+| YALMIP | Modeling layer and solver gateway used by `pdvar` and `pdlmi`. |
 | Astro | Static-site framework for this GitHub Pages documentation. |
 | Starlight | Documentation theme, sidebar, search, and page structure. |
 

@@ -24,7 +24,7 @@ above is explicitly the current `main` snapshot.
 ## Requirements
 
 - MATLAB.
-- YALMIP on the MATLAB path for `dpvar`, `dplmi`, and solver-facing examples.
+- YALMIP on the MATLAB path for `pdvar`, `pdlmi`, and solver-facing examples.
 - A solver supported by YALMIP. The smoke tests prefer MOSEK when available and otherwise fall back to `lmilab`.
 
 ## Path Setup
@@ -44,7 +44,7 @@ results = tests.run_all();
 ## First Lookup
 
 - [Reference lookup table](/DP-LMI-package/documents/reference-index/)
-- [dpmat constructor](/DP-LMI-package/documents/reference/dpmat/constructor/)
-- [dpvar constructor](/DP-LMI-package/documents/reference/dpvar/constructor/)
+- [pdmat constructor](/DP-LMI-package/documents/reference/pdmat/constructor/)
+- [pdvar constructor](/DP-LMI-package/documents/reference/pdvar/constructor/)
 - [Solver smoke examples](/DP-LMI-package/examples/solver-smoke/)
 - [Status and limits](/DP-LMI-package/documents/status-and-limits/)

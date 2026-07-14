@@ -1,12 +1,12 @@
 ---
-title: dpvar Constructor
+title: pdvar Constructor
 description: Construct continuous YALMIP-backed Bernstein decision expressions.
 ---
 
 <nav class="manual-trail">
   <a href="/DP-LMI-package/documents/">Documents</a>
   <span>/</span>
-  <a href="/DP-LMI-package/documents/reference/dpvar/">dpvar</a>
+  <a href="/DP-LMI-package/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
   <span>constructor</span>
 </nav>
@@ -18,23 +18,23 @@ Create a continuous cell-local Bernstein decision expression backed by YALMIP co
 ## Syntax
 
 ```matlab
-P = dpvar(n, gridVectors)
-P = dpvar(n, n, gridVectors)
-P = dpvar(n, m, gridVectors)
-P = dpvar(..., "full")
-P = dpvar(..., "symmetric")
-P = dpvar(..., Degree=0)
-P = dpvar(..., Degree=1, RateBounds=rb)
+P = pdvar(n, gridVectors)
+P = pdvar(n, n, gridVectors)
+P = pdvar(n, m, gridVectors)
+P = pdvar(..., "full")
+P = pdvar(..., "symmetric")
+P = pdvar(..., Degree=0)
+P = pdvar(..., Degree=d, RateBounds=rb)
 ```
 
 ## Arguments And Options
 
 | Input | Description |
 | :--- | :--- |
-| `n`, `m` | Positive integer matrix dimensions. `dpvar(n, gridVectors)` creates an `n x n` object, such as `dpvar(2,{[0 1]})`; `dpvar(n,m,gridVectors)` creates an `n x m` object, such as `dpvar(2,3,[0 1])`. |
+| `n`, `m` | Positive integer matrix dimensions. `pdvar(n, gridVectors)` creates an `n x n` object, such as `pdvar(2,{[0 1]})`; `pdvar(n,m,gridVectors)` creates an `n x m` object, such as `pdvar(2,3,[0 1])`. |
 | `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of grid vectors, such as `{[0 1], [10 20]}`. |
-| `"full"` | Use full YALMIP matrix coefficients, as in `dpvar(2,2,{[0 1]},"full")`. |
-| `"symmetric"` | Use symmetric YALMIP matrix coefficients, as in `dpvar(2,{[0 1]},"symmetric")`. Requires square dimensions. |
+| `"full"` | Use full YALMIP matrix coefficients, as in `pdvar(2,2,{[0 1]},"full")`. |
+| `"symmetric"` | Use symmetric YALMIP matrix coefficients, as in `pdvar(2,{[0 1]},"symmetric")`. Requires square dimensions. |
 | `Degree` | Finite nonnegative integer scalar. Default is `1`; use `Degree=0` for a parameter-independent decision, or higher degrees for continuous piecewise Bernstein decision data. |
 | `RateBounds` | Finite `ell x 2` lower/upper rate-bound table stored as metadata, such as `RateBounds=[-1 1]` or `RateBounds=[-1 2; -3 4]`. |
 
@@ -42,7 +42,7 @@ Unsupported public options: `IsContinuous`, `ContainsDecision`, and `HasRateDepe
 
 ## Returned Object
 
-`P` is a parameter-dependent `dpvar < dpbase` object with
+`P` is a parameter-dependent `pdvar < pdbase` object with
 `ContainsDecision=true`. It is not one isolated `sdpvar` matrix. For the
 default degree-1 constructor, each local grid cell stores the Bernstein
 coefficient matrices that define `P(rho)` on that cell. The coefficient payloads
@@ -78,9 +78,9 @@ the stored leaves are `LocalValues{1} = {P_0, P_1}`,
 The inherited fields are readable through dot syntax and have private set
 access:
 
-| Field | How to inspect it | Meaning for `dpvar` |
+| Field | How to inspect it | Meaning for `pdvar` |
 | :--- | :--- | :--- |
-| `GridInfo` | `P.GridInfo.Vectors{1}`, `P.GridInfo.Points`, `P.GridInfo.Bounds` | Tensor-grid metadata inherited from `dpbase`. |
+| `GridInfo` | `P.GridInfo.Vectors{1}`, `P.GridInfo.Points`, `P.GridInfo.Bounds` | Tensor-grid metadata inherited from `pdbase`. |
 | `MatrixSize` | `P.MatrixSize` | Matrix size of each YALMIP coefficient payload. |
 | `Degree` | `P.Degree` | Constructor-created objects accept every nonnegative integer degree; algebra can also raise degree. |
 | `LocalValues` | `P.LocalValues{1}` or `P.coeffs(1)` | Cell-local YALMIP coefficient payloads. |
@@ -90,7 +90,7 @@ access:
 | `RateBounds` | `P.RateBounds` | Empty or the `ell x 2` rate-bound table. |
 | `SourceSummary` | `P.SourceSummary` | Source label such as `decision` or `derivative`. |
 
-`dpvar` has no `FunctionHandle` field. Its internal values are symbolic
+`pdvar` has no `FunctionHandle` field. Its internal values are symbolic
 coefficient expressions in `LocalValues`. These fields are inspectable but not
 assignable so that `Degree`, grid dimension, label order, continuity metadata,
 and coefficient storage stay synchronized.
@@ -101,7 +101,7 @@ and coefficient storage stay synchronized.
 
 ```matlab
 yalmip('clear')
-P = dpvar(2, {[0 1 2]}, "symmetric");
+P = pdvar(2, {[0 1 2]}, "symmetric");
 P.GridInfo.Vectors{1}
 first = P.coeffs(1);
 second = P.coeffs(2);
@@ -143,7 +143,7 @@ ans =
 
 ```matlab
 yalmip('clear')
-Q = dpvar(2, 3, [0 1], "full", Degree=0);
+Q = pdvar(2, 3, [0 1], "full", Degree=0);
 Q.MatrixSize
 Q.Degree
 ```
@@ -160,7 +160,7 @@ ans =
 
 ```matlab
 yalmip('clear')
-P = dpvar(1, {[0 1], [10 20]}, RateBounds=[-1 2; -3 4]);
+P = pdvar(1, {[0 1], [10 20]}, RateBounds=[-1 2; -3 4]);
 P.HasRateDependence
 P.RateBounds
 ```
@@ -177,12 +177,14 @@ ans =
 
 ## Validation And Errors
 
-- Missing dimensions or grid vectors raise `dpvar:InvalidInput`.
-- Nonsquare `"symmetric"` variables raise `dpvar:InvalidStructure`.
-- Negative, noninteger, nonscalar, or nonfinite constructor degrees raise `dpvar:InvalidDegree`.
-- Invalid rate metadata raises `dpvar:InvalidRateBounds` or inherited `dpbase:InvalidRateBounds`.
-- Unknown options raise `dpvar:UnknownOption`; internal metadata options raise `dpvar:UnsupportedOption`.
+- Missing dimensions or grid vectors raise `pdvar:InvalidInput`.
+- Invalid matrix dimensions raise `pdvar:InvalidMatrixSize`; malformed option
+  sequences raise `pdvar:InvalidOptions`.
+- Nonsquare `"symmetric"` variables raise `pdvar:InvalidStructure`.
+- Negative, noninteger, nonscalar, or nonfinite constructor degrees raise `pdvar:InvalidDegree`.
+- Invalid constructor rate metadata raises inherited `pdbase:InvalidRateBounds`.
+- Unknown options raise `pdvar:UnknownOption`; internal metadata options raise `pdvar:UnsupportedOption`.
 
 ## See Also
 
-[`rhodiff`](/DP-LMI-package/documents/reference/dpvar/rhodiff/) · [`dpvar matrix operations`](/DP-LMI-package/documents/reference/dpvar/matrix-operations/) · [`dpbase`](/DP-LMI-package/documents/reference/dpbase/)
+[`rhodiff`](/DP-LMI-package/documents/reference/pdvar/rhodiff/) · [`pdvar matrix operations`](/DP-LMI-package/documents/reference/pdvar/matrix-operations/) · [`pdbase`](/DP-LMI-package/documents/reference/pdbase/)
