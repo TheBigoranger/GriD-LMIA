@@ -107,6 +107,13 @@ contains a solver-independent transcript that compares direct assembly, the
 minimum full-box order, an explicit higher order, replacement of a Pólya
 selection, and `toYalmip` export counts.
 
+## Deterministic Putinar Selection
+
+The [`applyPutinar` reference](/PD-LMI-package/documents/reference/pdlmi/applyputinar/#deterministic-transcript-example)
+contains a solver-independent transcript that compares direct assembly, the
+minimum Putinar order, an explicit higher order, replacement of a Pólya
+selection, and `toYalmip` export counts.
+
 ## Solver Smoke Cases
 
 The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](https://github.com/TheBigoranger/PD-LMI-package/blob/main/%2Btests/%2Bpdlmi/test_solver_smoke.m) are documented on a dedicated page:
@@ -117,5 +124,6 @@ The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](http
 ## Current Solver Boundary
 
 The package currently assembles direct or Pólya-elevated coefficient-wise
-constraints and the opt-in fixed-order full box preordering. It does not
-provide a package-owned solver wrapper or residual diagnostic layer.
+constraints and the opt-in fixed-order Putinar box and full box Gram
+certificates. It does not provide a package-owned solver wrapper or residual
+diagnostic layer.

@@ -31,7 +31,7 @@ The no-argument form selects the smallest admissible absolute order. The
 explicit form selects `order`; it does not add `order` to the residual degree.
 Both forms rebuild from `C.Residual` and `C.Relation`, return a new object, and
 leave `C` unchanged. Reapplication therefore replaces an earlier full-box
-order or a Pólya selection instead of compounding either one.
+order, a Pólya selection, or a Putinar selection instead of compounding it.
 
 For a one-parameter residual of degree $m$, the minimum is
 $\lfloor m/2\rfloor$. Even-degree residuals use an unweighted Gram block plus
@@ -68,7 +68,7 @@ develops the Gram and Markov–Lukács background step by step.
 
 ## Returned Object
 
-`Cbox` is a new `pdlmi` with `UsePolya=false`,
+`Cbox` is a new `pdlmi` with `UsePolya=false`, `UsePutinar=false`,
 `UseFullBoxPreorder=true`, and `FullBoxOrder` equal to the selected order.
 Within each cell and rate row, `Constraints` stores all PSD Gram-block
 conditions before the exact coefficient identities. `toYalmip(Cbox)` returns
@@ -127,14 +127,17 @@ it does not use the already elevated constraints.
 ## Limitations
 
 This method implements the fixed-order full box preordering on each local
-parameter box. It is not a general Putinar certificate, a general-domain SOS
-interface, a full-space SOS representation, or an automatic hierarchy
-selector.
+parameter box. It is distinct from the implemented
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/)
+module because full box includes every generator-subset product. It is not a
+general-domain SOS interface, a full-space SOS representation, or an automatic
+hierarchy selector.
 
 ## See Also
 
 [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
 [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
 [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) ·
 [`Bernstein Polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
 [`SOS Certificates`](/PD-LMI-package/documents/math/sos-certificates/)

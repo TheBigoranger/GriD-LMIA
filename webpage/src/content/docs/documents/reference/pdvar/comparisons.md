@@ -111,4 +111,4 @@ constraints.
 
 ## See Also
 
-[`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)
+[`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) · [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)

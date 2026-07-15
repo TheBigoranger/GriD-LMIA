@@ -1,6 +1,6 @@
 ---
 title: pdlmi Constructor
-description: Select direct, Pólya-elevated, or full-box PD-LMI assembly.
+description: Select direct, Pólya-elevated, Putinar, or full-box PD-LMI assembly.
 ---
 
 import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
@@ -29,6 +29,12 @@ C = pdlmi(expr, relation, UseFullBoxPreorder=true)
 C = pdlmi(expr, relation, FullBoxOrder=r)
 C = pdlmi(expr, relation, UseFullBoxPreorder=true, FullBoxOrder=r)
 C = pdlmi(expr, relation, UseFullBoxPreorder=false, FullBoxOrder=r)
+C = pdlmi(expr, relation, "UsePutinar")
+C = pdlmi(expr, relation, UsePutinar=true)
+C = pdlmi(expr, relation, PutinarOrder=r)
+C = pdlmi(expr, relation, UsePutinar=true, PutinarOrder=r)
+C = pdlmi(expr, relation, "PutinarOrder", r)
+C = pdlmi(expr, relation, "UsePutinar", true, "PutinarOrder", r)
 C = lhs <= rhs
 C = lhs >= rhs
 ```
@@ -36,17 +42,20 @@ C = lhs >= rhs
 ## Description
 
 Direct coefficient-wise assembly is the default. `UsePolya` selects exact
-degree elevation before coefficient constraints. `UseFullBoxPreorder` selects
-a box-specific Bernstein-Gram certificate with positive-semidefinite Gram
-blocks and exact coefficient identities. Pólya and full-box assembly are
-mutually exclusive.
+degree elevation before coefficient constraints. `UsePutinar` selects a
+box-specific quadratic-module certificate with one unweighted Gram term and
+one $\alpha_s(1-\alpha_s)$-weighted term per parameter. `UseFullBoxPreorder`
+selects a box-specific Bernstein-Gram certificate with a term for every
+generator-subset product. All three opt-in selections are mutually exclusive.
 
 <CertificateDiagram kind="map" />
 
 Use the direct default first. Choose Pólya when you want one exact degree
 elevation followed by the same coefficient test. Choose full box when you
-want the implemented fixed-order Gram certificate. For derivations and the
-difference between representation degree and certificate order, see
+want every generator-subset product. Choose Putinar when the unweighted term
+plus the separate axis generators is the intended fixed-order certificate.
+For derivations and the difference between representation degree and
+certificate order, see
 [SOS Certificates On A Hypercube](/PD-LMI-package/documents/math/sos-certificates/).
 
 ## Arguments And Options
@@ -59,6 +68,8 @@ difference between representation degree and certificate order, see
 | `PolyaDegree` | Finite nonnegative integer scalar. Default `0`. Supplying it without `UsePolya` enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
 | `UseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select full-box assembly at the minimum admissible order. |
 | `FullBoxOrder` | Finite nonnegative integer scalar. This is an absolute order, not a degree increment. Supplying it alone enables full-box assembly without a warning. |
+| `UsePutinar` | Logical scalar. Default `false`. The bare flag and explicit `true` select Putinar box assembly at the minimum admissible order. |
+| `PutinarOrder` | Finite nonnegative integer scalar. This is an absolute order, not a degree increment. Supplying it alone enables Putinar assembly without a warning. |
 
 When full-box assembly is active, the minimum order is
 `floor(expr.Degree/2)` for one parameter and `ceil(expr.Degree/2)` for two or
@@ -67,13 +78,18 @@ more parameters. Explicitly pairing `UseFullBoxPreorder=false` with
 inspectable metadata. This combination is valid and is not a relaxation
 conflict.
 
+When Putinar assembly is active, the minimum and default order are
+`ceil(expr.Degree/2)`. Unlike the full-box metadata form, explicitly pairing
+`UsePutinar=false` with any supplied `PutinarOrder` is rejected. Enabling more
+than one of Pólya, Putinar, and full-box assembly is also rejected.
+
 ## Returned Object
 
 `C` is a `pdlmi` object with private-set, inspectable `Constraints`, `Residual`,
-`Relation`, `UsePolya`, `PolyaDegree`, `UseFullBoxPreorder`, and `FullBoxOrder`
-properties. `Constraints` contains direct coefficient inequalities, Pólya-
-elevated coefficient inequalities, or full-box PSD blocks and exact identities,
-according to the selected mode.
+`Relation`, `UsePolya`, `PolyaDegree`, `UseFullBoxPreorder`, `FullBoxOrder`,
+`UsePutinar`, and `PutinarOrder` properties. `Constraints` contains direct
+coefficient inequalities, Pólya-elevated coefficient inequalities, or the PSD
+blocks and exact identities for the selected Gram mode.
 
 ## Examples
 
@@ -167,24 +183,61 @@ explicit false: fullBox=0, order=2, constraints=3
 form deliberately suppresses that implicit selection: it records order two,
 but its three constraints are the direct degree-two coefficient conditions.
 
+### Putinar option forms
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, Degree=2);
+bare = pdlmi(P, ">=", "UsePutinar");
+named = pdlmi(P, ">=", UsePutinar=true, PutinarOrder=2);
+orderOnly = pdlmi(P, ">=", PutinarOrder=2);
+paired = pdlmi(P, ">=", "UsePutinar", true, "PutinarOrder", 2);
+
+fprintf("bare: putinar=%d, order=%d, constraints=%d\n", ...
+    bare.UsePutinar, bare.PutinarOrder, numel(bare.Constraints));
+fprintf("named: putinar=%d, order=%d, constraints=%d\n", ...
+    named.UsePutinar, named.PutinarOrder, numel(named.Constraints));
+fprintf("order only: putinar=%d, order=%d, constraints=%d\n", ...
+    orderOnly.UsePutinar, orderOnly.PutinarOrder, ...
+    numel(orderOnly.Constraints));
+fprintf("paired strings: putinar=%d, order=%d, constraints=%d\n", ...
+    paired.UsePutinar, paired.PutinarOrder, numel(paired.Constraints));
+```
+
+```text
+bare: putinar=1, order=1, constraints=5
+named: putinar=1, order=2, constraints=7
+order only: putinar=1, order=2, constraints=7
+paired strings: putinar=1, order=2, constraints=7
+```
+
+`PutinarOrder` alone selects Putinar assembly without a warning. Name-value
+syntax and paired string/value syntax select the same implemented mode. Each
+object uses independent Gram blocks and exact coefficient identities;
+construction does not call a solver or add a positivity margin.
+
 ## Validation And Errors
 
 - Nonsquare residual coefficient matrices raise `pdlmi:InvalidMatrixSize`.
 - Nonsymmetric or non-Hermitian coefficient matrices raise `pdlmi:NonSymmetricExpression`.
 - A non-`pdvar` residual raises `pdlmi:InvalidExpression`; an unsupported relation raises `pdlmi:InvalidRelation`.
-- Nonlogical selectors raise `pdlmi:InvalidUsePolya` or `pdlmi:InvalidUseFullBoxPreorder`.
-- Invalid Pólya increments or full-box orders raise `pdlmi:InvalidPolyaDegree` or `pdlmi:InvalidFullBoxOrder`.
-- When full-box assembly is enabled, a valid integer below the applicable minimum raises `pdlmi:FullBoxOrderTooLow`.
+- Nonlogical selectors raise `pdlmi:InvalidUsePolya`, `pdlmi:InvalidUseFullBoxPreorder`, or `pdlmi:InvalidUsePutinar`.
+- Invalid Pólya increments, full-box orders, or Putinar orders raise `pdlmi:InvalidPolyaDegree`, `pdlmi:InvalidFullBoxOrder`, or `pdlmi:InvalidPutinarOrder`.
+- When a Gram mode is enabled, a valid integer below its applicable minimum raises `pdlmi:FullBoxOrderTooLow` or `pdlmi:PutinarOrderTooLow`.
 - `UsePolya=false` with a positive `PolyaDegree` raises `pdlmi:ConflictingPolyaOptions`.
-- Enabling both Pólya and full-box assembly raises `pdlmi:ConflictingRelaxations`.
+- `UsePutinar=false` with an explicit `PutinarOrder` raises `pdlmi:ConflictingPutinarOptions`, even when the order is zero.
+- Enabling more than one of Pólya, Putinar, and full-box assembly raises `pdlmi:ConflictingRelaxations`.
 - Malformed, duplicate, or unknown options raise `pdlmi:InvalidOptions`, `pdlmi:DuplicateOption`, or `pdlmi:UnknownOption`.
 
 ## Limitations
 
-Full-box assembly is the implemented fixed-order box preordering. It is not a
-general Putinar certificate, a general-domain SOS interface, or an automatic
-hierarchy selector. No assembly mode adds an implicit positivity margin.
+Putinar assembly is limited to the local hypercube generators
+$\alpha_s(1-\alpha_s)$; it is not a general-domain or general-generator
+quadratic-module interface. Full-box assembly is the distinct fixed-order box
+preordering with every generator-subset product. Neither is an automatic
+hierarchy selector. No assembly mode adds an implicit positivity margin or
+calls a solver.
 
 ## See Also
 
-[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)
+[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)

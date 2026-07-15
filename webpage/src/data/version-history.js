@@ -2,7 +2,7 @@ export const versionHistory = [
   {
     version: "v0.3.2",
     date: "2026-07-14",
-    status: "current",
+    status: "previous",
     summary:
       "Standardized the PD-LMI identity, replaced the introductory linear case with a quadratic two-cell DPD-LMI, expanded ordered Bernstein convolution, and rebuilt the Web diagrams for responsive reading.",
   },

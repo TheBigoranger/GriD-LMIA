@@ -432,6 +432,21 @@ The package does not currently expose a strictness-margin option. Users should
 not infer numerical strictness semantics beyond the constraints actually
 assembled by YALMIP.
 
+## Fixed-Order Putinar Box Certificate
+
+The opt-in [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/)
+path replaces coefficient-wise sign tests with an unweighted Bernstein-Gram
+term plus one $\alpha_s(1-\alpha_s)$-weighted term per parameter. At absolute
+order $r\ge\lceil m/2\rceil$, those terms use tensor basis degrees
+$r\mathbf1$ and $r\mathbf1-\mathbf e_s$, respectively. Exact coefficient
+identities are matched at tensor degree $2r\mathbf1$ independently for every
+physical cell and rate row.
+
+This is the implemented Putinar specialization for the local parameter box.
+It is not a general-domain or general-generator interface, does not search
+orders automatically, and does not insert a strictness margin or call a
+solver.
+
 ## Fixed-Order Full Box Preordering
 
 The opt-in [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
@@ -443,7 +458,8 @@ independent across physical cells and rate rows, and exact identities match
 the represented polynomial coefficients.
 
 This is a fixed-order certificate on the local parameter box. It is distinct
-from a general Putinar certificate, a general-domain SOS interface, or an
+from the implemented Putinar box module because it includes every
+generator-subset product, and it is not a general-domain SOS interface or an
 automatically selected hierarchy. The dedicated method page documents order
 selection, constraint ordering, relation signs, examples, and errors.
 
@@ -481,7 +497,8 @@ not imply that every theorem, refinement, or hierarchy in that literature is
 implemented in the MATLAB/YALMIP package. In particular, general SOS
 assembly, adaptive refinement, package-owned strictness or residual
 certification, and diagnostics remain reserved or unsupported. The supported
-SOS-family feature is the fixed-order full box preordering certificate.
+SOS-family features are the fixed-order Putinar box and full box preordering
+certificates.
 
 ## See Also
 
@@ -490,5 +507,6 @@ SOS-family feature is the fixed-order full box preordering certificate.
 [`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/) ·
 [`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
 [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
 [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
 [`Bernstein backend utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/)

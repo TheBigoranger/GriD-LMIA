@@ -1,9 +1,9 @@
 ---
 title: Install And Download
-description: Install the PD-LMI package, open the synchronized v0.3.2 manual, and verify the MATLAB/YALMIP setup.
+description: Install the PD-LMI package, open the synchronized v0.3.3 manual, and verify the MATLAB/YALMIP setup.
 ---
 
-The online and printable manuals describe documentation version `v0.3.2`.
+The online and printable manuals describe documentation version `v0.3.3`.
 Use the current `main` source snapshot for that interface. The older tagged
 `v0.2.0` release remains available when an immutable historical package
 snapshot is required.
@@ -12,7 +12,7 @@ snapshot is required.
 
 | Item | Link |
 | :--- | :--- |
-| v0.3.2 manual | [Open the synchronized printable manual](/PD-LMI-package/manual.pdf) |
+| v0.3.3 manual | [Open the synchronized printable manual](/PD-LMI-package/manual.pdf) |
 | Current source snapshot | [Download `main` as ZIP](https://github.com/TheBigoranger/PD-LMI-package/archive/refs/heads/main.zip) |
 | GitHub repository | [TheBigoranger/PD-LMI-package](https://github.com/TheBigoranger/PD-LMI-package) |
 | Version history | [Open version history](/PD-LMI-package/version-history/) |

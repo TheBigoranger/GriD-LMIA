@@ -4,8 +4,8 @@ description: Reference-first entry point for PD-LMI classes, methods, and mathem
 ---
 
 Use this page as the lookup entry for current PD-LMI behavior. The reference
-pages document implemented code only, including direct, opt-in Pólya, and
-fixed-order full-box preordering assembly. Validation and limitations appear
+pages document implemented code only, including direct, opt-in Pólya,
+fixed-order Putinar box, and fixed-order full-box preordering assembly. Validation and limitations appear
 beside the constructor or method they affect.
 
 PD-LMI means **parameter-dependent LMI**. The package represents continuous
@@ -21,7 +21,7 @@ only for a differentiable PD-LMI with explicit derivative and rate terms.
 | :--- | :--- | :--- |
 | `pdmat` | [`pdmat` overview](/PD-LMI-package/documents/reference/pdmat/) | [`constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/), [`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/), [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/), [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/), [`matrix operations`](/PD-LMI-package/documents/reference/pdmat/matrix-operations/) |
 | `pdvar` | [`pdvar` overview](/PD-LMI-package/documents/reference/pdvar/) | [`constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/), [`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/), [`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/), [`matrix operations`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/), [`comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) |
-| `pdlmi` | [`pdlmi` overview](/PD-LMI-package/documents/reference/pdlmi/) | [`constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/), [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/), [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/), [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) |
+| `pdlmi` | [`pdlmi` overview](/PD-LMI-package/documents/reference/pdlmi/) | [`constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/), [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/), [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/), [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/), [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) |
 | `pdbase` | [`pdbase` overview](/PD-LMI-package/documents/reference/pdbase/) | [`storage inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/) |
 
 ## Function Pages
@@ -36,6 +36,7 @@ only for a differentiable PD-LMI with explicit derivative and rate terms.
 | `rhodiff(P)` | [`pdvar rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) | Build rate-vertex derivative expressions. |
 | `P <= 0`, `P >= 0` | [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) | Create `pdlmi` constraints from residual expressions. |
 | `C.applyPolya([d])` | [`pdlmi applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) | Rebuild from the stored residual with a selected degree increment. |
+| `C.applyPutinar([r])` | [`pdlmi applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) | Select the minimum or an explicit absolute Putinar box order. |
 | `C.applyFullBoxPreorder([r])` | [`pdlmi applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) | Select the minimum or an explicit absolute full-box order. |
 | `toYalmip(C)` | [`pdlmi toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) | Hand assembled constraints to YALMIP `optimize`. |
 
@@ -51,7 +52,7 @@ entry points.
 
 - [Bernstein Polynomial](/PD-LMI-package/documents/math/bernstein-polynomial/): history, the standard forward local coordinate, convex-hull certificates, tensor-product storage, derivatives, elevation, subdivision, multiplication, traversal, and refinement boundaries.
 - [Gridding And Bernstein Degree](/PD-LMI-package/documents/math/gridding-and-degree/): diagram-led one- and two-parameter inputs, global coefficient-grid shapes, nested `LocalValues`, and the \(\ell\)-dimensional count rules.
-- [SOS Certificates On A Hypercube](/PD-LMI-package/documents/math/sos-certificates/): full-space SOS, direct Bernstein evidence, Pólya elevation, Putinar quadratic modules, Schmüdgen preorderings, one-dimensional Markov–Lukács forms, and the exact software boundary.
+- [SOS Certificates On A Hypercube](/PD-LMI-package/documents/math/sos-certificates/): full-space SOS background, direct Bernstein evidence, Pólya elevation, the implemented Putinar box module, Schmüdgen preorderings, one-dimensional Markov–Lukács forms, and the exact software boundary.
 
 ## Install And Examples
 

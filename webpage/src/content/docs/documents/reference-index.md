@@ -104,10 +104,11 @@ This generated page lists implemented public classes and methods that are docume
 | [`height`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/#pdvar-height) | pdvar method | Report the first payload dimension. |
 | [`width`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/#pdvar-width) | pdvar method | Report the second payload dimension. |
 | [`size`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/#pdvar-size) | pdvar method | Inspect matrix payload dimensions. |
-| [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) | Constraint class | Store direct, Pólya-elevated, or full-box YALMIP constraints. |
-| [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) | pdlmi function | Select direct, Pólya-elevated, or fixed-order full-box assembly. |
+| [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) | Constraint class | Store direct, Pólya-elevated, Putinar, or full-box YALMIP constraints. |
+| [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) | pdlmi function | Select direct, Pólya-elevated, fixed-order Putinar, or fixed-order full-box assembly. |
 | [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) | pdlmi method | Concatenate stored constraints for YALMIP optimize calls. |
 | [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) | pdlmi method | Rebuild a residual with a selected Pólya degree increment. |
+| [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) | pdlmi method | Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate. |
 | [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) | pdlmi method | Rebuild a residual with a fixed-order full box Bernstein-Gram certificate. |
 | [`bernElev`](/PD-LMI-package/documents/reference/bernstein-utilities/#bernElev) | pdbase backend method | Elevate Bernstein degree for compatible coefficient payloads. |
 | [`bernProd`](/PD-LMI-package/documents/reference/bernstein-utilities/#bernProd) | pdbase backend method | Multiply local Bernstein coefficient families by label convolution. |

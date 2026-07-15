@@ -3,6 +3,7 @@ import ConvolutionDiagram from "./ConvolutionDiagram.astro";
 import PdmatStorageDiagram from "./PdmatStorageDiagram.astro";
 import WorkflowStepDiagram from "./WorkflowStepDiagram.astro";
 import { renderDisplayMath } from "../lib/mathjax.js";
+import { versionInfo } from "../data/version.js";
 
 const base = import.meta.env.BASE_URL;
 const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}`;
@@ -19,7 +20,7 @@ const manualLinks = [
   { href: local("documents/math/bernstein-polynomial/"), title: "Bernstein mathematics", text: "Build the idea from local coordinates through weighted convolution, derivatives, and certificates." },
   { href: local("documents/reference/pdmat/matrix-operations/"), title: "Known-data products", text: "See exact degree alignment, ordered products, tensor generalization, and validation boundaries." },
   { href: local("documents/reference/pdvar/matrix-operations/"), title: "Decision products", text: "Distinguish supported known-data products from rejected nonlinear decision products." },
-  { href: local("documents/reference/pdlmi/"), title: "Choose a certificate", text: "Compare direct, Pólya, and full-box assembly before the YALMIP handoff." },
+  { href: local("documents/reference/pdlmi/"), title: "Choose a certificate", text: "Compare direct, Pólya, Putinar, and full-box assembly before the YALMIP handoff." },
 ];
 
 const lmiSteps = [
@@ -80,7 +81,7 @@ const lmiSteps = [
       <b aria-hidden="true">↓</b>
       <section><b>Bernstein data</b><span>physical cells + local labels</span></section>
       <b aria-hidden="true">↓</b>
-      <section><b>Finite certificate</b><span>direct / Pólya / full box</span></section>
+      <section><b>Finite certificate</b><span>direct / Pólya / Putinar / full box</span></section>
       <b aria-hidden="true">↓</b>
       <section class="hero-flow__result"><b>YALMIP / SDP</b><span>ordinary solver interface</span></section>
     </div>
@@ -88,7 +89,7 @@ const lmiSteps = [
 
   <section class="product-walkthrough" aria-labelledby="walkthrough-title">
     <header class="section-heading">
-      <p class="home-label">Worked spine · v0.3.2</p>
+      <p class="home-label">Worked spine · {versionInfo.current}</p>
       <h2 id="walkthrough-title">From one quadratic two-cell DPD-LMI to finite constraints</h2>
       <p>Each step pairs the mathematical conclusion with the exact public API call and a deterministic transcript.</p>
     </header>
@@ -122,7 +123,7 @@ const lmiSteps = [
   </section>
 
   <section class="download-panel">
-    <div><p class="home-label">Source and manual</p><h2>Use the synchronized v0.3.2 documentation.</h2><p>The printable manual and online reference use the same terminology, worked example, and API boundary.</p></div>
+    <div><p class="home-label">Source and manual</p><h2>Use the synchronized {versionInfo.current} documentation.</h2><p>The printable manual and online reference use the same terminology, worked example, and API boundary.</p></div>
     <nav class="download-links" aria-label="Download links">
       <a href="https://github.com/TheBigoranger/PD-LMI-package">Current source</a>
       <a href={local("manual.pdf")}>Printable manual</a>

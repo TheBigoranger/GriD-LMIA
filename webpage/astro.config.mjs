@@ -69,6 +69,7 @@ export default defineConfig({
                 { label: "Overview", slug: "documents/reference/pdlmi" },
                 { label: "Constructor", slug: "documents/reference/pdlmi/constructor" },
                 { label: "applyPolya", slug: "documents/reference/pdlmi/applypolya" },
+                { label: "applyPutinar", slug: "documents/reference/pdlmi/applyputinar" },
                 { label: "applyFullBoxPreorder", slug: "documents/reference/pdlmi/applyfullboxpreorder" },
                 { label: "toYalmip", slug: "documents/reference/pdlmi/toyalmip" },
               ],

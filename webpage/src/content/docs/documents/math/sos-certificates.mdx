@@ -61,9 +61,9 @@ the residual; the package does not insert one.
     </tr>
     <tr>
       <th scope="row" data-label="Certificate">Putinar quadratic module</th>
-      <td data-label="Proof domain">Basic closed semialgebraic set</td>
-      <td data-label="Central hypothesis">Strict positivity and an Archimedean quadratic module</td>
-      <td data-label="Package status">Mathematical background</td>
+      <td data-label="Proof domain">Basic closed semialgebraic set; implemented path is one local hypercube</td>
+      <td data-label="Central hypothesis">Strict positivity and an Archimedean quadratic module in the general theorem</td>
+      <td data-label="Package status">Fixed-order box module implemented</td>
     </tr>
     <tr>
       <th scope="row" data-label="Certificate">Schmüdgen preordering</th>
@@ -202,8 +202,41 @@ Putinar's Positivstellensatz states that every polynomial strictly positive on
 $K$ has such a representation when the quadratic module is Archimedean.
 Compactness alone is not Putinar's hypothesis. Truncating multiplier degrees
 produces finite SDP relaxations, but failure at one order is not a
-nonnegativity counterexample. General Putinar modules are not a current
-`pdlmi` option. See [Putinar (1993)](https://www.jstor.org/stable/24897130).
+nonnegativity counterexample. See
+[Putinar (1993)](https://www.jstor.org/stable/24897130).
+
+### Implemented Putinar box module
+
+The package implements one fixed-order specialization on every local
+hypercube. With the axis generators
+$h_s=\alpha_s(1-\alpha_s)$, the sign-normalized target is represented as
+
+$$
+S(\boldsymbol\alpha)=S_0(\boldsymbol\alpha)
++\sum_{s=1}^{\ell}
+\alpha_s(1-\alpha_s)S_s(\boldsymbol\alpha).
+$$
+
+For a target of stored degree $m$, the absolute order satisfies
+
+$$
+r\ge\left\lceil\frac m2\right\rceil.
+$$
+
+The no-argument method uses equality. At order $r$, the unweighted Gram term
+uses tensor Bernstein basis degree $r\mathbf1$. The $s$th multiplier uses
+$r\mathbf1-\mathbf e_s$; blocks with a negative degree component are omitted.
+After multiplication by $h_s$, every term has tensor degree $2r\mathbf1$.
+The stored target is elevated to that degree and matched exactly, coefficient
+by coefficient.
+
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/)
+creates independent dense PSD Gram blocks and equalities for every physical
+cell and active rate row. It adds no strictness margin and does not call a
+solver. This callable path is not a general-domain or general-generator
+Putinar interface.
+
+<CertificateDiagram kind="putinar" />
 
 ## Schmüdgen And Full Preorderings
 
@@ -267,31 +300,35 @@ their Bernstein-basis matrix-Gram counterpart.
 3. **Physical subdivision** re-expresses the residual on smaller cells.
 4. **Higher Gram order** enlarges a positivity certificate.
 
-Only the second operation is performed by `applyPolya`; only the fourth is
-selected by `applyFullBoxPreorder`. Their method pages place unsupported
-adaptive and general-purpose boundaries beside the callable syntax.
+Only the second operation is performed by `applyPolya`; the fourth is selected
+at one explicit or default order by `applyPutinar` or
+`applyFullBoxPreorder`. Their method pages place unsupported adaptive and
+general-purpose boundaries beside the callable syntax.
 
 ## Exact Software Boundary
 
 The callable package boundary is limited to:
 
 - direct coefficient assembly;
-- fixed-increment Pólya elevation followed by direct assembly; and
+- fixed-increment Pólya elevation followed by direct assembly;
+- fixed-order Putinar assembly with the separate box generators
+  $\alpha_s(1-\alpha_s)$; and
 - fixed-order full box preordering, including the parity-specific
   one-dimensional form.
 
-Full-space SOS, general Putinar modules, general-domain preorderings,
-adaptive order search or automatic escalation, adaptive subdivision,
-automatic strictness margins, and post-solve residual certificates are
-mathematical background, not public package APIs. The no-argument
-`applyFullBoxPreorder()` call does have a deterministic public default: it
-selects $\lfloor m/2\rfloor$ in one parameter and $\lceil m/2\rceil$ in two
-or more parameters.
+Full-space SOS, general-domain or general-generator Putinar modules,
+general-domain preorderings, adaptive order search or automatic escalation,
+adaptive subdivision, automatic strictness margins, and post-solve residual
+certificates are mathematical background, not public package APIs. The
+no-argument `applyPutinar()` call selects $\lceil m/2\rceil$. The distinct
+`applyFullBoxPreorder()` default selects $\lfloor m/2\rfloor$ in one parameter
+and $\lceil m/2\rceil$ in two or more parameters.
 
 ## See Also
 
 [`Bernstein Polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
 [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) ·
 [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
 [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
 [`Solver Examples`](/PD-LMI-package/examples/solver-smoke/)

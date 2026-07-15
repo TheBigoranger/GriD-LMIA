@@ -172,6 +172,7 @@ The numeric value is solver- and tolerance-dependent, so the manual does not pre
 ## Boundary
 
 These examples do not call a package-owned solver wrapper. They document the
-current boundary: PD-LMI builds direct, Pólya-elevated, or
+current boundary: PD-LMI builds direct, Pólya-elevated,
+[`Putinar box`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/), or
 [`full-box`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
 YALMIP constraints, and users call `optimize` directly.

@@ -12,8 +12,8 @@ The current implementation provides:
 - `pdvar` for arbitrary-degree continuous YALMIP-backed Bernstein decision
   expressions whose neighboring cells share boundary values.
 - `rhodiff` for discontinuous rate-vertex derivative expressions.
-- `pdlmi` for direct, Pólya-elevated, or full-box-preordering YALMIP constraint
-  assembly and `toYalmip` handoff.
+- `pdlmi` for direct, Pólya-elevated, Putinar box, or full-box-preordering
+  YALMIP constraint assembly and `toYalmip` handoff.
 - `bernsteinTable` methods on both `pdmat` and `pdvar` for command-window
   inspection of local Bernstein coefficient rows.
 
@@ -119,11 +119,41 @@ for example `pdlmi(P, "<=", "UsePolya")` or
 residual, so repeated calls replace rather than compound the selected
 increment. This is a sufficient certificate, not an infeasibility test.
 
+## Opt-in Putinar Box Certificate
+
+`applyPutinar([order])` replaces direct, Pólya, or full-box assembly with a
+cell-local quadratic-module certificate for every physical cell and active
+rate row. At absolute tensor order `r`, it represents the sign-normalized
+target as
+
+```text
+S0 + sum_s alpha_s(1-alpha_s) Ss
+```
+
+using an order-`r` Bernstein Gram basis for `S0` and an order-`r-e_s` basis
+for each `Ss`. Coefficients are matched exactly at tensor degree `2*r`. The
+default and minimum order is `ceil(Residual.Degree/2)`; the method adds no
+implicit positivity margin and does not call a solver.
+
+```matlab
+yalmip('clear')
+P = pdvar(2, {[0 1]}, "symmetric", Degree=3);
+direct = P >= 0;
+putinar = direct.applyPutinar(2);
+F = putinar.toYalmip();
+```
+
+The constructor forms `pdlmi(P, ">=", "UsePutinar")`,
+`pdlmi(P, ">=", UsePutinar=true, PutinarOrder=2)`, and
+`pdlmi(P, ">=", PutinarOrder=2)` select the same certificate family. A new
+Pólya, Putinar, or full-box selection always rebuilds from the original
+residual and replaces the previous family.
+
 ## Opt-in Full Box Preordering
 
-`applyFullBoxPreorder([order])` replaces direct or Pólya assembly with a
-cell-local dense Bernstein–Gram certificate for every physical cell and
-active rate row. In one parameter it uses the parity-specific
+`applyFullBoxPreorder([order])` replaces direct, Pólya, or Putinar assembly
+with a cell-local dense Bernstein–Gram certificate for every physical cell
+and active rate row. In one parameter it uses the parity-specific
 Markov–Lukács form; in multiple parameters it includes every subset product
 of the box generators `alpha_s(1-alpha_s)` at the selected absolute order.
 It is not a general SOS parser and adds no implicit strictness margin.
@@ -143,6 +173,7 @@ F = preorder.toYalmip();
 - Install and downloads: https://thebigoranger.github.io/PD-LMI-package/install/
 - Version history: https://thebigoranger.github.io/PD-LMI-package/version-history/
 - Solver smoke examples: https://thebigoranger.github.io/PD-LMI-package/examples/solver-smoke/
+- `applyPutinar` reference: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/applyputinar/
 - `pdmat/plot` output examples: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdmat/plot/
 - Reference lookup table: https://thebigoranger.github.io/PD-LMI-package/documents/reference-index/
 - Local PDF manual: `doc/manual.pdf`
@@ -155,11 +186,13 @@ built with npm, Astro, and Starlight.
 
 ## Scope Boundaries
 
-- Direct and Pólya assembly are sufficient finite certificates;
-  a failed certificate does not prove continuous PD-LMI infeasibility.
+- Direct, Pólya, Putinar, and full-box assembly are sufficient finite
+  certificates; a failed certificate does not prove continuous PD-LMI
+  infeasibility.
 - Package-owned solver wrappers, strictness-margin diagnostics, residual
-  evidence, and general SOS hierarchies remain future layers. The implemented
-  opt-in full box preordering certificate is documented separately and is
-  cross-validated outside the ordinary runtime suite.
+  evidence, general-domain generator parsing, and general SOS hierarchies
+  remain future layers. The implemented Putinar and full-box certificates are
+  box-specific fixed-order assemblies and are cross-validated outside the
+  ordinary runtime suite.
 - `pdbase` is backend architecture context, not the primary modeling API.
 - Function-only `pdmat` objects without explicit Bernstein evidence do not enter coefficient algebra.

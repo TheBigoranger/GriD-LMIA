@@ -34,7 +34,8 @@ method is value-like: it returns a new object and leaves `C` unchanged.
 
 Each call rebuilds from `C.Residual`, rather than compounding a previous
 elevation. Thus `C.applyPolya(2)` and `C.applyPolya().applyPolya(2)` both use
-an increment of two from the original residual.
+an increment of two from the original residual. A prior Putinar or full-box
+selection is replaced in the same way.
 
 <CertificateDiagram kind="polya" />
 
@@ -76,4 +77,4 @@ for the theorem's strict-positivity setting and the narrower runtime contract.
 
 ## See Also
 
-[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/PD-LMI-package/documents/math/sos-certificates/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) · [`pdbase storage and inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/)
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/PD-LMI-package/documents/math/sos-certificates/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) · [`pdbase storage and inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/)

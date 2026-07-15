@@ -145,13 +145,13 @@ export const referenceEntries = [
   {
     name: "pdlmi",
     type: "Constraint class",
-    task: "Store direct, Pólya-elevated, or full-box YALMIP constraints.",
+    task: "Store direct, Pólya-elevated, Putinar, or full-box YALMIP constraints.",
     href: "/PD-LMI-package/documents/reference/pdlmi/",
   },
   {
     name: "pdlmi constructor",
     type: "pdlmi function",
-    task: "Select direct, Pólya-elevated, or fixed-order full-box assembly.",
+    task: "Select direct, Pólya-elevated, fixed-order Putinar, or fixed-order full-box assembly.",
     href: "/PD-LMI-package/documents/reference/pdlmi/constructor/",
   },
   {
@@ -165,6 +165,12 @@ export const referenceEntries = [
     type: "pdlmi method",
     task: "Rebuild a residual with a selected Pólya degree increment.",
     href: "/PD-LMI-package/documents/reference/pdlmi/applypolya/",
+  },
+  {
+    name: "applyPutinar",
+    type: "pdlmi method",
+    task: "Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate.",
+    href: "/PD-LMI-package/documents/reference/pdlmi/applyputinar/",
   },
   {
     name: "applyFullBoxPreorder",
