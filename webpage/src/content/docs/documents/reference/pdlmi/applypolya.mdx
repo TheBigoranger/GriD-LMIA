@@ -3,7 +3,7 @@ title: pdlmi applyPolya
 description: Rebuild a PD-LMI residual with a Pólya degree increment.
 ---
 
-import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -37,7 +37,7 @@ elevation. Thus `C.applyPolya(2)` and `C.applyPolya().applyPolya(2)` both use
 an increment of two from the original residual. A prior Putinar or full-box
 selection is replaced in the same way.
 
-<CertificateDiagram kind="polya" />
+<CertificateSpectrum selected="polya" />
 
 The diagram's first and second boxes represent the same residual polynomial.
 Only its Bernstein coefficient row is longer. The final arrow is the ordinary

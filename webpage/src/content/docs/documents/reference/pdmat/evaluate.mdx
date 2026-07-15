@@ -3,6 +3,11 @@ title: pdmat evaluate
 description: Evaluate known pdmat data at one parameter point.
 ---
 
+import ParameterCurveDiagram from "../../../../../components/ParameterCurveDiagram.astro";
+
+export const evalSeries = [{ label: "A(ρ)", path: "M58 210 C250 190 475 120 680 62", tone: "first" }];
+export const evalMarker = { x: 369, y: 151, label: "A(0.5)" };
+
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -10,6 +15,8 @@ description: Evaluate known pdmat data at one parameter point.
   <span>/</span>
   <span>evaluate</span>
 </nav>
+
+<ParameterCurveDiagram series={evalSeries} marker={evalMarker} label="A parameter-dependent entry with an evaluation marker at rho one half" caption="evaluate reads the represented function at one physical parameter point; it does not expose a nearest stored label." />
 
 ## Purpose
 

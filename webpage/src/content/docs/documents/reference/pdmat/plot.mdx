@@ -3,6 +3,13 @@ title: pdmat plot
 description: Plot pdmat matrix entries over one or two grid dimensions.
 ---
 
+import ParameterCurveDiagram from "../../../../../components/ParameterCurveDiagram.astro";
+
+export const plotSeries = [
+  { label: "A₁₁(ρ)", path: "M58 196 C220 168 430 116 680 72", tone: "first" },
+  { label: "A₁₂(ρ)", path: "M58 82 C240 96 440 154 680 204", tone: "second" },
+];
+
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -10,6 +17,8 @@ description: Plot pdmat matrix entries over one or two grid dimensions.
   <span>/</span>
   <span>plot</span>
 </nav>
+
+<ParameterCurveDiagram series={plotSeries} label="Two pdmat entries plotted across rho from zero to one" caption="plot samples represented matrix entries over the physical parameter interval; each visible curve remains tied to its matrix index." />
 
 ## Purpose
 

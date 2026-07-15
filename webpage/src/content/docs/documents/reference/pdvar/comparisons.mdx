@@ -3,6 +3,10 @@ title: pdvar Comparisons
 description: Create pdlmi constraints using <= and >=.
 ---
 
+import ParameterCurveDiagram from "../../../../../components/ParameterCurveDiagram.astro";
+
+export const residualSeries = [{ label: "R(ρ)=lhs−rhs", path: "M58 104 C230 138 470 174 680 190", tone: "result" }];
+
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -10,6 +14,8 @@ description: Create pdlmi constraints using <= and >=.
   <span>/</span>
   <span>comparisons</span>
 </nav>
+
+<ParameterCurveDiagram series={residualSeries} label="A comparison residual traced over the parameter interval" caption="A comparison stores the residual lhs minus rhs. The selected certificate subsequently proves the required matrix sign over every physical cell." />
 
 ## Purpose
 

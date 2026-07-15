@@ -3,8 +3,9 @@ title: pdvar Matrix Operations
 description: Interleaved examples, outputs, and diagrams for affine YALMIP-backed pdvar algebra and structural operations.
 ---
 
-import MatrixOperationDiagram from "../../../../../components/MatrixOperationDiagram.astro";
-import ConvolutionDiagram from "../../../../../components/ConvolutionDiagram.astro";
+import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
+import MultiplicationDiagram from "../../../../../components/MultiplicationDiagram.astro";
+import ExampleDisclosure from "../../../../../components/ExampleDisclosure.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -53,7 +54,7 @@ Q: decision=0, degree=0
 R=1-by-1, S=1-by-1, uplus=1-by-1
 ```
 
-<MatrixOperationDiagram kind="align" caption="Affine addition aligns the physical grid and Bernstein degree before combining symbolic coefficient rows." />
+<MatrixGlyphDiagram before={[["x₀", "x₁"]]} after={[["x₀+a₀", "x₁+a₁", "x₂+a₂"]]} beforeLabel="symbolic row" afterLabel="aligned affine row" caption="Affine addition aligns the physical grid and Bernstein degree before combining symbolic coefficient rows." />
 
 ## <span id="pdvar-mtimes"></span>Multiply By Known Data
 
@@ -83,26 +84,16 @@ with $A[j]P[i]$.
 
 ### Microexample
 
-```matlab
-yalmip('clear')
-A = pdmat({[0 1]}, {2, 3}, Degree=1);
-P = pdvar(1, {[0 1]}, Degree=2);
-L = A * P;
-R = P * A;
-fprintf('left=%d-by-%d degree=%d\n', size(L,1),size(L,2),L.Degree);
-fprintf('right=%d-by-%d degree=%d\n', size(R,1),size(R,2),R.Degree);
-```
+<ExampleDisclosure
+  visibleCode={"L = A * P;\nR = P * A;"}
+  fullCode={"yalmip('clear')\nA = pdmat({[0 1]}, {2, 3}, Degree=1);\nP = pdvar(1, {[0 1]}, Degree=2);\nL = A * P;\nR = P * A;\nfprintf('left=%d-by-%d degree=%d\\n', size(L,1),size(L,2),L.Degree);\nfprintf('right=%d-by-%d degree=%d\\n', size(R,1),size(R,2),R.Degree);\n% left=1-by-1 degree=3\n% right=1-by-1 degree=3"}
+  summary="Show the complete runnable affine-decision example"
+/>
 
-```text
-left=1-by-1 degree=3
-right=1-by-1 degree=3
-```
-
-<MatrixOperationDiagram kind="product" caption="Known and decision coefficient rows convolve exactly; keeping decision dependence on one side preserves affine optimization variables." />
 
 ### Visual conclusion
 
-<ConvolutionDiagram />
+<MultiplicationDiagram />
 
 Known `pdmat` or finite numeric data may appear on either side of one affine
 decision expression. `P*Q` for two decision-bearing `pdvar` objects, `P*x`
@@ -133,7 +124,7 @@ transpose=2-by-2, ctranspose=2-by-2
 reshape=1-by-4, vec=4-by-1
 ```
 
-<MatrixOperationDiagram kind="transform" caption="Every local symbolic matrix is reshaped in the same way; physical cells, local labels, and decision handles remain aligned." />
+<MatrixGlyphDiagram before={[["x₁", "x₂"], ["x₃", "x₄"]]} after={[["x₁"], ["x₃"], ["x₂"], ["x₄"]]} beforeLabel="symbolic 2 × 2" afterLabel="vec(P)" caption="Every local symbolic matrix is reshaped in the same way; cells, labels, and decision handles remain aligned." />
 
 ## <span id="pdvar-diag"></span><span id="pdvar-trace"></span><span id="pdvar-sum"></span><span id="pdvar-mean"></span><span id="pdvar-cumsum"></span><span id="pdvar-tril"></span><span id="pdvar-triu"></span>Extract And Reduce Matrix Structure
 
@@ -159,7 +150,7 @@ diag=2-by-1, trace=1-by-1, sum=1-by-2
 mean=2-by-1, cumsum=2-by-2, triangles=2-by-2
 ```
 
-<MatrixOperationDiagram kind="summary" caption="A structural reduction is applied coefficient by coefficient, so the result remains a parameter-dependent affine expression." />
+<MatrixGlyphDiagram before={[["x₁", "x₂"], ["x₃", "x₄"]]} after={[["x₁"], ["x₄"]]} beforeLabel="symbolic matrix" afterLabel="diag(P)" caption="A structural reduction is applied coefficient by coefficient, so the result remains a parameter-dependent affine expression." />
 
 ## <span id="pdvar-horzcat"></span><span id="pdvar-vertcat"></span><span id="pdvar-cat"></span><span id="pdvar-blkdiag"></span><span id="pdvar-repmat"></span>Assemble Symbolic Blocks
 
@@ -184,7 +175,7 @@ H=1-by-2, V=2-by-1, cat=1-by-2
 blkdiag=2-by-2, repmat=2-by-3
 ```
 
-<MatrixOperationDiagram kind="assemble" caption="Block assembly changes matrix layout while each block retains the same cell-local symbolic geometry." />
+<MatrixGlyphDiagram before={[["P", "A"]]} after={[["P", "0"], ["0", "A"]]} beforeLabel="symbolic + known" afterLabel="blkdiag(P,A)" caption="Block assembly changes matrix layout while each block retains the same cell-local symbolic geometry." />
 
 ## <span id="pdvar-flip"></span><span id="pdvar-fliplr"></span><span id="pdvar-flipud"></span><span id="pdvar-rot90"></span>Reorder Matrix Entries
 
@@ -206,7 +197,7 @@ flip=2-by-3, fliplr=2-by-3, flipud=2-by-3
 rot90=3-by-2
 ```
 
-<MatrixOperationDiagram kind="reorder" caption="The permutation is repeated at every symbolic Bernstein coefficient; only matrix-entry positions change." />
+<MatrixGlyphDiagram before={[["x₁", "x₂"], ["x₃", "x₄"]]} after={[["x₄", "x₃"], ["x₂", "x₁"]]} beforeLabel="symbolic payload" afterLabel="reordered payload" caption="The permutation is repeated at every symbolic Bernstein coefficient; only matrix-entry positions change." />
 
 ## <span id="pdvar-subsref"></span><span id="pdvar-subsasgn"></span><span id="pdvar-end"></span>Index And Assign Symbolic Blocks
 
@@ -227,7 +218,7 @@ fprintf('entry=%d-by-%d, assigned=%d-by-%d\n', ...
 entry=1-by-1, assigned=2-by-2
 ```
 
-<MatrixOperationDiagram kind="index" caption="Indexing selects a matrix position consistently across all symbolic coefficient rows; assignment replaces that block without changing the parameter grid." />
+<MatrixGlyphDiagram before={[["x₁₁", "x₁₂"], ["x₂₁", "x₂₂"]]} after={[["x₁₂"]]} beforeLabel="each symbolic matrix" afterLabel="P(1,2)" caption="Indexing selects one matrix position across all symbolic coefficient rows without changing the parameter grid." />
 
 ## <span id="pdvar-size"></span><span id="pdvar-numel"></span><span id="pdvar-ndims"></span><span id="pdvar-length"></span><span id="pdvar-height"></span><span id="pdvar-width"></span><span id="pdvar-isequal"></span><span id="pdvar-disp"></span><span id="pdvar-display"></span><span id="pdvar-numArgumentsFromSubscript"></span>Inspect Shape, Equality, And Display
 
@@ -250,7 +241,6 @@ size=2-by-2, length=2, numel=4, ndims=2
 isequal(P,P)=1
 ```
 
-<MatrixOperationDiagram kind="shape" caption="Matrix-shape inspection is separate from ncell, ncoeff, and rate-row inspection." />
 
 ## Validation And Limitations
 

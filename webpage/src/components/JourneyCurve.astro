@@ -1,0 +1,41 @@
+<div class="journey-curve">
+  <svg viewBox="0 0 620 360" role="img" aria-labelledby="journey-title journey-desc">
+    <title id="journey-title">From a parameter-dependent LMI to a solver</title>
+    <desc id="journey-desc">A single rising curve passes through PD-LMI model, cell-local data, finite certificate, and YALMIP or SDP.</desc>
+    <defs>
+      <linearGradient id="journey-gradient" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="var(--diagram-input)" />
+        <stop offset="1" stop-color="var(--diagram-result)" />
+      </linearGradient>
+    </defs>
+    <path class="journey-guide" d="M58 298 C170 286 174 182 286 194 S430 88 560 60" />
+    <g class="journey-stage journey-stage--1">
+      <circle cx="70" cy="296" r="10" />
+      <text x="70" y="328" text-anchor="middle">PD-LMI model</text>
+    </g>
+    <g class="journey-stage journey-stage--2">
+      <circle cx="244" cy="196" r="10" />
+      <text x="244" y="156" text-anchor="middle" aria-label="cell-local data"><tspan x="244">cell-local</tspan><tspan x="244" dy="23">data</tspan></text>
+    </g>
+    <g class="journey-stage journey-stage--3">
+      <circle cx="405" cy="129" r="10" />
+      <text x="405" y="151" text-anchor="middle" aria-label="finite certificate"><tspan x="405">finite</tspan><tspan x="405" dy="23">certificate</tspan></text>
+    </g>
+    <g class="journey-stage journey-stage--4">
+      <circle cx="555" cy="61" r="10" />
+      <text x="555" y="32" text-anchor="middle">YALMIP / SDP</text>
+    </g>
+  </svg>
+</div>
+
+<style>
+  .journey-curve { display: grid; align-content: center; min-width: 0; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .journey-guide { fill: none; stroke: url(#journey-gradient); stroke-width: 7; stroke-linecap: round; }
+  .journey-stage circle { fill: var(--sl-color-bg); stroke: var(--sl-color-accent); stroke-width: 5; }
+  .journey-stage--4 circle { stroke: var(--diagram-result); }
+  .journey-stage text { fill: var(--sl-color-text); font-family: system-ui, sans-serif; font-size: 21px; font-weight: 750; }
+  @media (max-width: 520px) {
+    .journey-stage text { font-size: 20px; }
+  }
+</style>

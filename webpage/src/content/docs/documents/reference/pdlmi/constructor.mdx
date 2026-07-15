@@ -3,7 +3,7 @@ title: pdlmi Constructor
 description: Select direct, Pólya-elevated, Putinar, or full-box PD-LMI assembly.
 ---
 
-import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -48,7 +48,7 @@ one $\alpha_s(1-\alpha_s)$-weighted term per parameter. `UseFullBoxPreorder`
 selects a box-specific Bernstein-Gram certificate with a term for every
 generator-subset product. All three opt-in selections are mutually exclusive.
 
-<CertificateDiagram kind="map" />
+<CertificateSpectrum selected="direct" showDefault />
 
 Use the direct default first. Choose Pólya when you want one exact degree
 elevation followed by the same coefficient test. Choose full box when you

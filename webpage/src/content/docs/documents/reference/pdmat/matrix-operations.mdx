@@ -3,8 +3,9 @@ title: pdmat Matrix Operations
 description: Interleaved examples, outputs, and diagrams for coefficient-backed pdmat algebra and structural operations.
 ---
 
-import MatrixOperationDiagram from "../../../../../components/MatrixOperationDiagram.astro";
-import ConvolutionDiagram from "../../../../../components/ConvolutionDiagram.astro";
+import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
+import MultiplicationDiagram from "../../../../../components/MultiplicationDiagram.astro";
+import ExampleDisclosure from "../../../../../components/ExampleDisclosure.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -59,7 +60,7 @@ degree=2
 minus=0, uminus=-2, uplus=1
 ```
 
-<MatrixOperationDiagram kind="align" caption="Degree elevation changes the coefficient representation, not the represented polynomial; addition then combines aligned local labels." />
+<MatrixGlyphDiagram before={[["a₀", "a₁"]]} after={[["a₀+b₀", "a₁+b₁", "a₂+b₂"]]} beforeLabel="unaligned rows" afterLabel="common degree" caption="Degree elevation changes the coefficient representation, not the represented polynomial; addition combines aligned local labels." />
 
 If two coefficient-backed operands have compatible bounds but different
 interior nodes, the operation uses their sorted-union physical grid. Grid
@@ -92,27 +93,17 @@ degree two and nine local labels in two parameters.
 
 ### Microexample
 
-```matlab
-grid = {[0 1], [10 20]};
-A = pdmat(grid, {1 2; 3 4}, Degree=1);
-B = pdmat(grid, {5 6; 7 8}, Degree=1);
-K = A * B;
-cK = K.coeffs([1 1]);
-fprintf('degree=%d, coefficients=%d\n', K.Degree, K.ncoeff());
-disp([cK{:}])
-```
+<ExampleDisclosure
+  visibleCode={"K = A * B;\ncK = K.coeffs([1 1]);"}
+  fullCode={"grid = {[0 1], [10 20]};\nA = pdmat(grid, {1 2; 3 4}, Degree=1);\nB = pdmat(grid, {5 6; 7 8}, Degree=1);\nK = A * B;\ncK = K.coeffs([1 1]);\nfprintf('degree=%d, coefficients=%d\\n', K.Degree, K.ncoeff());\ndisp([cK{:}])\n% degree=2, coefficients=9\n% 5  8  12  11  15  20  21  26  32"}
+  summary="Show the complete runnable two-parameter example"
+/>
 
-```text
-degree=2, coefficients=9
-     5     8    12    11    15    20    21    26    32
-```
-
-<MatrixOperationDiagram kind="product" caption="Two degree-one coefficient rows convolve into one degree-two row; the middle coefficient combines two ordered products." />
 
 For a quadratic-by-affine scalar example, the same rule exposes all four
 anti-diagonals without a crossing arrow fan:
 
-<ConvolutionDiagram example="numeric" />
+<MultiplicationDiagram />
 
 ### Visual conclusion
 
@@ -148,7 +139,7 @@ transpose=2-by-2, reshape=1-by-4, vec=4-by-1
      4
 ```
 
-<MatrixOperationDiagram kind="transform" caption="Reshape changes the payload dimensions; vec reads each local matrix in MATLAB column order." />
+<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["a"], ["c"], ["b"], ["d"]]} beforeLabel="2 × 2 payload" afterLabel="vec(A)" caption="Reshape changes the payload dimensions; vec reads each local matrix in MATLAB column order." />
 
 ## <span id="pdmat-diag"></span><span id="pdmat-trace"></span><span id="pdmat-sum"></span><span id="pdmat-mean"></span><span id="pdmat-cumsum"></span><span id="pdmat-tril"></span><span id="pdmat-triu"></span>Extract, Reduce, And Triangularize
 
@@ -177,7 +168,7 @@ trace=5
      3     4
 ```
 
-<MatrixOperationDiagram kind="summary" caption="diag extracts a coefficient-wise diagonal, while trace reduces it to a scalar at every local label." />
+<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["a"], ["d"]]} beforeLabel="matrix coefficient" afterLabel="diag(A)" caption="diag extracts the diagonal at every local label; trace then reduces that diagonal to a scalar." />
 
 ## <span id="pdmat-horzcat"></span><span id="pdmat-vertcat"></span><span id="pdmat-cat"></span><span id="pdmat-blkdiag"></span><span id="pdmat-repmat"></span>Assemble Larger Matrices
 
@@ -200,7 +191,7 @@ H=1-by-2, V=2-by-1, cat=1-by-2
 blkdiag=2-by-2, repmat=2-by-3
 ```
 
-<MatrixOperationDiagram kind="assemble" caption="blkdiag places the same parameter-dependent payload on diagonal blocks; each block keeps the common grid and local labels." />
+<MatrixGlyphDiagram before={[["A", "B"]]} after={[["A", "0"], ["0", "B"]]} beforeLabel="two payloads" afterLabel="blkdiag(A,B)" caption="Block assembly changes matrix layout while every block keeps the common grid and local labels." />
 
 ## <span id="pdmat-flip"></span><span id="pdmat-fliplr"></span><span id="pdmat-flipud"></span><span id="pdmat-rot90"></span>Flip And Rotate Matrix Entries
 
@@ -224,7 +215,7 @@ disp(rot90(A).evaluate(0))
      1     3
 ```
 
-<MatrixOperationDiagram kind="reorder" caption="Reordering changes positions inside each stored matrix; the physical cell and local Bernstein label stay fixed." />
+<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["d", "c"], ["b", "a"]]} beforeLabel="stored payload" afterLabel="rot90(A,2)" caption="Reordering changes positions inside each stored matrix; the physical cell and local Bernstein label stay fixed." />
 
 ## <span id="pdmat-subsref"></span><span id="pdmat-subsasgn"></span><span id="pdmat-end"></span>Index And Assign Blocks
 
@@ -246,7 +237,7 @@ entry=1-by-1
     10     8
 ```
 
-<MatrixOperationDiagram kind="index" caption="Indexing selects the same matrix position from every local coefficient; assignment replaces that coefficient-wise block." />
+<MatrixGlyphDiagram before={[["a₁₁", "a₁₂"], ["a₂₁", "a₂₂"]]} after={[["a₁₂"]]} beforeLabel="each local matrix" afterLabel="A(1,2)" caption="Indexing selects the same matrix position from every local coefficient; assignment replaces that block coefficient-wise." />
 
 ## <span id="pdmat-size"></span><span id="pdmat-numel"></span><span id="pdmat-ndims"></span><span id="pdmat-length"></span><span id="pdmat-height"></span><span id="pdmat-width"></span><span id="pdmat-isequal"></span><span id="pdmat-disp"></span><span id="pdmat-display"></span><span id="pdmat-numArgumentsFromSubscript"></span>Inspect Shape, Equality, And Display
 
@@ -268,7 +259,6 @@ size=2-by-2, length=2, numel=4, ndims=2
 isequal(A,A)=1
 ```
 
-<MatrixOperationDiagram kind="shape" caption="Shape methods describe one matrix payload; use ncell and ncoeff for physical-cell and local-label counts." />
 
 ## Validation And Limitations
 

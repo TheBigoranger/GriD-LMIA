@@ -371,6 +371,79 @@
   font-size: 0.72rem;
 }
 
+/* One-off pdvar evidence compositions reuse the shared figure frame while
+   keeping their domain-specific storage meaning visible in the page source. */
+.decision-handles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.decision-handles > * {
+  display: grid;
+  min-height: 3.6rem;
+  place-items: center;
+  border-block-start: 3px solid var(--diagram-input);
+  padding: 0.55rem;
+  background: var(--sl-color-bg);
+  color: var(--sl-color-text);
+  font-family: "STIX Two Math", Cambria, serif;
+}
+
+.decision-handles strong {
+  border-color: var(--diagram-contribution);
+  color: var(--diagram-contribution);
+}
+
+.decision-handles small {
+  font-family: system-ui, sans-serif;
+  font-size: 0.66rem;
+}
+
+.value-evidence {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.value-evidence span,
+.value-evidence strong {
+  border-block-start: 3px solid var(--diagram-input);
+  padding: 0.7rem 0.35rem;
+  text-align: center;
+  background: var(--sl-color-bg);
+}
+
+.value-evidence strong {
+  border-color: var(--diagram-result);
+  color: var(--diagram-result);
+}
+
+.value-evidence b {
+  color: var(--sl-color-text-accent);
+  font-size: 1.4rem;
+}
+
+.coefficient-row-map {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 0.5rem 0.8rem;
+  align-items: center;
+}
+
+.coefficient-row-map code,
+.coefficient-row-map strong {
+  border-block-start: 2px solid var(--diagram-input);
+  padding: 0.55rem;
+  background: var(--sl-color-bg);
+}
+
+.coefficient-row-map strong {
+  border-color: var(--diagram-result);
+  color: var(--diagram-result);
+}
+
 .sl-markdown-content img {
   border: 1px solid var(--sl-color-gray-5);
   border-radius: 8px;
@@ -410,6 +483,20 @@
 }
 
 @media (max-width: 520px) {
+  .decision-handles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .value-evidence {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .value-evidence b {
+    grid-column: 1 / -1;
+    transform: rotate(90deg);
+    justify-self: center;
+  }
+
   .sl-markdown-content .mobile-stack-table,
   .mobile-stack-table tbody,
   .mobile-stack-table tr,

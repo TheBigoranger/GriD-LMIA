@@ -3,7 +3,7 @@ title: pdlmi applyPutinar
 description: Rebuild a PD-LMI residual with a fixed-order Putinar box Bernstein-Gram certificate.
 ---
 
-import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -56,7 +56,7 @@ component. Every present Gram matrix is constrained positive semidefinite.
 The target is exactly elevated and matched coefficient by coefficient at
 tensor degree $2r\mathbf 1$.
 
-<CertificateDiagram kind="putinar" />
+<CertificateSpectrum selected="putinar" />
 
 Each cell and rate row receives independent dense Gram blocks and independent
 coefficient equalities. The method does not share Gram variables across cells,

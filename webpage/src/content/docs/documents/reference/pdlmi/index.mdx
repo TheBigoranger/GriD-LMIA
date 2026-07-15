@@ -3,7 +3,7 @@ title: pdlmi
 description: Cell-local YALMIP constraints for PD-LMI expressions.
 ---
 
-import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -16,7 +16,7 @@ residual expressions. Direct coefficient assembly is the default; Pólya
 degree elevation, fixed-order Putinar box assembly, and fixed-order full box
 Bernstein-Gram preordering are explicit alternatives.
 
-<CertificateDiagram kind="map" />
+<CertificateSpectrum selected="direct" showDefault />
 
 The four paths begin with the same stored residual. **Direct** tests every
 local coefficient and is the default. **Pólya** exactly elevates that residual

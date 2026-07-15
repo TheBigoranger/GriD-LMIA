@@ -3,7 +3,7 @@ title: pdlmi applyFullBoxPreorder
 description: Rebuild a PD-LMI residual with a fixed-order full box Bernstein-Gram certificate.
 ---
 
-import CertificateDiagram from "../../../../../components/CertificateDiagram.astro";
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -51,13 +51,50 @@ semidefinite, then exact identities match every Bernstein coefficient. For a
 semidefinite matching; for `>=`, the residual is matched directly. No implicit
 positivity margin is added.
 
-<CertificateDiagram kind="fullbox" />
+<CertificateSpectrum selected="fullbox" />
 
 For two parameters the four illustrated blocks correspond to the empty
 subset, each single generator, and their product. In $\ell$ parameters the
 same pattern has up to $2^\ell$ subset products. The
 [SOS certificate chapter](/PD-LMI-package/documents/math/sos-certificates/)
 develops the Gram and Markov–Lukács background step by step.
+
+### Finite-SDP shape: two parameters, degree three
+
+For one cell and one active rate row, let the sign-normalized residual have
+Bernstein coefficients $F_{i,k}$ at tensor degree $(3,3)$. The default order
+is $r=2$, so the residual is exactly elevated to degree $(4,4)$. The returned
+constraint list has four PSD Gram constraints, followed by 25 exact affine
+matrix equalities:
+
+$$
+\begin{gathered}
+Q_{\varnothing}\succeq0,\quad Q_{\{1\}}\succeq0,\quad
+Q_{\{2\}}\succeq0,\quad Q_{\{1,2\}}\succeq0,\\
+\widetilde F_{p,q}=
+\mathcal A_{p,q}(Q_{\varnothing},Q_{\{1\}},Q_{\{2\}},Q_{\{1,2\}}),
+\qquad p,q=0,\ldots,4.
+\end{gathered}
+$$
+
+Each $\mathcal A_{p,q}$ is a fixed affine Bernstein-coefficient map of the
+Gram blocks. For instance,
+
+$$
+F_{0,0}=[Q_{\varnothing}]_{(0,0),(0,0)},
+$$
+
+while
+
+$$
+\tfrac14F_{0,0}+\tfrac34F_{1,0}
+=\tfrac12[Q_{\varnothing}]_{(0,0),(1,0)}
++\tfrac12[Q_{\varnothing}]_{(1,0),(0,0)}
++\tfrac14[Q_{\{1\}}]_{(0,0),(0,0)}.
+$$
+
+The detailed identity, basis degrees, and Gram dimensions are in the
+[worked two-parameter example](/PD-LMI-package/documents/math/sos-certificates/#worked-full-box-example-two-parameters-degree-three).
 
 ## Arguments And Options
 

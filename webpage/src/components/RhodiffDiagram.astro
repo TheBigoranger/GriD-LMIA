@@ -1,0 +1,58 @@
+---
+import DiagramFrame from "./DiagramFrame.astro";
+
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+const vertices = ["(−1, −1)", "(−1, +1)", "(+1, −1)", "(+1, +1)"];
+---
+
+<DiagramFrame
+  caption="For ell = 2, lower/upper tensor order creates four rate rows. Axis-wise partials have different tensor degree vectors; elevate them to the common tensor Degree = m, then rate-weight and sum."
+  label="Four rate vertices and the multivariate rhodiff storage sequence"
+  class:list={["rhodiff-diagram", { compact }]}
+>
+  <div class="rhodiff-sequence">
+    <section>
+      <span class="sequence-index">1</span>
+      <strong>Axis-wise partials</strong>
+      <p>different tensor degree vectors</p>
+    </section>
+    <span class="sequence-arrow" aria-hidden="true">→</span>
+    <section>
+      <span class="sequence-index">2</span>
+      <strong>Common tensor basis</strong>
+      <p>elevate each term to <code>Degree = m</code></p>
+    </section>
+    <span class="sequence-arrow" aria-hidden="true">→</span>
+    <section>
+      <span class="sequence-index">3</span>
+      <strong>Rate-weight and sum</strong>
+      <p>one stored coefficient row per vertex</p>
+    </section>
+  </div>
+  <div class="rate-row-list" role="img" aria-label="Rate vertices in lower upper tensor order: minus one minus one, minus one plus one, plus one minus one, plus one plus one">
+    {vertices.map((vertex, index) => <span><b>row {index + 1}</b>{vertex}</span>)}
+  </div>
+</DiagramFrame>
+
+<style>
+  .rhodiff-sequence { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 0.65rem; align-items: center; }
+  .rhodiff-sequence section { min-width: 0; border-block-start: 3px solid var(--diagram-input); padding-block-start: 0.55rem; }
+  .rhodiff-sequence section:nth-of-type(2) { border-color: var(--diagram-contribution); }
+  .rhodiff-sequence section:nth-of-type(3) { border-color: var(--diagram-result); }
+  .sequence-index { display: block; color: var(--sl-color-gray-2); font-size: 0.7rem; font-weight: 800; }
+  .rhodiff-sequence p { margin: 0.18rem 0 0; color: var(--sl-color-gray-2); font-size: 0.8rem; }
+  .sequence-arrow { color: var(--sl-color-text-accent); font-size: 1.25rem; }
+  .rate-row-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.55rem; margin-block-start: 1rem; }
+  .rate-row-list span { display: grid; gap: 0.25rem; border-block-start: 2px solid var(--diagram-contribution); padding-block-start: 0.45rem; text-align: center; font-family: "STIX Two Math", Cambria, serif; font-weight: 750; }
+  .rate-row-list b { color: var(--sl-color-gray-2); font-family: system-ui, sans-serif; font-size: 0.68rem; text-transform: uppercase; }
+  :global(.rhodiff-diagram.compact) { margin-block: 0.4rem 0; }
+  @media (max-width: 620px) {
+    .rhodiff-sequence { grid-template-columns: 1fr; }
+    .sequence-arrow { transform: rotate(90deg); justify-self: center; }
+    .rate-row-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>

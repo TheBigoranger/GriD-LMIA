@@ -3,6 +3,9 @@ title: pdvar bernsteinTable
 description: Inspect symbolic Bernstein coefficients and rate-vertex rows.
 ---
 
+import DiagramFrame from "../../../../../components/DiagramFrame.astro";
+import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
+
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -10,6 +13,16 @@ description: Inspect symbolic Bernstein coefficients and rate-vertex rows.
   <span>/</span>
   <span>bernsteinTable</span>
 </nav>
+
+<DiagramFrame caption="bernsteinTable keeps each physical cell, local tensor label, and symbolic coefficient value in one inspectable row." label="Local Bernstein labels mapped to symbolic table rows">
+  <div class="coefficient-row-map" role="img" aria-label="Local labels zero zero, zero one, and one zero map to symbolic coefficient rows">
+    <code>[0,0]</code><span>→</span><strong>row: X₀₀</strong>
+    <code>[0,1]</code><span>→</span><strong>row: X₀₁</strong>
+    <code>[1,0]</code><span>→</span><strong>row: X₁₀</strong>
+  </div>
+</DiagramFrame>
+
+<RhodiffDiagram />
 
 ## Purpose
 

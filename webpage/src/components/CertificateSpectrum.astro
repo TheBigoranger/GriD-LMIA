@@ -1,0 +1,49 @@
+---
+import DiagramFrame from "./DiagramFrame.astro";
+
+interface Props {
+  selected: "direct" | "polya" | "putinar" | "fullbox";
+  showDefault?: boolean;
+}
+
+const { selected, showDefault = false } = Astro.props;
+const options = [
+  { key: "direct", label: "Direct", note: "coefficient test" },
+  { key: "polya", label: "Pólya", note: "exact elevation" },
+  { key: "putinar", label: "Putinar", note: "axis generators" },
+  { key: "fullbox", label: "Full Box", note: "all subsets" },
+] as const;
+---
+
+<DiagramFrame
+  caption="One residual, four finite certificate choices. The highlighted method is the one used on this page."
+  label={`Certificate spectrum with ${selected} selected`}
+  class="certificate-spectrum-figure"
+>
+  <div class="certificate-spectrum" role="list">
+    {options.map((option) => {
+      const isSelected = option.key === selected;
+      return (
+        <section class:list={{ selected: isSelected }} aria-current={isSelected ? "true" : undefined} role="listitem">
+          {showDefault && option.key === "direct" && <span class="default-marker">Default</span>}
+          <strong>{option.label}</strong>
+          <small>{option.note}</small>
+        </section>
+      );
+    })}
+  </div>
+</DiagramFrame>
+
+<style>
+  .certificate-spectrum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--diagram-border); }
+  section { position: relative; display: grid; gap: 0.25rem; min-width: 0; padding: 1.1rem 0.65rem; text-align: center; }
+  section + section { border-inline-start: 1px solid var(--diagram-border); }
+  section.selected { color: var(--diagram-result); background: color-mix(in srgb, var(--diagram-result) 9%, transparent); box-shadow: inset 0 3px var(--diagram-result); }
+  small { color: var(--sl-color-gray-2); font-size: 0.72rem; }
+  .default-marker { color: var(--sl-color-gray-2); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
+  @media (max-width: 560px) {
+    .certificate-spectrum { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    section:nth-child(3) { border-inline-start: 0; }
+    section:nth-child(n + 3) { border-block-start: 1px solid var(--diagram-border); }
+  }
+</style>

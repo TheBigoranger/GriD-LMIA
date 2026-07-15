@@ -1,0 +1,29 @@
+---
+interface Props {
+  visibleCode: string;
+  fullCode: string;
+  summary: string;
+}
+
+const { visibleCode, fullCode, summary } = Astro.props;
+---
+
+<div class="example-disclosure">
+  <pre class="example-disclosure__essential"><code>{visibleCode}</code></pre>
+  <!-- Native details keeps the complete example keyboard-accessible without
+       letting a long transcript compete with the scientific figure. -->
+  <details>
+    <summary>{summary}</summary>
+    <pre><code>{fullCode}</code></pre>
+  </details>
+</div>
+
+<style>
+  .example-disclosure { display: grid; gap: 0.55rem; min-width: 0; }
+  .example-disclosure pre { min-width: 0; margin: 0; overflow-x: auto; }
+  .example-disclosure__essential { border-inline-start: 3px solid var(--sl-color-accent); }
+  details { border-block-start: 1px solid var(--diagram-border); padding-block-start: 0.55rem; }
+  summary { width: fit-content; cursor: pointer; color: var(--sl-color-text-accent); font-size: 0.86rem; font-weight: 750; }
+  details pre { margin-block-start: 0.6rem; }
+  summary:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 4px; border-radius: 3px; }
+</style>

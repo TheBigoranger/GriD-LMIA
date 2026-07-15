@@ -3,7 +3,7 @@ title: SOS Certificates On A Hypercube
 description: Mathematical map from global SOS and Bernstein tests to Pólya, Putinar, Schmüdgen, and Markov–Lukács certificates.
 ---
 
-import CertificateDiagram from "../../../../components/CertificateDiagram.astro";
+import CertificateSpectrum from "../../../../components/CertificateSpectrum.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -85,7 +85,7 @@ defines the forward coordinate and exact coefficient algebra. The
 [`pdlmi` overview](/PD-LMI-package/documents/reference/pdlmi/) documents which
 rows of this table are callable.
 
-<CertificateDiagram kind="map" />
+<CertificateSpectrum selected="direct" showDefault />
 
 ## A Tiny Example: Positive Polynomial, Failed Direct Test
 
@@ -155,7 +155,7 @@ certificate after residual and rate-vertex assembly. It introduces no Gram
 matrices. The converse is false: an indefinite coefficient defeats this
 certificate, not the continuous inequality.
 
-<CertificateDiagram kind="direct" />
+<CertificateSpectrum selected="direct" showDefault />
 
 ## <span id="polya-type-coefficient-relaxation"></span>Pólya-Type Coefficient Relaxation
 
@@ -181,7 +181,7 @@ SOS multipliers. Failure at one increment is inconclusive. Quantitative Pólya
 bounds also retain strict-positivity assumptions; see
 [Powers and Reznick (2001)](https://doi.org/10.1016/S0022-4049(00)00155-9).
 
-<CertificateDiagram kind="polya" />
+<CertificateSpectrum selected="polya" />
 
 ## Putinar Quadratic Modules
 
@@ -236,7 +236,7 @@ cell and active rate row. It adds no strictness margin and does not call a
 solver. This callable path is not a general-domain or general-generator
 Putinar interface.
 
-<CertificateDiagram kind="putinar" />
+<CertificateSpectrum selected="putinar" />
 
 ## Schmüdgen And Full Preorderings
 
@@ -265,7 +265,84 @@ creates independent Gram blocks for every physical cell and active rate row,
 then matches the resulting Bernstein coefficients exactly. This is not a
 general-domain Schmüdgen interface.
 
-<CertificateDiagram kind="fullbox" />
+<CertificateSpectrum selected="fullbox" />
+
+### Worked full-box example: two parameters, degree three
+
+This example shows the finite SDP that the package assembles, rather than an
+inequality that remains quantified over the box. Fix one physical cell and
+one active rate row. Write its sign-normalized residual in local coordinates
+$(a,b)\in[0,1]^2$ as
+
+$$
+F(a,b)=\sum_{i=0}^{3}\sum_{k=0}^{3}
+B_i^3(a)B_k^3(b)F_{i,k}.
+$$
+
+Here $m=3$ and $\ell=2$, so the default full-box order is
+$r=\lceil m/2\rceil=2$. The implementation first elevates $F$ exactly to
+tensor degree $(4,4)$:
+
+$$
+F(a,b)=\sum_{p=0}^{4}\sum_{q=0}^{4}
+B_p^4(a)B_q^4(b)\widetilde F_{p,q}.
+$$
+
+For example,
+$\widetilde F_{0,0}=F_{0,0}$ and
+$\widetilde F_{1,0}=\tfrac14F_{0,0}+\tfrac34F_{1,0}$. It then introduces
+four independent positive-semidefinite Gram matrices and imposes the
+identity
+
+$$
+\begin{aligned}
+F(a,b)={}&Z_{2,2}^{\mathsf T}Q_{\varnothing}Z_{2,2}
+ +a(1-a)Z_{1,2}^{\mathsf T}Q_{\{1\}}Z_{1,2}\\
+&+b(1-b)Z_{2,1}^{\mathsf T}Q_{\{2\}}Z_{2,1}\\
+&+a(1-a)b(1-b)
+ Z_{1,1}^{\mathsf T}Q_{\{1,2\}}Z_{1,1}.
+\end{aligned}
+$$
+
+$Z_{u,v}$ is the tensor Bernstein basis of degree $(u,v)$, with each scalar
+basis function tensored with the identity of the residual-matrix size $n$.
+Consequently, the four Gram matrices have dimensions
+
+$$
+9n\mathbin{\times}9n,\quad 6n\mathbin{\times}6n,\quad
+6n\mathbin{\times}6n,\quad 4n\mathbin{\times}4n,
+$$
+
+respectively, and the finite LMI part is
+
+$$
+Q_{\varnothing}\succeq0,\qquad Q_{\{1\}}\succeq0,\qquad
+Q_{\{2\}}\succeq0,\qquad Q_{\{1,2\}}\succeq0.
+$$
+
+The polynomial identity above is implemented as 25 exact matrix equalities,
+one for each $(p,q)\in\{0,\ldots,4\}^2$. If $[Q]_{u,v}$ denotes the
+$n\mathbin{\times}n$ block indexed by two tensor-basis labels, the first two
+equalities make the mechanism concrete:
+
+$$
+F_{0,0}=[Q_{\varnothing}]_{(0,0),(0,0)},
+$$
+
+$$
+\tfrac14F_{0,0}+\tfrac34F_{1,0}
+=\tfrac12[Q_{\varnothing}]_{(0,0),(1,0)}
++\tfrac12[Q_{\varnothing}]_{(1,0),(0,0)}
++\tfrac14[Q_{\{1\}}]_{(0,0),(0,0)}.
+$$
+
+The $b(1-b)$-weighted blocks cannot contribute to the coefficient labelled
+$(1,0)$, which is why they do not appear in the second equality. Thus this
+one cell/rate-row certificate is **four PSD-LMI constraints plus 25 affine
+matrix equalities**. It is an SDP formulation, not 25 further LMIs. Other
+cells and active rate rows receive independent copies of exactly this system.
+For a `<=` residual, the same construction matches the coefficients of
+$-F$ instead.
 
 ## One-Dimensional Markov–Lukács Forms
 

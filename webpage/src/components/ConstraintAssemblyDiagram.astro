@@ -1,0 +1,28 @@
+---
+import DiagramFrame from "./DiagramFrame.astro";
+---
+
+<DiagramFrame
+  caption="toYalmip returns the already assembled finite YALMIP constraints; the solver sees ordinary semidefinite constraints, not a parameter-dependent object."
+  label="Open coefficient-to-constraint composition for toYalmip"
+  class="constraint-assembly-diagram"
+>
+  <ol class="coefficient-to-constraint">
+    <li><span>1</span><strong>Residual coefficients</strong><small>cell · rate row · local label</small></li>
+    <li><span>2</span><strong>Selected certificate</strong><small>direct or opt-in Gram assembly</small></li>
+    <li><span>3</span><strong>toYalmip</strong><small>returns the stored finite set</small></li>
+    <li><span>4</span><strong>YALMIP constraints</strong><small>ordinary SDP solver input</small></li>
+  </ol>
+</DiagramFrame>
+
+<style>
+  .coefficient-to-constraint { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0; list-style: none; border-block: 1px solid var(--diagram-border); }
+  li { display: grid; gap: 0.25rem; min-width: 0; padding: 0.9rem; }
+  li + li { border-inline-start: 1px solid var(--diagram-border); }
+  li span { color: var(--sl-color-text-accent); font-size: 0.72rem; font-weight: 850; }
+  li small { color: var(--sl-color-gray-2); line-height: 1.35; }
+  @media (max-width: 620px) {
+    .coefficient-to-constraint { grid-template-columns: 1fr; }
+    li + li { border-inline-start: 0; border-block-start: 1px solid var(--diagram-border); }
+  }
+</style>

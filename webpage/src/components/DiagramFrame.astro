@@ -8,8 +8,8 @@ interface Props {
 const { caption, label = caption, class: className = "" } = Astro.props;
 ---
 
-<figure class:list={["diagram-frame", className]}>
-  <div class="diagram-frame__body" role="img" aria-label={label}>
+<figure class:list={["diagram-frame", className]} aria-label={label}>
+  <div class="diagram-frame__body">
     <slot />
   </div>
   <figcaption>{caption}</figcaption>

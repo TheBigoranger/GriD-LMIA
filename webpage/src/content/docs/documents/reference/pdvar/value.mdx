@@ -3,6 +3,8 @@ title: pdvar value
 description: Convert assigned symbolic coefficients to known pdmat data.
 ---
 
+import DiagramFrame from "../../../../../components/DiagramFrame.astro";
+
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
   <span>/</span>
@@ -10,6 +12,12 @@ description: Convert assigned symbolic coefficients to known pdmat data.
   <span>/</span>
   <span>value</span>
 </nav>
+
+<DiagramFrame caption="value preserves the grid, degree, cell labels, and matrix shape while replacing every assigned symbolic coefficient with its numeric value." label="Symbolic pdvar coefficients become numeric pdmat coefficients">
+  <div class="value-evidence" role="img" aria-label="Symbolic coefficients X zero X one X two become numeric coefficients 1 1.5 3">
+    <span>X₀</span><span>X₁</span><span>X₂</span><b aria-hidden="true">→</b><strong>1</strong><strong>1.5</strong><strong>3</strong>
+  </div>
+</DiagramFrame>
 
 ## Purpose
 

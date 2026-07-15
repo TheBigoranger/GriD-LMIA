@@ -1,7 +1,10 @@
 ---
-import ConvolutionDiagram from "./ConvolutionDiagram.astro";
-import PdmatStorageDiagram from "./PdmatStorageDiagram.astro";
-import WorkflowStepDiagram from "./WorkflowStepDiagram.astro";
+import CellStorageDiagram from "./CellStorageDiagram.astro";
+import ExampleDisclosure from "./ExampleDisclosure.astro";
+import JourneyCurve from "./JourneyCurve.astro";
+import MultiplicationDiagram from "./MultiplicationDiagram.astro";
+import RhodiffDiagram from "./RhodiffDiagram.astro";
+import CertificateSpectrum from "./CertificateSpectrum.astro";
 import { renderDisplayMath } from "../lib/mathjax.js";
 import { versionInfo } from "../data/version.js";
 
@@ -32,30 +35,40 @@ const lmiSteps = [
   },
   {
     number: "02",
-    title: "Choose the physical grid and polynomial degrees",
-    text: "Use two physical cells on [0,1]. The known matrix A is affine, while the continuous symmetric decision P is quadratic. Each cell has three local P coefficients; one interface value is shared, so there are five global matrix controls.",
-    math: "\\text{grid}=\\{[0,0.5,1]\\},\\qquad \\deg A=1,\\qquad \\deg P=2.",
-    kind: "store",
-    code: "yalmip('clear')\ngrid = {[0 0.5 1]};\nA = pdmat(grid, @(rho) [-1 .5; -1 -2] + ...\n    rho*[-1.3 -20; 2 -10], Degree=1);\nP = pdvar(2, grid, \"symmetric\", Degree=2);\nfprintf(\"cells=%d, local=%d, global=%d\\n\", ...\n    P.ncell(), P.ncoeff(), 2*P.Degree+1);",
-    output: "cells=2, local=3, global=5",
+    title: "Initialize the grid and cell-local storage",
+    text: "A physical grid says where each polynomial lives. Degree says how many Bernstein labels live inside that cell. Continuity reuses values on shared faces instead of turning the representation into a B-spline.",
+    math: "\\text{two 1-D cells: }3+3-1=5\\text{ global controls},\\qquad \\text{one 2-D degree-2 cell: }(2+1)^2=9\\text{ local labels}.",
+    visual: "storage",
+    visibleCode: "grid = {[0 0.5 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);",
+    fullCode: "yalmip('clear')\ngrid = {[0 0.5 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);\nP.ncell()\nP.ncoeff()",
   },
   {
     number: "03",
-    title: "Multiply and differentiate cell locally",
-    text: "Bernstein products are weighted coefficient convolutions with matrix order preserved. Quadratic P times affine A is cubic. rhodiff(P) uses forward differences inside each physical cell, lowers degree to one, and creates rows for the two rate vertices −1 and +1.",
-    math: "\\deg(PA)=3,\\qquad \\deg(\\operatorname{rhodiff}P)=1,\\qquad \\dot\\rho\\in\\{-1,+1\\}.",
-    kind: "assemble",
-    code: "PA = P*A;\nD = rhodiff(P, [-1 1]);\nresidual = D + PA + A'*P;\nfprintf(\"PA=%d, D=%d, residual=%d, rows=%d\\n\", ...\n    PA.Degree, D.Degree, residual.Degree, ...\n    size(D.coeffs(1),1));",
-    output: "PA=3, D=1, residual=3, rows=2",
+    title: "Multiply: pointwise curves become coefficient convolution",
+    text: "On one interval, two affine functions multiply pointwise into a quadratic curve. In coefficient space, the same operation is an ordered Bernstein convolution with binomial normalization.",
+    math: "P(\\rho)=1+2\\rho,\\quad Q(\\rho)=2+2\\rho,\\quad R(\\rho)=P(\\rho)Q(\\rho).",
+    visual: "multiply",
+    coefficients: "[1, 3] × [2, 4] → [2, 5, 12]",
+    visibleCode: "R = P*Q;",
+    fullCode: "P = pdmat({[0 1]}, {1, 3}, Degree=1);\nQ = pdmat({[0 1]}, {2, 4}, Degree=1);\nR = P*Q;\nR.bernsteinTable()",
   },
   {
     number: "04",
-    title: "Count the direct finite certificate",
-    text: "Addition exactly elevates the degree-one derivative rows to the cubic residual degree. Direct decay certification visits two cells, two rate rows, and four cubic labels. Positivity visits two cells and three quadratic labels.",
-    math: "2\\times2\\times4=16\\quad\\text{decay constraints},\\qquad 2\\times3=6\\quad\\text{positivity constraints}.",
-    kind: "solve",
-    code: "Cdecay = residual <= -1e-6*eye(2);\nCpositive = P >= eye(2);\nfprintf(\"decay=%d, positivity=%d\\n\", ...\n    numel(Cdecay.Constraints), ...\n    numel(Cpositive.Constraints));",
-    output: "decay=16, positivity=6",
+    title: "Differentiate at every rate vertex",
+    text: "For two scheduling parameters, rhodiff stores four rate rows: (−1,−1), (−1,+1), (+1,−1), and (+1,+1). The rule is exact: axis-wise partials have different tensor degree vectors; elevate them to the common degree-m tensor basis, then rate-weight and sum. The multivariate result is stored with Degree=m.",
+    math: "\\ell=2,\\qquad 2^\\ell=4\\text{ rate rows},\\qquad \\operatorname{Degree}(\\operatorname{rhodiff}P)=m\\text{ for }m>0.",
+    visual: "rhodiff",
+    visibleCode: "P = pdvar(1, grid, Degree=2);\nD = rhodiff(P, [-1 1; -1 1]);",
+    fullCode: "yalmip('clear')\ngrid = {[0 1], [0 1]};\nP = pdvar(1, grid, Degree=2);\nD = rhodiff(P, [-1 1; -1 1]);\nD.Degree\nsize(D.coeffs([1 1]), 1)",
+  },
+  {
+    number: "05",
+    title: "Select and assemble a finite certificate",
+    text: "Start with the direct cell-local coefficient test. Pólya performs exact degree elevation first; Putinar and Full Box introduce fixed-order Bernstein-Gram certificates. Every option ends as ordinary YALMIP constraints.",
+    math: "\\text{continuous residual}\\;\\longrightarrow\\;\\text{finite coefficient or Gram constraints}.",
+    visual: "certificate",
+    visibleCode: "L = pdlmi(P, \">=\");\nC = L.toYalmip();",
+    fullCode: "yalmip('clear')\nP = pdvar(2, {[0 1]}, \"symmetric\");\nL = pdlmi(P, \">=\");\nC = L.toYalmip();\nnumel(C)",
   },
 ];
 ---
@@ -76,43 +89,40 @@ const lmiSteps = [
         {primaryLinks.map((link) => <a href={link.href}>{link.label}</a>)}
       </nav>
     </div>
-    <div class="hero-flow" role="img" aria-label="A continuous PD-LMI is represented by cell-local Bernstein data, certified by finite constraints, and exported through YALMIP to an SDP solver.">
-      <section><b>PD-LMI / DPD-LMI</b><span>continuous domain</span></section>
-      <b aria-hidden="true">↓</b>
-      <section><b>Bernstein data</b><span>physical cells + local labels</span></section>
-      <b aria-hidden="true">↓</b>
-      <section><b>Finite certificate</b><span>direct / Pólya / Putinar / full box</span></section>
-      <b aria-hidden="true">↓</b>
-      <section class="hero-flow__result"><b>YALMIP / SDP</b><span>ordinary solver interface</span></section>
-    </div>
+    <JourneyCurve />
   </section>
 
   <section class="product-walkthrough" aria-labelledby="walkthrough-title">
     <header class="section-heading">
       <p class="home-label">Worked spine · {versionInfo.current}</p>
       <h2 id="walkthrough-title">From one quadratic two-cell DPD-LMI to finite constraints</h2>
-      <p>Each step pairs the mathematical conclusion with the exact public API call and a deterministic transcript.</p>
+      <p>Read the geometry first. The page keeps only the essential API line in view and puts each complete runnable example one disclosure away.</p>
     </header>
 
     <div class="lmi-narrative">
       {lmiSteps.map((step) => (
-        <section class:list={["lmi-step", { illustrated: step.kind }]}>
+        <section class="lmi-step">
           <div class="step-number" aria-hidden="true">{step.number}</div>
           <div class="step-content">
             <div class="step-copy">
               <h3>{step.title}</h3>
               <p>{step.text}</p>
               <div class="math-strip" set:html={renderDisplayMath(step.math)} />
-              {step.code && <div class="step-example"><pre><code>{step.code}</code></pre><pre class="step-output"><code>{step.output}</code></pre></div>}
+              {step.visibleCode && <ExampleDisclosure visibleCode={step.visibleCode} fullCode={step.fullCode} summary={`Show the complete ${step.number} example`} />}
             </div>
-            {step.kind && <WorkflowStepDiagram kind={step.kind} />}
+            {step.visual === "storage" && <CellStorageDiagram />}
+            {step.visual === "multiply" && <MultiplicationDiagram />}
+            {step.visual === "rhodiff" && (
+              <RhodiffDiagram compact />
+            )}
+            {step.visual === "certificate" && (
+              <CertificateSpectrum selected="direct" showDefault />
+            )}
           </div>
         </section>
       ))}
     </div>
 
-    <PdmatStorageDiagram />
-    <ConvolutionDiagram />
   </section>
 
   <section class="manual-section" aria-labelledby="manual-title">
@@ -139,7 +149,6 @@ const lmiSteps = [
 
   .home-portal { display: grid; gap: clamp(2rem, 4vw, 3.2rem); }
   .home-hero,
-  .product-walkthrough,
   .download-panel { border: 1px solid var(--diagram-border); border-radius: 22px; background: var(--diagram-surface); box-shadow: 0 20px 50px rgb(15 23 42 / 0.08); }
   .home-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(17rem, 0.7fr); gap: clamp(1.4rem, 4vw, 2.8rem); padding: clamp(1.3rem, 3.5vw, 2.8rem); }
   .home-copy { display: grid; align-content: center; gap: 0.9rem; min-width: 0; }
@@ -156,13 +165,7 @@ const lmiSteps = [
   .download-links a { border: 1px solid var(--diagram-border); border-radius: 999px; padding: 0.68rem 0.9rem; color: var(--sl-color-text); text-decoration: none; background: var(--sl-color-bg); font-weight: 700; }
   .home-actions a:first-child { color: white; border-color: transparent; background: linear-gradient(135deg, var(--diagram-input), var(--diagram-result)); }
 
-  .hero-flow { display: grid; gap: 0.42rem; align-content: center; }
-  .hero-flow > section { display: grid; gap: 0.2rem; place-items: center; border: 1px solid var(--diagram-input); border-radius: 11px; padding: 0.7rem; text-align: center; background: var(--sl-color-bg); }
-  .hero-flow > section span { color: var(--sl-color-gray-2); font-size: 0.73rem; }
-  .hero-flow > b { color: var(--sl-color-text-accent); text-align: center; }
-  .hero-flow .hero-flow__result { border-color: var(--diagram-result); }
-
-  .product-walkthrough { display: grid; gap: 1.2rem; padding: clamp(1rem, 2.5vw, 1.6rem); }
+  .product-walkthrough { display: grid; gap: 1.2rem; }
   .section-heading { display: grid; gap: 0.45rem; }
   .section-heading h2,
   .download-panel h2 { margin: 0; font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1.12; }
@@ -170,16 +173,14 @@ const lmiSteps = [
   .step-number { color: var(--sl-color-text-accent); font-size: 2rem; font-weight: 900; }
   .step-content,
   .step-copy { display: grid; gap: 0.75rem; min-width: 0; }
-  .lmi-step.illustrated .step-content { grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.85fr); align-items: center; }
   .step-copy h3,
   .step-copy p { margin: 0; }
   .step-copy p { color: var(--sl-color-gray-2); line-height: 1.65; }
   .math-strip { max-width: 100%; border-inline-start: 3px solid var(--sl-color-accent); padding-inline-start: 0.8rem; }
   .math-strip :global(mjx-container) { margin: 0; }
   .math-strip :global(svg) { max-width: 100%; height: auto; }
-  .step-example { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(8rem, 0.6fr); gap: 0.45rem; min-width: 0; }
-  .step-example pre { min-width: 0; margin: 0; border: 1px solid var(--diagram-border); border-radius: 9px; padding: 0.65rem; overflow-x: auto; background: var(--sl-color-bg); }
-  .step-output { border-color: var(--diagram-result) !important; }
+  .step-content :global(.diagram-frame) { margin-block: 0.4rem 0; }
+
 
   .manual-section { display: grid; gap: 1rem; }
   .manual-entry-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
@@ -192,21 +193,19 @@ const lmiSteps = [
 
   @media (max-width: 820px) {
     .home-hero,
-    .lmi-step.illustrated .step-content,
     .download-panel { grid-template-columns: 1fr; }
     .download-links { justify-content: flex-start; }
   }
 
   @media (max-width: 600px) {
     .lmi-step,
-    .step-example,
     .manual-entry-list { grid-template-columns: 1fr; }
     .step-number { font-size: 1.45rem; }
   }
 
   @media (max-width: 390px) {
     .home-hero,
-    .product-walkthrough { border-radius: 16px; padding: 0.85rem; }
+    .download-panel { border-radius: 16px; padding: 0.85rem; }
     .home-actions a,
     .download-links a { width: 100%; text-align: center; }
   }
