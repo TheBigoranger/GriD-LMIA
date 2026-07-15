@@ -40,6 +40,7 @@ function out = blkdiag(varargin)
 end
 
 function coeffs = blkCell(data, subs)
+    %BLKCELL Assemble one physical cell's block-diagonal coefficients.
     nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
     coeffs = cell(1, nCoeff);
     for c = 1:nCoeff

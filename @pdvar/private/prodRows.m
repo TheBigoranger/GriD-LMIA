@@ -4,6 +4,13 @@ function coeffs = prodRows(obj, lhs, lhsDeg, rhs, rhsDeg)
     %   Syntax:
     %     coeffs = prodRows(obj, lhs, lhsDeg, rhs, rhsDeg)
     %
+    %   Arguments:
+    %     lhs, rhs       - Ordinary or rate-vertex coefficient tables.
+    %     lhsDeg, rhsDeg - Scalar Bernstein degrees of those tables.
+    %
+    %   Output:
+    %     coeffs - Product table with ordinary rows broadcast as needed.
+    %
     %   Example (via public algebra):
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     P = pdvar(1, {[0 1]}, RateBounds=[-1 1]);

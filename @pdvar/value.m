@@ -5,6 +5,13 @@ function out = value(obj)
     %     A = value(P)
     %     rows = value(rhodiff(P))
     %
+    %   Arguments:
+    %     P - pdvar expression whose YALMIP coefficients have assigned values.
+    %
+    %   Output:
+    %     A    - Coefficient-backed pdmat for an ordinary expression.
+    %     rows - One pdmat per derivative rate vertex, in combRows order.
+    %
     %   An ordinary pdvar returns one coefficient-backed pdmat.  A pdvar
     %   with derivative rate rows returns a 1-by-2^ell cell array of pdmat
     %   objects in helper.combRows(RateBounds) vertex order.  Outputs preserve
@@ -24,7 +31,7 @@ function out = value(obj)
     vals = helper.mapVals(obj.LocalValues, @evalCoeff, grid);
     nCoeff = (obj.Degree + 1) ^ obj.npar();
     if ~isRateRows(vals, grid, nCoeff)
-        out = makePdmat(obj, vals);
+        out = mkPdmat(obj, vals);
         return
     end
 
@@ -35,11 +42,12 @@ function out = value(obj)
     out = cell(1, nVert);
     for row = 1:nVert
         rowVals = helper.mkNest(nCell, @(subs) pickRow(vals, subs, row));
-        out{row} = makePdmat(obj, rowVals);
+        out{row} = mkPdmat(obj, rowVals);
     end
 end
 
 function val = evalCoeff(val)
+    %EVALCOEFF Convert one assigned coefficient to a finite real numeric matrix.
     if isnumeric(val)
         raw = val;
     elseif isa(val, "sdpvar")
@@ -61,11 +69,12 @@ function val = evalCoeff(val)
 end
 
 function rowVals = pickRow(vals, subs, row)
+    %PICKROW Extract one rate-vertex row from a physical-cell leaf.
     coeffs = helper.cellGet(vals, subs);
     rowVals = coeffs(row, :);
 end
 
-function out = makePdmat(obj, vals)
+function out = mkPdmat(obj, vals)
     % Prepared construction preserves deliberate derivative discontinuities
     % without presenting them as invalid user-supplied local data.
     init = struct;

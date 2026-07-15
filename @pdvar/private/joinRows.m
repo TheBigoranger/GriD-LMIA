@@ -4,6 +4,14 @@ function coeffs = joinRows(leaves, fcn, errId)
     %   Syntax:
     %     coeffs = joinRows(leaves, fcn, errId)
     %
+    %   Arguments:
+    %     leaves - Coefficient tables to align by row and column.
+    %     fcn    - Assembly function receiving one value from each leaf.
+    %     errId  - Identifier for incompatible row or column counts.
+    %
+    %   Output:
+    %     coeffs - Combined table at the active rate-row count.
+    %
     %   Example (via rate-affine algebra):
     %     P = pdvar(1, {[0 1]}, RateBounds=[-1 1]);
     %     C = rhodiff(P) + P;

@@ -4,14 +4,21 @@ function out = bernElev(obj, coeffs, fromDeg, toDeg)
     %   Syntax:
     %     out = bernElev(obj, coeffs, fromDeg, toDeg)
     %
-    %   Example:
-    %     A = pdmat({[0 1]}, {[1 2]}, Degree=1);
-    %     c = A.coeffs(1);
-    %     cElevated = bernElev(A, c, 1, 2);
+    %   Arguments:
+    %     coeffs - Flat coefficients for one physical cell.
+    %     fromDeg - Current scalar degree in every parameter direction.
+    %     toDeg   - Target degree, not smaller than fromDeg.
+    %
+    %   Output:
+    %     out - Equivalent flat coefficients at toDeg.
+    %
+    %   Example (through the public elevation API):
+    %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
+    %     vals = A.elevVals(1);
 
     % sanity check inputs
     nPar = obj.npar();
-    sanCheck(fromDeg, toDeg, coeffs, nPar);
+    sanChk(fromDeg, toDeg, coeffs, nPar);
 
     if toDeg == fromDeg
         out = coeffs;
@@ -51,7 +58,8 @@ function out = bernElev(obj, coeffs, fromDeg, toDeg)
     end
 end
 
-function sanCheck(fromDeg, toDeg, coeffs, nPar)
+function sanChk(fromDeg, toDeg, coeffs, nPar)
+    %SANCHK Validate degree bounds and the flat tensor coefficient count.
     fromDeg = double(helper.chk(fromDeg, "pdbase:InvalidDegree", ...
         "fromDeg must be a nonnegative integer scalar.", ...
         "numeric", "real", "scalar", "finite", "integer", "nonnegative"));

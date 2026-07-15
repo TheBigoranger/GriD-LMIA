@@ -7,6 +7,14 @@ function tbl = bernsteinTable(obj, varargin)
     %     T = bernsteinTable(P, "oneLine")
     %     T = bernsteinTable(P, cellSubs, "oneLine")
     %
+    %   Arguments:
+    %     P          - pdvar expression to inspect.
+    %     cellSubs   - Optional physical-cell subscript row.
+    %     "oneLine" - Optional expression-per-cell or rate-row mode.
+    %
+    %   Output:
+    %     T - Table of cells, rate vertices, basis labels, and coefficients.
+    %
     %   Example:
     %     yalmip("clear");
     %     P = pdvar(1, {[0 1]});
@@ -28,6 +36,7 @@ function tbl = bernsteinTable(obj, varargin)
 end
 
 function txt = sdpText(val)
+    %SDPTEXT Format numeric or symbolic coefficients as compact table text.
     if ~isa(val, "sdpvar")
         txt = string(mat2str(val));
         return

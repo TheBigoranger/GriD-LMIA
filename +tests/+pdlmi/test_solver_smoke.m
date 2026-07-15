@@ -49,7 +49,7 @@ function testParameterDependentPBeatsConstantP(testCase)
 end
 
 function testUserBlockLmiSolverExample(testCase)
-    % Absorbed from root test.m as a solver-facing block-DP-LMI example.
+    % Absorbed from root test.m as a solver-facing block-PD-LMI example.
     yalmip("clear");
 
     grid = linspace(0, 1, 2);

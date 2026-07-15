@@ -7,6 +7,14 @@ function tf = isZero(val, mode, varargin)
     %     tf = helper.isZero(val, "vals")
     %     tf = helper.isZero(obj, "obj")
     %
+    %   Arguments:
+    %     val  - Numeric value, coefficient tree, or package object.
+    %     mode - "num", "add", "vals", or "obj" evidence rule.
+    %     matrixSize - Required only by "add" for shape compatibility.
+    %
+    %   Output:
+    %     tf - True only when the selected mode proves zero.
+    %
     %   Example:
     %     tf = helper.isZero(zeros(2), "add", [2 2]);
     %     A = pdmat({[0 1]}, {0, 0}, Degree=1);

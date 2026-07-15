@@ -1,5 +1,19 @@
 function info = mkGrid(grid, owner)
     %MKGRID Validate tensor-grid vectors and build GridInfo.
+    %
+    %   Syntax:
+    %     info = helper.mkGrid(grid)
+    %     info = helper.mkGrid(grid, owner)
+    %
+    %   Arguments:
+    %     grid  - Nonempty cell array of increasing parameter vectors.
+    %     owner - Optional package prefix for validation identifiers.
+    %
+    %   Output:
+    %     info - Struct with Vectors, Points, Bounds, and NumNodes.
+    %
+    %   Example:
+    %     info = helper.mkGrid({[0 1], [10 20]}, "demo");
 
     if nargin < 2
         owner = "pdbase";

@@ -6,28 +6,34 @@ function out = mtimes(lhs, rhs)
     %     C = P * A
     %     C = P * M
     %
+    %   Arguments:
+    %     lhs, rhs - Compatible pdvar, pdmat, or finite numeric operands.
+    %
+    %   Output:
+    %     C - Affine cell-local product with at most one decision/rate side.
+    %
     %   Example:
     %     P = pdvar(2, {[0 1]});
     %     A = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     %     C = A * P;
 
     % Classify special paths before entering general coefficient algebra.
-    route = routeProduct(lhs, rhs);
+    route = routeProd(lhs, rhs);
     switch route
         case "zero"
-            out = zeroProduct(lhs, rhs);
+            out = zeroProd(lhs, rhs);
         case "pdvar-pdvar"
             error("pdvar:InvalidMultiplication", ...
                 "pdvar * pdvar is unsupported because it would create quadratic decision terms.");
         case "scalar"
-            out = scalarProduct(lhs, rhs);
+            out = scalarProd(lhs, rhs);
         case "general"
-            out = generalProduct(lhs, rhs);
+            out = generalProd(lhs, rhs);
     end
 end
 
-function route = routeProduct(lhs, rhs)
-    %ROUTEPRODUCT Select the semantic multiplication path.
+function route = routeProd(lhs, rhs)
+    %ROUTEPROD Select the semantic multiplication path.
     if isa(lhs, "pdvar") && helper.isZero(lhs, "obj") && ...
             (isa(rhs, "pdvar") || isa(rhs, "pdmat") || ...
             (isnumeric(rhs) && ismatrix(rhs) && isreal(rhs) && ...
@@ -61,8 +67,8 @@ function route = routeProduct(lhs, rhs)
     route = "general";
 end
 
-function out = zeroProduct(lhs, rhs)
-    %ZEROPRODUCT Build a compact zero result after route validation.
+function out = zeroProd(lhs, rhs)
+    %ZEROPROD Build a compact zero result after route validation.
     if isa(lhs, "pdvar") && helper.isZero(lhs, "obj") && ...
             (isa(rhs, "pdvar") || isa(rhs, "pdmat") || ...
             (isnumeric(rhs) && ismatrix(rhs) && isreal(rhs) && ...
@@ -76,7 +82,7 @@ function out = zeroProduct(lhs, rhs)
         else
             rhsSize = size(rhs);
         end
-        out = zeroObj(grid, prodSize(lhs.MatrixSize, rhsSize));
+        out = zeroObj(grid, prodSz(lhs.MatrixSize, rhsSize));
         return
     end
     if (isa(lhs, "pdvar") || isa(lhs, "pdmat") || ...
@@ -92,18 +98,18 @@ function out = zeroProduct(lhs, rhs)
         else
             lhsSize = size(lhs);
         end
-        out = zeroObj(grid, prodSize(lhsSize, rhs.MatrixSize));
+        out = zeroObj(grid, prodSz(lhsSize, rhs.MatrixSize));
         return
     end
     if isa(lhs, "pdvar") && helper.isZero(rhs, "num")
-        out = zeroObj(lhs.GridInfo.Vectors, prodSize(lhs.MatrixSize, size(rhs)));
+        out = zeroObj(lhs.GridInfo.Vectors, prodSz(lhs.MatrixSize, size(rhs)));
         return
     end
-    out = zeroObj(rhs.GridInfo.Vectors, prodSize(size(lhs), rhs.MatrixSize));
+    out = zeroObj(rhs.GridInfo.Vectors, prodSz(size(lhs), rhs.MatrixSize));
 end
 
-function out = scalarProduct(lhs, rhs)
-    %SCALARPRODUCT Scale a pdvar while preserving rate-row restrictions.
+function out = scalarProd(lhs, rhs)
+    %SCALARPROD Scale a pdvar while preserving rate-row restrictions.
     if isa(lhs, "pdvar")
         obj = lhs;
         scale = rhs;
@@ -127,8 +133,8 @@ function out = scalarProduct(lhs, rhs)
     end
 end
 
-function out = generalProduct(lhs, rhs)
-    %GENERALPRODUCT Align operands and multiply local Bernstein rows.
+function out = generalProd(lhs, rhs)
+    %GENERALPROD Align operands and multiply local Bernstein rows.
     if isa(lhs, "pdvar")
         anchor = lhs;
     elseif isa(rhs, "pdvar")
@@ -155,7 +161,7 @@ function out = generalProduct(lhs, rhs)
             "Products may contain derivative rate vertices on exactly one known-data side.");
     end
 
-    sz = prodSize(ld.MatrixSize, rd.MatrixSize);
+    sz = prodSz(ld.MatrixSize, rd.MatrixSize);
     % Multiply local rows while broadcasting ordinary rows as needed.
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) prodRows(anchor, ...
@@ -172,7 +178,8 @@ function out = generalProduct(lhs, rhs)
         "expression", ld.IsContinuous && rd.IsContinuous));
 end
 
-function sz = prodSize(lhs, rhs)
+function sz = prodSz(lhs, rhs)
+    %PRODSZ Return scalar-aware matrix-product dimensions or fail explicitly.
     lhsScalar = isequal(lhs, [1 1]);
     rhsScalar = isequal(rhs, [1 1]);
 

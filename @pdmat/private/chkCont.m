@@ -4,6 +4,14 @@ function tf = chkCont(vals, nCell, deg)
     %   Syntax:
     %     tf = chkCont(localValues, numCells, degree)
     %
+    %   Arguments:
+    %     localValues - Nested physical-cell coefficient tree.
+    %     numCells   - Physical-cell count per parameter direction.
+    %     degree     - Scalar Bernstein degree.
+    %
+    %   Output:
+    %     tf - True when every adjacent face agrees within tolerance.
+    %
     %   Adjacent hypercubes must use matching endpoint coefficients on every
     %   shared face for explicit nested LocalValues to be continuous. This
     %   helper only classifies the data; the public constructor owns warnings.

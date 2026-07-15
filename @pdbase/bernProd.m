@@ -4,15 +4,21 @@ function out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
     %   Syntax:
     %     out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
     %
-    %   Example:
-    %     A = pdmat({[0 1]}, {[1 2]}, Degree=1);
-    %     lhs = A.coeffs(1);
-    %     rhs = A.coeffs(1);
-    %     product = bernProd(A, lhs, 1, rhs, 1);
+    %   Arguments:
+    %     lhs, rhs      - Flat coefficient rows for one physical cell.
+    %     lhsDeg, rhsDeg - Scalar Bernstein degrees of the operands.
+    %
+    %   Output:
+    %     out - Product coefficients at degree lhsDeg + rhsDeg.
+    %
+    %   Example (through public pdmat multiplication):
+    %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
+    %     B = pdmat({[0 1]}, {3, 4}, Degree=1);
+    %     C = A * B;
 
     %  sanity check inputs
     nPar = obj.npar();
-    sanCheck(lhsDeg, rhsDeg, lhs, rhs, nPar);
+    sanChk(lhsDeg, rhsDeg, lhs, rhs, nPar);
 
     outDeg = lhsDeg + rhsDeg;
     lhsLbls = helper.combRows(repmat({0:lhsDeg}, 1, nPar));
@@ -58,7 +64,8 @@ function out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
 
 end
 
-function sanCheck(lhsDeg, rhsDeg, lhs, rhs, nPar)
+function sanChk(lhsDeg, rhsDeg, lhs, rhs, nPar)
+    %SANCHK Validate both degrees and their flat tensor coefficient counts.
     lhsDeg = double(helper.chk(lhsDeg, "pdbase:InvalidDegree", ...
         "lhsDeg must be a nonnegative integer scalar.", ...
         "numeric", "real", "scalar", "finite", "integer", "nonnegative"));

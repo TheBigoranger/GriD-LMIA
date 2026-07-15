@@ -4,6 +4,14 @@ function out = binOp(lhs, rhs, fcn, errId)
     %   Syntax:
     %     out = binOp(lhs, rhs, fcn, errId)
     %
+    %   Arguments:
+    %     lhs, rhs - Supported operands with at least one pdvar.
+    %     fcn      - Binary mapping applied to aligned coefficients.
+    %     errId    - Operation-specific validation identifier.
+    %
+    %   Output:
+    %     out - Affine pdvar result on the common grid and degree.
+    %
     %   Example (via public algebra):
     %     P = pdvar(1, {[0 1]});
     %     C = P + 1;

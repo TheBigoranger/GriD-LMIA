@@ -4,6 +4,14 @@ function out = unOp(obj, fcn, sz)
     %   Syntax:
     %     out = unOp(obj, fcn, sz)
     %
+    %   Arguments:
+    %     obj - pdvar expression to transform.
+    %     fcn - Unary mapping applied to every coefficient payload.
+    %     sz  - Optional known result size; inferred when omitted.
+    %
+    %   Output:
+    %     out - pdvar result preserving coefficient and rate-row ordering.
+    %
     %   Example (via public algebra):
     %     P = pdvar(1, {[0 1]});
     %     Q = -P;

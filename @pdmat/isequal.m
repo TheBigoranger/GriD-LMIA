@@ -31,6 +31,7 @@ function tf = isequal(varargin)
 end
 
 function tf = sameOne(a, b)
+    %SAMEONE Compare metadata, then use normalized coefficient evidence.
     if ~(builtin("isequal", a.MatrixSize, b.MatrixSize) && ...
             builtin("isequal", a.IsContinuous, b.IsContinuous) && ...
             builtin("isequal", a.ContainsDecision, b.ContainsDecision) && ...
@@ -43,7 +44,20 @@ function tf = sameOne(a, b)
     % Function-only objects have placeholder LocalValues, so compare their
     % metadata and function handles instead of treating placeholders as evidence.
     if a.SourceSummary ~= "function" && b.SourceSummary ~= "function"
-        tf = sameEvidence(a, b);
+        % Compare coefficient-backed operands after grid and degree alignment.
+        try
+            grid = a.mergeGrid("pdmat:InvalidEquality", a, b);
+            ad = asData(grid, a, a.MatrixSize, "pdmat:InvalidEquality");
+            bd = asData(grid, b, a.MatrixSize, "pdmat:InvalidEquality");
+        catch
+            tf = false;
+            return
+        end
+
+        deg = max(ad.Degree, bd.Degree);
+        av = elevLocalValues(a, ad.LocalValues, ad.Degree, deg, grid);
+        bv = elevLocalValues(a, bd.LocalValues, bd.Degree, deg, grid);
+        tf = valsEqual(av, bv);
         return
     end
 
@@ -53,23 +67,8 @@ function tf = sameOne(a, b)
         builtin("isequal", a.FunctionHandle, b.FunctionHandle);
 end
 
-function tf = sameEvidence(a, b)
-    try
-        grid = a.mergeGrid("pdmat:InvalidEquality", a, b);
-        ad = asData(grid, a, a.MatrixSize, "pdmat:InvalidEquality");
-        bd = asData(grid, b, a.MatrixSize, "pdmat:InvalidEquality");
-    catch
-        tf = false;
-        return
-    end
-
-    deg = max(ad.Degree, bd.Degree);
-    av = elevLocalValues(a, ad.LocalValues, ad.Degree, deg, grid);
-    bv = elevLocalValues(a, bd.LocalValues, bd.Degree, deg, grid);
-    tf = valsEqual(av, bv);
-end
-
 function tf = valsEqual(a, b)
+    %VALSEQUAL Recursively compare numeric coefficient trees with tolerance.
     if iscell(a) || iscell(b)
         if ~(iscell(a) && iscell(b)) || ~isequal(size(a), size(b))
             tf = false;

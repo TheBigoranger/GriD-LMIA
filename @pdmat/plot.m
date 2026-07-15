@@ -6,6 +6,15 @@ function varargout = plot(obj, varargin)
     %     h = plot(A, dims, Name, Value)
     %     h = plot(A, SamplesPerCell=n)
     %
+    %   Arguments:
+    %     A              - pdmat object to sample and plot.
+    %     dims           - Optional one or two parameter dimensions.
+    %     SamplesPerCell - Positive sample count per physical cell.
+    %     Name, Value    - Additional MATLAB line or surface options.
+    %
+    %   Output:
+    %     h - Line or surface graphics handles, one per matrix entry.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, @(rho) [rho, rho^2]);
     %     h = plot(A, SamplesPerCell=20);
@@ -36,6 +45,7 @@ function varargout = plot(obj, varargin)
 end
 
 function [dims, args, spc] = parseArgs(obj, args)
+    %PARSEARGS Select plot dimensions and remove SamplesPerCell from options.
     if obj.npar() == 1
         dims = 1;
     else
@@ -76,6 +86,7 @@ function [dims, args, spc] = parseArgs(obj, args)
 end
 
 function x = denseVec(v, spc)
+    %DENSEVEC Sample each grid interval without duplicating shared nodes.
     x = zeros(1, (numel(v) - 1) * spc + 1);
     pos = 1;
     for k = 1:(numel(v) - 1)
@@ -90,6 +101,7 @@ function x = denseVec(v, spc)
 end
 
 function h = plot1(obj, dim, args, spc, lbls)
+    %PLOT1 Draw every matrix entry along one selected parameter dimension.
     x = denseVec(obj.GridInfo.Vectors{dim}, spc);
     base = obj.GridInfo.Bounds(:, 1).';
     nEntry = numel(lbls);
@@ -122,6 +134,7 @@ function h = plot1(obj, dim, args, spc, lbls)
 end
 
 function h = plot2(obj, dims, args, spc, lbls)
+    %PLOT2 Draw one surface per matrix entry over two selected dimensions.
     x = denseVec(obj.GridInfo.Vectors{dims(1)}, spc);
     y = denseVec(obj.GridInfo.Vectors{dims(2)}, spc);
     [X, Y] = meshgrid(x, y);

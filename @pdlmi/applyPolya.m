@@ -5,6 +5,12 @@ function out = applyPolya(obj, degreeIncrement)
     %     out = obj.applyPolya()
     %     out = obj.applyPolya(degreeIncrement)
     %
+    %   Arguments:
+    %     degreeIncrement - Optional nonnegative elevation increment; default 1.
+    %
+    %   Output:
+    %     out - New pdlmi rebuilt with Pólya elevation enabled.
+    %
     %   The no-argument form uses increment one. Passing a finite nonnegative
     %   integer replaces any prior selection because assembly always starts
     %   from the stored original Residual rather than existing constraints.

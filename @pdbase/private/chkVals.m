@@ -1,5 +1,25 @@
 function hasRate = chkVals(vals, nCell, nCoeff, sz, nPar)
-    %CHKVALS Validate nested cell-local Bernstein payloads.
+    %CHKVALS Validate cell-local Bernstein values.
+    %
+    %   Syntax:
+    %     hasRate = chkVals(vals, nCell, nCoeff, sz, nPar)
+    %
+    %   Arguments:
+    %     vals    - Nested LocalValues cell array, one level per parameter.
+    %     nCell   - Number of physical cells in each parameter direction.
+    %     nCoeff  - Number of Bernstein coefficients in each physical cell.
+    %     sz      - Required [rows, columns] size of each coefficient matrix.
+    %     nPar    - Number of scheduling parameters.
+    %
+    %   Output:
+    %     hasRate - True when vals contains rate-vertex or rate-affine data.
+    %
+    %   Example:
+    %     vals = {{1, 2}}; % One cell with two scalar coefficients.
+    %     hasRate = chkVals(vals, 1, 2, [1 1], 1);
+    %
+    %   Malformed nesting, coefficient counts, payloads, or sizes raise a
+    %   pdbase validation error.
 
     helper.chk(vals, "pdbase:InvalidLocalValues", ...
         "LocalValues must match the physical nested-cell grid shape.", ...
@@ -11,14 +31,16 @@ function hasRate = chkVals(vals, nCell, nCoeff, sz, nPar)
             coeffs = vals{k};
             hasRate = chkCoeffRow(coeffs, nCoeff, sz, nPar) || hasRate;
         else
-            % Preserve the nested physical-cell shape while walking down one
-            % parameter dimension at a time.
+            % Recurse through one physical-grid dimension at a time.
             hasRate = chkVals(vals{k}, nCell(2:end), nCoeff, sz, nPar) || hasRate;
         end
     end
 end
 
 function hasRate = chkCoeffRow(coeffs, nCoeff, sz, nPar)
+    %CHKCOEFFROW Validate one physical-cell leaf and classify rate storage.
+    % A leaf is flat or has one row per corner of the parameter-rate box.
+
     helper.chk(coeffs, "pdbase:InvalidCoefficientCell", ...
         "Each physical coefficient row must be a flat coefficient cell or a rate-vertex coefficient table.", ...
         "cell");
@@ -56,7 +78,7 @@ function hasRate = chkCoeffRow(coeffs, nCoeff, sz, nPar)
 end
 
 function chkMat(val, sz)
-    % pdbase validates storage shape only; subclasses own symbolic algebra.
+    %CHKMAT Validate a numeric or symbolic coefficient matrix.
     if isa(val, "sdpvar")
         if ~ismatrix(val) || ~isequal(size(val), sz) || ~isreal(val)
             error("pdbase:InvalidCoefficientPayload", ...

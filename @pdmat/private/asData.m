@@ -4,6 +4,15 @@ function data = asData(grid, val, reqSize, errId)
     %   Syntax:
     %     data = asData(grid, val, reqSize, errId)
     %
+    %   Arguments:
+    %     grid    - Target common-refinement grid.
+    %     val     - Numeric or coefficient-backed pdmat operand.
+    %     reqSize - Required matrix size, or empty to infer it.
+    %     errId   - Operation-specific validation identifier.
+    %
+    %   Output:
+    %     data - Normalized size, degree, LocalValues, and continuity metadata.
+    %
     %   Example (called from an @pdmat method):
     %     grid = {[0 1]};
     %     data = asData(grid, 2, [1 1], "pdmat:InvalidOperand");

@@ -1,16 +1,25 @@
-function vals = checkBernstein(fh, info, deg, sz)
-    %CHECKBERNSTEIN Validate a function handle as local Bernstein data.
+function vals = chkBernstein(fh, info, deg, sz)
+    %CHKBERNSTEIN Validate a function handle as local Bernstein data.
     %
     %   Syntax:
-    %     vals = checkBernstein(fh, gridInfo, degree, matrixSize)
+    %     vals = chkBernstein(fh, gridInfo, degree, matrixSize)
+    %
+    %   Arguments:
+    %     fh         - Function handle with one input per parameter.
+    %     gridInfo   - Normalized tensor-grid metadata.
+    %     degree     - Requested scalar Bernstein degree.
+    %     matrixSize - Required function-output size.
+    %
+    %   Output:
+    %     vals - Certified cell-local coefficient tree.
     %
     %   Example:
     %     info = helper.mkGrid({[0 1]}, "pdmat");
-    %     vals = checkBernstein(@(rho) rho, info, 1, [1 1]);
+    %     vals = chkBernstein(@(rho) rho, info, 1, [1 1]);
 
     nPar = numel(info.Vectors);
     nCell = info.NumNodes - 1;
-    [vals, lbls] = fitVals(info, deg, sz, @(pt) evalFun(fh, pt, sz));
+    [vals, lbls] = fitVals(info, deg, sz, @(pt) evalFcn(fh, pt, sz));
     nCoeff = size(lbls, 1);
 
     symOk = false;
@@ -76,7 +85,7 @@ function vals = checkBernstein(fh, info, deg, sz)
 
             % Map the forward local coordinate back into this physical cell.
             pt = bounds(:, 1).' + alpha .* (bounds(:, 2).' - bounds(:, 1).');
-            actual = evalFun(fh, pt, sz);
+            actual = evalFcn(fh, pt, sz);
 
             % Reconstruct with the fitted Bernstein coefficients at the probe.
             recon = zeros(sz);
@@ -99,8 +108,8 @@ function vals = checkBernstein(fh, info, deg, sz)
     end
 end
 
-function val = evalFun(fh, pt, sz)
-    %EVALFUN Evaluate and validate a pdmat function-handle payload.
+function val = evalFcn(fh, pt, sz)
+    %EVALFCN Evaluate and validate a pdmat function-handle payload.
     %
     %   PT contains one point per parameter dimension. The helper normalizes
     %   function-handle failures and output-shape/type failures to the

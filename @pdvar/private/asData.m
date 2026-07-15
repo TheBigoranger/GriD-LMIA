@@ -4,6 +4,16 @@ function data = asData(grid, val, reqSize, rb, errId)
     %   Syntax:
     %     data = asData(grid, val, reqSize, rb, errId)
     %
+    %   Arguments:
+    %     grid    - Target common-refinement grid.
+    %     val     - pdvar, pdmat, numeric, or affine sdpvar operand.
+    %     reqSize - Required matrix size, or empty to infer it.
+    %     rb      - Operation-level RateBounds, possibly empty.
+    %     errId   - Operation-specific validation identifier.
+    %
+    %   Output:
+    %     data - Normalized coefficient tree and decision/rate metadata.
+    %
     %   Example (via public algebra):
     %     P = pdvar(1, {[0 1]});
     %     C = P + 1;

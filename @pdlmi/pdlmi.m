@@ -1,34 +1,30 @@
 classdef pdlmi
-    %PDLMI Cell-local YALMIP constraints for DP-LMI expressions.
+    %PDLMI Cell-local YALMIP constraints for PD-LMI expressions.
     %
     %   Syntax:
     %     C = pdlmi(expr, "<=")
     %     C = pdlmi(expr, relation, "UsePolya")
     %     C = pdlmi(expr, relation, UsePolya=true, PolyaDegree=d)
     %     C = pdlmi(expr, relation, "UsePolya", "PolyaDegree", d)
+    %     C = pdlmi(expr, relation, "UseFullBoxPreorder")
+    %     C = pdlmi(expr, relation, FullBoxOrder=r)
+    %     C = pdlmi(expr, relation, "UsePutinar")
+    %     C = pdlmi(expr, relation, UsePutinar=true, PutinarOrder=r)
+    %     C = pdlmi(expr, relation, PutinarOrder=r)
     %
-    %   Direct coefficient-wise assembly is the default. Pólya assembly
-    %   elevates the residual by the nonnegative increment PolyaDegree in
-    %   every parameter direction, then constrains every elevated coefficient
-    %   and active rate row. Bare UsePolya defaults the increment to one.
-    %   Supplying PolyaDegree without UsePolya enables Pólya and issues
-    %   warning pdlmi:ImplicitUsePolya.
+    %   Arguments:
+    %     expr     - Square pdvar residual to constrain coefficient-wise.
+    %     relation - "<=" or ">=" applied to every assembled coefficient.
+    %     options  - One optional Pólya, Putinar, or full-box selection.
     %
-    %   applyFullBoxPreorder selects an opt-in full box preordering in each
-    %   cell's local Bernstein basis. In one parameter it uses the
-    %   parity-specific Markov-Lukacs form; in multiple parameters it includes
-    %   one Gram block for every subset product of alpha_s(1-alpha_s). This is
-    %   the box-specific preordering, not a general Putinar or general-domain
-    %   SOS relaxation. FullBoxOrder is an absolute order, not a degree
-    %   increment. Gram variables are independent across physical cells and
-    %   active rate rows, and no implicit margin is added.
+    %   Output:
+    %     C - Constraint wrapper retaining the residual and assembly settings.
     %
-    %   Residual retains the original pdvar expression and Relation stores
-    %   "<=" or ">=". applyPolya rebuilds from that residual, so selecting a
-    %   new increment does not compound an earlier elevation or mutate C.
-    %   A positive degree with UsePolya=false raises
-    %   pdlmi:ConflictingPolyaOptions; malformed, duplicate, unknown, or
-    %   invalid options also fail explicitly.
+    %   Direct assembly is the default. Pólya uses a nonnegative degree
+    %   increment; Putinar and full-box use absolute Gram orders. The three
+    %   relaxations are mutually exclusive, operate independently per physical
+    %   cell and rate row, and add no implicit positivity margin. Apply methods
+    %   rebuild from Residual, so a new selection replaces the previous one.
     %
     %   Example:
     %     P = pdvar(2, {[0 1]}, "symmetric");
@@ -36,6 +32,7 @@ classdef pdlmi
     %     polya1 = pdlmi(P, "<=", "UsePolya");
     %     polya2 = direct.applyPolya(2);
     %     directPos = P >= 0;
+    %     putinar = directPos.applyPutinar(1);
     %     preorder = directPos.applyFullBoxPreorder();
 
     properties (SetAccess = private)
@@ -46,6 +43,8 @@ classdef pdlmi
         PolyaDegree
         UseFullBoxPreorder
         FullBoxOrder
+        UsePutinar
+        PutinarOrder
     end
 
     methods
@@ -65,40 +64,59 @@ classdef pdlmi
                     "relation must be the scalar string '<=' or '>='.");
             end
 
-            opts = parseOptions(varargin{:});
+            opts = parseOpts(varargin{:});
             obj.Residual = expr;
             obj.Relation = relation;
             obj.UsePolya = opts.UsePolya;
             obj.PolyaDegree = opts.PolyaDegree;
             obj.UseFullBoxPreorder = opts.UseFullBoxPreorder;
             obj.FullBoxOrder = opts.FullBoxOrder;
+            obj.UsePutinar = opts.UsePutinar;
+            obj.PutinarOrder = opts.PutinarOrder;
             if opts.UseFullBoxPreorder
                 if opts.FullBoxOrderSpecified
-                    opts.FullBoxOrder = validateFullBoxOrder(expr, ...
+                    opts.FullBoxOrder = chkFullBoxOrder(expr, ...
                         opts.FullBoxOrder);
                 else
-                    opts.FullBoxOrder = validateFullBoxOrder(expr);
+                    opts.FullBoxOrder = chkFullBoxOrder(expr);
                 end
                 obj.FullBoxOrder = opts.FullBoxOrder;
-                obj.Constraints = buildFullBoxPreorderConstraints(expr, ...
+                obj.Constraints = mkFullBoxCons(expr, ...
                     relation, opts.FullBoxOrder);
+            elseif opts.UsePutinar
+                if opts.PutinarOrderSpecified
+                    opts.PutinarOrder = chkPutinarOrder(expr, ...
+                        opts.PutinarOrder);
+                else
+                    opts.PutinarOrder = chkPutinarOrder(expr);
+                end
+                obj.PutinarOrder = opts.PutinarOrder;
+                obj.Constraints = mkPutinarCons(expr, relation, ...
+                    opts.PutinarOrder);
             else
-                obj.Constraints = buildCoefficientConstraints(expr, relation, ...
+                obj.Constraints = mkCoeffCons(expr, relation, ...
                     opts.UsePolya, opts.PolyaDegree);
             end
         end
 
         out = applyPolya(obj, degreeIncrement)
         out = applyFullBoxPreorder(obj, order)
+        out = applyPutinar(obj, order)
     end
 end
 
-function opts = parseOptions(varargin)
+function opts = parseOpts(varargin)
+    %PARSEOPTS Normalize selector flags and relaxation-specific orders.
+    %   Order-only forms enable their relaxation; conflicting families and
+    %   explicit false-plus-order Putinar input are rejected before assembly.
+
     opts = struct("UsePolya", false, "PolyaDegree", 0, ...
         "UseFullBoxPreorder", false, "FullBoxOrder", 0, ...
-        "FullBoxOrderSpecified", false);
+        "FullBoxOrderSpecified", false, "UsePutinar", false, ...
+        "PutinarOrder", 0, "PutinarOrderSpecified", false);
     seen = struct("UsePolya", false, "PolyaDegree", false, ...
-        "UseFullBoxPreorder", false, "FullBoxOrder", false);
+        "UseFullBoxPreorder", false, "FullBoxOrder", false, ...
+        "UsePutinar", false, "PutinarOrder", false);
     k = 1;
     while k <= numel(varargin)
         rawName = varargin{k};
@@ -109,7 +127,8 @@ function opts = parseOptions(varargin)
         end
         name = string(rawName);
         if ~any(name == ["UsePolya", "PolyaDegree", ...
-                "UseFullBoxPreorder", "FullBoxOrder"])
+                "UseFullBoxPreorder", "FullBoxOrder", ...
+                "UsePutinar", "PutinarOrder"])
             error("pdlmi:UnknownOption", "Unsupported pdlmi option: %s.", name);
         end
         if seen.(char(name))
@@ -119,7 +138,8 @@ function opts = parseOptions(varargin)
         seen.(char(name)) = true;
 
         % Relaxation selector flags may appear without an explicit value.
-        if any(name == ["UsePolya", "UseFullBoxPreorder"]) && ...
+        if any(name == ["UsePolya", "UseFullBoxPreorder", ...
+                "UsePutinar"]) && ...
                 (k == numel(varargin) || ...
                 ((ischar(varargin{k + 1}) && isrow(varargin{k + 1}) && ...
                 ~isempty(varargin{k + 1})) || ...
@@ -139,12 +159,15 @@ function opts = parseOptions(varargin)
                 ~ismissing(varargin{k + 1}))
             nextName = string(varargin{k + 1});
             if any(nextName == ["UsePolya", "PolyaDegree", ...
-                    "UseFullBoxPreorder", "FullBoxOrder"])
+                    "UseFullBoxPreorder", "FullBoxOrder", ...
+                    "UsePutinar", "PutinarOrder"])
                 error("pdlmi:InvalidOptions", ...
                     "pdlmi option %s requires a value.", name);
             end
-            error("pdlmi:UnknownOption", ...
-                "Unsupported pdlmi option: %s.", nextName);
+            if name ~= "PutinarOrder"
+                error("pdlmi:UnknownOption", ...
+                    "Unsupported pdlmi option: %s.", nextName);
+            end
         end
         val = varargin{k + 1};
         switch name
@@ -173,6 +196,19 @@ function opts = parseOptions(varargin)
                     "numeric", "real", "finite", "integer", ...
                     "nonnegative", "scalar"));
                 opts.FullBoxOrderSpecified = true;
+            case "UsePutinar"
+                if ~islogical(val) || ~isscalar(val)
+                    error("pdlmi:InvalidUsePutinar", ...
+                        "UsePutinar must be a logical scalar.");
+                end
+                opts.UsePutinar = val;
+            case "PutinarOrder"
+                opts.PutinarOrder = double(helper.chk(val, ...
+                    "pdlmi:InvalidPutinarOrder", ...
+                    "PutinarOrder must be a finite nonnegative integer scalar.", ...
+                    "numeric", "real", "finite", "integer", ...
+                    "nonnegative", "scalar"));
+                opts.PutinarOrderSpecified = true;
         end
         k = k + 2;
     end
@@ -191,8 +227,15 @@ function opts = parseOptions(varargin)
     if seen.FullBoxOrder && ~seen.UseFullBoxPreorder
         opts.UseFullBoxPreorder = true;
     end
-    if opts.UsePolya && opts.UseFullBoxPreorder
+    if seen.UsePutinar && ~opts.UsePutinar && seen.PutinarOrder
+        error("pdlmi:ConflictingPutinarOptions", ...
+            "UsePutinar=false conflicts with an explicit PutinarOrder.");
+    end
+    if seen.PutinarOrder && ~seen.UsePutinar
+        opts.UsePutinar = true;
+    end
+    if sum([opts.UsePolya, opts.UseFullBoxPreorder, opts.UsePutinar]) > 1
         error("pdlmi:ConflictingRelaxations", ...
-            "Pólya and full box preordering cannot be enabled together.");
+            "Pólya, Putinar, and full box preordering cannot be enabled together.");
     end
 end

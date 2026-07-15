@@ -5,6 +5,13 @@ function out = rhodiff(obj, rb)
     %     D = rhodiff(P, rb)
     %     D = rhodiff(P)
     %
+    %   Arguments:
+    %     P  - Ordinary pdvar expression to differentiate cell by cell.
+    %     rb - Optional ell-by-2 parameter-rate bounds; otherwise P.RateBounds.
+    %
+    %   Output:
+    %     D - Discontinuous pdvar with one coefficient row per rate vertex.
+    %
     %   Example:
     %     P = pdvar(1, {[0 1 2]}, RateBounds=[-1 1]);
     %     D = rhodiff(P);
@@ -62,6 +69,7 @@ function out = rhodiff(obj, rb)
 end
 
 function coeffs = diffCell(obj, subs, verts, outDeg)
+    %DIFFCELL Build every rate-vertex derivative row for one physical cell.
     deg = obj.Degree;
     nPar = obj.npar();
     nVert = size(verts, 1);
@@ -95,6 +103,7 @@ function coeffs = diffCell(obj, subs, verts, outDeg)
 end
 
 function row = scalarDiff(vals, deg, h, rate)
+    %SCALARDIFF Differentiate one scalar-parameter Bernstein coefficient row.
     row = cell(1, deg);
     scale = deg * rate / h;
     for q = 0:(deg - 1)
@@ -103,6 +112,7 @@ function row = scalarDiff(vals, deg, h, rate)
 end
 
 function row = tensorDiff(vals, deg, h, rate, sz)
+    %TENSORDIFF Elevate and sum all tensor partials at one rate vertex.
     nPar = numel(h);
     row = cell(1, (deg + 1) ^ nPar);
     mult = (deg + 1) .^ (nPar - 1:-1:0);

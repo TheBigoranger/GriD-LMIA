@@ -1,5 +1,5 @@
 function out = le(lhs, rhs)
-    %LE Assemble a coefficient-wise nonpositive DP-LMI constraint.
+    %LE Assemble a coefficient-wise nonpositive PD-LMI constraint.
     %
     %   Syntax:
     %     C = P <= Q

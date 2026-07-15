@@ -5,6 +5,14 @@ function sz = scanMats(vals, errId, msg)
     %     sz = scanMats(vals, errId)
     %     sz = scanMats(vals, errId, msg)
     %
+    %   Arguments:
+    %     vals  - Cell array of matrix payloads.
+    %     errId - Validation error identifier.
+    %     msg   - Optional payload-validation message.
+    %
+    %   Output:
+    %     sz - Common matrix size shared by every payload.
+    %
     %   Example:
     %     sz = scanMats({eye(2), zeros(2)}, "pkg:BadMatrix");
 

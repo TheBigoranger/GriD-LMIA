@@ -1,0 +1,75 @@
+function cons = mkGramCons(expr, relation, targetDeg, specs)
+    %MKGRAMCONS Assemble one specified Bernstein-Gram certificate per cell/row.
+    %   TARGETDEG is the common tensor matching degree. SPECS has one row per
+    %   PSD block: column one stores its tensor Gram degree and column two
+    %   stores [alpha; 1-alpha] weight exponents. The result contains the PSD
+    %   constraints followed by exact coefficient-matching equalities for
+    %   every physical cell and active rate row. Invalid matrix payloads raise
+    %   the same square/symmetry errors as direct assembly.
+
+    vals = expr.elevVals(targetDeg - expr.Degree);
+    cells = expr.cells();
+    nPar = numel(expr.GridInfo.Vectors);
+    cons = {};
+
+    for c = 1:size(cells, 1)
+        coeffs = helper.cellGet(vals, cells(c, :));
+        for row = 1:size(coeffs, 1)
+            % Certificates are independent across cells and active rate rows.
+            target = coeffs(row, :);
+            for k = 1:numel(target)
+                mat = target{k};
+                if size(mat, 1) ~= size(mat, 2)
+                    error("pdlmi:InvalidMatrixSize", ...
+                        "PD-LMI constraints require square coefficient matrices.");
+                end
+                if isa(mat, "sdpvar")
+                    symmetric = ishermitian(mat);
+                else
+                    symmetric = norm(mat - mat', inf) <= 1e-10;
+                end
+                if ~symmetric
+                    error("pdlmi:NonSymmetricExpression", ...
+                        "PD-LMI constraints require symmetric or Hermitian coefficient matrices.");
+                end
+                if relation == "<="
+                    target{k} = -mat;
+                end
+            end
+
+            [psdCons, represented] = mkCert(expr.MatrixSize(1), nPar, specs);
+            cons = [cons; psdCons]; %#ok<AGROW>
+            % Matching is exact; strictness remains encoded in the residual.
+            for k = 1:numel(target)
+                cons{end + 1, 1} = represented{k} == target{k}; %#ok<AGROW>
+            end
+        end
+    end
+end
+
+function [cons, coeffs] = mkCert(n, nPar, specs)
+    %MKCERT Create independent dense Gram blocks and sum their weighted maps.
+    cons = {};
+    coeffs = {};
+    for k = 1:size(specs, 1)
+        gramDeg = reshape(specs{k, 1}, 1, []);
+        if any(gramDeg < 0)
+            % At order zero, multiplier blocks have an empty nominal basis.
+            continue
+        end
+        dim = n * prod(gramDeg + 1);
+        gram = sdpvar(dim, dim, 'symmetric');
+        cons{end + 1, 1} = gram >= 0; %#ok<AGROW>
+        weight = specs{k, 2};
+        term = bernGramCoeffs(gram, gramDeg, ...
+            reshape(weight(1, :), 1, nPar), ...
+            reshape(weight(2, :), 1, nPar));
+        if isempty(coeffs)
+            coeffs = term;
+        else
+            for j = 1:numel(coeffs)
+                coeffs{j} = coeffs{j} + term{j}; %#ok<AGROW>
+            end
+        end
+    end
+end

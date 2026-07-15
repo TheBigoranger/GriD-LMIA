@@ -4,6 +4,14 @@ function out = binOp(lhs, rhs, fcn, errId)
     %   Syntax:
     %     out = binOp(lhs, rhs, fcn, errId)
     %
+    %   Arguments:
+    %     lhs, rhs - pdmat or numeric operands.
+    %     fcn      - Binary operation applied to aligned coefficients.
+    %     errId    - Operation-specific validation identifier.
+    %
+    %   Output:
+    %     out - Coefficient-backed pdmat result.
+    %
     %   Example (via public algebra):
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     C = A + 1;

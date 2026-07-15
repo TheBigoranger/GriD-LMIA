@@ -19,6 +19,7 @@ function testDefaultOrderThroughConstructorAndApply(testCase)
     testCase.verifyEqual(interval.FullBoxOrder, 1);
     testCase.verifyEqual(reapplied.FullBoxOrder, 1);
     testCase.verifyFalse(reapplied.UsePolya);
+    testCase.verifyFalse(reapplied.UsePutinar);
     testCase.verifyFalse(direct.UseFullBoxPreorder, ...
         "Applying a certificate must not mutate the source wrapper.");
 
@@ -63,4 +64,5 @@ function verifyAllModesFail(testCase, expr, errorId)
     testCase.verifyError(@() pdlmi(expr, "<=", UsePolya=true), errorId);
     testCase.verifyError(@() pdlmi(expr, "<=", ...
         UseFullBoxPreorder=true), errorId);
+    testCase.verifyError(@() pdlmi(expr, "<=", UsePutinar=true), errorId);
 end

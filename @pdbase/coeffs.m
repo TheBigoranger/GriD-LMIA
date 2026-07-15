@@ -5,6 +5,13 @@ function c = coeffs(obj, cellSubs)
     %     c = coeffs(obj, cellSubs)
     %     c = obj.coeffs(cellSubs)
     %
+    %   Arguments:
+    %     obj      - Gridded object owning LocalValues.
+    %     cellSubs - One valid physical-cell index per parameter.
+    %
+    %   Output:
+    %     c - Flat local coefficient row or rate-vertex table.
+    %
     %   Example:
     %     obj = pdbase({[0 1 2]}, [1 1], 1);
     %     c = obj.coeffs(2);

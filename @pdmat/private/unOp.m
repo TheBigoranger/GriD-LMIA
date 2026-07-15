@@ -4,6 +4,13 @@ function out = unOp(obj, fcn)
     %   Syntax:
     %     out = unOp(obj, fcn)
     %
+    %   Arguments:
+    %     obj - Coefficient-backed pdmat operand.
+    %     fcn - Unary mapping applied to every coefficient matrix.
+    %
+    %   Output:
+    %     out - Rewrapped coefficient-backed result.
+    %
     %   Example (via public algebra):
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     B = -A;

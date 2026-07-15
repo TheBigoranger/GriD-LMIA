@@ -1,11 +1,24 @@
 function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPower)
     %BERNGRAMCOEFFS Map a weighted tensor Bernstein Gram form to coefficients.
     %
-    %   coeffs = bernGramCoeffs(Q,d,a,b) returns coefficients of
-    %   alpha.^a.*(1-alpha).^b.*Z_d'*Q*Z_d in repository combRows order.
-    %   d, a, and b contain one nonnegative integer per parameter direction.
+    %   Syntax:
+    %     coeffs = bernGramCoeffs(Q, d, alphaPower, oneMinusAlphaPower)
+    %
+    %   Arguments:
+    %     Q                  - Square basis-major block Gram matrix.
+    %     d                  - Tensor Bernstein degree of the Gram basis.
+    %     alphaPower         - Per-axis powers of alpha.
+    %     oneMinusAlphaPower - Per-axis powers of 1-alpha.
+    %
+    %   Output:
+    %     coeffs - Flat matrix coefficients in helper.combRows order.
+    %
+    %   The result contains coefficients of alpha.^alphaPower .* ...
+    %   (1-alpha).^oneMinusAlphaPower .* Z_d' * Q * Z_d.
+    %   d, alphaPower, and oneMinusAlphaPower each contain one nonnegative
+    %   integer per parameter direction.
     %   Q uses basis-major blocks, with one matrix block per tensor label.
-    %   The result has tensor degree 2*d+a+b and contains matrix coefficients.
+    %   The tensor degree is 2*d + alphaPower + oneMinusAlphaPower.
     %   Labels count alpha powers: label 0 is lower/left and label d is
     %   upper/right in each parameter direction.
     %
@@ -13,10 +26,10 @@ function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPowe
     %   that is not square, or whose dimension is not a multiple of the tensor
     %   basis size, raises pdlmi:InvalidGramShape.
 
-    gramDegree = rowVector(gramDegree, "gramDegree");
+    gramDegree = rowVec(gramDegree, "gramDegree");
     nPar = numel(gramDegree);
-    alphaPower = rowVector(alphaPower, "alphaPower");
-    oneMinusAlphaPower = rowVector(oneMinusAlphaPower, "oneMinusAlphaPower");
+    alphaPower = rowVec(alphaPower, "alphaPower");
+    oneMinusAlphaPower = rowVec(oneMinusAlphaPower, "oneMinusAlphaPower");
     allPowers = [gramDegree, alphaPower, oneMinusAlphaPower];
     if numel(alphaPower) ~= nPar || numel(oneMinusAlphaPower) ~= nPar || ...
             any(allPowers < 0) || any(mod(allPowers, 1) ~= 0)
@@ -57,7 +70,7 @@ function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPowe
     end
 end
 
-function out = rowVector(val, name)
+function out = rowVec(val, name)
     if ~isnumeric(val) || ~isreal(val) || isempty(val) || ~isvector(val) || ...
             any(~isfinite(val))
         error("pdlmi:InvalidGramPowers", "%s must be a finite real vector.", name);

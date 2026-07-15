@@ -1,5 +1,5 @@
 function out = ge(lhs, rhs)
-    %GE Assemble a coefficient-wise nonnegative DP-LMI constraint.
+    %GE Assemble a coefficient-wise nonnegative PD-LMI constraint.
     %
     %   Syntax:
     %     C = P >= Q

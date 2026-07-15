@@ -1,5 +1,21 @@
 function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
     %GRIDTOLOCAL Convert a global Bernstein coefficient grid to local cells.
+    %
+    %   Syntax:
+    %     [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
+    %
+    %   Arguments:
+    %     src    - Global tensor cell grid of numeric coefficients.
+    %     vecs   - Physical parameter grid vectors.
+    %     optDeg - Optional requested scalar degree.
+    %     owner  - Optional package name used in validation errors.
+    %
+    %   Output:
+    %     sz       - Common coefficient-matrix size.
+    %     deg      - Inferred or validated Bernstein degree.
+    %     vals     - Nested physical-cell LocalValues tree.
+    %     flat     - One flat coefficient leaf per cell row.
+    %     cellSubs - Physical-cell subscripts matching flat.
 
     if nargin < 4
         owner = "pdmat";
@@ -33,6 +49,7 @@ function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
 end
 
 function dims = gridDims(src, nPar, owner)
+    %GRIDDIMS Normalize the global cell-array dimensions to nPar axes.
     if nPar == 1
         dims = numel(src);
         return
@@ -50,6 +67,7 @@ function dims = gridDims(src, nPar, owner)
 end
 
 function deg = gridDeg(dims, nCell, optDeg, owner)
+    %GRIDDEG Infer the common degree or validate the requested one.
     if isempty(optDeg)
         raw = (dims - 1) ./ nCell;
         if any(raw ~= fix(raw)) || any(raw ~= raw(1))
@@ -68,6 +86,7 @@ function deg = gridDeg(dims, nCell, optDeg, owner)
 end
 
 function coeffs = coeffsFromGrid(src, cellSubs, deg, nPar)
+    %COEFFSFROMGRID Extract one local leaf, retaining shared boundaries.
     lbls = helper.combRows(repmat({0:deg}, 1, nPar));
     coeffs = cell(1, size(lbls, 1));
     for k = 1:size(lbls, 1)

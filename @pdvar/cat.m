@@ -46,6 +46,7 @@ function out = cat(dim, varargin)
 end
 
 function [data, outSize] = catData(dim, args, grid, rb)
+    %CATDATA Promote blocks, broadcast scalars, and infer concatenated size.
     data = repmat(struct( ...
         "MatrixSize", [], ...
         "Degree", [], ...
@@ -92,6 +93,7 @@ function [data, outSize] = catData(dim, args, grid, rb)
 end
 
 function common = commonDim(vals, label)
+    %COMMONDIM Return the shared non-scalar block dimension or fail.
     vals = vals(vals > 0);
     if isempty(vals)
         common = 1;
@@ -105,6 +107,7 @@ function common = commonDim(vals, label)
 end
 
 function coeffs = catCell(dim, data, subs)
+    %CATCELL Concatenate one cell after ordinary/rate row alignment.
     leaves = cell(1, numel(data));
     for k = 1:numel(data)
         leaves{k} = helper.cellGet(data(k).LocalValues, subs);

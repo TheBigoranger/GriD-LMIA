@@ -5,6 +5,12 @@ function subs = cells(obj)
     %     subs = cells(obj)
     %     subs = obj.cells()
     %
+    %   Arguments:
+    %     obj - Gridded object whose physical cells are enumerated.
+    %
+    %   Output:
+    %     subs - One physical-cell subscript row per tensor hypercube.
+    %
     %   Example:
     %     obj = pdbase({[0 1 2], [10 20]}, [1 1], 0);
     %     subs = obj.cells();

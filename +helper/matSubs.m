@@ -4,6 +4,14 @@ function [rows, cols] = matSubs(subs, sz, errId)
     %   Syntax:
     %     [rows, cols] = helper.matSubs(subs, sz, errId)
     %
+    %   Arguments:
+    %     subs - Two-element cell array of row and column subscripts.
+    %     sz   - Available [rows, columns] matrix size.
+    %     errId - Caller-owned invalid-subscript identifier.
+    %
+    %   Output:
+    %     rows, cols - Normalized positive index rows.
+    %
     %   Example:
     %     [rows, cols] = helper.matSubs({":", 2}, [3 4], "pkg:BadSub");
 

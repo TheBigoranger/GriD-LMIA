@@ -5,6 +5,15 @@ function val = chk(val, errId, msg, varargin)
     %     val = helper.chk(val, errId, msg, tags...)
     %     val = helper.chk(val, errId, msg, tags..., Name, Value)
     %
+    %   Arguments:
+    %     val   - Value to return after validation.
+    %     errId - Caller-owned error identifier.
+    %     msg   - Caller-owned validation message.
+    %     tags  - Named predicates plus optional Size/Numel/range pairs.
+    %
+    %   Output:
+    %     val - The unchanged validated value.
+    %
     %   Example:
     %     v = helper.chk([1 2], "pkg:BadValue", "bad value", ...
     %         "numeric", "real", "finite", "Size", [1 2]);

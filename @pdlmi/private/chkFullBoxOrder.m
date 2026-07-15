@@ -1,5 +1,5 @@
-function order = validateFullBoxOrder(expr, order)
-    %VALIDATEFULLBOXORDER Enforce the absolute order contract on every path.
+function order = chkFullBoxOrder(expr, order)
+    %CHKFULLBOXORDER Enforce the absolute order contract on every path.
     %   Omitting ORDER selects the parity/dimension-dependent minimum.
     %   Malformed values and well-formed but insufficient orders intentionally
     %   use different identifiers so callers can distinguish input errors from

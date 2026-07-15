@@ -5,6 +5,13 @@ function val = evaluate(obj, pt)
     %     val = evaluate(obj, pt)
     %     val = obj.evaluate(pt)
     %
+    %   Arguments:
+    %     obj - pdmat object to evaluate.
+    %     pt  - In-bounds point with one coordinate per parameter.
+    %
+    %   Output:
+    %     val - Numeric matrix value at pt.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 3}, Degree=1);
     %     val = A.evaluate(0.25);
@@ -42,6 +49,7 @@ function val = evaluate(obj, pt)
 end
 
 function val = evalHandle(obj, pt)
+    %EVALHANDLE Evaluate the exact source and enforce its stored matrix size.
     args = num2cell(pt);
     try
         raw = obj.FunctionHandle(args{:});
@@ -60,6 +68,7 @@ function val = evalHandle(obj, pt)
 end
 
 function [subs, alpha] = localPoint(obj, pt)
+    %LOCALPOINT Locate pt's physical cell and forward Bernstein coordinates.
     nPar = obj.npar();
     subs = zeros(1, nPar);
     alpha = zeros(1, nPar);

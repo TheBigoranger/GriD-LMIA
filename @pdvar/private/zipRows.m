@@ -4,6 +4,14 @@ function vals = zipRows(lhsVals, rhsVals, fcn, grid)
     %   Syntax:
     %     vals = zipRows(lhsVals, rhsVals, fcn, grid)
     %
+    %   Arguments:
+    %     lhsVals, rhsVals - Nested coefficient trees to combine.
+    %     fcn              - Binary coefficient mapping.
+    %     grid             - Grid defining the physical-cell tree.
+    %
+    %   Output:
+    %     vals - Combined tree after valid one-row broadcasting.
+    %
     %   Example (via rate-affine algebra):
     %     P = pdvar(1, {[0 1]}, RateBounds=[-1 1]);
     %     C = rhodiff(P) + P;

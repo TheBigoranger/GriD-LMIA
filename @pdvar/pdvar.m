@@ -8,6 +8,16 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
     %     P = pdvar(..., "full")
     %     P = pdvar(..., "symmetric", Degree=0, RateBounds=rb)
     %
+    %   Arguments:
+    %     n, m        - Positive matrix dimensions; one n creates n-by-n.
+    %     gridVectors - Parameter grid cell array or one-vector shorthand.
+    %     structure   - Optional "symmetric" or "full" YALMIP structure.
+    %     Degree      - Nonnegative scalar Bernstein degree; default 1.
+    %     RateBounds  - Optional parameter-rate box with one row per parameter.
+    %
+    %   Output:
+    %     P - Continuous cell-local YALMIP decision variable.
+    %
     %   Degree accepts any finite nonnegative integer scalar and defaults to
     %   1.  Degree 0 creates one parameter-independent decision matrix shared
     %   across the grid.  Degree d >= 1 creates continuous piecewise Bernstein
@@ -58,6 +68,7 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
 end
 
 function [grid, sz, deg, vals, hasRate, rb] = ctorArgs(varargin)
+    %CTORARGS Parse public inputs and allocate shared continuous coefficients.
     [sz, grid, info, typ, deg, rb] = parseArgs(varargin{:});
     nCell = info.NumNodes - 1;
     if deg == 0
@@ -81,6 +92,7 @@ function [grid, sz, deg, vals, hasRate, rb] = ctorArgs(varargin)
 end
 
 function [sz, grid, info, typ, deg, rb] = parseArgs(varargin)
+    %PARSEARGS Normalize matrix size, grid, structure, degree, and rate box.
     if nargin < 2
         error("pdvar:InvalidInput", ...
             "pdvar requires a matrix size and gridVectors.");
@@ -178,6 +190,7 @@ function [sz, grid, info, typ, deg, rb] = parseArgs(varargin)
 end
 
 function coeffs = cellVals(nodes, subs, lbls, deg)
+    %CELLVALS Select one cell's flat coefficients from the global handle lattice.
     nCoeff = size(lbls, 1);
     coeffs = cell(1, nCoeff);
     for k = 1:nCoeff

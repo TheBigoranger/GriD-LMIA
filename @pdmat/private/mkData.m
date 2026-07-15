@@ -4,6 +4,17 @@ function [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
     %   Syntax:
     %     [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
     %
+    %   Arguments:
+    %     grid   - Physical parameter grid vectors.
+    %     src    - Function, global coefficient grid, or nested LocalValues.
+    %     optDeg - Optional requested scalar degree.
+    %
+    %   Output:
+    %     sz, deg - Inferred matrix size and Bernstein degree.
+    %     vals    - Nested local coefficient tree.
+    %     isCont  - Shared-face continuity classification.
+    %     summary - Source-mode label; fh is the optional exact evaluator.
+    %
     %   Example (via the public constructor):
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %
@@ -23,7 +34,7 @@ function [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
             "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
     end
     if isa(src, "function_handle")
-        [sz, deg, vals, summary, fh] = funData(src, info, optDeg);
+        [sz, deg, vals, summary, fh] = fcnData(src, info, optDeg);
         isCont = true;
         return
     end
@@ -43,16 +54,16 @@ function [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
     end
 end
 
-function [sz, deg, vals, summary, fh] = funData(fh, info, optDeg)
-    %FUNDATA Probe a function source and optionally certify Bernstein data.
+function [sz, deg, vals, summary, fh] = fcnData(fh, info, optDeg)
+    %FCNDATA Probe a function source and optionally certify Bernstein data.
     %
     %   Syntax:
-    %     [sz, deg, vals, summary, fh] = funData(fh, info, optDeg)
+    %     [sz, deg, vals, summary, fh] = fcnData(fh, info, optDeg)
     %
     %   Example (via the public constructor):
     %     A = pdmat({[0 1]}, @(rho) rho, Degree=1);
     %   Without an explicit degree this function only records the exact
-    %   evaluator and lower-bound size probe; with one, checkBernstein must
+    %   evaluator and lower-bound size probe; with one, chkBernstein must
     %   certify the returned function before coefficient algebra can use it.
 
     vecs = info.Vectors;
@@ -93,7 +104,7 @@ function [sz, deg, vals, summary, fh] = funData(fh, info, optDeg)
         return
     end
 
-    vals = checkBernstein(fh, info, deg, sz);
+    vals = chkBernstein(fh, info, deg, sz);
     summary = "function-bernstein";
 end
 

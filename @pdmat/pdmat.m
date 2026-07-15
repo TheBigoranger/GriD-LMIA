@@ -5,6 +5,14 @@ classdef pdmat < pdbase
     %     A = pdmat(gridVectors, source)
     %     A = pdmat(gridVectors, source, Degree=m)
     %
+    %   Arguments:
+    %     gridVectors - Parameter grid cell array or one-vector shorthand.
+    %     source      - Function handle, global coefficient grid, or LocalValues.
+    %     Degree      - Optional nonnegative scalar Bernstein degree.
+    %
+    %   Output:
+    %     A - Known parameter-dependent matrix data.
+    %
     %   source may be a function handle, a global cell grid of numeric
     %   Bernstein coefficients, or nested LocalValues in the pdbase contract.
     %   Nested LocalValues with mismatched shared faces produce a
@@ -39,7 +47,7 @@ classdef pdmat < pdbase
                 fh = init.FunctionHandle;
                 warnCont = false;
             else
-                degOpt = parseOptions(varargin{:});
+                degOpt = parseOpts(varargin{:});
                 if isnumeric(gridVectors) && isvector(gridVectors) && numel(gridVectors) >= 2
                     % Accept scalar-parameter shorthand at the public entry;
                     % pdbase still receives its strict cell-vector grid contract.
@@ -70,7 +78,8 @@ classdef pdmat < pdbase
 
 end
 
-function degOpt = parseOptions(varargin)
+function degOpt = parseOpts(varargin)
+    %PARSEOPTS Parse the optional Bernstein representation degree.
     degOpt = [];
     if mod(numel(varargin), 2) ~= 0
         error("pdmat:InvalidOptions", "pdmat options must be Name=Value pairs.");

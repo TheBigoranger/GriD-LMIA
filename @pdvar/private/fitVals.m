@@ -4,6 +4,15 @@ function vals = fitVals(info, deg, sz, evalFcn)
     %   Syntax:
     %     vals = fitVals(gridInfo, degree, matrixSize, evalFcn)
     %
+    %   Arguments:
+    %     gridInfo   - Normalized tensor-grid metadata.
+    %     degree     - Scalar Bernstein degree.
+    %     matrixSize - Matrix size returned by evalFcn.
+    %     evalFcn    - Affine evaluator accepting one physical-point row.
+    %
+    %   Output:
+    %     vals - Nested cell-local coefficient tree.
+    %
     %   Example (internal interpolation path):
     %     info = helper.mkGrid({[0 1]}, "pdvar");
     %     vals = fitVals(info, 1, [1 1], @(pt) pt(1));

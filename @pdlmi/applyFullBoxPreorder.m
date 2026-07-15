@@ -1,10 +1,19 @@
 function out = applyFullBoxPreorder(obj, order)
     %APPLYFULLBOXPREORDER Apply a cell-local full box preordering certificate.
     %
-    %   out = obj.applyFullBoxPreorder() chooses the smallest admissible
-    %   absolute order. out = obj.applyFullBoxPreorder(r) selects order r.
-    %   Reapplication starts from Residual, so it replaces Pólya or an earlier
-    %   full-box selection rather than compounding it.
+    %   Syntax:
+    %     out = obj.applyFullBoxPreorder()
+    %     out = obj.applyFullBoxPreorder(order)
+    %
+    %   Arguments:
+    %     order - Optional admissible absolute certificate order.
+    %
+    %   Output:
+    %     out - New pdlmi rebuilt with full-box preordering enabled.
+    %
+    %   The no-argument form chooses the smallest admissible absolute order.
+    %   Reapplication starts from Residual, so it replaces any Pólya, Putinar,
+    %   or earlier full-box selection rather than compounding it.
     %
     %   The default is floor(m/2) for one parameter and ceil(m/2) otherwise,
     %   where m is the residual degree. Each physical cell and active rate row
@@ -15,11 +24,16 @@ function out = applyFullBoxPreorder(obj, order)
     %
     %   Invalid orders raise pdlmi:InvalidFullBoxOrder; an integer below the
     %   parity/dimension minimum raises pdlmi:FullBoxOrderTooLow.
+    %
+    %   Example:
+    %     P = pdvar(2, {[0 1]}, "symmetric", Degree=2);
+    %     direct = P >= 0;
+    %     preorder = direct.applyFullBoxPreorder(1);
 
     if nargin < 2
-        order = validateFullBoxOrder(obj.Residual);
+        order = chkFullBoxOrder(obj.Residual);
     else
-        order = validateFullBoxOrder(obj.Residual, order);
+        order = chkFullBoxOrder(obj.Residual, order);
     end
 
     out = pdlmi(obj.Residual, obj.Relation, ...

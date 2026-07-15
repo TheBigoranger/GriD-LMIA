@@ -5,6 +5,12 @@ function F = toYalmip(obj)
     %     F = toYalmip(C)
     %     F = C.toYalmip()
     %
+    %   Arguments:
+    %     C - pdlmi wrapper containing assembled constraint entries.
+    %
+    %   Output:
+    %     F - Concatenated YALMIP constraint object for optimize.
+    %
     %   Example:
     %     P = pdvar(2, {[0 1]}, "symmetric");
     %     F = toYalmip(P <= 0);

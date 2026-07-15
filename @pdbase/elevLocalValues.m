@@ -1,10 +1,18 @@
 function vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
     %ELEVLOCALVALUES Elevate temporary cell-local coefficient tables.
     %
-    %   This protected engine supports algebra after common-grid remapping.
-    %   It applies the same source and target degree in every parameter
-    %   direction. Each leaf row is elevated independently because rows
-    %   denote rate vertices, while columns denote Bernstein coefficients.
+    %   Syntax:
+    %     vals = elevLocalValues(obj, vals, fromDeg, toDeg)
+    %     vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
+    %
+    %   Arguments:
+    %     vals     - Nested coefficient tree on grid.
+    %     fromDeg  - Current scalar degree in every parameter direction.
+    %     toDeg    - Target scalar degree.
+    %     grid     - Optional grid owning vals; defaults to obj's grid.
+    %
+    %   Output:
+    %     vals - Elevated tree with each rate-vertex row handled separately.
 
     if nargin < 5
         grid = obj.GridInfo.Vectors;

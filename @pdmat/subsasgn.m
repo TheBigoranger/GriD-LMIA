@@ -14,7 +14,7 @@ function obj = subsasgn(obj, S, rhs)
         return
     end
 
-    [rows, cols] = sanCheck(obj, S, rhs);
+    [rows, cols] = sanChk(obj, S, rhs);
     grid = obj.mergeGrid("pdmat:MixedGrid", rhs);
     lhsData = asData(grid, obj, [], "pdmat:InvalidAssignment");
     rhsData = asData(grid, rhs, [numel(rows), numel(cols)], "pdmat:InvalidAssignment");
@@ -29,8 +29,8 @@ function obj = subsasgn(obj, S, rhs)
     obj = mkObj(grid, vals, deg);
 end
 
-function [rows, cols] = sanCheck(obj, S, rhs)
-    %SANCHECK Validate the assignment form before coefficient conversion.
+function [rows, cols] = sanChk(obj, S, rhs)
+    %SANCHK Validate the assignment form before coefficient conversion.
     if numel(S) ~= 1
         error("pdmat:UnsupportedAssignment", ...
             "pdmat only supports direct two-dimensional block assignment.");

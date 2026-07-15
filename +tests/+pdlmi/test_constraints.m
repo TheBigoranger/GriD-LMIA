@@ -286,6 +286,8 @@ function verifyDefaults(testCase, C)
     testCase.verifyEqual(C.PolyaDegree, 0);
     testCase.verifyFalse(C.UseFullBoxPreorder);
     testCase.verifyEqual(C.FullBoxOrder, 0);
+    testCase.verifyFalse(C.UsePutinar);
+    testCase.verifyEqual(C.PutinarOrder, 0);
 end
 
 function verifyPolya(testCase, C, degree, count)
@@ -293,6 +295,8 @@ function verifyPolya(testCase, C, degree, count)
     testCase.verifyEqual(C.PolyaDegree, degree);
     testCase.verifyFalse(C.UseFullBoxPreorder);
     testCase.verifyEqual(C.FullBoxOrder, 0);
+    testCase.verifyFalse(C.UsePutinar);
+    testCase.verifyEqual(C.PutinarOrder, 0);
     testCase.verifyEqual(numel(C.Constraints), count);
     verifyConstraintCells(testCase, C);
 end

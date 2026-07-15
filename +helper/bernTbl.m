@@ -6,6 +6,17 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
     %     T = helper.bernTbl(..., cellSubs)
     %     T = helper.bernTbl(..., "oneLine")
     %
+    %   Arguments:
+    %     obj       - pdbase-derived object providing cells, labels, and coeffs.
+    %     errId     - Identifier for selector or rate-row errors.
+    %     valFcn    - Coefficient-to-table-value mapping.
+    %     exprFcn   - Coefficient-to-expression-text mapping.
+    %     rateVerts - Empty or one row per active rate vertex.
+    %     varargin  - Optional cell selector and "oneLine" flag.
+    %
+    %   Output:
+    %     T - Detailed coefficient table or one-line expression table.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     T = helper.bernTbl(A, "demo:Invalid", @(x) x, ...
@@ -51,6 +62,7 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
 end
 
 function tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn)
+    %ORDINARYTBL Emit one table row per cell and Bernstein coefficient.
     nRow = size(cells, 1) * size(lbls, 1);
     termIdx = (1:nRow).';
     cellSubs = cell(nRow, 1);
@@ -84,6 +96,7 @@ function tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn)
 end
 
 function tbl = rateTbl(obj, cells, lbls, basis, valFcn, rateVerts, errId)
+    %RATETBL Emit one table row per cell, rate vertex, and coefficient.
     nVert = size(rateVerts, 1);
     nRow = size(cells, 1) * nVert * size(lbls, 1);
     termIdx = (1:nRow).';
@@ -128,6 +141,7 @@ function tbl = rateTbl(obj, cells, lbls, basis, valFcn, rateVerts, errId)
 end
 
 function tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errId)
+    %PRINTONELINE Build one expression row per cell and active rate vertex.
     if hasRate
         nVert = size(rateVerts, 1);
         nRow = size(cells, 1) * nVert;
@@ -173,6 +187,7 @@ function tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errI
 end
 
 function expr = rowExpr(basis, vals, exprFcn)
+    %ROWEXPR Join one ordered coefficient row into Bernstein expression text.
     terms = strings(1, numel(vals));
     for k = 1:numel(vals)
         val = exprFcn(vals{k});
@@ -198,6 +213,7 @@ function [coeffSub, nodeFlag] = coeffInfo(obj, cellSub, loc)
 end
 
 function [cells, oneLine] = parseArgs(obj, errId, varargin)
+    %PARSEARGS Normalize the optional cell selector and oneLine flag.
     cells = obj.cells();
     oneLine = false;
     hasCell = false;

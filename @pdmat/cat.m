@@ -10,7 +10,7 @@ function out = cat(dim, varargin)
     %     C = cat(2, A, A);
 
     % sanity check inputs and select anchor pdmat for metadata
-    anchor = sanCheck(dim, varargin);
+    anchor = sanChk(dim, varargin);
 
     grid = anchor.mergeGrid("pdmat:MixedGrid", varargin{:});
     [data, sz] = catData(anchor, dim, varargin, grid);
@@ -29,8 +29,8 @@ function out = cat(dim, varargin)
     end
 end
 
-function anchor = sanCheck(dim, args)
-    %SANCHECK Validate cat dimension and select the pdmat metadata anchor.
+function anchor = sanChk(dim, args)
+    %SANCHK Validate cat dimension and select the pdmat metadata anchor.
     if ~isnumeric(dim) || ~isscalar(dim) || dim ~= fix(dim) || dim < 1
         error("pdmat:InvalidConcatenation", "Concatenation dimension must be a positive integer scalar.");
     end
@@ -49,6 +49,7 @@ function anchor = sanCheck(dim, args)
 end
 
 function [data, outSize] = catData(anchor, dim, args, grid)
+    %CATDATA Promote blocks, broadcast numeric scalars, and infer output size.
     data = repmat(struct( ...
         "MatrixSize", [], ...
         "Degree", [], ...
@@ -125,6 +126,7 @@ function [data, outSize] = catData(anchor, dim, args, grid)
 end
 
 function coeffs = catCell(dim, data, subs)
+    %CATCELL Concatenate aligned coefficient blocks in one physical cell.
     nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
     coeffs = cell(1, nCoeff);
     for c = 1:nCoeff

@@ -1,9 +1,19 @@
 classdef pdbase
-    %PDBASE Shared cell-local Bernstein storage for gridded DP-LMI objects.
+    %PDBASE Shared cell-local Bernstein storage for gridded PD-LMI objects.
     %
     %   Syntax:
     %     obj = pdbase(gridVectors, matrixSize, degree)
     %     obj = pdbase(gridVectors, matrixSize, degree, localValues, Name=Value)
+    %
+    %   Arguments:
+    %     gridVectors - Cell array of strictly increasing parameter grids.
+    %     matrixSize  - Positive [rows, columns] coefficient-matrix size.
+    %     degree      - Nonnegative scalar Bernstein degree per parameter.
+    %     localValues - Optional nested cell-local coefficient tree.
+    %     Name=Value  - Continuity, decision, rate, and source metadata.
+    %
+    %   Output:
+    %     obj - Shared grid and coefficient-storage object.
     %
     %   Example:
     %     obj = pdbase({[0 1 2]}, [2 2], 1);

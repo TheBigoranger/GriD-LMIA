@@ -4,6 +4,13 @@ function grid = mergeGrid(obj, errId, varargin)
     %   Syntax:
     %     grid = obj.mergeGrid(errId, other1, other2, ...)
     %
+    %   Arguments:
+    %     errId  - Error identifier used for incompatible grids.
+    %     others - Operands whose interior grid nodes are merged.
+    %
+    %   Output:
+    %     grid - Same-bound common refinement containing all operand nodes.
+    %
     %   Example (invoked through public pdmat algebra):
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     B = pdmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);

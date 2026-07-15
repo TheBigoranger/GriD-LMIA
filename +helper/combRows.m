@@ -1,5 +1,17 @@
 function rows = combRows(vecs)
     %COMBROWS Cartesian product rows in shared combination order.
+    %
+    %   Syntax:
+    %     rows = helper.combRows(vecs)
+    %
+    %   Arguments:
+    %     vecs - Cell array containing one vector per tensor axis.
+    %
+    %   Output:
+    %     rows - Cartesian combinations with earlier axes varying more slowly.
+    %
+    %   Example:
+    %     rows = helper.combRows({0:1, 10:11});
 
     nDim = numel(vecs);
     n = cellfun(@numel, vecs);

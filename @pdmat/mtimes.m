@@ -6,6 +6,12 @@ function out = mtimes(lhs, rhs)
     %     C = A * M
     %     C = M * A
     %
+    %   Arguments:
+    %     lhs, rhs - Compatible coefficient-backed pdmat or numeric operands.
+    %
+    %   Output:
+    %     C - Cell-local Bernstein matrix product on the common grid.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {[1 0; 0 1], [2 0; 0 2]}, Degree=1);
     %     B = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
@@ -21,20 +27,20 @@ function out = mtimes(lhs, rhs)
     if isa(lhs, "pdmat") && isa(rhs, "pdmat") && ...
             (helper.isZero(lhs, "obj") || helper.isZero(rhs, "obj"))
         grid = lhs.mergeGrid("pdmat:MixedGrid", lhs, rhs);
-        out = zeroObj(grid, zeroProdSize(lhs.MatrixSize, rhs.MatrixSize, ...
+        out = zeroObj(grid, zeroProdSz(lhs.MatrixSize, rhs.MatrixSize, ...
         "pdmat:InvalidMultiplication"));
         return
     end
 
     % Collapse numeric-zero products after validating their dimensions.
     if isa(lhs, "pdmat") && helper.isZero(rhs, "num")
-        out = zeroObj(lhs.GridInfo.Vectors, zeroProdSize(lhs.MatrixSize, size(rhs), ...
+        out = zeroObj(lhs.GridInfo.Vectors, zeroProdSz(lhs.MatrixSize, size(rhs), ...
         "pdmat:InvalidMultiplication"));
         return
     end
 
     if helper.isZero(lhs, "num") && isa(rhs, "pdmat")
-        out = zeroObj(rhs.GridInfo.Vectors, zeroProdSize(size(lhs), rhs.MatrixSize, ...
+        out = zeroObj(rhs.GridInfo.Vectors, zeroProdSz(size(lhs), rhs.MatrixSize, ...
         "pdmat:InvalidMultiplication"));
         return
     end
@@ -83,7 +89,7 @@ function out = mtimes(lhs, rhs)
 
     % Compact products that cancel to an all-zero coefficient payload.
     if helper.isZero(vals, "vals")
-        out = zeroObj(grid, zeroProdSize(ld.MatrixSize, rd.MatrixSize, ...
+        out = zeroObj(grid, zeroProdSz(ld.MatrixSize, rd.MatrixSize, ...
         "pdmat:InvalidMultiplication"));
         return
     end
@@ -91,7 +97,8 @@ function out = mtimes(lhs, rhs)
     out = mkObj(grid, vals, ld.Degree + rd.Degree);
 end
 
-function sz = zeroProdSize(lhs, rhs, errId)
+function sz = zeroProdSz(lhs, rhs, errId)
+    %ZEROPRODSZ Return scalar-aware product size after dimension validation.
     lhsScalar = isequal(lhs, [1 1]);
     rhsScalar = isequal(rhs, [1 1]);
 

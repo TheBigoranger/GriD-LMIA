@@ -4,6 +4,12 @@ function vals = elevVals(obj, degreeIncrement)
     %   Syntax:
     %     vals = obj.elevVals(degreeIncrement)
     %
+    %   Arguments:
+    %     degreeIncrement - Nonnegative degree added in every parameter.
+    %
+    %   Output:
+    %     vals - Elevated LocalValues tree; obj is unchanged.
+    %
     %   vals = obj.elevVals(degreeIncrement) preserves the represented
     %   polynomial, physical-cell tree, and rate-row ordering while adding
     %   degreeIncrement to every parameter direction. The object is unchanged.

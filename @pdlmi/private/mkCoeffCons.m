@@ -1,5 +1,5 @@
-function cons = buildCoefficientConstraints(expr, relation, usePolya, pDeg)
-    %BUILDCOEFFICIENTCONSTRAINTS Assemble direct or elevated coefficients.
+function cons = mkCoeffCons(expr, relation, usePolya, pDeg)
+    %MKCOEFFCONS Assemble direct or elevated coefficient constraints.
     %   Each physical cell and active rate row produces one semidefinite
     %   constraint per local Bernstein coefficient. Pólya selection changes
     %   only the coefficient degree through exact elevation.
@@ -20,7 +20,7 @@ function cons = buildCoefficientConstraints(expr, relation, usePolya, pDeg)
                 mat = coeffs{row, k};
                 if size(mat, 1) ~= size(mat, 2)
                     error("pdlmi:InvalidMatrixSize", ...
-                        "DP-LMI constraints require square coefficient matrices.");
+                        "PD-LMI constraints require square coefficient matrices.");
                 end
                 if isa(mat, "sdpvar")
                     symmetric = ishermitian(mat);
@@ -29,7 +29,7 @@ function cons = buildCoefficientConstraints(expr, relation, usePolya, pDeg)
                 end
                 if ~symmetric
                     error("pdlmi:NonSymmetricExpression", ...
-                        "DP-LMI constraints require symmetric or Hermitian coefficient matrices.");
+                        "PD-LMI constraints require symmetric or Hermitian coefficient matrices.");
                 end
 
                 % Each row is a rate vertex when rhodiff produced rate rows;

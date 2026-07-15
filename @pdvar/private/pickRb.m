@@ -4,6 +4,13 @@ function rb = pickRb(errId, varargin)
     %   Syntax:
     %     rb = pickRb(errId, operand1, operand2, ...)
     %
+    %   Arguments:
+    %     errId   - Operation-specific mismatch identifier.
+    %     operands - Values whose rate metadata must be reconciled.
+    %
+    %   Output:
+    %     rb - Unique nonempty RateBounds, or empty for ordinary operands.
+    %
     %   Example (via public algebra):
     %     P = pdvar(1, {[0 1]}, RateBounds=[-1 1]);
     %     C = P + 1;

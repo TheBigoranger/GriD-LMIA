@@ -42,6 +42,7 @@ function out = blkdiag(varargin)
 end
 
 function coeffs = blkCell(data, subs)
+    %BLKCELL Assemble aligned block diagonals with rate-row broadcasting.
     leaves = cell(1, numel(data));
     for k = 1:numel(data)
         leaves{k} = helper.cellGet(data(k).LocalValues, subs);
