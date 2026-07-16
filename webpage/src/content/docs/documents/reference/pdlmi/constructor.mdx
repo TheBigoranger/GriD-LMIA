@@ -42,18 +42,20 @@ C = lhs >= rhs
 ## Description
 
 Direct coefficient-wise assembly is the default. `UsePolya` selects exact
-degree elevation before coefficient constraints. `UsePutinar` selects a
-box-specific quadratic-module certificate with one unweighted Gram term and
-one $\alpha_s(1-\alpha_s)$-weighted term per parameter. `UseFullBoxPreorder`
-selects a box-specific Bernstein-Gram certificate with a term for every
-generator-subset product. All three opt-in selections are mutually exclusive.
+degree elevation before coefficient constraints. In one parameter,
+`UsePutinar` and `UseFullBoxPreorder` select the same parity-specific
+Markov–Lukács interval form. In two or more parameters, `UsePutinar` selects
+one unweighted Gram term plus one $\alpha_s(1-\alpha_s)$-weighted term per
+axis, while `UseFullBoxPreorder` selects a term for every generator-subset
+product. All three opt-in selections are mutually exclusive.
 
 <CertificateSpectrum selected="direct" showDefault />
 
 Use the direct default first. Choose Pólya when you want one exact degree
-elevation followed by the same coefficient test. Choose full box when you
-want every generator-subset product. Choose Putinar when the unweighted term
-plus the separate axis generators is the intended fixed-order certificate.
+elevation followed by the same coefficient test. In one parameter the two
+Gram selectors are equivalent. In two or more parameters, choose full box for
+every generator-subset product or Putinar for the unweighted term plus the
+separate axis generators.
 For derivations and the difference between representation degree and
 certificate order, see
 [SOS Certificates On A Hypercube](/PD-LMI-package/documents/math/sos-certificates/).
@@ -79,7 +81,8 @@ inspectable metadata. This combination is valid and is not a relaxation
 conflict.
 
 When Putinar assembly is active, the minimum and default order are
-`ceil(expr.Degree/2)`. Unlike the full-box metadata form, explicitly pairing
+`floor(expr.Degree/2)` in one parameter and `ceil(expr.Degree/2)` in two or
+more parameters. Unlike the full-box metadata form, explicitly pairing
 `UsePutinar=false` with any supplied `PutinarOrder` is rejected. Enabling more
 than one of Pólya, Putinar, and full-box assembly is also rejected.
 
@@ -231,12 +234,12 @@ construction does not call a solver or add a positivity margin.
 
 ## Limitations
 
-Putinar assembly is limited to the local hypercube generators
-$\alpha_s(1-\alpha_s)$; it is not a general-domain or general-generator
-quadratic-module interface. Full-box assembly is the distinct fixed-order box
-preordering with every generator-subset product. Neither is an automatic
-hierarchy selector. No assembly mode adds an implicit positivity margin or
-calls a solver.
+In one parameter, Putinar and full-box assembly share the exact
+parity-specific Markov–Lukács form. In two or more parameters, Putinar is
+limited to the local hypercube generators $\alpha_s(1-\alpha_s)$ and full-box
+assembly uses every generator-subset product. Neither is a general-domain or
+general-generator interface or an automatic hierarchy selector. No assembly
+mode adds an implicit positivity margin or calls a solver.
 
 ## See Also
 

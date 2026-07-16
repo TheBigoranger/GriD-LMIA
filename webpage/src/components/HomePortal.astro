@@ -1,10 +1,10 @@
 ---
-import CellStorageDiagram from "./CellStorageDiagram.astro";
+import CellStorageExplorer from "./CellStorageExplorer.tsx";
+import CertificateChooser from "./CertificateChooser.astro";
+import DifferentiationStorage from "./DifferentiationStorage.astro";
 import ExampleDisclosure from "./ExampleDisclosure.astro";
 import JourneyCurve from "./JourneyCurve.astro";
-import MultiplicationDiagram from "./MultiplicationDiagram.astro";
-import RhodiffDiagram from "./RhodiffDiagram.astro";
-import CertificateSpectrum from "./CertificateSpectrum.astro";
+import MultiplicationExplorer from "./MultiplicationExplorer.tsx";
 import { renderDisplayMath } from "../lib/mathjax.js";
 import { versionInfo } from "../data/version.js";
 
@@ -18,26 +18,18 @@ const primaryLinks = [
   { href: local("examples/solver-smoke/"), label: "Solver examples" },
 ];
 
-const manualLinks = [
-  { href: local("documents/reference-index/"), title: "Lookup by name", text: "Find every implemented class, constructor, method, operator family, and solver-facing task." },
-  { href: local("documents/math/bernstein-polynomial/"), title: "Bernstein mathematics", text: "Build the idea from local coordinates through weighted convolution, derivatives, and certificates." },
-  { href: local("documents/reference/pdmat/matrix-operations/"), title: "Known-data products", text: "See exact degree alignment, ordered products, tensor generalization, and validation boundaries." },
-  { href: local("documents/reference/pdvar/matrix-operations/"), title: "Decision products", text: "Distinguish supported known-data products from rejected nonlinear decision products." },
-  { href: local("documents/reference/pdlmi/"), title: "Choose a certificate", text: "Compare direct, Pólya, Putinar, and full-box assembly before the YALMIP handoff." },
-];
-
 const lmiSteps = [
   {
     number: "01",
     title: "State a PD-LMI or DPD-LMI",
     text: "PD-LMI means parameter-dependent LMI. When bounded scheduling rates and derivatives of decision functions are present, the more specific name is differentiable PD-LMI (DPD-LMI). Removing the derivative term returns an ordinary PD-LMI.",
-    math: "\\dot P(\\rho,\\dot\\rho)+P(\\rho)A(\\rho)+A(\\rho)^{\\mathsf T}P(\\rho)\\preceq-\\varepsilon I,\\qquad P(\\rho)\\succeq I.",
+    math: "\\begin{aligned}\\dot P(\\rho,\\dot\\rho)+P(\\rho)A(\\rho)+A(\\rho)^{\\mathsf T}P(\\rho)&\\preceq-\\varepsilon I,\\\\ P(\\rho)&\\succeq I.\\end{aligned}",
   },
   {
     number: "02",
     title: "Initialize the grid and cell-local storage",
     text: "A physical grid says where each polynomial lives. Degree says how many Bernstein labels live inside that cell. Continuity reuses values on shared faces instead of turning the representation into a B-spline.",
-    math: "\\text{two 1-D cells: }3+3-1=5\\text{ global controls},\\qquad \\text{one 2-D degree-2 cell: }(2+1)^2=9\\text{ local labels}.",
+    math: "\\begin{aligned}\\text{two 1-D cells: }&3+3-1=5\\text{ global controls},\\\\ \\text{one 2-D degree-2 cell: }&(2+1)^2=9\\text{ local labels}.\\end{aligned}",
     visual: "storage",
     visibleCode: "grid = {[0 0.5 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);",
     fullCode: "yalmip('clear')\ngrid = {[0 0.5 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);\nP.ncell()\nP.ncoeff()",
@@ -46,7 +38,7 @@ const lmiSteps = [
     number: "03",
     title: "Multiply: pointwise curves become coefficient convolution",
     text: "On one interval, two affine functions multiply pointwise into a quadratic curve. In coefficient space, the same operation is an ordered Bernstein convolution with binomial normalization.",
-    math: "P(\\rho)=1+2\\rho,\\quad Q(\\rho)=2+2\\rho,\\quad R(\\rho)=P(\\rho)Q(\\rho).",
+    math: "\\begin{aligned}P(\\rho)&=1+2\\rho,\\quad Q(\\rho)=2+2\\rho,\\\\ R(\\rho)&=P(\\rho)Q(\\rho).\\end{aligned}",
     visual: "multiply",
     coefficients: "[1, 3] × [2, 4] → [2, 5, 12]",
     visibleCode: "R = P*Q;",
@@ -54,18 +46,28 @@ const lmiSteps = [
   },
   {
     number: "04",
-    title: "Differentiate at every rate vertex",
-    text: "For two scheduling parameters, rhodiff stores four rate rows: (−1,−1), (−1,+1), (+1,−1), and (+1,+1). The rule is exact: axis-wise partials have different tensor degree vectors; elevate them to the common degree-m tensor basis, then rate-weight and sum. The multivariate result is stored with Degree=m.",
-    math: "\\ell=2,\\qquad 2^\\ell=4\\text{ rate rows},\\qquad \\operatorname{Degree}(\\operatorname{rhodiff}P)=m\\text{ for }m>0.",
-    visual: "rhodiff",
-    visibleCode: "P = pdvar(1, grid, Degree=2);\nD = rhodiff(P, [-1 1; -1 1]);",
-    fullCode: "yalmip('clear')\ngrid = {[0 1], [0 1]};\nP = pdvar(1, grid, Degree=2);\nD = rhodiff(P, [-1 1; -1 1]);\nD.Degree\nsize(D.coeffs([1 1]), 1)",
+    title: "Differentiate into rate-vertex storage",
+    text: "On one cell, differentiation converts neighboring degree-two controls into degree-one forward differences. The lower and upper rate vertices store opposite signed rows.",
+    math: [
+      "[P_0,P_1,P_2]\\longmapsto\\Delta P",
+      "\\Delta P=[P_1-P_0,\\;P_2-P_1]",
+      "d_-=-2\\Delta P",
+      "d_+=+2\\Delta P",
+    ],
+    visual: "differentiate",
+    visibleCode: "P = pdvar(1, {[0 1]}, Degree=2);\nD = rhodiff(P, [-1 1]);",
+    fullCode: "yalmip('clear')\nP = pdvar(1, {[0 1]}, Degree=2);\nD = rhodiff(P, [-1 1]);\nD.Degree\nsize(D.coeffs(1), 1)",
   },
   {
     number: "05",
     title: "Select and assemble a finite certificate",
     text: "Start with the direct cell-local coefficient test. Pólya performs exact degree elevation first; Putinar and Full Box introduce fixed-order Bernstein-Gram certificates. Every option ends as ordinary YALMIP constraints.",
-    math: "\\text{continuous residual}\\;\\longrightarrow\\;\\text{finite coefficient or Gram constraints}.",
+    math: [
+      "\\text{continuous residual}",
+      "\\mathrel{\\longrightarrow}",
+      "\\text{finite coefficient constraints}",
+      "\\text{or finite Gram constraints}",
+    ],
     visual: "certificate",
     visibleCode: "L = pdlmi(P, \">=\");\nC = L.toYalmip();",
     fullCode: "yalmip('clear')\nP = pdvar(2, {[0 1]}, \"symmetric\");\nL = pdlmi(P, \">=\");\nC = L.toYalmip();\nnumel(C)",
@@ -107,29 +109,22 @@ const lmiSteps = [
             <div class="step-copy">
               <h3>{step.title}</h3>
               <p>{step.text}</p>
-              <div class="math-strip" set:html={renderDisplayMath(step.math)} />
+              <div class:list={["math-strip", { "math-strip--stacked": Array.isArray(step.math) }]}>
+                {(Array.isArray(step.math) ? step.math : [step.math]).map((line) => (
+                  <div class="math-strip__row" set:html={renderDisplayMath(line)} />
+                ))}
+              </div>
               {step.visibleCode && <ExampleDisclosure visibleCode={step.visibleCode} fullCode={step.fullCode} summary={`Show the complete ${step.number} example`} />}
             </div>
-            {step.visual === "storage" && <CellStorageDiagram />}
-            {step.visual === "multiply" && <MultiplicationDiagram />}
-            {step.visual === "rhodiff" && (
-              <RhodiffDiagram compact />
-            )}
-            {step.visual === "certificate" && (
-              <CertificateSpectrum selected="direct" showDefault />
-            )}
+            {step.visual === "storage" && <CellStorageExplorer client:visible />}
+            {step.visual === "multiply" && <MultiplicationExplorer client:visible />}
+            {step.visual === "differentiate" && <DifferentiationStorage />}
+            {step.visual === "certificate" && <CertificateChooser />}
           </div>
         </section>
       ))}
     </div>
 
-  </section>
-
-  <section class="manual-section" aria-labelledby="manual-title">
-    <header class="section-heading"><p class="home-label">Manual entrances</p><h2 id="manual-title">Continue from the idea you need.</h2></header>
-    <div class="manual-entry-list">
-      {manualLinks.map((link) => <a href={link.href}><strong>{link.title}</strong><span>{link.text}</span></a>)}
-    </div>
   </section>
 
   <section class="download-panel">
@@ -182,11 +177,6 @@ const lmiSteps = [
   .step-content :global(.diagram-frame) { margin-block: 0.4rem 0; }
 
 
-  .manual-section { display: grid; gap: 1rem; }
-  .manual-entry-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
-  .manual-entry-list a { display: grid; gap: 0.35rem; border: 1px solid var(--diagram-border); border-radius: 12px; padding: 0.9rem; text-decoration: none; background: var(--sl-color-bg); }
-  .manual-entry-list strong { color: var(--sl-color-text-accent); }
-  .manual-entry-list span { color: var(--sl-color-gray-2); }
   .download-panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: center; padding: 1.2rem; }
   .download-panel > div { display: grid; gap: 0.45rem; }
   .download-links { justify-content: flex-end; }
@@ -198,8 +188,7 @@ const lmiSteps = [
   }
 
   @media (max-width: 600px) {
-    .lmi-step,
-    .manual-entry-list { grid-template-columns: 1fr; }
+    .lmi-step { grid-template-columns: 1fr; }
     .step-number { font-size: 1.45rem; }
   }
 

@@ -75,7 +75,7 @@ the residual; the package does not insert one.
       <th scope="row" data-label="Certificate">Markov–Lukács</th>
       <td data-label="Proof domain">One closed interval</td>
       <td data-label="Central hypothesis">Degree-parity Gram form</td>
-      <td data-label="Package status">Implemented by the one-parameter full-box path</td>
+      <td data-label="Package status">Implemented by both one-parameter Putinar and full-box selectors</td>
     </tr>
   </tbody>
 </table>
@@ -136,17 +136,17 @@ The package has no full-space SOS constructor.
 On a local box, write
 
 $$
-S_c(\boldsymbol\alpha)=
+S^{(\mathbf c)}(\boldsymbol\alpha)=
 \sum_{\boldsymbol i}
-B_{\boldsymbol i}^{m}(\boldsymbol\alpha)C^{(c)}[\boldsymbol i].
+B_{\boldsymbol i}^{m}(\boldsymbol\alpha)C^{(\mathbf c)}[\boldsymbol i].
 $$
 
 Because the tensor Bernstein basis is nonnegative and sums to one,
 
 $$
-C^{(c)}[\boldsymbol i]\succeq0\quad\text{for every }\boldsymbol i
+C^{(\mathbf c)}[\boldsymbol i]\succeq0\quad\text{for every }\boldsymbol i
 \quad\Longrightarrow\quad
-S_c(\boldsymbol\alpha)\succeq0
+S^{(\mathbf c)}(\boldsymbol\alpha)\succeq0
 \quad\text{on the box}.
 $$
 
@@ -205,10 +205,14 @@ produces finite SDP relaxations, but failure at one order is not a
 nonnegativity counterexample. See
 [Putinar (1993)](https://www.jstor.org/stable/24897130).
 
-### Implemented Putinar box module
+### Implemented Putinar selector
 
-The package implements one fixed-order specialization on every local
-hypercube. With the axis generators
+In one parameter, the package dispatches `applyPutinar` to the exact
+parity-specific Markov–Lukács form described below. Its minimum and default
+order are $\lfloor m/2\rfloor$, the same as `applyFullBoxPreorder`.
+
+For two or more parameters, the package uses one fixed-order specialization on
+every local hypercube. With the axis generators
 $h_s=\alpha_s(1-\alpha_s)$, the sign-normalized target is represented as
 
 $$
@@ -217,13 +221,15 @@ S(\boldsymbol\alpha)=S_0(\boldsymbol\alpha)
 \alpha_s(1-\alpha_s)S_s(\boldsymbol\alpha).
 $$
 
-For a target of stored degree $m$, the absolute order satisfies
+For a target of stored degree $m$ in two or more parameters, the absolute
+order satisfies
 
 $$
 r\ge\left\lceil\frac m2\right\rceil.
 $$
 
-The no-argument method uses equality. At order $r$, the unweighted Gram term
+The no-argument method uses equality in either dimension case. For two or more
+parameters at order $r$, the unweighted Gram term
 uses tensor Bernstein basis degree $r\mathbf1$. The $s$th multiplier uses
 $r\mathbf1-\mathbf e_s$; blocks with a negative degree component are omitted.
 After multiplication by $h_s$, every term has tensor degree $2r\mathbf1$.
@@ -388,18 +394,20 @@ The callable package boundary is limited to:
 
 - direct coefficient assembly;
 - fixed-increment Pólya elevation followed by direct assembly;
-- fixed-order Putinar assembly with the separate box generators
-  $\alpha_s(1-\alpha_s)$; and
-- fixed-order full box preordering, including the parity-specific
-  one-dimensional form.
+- fixed-order Putinar assembly, using the parity-specific one-dimensional
+  Markov–Lukács form or the separate box generators
+  $\alpha_s(1-\alpha_s)$ in two or more parameters; and
+- fixed-order full box preordering, sharing that one-dimensional form and
+  using every generator-subset product in multiple parameters.
 
 Full-space SOS, general-domain or general-generator Putinar modules,
 general-domain preorderings, adaptive order search or automatic escalation,
 adaptive subdivision, automatic strictness margins, and post-solve residual
-certificates are mathematical background, not public package APIs. The
-no-argument `applyPutinar()` call selects $\lceil m/2\rceil$. The distinct
-`applyFullBoxPreorder()` default selects $\lfloor m/2\rfloor$ in one parameter
-and $\lceil m/2\rceil$ in two or more parameters.
+certificates are mathematical background, not public package APIs. Both
+no-argument Gram selectors use $\lfloor m/2\rfloor$ in one parameter and
+$\lceil m/2\rceil$ in two or more parameters. Their one-dimensional
+Markov–Lukács assembly is the same; their multiple-parameter generator sets
+differ as described above.
 
 ## See Also
 

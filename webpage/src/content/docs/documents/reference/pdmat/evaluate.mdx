@@ -3,10 +3,7 @@ title: pdmat evaluate
 description: Evaluate known pdmat data at one parameter point.
 ---
 
-import ParameterCurveDiagram from "../../../../../components/ParameterCurveDiagram.astro";
-
-export const evalSeries = [{ label: "A(ρ)", path: "M58 210 C250 190 475 120 680 62", tone: "first" }];
-export const evalMarker = { x: 369, y: 151, label: "A(0.5)" };
+import EvaluateExplorer from "../../../../../components/EvaluateExplorer.tsx";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -16,7 +13,7 @@ export const evalMarker = { x: 369, y: 151, label: "A(0.5)" };
   <span>evaluate</span>
 </nav>
 
-<ParameterCurveDiagram series={evalSeries} marker={evalMarker} label="A parameter-dependent entry with an evaluation marker at rho one half" caption="evaluate reads the represented function at one physical parameter point; it does not expose a nearest stored label." />
+<EvaluateExplorer client:visible />
 
 ## Purpose
 
@@ -47,7 +44,7 @@ interpolation. For degree-one scalar data on `[rho0,rho1]`,
 
 $$
 A(\rho)=(1-\alpha)A_0+\alpha A_1,\qquad
-\alpha=\frac{\rho-\rho_0}{\rho_1-\rho_0}.
+\alpha=\frac{\rho-\rho_1^{(c)}}{\rho_1^{(c+1)}-\rho_1^{(c)}}.
 $$
 
 For matrix-valued data, the same formula is applied entrywise to each stored

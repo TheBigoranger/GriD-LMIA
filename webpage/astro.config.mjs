@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import react from "@astrojs/react";
 import { unified } from "@astrojs/markdown-remark";
 import remarkMath from "remark-math";
 import rehypeMathjax from "rehype-mathjax";
@@ -16,6 +17,7 @@ export default defineConfig({
     }),
   },
   integrations: [
+    react(),
     starlight({
       title: "PD-LMI Manual",
       description:
@@ -28,6 +30,9 @@ export default defineConfig({
           href: "https://github.com/thebigoranger/PD-LMI-package",
         },
       ],
+      components: {
+        Header: "./src/components/Header.astro",
+      },
       sidebar: [
         { label: "Welcome", link: "/" },
         { label: "Install", slug: "install" },
@@ -91,6 +96,7 @@ export default defineConfig({
             { label: "Solver Smoke Cases", slug: "examples/solver-smoke" },
           ],
         },
+        { label: "About me", slug: "about" },
         { label: "Thanks", link: "/thanks/" },
       ],
     }),

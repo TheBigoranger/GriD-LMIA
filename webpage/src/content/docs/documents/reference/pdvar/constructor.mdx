@@ -60,28 +60,31 @@ are YALMIP `sdpvar` matrices, and the cell-local storage lives in
 For one parameter segment, the scalar-entry mental model is:
 
 $$
-P(\rho) =
-B_0^1(\alpha)P_i + B_1^1(\alpha)P_{i+1},
+P^{(c)}(\rho) =
+B_0^1(\alpha)P^{(c)}[0] + B_1^1(\alpha)P^{(c)}[1],
 \qquad
-\alpha = \frac{\rho-\rho_i}{\rho_{i+1}-\rho_i},
+\alpha = \frac{\rho-\rho_1^{(c)}}{\rho_1^{(c+1)}-\rho_1^{(c)}},
 \qquad
 B_j^1(\alpha)=(1-\alpha)^{1-j}\alpha^j.
 $$
 
-Here `P_i` and `P_{i+1}` stand for YALMIP matrix coefficients. Adjacent
+Here $P^{(c)}[0]$ and $P^{(c)}[1]$ stand for YALMIP matrix coefficients. Adjacent
 degree-1 cells share the boundary coefficient handle, so continuity is stored
 directly in the coefficient graph instead of being enforced by a separate LMI
 constraint. Degree-0 variables reuse one symbolic coefficient over all physical
 cells while still carrying grid metadata.
 
 This is the standard forward-coordinate convention: `alpha=0` at the left
-endpoint, so local label `0` selects `P_i`; `alpha=1` at the right endpoint,
-so local label `1` selects `P_{i+1}`. At general degree $m$, label $j$ uses
-$B_j^m(\alpha)=\binom{m}{j}(1-\alpha)^{m-j}\alpha^j$.
+endpoint, so local label `0` selects $P^{(c)}[0]$; `alpha=1` at the right
+endpoint, so local label `m` selects $P^{(c)}[m]$. At general degree $m$,
+label $i$ selects $P^{(c)}[i]$ and uses
+$B_i^m(\alpha)=\binom{m}{i}(1-\alpha)^{m-i}\alpha^i$.
 
-In the stored object, each labeled endpoint is a YALMIP matrix coefficient, and
-the stored leaves are `LocalValues{1} = {P_0, P_1}`,
-`LocalValues{2} = {P_1, P_2}`, and so on.
+In the stored object, each labeled endpoint is a YALMIP matrix coefficient.
+For degree one, the stored leaves are
+`LocalValues{1} = {P^(1)[0], P^(1)[1]}` and
+`LocalValues{2} = {P^(2)[0], P^(2)[1]}`, with the shared-face handle satisfying
+$P^{(1)}[1]=P^{(2)}[0]$.
 
 The inherited fields are readable through dot syntax and have private set
 access:

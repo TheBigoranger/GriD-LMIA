@@ -183,6 +183,7 @@
 
 .sl-markdown-content mjx-container[display="true"] {
   display: block;
+  font-size: 2rem;
   max-width: 100%;
   margin-inline: auto;
   padding-block: 0.25rem;
@@ -197,6 +198,7 @@
 
 .sl-markdown-content mjx-container:not([display="true"]) {
   display: inline-block;
+  font-size: 1em;
   overflow: visible;
   max-width: none;
   white-space: nowrap;
@@ -249,9 +251,268 @@
   line-height: 1.5;
 }
 
+/* React islands reuse the route-wide frame and keep every legend outside SVG. */
+.interactive-figure button,
+.interactive-figure input {
+  font: inherit;
+}
+
+.interactive-figure button:focus-visible,
+.interactive-figure input:focus-visible,
+.interactive-plot:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sl-color-accent) 65%, transparent);
+  outline-offset: 2px;
+}
+
+.explorer-stack,
+.evaluate-explorer,
+.cell-readout,
+.certificate-chooser section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.cell-explorer {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.65fr) minmax(0, 1.35fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.cell-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem;
+  aspect-ratio: 1;
+}
+
+.cell-grid button {
+  border: 1px solid var(--diagram-border);
+  border-radius: 8px;
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg);
+  cursor: pointer;
+}
+
+.cell-grid button.selected {
+  border: 3px solid var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
+  background: var(--sl-color-accent-low);
+  font-weight: 800;
+}
+
+.cell-readout p,
+.product-result,
+.input-help,
+.input-error,
+.certificate-chooser section > * {
+  margin: 0;
+}
+
+.cell-coeffs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.cell-coeffs span {
+  min-width: 0;
+  border-block-start: 2px solid var(--diagram-input);
+  padding: 0.55rem 0.2rem;
+  text-align: center;
+  background: var(--sl-color-bg);
+  font-family: "STIX Two Math", Cambria, serif;
+  overflow-wrap: anywhere;
+}
+
+.coefficient-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.coefficient-inputs label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--sl-color-gray-2);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.coefficient-inputs input {
+  min-width: 0;
+  border: 1px solid var(--diagram-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg);
+}
+
+.input-help {
+  color: var(--sl-color-gray-2);
+  font-size: 0.78rem;
+}
+
+.input-error {
+  min-height: 1.3em;
+  color: var(--diagram-warning);
+  font-weight: 750;
+}
+
+.plot-block {
+  min-width: 0;
+  border: 1px solid var(--diagram-border);
+  border-radius: 10px;
+  padding: 0.65rem;
+  background: var(--sl-color-bg);
+}
+
+.plot-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  min-height: 1.6rem;
+  padding-inline: 0.35rem;
+}
+
+.plot-legend__item {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  color: var(--sl-color-gray-2);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.plot-legend__item i {
+  width: 1.5rem;
+  border-block-start: 3px solid currentColor;
+}
+
+.plot-block svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.plot-axis {
+  stroke: var(--sl-color-gray-4);
+  stroke-width: 1.5;
+}
+
+.plot-axis-label {
+  fill: var(--sl-color-gray-2);
+  font: 14px system-ui, sans-serif;
+}
+
+.plot-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.plot-tone--first { color: var(--diagram-input); }
+.plot-tone--second { color: var(--diagram-second); }
+.plot-tone--result { color: var(--diagram-result); }
+
+.plot-marker line {
+  stroke: var(--sl-color-gray-3);
+  stroke-dasharray: 5 4;
+}
+
+.plot-marker circle {
+  fill: var(--sl-color-bg);
+  stroke: var(--diagram-result);
+  stroke-width: 4;
+}
+
+.contribution-table {
+  display: grid;
+  border-block-start: 1px solid var(--diagram-border);
+}
+
+.contribution-table > div {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) minmax(8rem, auto);
+  gap: 0.6rem;
+  align-items: center;
+  border-block-end: 1px solid var(--diagram-border);
+  padding: 0.45rem 0;
+  font-size: 0.78rem;
+}
+
+.contribution-term { display: block; overflow-wrap: anywhere; }
+.contribution-term + .contribution-term { margin-block-start: 0.2rem; }
+
+.contribution-table span { color: var(--sl-color-gray-2); }
+
+.evaluate-expression {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+}
+
+.evaluate-expression strong { font-family: "STIX Two Math", Cambria, serif; font-size: 1.15rem; }
+.evaluate-expression span { color: var(--sl-color-gray-2); }
+.evaluate-expression output { margin-inline-start: auto; color: var(--sl-color-text-accent); font-weight: 800; }
+.interactive-plot { border-radius: 10px; cursor: crosshair; touch-action: manipulation; }
+
+.certificate-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.certificate-tabs button {
+  display: grid;
+  gap: 0.15rem;
+  border: 1px solid var(--diagram-border);
+  border-radius: 8px;
+  padding: 0.7rem 0.35rem;
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg);
+  cursor: pointer;
+}
+
+.certificate-tabs button[aria-selected="true"] {
+  border-color: var(--diagram-result);
+  color: var(--diagram-result);
+  box-shadow: inset 0 3px var(--diagram-result);
+}
+
+.certificate-tabs small {
+  color: var(--sl-color-gray-2);
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.certificate-chooser section {
+  margin-block-start: 0.8rem;
+  border-inline-start: 3px solid var(--diagram-result);
+  padding-inline-start: 0.85rem;
+}
+
+.certificate-chooser section h3 { font-size: 1.05rem; }
+.certificate-chooser section p { color: var(--sl-color-gray-2); }
+.certificate-formula { display: grid; gap: 0.3rem; max-width: 100%; }
+.certificate-formula__row { min-width: 0; }
+.certificate-formula mjx-container { margin: 0 !important; text-align: start !important; }
+
 .diagram-frame svg {
   display: block;
   width: 100%;
+  height: auto;
+}
+
+/* MathJax rows keep their intrinsic width inside the general diagram frame. */
+.diagram-frame .certificate-formula svg {
+  width: auto;
+  max-width: 100%;
   height: auto;
 }
 
@@ -480,9 +741,22 @@
   .diagram-panels--three {
     grid-template-columns: 1fr;
   }
+
+  .cell-explorer,
+  .coefficient-inputs { grid-template-columns: 1fr; }
+
+  .cell-grid { max-width: 20rem; width: 100%; justify-self: center; }
+
+  .certificate-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
+  .sl-markdown-content mjx-container[display="true"] { font-size: 1.5rem; }
+
+  .contribution-table > div { grid-template-columns: 1fr; gap: 0.2rem; }
+
+  .evaluate-expression { display: grid; }
+  .evaluate-expression output { margin-inline-start: 0; }
   .decision-handles {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

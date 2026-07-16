@@ -43,11 +43,6 @@ import DiagramFrame from "./DiagramFrame.astro";
         <circle class="point--second" cx="60" cy="215" r="5"/><circle class="point--second" cx="840" cy="180" r="5"/>
         <circle class="point--result" cx="60" cy="215" r="5"/><circle class="point--result" cx="840" cy="40" r="5"/>
       </g>
-      <g class="curve-labels">
-        <text x="730" y="187" class="label--first">P</text>
-        <text x="730" y="168" class="label--second">Q</text>
-        <text x="730" y="83" class="label--result">R = PQ</text>
-      </g>
     </svg>
   </div>
   <p class="middle-coefficient">The middle result is (1·4 + 3·2) / 2 = 5.</p>
@@ -67,7 +62,7 @@ import DiagramFrame from "./DiagramFrame.astro";
   .curve-copy p { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   svg { grid-column: 1 / -1; overflow: visible; }
   .axes path { fill: none; stroke: var(--sl-color-text); stroke-width: 2; }
-  .axes text, .curve-labels text { fill: var(--sl-color-text); font-family: system-ui, sans-serif; font-size: 16px; }
+  .axes text { fill: var(--sl-color-text); font-family: system-ui, sans-serif; font-size: 16px; }
   .grid path { fill: none; stroke: var(--diagram-border); stroke-width: 1; stroke-dasharray: 4 8; }
   .curve { fill: none; stroke-width: 5; stroke-linecap: round; }
   .curve--first { stroke: var(--diagram-input); }
@@ -76,10 +71,6 @@ import DiagramFrame from "./DiagramFrame.astro";
   .point--first { fill: var(--diagram-input); }
   .point--second { fill: var(--diagram-second); }
   .point--result { fill: var(--diagram-result); }
-  .curve-labels text { font-size: 18px; font-weight: 800; }
-  .curve-labels .label--first { fill: var(--diagram-input); }
-  .curve-labels .label--second { fill: var(--diagram-second); }
-  .curve-labels .label--result { fill: var(--diagram-result); }
   .middle-coefficient { color: var(--diagram-result); text-align: center; font-weight: 750; }
   @media (max-width: 560px) {
     .curve-layout { grid-template-columns: 1fr; }

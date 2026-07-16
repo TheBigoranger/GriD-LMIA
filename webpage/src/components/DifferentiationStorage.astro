@@ -1,0 +1,24 @@
+---
+import DiagramFrame from "./DiagramFrame.astro";
+---
+
+<DiagramFrame
+  class="differentiation-storage"
+  label="Before and after cell-local differentiation storage"
+  caption="A quadratic one-cell decision stores three values. Each rate vertex stores the two exact forward differences on the degree-one basis."
+>
+  <div class="diff-storage">
+    <section><small>Before · Degree 2</small><strong>[P₀, P₁, P₂]</strong><span>one cell on [0,1]</span></section>
+    <b aria-hidden="true">→</b>
+    <section><small>After · Degree 1</small><strong>rate −: [−2(P₁−P₀), −2(P₂−P₁)]</strong><strong>rate +: [+2(P₁−P₀), +2(P₂−P₁)]</strong></section>
+  </div>
+</DiagramFrame>
+
+<style>
+  .diff-storage { display: grid; grid-template-columns: minmax(0, 0.8fr) auto minmax(0, 1.4fr); gap: 0.8rem; align-items: center; }
+  section { display: grid; gap: 0.45rem; min-width: 0; border: 1px solid var(--diagram-border); border-radius: 10px; padding: 0.85rem; background: var(--sl-color-bg); }
+  small { color: var(--sl-color-gray-2); font-weight: 800; text-transform: uppercase; }
+  strong { overflow-wrap: anywhere; }
+  b { color: var(--sl-color-text-accent); font-size: 1.5rem; }
+  @media (max-width: 620px) { .diff-storage { grid-template-columns: 1fr; } b { justify-self: center; transform: rotate(90deg); } }
+</style>

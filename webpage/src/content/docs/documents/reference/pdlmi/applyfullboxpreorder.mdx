@@ -164,11 +164,12 @@ it does not use the already elevated constraints.
 ## Limitations
 
 This method implements the fixed-order full box preordering on each local
-parameter box. It is distinct from the implemented
-[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/)
-module because full box includes every generator-subset product. It is not a
-general-domain SOS interface, a full-space SOS representation, or an automatic
-hierarchy selector.
+parameter box. In one parameter it shares the parity-specific Markov–Lukács
+assembly with
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/).
+For two or more parameters it is distinct because full box includes every
+generator-subset product. It is not a general-domain SOS interface, a
+full-space SOS representation, or an automatic hierarchy selector.
 
 ## See Also
 

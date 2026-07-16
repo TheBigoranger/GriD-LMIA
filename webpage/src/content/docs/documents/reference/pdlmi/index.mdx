@@ -3,7 +3,7 @@ title: pdlmi
 description: Cell-local YALMIP constraints for PD-LMI expressions.
 ---
 
-import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import CertificateChooser from "../../../../../components/CertificateChooser.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -16,13 +16,15 @@ residual expressions. Direct coefficient assembly is the default; Pólya
 degree elevation, fixed-order Putinar box assembly, and fixed-order full box
 Bernstein-Gram preordering are explicit alternatives.
 
-<CertificateSpectrum selected="direct" showDefault />
+<CertificateChooser />
 
 The four paths begin with the same stored residual. **Direct** tests every
 local coefficient and is the default. **Pólya** exactly elevates that residual
-before repeating the direct test. **Putinar** introduces an unweighted Gram
-term and one generator-weighted term per parameter. **Full box** adds Gram
-terms for every subset product of the generators. Both Gram paths match exact
+before repeating the direct test. In one parameter, **Putinar** and **Full
+box** dispatch to the same parity-specific Markov–Lukács form with minimum
+order `floor(m/2)`. In two or more parameters, Putinar uses an unweighted Gram
+term plus one generator-weighted term per axis at minimum `ceil(m/2)`, while
+Full box includes every generator-subset product. Both Gram paths match exact
 box-polynomial identities. The
 [SOS certificate chapter](/PD-LMI-package/documents/math/sos-certificates/)
 derives these ideas; the API pages below stay focused on callable syntax.
@@ -50,10 +52,12 @@ derives these ideas; the API pages below stay focused on callable syntax.
 Direct coefficient-wise assembly is the default. Pólya degree elevation is
 available through constructor options and `applyPolya`. The opt-in Putinar
 and full-box paths use independent positive-semidefinite Gram blocks for each
-physical cell and active rate row, with exact coefficient identities. Putinar
-uses only the axis generators $\alpha_s(1-\alpha_s)$ separately; full box
-also uses every subset product. They are fixed-order certificates on the local
-hypercube, not a general-domain SOS interface or automatic hierarchy.
+physical cell and active rate row, with exact coefficient identities. Their
+one-dimensional dispatch is the shared Markov–Lukács interval form. For two
+or more parameters, Putinar uses only the axis generators
+$\alpha_s(1-\alpha_s)$ separately, while full box also uses every subset
+product. They are fixed-order certificates on the local hypercube, not a
+general-domain SOS interface or automatic hierarchy.
 Strictness margins, residual evidence, diagnostics, and package-owned solver
 wrappers remain outside this slice.
 

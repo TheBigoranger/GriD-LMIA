@@ -60,10 +60,11 @@ sufficient constraints.
 
 ## Local Coordinate, Basis Order, And Endpoint Labels
 
-On a scalar physical cell $[\rho_k,\rho_{k+1}]$, the package uses
+On one-dimensional physical cell $c$, with endpoints
+$[\rho_1^{(c)},\rho_1^{(c+1)}]$, the package uses
 
 $$
-\alpha = \frac{\rho-\rho_k}{\rho_{k+1}-\rho_k},
+\alpha = \frac{\rho-\rho_1^{(c)}}{\rho_1^{(c+1)}-\rho_1^{(c)}},
 \qquad \alpha \in [0,1].
 $$
 
@@ -88,13 +89,13 @@ $$
 The normalized Bernstein basis factors include the binomial coefficients
 $\binom{m}{i}$ shown in the definition above. The endpoint labels are:
 
-- at the left endpoint $\rho=\rho_k$, $\alpha=0$ and local label `0` is selected;
-- at the right endpoint $\rho=\rho_{k+1}$, $\alpha=1$ and local label `m` is selected.
+- at the left endpoint $\rho=\rho_1^{(c)}$, $\alpha=0$ and local label `0` is selected;
+- at the right endpoint $\rho=\rho_1^{(c+1)}$, $\alpha=1$ and local label `m` is selected.
 
 For degree two,
 
 $$
-P_c(\alpha)=(1-\alpha)^2C^{(c)}[0]
+P^{(c)}(\alpha)=(1-\alpha)^2C^{(c)}[0]
 +2(1-\alpha)\alpha C^{(c)}[1]+\alpha^2C^{(c)}[2].
 $$
 
@@ -118,19 +119,19 @@ $$
 Therefore
 
 $$
-P_c(\alpha)=\sum_i B_i^m(\alpha)P^{(c)}[i]
+P^{(c)}(\alpha)=\sum_i B_i^m(\alpha)P^{(c)}[i]
 $$
 
 lies in the convex hull of its coefficients. The statement applies to several
 payload types:
 
-- scalar: $\min_i P^{(c)}[i]\le P_c(\alpha)\le\max_iP^{(c)}[i]$;
+- scalar: $\min_i P^{(c)}[i]\le P^{(c)}(\alpha)\le\max_iP^{(c)}[i]$;
 - vector: every value lies in the convex hull of the coefficient vectors;
 - matrix: every value is a convex combination of the coefficient matrices.
 
 For symmetric matrix coefficients, if every $P^{(c)}[i]\preceq0$, then
-$P_c(\alpha)\preceq0$ throughout the cell. Apply the scalar convex-combination
-argument to $x^{\mathsf T}P_c(\alpha)x$ for every vector $x$. Strictly negative
+$P^{(c)}(\alpha)\preceq0$ throughout the cell. Apply the scalar convex-combination
+argument to $x^{\mathsf T}P^{(c)}(\alpha)x$ for every vector $x$. Strictly negative
 coefficient matrices similarly give a strict cell-wide certificate.
 
 <BernsteinConceptDiagram kind="convex" />
@@ -159,10 +160,12 @@ Here each axis has an independent grid interval and local label.
 
 The tensor picture deliberately uses four physical nodes on the first axis
 and three on the second: axis node counts need not match. In $\ell$
-dimensions, a physical node has vector subscript
-$\mathbf k=(k_1,\ldots,k_\ell)$, a cell has identity $\mathbf c$, and a local
-Bernstein label is $\mathbf i=(i_1,\ldots,i_\ell)$. A stored matrix is
-therefore $C^{(\mathbf c)}[\mathbf i]$.
+dimensions, a physical node has multi-index
+$\mathbf j=(j_1,\ldots,j_\ell)$ and coordinates
+$\boldsymbol\rho^{(\mathbf j)}=(\rho_1^{(j_1)},\ldots,\rho_\ell^{(j_\ell)})$.
+A cell has identity $\mathbf c$, and a local Bernstein label is
+$\mathbf i=(i_1,\ldots,i_\ell)$. A stored matrix is therefore
+$C^{(\mathbf c)}[\mathbf i]$.
 
 ## LocalValues, Continuity, And Boundaries
 
@@ -188,14 +191,14 @@ physical widths and different partial-difference data.
 For
 
 $$
-P_c(\alpha)=\sum_{i=0}^{m}P^{(c)}[i]B_i^m(\alpha),
+P^{(c)}(\alpha)=\sum_{i=0}^{m}P^{(c)}[i]B_i^m(\alpha),
 $$
 
-the forward coordinate gives the physical derivative on a cell of width
-$h=\rho_{k+1}-\rho_k$:
+the forward coordinate gives the physical derivative on one-dimensional cell
+$c$ of width $h_c=\rho_1^{(c+1)}-\rho_1^{(c)}$:
 
 $$
-\frac{dP_c}{d\rho}
+\frac{dP^{(c)}}{d\rho}
 =\frac{m}{h_c}\sum_{i=0}^{m-1}
 \bigl(P^{(c)}[i+1]-P^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
 $$
@@ -263,8 +266,8 @@ On a fixed physical cell, let
 
 $$
 \begin{aligned}
-P_c(\alpha)&=\sum_{i=0}^{m}B_i^m(\alpha)P^{(c)}[i],\\
-Q_c(\alpha)&=\sum_{j=0}^{n}B_j^n(\alpha)Q^{(c)}[j].
+P^{(c)}(\alpha)&=\sum_{i=0}^{m}B_i^m(\alpha)P^{(c)}[i],\\
+Q^{(c)}(\alpha)&=\sum_{j=0}^{n}B_j^n(\alpha)Q^{(c)}[j].
 \end{aligned}
 $$
 
@@ -375,10 +378,11 @@ removed.
 
 ## Hypercube Counts And Traversal
 
-With node counts $N_1,\ldots,N_\ell$, the number of physical hypercubes is
+With axis node counts $k_1,\ldots,k_\ell$, the number of physical
+hypercubes is
 
 $$
-N_{\mathrm{cell}}=\prod_{r=1}^{\ell}(N_r-1).
+N_{\mathrm{cell}}=\prod_{s=1}^{\ell}(k_s-1).
 $$
 
 For a common local degree $m$, each hypercube stores $(m+1)^\ell$
@@ -435,17 +439,20 @@ assembled by YALMIP.
 ## Fixed-Order Putinar Box Certificate
 
 The opt-in [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/)
-path replaces coefficient-wise sign tests with an unweighted Bernstein-Gram
-term plus one $\alpha_s(1-\alpha_s)$-weighted term per parameter. At absolute
-order $r\ge\lceil m/2\rceil$, those terms use tensor basis degrees
-$r\mathbf1$ and $r\mathbf1-\mathbf e_s$, respectively. Exact coefficient
-identities are matched at tensor degree $2r\mathbf1$ independently for every
-physical cell and rate row.
+path is dimension-aware. In one parameter it dispatches to the same
+parity-specific Markov–Lukács form as the full-box selector, with minimum and
+default order $\lfloor m/2\rfloor$. In two or more parameters it replaces
+coefficient-wise sign tests with an unweighted Bernstein-Gram term plus one
+$\alpha_s(1-\alpha_s)$-weighted term per axis. At absolute order
+$r\ge\lceil m/2\rceil$, those terms use tensor basis degrees $r\mathbf1$ and
+$r\mathbf1-\mathbf e_s$, respectively. Exact coefficient identities are
+matched at tensor degree $2r\mathbf1$ independently for every physical cell
+and rate row.
 
-This is the implemented Putinar specialization for the local parameter box.
-It is not a general-domain or general-generator interface, does not search
-orders automatically, and does not insert a strictness margin or call a
-solver.
+For two or more parameters, this is the implemented Putinar specialization
+for the local parameter box. It is not a general-domain or general-generator
+interface, does not search orders automatically, and does not insert a
+strictness margin or call a solver.
 
 ## Fixed-Order Full Box Preordering
 
@@ -457,9 +464,10 @@ $\alpha_s(1-\alpha_s)$ in multiple parameters. PSD Gram blocks are
 independent across physical cells and rate rows, and exact identities match
 the represented polynomial coefficients.
 
-This is a fixed-order certificate on the local parameter box. It is distinct
-from the implemented Putinar box module because it includes every
-generator-subset product, and it is not a general-domain SOS interface or an
+This is a fixed-order certificate on the local parameter box. In one parameter
+it is the same Markov–Lukács assembly selected by Putinar. In two or more
+parameters it is distinct from the Putinar box module because it includes
+every generator-subset product. It is not a general-domain SOS interface or an
 automatically selected hierarchy. The dedicated method page documents order
 selection, constraint ordering, relation signs, examples, and errors.
 

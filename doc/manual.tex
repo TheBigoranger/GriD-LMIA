@@ -36,26 +36,19 @@
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \definecolor{dpblue}{RGB}{35,86,125}
 \definecolor{dpbluewash}{RGB}{239,245,250}
-\definecolor{dpinputwash}{RGB}{247,249,252}
-\definecolor{dpoutputwash}{RGB}{246,249,246}
-\definecolor{dpknown}{RGB}{35,86,125}
-\definecolor{dpdecision}{RGB}{103,78,167}
-\definecolor{dpcontribution}{RGB}{181,103,24}
-\definecolor{dpresult}{RGB}{38,120,83}
-\definecolor{dpcertificate}{RGB}{180,82,38}
-\definecolor{dpneutral}{RGB}{83,92,104}
-% Shared semantic drawing vocabulary.  All conceptual figures use the same
-% input/result/certificate roles, restrained fills, rounded corners, and arrow
-% weight.  Dense relations are split into panels instead of crossing arrows.
+% Shared semantic drawing vocabulary.  The single blue accent is decorative;
+% semantic roles remain legible in grayscale through borders, line patterns,
+% labels, and type weight.  Dense relations use panels instead of crossing
+% arrow fans.
 \tikzset{
   every picture/.append style={>=Latex},
-  dp/known/.style={draw=dpknown!85!black,fill=dpknown!8,rounded corners=2pt},
-  dp/decision/.style={draw=dpdecision!85!black,fill=dpdecision!8,rounded corners=2pt},
-  dp/contribution/.style={draw=dpcontribution!85!black,fill=dpcontribution!9,rounded corners=2pt},
-  dp/result/.style={draw=dpresult!85!black,fill=dpresult!8,rounded corners=2pt},
-  dp/certificate/.style={draw=dpcertificate!85!black,fill=dpcertificate!8,rounded corners=2pt},
-  dp/neutral/.style={draw=dpneutral!75,fill=white,rounded corners=2pt},
-  dp/arrow/.style={->,semithick,draw=dpneutral},
+  dp/known/.style={draw=black!70,fill=white,rounded corners=2pt},
+  dp/decision/.style={draw=black!80,fill=black!3,rounded corners=2pt,double},
+  dp/contribution/.style={draw=black!70,fill=black!3,rounded corners=2pt,dashed},
+  dp/result/.style={draw=black!90,fill=black!7,rounded corners=2pt,very thick},
+  dp/certificate/.style={draw=black!80,fill=white,rounded corners=2pt,densely dotted},
+  dp/neutral/.style={draw=black!55,fill=white,rounded corners=2pt},
+  dp/arrow/.style={->,semithick,draw=black!65},
   dp/panel/.style={draw=black!18,rounded corners=3pt,inner sep=6pt}
 }
 \setlength{\parindent}{0pt}
@@ -78,7 +71,7 @@
   showstringspaces=false,
   frame=single,
   rulecolor=\color{dpblue!35},
-  backgroundcolor=\color{dpinputwash},
+  backgroundcolor=\color{black!2},
   framesep=4pt,
   framerule=0.45pt,
   aboveskip=0.45\baselineskip,
@@ -110,13 +103,13 @@
   columns=fullflexible,
   keepspaces=true,
   frame=single,
-  rulecolor=\color{green!35!black},
-  backgroundcolor=\color{dpoutputwash},
+  rulecolor=\color{black!45},
+  backgroundcolor=\color{black!3},
   framesep=4pt,
   framerule=0.55pt,
   aboveskip=0.45\baselineskip,
   belowskip=0.95\baselineskip,
-  title={\textcolor{green!35!black}{\sffamily\bfseries\footnotesize Output}},
+  title={\textcolor{black!75}{\sffamily\bfseries\footnotesize Output}},
   numbers=none
 }
 
@@ -126,13 +119,13 @@
   columns=fullflexible,
   keepspaces=true,
   frame=single,
-  rulecolor=\color{green!35!black},
-  backgroundcolor=\color{dpoutputwash},
+  rulecolor=\color{black!45},
+  backgroundcolor=\color{black!3},
   framesep=4pt,
   framerule=0.55pt,
   aboveskip=0.45\baselineskip,
   belowskip=0.95\baselineskip,
-  title={\textcolor{green!35!black}{\sffamily\bfseries\footnotesize Output}},
+  title={\textcolor{black!75}{\sffamily\bfseries\footnotesize Output}},
   numbers=none
 }
 
@@ -152,15 +145,18 @@
   \noindent\textcolor{black!55}{\rule{\linewidth}{0.45pt}}\par
   \vspace{0.48\baselineskip}\nopagebreak}
 \newcommand{\syntaxhead}{\refhead{Syntax}}
-\newcommand{\examplehead}{\refhead{Example}}
-\newcommand{\arghead}{\refhead{Arguments and options}}
+\newcommand{\arghead}{\refhead{Arguments}}
+\newcommand{\descriptionhead}{\refhead{Description}}
+\newcommand{\examplehead}{\refhead{Examples and output}}
+\newcommand{\remarkshead}{\refhead{Remarks}}
+\newcommand{\seealsohead}{\refhead{See Also}}
 \newcommand{\ideastep}[1]{%
   \par\addvspace{0.65\baselineskip}%
   \needspace{3\baselineskip}%
   \noindent\textcolor{dpblue}{\sffamily\bfseries #1.}\enspace}
 
 \title{\pkg\\User Manual}
-\author{Version v0.3.4}
+\author{Version v0.3.5}
 \date{July 2026}
 
 \begin{document}
@@ -196,14 +192,13 @@ also uses the bounded rate
 \(\dot{\boldsymbol\rho}\in\mathcal V\) and derivatives of its decision
 functions, we call it a \emph{differentiable parameter-dependent LMI}, or
 \emph{DPD-LMI}.  A canonical DPD-LMI is
-\begin{equation}
+\begin{equation*}
   \sum_i R_i(\boldsymbol\rho)
     \left(\sum_{j=1}^{\ell}
       \frac{\partial x_i(\boldsymbol\rho)}{\partial\rho_j}\dot\rho_j\right)
   +F_0(\boldsymbol\rho)
   +\sum_i F_i(\boldsymbol\rho)x_i(\boldsymbol\rho)\prec0.
-  \label{eq:canonical-dpdlmi}
-\end{equation}
+\end{equation*}
 The known functions are the \(R_i\) and \(F_i\); the differentiable functions
 \(x_i\) are decisions.  After known data are fixed, every term must remain
 affine in the decision coefficients.  Removing the derivative term recovers
@@ -216,7 +211,7 @@ A concrete one-parameter example is the LPV Lyapunov condition
   \dot P(\rho,\dot\rho)+P(\rho)A(\rho)
     +A(\rho)^{\mathsf T}P(\rho)&\preceq-\varepsilon I, \label{eq:lpv-spine}\\
   \dot P(\rho,\dot\rho)&=
-    \frac{\partial P(\rho)}{\partial\rho}\dot\rho.
+    \frac{\partial P(\rho)}{\partial\rho}\dot\rho.\notag
 \end{align}
 Taking \(\dot\rho=0\), or removing \(\dot P\), gives the familiar PD-LMI
 Lyapunov inequality.  In the worked path below \(P\) is \(2\)-by-\(2\),
@@ -245,32 +240,33 @@ the displayed \(\varepsilon I\) is part of the user's model.
 replace YALMIP's solver interface.}
 \end{center}
 
-Figure colors keep one semantic meaning throughout the manual:
-\textcolor{dpknown}{blue is known data},
-\textcolor{dpdecision}{violet is a decision},
-\textcolor{dpcontribution}{amber is an intermediate contribution},
-\textcolor{dpresult}{green is a computed result}, and
-\textcolor{dpcertificate}{rust is a certificate choice}.  Neutral gray arrows
-show reading order.  When a relation has many contributions, separate panels
-replace crossing edge fans.
+Figures do not use color to encode meaning.  A solid border marks known data,
+a double border marks a decision, a dashed border marks an intermediate
+contribution, a heavy border marks a result, and a dotted border marks a
+certificate choice.  Explicit labels repeat every role, and arrows show
+reading order.  When a relation has many contributions, separate panels
+replace crossing edge fans.  Blue is reserved for decorative framing.
 
 \subsection{Separate Physical Nodes, Cells, And Local Labels}
 
 For one parameter choose physical grid nodes
 \[
-  \rho_0<\rho_1<\rho_2.
+  \rho_1^{(1)}<\rho_1^{(2)}<\rho_1^{(3)}.
 \]
-The subscript on \(\rho_k\) identifies a physical node only.  The two physical
+The subscript identifies the parameter direction, while the parenthesized
+superscript identifies the one-based physical node.  The two physical
 cells have separate identities \(c=1\) and \(c=2\):
-\([\rho_0,\rho_1]\) and \([\rho_1,\rho_2]\).  On cell \(c\), define the
+\([\rho_1^{(1)},\rho_1^{(2)}]\) and
+\([\rho_1^{(2)},\rho_1^{(3)}]\).  On cell \(c\), define the
 forward coordinate
 \[
-  \alpha=\frac{\rho-\rho_{c-1}}{\rho_c-\rho_{c-1}}\in[0,1].
+  \alpha=\frac{\rho_1-\rho_1^{(c)}}
+                   {\rho_1^{(c+1)}-\rho_1^{(c)}}\in[0,1].
 \]
 For local degree \(m=2\), the three coefficient labels are bracketed local
 positions, not additional physical nodes:
 \[
-  M_c(\alpha)=\sum_{i=0}^{2}B_i^2(\alpha)C^{(c)}[i].
+  C^{(c)}(\rho_1)=\sum_{i=0}^{2}B_i^2(\alpha)C^{(c)}[i].
 \]
 
 \begin{center}
@@ -278,7 +274,7 @@ positions, not additional physical nodes:
   coeff/.style={draw=dpblue!75!black,rounded corners=2pt,fill=dpbluewash,
     font=\scriptsize,minimum width=10mm,minimum height=6mm}]
   \draw[very thick,black!55] (0,0) -- (2,0);
-  \foreach \x/\lab in {0/{\rho_0},1/{\rho_1},2/{\rho_2}}{
+  \foreach \x/\lab in {0/{\rho_1^{(1)}},1/{\rho_1^{(2)}},2/{\rho_1^{(3)}}}{
     \filldraw[fill=white,draw=black!70] (\x,0) circle (1.6pt);
     \node[above=2pt,font=\small] at (\x,0) {$\lab$};}
   \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (0,-0.18) -- (1,-0.18)
@@ -292,7 +288,7 @@ positions, not additional physical nodes:
   \node[coeff] at (1.50,-0.82) {$C^{(2)}[1]$};
   \node[coeff] at (1.87,-0.82) {$C^{(2)}[2]$};
   \node[align=center,font=\scriptsize] at (1,-1.38)
-    {physical-node subscripts (k), cell identity (c), and local labels ([i]) have different jobs};
+    {direction subscripts, parenthesized node indices, cell identity, and local labels have different jobs};
 \end{tikzpicture}
 \end{center}
 
@@ -325,7 +321,8 @@ cells=2, coefficients per cell=3
     20    25    30
 \end{lstlisting}
 
-The shared value \(20\) belongs to the physical interface \(\rho_1\).  It is
+The shared value \(20\) belongs to the physical interface
+\(\rho_1^{(2)}\).  It is
 seen as \(C^{(1)}[2]\) from the left cell and \(C^{(2)}[0]\) from the right.
 This is \(C^0\) face sharing: values meet, but the two cell-local derivatives
 need not agree.  Consequently the representation is a continuous
@@ -396,7 +393,7 @@ local coefficients/cell=3, global controls=5
 
 \subsection{Form Matrix Algebra In Coefficient Space}
 
-Fix a physical cell (c).  Its identity remains in the parenthesized
+Fix a physical cell \(c\).  Its identity remains in the parenthesized
 superscript while the bracketed integers are local Bernstein labels:
 \(P=\sum_iB_i^mP^{(c)}[i]\) and
 \(A=\sum_jB_j^nA^{(c)}[j]\).  Their ordered product is
@@ -446,7 +443,7 @@ coefficient matrices in P*A=4
     \(P_0,P_1,P_2\)\\
     \(A_0,A_1\)\\
   };
-  \node[above=3pt of inputs,font=\scriptsize\bfseries,text=dpdecision]
+  \node[above=3pt of inputs,font=\scriptsize\bfseries,text=black!85]
     {1. Input rows};
   \node[group,dp/contribution,right=13mm of inputs] (g0)
     {\(k=0:\ (0,0)\)};
@@ -456,7 +453,7 @@ coefficient matrices in P*A=4
     {\(k=2:\ (1,1),(2,0)\)};
   \node[group,dp/contribution,below=2mm of g2] (g3)
     {\(k=3:\ (2,1)\)};
-  \node[above=3pt of g0,font=\scriptsize\bfseries,text=dpcontribution]
+  \node[above=3pt of g0,font=\scriptsize\bfseries,text=black!85]
     {2. Group \(i+j=k\)};
   \node[resultrow,dp/result,right=13mm of g0] (r0) {\(R[0]=P_0A_0\)};
   \node[resultrow,dp/result,below=2mm of r0] (r1)
@@ -464,7 +461,7 @@ coefficient matrices in P*A=4
   \node[resultrow,dp/result,below=2mm of r1] (r2)
     {\(R[2]=(2P_1A_1+P_2A_0)/3\)};
   \node[resultrow,dp/result,below=2mm of r2] (r3) {\(R[3]=P_2A_1\)};
-  \node[above=3pt of r0,font=\scriptsize\bfseries,text=dpresult]
+  \node[above=3pt of r0,font=\scriptsize\bfseries,text=black!85]
     {3. Normalize};
   \draw[dp/arrow] (inputs.east)--node[above,font=\tiny]{enumerate}(g1.west);
   \draw[dp/arrow] (g1.east)--node[above,font=\tiny]{weight}(r1.west);
@@ -476,7 +473,7 @@ products, group by one anti-diagonal, then apply binomial normalization.}
 
 \subsection{Differentiate And Enumerate Rate Vertices}
 
-For a degree-\(m\) cell (c) of width \(h_c\), differentiation is a forward
+For a degree-\(m\) cell \(c\) of width \(h_c\), differentiation is a forward
 difference of adjacent local coefficients:
 \[
   \frac{\partial P}{\partial\rho}
@@ -561,10 +558,11 @@ direct=16, Polya(1)=20, Putinar=28, full-box=24
   mode/.style={draw=dpblue!75!black,rounded corners=2pt,fill=dpbluewash,
     align=center,font=\scriptsize,minimum width=35mm,minimum height=14mm}]
   \node[mode] (res) {stored residual\\physical cells and rate rows};
-  \node[mode,right=of res,yshift=20mm] (direct) {direct\\sign of every coefficient};
-  \node[mode,right=of res,yshift=7mm] (polya) {P\'olya\\elevate, then test coefficients};
-  \node[mode,right=of res,yshift=-7mm] (putinar) {Putinar box module\\singleton generators + identities};
-  \node[mode,right=of res,yshift=-20mm] (box) {full box\\all generator products + identities};
+  \node[mode,right=of res,yshift=27mm] (direct) {direct\\sign of every coefficient};
+  \node[mode,right=of res,yshift=9mm] (polya) {P\'olya\\elevate, then test coefficients};
+  \node[mode,right=of res,yshift=-9mm] (putinar)
+    {Putinar\\exact parity (1-D) /\\singleton module (multi-D)};
+  \node[mode,right=of res,yshift=-27mm] (box) {full box\\all generator products + identities};
   \draw[->,thick,dpblue] (res.east) -- (direct.west);
   \draw[->,thick,dpblue] (res.east) -- (polya.west);
   \draw[->,thick,dpblue] (res.east) -- (putinar.west);
@@ -636,48 +634,50 @@ physical cells=6, coefficients per cell=4
 \begin{center}
 \begin{tikzpicture}[x=1.55cm,y=1.25cm,>=Latex,
   cell/.style={font=\scriptsize,text=dpblue!70!black}]
-  \foreach \x/\lab in {0/{\rho_{1,0}},1/{\rho_{1,1}},2/{\rho_{1,2}},3/{\rho_{1,3}}}{
+  \foreach \x/\lab in {0/{\rho_1^{(1)}},1/{\rho_1^{(2)}},2/{\rho_1^{(3)}},3/{\rho_1^{(4)}}}{
     \draw[black!45] (\x,0) -- (\x,2);
     \node[below=3pt,font=\scriptsize] at (\x,0) {$\lab$};}
-  \foreach \y/\lab in {0/{\rho_{2,0}},1/{\rho_{2,1}},2/{\rho_{2,2}}}{
+  \foreach \y/\lab in {0/{\rho_2^{(1)}},1/{\rho_2^{(2)}},2/{\rho_2^{(3)}}}{
     \draw[black!45] (0,\y) -- (3,\y);
     \node[left=3pt,font=\scriptsize] at (0,\y) {$\lab$};}
-  \node[cell] at (0.5,0.5) {$\boldsymbol c=(1,1)$};
-  \node[cell] at (0.5,1.5) {$\boldsymbol c=(1,2)$};
-  \node[cell] at (1.5,0.5) {$\boldsymbol c=(2,1)$};
-  \node[cell] at (1.5,1.5) {$\boldsymbol c=(2,2)$};
-  \node[cell] at (2.5,0.5) {$\boldsymbol c=(3,1)$};
-  \node[cell] at (2.5,1.5) {$\boldsymbol c=(3,2)$};
+  \node[cell] at (0.5,0.5) {$\mathbf c=(1,1)$};
+  \node[cell] at (0.5,1.5) {$\mathbf c=(1,2)$};
+  \node[cell] at (1.5,0.5) {$\mathbf c=(2,1)$};
+  \node[cell] at (1.5,1.5) {$\mathbf c=(2,2)$};
+  \node[cell] at (2.5,0.5) {$\mathbf c=(3,1)$};
+  \node[cell] at (2.5,1.5) {$\mathbf c=(3,2)$};
   \draw[->,thick,dpblue] (0,-0.55) -- (3,-0.55) node[right,font=\scriptsize]{$\rho_1$};
   \draw[->,thick,dpblue] (-0.55,0) -- (-0.55,2) node[above,font=\scriptsize]{$\rho_2$};
   \node[draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
     font=\scriptsize,align=left] at (5.0,1)
     {inside one degree-one cell:\\local labels\\
-     \(\boldsymbol i=[0,0],[0,1],\)\\
-     \(\phantom{\boldsymbol i={}}[1,0],[1,1]\)\\coefficients
-     \(C^{(\boldsymbol c)}[\boldsymbol i]\)};
+     \(\mathbf i=[0,0],[0,1],\)\\
+     \(\phantom{\mathbf i={}}[1,0],[1,1]\)\\coefficients
+     \(C^{(\mathbf c)}[\mathbf i]\)};
 \end{tikzpicture}
 \end{center}
 
-In \(\ell\) dimensions, a physical node has an \(\ell\)-component subscript
-\(\boldsymbol k=(k_1,\ldots,k_\ell)\) and is written
-\(\boldsymbol\rho_{\boldsymbol k}\).  Direction \(s\) may have its own node
-count \(N_s\).  A physical cell has the separate identity
-\(\boldsymbol c=(c_1,\ldots,c_\ell)\), so the number of cells is
-\(\prod_s(N_s-1)\).  With the forward coordinates
+In \(\ell\) dimensions, direction \(s\) has the one-based nodes
+\(\mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\}\).  The tensor grid is
+\(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\), with
+\(\prod_{s=1}^{\ell}k_s\) physical nodes.  A physical hypercube has the
+separate one-based multi-index
+\(\mathbf c=(c_1,\ldots,c_\ell)\), so there are
+\(\prod_{s=1}^{\ell}(k_s-1)\) hypercubes.  With the forward coordinates
 \[
-  \alpha_s=\frac{\rho_s-\rho_{s,c_s-1}}
-                  {\rho_{s,c_s}-\rho_{s,c_s-1}},
+  \alpha_s=\frac{\rho_s-\rho_s^{(c_s)}}
+                  {\rho_s^{(c_s+1)}-\rho_s^{(c_s)}},
 \]
-the local degree-(m) tensor representation is
+the local degree-\(m\) tensor representation is
 \[
-  M_{\boldsymbol c}(\boldsymbol\alpha)=
-  \sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+  C^{(\mathbf c)}(\boldsymbol\rho)=
+  \sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
   \left(\prod_{s=1}^{\ell}B_{i_s}^{m}(\alpha_s)\right)
-  C^{(\boldsymbol c)}[\boldsymbol i].
+  C^{(\mathbf c)}[\mathbf i].
 \]
-The bracketed \(\boldsymbol i\) is an \(\ell\)-component local label, never a
-physical-node subscript.  Earlier dimensions vary more slowly in \code{cells},
+The local Bernstein label \(\mathbf i\) is zero-based, while every
+physical-node index and physical-cell component is one-based.  Earlier
+dimensions vary more slowly in \code{cells},
 \code{lbls}, \code{coeffs}, and rate-vertex traversal.  Cell-local spline and
 gridding constructions for PD-LMIs motivate this architecture
 \cite{masubuchi1998,xu2024}; Appendix~\ref{app:bernstein-math} develops the
@@ -929,7 +929,7 @@ ans =
 The printed \code{ncoeff} value is \((1+1)^2=4\), one local Bernstein
 coefficient for each tensor-product label in the two parameter directions.
 
-\refhead{Validation and errors}
+\remarkshead
 Malformed grid containers and node vectors raise
 \codeerr{pdbase}{InvalidGrid} and
 \codeerr{pdbase}{Invalid}\allowbreak\code{GridVector}.
@@ -1035,7 +1035,7 @@ c = obj.coeffs(cellSubs)
         leaves return one row per active rate vertex in the stored row order.
 \end{itemize}
 
-\refhead{Validation and errors}
+\remarkshead
 \code{coeffs} requires one positive integer physical-cell index per parameter,
 within the corresponding cell count.  Invalid numeric or cell-array selectors
 raise \codeerr{pdbase}{InvalidCellSubs}.
@@ -1092,7 +1092,7 @@ d = size(obj, dim)
   \item \code{obj} is a \code{pdbase} object or subclass instance.
   \item \code{dim} is a positive integer matrix dimension for \code{size}; it
         follows MATLAB's ordinary \code{size(obj,dim)} convention.
-  \item \code{ncell} returns \(\prod_r(N_r-1)\), the number of physical
+  \item \code{ncell} returns \(\prod_s(k_s-1)\), the number of physical
         hypercube cells.
   \item \code{ncoeff} returns \((m+1)^\ell\), the number of local Bernstein
         coefficients stored per physical cell.
@@ -1144,14 +1144,14 @@ vals = obj.elevVals(degreeIncrement)
         coefficient evidence at the current degree.
 \end{itemize}
 
-\refhead{Output}
+\descriptionhead
 \code{vals} is a nested \code{LocalValues}-shaped cell tree.  Each physical
 cell contains coefficients of degree \code{obj.Degree + degreeIncrement}, with
 the represented polynomial, physical-cell tree, and any rate-row ordering
 preserved.  The method does not modify \code{obj} or its stored coefficient
 evidence.
 
-\refhead{Validation and errors}
+\remarkshead
 An invalid increment raises \code{pdbase:InvalidDegreeIncrement}.  A
 function-only \code{pdmat} has no stored Bernstein coefficient evidence, so
 this method raises \code{pdbase:MissingCoefficientEvidence}.
@@ -1524,12 +1524,12 @@ ans =
 These forms all create finite known-data objects, but only the coefficient-
 backed and function-Bernstein forms can participate in coefficient algebra.
 
-\refhead{Public property}
+\descriptionhead
 \code{FunctionHandle} retains the supplied function handle for function-only
 and function-Bernstein sources; it is empty for cell-backed sources.  Its set
 access is private.
 
-\refhead{Validation and errors}
+\remarkshead
 Constructor options must be name--value pairs.  Malformed syntax raises
 \codeerr{pdmat}{InvalidOptions}; backend-only options raise
 \codeerr{pdmat}{Unsupported}\allowbreak\code{Option}; unknown names raise
@@ -1578,7 +1578,7 @@ val = A.evaluate(point)
         their stored function handle.
 \end{itemize}
 
-\refhead{Validation and errors}
+\remarkshead
 A point with the wrong type, length, or finite-real shape raises
 \codeerr{pdmat}{InvalidPoint}; a point outside any grid bound raises
 \codeerr{pdmat}{PointOutOfBounds}.  If a stored function fails or returns a
@@ -1586,10 +1586,12 @@ nonfinite, complex, empty, or size-inconsistent matrix at the requested point,
 \code{evaluate} raises
 \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionValue}.
 
-For a degree-one scalar coefficient-backed object on \([\rho_0,\rho_1]\),
+For a degree-one scalar coefficient-backed object on
+\([\rho_1^{(1)},\rho_1^{(2)}]\),
 \[
   A(\rho) = (1-\alpha)A^{(c)}[0]+\alpha A^{(c)}[1],\qquad
-  \alpha = \frac{\rho-\rho_0}{\rho_1-\rho_0}.
+  \alpha = \frac{\rho_1-\rho_1^{(1)}}
+                 {\rho_1^{(2)}-\rho_1^{(1)}}.
 \]
 The same local-coordinate rule is applied entrywise for matrix-valued data.
 
@@ -1735,7 +1737,7 @@ disp(T)
         3            {[1]}            {[3]}           {[2]}       "alpha^2"           true          {[3]}
 \end{lstlisting}
 
-\refhead{Validation and errors}
+\remarkshead
 A function-only object has no coefficient evidence and raises
 \codeerr{pdmat}{FunctionOnly}\allowbreak\code{BernsteinTable}.  Unknown text
 options, repeated selectors, or invalid physical-cell selectors raise
@@ -1804,7 +1806,7 @@ h = plot(A, ..., Name, Value)
         matrix element.
 \end{itemize}
 
-\refhead{Validation and errors}
+\remarkshead
 An invalid parameter index, a repeated dimension, or a request for more than
 two plotting dimensions raises
 \codeerr{pdmat}{Invalid}\allowbreak\code{PlotDimensions}.  Malformed plotting
@@ -1958,9 +1960,9 @@ K = A * M
 K = M * A
 \end{lstlisting}
 
-For a fixed physical cell (c), let
+For one parameter, fix physical cell \(c\) and let
 \(A=\sum_iB_i^mA^{(c)}[i]\) and
-\(D=\sum_jB_j^nD^{(c)}[j]\).  Then (K=AD) has coefficients
+\(D=\sum_jB_j^nD^{(c)}[j]\).  Then \(K=AD\) has coefficients
 \[
   K^{(c)}[k]=\sum_{i+j=k}
   \frac{\binom mi\binom nj}{\binom{m+n}{k}}\,
@@ -2014,7 +2016,7 @@ For tensor data, label addition and binomial weights are applied independently
 in each parameter direction.  Two degree-one factors in two parameters produce
 degree two and \(3^2=9\) coefficients per physical cell.
 
-\refhead{Validation and errors}
+\remarkshead
 Incompatible operands for \code{+}, \code{-}, and \code{*} raise
 \codeerr{pdmat}{InvalidAddition},
 \codeerr{pdmat}{InvalidSubtraction}, or
@@ -2452,7 +2454,7 @@ deletion, or non-parenthesis assignment raises
 \codeerr{pdmat}{UnsupportedAssignment}; an incompatible right-hand side raises
 \codeerr{pdmat}{InvalidAssignment}.  Slicing and assignment require coefficient
 evidence and otherwise raise \codeerr{pdmat}{FunctionOnlyAlgebra}.
-\subsection{Limits}
+\subsection{Remarks}
 \label{sec:pdmat-limits}
 
 \begin{itemize}[leftmargin=*]
@@ -2688,7 +2690,7 @@ ans =
     -3     4
 \end{lstlisting}
 
-\refhead{Validation and errors}
+\remarkshead
 Missing dimensions, a missing grid, or a grid in the wrong argument position
 raises \codeerr{pdvar}{InvalidInput}.  Nonpositive or noninteger matrix sizes
 raise \codeerr{pdvar}{Invalid}\allowbreak\code{MatrixSize}; malformed degrees
@@ -2730,7 +2732,7 @@ D = rhodiff(P, rb)
 \end{itemize}
 
 For a one-parameter degree-one coefficient pair
-\(P^{(c)}[0],P^{(c)}[1]\) on physical cell (c) of width \(h_c\), the
+\(P^{(c)}[0],P^{(c)}[1]\) on physical cell \(c\) of width \(h_c\), the
 rate-dependent derivative row is
 \[
   \dot P(\rho,\dot\rho)
@@ -2744,7 +2746,7 @@ The implementation stores one row for each allowed rate vertex.
     align=center,minimum width=33mm,minimum height=10mm},
   result/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
     font=\scriptsize,align=center,minimum width=34mm,minimum height=10mm}]
-  \node[box] (p) {\(P^{(c)}[0],P^{(c)}[1]\)\\physical cell (c)};
+  \node[box] (p) {\(P^{(c)}[0],P^{(c)}[1]\)\\one-parameter cell \(c\)};
   \node[result,right=of p] (d)
     {\((P^{(c)}[1]-P^{(c)}[0])/h_c\)\\local derivative};
   \node[result,right=of d,yshift=8mm] (lo) {\(\dot\rho_{\min}\) row};
@@ -2758,7 +2760,7 @@ The implementation stores one row for each allowed rate vertex.
 rows.  Neither operation adds physical cells.}
 \end{center}
 
-\refhead{Validation and errors}
+\remarkshead
 Unsupported call arity or differentiating an expression that already contains
 rate-vertex rows raises \codeerr{pdvar}{InvalidDiff}.  Explicit malformed rate
 bounds raise \codeerr{pdvar}{Invalid}\allowbreak\code{RateBounds}.  Calling
@@ -2879,7 +2881,7 @@ disp(T)
         {[1]}        "(1-alpha)*internal(1) + alpha*internal(2)"
 \end{lstlisting}
 
-\refhead{Validation and errors}
+\remarkshead
 \code{bernsteinTable} is an inspection method, not a solver call.  Text options
 other than \code{"oneLine"}, repeated selectors, invalid physical-cell
 selectors, or inconsistent rate-vertex rows raise
@@ -3047,7 +3049,7 @@ quadratic in YALMIP decision coefficients.  The supported boundary is numeric
 or known \code{pdmat} data multiplying one affine \code{pdvar} expression on
 either side, with the written matrix order preserved.
 
-\refhead{Validation and errors}
+\remarkshead
 Incompatible affine operands raise \codeerr{pdvar}{InvalidAddition} or
 \codeerr{pdvar}{InvalidSubtraction}.  Bad dimensions, two decision-bearing
 factors, nonlinear symbolic data, or unsupported rate combinations raise
@@ -3547,7 +3549,7 @@ ans =
 \end{tikzpicture}
 \end{center}
 
-\subsection{Limits}
+\subsection{Remarks}
 \label{sec:pdvar-limits}
 
 \begin{itemize}[leftmargin=*]
@@ -3571,7 +3573,7 @@ ans =
 
 \code{pdlmi} stores YALMIP constraints assembled from square symmetric
 \code{pdvar} expressions.  Direct coefficient-wise assembly is the default;
-cell-local P\'olya elevation, a Putinar box quadratic module, and the full box
+cell-local P\'olya elevation, a dimension-aware Putinar selector, and the full box
 Bernstein--Gram preordering are explicit alternatives.  It is the package
 boundary between Bernstein objects and ordinary YALMIP solver calls.
 
@@ -3580,19 +3582,20 @@ boundary between Bernstein objects and ordinary YALMIP solver calls.
   box/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
     font=\scriptsize,align=center,minimum width=34mm,minimum height=13mm}]
   \node[box] (cmp) {\code{lhs <= rhs}\\store residual and relation};
-  \node[box,right=of cmp,yshift=21mm] (direct) {direct\\coefficient signs};
-  \node[box,right=of cmp,yshift=7mm] (polya) {P\'olya\\lossless elevation};
-  \node[box,right=of cmp,yshift=-7mm] (putinar) {Putinar\\singleton box generators};
-  \node[box,right=of cmp,yshift=-21mm] (box) {full box\\all generator products};
-  \node[box,right=16mm of polya,yshift=-7mm] (yal) {\code{toYalmip}\\finite constraints};
+  \node[box,right=of cmp,yshift=27mm] (direct) {direct\\coefficient signs};
+  \node[box,right=of cmp,yshift=9mm] (polya) {P\'olya\\lossless elevation};
+  \node[box,right=of cmp,yshift=-9mm] (putinar)
+    {Putinar\\1-D parity\\multi-D singletons};
+  \node[box,right=of cmp,yshift=-27mm] (box) {full box\\all generator products};
+  \node[box,right=22mm of polya,yshift=-9mm] (yal) {\code{toYalmip}\\finite constraints};
   \draw[->,thick,dpblue] (cmp.east) -- (direct.west);
   \draw[->,thick,dpblue] (cmp.east) -- (polya.west);
   \draw[->,thick,dpblue] (cmp.east) -- (putinar.west);
   \draw[->,thick,dpblue] (cmp.east) -- (box.west);
-  \draw[->,thick,dpblue] (direct.east) -- (yal.west);
-  \draw[->,thick,dpblue] (polya.east) -- (yal.west);
-  \draw[->,thick,dpblue] (putinar.east) -- (yal.west);
-  \draw[->,thick,dpblue] (box.east) -- (yal.west);
+  \draw[->,thick,dpblue] (direct.east) -- ([yshift=4.5mm]yal.west);
+  \draw[->,thick,dpblue] (polya.east) -- ([yshift=1.5mm]yal.west);
+  \draw[->,thick,dpblue] (putinar.east) -- ([yshift=-1.5mm]yal.west);
+  \draw[->,thick,dpblue] (box.east) -- ([yshift=-4.5mm]yal.west);
 \end{tikzpicture}
 
 \textit{The four certificate paths are alternatives.  Selecting P\'olya,
@@ -3614,7 +3617,7 @@ Count constraints &
 \hyperref[sec:pdlmi-direct]{direct coefficient constraints} \\
 Select P\'olya elevation &
 \hyperref[sec:pdlmi-polya]{\code{UsePolya}, \code{PolyaDegree}, and \code{applyPolya}} \\
-Select Putinar box module &
+Select Putinar certificate &
 \hyperref[sec:pdlmi-putinar]{\code{UsePutinar}, \code{PutinarOrder}, and
 \code{applyPutinar}} \\
 Select full box preordering &
@@ -3665,10 +3668,12 @@ C = lhs >= rhs
         \codeerr{pdlmi}{ConflictingPolyaOptions}.
   \item \code{UsePutinar} is a logical scalar option with default
         \code{false}.  Its bare form and the explicit value \code{true} select
-        the Putinar box module at the smallest admissible order.
+        the dimension-appropriate Putinar certificate at the smallest
+        admissible order.
   \item \code{PutinarOrder=r} is a finite nonnegative integer scalar and is an
-        absolute tensor Bernstein Gram order, not a degree increment.  Its
-        default and minimum are \(\lceil m/2\rceil\) for residual degree \(m\).
+        absolute Bernstein Gram order, not a degree increment.  For residual
+        degree \(m\), its default and minimum are \(\lfloor m/2\rfloor\) in
+        one parameter and \(\lceil m/2\rceil\) in two or more parameters.
         Supplying the order without \code{UsePutinar} enables Putinar assembly.
         Pairing \code{UsePutinar=false} with any explicit order, including
         zero, raises \codeerr{pdlmi}{ConflictingPutinarOptions}.
@@ -3767,7 +3772,7 @@ ans =
 \end{tikzpicture}
 \end{center}
 
-\refhead{Validation and errors}
+\remarkshead
 The constructor rejects a non-\code{pdvar} residual with
 \codeerr{pdlmi}{InvalidExpression}, a relation other than \code{"<="} or
 \code{">="} with \codeerr{pdlmi}{InvalidRelation}, and malformed, unknown, or
@@ -3807,16 +3812,20 @@ coefficients per cell, the number of stored constraints is \(N_cN_b\).  For a
 The idea is the Bernstein convex-hull property.  After orienting the relation
 as a positive-semidefinite target
 \[
-  S_{\boldsymbol c,v}(\boldsymbol\alpha)=
-  \sum_{\boldsymbol i}B_{\boldsymbol i}^m(\boldsymbol\alpha)
-  C^{(\boldsymbol c,v)}[\boldsymbol i],
+  S_{\mathbf c,v}(\boldsymbol\alpha)=
+  \sum_{\mathbf i}B_{\mathbf i}^m(\boldsymbol\alpha)
+  C^{(\mathbf c,v)}[\mathbf i],
 \]
 the direct certificate requires
-\(C^{(\boldsymbol c,v)}[\boldsymbol i]\succeq0\) for every physical cell
-\(\boldsymbol c\), active rate vertex \(v\), and local label
-\(\boldsymbol i\).  This is sufficient, not necessary.
+\(C^{(\mathbf c,v)}[\mathbf i]\succeq0\) for every physical cell
+\(\mathbf c\), active rate vertex \(v\), and local label
+\(\mathbf i\).  This is sufficient, not necessary.
 
 \begin{center}
+The diagram specializes to one parameter, degree two, and one ordinary
+(non-rate) row; therefore \(c\) is a scalar one-based cell index and
+\(i\in\{0,1,2\}\).
+
 \begin{tikzpicture}[>=Latex,node distance=5mm and 7mm,
   c/.style={draw=black!55,fill=white,rounded corners=2pt,font=\scriptsize,
     minimum width=14mm,minimum height=7mm},
@@ -3904,19 +3913,38 @@ decision degree, a grid refinement, or a Gram order.}
 The mathematical background and the limits of fixed-increment coefficient
 positivity are developed in \cref{app:certificates}.
 
-\subsection{Putinar Box Module And
+\subsection{Putinar Selection And
 \texorpdfstring{\code{applyPutinar}}{applyPutinar}}
 \label{sec:pdlmi-putinar}
 
-The Putinar mode is a fixed-order, box-specific Bernstein--Gram quadratic
-module.  After normalizing the relation so that the target
+The Putinar selector is dimension-aware.  With one parameter it deliberately
+uses the same exact even/odd Markov--Luk\'acs assembly as
+\code{applyFullBoxPreorder}.  For selected absolute order \(r\), the even form
+matches at degree \(2r\),
+\[
+  F=\mathcal Z_r^{\mathsf T}Q_0\mathcal Z_r
+    +\alpha(1-\alpha)
+      \mathcal Z_{r-1}^{\mathsf T}Q_1\mathcal Z_{r-1},
+\]
+where the second block is omitted at \(r=0\).  The odd form matches at degree
+\(2r+1\),
+\[
+  F=(1-\alpha)\mathcal Z_r^{\mathsf T}Q_L\mathcal Z_r
+    +\alpha\mathcal Z_r^{\mathsf T}Q_U\mathcal Z_r.
+\]
+All present Gram matrices are positive semidefinite.  The one-parameter
+default and minimum are \(r=\lfloor m/2\rfloor\) for residual degree \(m\).
+
+For two or more parameters, the selector instead uses the fixed-order,
+box-specific singleton-generator Bernstein--Gram quadratic module.  After
+normalizing the relation so that
 \(F(\boldsymbol\alpha)\) is positive semidefinite, it represents
 \[
   F(\boldsymbol\alpha)=S_0(\boldsymbol\alpha)
     +\sum_{s=1}^{\ell}\alpha_s(1-\alpha_s)
       S_s(\boldsymbol\alpha).
 \]
-Only the singleton box generators appear: products such as
+Only singleton box generators appear in this multivariate branch: products such as
 \(\alpha_1(1-\alpha_1)\alpha_2(1-\alpha_2)\) belong to the full-box
 preordering, not this module.
 
@@ -3926,14 +3954,14 @@ Cputinar = C.applyPutinar()
 Cputinar = C.applyPutinar(r)
 \end{lstlisting}
 
-Here \code{r} is an absolute tensor Bernstein Gram order.  The no-argument
-form selects \(r=\lceil m/2\rceil\), where \(m\) is the scalar degree of
-\code{C.Residual}; an explicit order must satisfy the same lower bound.  The
-unweighted block \(S_0\) uses tensor basis degree \(r\boldsymbol1\), while
-\(S_s\) uses degree \(r\boldsymbol1-\boldsymbol e_s\).  A nominal block with a
-negative component is omitted, which occurs for every multiplier at \(r=0\).
-The target is degree-elevated without changing its represented polynomial, and
-the Gram sum is matched exactly at tensor degree \(2r\).
+Here \code{r} is an absolute Bernstein Gram order.  The no-argument form uses
+the dimension-dependent minima above; an explicit order must satisfy the same
+applicable bound.  In the multivariate branch, the unweighted block \(S_0\)
+uses tensor basis degree \(r\boldsymbol1\), while \(S_s\) uses degree
+\(r\boldsymbol1-\boldsymbol e_s\).  A nominal block with a negative component
+is omitted, which occurs for every multiplier at \(r=0\).  The target is
+degree-elevated without changing its represented polynomial, and the
+multivariate Gram sum is matched exactly at tensor degree \(2r\).
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -3953,12 +3981,16 @@ direct: putinar=0, order=0, constraints=3
 selected: putinar=1, order=1, constraints=5
 \end{lstlisting}
 
-For this scalar degree-two cell, order one creates an unweighted Gram block of
-dimension two and one generator-weighted block of dimension one, followed by
-three exact coefficient identities.  Each physical cell and each active
+For this one-parameter scalar degree-two cell, order one uses the exact even
+Markov--Luk\'acs form: an unweighted Gram block of dimension two and one
+generator-weighted block of dimension one, followed by three exact coefficient
+identities.  The result is identical to
+\code{direct.applyFullBoxPreorder()}.  Each physical cell and each active
 rate-vertex row receives independent copies of these PSD blocks and identities.
 
 \begin{center}
+The diagram below specializes to the even one-parameter example above.
+
 \begin{tikzpicture}[node distance=7mm and 9mm,
   n/.style={dp/neutral,font=\scriptsize,align=center,minimum width=28mm,
     minimum height=11mm},
@@ -3982,12 +4014,13 @@ leaves \code{C} unchanged, and rebuilds from the original \code{Residual} and
 \code{Relation}.  Reapplication replaces any earlier P\'olya, Putinar, or
 full-box selection.  It adds no implicit margin and makes no solver call.
 
-\refhead{Validation and errors}
+\remarkshead
 \begingroup
 \setlength{\emergencystretch}{1em}
 Malformed orders raise
 \codeerr{pdlmi}{Invalid}\allowbreak\code{Putinar}\allowbreak\code{Order}; an integer below
-\(\lceil m/2\rceil\) raises
+\(\lfloor m/2\rfloor\) in one parameter, or below
+\(\lceil m/2\rceil\) in two or more parameters, raises
 \codeerr{pdlmi}{Putinar}\allowbreak\code{Order}\allowbreak\code{TooLow}.  The
 constructor rejects malformed selectors with
 \codeerr{pdlmi}{InvalidUse}\allowbreak\code{Putinar}, explicit false plus any supplied order with
@@ -4059,7 +4092,7 @@ by three exact Bernstein coefficient identities.
 \begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
   box/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
     font=\scriptsize,align=center,minimum width=34mm,minimum height=12mm}]
-  \node[box] (target) {cell-(c) target coefficients\\
+  \node[box] (target) {one-parameter cell \(c\)\\target coefficients\\
     \(C^{(c)}[0],C^{(c)}[1],C^{(c)}[2]\)};
   \node[box,right=15mm of target,yshift=9mm] (q0) {unweighted Gram block\\\(Q_0\succeq0\)};
   \node[box,right=15mm of target,yshift=-9mm] (q1) {box-weighted block\\
@@ -4074,7 +4107,8 @@ by three exact Bernstein coefficient identities.
 
 Appendix~\ref{app:certificates} derives the one-dimensional parity forms,
 explains the multivariate subset masks, and distinguishes this implemented
-  box preordering from the singleton-generator Putinar mode, full-space SOS,
+  box preordering from the multivariate singleton-generator Putinar branch,
+  full-space SOS,
   and general polynomial parsers.
 Assembly is independent for every physical cell and every active rate-vertex
 row; Gram variables are not shared across either boundary.  For \code{>=}, the
@@ -4084,7 +4118,7 @@ the stored constraints are ordered as all PSD Gram blocks followed by exact
 equalities matching every Bernstein coefficient.  Consequently, the number of
 stored constraints is not the direct coefficient count.
 
-\refhead{Validation and errors}
+\remarkshead
 Malformed orders raise \codeerr{pdlmi}{InvalidFullBoxOrder}; an admissible
 integer below the minimum raises \codeerr{pdlmi}{FullBoxOrderTooLow}.  The
 constructor rejects malformed selectors with
@@ -4457,7 +4491,7 @@ different rate-row and degree structures.
   axes/.style={draw=black!55,fill=white,rounded corners=2pt,
     font=\scriptsize,align=left,minimum width=64mm,minimum height=24mm,
     inner sep=5pt},
-  count/.style={draw=orange!80!black,fill=orange!10,rounded corners=2pt,
+  count/.style={draw=black!75,fill=black!3,rounded corners=2pt,dashed,
     font=\scriptsize,align=center,minimum width=64mm,minimum height=12mm,
     inner sep=4pt},
   merge/.style={draw=dpblue!85!black,fill=dpblue!12,rounded corners=2pt,
@@ -4569,10 +4603,11 @@ fact to motivate stronger certificates.
 
 \ideastep{Basic idea}
 Let a physical cell be
-\([\rho_{c-1},\rho_c]\), with width \(h_c=\rho_c-\rho_{c-1}>0\).  Its forward
+\([\rho_1^{(c)},\rho_1^{(c+1)}]\), with width
+\(h_c=\rho_1^{(c+1)}-\rho_1^{(c)}>0\).  Its forward
 local coordinate is
 \[
-  \alpha=\frac{\rho-\rho_{c-1}}{h_c}\in[0,1].
+  \alpha=\frac{\rho_1-\rho_1^{(c)}}{h_c}\in[0,1].
 \]
 \ideastep{Formula}
 The degree-one Bernstein basis is
@@ -4597,10 +4632,10 @@ For example, \(C^{(c)}[0]=2\) and \(C^{(c)}[1]=4\) give
 \begin{tikzpicture}[x=5.3cm,y=1.1cm,>=Latex]
   \draw[->,black!60] (-0.05,0) -- (1.08,0) node[right,font=\scriptsize]{\(\alpha\)};
   \draw[->,black!60] (0,-0.05) -- (0,1.08) node[above,font=\scriptsize]{basis weight};
-  \draw[very thick,dpblue] plot[domain=0:1,samples=40] (\x,{1-\x});
-  \draw[very thick,orange!80!black] plot[domain=0:1,samples=40] (\x,{\x});
-  \node[dpblue,font=\scriptsize,anchor=west] at (0.12,0.84) {\(B_0^1=1-\alpha\)};
-  \node[orange!80!black,font=\scriptsize,anchor=west] at (0.60,0.72) {\(B_1^1=\alpha\)};
+  \draw[very thick,black!85] plot[domain=0:1,samples=40] (\x,{1-\x});
+  \draw[very thick,black!85,densely dashed] plot[domain=0:1,samples=40] (\x,{\x});
+  \node[black!85,font=\scriptsize,anchor=west] at (0.12,0.84) {\(B_0^1=1-\alpha\)};
+  \node[black!85,font=\scriptsize,anchor=west] at (0.60,0.72) {\(B_1^1=\alpha\)};
   \foreach \x in {0,1}{\draw (\x,0.03)--(\x,-0.03)
     node[below,font=\scriptsize]{\(\x\)};}
 \end{tikzpicture}
@@ -4642,13 +4677,13 @@ For degree two,
 \begin{tikzpicture}[x=5.3cm,y=2.0cm,>=Latex]
   \draw[->,black!60] (-0.05,0) -- (1.08,0) node[right,font=\scriptsize]{\(\alpha\)};
   \draw[->,black!60] (0,-0.03) -- (0,1.08) node[above,font=\scriptsize]{\(B_i^2\)};
-  \draw[very thick,dpblue] plot[domain=0:1,samples=60] (\x,{(1-\x)^2});
-  \draw[very thick,orange!80!black] plot[domain=0:1,samples=60]
+  \draw[very thick,black!85] plot[domain=0:1,samples=60] (\x,{(1-\x)^2});
+  \draw[very thick,black!85,densely dashed] plot[domain=0:1,samples=60]
     (\x,{2*(1-\x)*\x});
-  \draw[very thick,green!45!black] plot[domain=0:1,samples=60] (\x,{\x^2});
-  \node[dpblue,font=\scriptsize] at (0.12,0.78) {\(B_0^2\)};
-  \node[orange!80!black,font=\scriptsize] at (0.50,0.57) {\(B_1^2\)};
-  \node[green!45!black,font=\scriptsize] at (0.87,0.78) {\(B_2^2\)};
+  \draw[very thick,black!85,dash dot] plot[domain=0:1,samples=60] (\x,{\x^2});
+  \node[black!85,font=\scriptsize] at (0.12,0.78) {\(B_0^2\)};
+  \node[black!85,font=\scriptsize] at (0.50,0.57) {\(B_1^2\)};
+  \node[black!85,font=\scriptsize] at (0.87,0.78) {\(B_2^2\)};
   \foreach \x in {0,0.5,1}{\draw (\x,0.02)--(\x,-0.02)
     node[below,font=\scriptsize]{\(\x\)};}
 \end{tikzpicture}
@@ -4727,8 +4762,8 @@ along one coordinate axis at a time.
 
 \subsection{Lossless Degree Elevation}
 
-A polynomial on physical cell (c) with degree (m) also has a Bernstein
-representation of every higher degree.  One elevation step gives
+In one parameter, a polynomial on physical cell \(c\) with degree \(m\) has a
+Bernstein representation of every higher degree.  One elevation step gives
 \[
   \widehat C^{(c)}[0]=C^{(c)}[0],\qquad
   \widehat C^{(c)}[k]=
@@ -4776,29 +4811,32 @@ new higher-degree \code{pdvar} does enlarge the decision parameterization.
 
 Suppose direction \(s\) has physical nodes
 \[
-  \rho_{s,0}<\rho_{s,1}<\cdots<\rho_{s,N_s-1}.
+  \rho_s^{(1)}<\rho_s^{(2)}<\cdots<\rho_s^{(k_s)}.
 \]
-The counts \(N_s\) may differ.  A physical node is identified by the
-\(\ell\)-vector \(\boldsymbol k\); a physical cell is identified separately by
-\(\boldsymbol c=(c_1,\ldots,c_\ell)\).  On that cell,
+The counts \(k_s\) may differ.  Thus
+\(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\) has
+\(\prod_s k_s\) physical nodes.  A physical hypercube is identified
+separately by the one-based multi-index
+\(\mathbf c=(c_1,\ldots,c_\ell)\).  On that hypercube,
 \[
   \alpha_s=
-  \frac{\rho_s-\rho_{s,c_s-1}}
-       {\rho_{s,c_s}-\rho_{s,c_s-1}},
+  \frac{\rho_s-\rho_s^{(c_s)}}
+       {\rho_s^{(c_s+1)}-\rho_s^{(c_s)}},
   \qquad s=1,\ldots,\ell.
 \]
 For the package's scalar degree \(m\),
 \[
-  M_{\boldsymbol c}(\boldsymbol\alpha)=
-  \sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
-  B_{\boldsymbol i}^{m}(\boldsymbol\alpha)
-  C^{(\boldsymbol c)}[\boldsymbol i],
+  C^{(\mathbf c)}(\boldsymbol\rho)=
+  \sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
+  B_{\mathbf i}^{m}(\boldsymbol\alpha)
+  C^{(\mathbf c)}[\mathbf i],
   \qquad
-  B_{\boldsymbol i}^{m}=
+  B_{\mathbf i}^{m}=
   \prod_{s=1}^{\ell}B_{i_s}^{m}(\alpha_s).
 \]
-There are \(\prod_s(N_s-1)\) physical cells and \((m+1)^\ell\) local
-coefficients per cell.
+There are \(\prod_s(k_s-1)\) physical hypercubes and \((m+1)^\ell\)
+zero-based local Bernstein labels per hypercube.  Physical node and hypercube
+indices remain one-based.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20 30 40]}, [1 1], 1);
@@ -4848,7 +4886,7 @@ coefficients.  Pairs with the same label sum contribute to the same output.
 For matrix payloads, ``ordered'' matters: the left factor stays on the left.
 
 \ideastep{Formula}
-Fix a physical cell (c), and let
+First consider one parameter and fix the one-based physical cell \(c\).  Let
 \[
   P=\sum_{i=0}^{m}B_i^mP^{(c)}[i],\qquad
   Q=\sum_{j=0}^{n}B_j^nQ^{(c)}[j].
@@ -4896,6 +4934,64 @@ The product degree in the transcript is three: degrees add, so
 \(2+1=3\).  The four outputs are coefficients in that cubic Bernstein basis,
 not values sampled at four points.
 
+The same calculation can be checked as a function identity.  On
+\(\alpha\in[0,1]\),
+\[
+  P(\alpha)=1+2\alpha+3\alpha^2,\qquad
+  Q(\alpha)=2+2\alpha,
+\]
+and
+\[
+  P(\alpha)Q(\alpha)
+  =2+6\alpha+10\alpha^2+6\alpha^3.
+\]
+
+\begin{center}
+\begin{tikzpicture}[x=2.55cm,y=2.05cm]
+  % Each panel has its own vertical normalization so all three shapes remain
+  % readable; the formulas and endpoint labels state the physical values.
+  \begin{scope}
+    \draw[->,black!60] (0,0)--(1.08,0) node[right,font=\tiny]{\(\alpha\)};
+    \draw[->,black!60] (0,0)--(0,1.08);
+    \draw[very thick,black!85] plot[domain=0:1,samples=60]
+      (\x,{(1+2*\x+3*\x*\x)/6});
+    \node[font=\scriptsize\bfseries] at (0.5,1.18) {Input \(P\), degree 2};
+    \node[font=\tiny,anchor=east] at (-0.03,0.17) {1};
+    \node[font=\tiny,anchor=east] at (-0.03,1) {6};
+    \draw[very thick,black!85] (0.12,-0.22)--(0.30,-0.22);
+    \node[font=\tiny,anchor=west] at (0.34,-0.22)
+      {\(P=1+2\alpha+3\alpha^2\)};
+  \end{scope}
+  \begin{scope}[xshift=3.3cm]
+    \draw[->,black!60] (0,0)--(1.08,0) node[right,font=\tiny]{\(\alpha\)};
+    \draw[->,black!60] (0,0)--(0,1.08);
+    \draw[very thick,black!85,densely dashed] plot[domain=0:1,samples=60]
+      (\x,{(2+2*\x)/4});
+    \node[font=\scriptsize\bfseries] at (0.5,1.18) {Input \(Q\), degree 1};
+    \node[font=\tiny,anchor=east] at (-0.03,0.5) {2};
+    \node[font=\tiny,anchor=east] at (-0.03,1) {4};
+    \draw[very thick,black!85,densely dashed] (0.12,-0.22)--(0.30,-0.22);
+    \node[font=\tiny,anchor=west] at (0.34,-0.22) {\(Q=2+2\alpha\)};
+  \end{scope}
+  \begin{scope}[xshift=6.6cm]
+    \draw[->,black!60] (0,0)--(1.08,0) node[right,font=\tiny]{\(\alpha\)};
+    \draw[->,black!60] (0,0)--(0,1.08);
+    \draw[ultra thick,black!85,dash dot] plot[domain=0:1,samples=60]
+      (\x,{(2+6*\x+10*\x*\x+6*\x*\x*\x)/24});
+    \node[font=\scriptsize\bfseries] at (0.5,1.18) {Product \(PQ\), degree 3};
+    \node[font=\tiny,anchor=east] at (-0.03,0.083) {2};
+    \node[font=\tiny,anchor=east] at (-0.03,1) {24};
+    \draw[ultra thick,black!85,dash dot] (0.06,-0.22)--(0.24,-0.22);
+    \node[font=\tiny,anchor=west] at (0.28,-0.22)
+      {\(PQ=2+6\alpha+10\alpha^2+6\alpha^3\)};
+  \end{scope}
+\end{tikzpicture}
+
+\textit{The line samples and formulas form a legend below the three plot
+regions.  Solid, dashed, and dash--dot strokes distinguish the functions
+without color; no label lies on a curve.}
+\end{center}
+
 \ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[node distance=11mm,
@@ -4928,10 +5024,10 @@ multiplication (\cref{sec:pdmat-operator-entries,sec:pdvar-algebra}).
 
 For tensor labels,
 \[
-  (PQ)^{(\boldsymbol c)}[\boldsymbol k]=
-  \sum_{\boldsymbol i+\boldsymbol j=\boldsymbol k}
-  P^{(\boldsymbol c)}[\boldsymbol i]
-  Q^{(\boldsymbol c)}[\boldsymbol j]
+  (PQ)^{(\mathbf c)}[\mathbf k]=
+  \sum_{\mathbf i+\mathbf j=\mathbf k}
+  P^{(\mathbf c)}[\mathbf i]
+  Q^{(\mathbf c)}[\mathbf j]
   \prod_{s=1}^{\ell}
   \frac{\binom m{i_s}\binom n{j_s}}
        {\binom{m+n}{k_s}}.
@@ -4947,7 +5043,7 @@ stored row per rate-box vertex.  Value continuity of \(P\) does not force the
 cell-local derivatives to match across a face.
 
 \ideastep{Formula}
-On physical cell (c) of width \(h_c\),
+For one parameter, on physical cell \(c\) of width \(h_c\),
 \[
   \frac{\partial P}{\partial\rho}
   =\frac{m}{h_c}\sum_{i=0}^{m-1}
@@ -4965,8 +5061,8 @@ In \(\ell\) dimensions, differentiation with respect to \(\rho_s\) replaces
 each coefficient by
 \[
   \frac{m}{h_s}
-  \left(C^{(\boldsymbol c)}[\boldsymbol i+\boldsymbol e_s]
-       -C^{(\boldsymbol c)}[\boldsymbol i]\right),
+  \left(C^{(\mathbf c)}[\mathbf i+\mathbf e_s]
+       -C^{(\mathbf c)}[\mathbf i]\right),
 \]
 reduces the degree along direction \(s\), and leaves the other label components
 unchanged.  The implementation elevates partial derivatives to a common tensor
@@ -5004,7 +5100,7 @@ it holds at every vertex.  \code{rhodiff} stores one row for each vertex.
 \subsection{de Casteljau Evaluation And Exact Subdivision}
 
 de Casteljau recursion evaluates a Bernstein polynomial using only affine
-combinations.  On a fixed physical cell (c), begin with
+combinations.  For one parameter, on a fixed physical cell \(c\), begin with
 \(C^{(c,0)}[i]=C^{(c)}[i]\) and define
 \[
   C^{(c,r)}[i]=(1-\tau)C^{(c,r-1)}[i]
@@ -5180,15 +5276,15 @@ combination of those coefficients has the same sign.  This yields a small,
 transparent sufficient certificate.
 
 \ideastep{Formula}
-On physical cell \(\boldsymbol c\) and one rate row, write
+On physical cell \(\mathbf c\) and one rate row, write
 \[
   S(\boldsymbol\alpha)=
-  \sum_{\boldsymbol i}B_{\boldsymbol i}^m(\boldsymbol\alpha)
-  C^{(\boldsymbol c)}[\boldsymbol i].
+  \sum_{\mathbf i}B_{\mathbf i}^m(\boldsymbol\alpha)
+  C^{(\mathbf c)}[\mathbf i].
 \]
 Because the basis weights are nonnegative and sum to one,
 \[
-  C^{(\boldsymbol c)}[\boldsymbol i]\succeq0\ \forall\boldsymbol i
+  C^{(\mathbf c)}[\mathbf i]\succeq0\ \forall\mathbf i
   \quad\Longrightarrow\quad S(\boldsymbol\alpha)\succeq0.
 \]
 This is the package default.  It introduces no Gram variables and creates one
@@ -5220,7 +5316,7 @@ the polynomial negative.
   \draw[dashed,black!45] (0,0.10)--(1,0.10);
   \node[font=\scriptsize,anchor=west] at (0.52,0.12) {minimum \(0.10\)};
   \node[coeff] at (0.12,-0.14) {\(0.35\)};
-  \node[coeff,fill=red!10,draw=red!65!black] at (0.50,-0.14) {\(-0.15\)};
+  \node[coeff,very thick,dashed] at (0.50,-0.14) {\textbf{*}\(-0.15\)};
   \node[coeff] at (0.88,-0.14) {\(0.35\)};
 \end{tikzpicture}
 
@@ -5386,12 +5482,20 @@ a Putinar quadratic module has the form
 Under the Archimedean hypothesis, every polynomial strictly positive on \(K\)
 has such a representation at some degree \cite{putinar1993}.  Compactness
 alone is not that theorem statement.  The package implements one box-specific,
-fixed-order instance, not a general-domain or general-generator parser.  With
-the local box generators
+fixed-order selector, not a general-domain or general-generator parser.
+
+For one parameter, \code{applyPutinar(r)} dispatches to the same exact
+even/odd Markov--Luk\'acs forms as \code{applyFullBoxPreorder(r)}.  Its absolute
+default and minimum are \(r=\lfloor m/2\rfloor\).  Even targets use the
+unweighted and \(\alpha(1-\alpha)\)-weighted Gram blocks and match at degree
+\(2r\); odd targets use the two endpoint-weighted Gram blocks and match at
+degree \(2r+1\).
+
+For \(\ell\ge2\), use the local box generators
 \[
   g_s(\boldsymbol\alpha)=\alpha_s(1-\alpha_s),
 \]
-\code{applyPutinar(r)} uses
+and \code{applyPutinar(r)} uses
 \[
   F=S_0+\sum_{s=1}^{\ell}g_sS_s,
   \qquad
@@ -5400,8 +5504,8 @@ the local box generators
   S_s=\mathcal Z_{r\boldsymbol1-\boldsymbol e_s}^{\mathsf T}Q_s
        \mathcal Z_{r\boldsymbol1-\boldsymbol e_s},
 \]
-where every present \(Q_s\succeq0\).  The order is absolute and satisfies
-\(r\ge\lceil m/2\rceil\).  Exact identities match the sign-normalized target,
+where every present \(Q_s\succeq0\).  In this multivariate branch the order is
+absolute and satisfies \(r\ge\lceil m/2\rceil\).  Exact identities match the sign-normalized target,
 elevated without changing it, at tensor degree \(2r\).  Negative-degree
 multiplier blocks are omitted at \(r=0\).  Each physical cell and active rate
 row owns independent Gram and equality blocks; no generator products, implicit

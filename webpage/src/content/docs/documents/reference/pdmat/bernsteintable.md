@@ -47,7 +47,7 @@ T = bernsteinTable(A, cellSubs, "oneLine")
 | `Value` | Stored numeric matrix coefficient. |
 
 Public formulas use the forward coordinate
-$\alpha=(\rho-\rho_k)/(\rho_{k+1}-\rho_k)$ and the normalized factors
+$\alpha=(\rho-\rho_1^{(c)})/(\rho_1^{(c+1)}-\rho_1^{(c)})$ and the normalized factors
 
 $$
 B_j^m(\alpha)=\binom{m}{j}(1-\alpha)^{m-j}\alpha^j.

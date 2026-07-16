@@ -24,6 +24,14 @@ const { caption, label, series, marker } = Astro.props;
 ---
 
 <DiagramFrame caption={caption} label={label} class="parameter-curve-diagram">
+  <div class="plot-legend" aria-label="Plot legend">
+    {series.map((item) => (
+      <span class:list={["plot-legend__item", `plot-tone--${item.tone ?? "first"}`]}>
+        <i aria-hidden="true"></i>{item.label}
+      </span>
+    ))}
+    {marker && <span class="curve-marker-readout"><strong>Selected:</strong> {marker.label}</span>}
+  </div>
   <svg viewBox="0 0 720 270" role="img" aria-label={label}>
     <g class="curve-grid">
       <path d="M58 220 H680 M58 166 H680 M58 112 H680 M58 58 H680" />
@@ -34,17 +42,15 @@ const { caption, label, series, marker } = Astro.props;
       <text x="680" y="252" text-anchor="middle">1</text>
       <text x="370" y="266" text-anchor="middle">ρ</text>
     </g>
-    {series.map((item, index) => (
+    {series.map((item) => (
       <g class:list={["curve-series", `curve-series--${item.tone ?? "first"}`]}>
         <path d={item.path} />
-        <text x="610" y={58 + index * 24}>{item.label}</text>
       </g>
     ))}
     {marker && (
       <g class="curve-marker">
         <line x1={marker.x} y1="44" x2={marker.x} y2="226" />
         <circle cx={marker.x} cy={marker.y} r="7" />
-        <text x={marker.x + 10} y={marker.y - 12}>{marker.label}</text>
       </g>
     )}
   </svg>
@@ -58,10 +64,7 @@ const { caption, label, series, marker } = Astro.props;
   .curve-series path { fill: none; stroke: var(--diagram-input); stroke-width: 4; stroke-linecap: round; }
   .curve-series--second path { stroke: var(--diagram-second); }
   .curve-series--result path { stroke: var(--diagram-result); }
-  .curve-series text { fill: var(--diagram-input); font-weight: 800; }
-  .curve-series--second text { fill: var(--diagram-second); }
-  .curve-series--result text { fill: var(--diagram-result); }
   .curve-marker line { stroke: var(--diagram-contribution); stroke-width: 1.5; stroke-dasharray: 5 5; }
   .curve-marker circle { fill: var(--sl-color-bg); stroke: var(--diagram-contribution); stroke-width: 4; }
-  .curve-marker text { fill: var(--diagram-contribution); font-weight: 800; }
+  .curve-marker-readout { margin-inline-start: auto; color: var(--diagram-contribution); font-size: 0.78rem; }
 </style>
