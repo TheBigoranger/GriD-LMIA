@@ -1,11 +1,22 @@
 function cons = mkGramCons(expr, relation, targetDeg, specs)
-    %MKGRAMCONS Assemble one specified Bernstein-Gram certificate per cell/row.
-    %   TARGETDEG is the common tensor matching degree. SPECS has one row per
-    %   PSD block: column one stores its tensor Gram degree and column two
-    %   stores [alpha; 1-alpha] weight exponents. The result contains the PSD
-    %   constraints followed by exact coefficient-matching equalities for
-    %   every physical cell and active rate row. Invalid matrix payloads raise
-    %   the same square/symmetry errors as direct assembly.
+    %MKGRAMCONS Assemble a specified Bernstein-Gram certificate per cell/row.
+    %
+    %   Syntax:
+    %     cons = mkGramCons(expr, relation, targetDeg, specs)
+    %
+    %   Arguments:
+    %     expr      - pdvar residual with local Bernstein coefficients.
+    %     relation  - Normalized "<=" or ">=" comparison relation.
+    %     targetDeg - Common tensor degree used for exact coefficient matching.
+    %     specs     - PSD-block specifications: Gram degree and [alpha; 1-alpha]
+    %                 weight exponents in each row.
+    %
+    %   Output:
+    %     cons - Cell column of PSD and exact coefficient-matching constraints.
+    %
+    %   The result contains one independent certificate per physical cell and
+    %   active rate row. Invalid matrix payloads raise the same square/symmetry
+    %   errors as direct coefficient assembly.
 
     vals = expr.elevVals(targetDeg - expr.Degree);
     cells = expr.cells();
@@ -48,7 +59,21 @@ function cons = mkGramCons(expr, relation, targetDeg, specs)
 end
 
 function [cons, coeffs] = mkCert(n, nPar, specs)
-    %MKCERT Create independent dense Gram blocks and sum their weighted maps.
+    %MKCERT Create dense Gram blocks and sum their weighted Bernstein maps.
+    %
+    %   Syntax:
+    %     [cons, coeffs] = mkCert(n, nPar, specs)
+    %
+    %   Arguments:
+    %     n    - Matrix dimension of each local residual coefficient.
+    %     nPar - Number of scheduling-parameter directions.
+    %     specs - PSD-block specifications from mkGramCons.
+    %
+    %   Output:
+    %     cons   - Cell column of PSD constraints for the active Gram blocks.
+    %     coeffs - Flat Bernstein coefficient cell for their weighted sum.
+    %
+    %   Negative nominal Gram degrees denote omitted order-zero multiplier blocks.
     cons = {};
     coeffs = {};
     for k = 1:size(specs, 1)

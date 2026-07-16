@@ -1,12 +1,12 @@
 function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPower)
-    %BERNGRAMCOEFFS Map a weighted tensor Bernstein Gram form to coefficients.
+    %BERNGRAMCOEFFS Map a weighted tensor Bernstein-Gram form to coefficients.
     %
     %   Syntax:
-    %     coeffs = bernGramCoeffs(Q, d, alphaPower, oneMinusAlphaPower)
+    %     coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPower)
     %
     %   Arguments:
-    %     Q                  - Square basis-major block Gram matrix.
-    %     d                  - Tensor Bernstein degree of the Gram basis.
+    %     gram               - Square basis-major block Gram matrix.
+    %     gramDegree         - Tensor Bernstein degree of the Gram basis.
     %     alphaPower         - Per-axis powers of alpha.
     %     oneMinusAlphaPower - Per-axis powers of 1-alpha.
     %
@@ -15,10 +15,10 @@ function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPowe
     %
     %   The result contains coefficients of alpha.^alphaPower .* ...
     %   (1-alpha).^oneMinusAlphaPower .* Z_d' * Q * Z_d.
-    %   d, alphaPower, and oneMinusAlphaPower each contain one nonnegative
-    %   integer per parameter direction.
-    %   Q uses basis-major blocks, with one matrix block per tensor label.
-    %   The tensor degree is 2*d + alphaPower + oneMinusAlphaPower.
+    %   gramDegree, alphaPower, and oneMinusAlphaPower each contain one
+    %   nonnegative integer per parameter direction. gram uses basis-major
+    %   blocks, with one matrix block per tensor label. The tensor degree is
+    %   2*gramDegree + alphaPower + oneMinusAlphaPower.
     %   Labels count alpha powers: label 0 is lower/left and label d is
     %   upper/right in each parameter direction.
     %
@@ -71,6 +71,20 @@ function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPowe
 end
 
 function out = rowVec(val, name)
+    %ROWVEC Normalize one finite real vector for Bernstein-Gram metadata.
+    %
+    %   Syntax:
+    %     out = rowVec(val, name)
+    %
+    %   Arguments:
+    %     val  - Finite real vector to normalize.
+    %     name - Argument name used in any validation error.
+    %
+    %   Output:
+    %     out - Double row vector with the values of val.
+    %
+    %   Errors:
+    %     Raises pdlmi:InvalidGramPowers when val is not finite and real.
     if ~isnumeric(val) || ~isreal(val) || isempty(val) || ~isvector(val) || ...
             any(~isfinite(val))
         error("pdlmi:InvalidGramPowers", "%s must be a finite real vector.", name);

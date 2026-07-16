@@ -10,24 +10,30 @@ function out = plus(lhs, rhs)
     %     P = pdvar(2, {[0 1]});
     %     C = P + eye(2);
 
-    if isa(lhs, "pdvar") && helper.isZero(lhs, "obj") && isa(rhs, "pdvar")
-        chkAddZero(lhs, rhs, "pdvar:InvalidAddition");
-        out = rhs;
-        return
-    end
-    if isa(lhs, "pdvar") && isa(rhs, "pdvar") && helper.isZero(rhs, "obj")
-        chkAddZero(rhs, lhs, "pdvar:InvalidAddition");
+    zeroVal = [];
+    if isa(lhs, "pdvar") && isa(rhs, "pdvar")
+        if helper.isZero(lhs, "obj")
+            zeroVal = lhs;
+            out = rhs;
+        elseif helper.isZero(rhs, "obj")
+            zeroVal = rhs;
+            out = lhs;
+        end
+    elseif isa(lhs, "pdvar") && isa(rhs, "pdmat") && helper.isZero(rhs, "obj")
+        zeroVal = rhs;
         out = lhs;
-        return
-    end
-    if isa(lhs, "pdvar") && isa(rhs, "pdmat") && helper.isZero(rhs, "obj")
-        chkAddZero(rhs, lhs, "pdvar:InvalidAddition");
-        out = lhs;
-        return
-    end
-    if isa(lhs, "pdmat") && helper.isZero(lhs, "obj") && isa(rhs, "pdvar")
-        chkAddZero(lhs, rhs, "pdvar:InvalidAddition");
+    elseif isa(lhs, "pdmat") && isa(rhs, "pdvar") && helper.isZero(lhs, "obj")
+        zeroVal = lhs;
         out = rhs;
+    end
+
+    % The identity fast path must still enforce ordinary addition compatibility.
+    if ~isempty(zeroVal)
+        if ~isequal(zeroVal.MatrixSize, out.MatrixSize)
+            error("pdvar:InvalidAddition", ...
+                "pdvar operand matrix sizes are incompatible for this operation.");
+        end
+        out.mergeGrid("pdvar:MixedGrid", zeroVal, out);
         return
     end
     if isa(lhs, "pdvar") && helper.isZero(rhs, "add", lhs.MatrixSize)
@@ -40,11 +46,4 @@ function out = plus(lhs, rhs)
     end
 
     out = binOp(lhs, rhs, @(a, b) a + b, "pdvar:InvalidAddition");
-end
-
-function chkAddZero(zeroVal, other, errId)
-    if ~isequal(zeroVal.MatrixSize, other.MatrixSize)
-        error(errId, "pdvar operand matrix sizes are incompatible for this operation.");
-    end
-    other.mergeGrid("pdvar:MixedGrid", zeroVal, other);
 end

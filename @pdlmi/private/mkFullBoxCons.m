@@ -1,5 +1,17 @@
 function cons = mkFullBoxCons(expr, relation, order)
-    %MKFULLBOXCONS Define and assemble the full box preordering blocks.
+    %MKFULLBOXCONS Define and assemble full-box-preordering constraints.
+    %
+    %   Syntax:
+    %     cons = mkFullBoxCons(expr, relation, order)
+    %
+    %   Arguments:
+    %     expr     - pdvar residual with local Bernstein coefficients.
+    %     relation - Normalized "<=" or ">=" comparison relation.
+    %     order    - Validated absolute full-box Gram order.
+    %
+    %   Output:
+    %     cons - Cell column of YALMIP Gram and coefficient-matching constraints.
+    %
     %   One parameter uses the parity-specific Markov-Lukacs specification.
     %   Multiple parameters use every subset mask of alpha_s(1-alpha_s), with
     %   all blocks passed to the shared cell/rate-row Gram assembler.

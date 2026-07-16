@@ -10,13 +10,14 @@ function out = minus(lhs, rhs)
     %     P = pdvar(2, {[0 1]});
     %     C = eye(2) - P;
 
-    if isa(lhs, "pdvar") && isa(rhs, "pdvar") && helper.isZero(rhs, "obj")
-        chkAddZero(rhs, lhs, "pdvar:InvalidSubtraction");
-        out = lhs;
-        return
-    end
-    if isa(lhs, "pdvar") && isa(rhs, "pdmat") && helper.isZero(rhs, "obj")
-        chkAddZero(rhs, lhs, "pdvar:InvalidSubtraction");
+    if isa(lhs, "pdvar") && (isa(rhs, "pdvar") || isa(rhs, "pdmat")) && ...
+            helper.isZero(rhs, "obj")
+        % The identity fast path must still enforce ordinary subtraction compatibility.
+        if ~isequal(rhs.MatrixSize, lhs.MatrixSize)
+            error("pdvar:InvalidSubtraction", ...
+                "pdvar operand matrix sizes are incompatible for this operation.");
+        end
+        lhs.mergeGrid("pdvar:MixedGrid", rhs, lhs);
         out = lhs;
         return
     end
@@ -30,11 +31,4 @@ function out = minus(lhs, rhs)
     end
 
     out = binOp(lhs, rhs, @(a, b) a - b, "pdvar:InvalidSubtraction");
-end
-
-function chkAddZero(zeroVal, other, errId)
-    if ~isequal(zeroVal.MatrixSize, other.MatrixSize)
-        error(errId, "pdvar operand matrix sizes are incompatible for this operation.");
-    end
-    other.mergeGrid("pdvar:MixedGrid", zeroVal, other);
 end

@@ -26,7 +26,7 @@ function testConstructorFormsAndInactiveDefaults(testCase)
 end
 
 function testDefaultOrderAcrossResidualDegrees(testCase)
-    expected = [0 1 1 2 2 3 3];
+    expected = [0 0 1 1 2 2 3];
     for degree = 0:6
         P = pdvar(1, {[0 1]}, Degree=degree);
         constructor = pdlmi(P, ">=", UsePutinar=true);
@@ -34,6 +34,22 @@ function testDefaultOrderAcrossResidualDegrees(testCase)
         applied = direct.applyPutinar();
         testCase.verifyEqual(constructor.PutinarOrder, expected(degree + 1));
         testCase.verifyEqual(applied.PutinarOrder, expected(degree + 1));
+    end
+end
+
+function testOneDimensionalPutinarMatchesFullBoxParityForm(testCase)
+    % The interval selector intentionally shares FullBox's exact parity form.
+    for degree = 0:5
+        P = pdvar(2, {[0 1]}, Degree=degree);
+        putinar = pdlmi(P, ">=", UsePutinar=true);
+        fullBox = pdlmi(P, ">=", UseFullBoxPreorder=true);
+        nPsd = 1 + (degree > 0);
+
+        testCase.verifyEqual(putinar.PutinarOrder, fullBox.FullBoxOrder);
+        testCase.verifyEqual(numel(putinar.Constraints), ...
+            numel(fullBox.Constraints));
+        testCase.verifyEqual(psdDimensions(putinar, nPsd), ...
+            psdDimensions(fullBox, nPsd));
     end
 end
 
@@ -111,8 +127,8 @@ function testDegreeZeroOddAndTensorBlockDimensions(testCase)
 
     % Order zero omits both nominal negative-degree multiplier blocks.
     verifyPutinar(testCase, constant, 0, 2, 1);
-    % Odd targets are elevated to even degree 2r rather than using parity facets.
-    verifyPutinar(testCase, odd, 2, [6 4], 5);
+    % One-dimensional odd targets use the Markov-Lukacs endpoint facets.
+    verifyPutinar(testCase, odd, 1, [4 4], 4);
     verifyPutinar(testCase, tensor, 1, [8 4 4], 9);
 end
 
@@ -133,10 +149,10 @@ function testSignsEveryCellAndRateRow(testCase)
     rate = derivative >= 0;
     rate = rate.applyPutinar();
     testCase.verifyEqual(size(derivative.coeffs(1)), [2 2]);
-    % Two cells and two rate rows each receive 2 PSD blocks plus 3 equalities.
-    testCase.verifyEqual(numel(rate.Constraints), 2 * 2 * 5);
-    psdIdx = reshape(((1:5:16)' + [0 1]).', 1, []);
-    testCase.verifyEqual(psdDimensionsAt(rate, psdIdx), repmat([2 1], 1, 4));
+    % Degree-one interval targets use two endpoint PSD blocks plus two equalities.
+    testCase.verifyEqual(numel(rate.Constraints), 2 * 2 * 4);
+    psdIdx = reshape(((1:4:13)' + [0 1]).', 1, []);
+    testCase.verifyEqual(psdDimensionsAt(rate, psdIdx), repmat([1 1], 1, 4));
 end
 
 function testMatrixValidationIdentifiers(testCase)

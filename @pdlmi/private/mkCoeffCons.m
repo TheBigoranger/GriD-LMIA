@@ -1,8 +1,21 @@
 function cons = mkCoeffCons(expr, relation, usePolya, pDeg)
     %MKCOEFFCONS Assemble direct or elevated coefficient constraints.
-    %   Each physical cell and active rate row produces one semidefinite
-    %   constraint per local Bernstein coefficient. Pólya selection changes
-    %   only the coefficient degree through exact elevation.
+    %
+    %   Syntax:
+    %     cons = mkCoeffCons(expr, relation, usePolya, pDeg)
+    %
+    %   Arguments:
+    %     expr     - pdvar residual with local Bernstein coefficients.
+    %     relation - Normalized "<=" or ">=" comparison relation.
+    %     usePolya - True to elevate coefficients before assembly.
+    %     pDeg     - Uniform Pólya elevation increment when usePolya is true.
+    %
+    %   Output:
+    %     cons - Cell column of YALMIP semidefinite constraints.
+    %
+    %   Each physical cell and active rate row produces one constraint per
+    %   local coefficient. Pólya selection changes only the coefficient degree
+    %   through exact elevation.
 
     if usePolya
         vals = expr.elevVals(pDeg);
