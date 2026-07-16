@@ -3,7 +3,7 @@ title: pdlmi applyPutinar
 description: Rebuild a PD-LMI residual with a fixed-order Putinar box Bernstein-Gram certificate.
 ---
 
-import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -12,6 +12,8 @@ import CertificateSpectrum from "../../../../../components/CertificateSpectrum.a
   <span>/</span>
   <span>applyPutinar</span>
 </nav>
+
+<CertificateNavigation selected="putinar" showSections={false} />
 
 ## Purpose
 
@@ -61,8 +63,6 @@ $r\mathbf 1-\mathbf e_s$; a block is omitted if that vector has a negative
 component. Every present Gram matrix is constrained positive semidefinite.
 The target is exactly elevated and matched coefficient by coefficient at
 tensor degree $2r\mathbf 1$.
-
-<CertificateSpectrum selected="putinar" />
 
 Each cell and rate row receives independent dense Gram blocks and independent
 coefficient equalities. The method does not share Gram variables across cells,
@@ -133,8 +133,6 @@ stored degree-two residual; it does not use the already elevated constraints.
   [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/)
   page, including `pdlmi:InvalidUsePutinar`,
   `pdlmi:ConflictingPutinarOptions`, and `pdlmi:ConflictingRelaxations`.
-
-## Limitations
 
 In one parameter, this selector uses the parity-specific Markov–Lukács
 interval certificate. In two or more parameters it implements only the

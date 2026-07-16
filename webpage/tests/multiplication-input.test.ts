@@ -55,7 +55,7 @@ test("nonfinite derived data reports both inputs and preserves the last valid pa
 
 test("nonfinite plot bounds cannot replace the last jointly valid pair", () => {
   const zeroRight = updateMultiplicationInput(initialMultiplicationInput, "right", "0");
-  assert.deepEqual(zeroRight.valid, { left: [1, 3], right: [0] });
+  assert.deepEqual(zeroRight.valid, { left: [4, 2], right: [0] });
 
   const unscalable = updateMultiplicationInput(zeroRight, "left", "1e308, -1e308");
   assert.match(unscalable.errors.left, /finite plot range/i);
@@ -76,5 +76,12 @@ test("accepts 256 coefficients, rejects 257, and recovers atomically", () => {
 
   const recovered = updateMultiplicationInput(oversized, "left", "5, 6");
   assert.deepEqual(recovered.errors, { left: "", right: "" });
-  assert.deepEqual(recovered.valid, { left: [5, 6], right: [2, 4] });
+  assert.deepEqual(recovered.valid, { left: [5, 6], right: [0.5, 3] });
+});
+
+test("uses the documented crossing defaults and exact normalized product", () => {
+  assert.deepEqual(initialMultiplicationInput.valid, {
+    left: [4, 2],
+    right: [0.5, 3],
+  });
 });

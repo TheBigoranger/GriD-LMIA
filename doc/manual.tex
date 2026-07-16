@@ -20,6 +20,8 @@
 \usepackage[numbered,framed]{matlab-prettifier}
 \usepackage{hyperref}
 \usepackage{cleveref}
+\usepackage{makeidx}
+\makeindex
 
 \usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,decorations.pathreplacing}
 
@@ -49,7 +51,13 @@
   dp/certificate/.style={draw=black!80,fill=white,rounded corners=2pt,densely dotted},
   dp/neutral/.style={draw=black!55,fill=white,rounded corners=2pt},
   dp/arrow/.style={->,semithick,draw=black!65},
-  dp/panel/.style={draw=black!18,rounded corners=3pt,inner sep=6pt}
+  dp/bus/.style={semithick,draw=black!65},
+  dp/panel/.style={draw=black!18,rounded corners=3pt,inner sep=6pt},
+  dp/card/.style={dp/certificate,align=center,font=\scriptsize,
+    text width=31mm,minimum height=17mm,inner sep=4pt},
+  dp/stage/.style={dp/neutral,align=center,font=\scriptsize,
+    minimum width=29mm,minimum height=12mm,inner sep=4pt},
+  dp/label/.style={font=\scriptsize,align=center,text=black!80}
 }
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.3em}
@@ -99,39 +107,31 @@
 
 \lstdefinestyle{dpoutput}{
   basicstyle=\ttfamily\scriptsize,
-  breaklines=false,
+  breaklines=true,
   columns=fullflexible,
   keepspaces=true,
-  frame=single,
-  rulecolor=\color{black!45},
-  backgroundcolor=\color{black!3},
-  framesep=4pt,
-  framerule=0.55pt,
-  aboveskip=0.45\baselineskip,
-  belowskip=0.95\baselineskip,
-  title={\textcolor{black!75}{\sffamily\bfseries\footnotesize Output}},
+  frame=none,
+  backgroundcolor=\color{white},
+  aboveskip=-0.45\baselineskip,
+  belowskip=0.8\baselineskip,
   numbers=none
 }
 
 \lstdefinestyle{dpwideoutput}{
   basicstyle=\ttfamily\tiny,
-  breaklines=false,
+  breaklines=true,
   columns=fullflexible,
   keepspaces=true,
-  frame=single,
-  rulecolor=\color{black!45},
-  backgroundcolor=\color{black!3},
-  framesep=4pt,
-  framerule=0.55pt,
-  aboveskip=0.45\baselineskip,
-  belowskip=0.95\baselineskip,
-  title={\textcolor{black!75}{\sffamily\bfseries\footnotesize Output}},
+  frame=none,
+  backgroundcolor=\color{white},
+  aboveskip=-0.45\baselineskip,
+  belowskip=0.8\baselineskip,
   numbers=none
 }
 
-% Keep short reference listings together; long transcripts may still flow
-% naturally when they exceed the remaining page height.
-\AtBeginEnvironment{lstlisting}{\needspace{6\baselineskip}}
+% Listings may break naturally.  Reference headings provide their own modest
+% keep-with-next space; avoiding a global listing reservation prevents the
+% large blank areas that short Syntax blocks previously created.
 
 \newcommand{\pkg}{PD-LMI package}
 \newcommand{\matlab}{MATLAB}
@@ -156,7 +156,7 @@
   \noindent\textcolor{dpblue}{\sffamily\bfseries #1.}\enspace}
 
 \title{\pkg\\User Manual}
-\author{Version v0.3.5}
+\author{Version v0.3.6}
 \date{July 2026}
 
 \begin{document}
@@ -169,7 +169,8 @@ finite semidefinite program.  Its core representation is a continuous
 piecewise-polynomial matrix function on a physical cell grid, expressed in a
 cell-local tensor-product Bernstein basis.  A worked \(2\)-by-\(2\) LPV
 Lyapunov problem first introduces quadratic decisions, physical cells, local
-Bernstein coefficients, matrix algebra, parameter-rate vertices, certificate
+Bernstein coefficients, matrix algebra, parameter-rate vertices\index{rate vertex},
+certificate\index{certificate}
 selection, and the YALMIP boundary.  The
 reference chapters then document \code{pdbase}, \code{pdmat}, \code{pdvar}, and
 \code{pdlmi}.  Two self-contained appendices develop the Bernstein and
@@ -186,12 +187,12 @@ calculus but have not previously used Bernstein bases or SOS certificates.
 
 Let the scheduling vector be
 \(\boldsymbol\rho=(\rho_1,\ldots,\rho_\ell)\in\mathcal P\).  A
-\emph{parameter-dependent LMI} is abbreviated \emph{PD-LMI} throughout this
+\emph{parameter-dependent LMI}\index{PD-LMI} is abbreviated \emph{PD-LMI} throughout this
 manual and is the umbrella problem class named by the package.  When a model
 also uses the bounded rate
 \(\dot{\boldsymbol\rho}\in\mathcal V\) and derivatives of its decision
 functions, we call it a \emph{differentiable parameter-dependent LMI}, or
-\emph{DPD-LMI}.  A canonical DPD-LMI is
+\emph{DPD-LMI}\index{DPD-LMI}.  A canonical DPD-LMI is
 \begin{equation*}
   \sum_i R_i(\boldsymbol\rho)
     \left(\sum_{j=1}^{\ell}
@@ -247,15 +248,72 @@ certificate choice.  Explicit labels repeat every role, and arrows show
 reading order.  When a relation has many contributions, separate panels
 replace crossing edge fans.  Blue is reserved for decorative framing.
 
+\subsection{Why The Package Uses Bernstein Polynomials}
+\label{sec:bernstein-motivation}
+
+On one normalized cell, the degree-\(m\) Bernstein
+polynomial\index{Bernstein polynomial} basis is
+\index{Bernstein basis}
+\[
+  B_i^m(\alpha)=\binom mi(1-\alpha)^{m-i}\alpha^i,
+  \qquad i=0,\ldots,m,
+\]
+where \(\alpha\in[0,1]\) is the forward local
+coordinate\index{local coordinate}.  The basis functions are nonnegative and
+form a partition of unity\index{partition of unity}.  Therefore a matrix
+polynomial \(C(\alpha)=\sum_iB_i^m(\alpha)C[i]\) lies in the convex hull of
+its Bernstein coefficients\index{Bernstein coefficient}.  This
+convex-hull property\index{convex-hull property} turns matrix-sign questions
+into finite sufficient coefficient tests.  Exact degree
+elevation\index{degree elevation} aligns operands without changing their
+values, tensor-product bases\index{tensor-product basis} extend the same
+reasoning to boxes, and separate cell-local storage handles nonuniform
+physical partitions without inventing global samples.
+
+The coefficients are not power-basis coefficients.  For example,
+\[
+  p(\alpha)=1+2\alpha+3\alpha^2
+    =B_0^2(\alpha)+2B_1^2(\alpha)+6B_2^2(\alpha).
+\]
+Thus the degree\index{degree} is two and the Bernstein coefficient row is
+\([1,2,6]\).  The basis sum remains one, so elevation can change this row
+while preserving exactly the same polynomial.
+
+The representation is local even when the physical domain is
+two-dimensional.  The following degree-two matrix example has grid
+\(\{[0,0.5,1],[0,1]\}\), hence two physical cells and nine local coefficient
+matrices per cell.  The public traversal methods return physical-cell rows and
+zero-based local labels; the accessor and the nested
+\code{LocalValues}\index{LocalValues@\texttt{LocalValues}} storage path select
+the same leaf.
+
+\begin{lstlisting}[style=dpmatlab]
+grid2 = {[0 .5 1], [0 1]};
+A2 = pdmat(grid2, @(rho1,rho2) ...
+    [1+rho1+rho2, rho1*rho2; ...
+     rho1*rho2,   2+rho1^2], Degree=2);
+physicalCells = A2.cells()
+localLabels = A2.lbls()
+secondCellCoefficients = A2.coeffs([2 1])
+sameLeaf = A2.LocalValues{2}{1}
+\end{lstlisting}
+
+Both final variables are the flat nine-entry coefficient cell for physical
+cell \([2,1]\); they are not a \(3\)-by-\(3\) grid of point samples.  The
+remaining construction details, exact power-to-Bernstein conversion, and
+tensor ordering are developed in Appendix~\ref{app:bernstein-math}.
+
 \subsection{Separate Physical Nodes, Cells, And Local Labels}
 
-For one parameter choose physical grid nodes
+For one parameter choose physical grid\index{physical grid} nodes
+\index{physical node}
 \[
   \rho_1^{(1)}<\rho_1^{(2)}<\rho_1^{(3)}.
 \]
 The subscript identifies the parameter direction, while the parenthesized
 superscript identifies the one-based physical node.  The two physical
-cells have separate identities \(c=1\) and \(c=2\):
+cells\index{physical cell/hypercube} have separate identities \(c=1\) and
+\(c=2\):
 \([\rho_1^{(1)},\rho_1^{(2)}]\) and
 \([\rho_1^{(2)},\rho_1^{(3)}]\).  On cell \(c\), define the
 forward coordinate
@@ -270,24 +328,27 @@ positions, not additional physical nodes:
 \]
 
 \begin{center}
-\begin{tikzpicture}[x=3.0cm,y=1cm,>=Latex,
+\begin{tikzpicture}[x=3.0cm,y=1cm,
   coeff/.style={draw=dpblue!75!black,rounded corners=2pt,fill=dpbluewash,
     font=\scriptsize,minimum width=10mm,minimum height=6mm}]
   \draw[very thick,black!55] (0,0) -- (2,0);
   \foreach \x/\lab in {0/{\rho_1^{(1)}},1/{\rho_1^{(2)}},2/{\rho_1^{(3)}}}{
     \filldraw[fill=white,draw=black!70] (\x,0) circle (1.6pt);
     \node[above=2pt,font=\small] at (\x,0) {$\lab$};}
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (0,-0.18) -- (1,-0.18)
-    node[midway,below=6pt,font=\scriptsize]{physical cell (c=1)};
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (1,-0.18) -- (2,-0.18)
-    node[midway,below=6pt,font=\scriptsize]{physical cell (c=2)};
-  \node[coeff] at (0.13,-0.82) {$C^{(1)}[0]$};
-  \node[coeff] at (0.50,-0.82) {$C^{(1)}[1]$};
-  \node[coeff] at (0.87,-0.82) {$C^{(1)}[2]$};
-  \node[coeff] at (1.13,-0.82) {$C^{(2)}[0]$};
-  \node[coeff] at (1.50,-0.82) {$C^{(2)}[1]$};
-  \node[coeff] at (1.87,-0.82) {$C^{(2)}[2]$};
-  \node[align=center,font=\scriptsize] at (1,-1.38)
+  \node[dp/label,anchor=east] at (-0.08,0.38) {physical\\nodes};
+  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (0,-0.22) -- (1,-0.22)
+    node[midway,below=7pt,font=\scriptsize]{cell \(c=1\)};
+  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (1,-0.22) -- (2,-0.22)
+    node[midway,below=7pt,font=\scriptsize]{cell \(c=2\)};
+  \node[dp/label,anchor=east] at (-0.08,-0.48) {physical\\cells};
+  \node[coeff] at (0.13,-1.05) {$C^{(1)}[0]$};
+  \node[coeff] at (0.50,-1.05) {$C^{(1)}[1]$};
+  \node[coeff] at (0.87,-1.05) {$C^{(1)}[2]$};
+  \node[coeff] at (1.13,-1.05) {$C^{(2)}[0]$};
+  \node[coeff] at (1.50,-1.05) {$C^{(2)}[1]$};
+  \node[coeff] at (1.87,-1.05) {$C^{(2)}[2]$};
+  \node[dp/label,anchor=east] at (-0.08,-1.05) {local\\coefficients};
+  \node[align=center,font=\scriptsize] at (1,-1.65)
     {direction subscripts, parenthesized node indices, cell identity, and local labels have different jobs};
 \end{tikzpicture}
 \end{center}
@@ -299,37 +360,42 @@ coefficient of each cell is an interior control, not a physical-grid sample.
 
 \begin{lstlisting}[style=dpmatlab]
 M = pdmat([0 0.5 1], {10, 15, 20, 25, 30}, Degree=2);
-disp(M.cells())
-disp(M.lbls())
-fprintf("cells=%d, coefficients per cell=%d\n", M.ncell(), M.ncoeff());
-c1 = M.coeffs(1);
-c2 = M.coeffs(2);
-disp([c1{:}])
-disp([c2{:}])
+physicalCells = M.cells()
+localLabels = M.lbls()
+physicalCellCount = M.ncell()
+coefficientsPerCell = M.ncoeff()
+cell1Coefficients = cell2mat(M.coeffs(1))
+cell2Coefficients = cell2mat(M.coeffs(2))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
+physicalCells =
      1
      2
-
+localLabels =
      0
      1
      2
-
-cells=2, coefficients per cell=3
+physicalCellCount =
+     2
+coefficientsPerCell =
+     3
+cell1Coefficients =
     10    15    20
+cell2Coefficients =
     20    25    30
 \end{lstlisting}
 
 The shared value \(20\) belongs to the physical interface
 \(\rho_1^{(2)}\).  It is
 seen as \(C^{(1)}[2]\) from the left cell and \(C^{(2)}[0]\) from the right.
-This is \(C^0\) face sharing: values meet, but the two cell-local derivatives
+This is \(C^0\) face sharing\index{continuity}: values meet, but the two cell-local derivatives
 need not agree.  Consequently the representation is a continuous
 piecewise-polynomial Bernstein representation on a gridding partition, not a
 B-spline construction and not a claim of global differentiability.
 
 \subsection{Store Known Data And Decisions On The Grid}
+\index{pdmat@\texttt{pdmat}}\index{pdvar@\texttt{pdvar}}
 
 The known LPV matrix in the worked example is affine in \(\rho\).  The
 physical grid has two cells, \([0,0.5]\) and \([0.5,1]\).  Supplying
@@ -341,13 +407,23 @@ yalmip('clear')
 grid = {[0 0.5 1]};
 A = pdmat(grid, @(rho) [-1, 0.5; -1, -2] + ...
     rho * [-1.3, -20; 2, -10], Degree=1);
-fprintf("A: %d-by-%d, cells=%d, degree=%d, coefficients/cell=%d\n", ...
-    size(A,1), size(A,2), A.ncell(), A.Degree, A.ncoeff());
-disp(A.evaluate(0))
+matrixSize = size(A)
+physicalCellCount = A.ncell()
+degree = A.Degree
+coefficientsPerCell = A.ncoeff()
+A0 = A.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-A: 2-by-2, cells=2, degree=1, coefficients/cell=2
+matrixSize =
+     2     2
+physicalCellCount =
+     2
+degree =
+     1
+coefficientsPerCell =
+     2
+A0 =
    -1.0000    0.5000
    -1.0000   -2.0000
 \end{lstlisting}
@@ -360,15 +436,25 @@ shared; the two interior controls remain independent.
 
 \begin{lstlisting}[style=dpmatlab]
 P = pdvar(2, grid, "symmetric", Degree=2);
-fprintf("P: %d-by-%d, degree=%d, continuous=%d\n", ...
-    size(P,1), size(P,2), P.Degree, P.IsContinuous);
-fprintf("local coefficients/cell=%d, global controls=%d\n", ...
-    numel(P.coeffs(1)), 2 * P.Degree + 1);
+matrixSize = size(P)
+degree = P.Degree
+isContinuous = P.IsContinuous
+localCoefficientsPerCell = numel(P.coeffs(1))
+globalControlCount = 2 * P.Degree + 1
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-P: 2-by-2, degree=2, continuous=1
-local coefficients/cell=3, global controls=5
+matrixSize =
+     2     2
+degree =
+     2
+isContinuous =
+  logical
+   1
+localCoefficientsPerCell =
+     3
+globalControlCount =
+     5
 \end{lstlisting}
 
 \begin{center}
@@ -416,19 +502,25 @@ coefficients are
   R^{(c)}[3]=P_2A_1.
 \]
 The pairs are first grouped by the anti-diagonal relation \(k=i+j\), then
-combined with the binomial weights.  This is a weighted convolution, not a
+combined with the binomial weights.  This is an ordered
+convolution\index{ordered convolution}, not a
 samplewise product.  Matrix order is preserved in every contribution.
 
 \begin{lstlisting}[style=dpmatlab]
 PA = P * A;
 ATP = A' * P;
-fprintf("degree(P*A)=%d, degree(A'*P)=%d\n", PA.Degree, ATP.Degree);
-fprintf("coefficient matrices in P*A=%d\n", numel(PA.coeffs(1)));
+degreePA = PA.Degree
+degreeATP = ATP.Degree
+coefficientCountPA = numel(PA.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-degree(P*A)=3, degree(A'*P)=3
-coefficient matrices in P*A=4
+degreePA =
+     3
+degreeATP =
+     3
+coefficientCountPA =
+     4
 \end{lstlisting}
 
 \begin{center}
@@ -486,14 +578,22 @@ checking both vertices \(-1\) and \(+1\) covers the whole interval
 
 \begin{lstlisting}[style=dpmatlab]
 D = rhodiff(P, [-1 1]);
-fprintf("derivative degree=%d, continuous=%d\n", D.Degree, D.IsContinuous);
-fprintf("rate rows=%d, coefficients per row=%d\n", ...
-    size(D.coeffs(1),1), size(D.coeffs(1),2));
+derivativeDegree = D.Degree
+isContinuous = D.IsContinuous
+rateRowCount = size(D.coeffs(1),1)
+coefficientsPerRow = size(D.coeffs(1),2)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-derivative degree=1, continuous=0
-rate rows=2, coefficients per row=2
+derivativeDegree =
+     1
+isContinuous =
+  logical
+   0
+rateRowCount =
+     2
+coefficientsPerRow =
+     2
 \end{lstlisting}
 
 \begin{center}
@@ -510,7 +610,7 @@ rate rows=2, coefficients per row=2
 \end{tikzpicture}
 \end{center}
 
-\subsection{Compare The Residual And Choose A Certificate}
+\subsection{Compare The Residual And Choose A Certificate}\index{residual}
 
 The following MATLAB expressions are a direct transcription of
 \cref{eq:canonical-positive,eq:lpv-spine}.  On each cell, addition elevates the
@@ -521,14 +621,18 @@ changing their represented values.
 residual = D + P * A + A' * P;
 Cdecay = residual <= -1e-6 * eye(2);
 Cpositive = P >= eye(2);
-fprintf("residual degree=%d\n", residual.Degree);
-fprintf("direct constraints: decay=%d, positivity=%d\n", ...
-    numel(Cdecay.Constraints), numel(Cpositive.Constraints));
+residualDegree = residual.Degree
+decayConstraintCount = numel(Cdecay.Constraints)
+positivityConstraintCount = numel(Cpositive.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-residual degree=3
-direct constraints: decay=16, positivity=6
+residualDegree =
+     3
+decayConstraintCount =
+    16
+positivityConstraintCount =
+     6
 \end{lstlisting}
 
 There are two physical cells, two rate vertices, and four degree-three local
@@ -544,29 +648,45 @@ the same stored residual but change the finite sufficient certificate:
 Cpolya = Cdecay.applyPolya(1);
 Cputinar = Cdecay.applyPutinar();
 Cbox = Cdecay.applyFullBoxPreorder();
-fprintf("direct=%d, Polya(1)=%d, Putinar=%d, full-box=%d\n", ...
-    numel(Cdecay.Constraints), numel(Cpolya.Constraints), ...
-    numel(Cputinar.Constraints), numel(Cbox.Constraints));
+directConstraintCount = numel(Cdecay.Constraints)
+polyaConstraintCount = numel(Cpolya.Constraints)
+putinarConstraintCount = numel(Cputinar.Constraints)
+fullBoxConstraintCount = numel(Cbox.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-direct=16, Polya(1)=20, Putinar=28, full-box=24
+directConstraintCount =
+    16
+polyaConstraintCount =
+    20
+putinarConstraintCount =
+    28
+fullBoxConstraintCount =
+    24
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
-  mode/.style={draw=dpblue!75!black,rounded corners=2pt,fill=dpbluewash,
-    align=center,font=\scriptsize,minimum width=35mm,minimum height=14mm}]
-  \node[mode] (res) {stored residual\\physical cells and rate rows};
-  \node[mode,right=of res,yshift=27mm] (direct) {direct\\sign of every coefficient};
-  \node[mode,right=of res,yshift=9mm] (polya) {P\'olya\\elevate, then test coefficients};
-  \node[mode,right=of res,yshift=-9mm] (putinar)
-    {Putinar\\exact parity (1-D) /\\singleton module (multi-D)};
-  \node[mode,right=of res,yshift=-27mm] (box) {full box\\all generator products + identities};
-  \draw[->,thick,dpblue] (res.east) -- (direct.west);
-  \draw[->,thick,dpblue] (res.east) -- (polya.west);
-  \draw[->,thick,dpblue] (res.east) -- (putinar.west);
-  \draw[->,thick,dpblue] (res.east) -- (box.west);
+\begin{tikzpicture}[node distance=5mm and 4mm]
+  \node[dp/card,text width=23mm] (direct)
+    {\textbf{Direct}\\test coefficient signs};
+  \node[dp/card,text width=23mm,right=of direct] (polya)
+    {\textbf{P\'olya}\\elevate, then test};
+  \node[dp/card,text width=23mm,below=of direct] (putinar)
+    {\textbf{Putinar}\\parity in 1-D;\\singletons in multi-D};
+  \node[dp/card,text width=23mm,right=of putinar] (box)
+    {\textbf{Full Box}\\all generator products};
+  \node[dp/panel,fit=(direct)(polya)(putinar)(box),inner sep=4mm] (options) {};
+  \node[dp/label,above=3pt of options] {choose exactly one};
+  \node[dp/known,left=6mm of options,align=center,font=\scriptsize,
+    text width=24mm,minimum height=18mm] (res)
+    {stored residual\\cells \(\times\) rate rows};
+  \node[dp/contribution,right=6mm of options,align=center,font=\scriptsize,
+    minimum width=15mm,minimum height=17mm] (export) {\code{toYalmip}};
+  \node[dp/result,right=3mm of export,align=center,font=\scriptsize,
+    text width=18mm,minimum height=17mm] (yal) {YALMIP\\Constraint};
+  \draw[dp/arrow] (res.east) -- (options.west);
+  \draw[dp/arrow] (options.east) -- (export.west);
+  \draw[dp/arrow] (export.east) -- (yal.west);
 \end{tikzpicture}
 
 \textit{A failed sufficient certificate does not prove that the continuous
@@ -582,12 +702,15 @@ select a solver, add an objective, or insert a margin.
 \begin{lstlisting}[style=dpmatlab]
 Fdecay = toYalmip(Cdecay);
 Fpositive = Cpositive.toYalmip();
-fprintf("exported constraints: decay=%d, positivity=%d\n", ...
-    length(Fdecay), length(Fpositive));
+decayConstraintCount = length(Fdecay)
+positivityConstraintCount = length(Fpositive)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-exported constraints: decay=16, positivity=6
+decayConstraintCount =
+    16
+positivityConstraintCount =
+     6
 \end{lstlisting}
 
 Use ordinary YALMIP calls after that boundary:
@@ -599,7 +722,7 @@ if exist('mosekopt', 'file') ~= 0
 end
 opts = sdpsettings('solver', solver, 'verbose', 0);
 sol = optimize([Fdecay, Fpositive], [], opts);
-fprintf("YALMIP problem code: %d\n", sol.problem);
+problemCode = sol.problem
 \end{lstlisting}
 
 The final code is produced by the installed solver and should be interpreted
@@ -616,13 +739,17 @@ create a \(3\)-by-\(2\) array of six physical cells:
 \begin{lstlisting}[style=dpmatlab]
 grid2 = {[-1 0 0.5 1], [10 15 20]};
 G = pdbase(grid2, [1 1], 1);
-fprintf("physical cells=%d, coefficients per cell=%d\n", ...
-    G.ncell(), G.ncoeff());
-disp(G.cells())
+physicalCellCount = G.ncell()
+coefficientsPerCell = G.ncoeff()
+physicalCells = G.cells()
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-physical cells=6, coefficients per cell=4
+physicalCellCount =
+     6
+coefficientsPerCell =
+     4
+physicalCells =
      1     1
      1     2
      2     1
@@ -736,8 +863,7 @@ Then exercise known-data inspection and the solver-facing assembly boundary:
 
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1]}, {1, 3}, Degree=1);
-T = bernsteinTable(A, "oneLine");
-disp(T)
+T = bernsteinTable(A, "oneLine")
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
@@ -770,7 +896,7 @@ sol = optimize(F, objective, opts);
 \subsection{Global Function Lookup}
 \label{sec:global-lookup}
 
-\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\begin{tabularx}{\textwidth}{@{}lY@{}}
 \toprule
 Category & Entries \\
 \midrule
@@ -813,6 +939,7 @@ LMIs &
 \end{tabularx}
 
 \section{\texorpdfstring{\code{pdbase}}{pdbase} Backend Reference}
+\index{pdbase@\texttt{pdbase}}
 \label{sec:pdbase}
 
 \code{pdbase} is the developer-facing backend parent for \code{pdmat} and
@@ -824,7 +951,7 @@ by both public modeling classes.
 \subsection{Lookup}
 \label{sec:pdbase-lookup}
 
-\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\begin{tabularx}{\textwidth}{@{}lY@{}}
 \toprule
 Task & Function or field \\
 \midrule
@@ -894,35 +1021,35 @@ parameter has one interval.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20]}, [2 2], 1);
-class(obj)
-obj.MatrixSize
-obj.Degree
-obj.ncell()
-obj.ncoeff()
-obj.npar()
-size(obj)
+objectClass = class(obj)
+matrixSize = obj.MatrixSize
+degree = obj.Degree
+cellCount = obj.ncell()
+coefficientCount = obj.ncoeff()
+parameterCount = obj.npar()
+objectSize = size(obj)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+objectClass =
     'pdbase'
 
-ans =
+matrixSize =
      2     2
 
-ans =
+degree =
      1
 
-ans =
+cellCount =
      2
 
-ans =
+coefficientCount =
      4
 
-ans =
+parameterCount =
      2
 
-ans =
+objectSize =
      2     2
 \end{lstlisting}
 
@@ -947,7 +1074,7 @@ expressions.  Malformed payloads raise
 and \code{HasRateDependence=true} require compatible nonempty
 \code{RateBounds}.
 
-\subsection{Storage Fields}
+\subsection{Storage Fields}\index{GridInfo@\texttt{GridInfo}}
 \label{sec:pdbase-fields}
 
 \begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}Y@{}}
@@ -968,26 +1095,30 @@ Field & Meaning \\
 
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[>=Latex,
-      store/.style={draw=dpblue!80!black,rounded corners=2pt,fill=dpbluewash,
-        align=center,font=\small,inner sep=4pt},
-      leaf/.style={draw=black!55,rounded corners=2pt,fill=white,
-        align=center,font=\scriptsize,inner sep=4pt}]
-    \node[store] (root) at (0,0) {\texttt{LocalValues}};
-    \node[store] (first) at (2.55,1.15) {first physical\\cell index \texttt{\{1\}}};
-    \node[store] (second) at (2.55,-1.15) {first physical\\cell index \texttt{\{2\}}};
-    \node[leaf] (leafone) at (6.0,1.15) {\texttt{LocalValues\{1\}\{1\}}\\[2pt]
-      \(\{C^{(1,1)}[0,0],C^{(1,1)}[0,1],
-             C^{(1,1)}[1,0],C^{(1,1)}[1,1]\}\)};
-    \node[leaf] (leaftwo) at (6.0,-1.15) {\texttt{LocalValues\{2\}\{1\}}\\[2pt]
-      \(\{C^{(2,1)}[0,0],C^{(2,1)}[0,1],
-             C^{(2,1)}[1,0],C^{(2,1)}[1,1]\}\)};
-    \draw[->,dpblue!75!black,thick] (root.east) -- (first.west);
-    \draw[->,dpblue!75!black,thick] (root.east) -- (second.west);
-    \draw[->,dpblue!75!black,thick] (first.east) -- (leafone.west);
-    \draw[->,dpblue!75!black,thick] (second.east) -- (leaftwo.west);
-    \node[align=center,font=\scriptsize] at (3.1,2.0)
-      {second physical index is \texttt{\{1\}} in both leaves};
+  \begin{tikzpicture}[node distance=7mm and 12mm,
+      store/.style={dp/known,align=center,font=\scriptsize,
+        minimum width=33mm,minimum height=10mm,inner sep=4pt},
+      leaf/.style={dp/result,align=left,font=\scriptsize,
+        text width=58mm,minimum height=18mm,inner sep=5pt}]
+    \node[store] (root) {\texttt{LocalValues}\\nested root};
+    \node[store,below left=of root] (first)
+      {first index \texttt{\{1\}}\\cell path \([1,\cdot]\)};
+    \node[store,below right=of root] (second)
+      {first index \texttt{\{2\}}\\cell path \([2,\cdot]\)};
+    \node[leaf,below=of first] (leafone)
+      {\texttt{LocalValues\{1\}\{1\}}\\
+       labels \([0,0],[0,1],[1,0],[1,1]\)\\
+       values \(C^{(1,1)}[\mathbf i]\)};
+    \node[leaf,below=of second] (leaftwo)
+      {\texttt{LocalValues\{2\}\{1\}}\\
+       labels \([0,0],[0,1],[1,0],[1,1]\)\\
+       values \(C^{(2,1)}[\mathbf i]\)};
+    \draw[dp/arrow] (root.south) -- ++(0,-3mm) -| (first.north);
+    \draw[dp/arrow] (root.south) -- ++(0,-3mm) -| (second.north);
+    \draw[dp/arrow] (first.south) -- (leafone.north);
+    \draw[dp/arrow] (second.south) -- (leaftwo.north);
+    \node[dp/label,above=3pt of root]
+      {second physical index is \texttt{\{1\}} on both paths};
   \end{tikzpicture}
   \caption{Nested cell-local storage for a two-parameter, degree-one object
   on \code{{[0 1 2], [10 20]}}.  There are two physical cells, \([1,1]\)
@@ -1048,24 +1179,24 @@ coefficient entries with labels \([0,0]\), \([0,1]\), \([1,0]\), and
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20]}, [1 1], 1);
-lbls(obj)
-cells(obj)
+labels = lbls(obj)
+physicalCells = cells(obj)
 c = coeffs(obj, [2 1]);
-numel(c)
+coefficientCount = numel(c)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+labels =
      0     0
      0     1
      1     0
      1     1
 
-ans =
+physicalCells =
      1     1
      2     1
 
-ans =
+coefficientCount =
      4
 \end{lstlisting}
 
@@ -1107,25 +1238,29 @@ independently of the grid shape.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20]}, [2 3], 1);
-fprintf('ncell = %d\n', obj.ncell());
-fprintf('ncoeff = %d\n', obj.ncoeff());
-fprintf('npar = %d\n', obj.npar());
-disp(size(obj))
-disp(size(obj, 1))
-disp(size(obj, 2))
-disp(size(obj, 3))
+physicalCellCount = obj.ncell()
+coefficientCount = obj.ncoeff()
+parameterCount = obj.npar()
+matrixSize = size(obj)
+rowCount = size(obj, 1)
+columnCount = size(obj, 2)
+thirdDimension = size(obj, 3)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ncell = 2
-ncoeff = 4
-npar = 2
-     2     3
-
+physicalCellCount =
      2
-
+coefficientCount =
+     4
+parameterCount =
+     2
+matrixSize =
+     2     3
+rowCount =
+     2
+columnCount =
      3
-
+thirdDimension =
      1
 \end{lstlisting}
 
@@ -1213,11 +1348,11 @@ out = bernElev(obj, coeffs, fromDeg, toDeg)
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
 B = pdmat({[0 1]}, {1, 2, 3}, Degree=2);
 C = A + B;
-C.Degree
+degree = C.Degree
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+degree =
      2
 \end{lstlisting}
 
@@ -1229,6 +1364,7 @@ with the source degree and parameter dimension raises
 \codeerr{pdbase}{InvalidCoefficientCell}.
 
 \subsubsection{\texorpdfstring{\code{bernProd}}{bernProd}}
+\index{bernProd@\texttt{bernProd}}
 \label{sec:pdbase-bernprod}
 
 \textit{Internal/protected mechanism.}  This signature documents the backend
@@ -1267,20 +1403,22 @@ derivation in Appendix~\ref{app:bernstein-math}.
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
 P = A * A;
-c = P.coeffs(1);
-fprintf("degree=%d; coefficients=", P.Degree)
-disp([c{:}])
+degree = P.Degree
+coefficients = cell2mat(P.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-degree=2; coefficients=     1     2     4
+degree =
+     2
+coefficients =
+     1     2     4
 \end{lstlisting}
 
 The example invokes the protected helper through public matrix multiplication;
 users do not call \code{bernProd} directly.  Even for scalar data, the middle
 coefficient comes from two ordered contributions rather than from one sample.
 
-\subsubsection{\texorpdfstring{\code{mergeGrid}}{mergeGrid}}
+\subsubsection{\texorpdfstring{\code{mergeGrid}}{mergeGrid}}\index{mergeGrid@\texttt{mergeGrid}}
 \label{sec:pdbase-mergegrid}
 
 \textit{Internal/protected mechanism.}  This signature documents the backend
@@ -1312,16 +1450,40 @@ directly by users.
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
 B = pdmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
 C = A + B;
-C.GridInfo.Vectors{1}
+commonGrid = C.GridInfo.Vectors{1}
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+commonGrid =
          0    0.5000    1.0000
 \end{lstlisting}
 
 The example invokes the protected helper through public addition; users do not
 call \code{mergeGrid} directly.
+
+\begin{center}
+\begin{tikzpicture}[x=4.9cm,y=0.9cm]
+  \node[dp/label,anchor=east] at (-0.08,1.05) {grid \(A\)};
+  \draw[very thick,black!60] (0,1.05)--(1,1.05);
+  \foreach \x in {0,1}{\filldraw[fill=white] (\x,1.05) circle (1.5pt);}
+  \node[dp/label,anchor=east] at (-0.08,0.45) {grid \(B\)};
+  \draw[very thick,black!60] (0,0.45)--(1,0.45);
+  \foreach \x in {0,0.5,1}{\filldraw[fill=white] (\x,0.45) circle (1.5pt);}
+  \node[dp/contribution,align=center,font=\scriptsize] (union)
+    at (1.55,0.75) {sorted union of\\interior nodes};
+  \draw[dp/arrow] (1.02,1.05)--(union.west);
+  \draw[dp/arrow] (1.02,0.45)--(union.west);
+  \node[dp/label,anchor=east] at (-0.08,-0.45) {common refinement};
+  \draw[very thick,dpblue] (0,-0.45)--(1,-0.45);
+  \foreach \x/\lab in {0/0,0.5/{0.5},1/1}{
+    \filldraw[fill=white,draw=black!70] (\x,-0.45) circle (1.6pt);
+    \node[below=2pt,font=\scriptsize] at (\x,-0.45) {\(\lab\)};}
+  \draw[dp/arrow] (union.south) |- (1.02,-0.45);
+\end{tikzpicture}
+
+\textit{No extra breakpoint is introduced: the sorted union is the unique
+minimal same-bound grid that contains every input node.}
+\end{center}
 
 \subsection{See Also}
 \code{pdmat}, \code{pdvar}, \code{cells}, \code{coeffs}, \code{lbls},
@@ -1340,7 +1502,7 @@ do not expose coefficient evidence for \code{bernsteinTable} or coefficient alge
 \subsection{Lookup}
 \label{sec:pdmat-lookup}
 
-\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\begin{tabularx}{\textwidth}{@{}lY@{}}
 \toprule
 Task & Entry \\
 \midrule
@@ -1392,19 +1554,24 @@ A = pdmat(gridVectors, source, Degree=m)
 \end{itemize}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=5mm and 10mm,
-  src/.style={draw=black!55,fill=white,rounded corners=2pt,font=\scriptsize,
-    align=center,minimum width=34mm,minimum height=9mm},
-  result/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
-    font=\scriptsize,align=center,minimum width=39mm,minimum height=12mm}]
-  \node[src] (f) {function handle\\exact evaluator};
-  \node[src,below=of f] (g) {global coefficient grid\\shared physical nodes};
-  \node[src,below=of g] (l) {nested \code{LocalValues}\\cell-local coefficients};
-  \node[result,right=of g] (a) {\code{pdmat}\\grid + matrix size + degree\\
+\begin{tikzpicture}[node distance=5mm and 9mm]
+  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
+    minimum height=11mm] (f) {function handle\\exact evaluator};
+  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
+    minimum height=11mm,below=of f] (g)
+    {global coefficient grid\\shared physical nodes};
+  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
+    minimum height=11mm,below=of g] (l)
+    {nested \code{LocalValues}\\cell-local coefficients};
+  \node[dp/contribution,right=of g,align=center,font=\scriptsize,
+    minimum width=17mm,minimum height=17mm] (or) {\textbf{one}\\source};
+  \node[dp/result,right=of or,align=center,font=\scriptsize,text width=39mm,
+    minimum height=17mm] (a) {\code{pdmat}\\grid, size, degree,\\
     optional coefficient evidence};
-  \draw[->,thick,dpblue] (f.east) -- (a.west);
-  \draw[->,thick,dpblue] (g.east) -- (a.west);
-  \draw[->,thick,dpblue] (l.east) -- (a.west);
+  \draw[dp/arrow] (f.east) -| ([xshift=-2mm]or.north);
+  \draw[dp/arrow] (g.east) -- (or.west);
+  \draw[dp/arrow] (l.east) -| ([xshift=-2mm]or.south);
+  \draw[dp/arrow] (or.east) -- (a.west);
 \end{tikzpicture}
 \end{center}
 
@@ -1415,22 +1582,22 @@ cells with degree one.
 
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat([0 1 2], {10, 20, 30}, Degree=1)
-size(A)
-A.Degree
-A.SourceSummary
+matrixSize = size(A)
+degree = A.Degree
+sourceSummary = A.SourceSummary
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
 A =
   pdmat [1 1] over 1-D grid, degree 1, source coefficient-backed
 
-ans =
+matrixSize =
      1     1
 
-ans =
+degree =
      1
 
-ans =
+sourceSummary =
     "coefficient-backed"
 \end{lstlisting}
 
@@ -1439,18 +1606,18 @@ matches the global coefficient grid implied by the two parameter directions.
 
 \begin{lstlisting}[style=dpmatlab]
 B = pdmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1)
-B.GridInfo.Vectors{2}
-B.lbls()
+secondGridVector = B.GridInfo.Vectors{2}
+labels = B.lbls()
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
 B =
   pdmat [1 1] over 2-D grid, degree 1, source coefficient-backed
 
-ans =
+secondGridVector =
     10    20
 
-ans =
+labels =
      0     0
      0     1
      1     0
@@ -1463,18 +1630,18 @@ directly.  Here each cell stores two \(1\times2\) row-vector coefficients.
 \begin{lstlisting}[style=dpmatlab]
 localVals = {{[1 0], [0 1]}, {[2 0], [0 2]}};
 C = pdmat({[0 1 2]}, localVals, Degree=1)
-size(C)
-C.coeffs(2)
+matrixSize = size(C)
+secondCellCoefficients = C.coeffs(2)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
 C =
   pdmat [1 2] over 1-D grid, degree 1, source coefficient-backed
 
-ans =
+matrixSize =
      1     2
 
-ans =
+secondCellCoefficients =
   1x2 cell array
     {[2 0]}    {[0 2]}
 \end{lstlisting}
@@ -1484,18 +1651,18 @@ object keeps the exact evaluator but does not claim coefficient evidence.
 
 \begin{lstlisting}[style=dpmatlab]
 F = pdmat({[0 1]}, @(rho) [rho rho^2])
-F.SourceSummary
-F.evaluate(0.5)
+sourceSummary = F.SourceSummary
+evaluatedValue = F.evaluate(0.5)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
 F =
   pdmat [1 2] over 1-D grid, degree 1, source function
 
-ans =
+sourceSummary =
     "function"
 
-ans =
+evaluatedValue =
     0.5000    0.2500
 \end{lstlisting}
 
@@ -1505,18 +1672,18 @@ used for point evaluation.
 
 \begin{lstlisting}[style=dpmatlab]
 G = pdmat({[0 1]}, @(rho) rho.^2, Degree=2)
-G.SourceSummary
-G.coeffs(1)
+sourceSummary = G.SourceSummary
+firstCellCoefficients = G.coeffs(1)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
 G =
   pdmat [1 1] over 1-D grid, degree 2, source function-bernstein
 
-ans =
+sourceSummary =
     "function-bernstein"
 
-ans =
+firstCellCoefficients =
   1x3 cell array
     {[0]}    {[0]}    {[1]}
 \end{lstlisting}
@@ -1558,6 +1725,7 @@ with mismatched shared faces is retained as discontinuous data and emits
 warning \codeerr{pdmat}{Discontinuous}\allowbreak\code{LocalValues}.
 
 \subsection{\texorpdfstring{\code{evaluate}}{evaluate}}
+\index{evaluate@\texttt{evaluate}}
 \label{sec:pdmat-evaluate}
 
 \syntaxhead
@@ -1596,19 +1764,26 @@ For a degree-one scalar coefficient-backed object on
 The same local-coordinate rule is applied entrywise for matrix-valued data.
 
 \begin{center}
-\begin{tikzpicture}[x=5.2cm,y=1cm,>=Latex]
-  \draw[very thick,black!55] (0,0) -- (1,0);
-  \filldraw[fill=white] (0,0) circle (1.7pt)
-    node[above=3pt,font=\scriptsize] {\(A^{(c)}[0]=2\)};
-  \filldraw[fill=white] (1,0) circle (1.7pt)
-    node[above=3pt,font=\scriptsize] {\(A^{(c)}[1]=4\)};
-  \filldraw[fill=dpblue] (0.25,0) circle (1.8pt)
-    node[below=4pt,font=\scriptsize] {\(\alpha=0.25\)};
-  \draw[->,dpblue,thick] (0.25,-0.32) -- (0.25,-0.05);
-  \node[font=\scriptsize,align=center] at (0.5,-0.72)
-    {\(A=0.75A^{(c)}[0]+0.25A^{(c)}[1]=2.5\)\\
-     local interpolation, not nearest-node sampling};
+\begin{tikzpicture}[x=5.4cm,y=0.72cm]
+  \draw[->,black!65] (0,0)--(1.08,0) node[right,font=\scriptsize] {\(\rho\)};
+  \draw[->,black!65] (0,0)--(0,4.35) node[above,font=\scriptsize] {\(A(\rho)\)};
+  \draw[very thick,dpblue,domain=0:1,samples=70,smooth]
+    plot (\x,{2+6*\x-5*\x*\x});
+  \foreach \x/\y/\lab in {0/2/{A^{(c)}[0]=2},0.5/3.75/{A^{(c)}[1]=5},1/3/{A^{(c)}[2]=3}}{
+    \filldraw[fill=white,draw=black!70] (\x,\y) circle (1.5pt);
+    \node[above=3pt,font=\scriptsize] at (\x,\y) {\(\lab\)};}
+  \def\evalx{0.35}
+  \def\evaly{3.4875}
+  \draw[densely dashed,black!60] (\evalx,0)--(\evalx,\evaly);
+  \filldraw[fill=dpblue,draw=dpblue] (\evalx,\evaly) circle (1.7pt);
+  \node[below=3pt,font=\scriptsize] at (\evalx,0)
+    {\(\rho_\star\)};
+  \node[dp/label,anchor=west] at (0.39,2.65)
+    {\(\code{Astar=A.evaluate(rhoStar)}\)};
 \end{tikzpicture}
+
+\textit{Evaluation follows the degree-two Bernstein curve with coefficients
+\([2,5,3]\); the dashed line locates the requested physical point.}
 \end{center}
 
 \examplehead
@@ -1658,6 +1833,7 @@ val =
 \label{sec:pdmat-visualization}
 
 \subsubsection{\texorpdfstring{\code{bernsteinTable}}{bernsteinTable}}
+\index{bernsteinTable@\texttt{bernsteinTable}}
 \label{sec:pdmat-table}
 
 \syntaxhead
@@ -1709,8 +1885,7 @@ function and does not create solver constraints.}
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1]}, {[0 1], [1 2]}, Degree=1);
-T = bernsteinTable(A, 1, "oneLine");
-disp(T)
+T = bernsteinTable(A, 1, "oneLine")
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
@@ -1724,8 +1899,7 @@ Use the full table when the metadata columns are the point of the example:
 
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1]}, {1, 2, 3}, Degree=2);
-T = bernsteinTable(A);
-disp(T)
+T = bernsteinTable(A)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpwideoutput]
@@ -1779,7 +1953,7 @@ A =
   Function handle: false
 \end{lstlisting}
 
-\subsubsection{\texorpdfstring{\code{plot}}{plot}}
+\subsubsection{\texorpdfstring{\code{plot}}{plot}}\index{plot@\texttt{plot}}
 \label{sec:pdmat-plot}
 
 \syntaxhead
@@ -1823,24 +1997,21 @@ an interactive figure window.
 fig = figure('Visible','off');
 A = pdmat({[0 1]}, @(rho) [rho, rho^2]);
 h = plot(A, SamplesPerCell=4, LineWidth=2);
-numel(h)
-numel(h(1).XData)
-h(1).LineWidth
-h(1).YData([1 end])
+graphicsHandleCount = numel(h)
+sampleCount = numel(h(1).XData)
+lineWidth = h(1).LineWidth
+endpointValues = h(1).YData([1 end])
 close(fig)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+graphicsHandleCount =
      2
-
-ans =
+sampleCount =
      5
-
-ans =
+lineWidth =
      2
-
-ans =
+endpointValues =
      0     1
 \end{lstlisting}
 
@@ -1897,13 +2068,14 @@ alignment visible.
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
 B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
 S = A + B;
-cS = S.coeffs(1);
-fprintf("sum degree=%d\n", S.Degree);
-disp([cS{:}])
+sumDegree = S.Degree
+sumCoefficients = cell2mat(S.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-sum degree=2
+sumDegree =
+     2
+sumCoefficients =
    11.0000   21.5000   32.0000
 \end{lstlisting}
 
@@ -1914,16 +2086,18 @@ Subtraction and unary signs act immediately on the same local coefficients.
 \begin{lstlisting}[style=dpmatlab]
 D = 5 - A;
 N = -A;
-cD = D.coeffs(1);
-fprintf("5-A coefficients: "); disp([cD{:}])
-fprintf("-A at rho=1: %.0f\n", N.evaluate(1));
-fprintf("class(+A) = %s\n", class(+A));
+differenceCoefficients = cell2mat(D.coeffs(1))
+negativeAtOne = N.evaluate(1)
+positiveClass = class(+A)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-5-A coefficients:      4     3
--A at rho=1: -2
-class(+A) = pdmat
+differenceCoefficients =
+     4     3
+negativeAtOne =
+    -2
+positiveClass =
+    'pdmat'
 \end{lstlisting}
 
 \begin{center}
@@ -1974,13 +2148,14 @@ The left/right matrix order is never exchanged.
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
 B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
 K = A * B;
-cK = K.coeffs(1);
-fprintf("product degree=%d\n", K.Degree);
-disp([cK{:}])
+productDegree = K.Degree
+productCoefficients = cell2mat(K.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-product degree=3
+productDegree =
+     3
+productCoefficients =
    10.0000   20.0000   36.6667   60.0000
 \end{lstlisting}
 
@@ -2013,8 +2188,19 @@ readable without crossing contribution arrows.}
 \end{center}
 
 For tensor data, label addition and binomial weights are applied independently
-in each parameter direction.  Two degree-one factors in two parameters produce
-degree two and \(3^2=9\) coefficients per physical cell.
+in each parameter direction.  If \(\mathbf m,\mathbf n\in\mathbb N^\ell\)
+are direction-wise basis degrees, the \(\ell\)-dimensional ordered convolution
+is
+\[
+ K^{(\mathbf c)}[\mathbf k]
+ =\sum_{\mathbf i+\mathbf j=\mathbf k}
+   \left(\prod_{s=1}^{\ell}
+   \frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
+        {\binom{m_s+n_s}{k_s}}\right)
+   A^{(\mathbf c)}[\mathbf i]D^{(\mathbf c)}[\mathbf j].
+\]
+Two degree-one factors in two parameters produce degree two and \(3^2=9\)
+coefficients per physical cell.
 
 \remarkshead
 Incompatible operands for \code{+}, \code{-}, and \code{*} raise
@@ -2054,8 +2240,6 @@ n = length(A)
 n = numel(A)
 n = ndims(A)
 tf = isequal(A, B, ...)
-disp(A)
-display(A)
 idx = end(A, k, n)
 n = numArgumentsFromSubscript(A, S, ctx)
 \end{lstlisting}
@@ -2063,17 +2247,31 @@ n = numArgumentsFromSubscript(A, S, ctx)
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1]}, ...
     {[1 2 3; 4 5 6], [10 20 30; 40 50 60]}, Degree=1);
-fprintf("size=%d-by-%d, height=%d, width=%d\n", ...
-    size(A,1), size(A,2), height(A), width(A));
-fprintf("length=%d, numel=%d, ndims=%d, equal(+A)=%d\n", ...
-    length(A), numel(A), ndims(A), isequal(A,+A));
-disp(A)
+matrixSize = size(A)
+rowCount = height(A)
+columnCount = width(A)
+longestDimension = length(A)
+elementCount = numel(A)
+dimensionCount = ndims(A)
+equalsUnaryPlus = isequal(A,+A)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-size=2-by-3, height=2, width=3
-length=3, numel=6, ndims=2, equal(+A)=1
-pdmat [2 3] over 1-D grid, degree 1, source coefficient-backed
+matrixSize =
+     2     3
+rowCount =
+     2
+columnCount =
+     3
+longestDimension =
+     3
+elementCount =
+     6
+dimensionCount =
+     2
+equalsUnaryPlus =
+  logical
+   1
 \end{lstlisting}
 
 A function-only object can use shape queries and compares its stored metadata
@@ -2101,20 +2299,25 @@ A = pdmat({[0 1]}, ...
     {[1 2 3; 4 5 6], [10 20 30; 40 50 60]}, Degree=1);
 T = A.';
 H = A';
-fprintf("transpose size=%d-by-%d, equal forms=%d\n", ...
-    size(T,1), size(T,2), isequal(T,H));
-disp(T.evaluate(0))
+transposeSize = size(T)
+formsEqual = isequal(T,H)
+transposeAtZero = T.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-transpose size=3-by-2, equal forms=1
+transposeSize =
+     3     2
+formsEqual =
+  logical
+   1
+transposeAtZero =
      1     4
      2     5
      3     6
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=12mm,
+\begin{tikzpicture}[>=Latex,node distance=28mm,
   a/.style={matrix of math nodes,nodes={draw=black!45,minimum size=6mm,
     font=\scriptsize},column sep=-\pgflinewidth,row sep=-\pgflinewidth},
   lab/.style={font=\scriptsize,align=center}]
@@ -2148,14 +2351,20 @@ A = pdmat({[0 1]}, ...
 V = vec(A);
 R = reshape(A, [3 2]);
 S = squeeze(A);
-fprintf("vec=%d-by-%d, reshape=%d-by-%d, squeeze=%d-by-%d\n", ...
-    size(V,1), size(V,2), size(R,1), size(R,2), size(S,1), size(S,2));
-v0 = V.evaluate(0);
-disp(v0.')
+vectorSize = size(V)
+reshapeSize = size(R)
+squeezeSize = size(S)
+vectorAtZero = V.evaluate(0).'
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-vec=6-by-1, reshape=3-by-2, squeeze=2-by-3
+vectorSize =
+     6     1
+reshapeSize =
+     3     2
+squeezeSize =
+     2     3
+vectorAtZero =
      1     4     2     5     3     6
 \end{lstlisting}
 
@@ -2182,18 +2391,20 @@ A = pdmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
 d = diag(A);
 D = diag(d);
 t = trace(A);
-disp(d.evaluate(0))
-disp(D.evaluate(0))
-fprintf("trace at rho=0: %.0f\n", t.evaluate(0));
+diagonalAtZero = d.evaluate(0)
+rebuiltAtZero = D.evaluate(0)
+traceAtZero = t.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
+diagonalAtZero =
      1
      4
-
+rebuiltAtZero =
      1     0
      0     4
-trace at rho=0: 5
+traceAtZero =
+     5
 \end{lstlisting}
 
 Invalid offsets or empty selections raise \codeerr{pdmat}{InvalidDiag}.
@@ -2227,14 +2438,15 @@ First inspect the two triangular results.
 A = pdmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
 L = tril(A);
 U = triu(A);
-disp(L.evaluate(0))
-disp(U.evaluate(0))
+lowerAtZero = L.evaluate(0)
+upperAtZero = U.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
+lowerAtZero =
      1     0
      3     4
-
+upperAtZero =
      1     2
      0     4
 \end{lstlisting}
@@ -2245,15 +2457,18 @@ Then apply reductions to the same coefficient matrix.
 rowSum = sum(A, 2);
 allMean = mean(A, "all");
 running = cumsum(A, 2);
-disp(rowSum.evaluate(0))
-fprintf("mean(all) at rho=0: %.1f\n", allMean.evaluate(0));
-disp(running.evaluate(0))
+rowSumAtZero = rowSum.evaluate(0)
+allMeanAtZero = allMean.evaluate(0)
+runningAtZero = running.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
+rowSumAtZero =
      3
      7
-mean(all) at rho=0: 2.5
+allMeanAtZero =
+    2.5000
+runningAtZero =
      1     3
      3     7
 \end{lstlisting}
@@ -2283,14 +2498,15 @@ B = rot90(A, k)
 A = pdmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
 F = flipud(A);
 R = rot90(A);
-disp(F.evaluate(0))
-disp(R.evaluate(0))
+flippedAtZero = F.evaluate(0)
+rotatedAtZero = R.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
+flippedAtZero =
      3     4
      1     2
-
+rotatedAtZero =
      2     4
      1     3
 \end{lstlisting}
@@ -2334,31 +2550,46 @@ b = pdmat({[0 1]}, {10, 20}, Degree=1);
 H = [a, b];
 V = [a; b];
 D = blkdiag(a, 5);
-disp(H.evaluate(0))
-disp(V.evaluate(0))
-disp(D.evaluate(0))
+horizontalAtZero = H.evaluate(0)
+verticalAtZero = V.evaluate(0)
+blockDiagonalAtZero = D.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
+horizontalAtZero =
      1    10
-
+verticalAtZero =
      1
     10
-
+blockDiagonalAtZero =
      1     0
      0     5
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=8mm and 13mm,
-  b/.style={draw=black!55,fill=white,minimum size=7mm,font=\scriptsize},
-  o/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
-    font=\scriptsize,minimum width=25mm,minimum height=10mm}]
-  \node[b] (a) {\(a\)}; \node[b,below=of a] (b) {\(b\)};
-  \node[o,right=of a] (h) {\([a\ b]\)};
-  \node[o,right=of b] (d) {\(\left[\begin{smallmatrix}a&0\\0&5\end{smallmatrix}\right]\)};
-  \draw[->,thick,dpblue] (a) -- (h); \draw[->,thick,dpblue] (b) -- (h);
-  \draw[->,thick,dpblue] (a) -- (d);
+\begin{tikzpicture}[>=Latex,x=1cm,y=1cm,
+  input/.style={dp/known,font=\scriptsize,align=center,
+    minimum width=13mm,minimum height=7mm},
+  operation/.style={dp/contribution,font=\scriptsize,align=center,
+    minimum width=20mm,minimum height=9mm},
+  output/.style={dp/result,font=\scriptsize,align=center,
+    minimum width=26mm,minimum height=10mm}]
+  \node[input] (ha) at (0,0.45) {\(a\)};
+  \node[input] (hb) at (0,-0.45) {\(b\)};
+  \node[operation] (hop) at (2.1,0) {\code{horzcat}};
+  \node[output] (hout) at (4.6,0) {\([a\ b]\)};
+  \draw[dp/arrow] (ha.east) -- ++(4mm,0) |- ([yshift=2mm]hop.west);
+  \draw[dp/arrow] (hb.east) -- ++(4mm,0) |- ([yshift=-2mm]hop.west);
+  \draw[dp/arrow] (hop.east) -- (hout.west);
+
+  \node[input] (da) at (0,-2.05) {\(a\)};
+  \node[input] (five) at (0,-2.95) {\(5\)};
+  \node[operation] (dop) at (2.1,-2.5) {\code{blkdiag}};
+  \node[output] (dout) at (4.6,-2.5)
+    {\(\left[\begin{smallmatrix}a&0\\0&5\end{smallmatrix}\right]\)};
+  \draw[dp/arrow] (da.east) -- ++(4mm,0) |- ([yshift=2mm]dop.west);
+  \draw[dp/arrow] (five.east) -- ++(4mm,0) |- ([yshift=-2mm]dop.west);
+  \draw[dp/arrow] (dop.east) -- (dout.west);
 \end{tikzpicture}
 \end{center}
 
@@ -2384,13 +2615,17 @@ R = repmat(A, [m n])
 \begin{lstlisting}[style=dpmatlab]
 v = pdmat({[0 1]}, {[1 2], [3 4]}, Degree=1);
 R = repmat(v, [2 2]);
-fprintf("repeated size=%d-by-%d, degree=%d\n", ...
-    size(R,1), size(R,2), R.Degree);
-disp(R.evaluate(0))
+repeatedSize = size(R)
+repeatedDegree = R.Degree
+repeatedAtZero = R.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-repeated size=2-by-4, degree=1
+repeatedSize =
+     2     4
+repeatedDegree =
+     1
+repeatedAtZero =
      1     2     1     2
      1     2     1     2
 \end{lstlisting}
@@ -2419,17 +2654,21 @@ A = pdmat({[0 1]}, ...
     {[1 2 3; 4 5 6], [10 20 30; 40 50 60]}, Degree=1);
 lastCol = A(:, end);
 A(:, 2) = 5;
-fprintf("selected size=%d-by-%d, assigned size=%d-by-%d\n", ...
-    size(lastCol,1), size(lastCol,2), size(A,1), size(A,2));
-disp(lastCol.evaluate(0))
-disp(A.evaluate(0))
+selectedSize = size(lastCol)
+assignedSize = size(A)
+selectedAtZero = lastCol.evaluate(0)
+assignedAtZero = A.evaluate(0)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-selected size=2-by-1, assigned size=2-by-3
+selectedSize =
+     2     1
+assignedSize =
+     2     3
+selectedAtZero =
      3
      6
-
+assignedAtZero =
      1     5     3
      4     5     6
 \end{lstlisting}
@@ -2457,14 +2696,14 @@ evidence and otherwise raise \codeerr{pdmat}{FunctionOnlyAlgebra}.
 \subsection{Remarks}
 \label{sec:pdmat-limits}
 
-\begin{itemize}[leftmargin=*]
+\begin{enumerate}[leftmargin=*]
   \item Function-only objects created without \code{Degree} do not have
         Bernstein coefficient evidence for \code{bernsteinTable} or coefficient algebra.
   \item Numeric operands must be finite real nonempty matrices with compatible
         sizes, or finite real scalars that can broadcast to the required size.
   \item Grid refinement is supported for matching parameter dimensions and
         matching grid bounds.
-\end{itemize}
+\end{enumerate}
 
 \subsubsection{See Also}
 \code{pdmat}, \code{evaluate}, \code{bernsteinTable}, \code{plot},
@@ -2482,7 +2721,7 @@ objects and \code{toYalmip} converts them to YALMIP constraints.
 \subsection{Lookup}
 \label{sec:pdvar-lookup}
 
-\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\begin{tabularx}{\textwidth}{@{}lY@{}}
 \toprule
 Task & Entry \\
 \midrule
@@ -2564,8 +2803,9 @@ P = pdvar(..., RateBounds=rb)
   \draw[decorate,decoration={brace,mirror,amplitude=4pt}]
     (1.75,-0.45) -- (4.25,-0.45)
     node[midway,below=6pt,font=\scriptsize]{cell 2 view, degree 2};
-  \node[above=5pt of p2,font=\scriptsize,align=center]
-    {shared interface handle\\gives structural continuity};
+  \node[dp/contribution,above=13pt of p2,font=\scriptsize,align=center]
+    (shared) {one shared interface handle};
+  \draw[dp/arrow] (shared.south)--(p2.north);
 \end{tikzpicture}
 
 \textit{For positive degree, neighboring physical cells reuse complete
@@ -2579,23 +2819,23 @@ default degree is one and the object carries no rate metadata.
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 Ps = pdvar(2, {[0 1]});
-class(Ps)
-size(Ps)
-Ps.Degree
-Ps.HasRateDependence
+variableClass = class(Ps)
+matrixSize = size(Ps)
+degree = Ps.Degree
+rateDependent = Ps.HasRateDependence
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+variableClass =
     'pdvar'
 
-ans =
+matrixSize =
      2     2
 
-ans =
+degree =
      1
 
-ans =
+rateDependent =
   logical
    0
 \end{lstlisting}
@@ -2605,19 +2845,19 @@ Use two dimension arguments for a rectangular full variable.
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 Pf = pdvar(2, 3, {[0 1]});
-class(Pf)
-size(Pf)
-Pf.Degree
+variableClass = class(Pf)
+matrixSize = size(Pf)
+degree = Pf.Degree
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+variableClass =
     'pdvar'
 
-ans =
+matrixSize =
      2     3
 
-ans =
+degree =
      1
 \end{lstlisting}
 
@@ -2627,19 +2867,19 @@ when a square variable should use full, not symmetric, coefficients.
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 Pfull = pdvar(2, 2, {[0 1]}, "full");
-class(Pfull)
-Pfull.MatrixSize
-Pfull.Degree
+variableClass = class(Pfull)
+matrixSize = Pfull.MatrixSize
+degree = Pfull.Degree
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+variableClass =
     'pdvar'
 
-ans =
+matrixSize =
      2     2
 
-ans =
+degree =
      1
 \end{lstlisting}
 
@@ -2649,19 +2889,19 @@ grid metadata.
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P0 = pdvar(1, [0 1 2], Degree=0);
-class(P0)
-P0.Degree
-P0.ncell()
+variableClass = class(P0)
+degree = P0.Degree
+cellCount = P0.ncell()
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+variableClass =
     'pdvar'
 
-ans =
+degree =
      0
 
-ans =
+cellCount =
      2
 \end{lstlisting}
 
@@ -2672,20 +2912,20 @@ stored rate-vertex rows.
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 Pr = pdvar(1, {[0 1], [10 20]}, RateBounds=[-1 2; -3 4]);
-class(Pr)
-Pr.HasRateDependence
-Pr.RateBounds
+variableClass = class(Pr)
+rateDependent = Pr.HasRateDependence
+rateBounds = Pr.RateBounds
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+variableClass =
     'pdvar'
 
-ans =
+rateDependent =
   logical
    1
 
-ans =
+rateBounds =
     -1     2
     -3     4
 \end{lstlisting}
@@ -2708,6 +2948,7 @@ Constructor violations therefore raise
 \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
 
 \subsection{\texorpdfstring{\code{rhodiff}}{rhodiff}}
+\index{rhodiff@\texttt{rhodiff}}
 \label{sec:pdvar-rhodiff}
 
 \syntaxhead
@@ -2751,7 +2992,7 @@ The implementation stores one row for each allowed rate vertex.
     {\((P^{(c)}[1]-P^{(c)}[0])/h_c\)\\local derivative};
   \node[result,right=of d,yshift=8mm] (lo) {\(\dot\rho_{\min}\) row};
   \node[result,right=of d,yshift=-8mm] (hi) {\(\dot\rho_{\max}\) row};
-  \draw[->,thick,dpblue] (p) -- node[above,font=\scriptsize]{forward difference} (d);
+  \draw[->,thick,dpblue] (p) -- (d);
   \draw[->,thick,dpblue] (d) -- (lo);
   \draw[->,thick,dpblue] (d) -- (hi);
 \end{tikzpicture}
@@ -2776,28 +3017,24 @@ When rate bounds live on the object, \code{rhodiff(P)} uses them directly.
 yalmip('clear')
 P = pdvar(2, {[0 1 2]}, "symmetric", RateBounds=[-1 1]);
 D = rhodiff(P);
-class(D)
-D.Degree
-D.IsContinuous
-size(D.coeffs(1))
-D.RateBounds
+derivativeClass = class(D)
+derivativeDegree = D.Degree
+isContinuous = D.IsContinuous
+coefficientTableSize = size(D.coeffs(1))
+rateBounds = D.RateBounds
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+derivativeClass =
     'pdvar'
-
-ans =
+derivativeDegree =
      0
-
-ans =
+isContinuous =
   logical
    0
-
-ans =
+coefficientTableSize =
      2     1
-
-ans =
+rateBounds =
     -1     1
 \end{lstlisting}
 
@@ -2808,23 +3045,20 @@ combinations from the two rows of \code{RateBounds}.
 yalmip('clear')
 Q = pdvar(1, {[0 1], [10 20]}, RateBounds=[-1 1; -2 2]);
 E = rhodiff(Q);
-class(E)
-E.Degree
-size(E.coeffs([1 1]))
-E.RateBounds
+derivativeClass = class(E)
+derivativeDegree = E.Degree
+coefficientTableSize = size(E.coeffs([1 1]))
+rateBounds = E.RateBounds
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+derivativeClass =
     'pdvar'
-
-ans =
+derivativeDegree =
      1
-
-ans =
+coefficientTableSize =
      4     4
-
-ans =
+rateBounds =
     -1     1
     -2     2
 \end{lstlisting}
@@ -2870,8 +3104,7 @@ T = bernsteinTable(P, cellSubs, "oneLine")
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(1, {[0 1]});
-T = bernsteinTable(P, "oneLine");
-disp(T)
+T = bernsteinTable(P, "oneLine")
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
@@ -2931,14 +3164,28 @@ X = sdpvar(2, 2, 'full');
 S = P + X;
 D = eye(2) - P;
 N = -P;
-fprintf("sum: %s, %d-by-%d, degree=%d, decision=%d\n", ...
-    class(S), size(S,1), size(S,2), S.Degree, S.ContainsDecision);
-fprintf("difference: %s, unary minus: %s\n", class(D), class(N));
+sumClass = class(S)
+sumSize = size(S)
+sumDegree = S.Degree
+sumContainsDecision = S.ContainsDecision
+differenceClass = class(D)
+negativeClass = class(N)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-sum: pdvar, 2-by-2, degree=1, decision=1
-difference: pdvar, unary minus: pdvar
+sumClass =
+    'pdvar'
+sumSize =
+     2     2
+sumDegree =
+     1
+sumContainsDecision =
+  logical
+   1
+differenceClass =
+    'pdvar'
+negativeClass =
+    'pdvar'
 \end{lstlisting}
 
 \begin{center}
@@ -2985,14 +3232,21 @@ P = pdvar(2, 1, {[0 1]}, "full");
 L = [1 2] * P;
 R = P * [4 5];
 S = 3 * P;
-fprintf("left=%d-by-%d, right=%d-by-%d, scaled=%d-by-%d\n", ...
-    size(L,1), size(L,2), size(R,1), size(R,2), size(S,1), size(S,2));
-fprintf("degrees: %d, %d, %d\n", L.Degree, R.Degree, S.Degree);
+leftSize = size(L)
+rightSize = size(R)
+scaledSize = size(S)
+degrees = [L.Degree R.Degree S.Degree]
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-left=1-by-1, right=2-by-2, scaled=2-by-1
-degrees: 1, 1, 1
+leftSize =
+     1     1
+rightSize =
+     2     2
+scaledSize =
+     2     1
+degrees =
+     1     1     1
 \end{lstlisting}
 
 A known parameter-dependent factor adds its Bernstein degree through ordered
@@ -3013,14 +3267,24 @@ P = pdvar(2, {[0 1]}, "symmetric", Degree=2);
 A = pdmat({[0 1]}, {eye(2), 2*eye(2)}, Degree=1);
 L = A * P;
 R = P * A;
-fprintf("known-left: %s degree %d; known-right: %s degree %d\n", ...
-    class(L), L.Degree, class(R), R.Degree);
-fprintf("coefficients per cell=%d\n", numel(L.coeffs(1)));
+knownLeftClass = class(L)
+knownLeftDegree = L.Degree
+knownRightClass = class(R)
+knownRightDegree = R.Degree
+coefficientsPerCell = numel(L.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-known-left: pdvar degree 3; known-right: pdvar degree 3
-coefficients per cell=4
+knownLeftClass =
+    'pdvar'
+knownLeftDegree =
+     3
+knownRightClass =
+    'pdvar'
+knownRightDegree =
+     3
+coefficientsPerCell =
+     4
 \end{lstlisting}
 
 \begin{center}
@@ -3090,15 +3354,31 @@ n = numArgumentsFromSubscript(P, S, ctx)
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
-fprintf("size=%d-by-%d, height=%d, width=%d\n", ...
-    size(P,1), size(P,2), height(P), width(P));
-fprintf("length=%d, numel=%d, ndims=%d, equal(+P)=%d\n", ...
-    length(P), numel(P), ndims(P), isequal(P,+P));
+matrixSize = size(P)
+rowCount = height(P)
+columnCount = width(P)
+longestDimension = length(P)
+elementCount = numel(P)
+dimensionCount = ndims(P)
+equalsUnaryPlus = isequal(P,+P)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-size=2-by-3, height=2, width=3
-length=3, numel=6, ndims=2, equal(+P)=1
+matrixSize =
+     2     3
+rowCount =
+     2
+columnCount =
+     3
+longestDimension =
+     3
+elementCount =
+     6
+dimensionCount =
+     2
+equalsUnaryPlus =
+  logical
+   1
 \end{lstlisting}
 
 \code{end}, \code{subsref}, \code{subsasgn}, and
@@ -3124,18 +3404,25 @@ yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
 T = P.';
 H = P';
-fprintf("transpose=%d-by-%d, ctranspose=%d-by-%d\n", ...
-    size(T,1), size(T,2), size(H,1), size(H,2));
-fprintf("classes: %s, %s\n", class(T), class(H));
+transposeSize = size(T)
+conjugateTransposeSize = size(H)
+transposeClass = class(T)
+conjugateTransposeClass = class(H)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-transpose=3-by-2, ctranspose=3-by-2
-classes: pdvar, pdvar
+transposeSize =
+     3     2
+conjugateTransposeSize =
+     3     2
+transposeClass =
+    'pdvar'
+conjugateTransposeClass =
+    'pdvar'
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=12mm,
+\begin{tikzpicture}[>=Latex,node distance=28mm,
   a/.style={matrix of math nodes,nodes={draw=black!45,minimum size=6mm,
     font=\scriptsize},column sep=-\pgflinewidth,row sep=-\pgflinewidth}]
   \matrix[a] (m) {p_{11}&p_{12}&p_{13}\\p_{21}&p_{22}&p_{23}\\};
@@ -3165,12 +3452,18 @@ P = pdvar(2, 3, {[0 1]}, "full");
 V = vec(P);
 R = reshape(P, [3 2]);
 S = squeeze(P);
-fprintf("vec=%d-by-%d, reshape=%d-by-%d, squeeze=%d-by-%d\n", ...
-    size(V,1), size(V,2), size(R,1), size(R,2), size(S,1), size(S,2));
+vectorSize = size(V)
+reshapeSize = size(R)
+squeezeSize = size(S)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-vec=6-by-1, reshape=3-by-2, squeeze=2-by-3
+vectorSize =
+     6     1
+reshapeSize =
+     3     2
+squeezeSize =
+     2     3
 \end{lstlisting}
 
 Malformed or size-changing reshape requests raise
@@ -3197,12 +3490,18 @@ P = pdvar(3, {[0 1]}, "full");
 d = diag(P);
 D = diag(d);
 t = trace(P);
-fprintf("diag=%d-by-%d, rebuilt=%d-by-%d, trace=%d-by-%d\n", ...
-    size(d,1), size(d,2), size(D,1), size(D,2), size(t,1), size(t,2));
+diagonalSize = size(d)
+rebuiltSize = size(D)
+traceSize = size(t)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-diag=3-by-1, rebuilt=3-by-3, trace=1-by-1
+diagonalSize =
+     3     1
+rebuiltSize =
+     3     3
+traceSize =
+     1     1
 \end{lstlisting}
 
 Invalid offsets or empty selections raise \codeerr{pdvar}{InvalidDiag}.
@@ -3237,12 +3536,18 @@ yalmip('clear')
 P = pdvar(3, {[0 1]}, "full");
 L = tril(P);
 U = triu(P);
-fprintf("lower=%d-by-%d, upper=%d-by-%d, degrees=%d/%d\n", ...
-    size(L,1), size(L,2), size(U,1), size(U,2), L.Degree, U.Degree);
+lowerSize = size(L)
+upperSize = size(U)
+degrees = [L.Degree U.Degree]
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-lower=3-by-3, upper=3-by-3, degrees=1/1
+lowerSize =
+     3     3
+upperSize =
+     3     3
+degrees =
+     1     1
 \end{lstlisting}
 
 Then reduce a rectangular expression.
@@ -3253,13 +3558,18 @@ P = pdvar(2, 3, {[0 1]}, "full");
 rowSum = sum(P, 2);
 allMean = mean(P, "all");
 running = cumsum(P, 2);
-fprintf("row sum=%d-by-%d, all mean=%d-by-%d, running=%d-by-%d\n", ...
-    size(rowSum,1), size(rowSum,2), size(allMean,1), size(allMean,2), ...
-    size(running,1), size(running,2));
+rowSumSize = size(rowSum)
+allMeanSize = size(allMean)
+runningSize = size(running)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-row sum=2-by-1, all mean=1-by-1, running=2-by-3
+rowSumSize =
+     2     1
+allMeanSize =
+     1     1
+runningSize =
+     2     3
 \end{lstlisting}
 
 Invalid triangular offsets raise
@@ -3288,14 +3598,21 @@ yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
 F = flipud(P);
 R = rot90(P);
-fprintf("flipud=%d-by-%d, rot90=%d-by-%d\n", ...
-    size(F,1), size(F,2), size(R,1), size(R,2));
-fprintf("classes: %s, %s\n", class(F), class(R));
+flippedSize = size(F)
+rotatedSize = size(R)
+flippedClass = class(F)
+rotatedClass = class(R)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-flipud=2-by-3, rot90=3-by-2
-classes: pdvar, pdvar
+flippedSize =
+     2     3
+rotatedSize =
+     3     2
+flippedClass =
+    'pdvar'
+rotatedClass =
+    'pdvar'
 \end{lstlisting}
 
 \begin{center}
@@ -3337,12 +3654,18 @@ P = pdvar(2, {[0 1]}, "full");
 H = [P, P];
 V = [P; P];
 D = blkdiag(P, eye(2));
-fprintf("horizontal=%d-by-%d, vertical=%d-by-%d, block=%d-by-%d\n", ...
-    size(H,1), size(H,2), size(V,1), size(V,2), size(D,1), size(D,2));
+horizontalSize = size(H)
+verticalSize = size(V)
+blockDiagonalSize = size(D)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-horizontal=2-by-4, vertical=4-by-2, block=4-by-4
+horizontalSize =
+     2     4
+verticalSize =
+     4     2
+blockDiagonalSize =
+     4     4
 \end{lstlisting}
 
 \begin{center}
@@ -3384,12 +3707,19 @@ Q = repmat(P, [m n])
 yalmip('clear')
 P = pdvar(1, 2, {[0 1]}, "full");
 Q = repmat(P, [2 2]);
-fprintf("repeated=%d-by-%d, degree=%d, decision=%d\n", ...
-    size(Q,1), size(Q,2), Q.Degree, Q.ContainsDecision);
+repeatedSize = size(Q)
+repeatedDegree = Q.Degree
+containsDecision = Q.ContainsDecision
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-repeated=2-by-4, degree=1, decision=1
+repeatedSize =
+     2     4
+repeatedDegree =
+     1
+containsDecision =
+  logical
+   1
 \end{lstlisting}
 
 Invalid repetition shapes raise \codeerr{pdvar}{InvalidRepmat}.
@@ -3418,15 +3748,25 @@ yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
 lastCol = P(:, end);
 P(:, 1) = 0;
-fprintf("selected=%d-by-%d, assigned=%d-by-%d\n", ...
-    size(lastCol,1), size(lastCol,2), size(P,1), size(P,2));
-fprintf("class=%s, degree=%d, decision=%d\n", ...
-    class(P), P.Degree, P.ContainsDecision);
+selectedSize = size(lastCol)
+assignedSize = size(P)
+assignedClass = class(P)
+assignedDegree = P.Degree
+containsDecision = P.ContainsDecision
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-selected=2-by-1, assigned=2-by-3
-class=pdvar, degree=1, decision=1
+selectedSize =
+     2     1
+assignedSize =
+     2     3
+assignedClass =
+    'pdvar'
+assignedDegree =
+     1
+containsDecision =
+  logical
+   1
 \end{lstlisting}
 
 \begin{center}
@@ -3474,11 +3814,11 @@ P = pdvar(1, [0 1], Degree=2);
 c = P.coeffs(1);
 assign([c{:}], [1 2 4]);
 A = value(P);
-A.coeffs(1)
+assignedCoefficients = A.coeffs(1)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+assignedCoefficients =
     {[1]}    {[2]}    {[4]}
 \end{lstlisting}
 
@@ -3513,46 +3853,51 @@ physical cell and local Bernstein coefficient.
 yalmip('clear')
 P = pdvar(2, {[0 0.5 1]}, "symmetric");
 Cneg = P <= 0;
-class(Cneg)
-numel(Cneg.Constraints)
+negativeWrapperClass = class(Cneg)
+negativeConstraintCount = numel(Cneg.Constraints)
 Cpos = P >= 0;
-class(Cpos)
-numel(Cpos.Constraints)
+positiveWrapperClass = class(Cpos)
+positiveConstraintCount = numel(Cpos.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+negativeWrapperClass =
     'pdlmi'
-
-ans =
+negativeConstraintCount =
      4
-
-ans =
+positiveWrapperClass =
     'pdlmi'
-
-ans =
+positiveConstraintCount =
      4
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=6mm,
-  box/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
-    font=\scriptsize,align=center,minimum width=36mm,minimum height=11mm}]
-  \node[box] (lhs) {\code{lhs}\\affine square \code{pdvar}};
-  \node[box,right=of lhs] (rhs) {\code{rhs}\\compatible affine data};
-  \node[box,right=of rhs] (res) {\code{lhs-rhs}\\stored residual};
-  \node[box,right=of res] (c) {\code{pdlmi}\\direct by default};
-  \draw[->,thick,dpblue] (lhs) -- (res);
-  \draw[->,thick,dpblue] (rhs) -- (res);
-  \draw[->,thick,dpblue] (res) -- node[above,font=\scriptsize]
-    {\code{<=} or \code{>=}} (c);
+\begin{tikzpicture}[node distance=7mm and 12mm]
+  \node[dp/decision,align=center,font=\scriptsize,text width=34mm,
+    minimum height=11mm] (lhs) {\code{lhs}\\affine square \code{pdvar}};
+  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
+    minimum height=11mm,below=of lhs] (rhs)
+    {\code{rhs}\\one or more compatible terms};
+  \node[dp/contribution,right=of lhs,yshift=-7mm,align=center,
+    font=\scriptsize,text width=30mm,minimum height=15mm] (res)
+    {\code{lhs-rhs}\\stored residual};
+  \node[dp/certificate,right=of res,align=center,font=\scriptsize,
+    text width=27mm,minimum height=15mm] (relation)
+    {relation\\\code{<=} or \code{>=}};
+  \node[dp/result,right=of relation,align=center,font=\scriptsize,
+    text width=25mm,minimum height=15mm] (c)
+    {\code{pdlmi}\\direct by default};
+  \draw[dp/arrow] (lhs.east) -- ++(5mm,0) |- (res.west);
+  \draw[dp/arrow] (rhs.east) -- ++(5mm,0) |- (res.west);
+  \draw[dp/arrow] (res) -- (relation);
+  \draw[dp/arrow] (relation) -- (c);
 \end{tikzpicture}
 \end{center}
 
 \subsection{Remarks}
 \label{sec:pdvar-limits}
 
-\begin{itemize}[leftmargin=*]
+\begin{enumerate}[leftmargin=*]
   \item Constructor-created \code{pdvar} objects support every finite
         nonnegative integer degree.  Higher degree increases the number of
         Bernstein control matrices per cell.
@@ -3562,13 +3907,13 @@ ans =
         unless they were constructed with explicit Bernstein evidence.
   \item \code{rhodiff} of an existing rate-vertex derivative expression is not
         part of the current public workflow.
-\end{itemize}
+\end{enumerate}
 
 \subsubsection{See Also}
 \code{pdvar}, \code{rhodiff}, \code{bernsteinTable}, \code{pdlmi},
 \code{pdmat}.
 
-\section{\texorpdfstring{\code{pdlmi}}{pdlmi} Reference}
+\section{\texorpdfstring{\code{pdlmi}}{pdlmi} Reference}\index{pdlmi@\texttt{pdlmi}}
 \label{sec:pdlmi}
 
 \code{pdlmi} stores YALMIP constraints assembled from square symmetric
@@ -3578,24 +3923,27 @@ Bernstein--Gram preordering are explicit alternatives.  It is the package
 boundary between Bernstein objects and ordinary YALMIP solver calls.
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
-  box/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
-    font=\scriptsize,align=center,minimum width=34mm,minimum height=13mm}]
-  \node[box] (cmp) {\code{lhs <= rhs}\\store residual and relation};
-  \node[box,right=of cmp,yshift=27mm] (direct) {direct\\coefficient signs};
-  \node[box,right=of cmp,yshift=9mm] (polya) {P\'olya\\lossless elevation};
-  \node[box,right=of cmp,yshift=-9mm] (putinar)
-    {Putinar\\1-D parity\\multi-D singletons};
-  \node[box,right=of cmp,yshift=-27mm] (box) {full box\\all generator products};
-  \node[box,right=22mm of polya,yshift=-9mm] (yal) {\code{toYalmip}\\finite constraints};
-  \draw[->,thick,dpblue] (cmp.east) -- (direct.west);
-  \draw[->,thick,dpblue] (cmp.east) -- (polya.west);
-  \draw[->,thick,dpblue] (cmp.east) -- (putinar.west);
-  \draw[->,thick,dpblue] (cmp.east) -- (box.west);
-  \draw[->,thick,dpblue] (direct.east) -- ([yshift=4.5mm]yal.west);
-  \draw[->,thick,dpblue] (polya.east) -- ([yshift=1.5mm]yal.west);
-  \draw[->,thick,dpblue] (putinar.east) -- ([yshift=-1.5mm]yal.west);
-  \draw[->,thick,dpblue] (box.east) -- ([yshift=-4.5mm]yal.west);
+\begin{tikzpicture}[node distance=5mm and 4mm]
+  \node[dp/card,text width=23mm] (direct)
+    {\textbf{Direct}\\coefficient signs};
+  \node[dp/card,text width=23mm,right=of direct] (polya)
+    {\textbf{P\'olya}\\lossless elevation};
+  \node[dp/card,text width=23mm,below=of direct] (putinar)
+    {\textbf{Putinar}\\1-D parity;\\multi-D singletons};
+  \node[dp/card,text width=23mm,right=of putinar] (box)
+    {\textbf{Full Box}\\all generator products};
+  \node[dp/panel,fit=(direct)(polya)(putinar)(box),inner sep=4mm] (options) {};
+  \node[dp/label,above=3pt of options] {choose exactly one};
+  \node[dp/known,left=6mm of options,align=center,font=\scriptsize,
+    text width=24mm,minimum height=18mm] (cmp)
+    {\code{lhs <= rhs}\\stored residual};
+  \node[dp/contribution,right=6mm of options,align=center,font=\scriptsize,
+    minimum width=15mm,minimum height=15mm] (export) {\code{toYalmip}};
+  \node[dp/result,right=3mm of export,align=center,font=\scriptsize,
+    text width=18mm,minimum height=15mm] (yal) {YALMIP\\Constraint};
+  \draw[dp/arrow] (cmp.east) -- (options.west);
+  \draw[dp/arrow] (options.east) -- (export.west);
+  \draw[dp/arrow] (export)--(yal);
 \end{tikzpicture}
 
 \textit{The four certificate paths are alternatives.  Selecting P\'olya,
@@ -3606,7 +3954,7 @@ selection.}
 \subsection{Lookup}
 \label{sec:pdlmi-lookup}
 
-\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth}Y@{}}
+\begin{tabularx}{\textwidth}{@{}lY@{}}
 \toprule
 Task & Entry \\
 \midrule
@@ -3718,42 +4066,35 @@ and options are explicit.
 yalmip('clear')
 P = pdvar(2, {[0 1]}, "symmetric");
 C = pdlmi(P, ">=", UsePolya=false, PolyaDegree=0);
-class(C)
-numel(C.Constraints)
-C.UsePolya
-C.PolyaDegree
-C.UsePutinar
-C.PutinarOrder
-C.UseFullBoxPreorder
-C.FullBoxOrder
+wrapperClass = class(C)
+constraintCount = numel(C.Constraints)
+usePolya = C.UsePolya
+polyaDegree = C.PolyaDegree
+usePutinar = C.UsePutinar
+putinarOrder = C.PutinarOrder
+useFullBox = C.UseFullBoxPreorder
+fullBoxOrder = C.FullBoxOrder
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+wrapperClass =
     'pdlmi'
-
-ans =
+constraintCount =
      2
-
-ans =
+usePolya =
   logical
    0
-
-ans =
+polyaDegree =
      0
-
-ans =
+usePutinar =
   logical
    0
-
-ans =
+putinarOrder =
      0
-
-ans =
+useFullBox =
   logical
    0
-
-ans =
+fullBoxOrder =
      0
 \end{lstlisting}
 
@@ -3773,33 +4114,33 @@ ans =
 \end{center}
 
 \remarkshead
-The constructor rejects a non-\code{pdvar} residual with
-\codeerr{pdlmi}{InvalidExpression}, a relation other than \code{"<="} or
-\code{">="} with \codeerr{pdlmi}{InvalidRelation}, and malformed, unknown, or
-duplicate options with \codeerr{pdlmi}{InvalidOptions},
-\codeerr{pdlmi}{UnknownOption}, or \codeerr{pdlmi}{DuplicateOption}.
-Nonlogical selectors raise
-\codeerr{pdlmi}{InvalidUse}\allowbreak\code{Polya},
-\codeerr{pdlmi}{InvalidUse}\allowbreak\code{Putinar}, or
-\codeerr{pdlmi}{InvalidUse}\allowbreak\code{FullBoxPreorder}.  Malformed P\'olya increments,
-Putinar orders, and full-box orders raise
-\codeerr{pdlmi}{InvalidPolya}\allowbreak\code{Degree},
-\codeerr{pdlmi}{InvalidPutinar}\allowbreak\code{Order}, and
-\codeerr{pdlmi}{InvalidFullBox}\allowbreak\code{Order}, respectively.  A valid integer below the
-active Putinar or full-box minimum raises
-\codeerr{pdlmi}{PutinarOrder}\allowbreak\code{TooLow} or
-\codeerr{pdlmi}{FullBoxOrder}\allowbreak\code{TooLow}.  Explicit false plus an explicit Putinar
-order raises\linebreak[4]
-\codeerr{pdlmi}{ConflictingPutinar}\allowbreak\code{Options};\newline
-positive P\'olya
-degree plus explicit false raises
-\codeerr{pdlmi}{ConflictingPolya}\allowbreak\code{Options}.
-The full-box explicit-false case remains direct, so its admissibility minimum
-is not applied to retained order metadata.  Every assembly path retains the
-square and symmetry checks, which raise \codeerr{pdlmi}{InvalidMatrixSize} and
-\codeerr{pdlmi}{NonSymmetricExpression}.
+\begin{enumerate}[leftmargin=*]
+  \item A non-\code{pdvar} residual raises
+        \codeerr{pdlmi}{InvalidExpression}; an unsupported relation raises
+        \codeerr{pdlmi}{InvalidRelation}.
+  \item Malformed, unknown, or duplicate options raise
+        \codeerr{pdlmi}{InvalidOptions}, \codeerr{pdlmi}{UnknownOption}, or
+        \codeerr{pdlmi}{DuplicateOption}; nonlogical selectors use their
+        corresponding \code{InvalidUse...} identifier.
+  \item Malformed P\'olya increments, Putinar orders, and full-box orders raise,
+        respectively,
+        \codeerr{pdlmi}{Invalid}\allowbreak\code{PolyaDegree},
+        \codeerr{pdlmi}{Invalid}\allowbreak\code{PutinarOrder}, and
+        \codeerr{pdlmi}{Invalid}\allowbreak\code{FullBoxOrder}.  An integer
+        below an active Gram-family minimum raises
+        \codeerr{pdlmi}{PutinarOrder}\allowbreak\code{TooLow} or
+        \codeerr{pdlmi}{FullBoxOrder}\allowbreak\code{TooLow}.
+  \item Explicit false plus a Putinar order raises
+        \codeerr{pdlmi}{ConflictingPutinarOptions}; explicit false plus a
+        positive P\'olya increment raises
+        \codeerr{pdlmi}{ConflictingPolyaOptions}.  The full-box explicit-false
+        form remains direct and retains the supplied order as metadata.
+  \item Every assembly path validates square symmetric or Hermitian
+        coefficients and raises \codeerr{pdlmi}{InvalidMatrixSize} or
+        \codeerr{pdlmi}{NonSymmetricExpression}.
+\end{enumerate}
 
-\subsection{Direct Coefficient Assembly}
+\subsection{Direct Coefficient Assembly}\index{direct assembly}
 \label{sec:pdlmi-direct}
 
 For each physical cell, local Bernstein coefficient, and rate-vertex row if
@@ -3845,6 +4186,7 @@ The diagram specializes to one parameter, degree two, and one ordinary
 \end{center}
 
 \subsection{Opt-In P\'olya Assembly And \texorpdfstring{\code{applyPolya}}{applyPolya}}
+\index{Polya@P\'olya}\index{applyPolya@\texttt{applyPolya}}
 \label{sec:pdlmi-polya}
 
 With \code{UsePolya=true}, \code{pdlmi} first elevates the stored residual by
@@ -3873,24 +4215,21 @@ yalmip('clear')
 P = pdvar(1, {[0 1]}, Degree=1);
 direct = P >= 0;
 polya = direct.applyPolya(2);
-direct.PolyaDegree
-polya.UsePolya
-polya.PolyaDegree
-numel(polya.Constraints)
+directDegree = direct.PolyaDegree
+usePolya = polya.UsePolya
+polyaDegree = polya.PolyaDegree
+constraintCount = numel(polya.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+directDegree =
      0
-
-ans =
+usePolya =
   logical
    1
-
-ans =
+polyaDegree =
      2
-
-ans =
+constraintCount =
      4
 \end{lstlisting}
 
@@ -3901,9 +4240,10 @@ ans =
   \node[box] (m) {degree \(m\) residual\\fixed polynomial};
   \node[box,right=of m] (e) {elevate by \(d\)\\degree \(m+d\)};
   \node[box,right=of e] (s) {test every elevated\\coefficient sign};
-  \draw[->,thick,dpblue] (m) -- node[above,font=\scriptsize]
-    {\(\prod_s((1-\alpha_s)+\alpha_s)^d=1\)} (e);
+  \draw[->,thick,dpblue] (m) -- (e);
   \draw[->,thick,dpblue] (e) -- (s);
+  \node[dp/label,above=5pt of e]
+    {\(\prod_s((1-\alpha_s)+\alpha_s)^d=1\)};
 \end{tikzpicture}
 
 \textit{P\'olya degree is a uniform representation increment, not a new
@@ -3915,10 +4255,12 @@ positivity are developed in \cref{app:certificates}.
 
 \subsection{Putinar Selection And
 \texorpdfstring{\code{applyPutinar}}{applyPutinar}}
+\index{Putinar}\index{applyPutinar@\texttt{applyPutinar}}
 \label{sec:pdlmi-putinar}
 
 The Putinar selector is dimension-aware.  With one parameter it deliberately
-uses the same exact even/odd Markov--Luk\'acs assembly as
+uses the same exact even/odd Markov--Luk\'acs
+\index{Markov--Lukacs@Markov--Luk\'acs} assembly as
 \code{applyFullBoxPreorder}.  For selected absolute order \(r\), the even form
 matches at degree \(2r\),
 \[
@@ -3969,16 +4311,29 @@ yalmip('clear')
 P = pdvar(1, {[0 1]}, Degree=2);
 direct = P >= 0;
 putinar = direct.applyPutinar();
-fprintf("direct: putinar=%d, order=%d, constraints=%d\n", ...
-    direct.UsePutinar, direct.PutinarOrder, numel(direct.Constraints));
-fprintf("selected: putinar=%d, order=%d, constraints=%d\n", ...
-    putinar.UsePutinar, putinar.PutinarOrder, ...
-    numel(putinar.Constraints));
+directUsesPutinar = direct.UsePutinar
+directOrder = direct.PutinarOrder
+directConstraintCount = numel(direct.Constraints)
+selectedUsesPutinar = putinar.UsePutinar
+selectedOrder = putinar.PutinarOrder
+selectedConstraintCount = numel(putinar.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-direct: putinar=0, order=0, constraints=3
-selected: putinar=1, order=1, constraints=5
+directUsesPutinar =
+  logical
+   0
+directOrder =
+     0
+directConstraintCount =
+     3
+selectedUsesPutinar =
+  logical
+   1
+selectedOrder =
+     1
+selectedConstraintCount =
+     5
 \end{lstlisting}
 
 For this one-parameter scalar degree-two cell, order one uses the exact even
@@ -4015,24 +4370,23 @@ leaves \code{C} unchanged, and rebuilds from the original \code{Residual} and
 full-box selection.  It adds no implicit margin and makes no solver call.
 
 \remarkshead
-\begingroup
-\setlength{\emergencystretch}{1em}
-Malformed orders raise
-\codeerr{pdlmi}{Invalid}\allowbreak\code{Putinar}\allowbreak\code{Order}; an integer below
-\(\lfloor m/2\rfloor\) in one parameter, or below
-\(\lceil m/2\rceil\) in two or more parameters, raises
-\codeerr{pdlmi}{Putinar}\allowbreak\code{Order}\allowbreak\code{TooLow}.  The
-constructor rejects malformed selectors with
-\codeerr{pdlmi}{InvalidUse}\allowbreak\code{Putinar}, explicit false plus any supplied order with
-\codeerr{pdlmi}{ConflictingPutinar}\allowbreak\code{Options}, and simultaneous relaxation
-families with \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}.  The expression,
-relation, option, square-matrix, and symmetry checks in
-\cref{sec:pdlmi-construction} apply unchanged.
-\par
-\endgroup
+\begin{enumerate}[leftmargin=*]
+  \item Malformed orders raise \codeerr{pdlmi}{InvalidPutinarOrder}; an integer
+        below \(\lfloor m/2\rfloor\) in one parameter, or below
+        \(\lceil m/2\rceil\) in two or more parameters, raises
+        \codeerr{pdlmi}{PutinarOrderTooLow}.
+  \item A malformed selector raises \codeerr{pdlmi}{InvalidUsePutinar};
+        explicit false plus any supplied order raises
+        \codeerr{pdlmi}{ConflictingPutinarOptions}.
+  \item Simultaneous relaxation families raise
+        \codeerr{pdlmi}{ConflictingRelaxations}; the expression, relation,
+        square-matrix, and symmetry checks in
+        \cref{sec:pdlmi-construction} apply unchanged.
+\end{enumerate}
 
 \subsection{Full Box Bernstein--Gram Preordering And
 \texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}}
+\index{Full Box preordering}\index{applyFullBoxPreorder@\texttt{applyFullBoxPreorder}}
 \label{sec:pdlmi-full-box}
 
 The full-box mode is a cell-local positive-semidefinite representation in the
@@ -4040,7 +4394,6 @@ forward local coordinates \(\alpha_s\in[0,1]\).  It is a box-specific Bernstein-
 preordering, not a general Putinar certificate, general-domain SOS interface,
 or full-space SOS representation.  It adds no implicit positivity margin.
 
-\needspace{10\baselineskip}
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 Cbox = C.applyFullBoxPreorder()
@@ -4075,14 +4428,22 @@ yalmip('clear')
 P = pdvar(1, {[0 1]}, Degree=2);
 direct = P >= 0;
 box = direct.applyFullBoxPreorder();
-fprintf("direct constraints=%d\n", numel(direct.Constraints));
-fprintf("full-box=%d, order=%d, constraints=%d\n", ...
-    box.UseFullBoxPreorder, box.FullBoxOrder, numel(box.Constraints));
+directConstraintCount = numel(direct.Constraints)
+useFullBox = box.UseFullBoxPreorder
+fullBoxOrder = box.FullBoxOrder
+fullBoxConstraintCount = numel(box.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-direct constraints=3
-full-box=1, order=1, constraints=5
+directConstraintCount =
+     3
+useFullBox =
+  logical
+   1
+fullBoxOrder =
+     1
+fullBoxConstraintCount =
+     5
 \end{lstlisting}
 
 At this order the scalar degree-two cell has two PSD Gram constraints followed
@@ -4129,6 +4490,7 @@ expression, relation, option, square-matrix, and symmetry checks described in
 \cref{sec:pdlmi-construction} apply unchanged.
 
 \subsection{\texorpdfstring{\code{toYalmip}}{toYalmip}}
+\index{toYalmip@\texttt{toYalmip}}\index{YALMIP}
 \label{sec:pdlmi-toyalmip}
 
 \syntaxhead
@@ -4152,35 +4514,30 @@ arrays.
 yalmip('clear')
 P = pdvar(2, {[0 1]}, "symmetric");
 C = P >= 0;
-class(C)
-numel(C.Constraints)
+wrapperClass = class(C)
+storedConstraintCount = numel(C.Constraints)
 F1 = toYalmip(C);
 F2 = C.toYalmip();
-isa(F1, "lmi") || isa(F1, "constraint")
-length(F1)
-isa(F2, "lmi") || isa(F2, "constraint")
-length(F2)
+firstIsConstraint = isa(F1, "lmi") || isa(F1, "constraint")
+firstConstraintCount = length(F1)
+secondIsConstraint = isa(F2, "lmi") || isa(F2, "constraint")
+secondConstraintCount = length(F2)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+wrapperClass =
     'pdlmi'
-
-ans =
+storedConstraintCount =
      2
-
-ans =
+firstIsConstraint =
   logical
    1
-
-ans =
+firstConstraintCount =
      2
-
-ans =
+secondIsConstraint =
   logical
    1
-
-ans =
+secondConstraintCount =
      2
 \end{lstlisting}
 
@@ -4203,7 +4560,6 @@ owns solver choice, diagnostics, and optimization status.
 \code{pdvar}, \code{rhodiff}, \code{applyPolya}, \code{applyPutinar},
 \code{applyFullBoxPreorder}, \code{toYalmip}, \code{optimize}.
 
-\needspace{13\baselineskip}
 \subsection{Solver-Facing Use}
 \label{sec:pdlmi-solver-use}
 
@@ -4215,10 +4571,6 @@ opts = sdpsettings("solver", solverName, "verbose", 0);
 sol = optimize([C1.toYalmip, C2.toYalmip], objective, opts);
 \end{lstlisting}
 
-The solver selected by YALMIP must be available on the MATLAB path.  The current
-test suite prefers MOSEK when available and otherwise falls back to LMILAB for
-smoke coverage.
-
 \section{Cross-Class Helper Reference}
 \label{sec:helpers}
 
@@ -4226,61 +4578,320 @@ The \code{+helper} namespace contains exactly nine implementation utilities
 whose ownership genuinely crosses class boundaries.  They are developer-facing
 building blocks, not an alternative modeling API: ordinary users should enter
 through \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}.  Their
-signatures and current consumers are listed below so maintainers can distinguish
-shared contracts from class-local implementation details.
+signatures and current consumers are documented below so maintainers can
+distinguish shared contracts from class-local implementation details.
 
-\begin{enumerate}[leftmargin=*,itemsep=0.65em]
-  \item \code{helper.bernTbl(...)}\\
-        Builds ordinary, rate-vertex, or one-line Bernstein inspection tables
-        with caller-supplied value and expression formatters.
-        \textit{Consumers:} \code{pdmat}, \code{pdvar}.
-  \item \code{helper.cellGet(vals, subs)}\\
-        Follows one tensor-subscript row through nested \code{LocalValues} and
-        returns the selected leaf.  \textit{Consumers:} all four classes.
-  \item \code{helper.chk(val, id, msg, ...)}\\
-        Applies shared predicate tags and bounds, returning the input or
-        raising the caller's error ID.  \textit{Consumers:} all four classes.
-  \item \code{helper.combRows(vecs)}\\
-        Returns Cartesian-product rows with earlier dimensions varying more
-        slowly.  \textit{Consumers:} all four classes.
-  \item \code{helper.isZero(val, mode, ...)}\\
-        Classifies numeric, additive, nested-payload, or coefficient-backed
-        object zero evidence.  \textit{Consumers:} \code{pdmat}, \code{pdvar}.
-  \item \code{helper.mapVals(vals, fcn, grid)}\\
-        Maps one function over every coefficient in a nested cell tree.
-        \textit{Consumers:} \code{pdmat}, \code{pdvar}.
-  \item \code{helper.matSubs(subs, sz, id)}\\
-        Normalizes numeric, logical, or colon matrix subscripts into row and
-        column indices.  \textit{Consumers:} \code{pdmat}, \code{pdvar}.
-  \item \code{helper.mkGrid(grid, owner)}\\
-        Validates tensor-grid vectors and builds \code{GridInfo} with vectors,
-        points, bounds, and node counts.  \textit{Consumers:} \code{pdbase},
-        \code{pdmat}, \code{pdvar}.
-  \item \code{helper.mkNest(counts, fcn[, prefix])}\\
-        Constructs recursive tensor storage and calls the leaf factory with
-        each complete subscript row.  \textit{Consumers:} \code{pdbase},
-        \code{pdmat}, \code{pdvar}.
-\end{enumerate}
+\subsection{\texorpdfstring{\code{helper.bernTbl}}{helper.bernTbl}}
 
-\subsection{Shared Validation And Errors}
+\textit{Purpose.} Build the shared detailed or one-line Bernstein inspection
+table used by \code{pdmat} and \code{pdvar}.
 
-\code{helper.chk} recognizes the predicate tags \code{numeric}, \code{real},
-\code{cell}, \code{struct}, \code{nonempty}, \code{scalar}, \code{vector},
-\code{matrix}, \code{finite}, \code{integer}, \code{positive},
-\code{nonnegative}, \code{increasing}, and \code{rowbounds}; its named tests are
-\code{Size}, \code{Numel}, \code{MinNumel}, \code{Min}, and \code{Max}.
-Failed user-data checks raise the supplied class error ID.  An unknown tag or a
-missing validator-option value raises
-\codeerr{helper}{Invalid}\allowbreak\code{ValidatorCall}.
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+T = helper.bernTbl(obj, errId, valFcn, exprFcn, rateVerts)
+T = helper.bernTbl(..., cellSubs)
+T = helper.bernTbl(..., "oneLine")
+\end{lstlisting}
 
-\code{helper.isZero} accepts modes \code{"num"}, \code{"add"},
-\code{"vals"}, and \code{"obj"}.  Unknown modes raise
-\codeerr{helper}{Invalid}\allowbreak\code{ZeroMode}.  A wrong number of
-mode-specific inputs raises
-\codeerr{helper}{Invalid}\allowbreak\code{ZeroCall}.
-\code{helper.matSubs} and
-\code{helper.bernTbl} deliberately receive a caller-owned error ID, so public
-indexing and table errors remain in the owning class namespace.
+\descriptionhead
+\code{obj} supplies \code{cells}, \code{lbls}, and \code{coeffs};
+\code{valFcn} maps each coefficient to a table value and \code{exprFcn} maps
+it to expression text.  \code{rateVerts} is empty for ordinary data or has one
+row per active rate vertex.  The optional \code{cellSubs} selects one physical
+cell; \code{"oneLine"} returns one expression per cell and rate row.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+T = helper.bernTbl(A, "demo:Invalid", @(x) x, ...
+    @(x) string(mat2str(x)), [], "oneLine")
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+T =
+    CellSubscript          Expression
+    _____________    ______________________
+        {[1]}        "(1-alpha)*1 + alpha*2"
+\end{lstlisting}
+
+\remarkshead
+Only one cell selector and the case-insensitive \code{"oneLine"} option are
+accepted.  Invalid selectors, unknown text, repeated selectors, or rate-row
+count mismatches raise the caller-owned \code{errId}, preserving the public
+class error namespace.
+
+\subsection{\texorpdfstring{\code{helper.cellGet}}{helper.cellGet}}
+
+\textit{Purpose.} Read one flat coefficient leaf from a nested physical-cell
+tree.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+leaf = helper.cellGet(vals, subs)
+\end{lstlisting}
+
+\descriptionhead
+\code{vals} is addressed as
+\code{vals{i1}{i2}...{i_ell}} and \code{subs} supplies one index per level.
+The returned \code{leaf} is the selected flat coefficient cell or rate-row
+table; no copy, reshaping, or multi-index cell interpretation is introduced.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+vals = {{{10, 20}}, {{30, 40}}};
+leaf = helper.cellGet(vals, [2 1])
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+leaf =
+  1x2 cell array
+    {[30]}    {[40]}
+\end{lstlisting}
+
+\remarkshead
+The helper deliberately relies on ordinary MATLAB cell indexing.  Callers
+validate the subscript length and bounds before traversal.
+
+\subsection{\texorpdfstring{\code{helper.chk}}{helper.chk}}
+
+\textit{Purpose.} Apply shared validation predicates while retaining a
+caller-owned error identifier and message.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+val = helper.chk(val, errId, msg, tags...)
+val = helper.chk(val, errId, msg, tags..., Name, Value)
+\end{lstlisting}
+
+\descriptionhead
+Predicate tags are \code{numeric}, \code{real}, \code{cell}, \code{struct},
+\code{nonempty}, \code{scalar}, \code{vector}, \code{matrix}, \code{finite},
+\code{integer}, \code{positive}, \code{nonnegative}, \code{increasing}, and
+\code{rowbounds}.  Named tests are \code{Size}, \code{Numel},
+\code{MinNumel}, \code{Min}, and \code{Max}.  Successful validation returns
+\code{val} unchanged.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+validated = helper.chk([1 2], "demo:BadValue", "bad value", ...
+    "numeric", "real", "finite", "Size", [1 2])
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+validated =
+     1     2
+\end{lstlisting}
+
+\remarkshead
+A failed data predicate raises \code{errId}.  An unknown predicate, or a named
+test without a value, raises \codeerr{helper}{InvalidValidatorCall}; these
+errors signal a validator-programming defect rather than bad caller data.
+
+\subsection{\texorpdfstring{\code{helper.combRows}}{helper.combRows}}
+
+\textit{Purpose.} Enumerate Cartesian combinations in the ordering shared by
+physical cells, local labels, and rate vertices.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+rows = helper.combRows(vecs)
+\end{lstlisting}
+
+\descriptionhead
+\code{vecs} is a cell array containing one vector per tensor axis.
+\code{rows} contains every Cartesian combination, with earlier dimensions
+varying more slowly.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+rows = helper.combRows({0:1, 10:11})
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+rows =
+     0    10
+     0    11
+     1    10
+     1    11
+\end{lstlisting}
+
+\remarkshead
+This ordering is part of the storage contract.  Reordering the rows would
+misalign tensor labels, physical-cell traversal, and derivative rate vertices.
+
+\subsection{\texorpdfstring{\code{helper.isZero}}{helper.isZero}}
+
+\textit{Purpose.} Prove the distinct zero notions used by known-data and affine
+algebra fast paths.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+tf = helper.isZero(val, "num")
+tf = helper.isZero(val, "add", matrixSize)
+tf = helper.isZero(vals, "vals")
+tf = helper.isZero(obj, "obj")
+\end{lstlisting}
+
+\descriptionhead
+\code{"num"} requires a nonempty finite real numeric zero;
+\code{"add"} additionally enforces scalar expansion or the supplied matrix
+shape; \code{"vals"} recursively checks nested, symbolic, and rate-structured
+payloads; and \code{"obj"} accepts coefficient-backed \code{pdmat} or
+\code{pdvar} evidence.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+numericZero = helper.isZero(zeros(2), "add", [2 2])
+A = pdmat({[0 1]}, {0, 0}, Degree=1);
+objectZero = helper.isZero(A, "obj")
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+numericZero =
+  logical
+   1
+objectZero =
+  logical
+   1
+\end{lstlisting}
+
+\remarkshead
+Function-only \code{pdmat} placeholders are not coefficient evidence and
+therefore do not prove object zero.  Invalid modes raise
+\codeerr{helper}{InvalidZeroMode}; the wrong mode-specific arity raises
+\codeerr{helper}{InvalidZeroCall}.
+
+\subsection{\texorpdfstring{\code{helper.mapVals}}{helper.mapVals}}
+
+\textit{Purpose.} Map one payload function across every leaf of a nested
+\code{LocalValues} tree.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+mapped = helper.mapVals(vals, fcn, grid)
+\end{lstlisting}
+
+\descriptionhead
+\code{grid} determines the nested physical-cell shape and \code{fcn} is
+applied with \code{cellfun} to every payload in every selected leaf.  The
+result retains the original physical-cell tree and coefficient ordering.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+vals = {{{1, 2}}, {{3, 4}}};
+mapped = helper.mapVals(vals, @(x) 10*x, {[0 1 2], [0 1]});
+secondLeaf = helper.cellGet(mapped, [2 1])
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+secondLeaf =
+  1x2 cell array
+    {[30]}    {[40]}
+\end{lstlisting}
+
+\remarkshead
+The mapping preserves nesting but does not validate payload semantics; the
+owning class remains responsible for matrix sizes, symbolic affinity, and
+rate-row structure.
+
+\subsection{\texorpdfstring{\code{helper.matSubs}}{helper.matSubs}}
+
+\textit{Purpose.} Normalize supported two-dimensional payload subscripts into
+explicit row and column index vectors.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+[rows, cols] = helper.matSubs(subs, sz, errId)
+\end{lstlisting}
+
+\descriptionhead
+\code{subs} is a two-element cell array.  Each element may be a finite
+positive integer vector, a matching logical vector, or \code{":"};
+\code{sz=[m n]} supplies the available matrix size.  Errors use the
+caller-owned \code{errId}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+[rows, cols] = helper.matSubs({":", 2}, [3 4], "demo:BadSub")
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+rows =
+     1     2     3
+cols =
+     2
+\end{lstlisting}
+
+\remarkshead
+The helper rejects linear indexing, empty or out-of-range numeric indices, and
+logical selectors whose lengths do not match the indexed dimension.  It never
+permits array growth.
+
+\subsection{\texorpdfstring{\code{helper.mkGrid}}{helper.mkGrid}}
+
+\textit{Purpose.} Validate tensor-grid vectors and construct the shared
+\code{GridInfo} record.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+info = helper.mkGrid(grid)
+info = helper.mkGrid(grid, owner)
+\end{lstlisting}
+
+\descriptionhead
+\code{grid} is a nonempty cell array of finite, real, strictly increasing
+vectors with at least two nodes each.  \code{owner} defaults to
+\code{"pdbase"} and prefixes validation identifiers.  The result contains
+\code{Vectors}, Cartesian-product \code{Points}, per-axis \code{Bounds}, and
+\code{NumNodes}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+info = helper.mkGrid({[0 1], [10 20]}, "demo");
+bounds = info.Bounds
+points = info.Points
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+bounds =
+     0     1
+    10    20
+points =
+     0    10
+     0    20
+     1    10
+     1    20
+\end{lstlisting}
+
+\remarkshead
+Malformed containers use \code{owner + ":InvalidGrid"}; malformed individual
+axes use \code{owner + ":InvalidGridVector"}.  Cell counts are derived by
+consumers and are not duplicated in \code{GridInfo}.
+
+\subsection{\texorpdfstring{\code{helper.mkNest}}{helper.mkNest}}
+
+\textit{Purpose.} Allocate recursive physical-cell storage and construct each
+leaf from its complete cell subscript.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+vals = helper.mkNest(nCell, mkLeaf)
+vals = helper.mkNest(nCell, mkLeaf, prefix)
+\end{lstlisting}
+
+\descriptionhead
+\code{nCell} gives the positive cell count per parameter direction and
+\code{mkLeaf} receives one completed one-based subscript row.  \code{prefix}
+is recursion state used internally; ordinary callers omit it.  The result is
+addressed as \code{vals{i1}{i2}...{i_ell}}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+vals = helper.mkNest([2 1], @(subs) {sum(subs)});
+secondLeaf = helper.cellGet(vals, [2 1])
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+secondLeaf =
+  1x1 cell array
+    {[3]}
+\end{lstlisting}
+
+\remarkshead
+\code{mkLeaf} owns the leaf payload.  The helper supplies deterministic
+physical-cell subscripts but does not infer coefficient count, matrix size, or
+rate semantics.
 
 \subsection{Class-Private Helpers}
 
@@ -4320,34 +4931,35 @@ boxFromPolya = polya.applyFullBoxPreorder();
 putinarFromBox = boxHigher.applyPutinar();
 Fbox = toYalmip(boxDefault);
 
-fprintf("direct: fullBox=%d, order=%d, constraints=%d\n", ...
-    direct.UseFullBoxPreorder, direct.FullBoxOrder, ...
-    numel(direct.Constraints));
-fprintf("default: fullBox=%d, order=%d, constraints=%d\n", ...
-    boxDefault.UseFullBoxPreorder, boxDefault.FullBoxOrder, ...
-    numel(boxDefault.Constraints));
-fprintf("Putinar: selected=%d, order=%d, constraints=%d\n", ...
-    putinarDefault.UsePutinar, putinarDefault.PutinarOrder, ...
-    numel(putinarDefault.Constraints));
-fprintf("higher: order=%d, constraints=%d\n", ...
-    boxHigher.FullBoxOrder, numel(boxHigher.Constraints));
-fprintf("replacement: polya=%d, fullBox=%d, order=%d\n", ...
-    boxFromPolya.UsePolya, boxFromPolya.UseFullBoxPreorder, ...
-    boxFromPolya.FullBoxOrder);
-fprintf("replace box: putinar=%d, fullBox=%d, order=%d\n", ...
-    putinarFromBox.UsePutinar, putinarFromBox.UseFullBoxPreorder, ...
-    putinarFromBox.PutinarOrder);
-fprintf("exported constraints=%d\n", length(Fbox));
+directState = [direct.UseFullBoxPreorder, direct.FullBoxOrder, ...
+    numel(direct.Constraints)]
+defaultState = [boxDefault.UseFullBoxPreorder, boxDefault.FullBoxOrder, ...
+    numel(boxDefault.Constraints)]
+putinarState = [putinarDefault.UsePutinar, putinarDefault.PutinarOrder, ...
+    numel(putinarDefault.Constraints)]
+higherState = [boxHigher.FullBoxOrder, numel(boxHigher.Constraints)]
+replacementState = [boxFromPolya.UsePolya, ...
+    boxFromPolya.UseFullBoxPreorder, boxFromPolya.FullBoxOrder]
+putinarReplacementState = [putinarFromBox.UsePutinar, ...
+    putinarFromBox.UseFullBoxPreorder, putinarFromBox.PutinarOrder]
+exportedConstraintCount = length(Fbox)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-direct: fullBox=0, order=0, constraints=3
-default: fullBox=1, order=1, constraints=5
-Putinar: selected=1, order=1, constraints=5
-higher: order=2, constraints=7
-replacement: polya=0, fullBox=1, order=1
-replace box: putinar=1, fullBox=0, order=1
-exported constraints=5
+directState =
+     0     0     3
+defaultState =
+     1     1     5
+putinarState =
+     1     1     5
+higherState =
+     2     7
+replacementState =
+     0     1     1
+putinarReplacementState =
+     1     0     1
+exportedConstraintCount =
+     5
 \end{lstlisting}
 
 For the degree-two scalar residual, order one uses two PSD Gram blocks followed
@@ -4427,10 +5039,10 @@ P(\rho)\succeq 0.
 \]
 The derivative term \(\dot P\) is built with \code{rhodiff(P, [-1 1])}.  The
 comparison operators create \code{pdlmi} wrappers, and \code{toYalmip} hands
-the coefficient-wise constraints to YALMIP.  In the second listing, the
-\code{fprintf} call prints the solver- and tolerance-dependent numeric value of
-\(\gamma\).  For this model, \code{numel(E1.Constraints)} returns (6), and
-\code{numel(E2.Constraints)} returns (2).
+the coefficient-wise constraints to YALMIP.  The second listing assigns the
+solver- and tolerance-dependent numeric value of \(\gamma\) to
+\code{gammaValue}.  For this model, \code{numel(E1.Constraints)} returns 6,
+and \code{numel(E2.Constraints)} returns 2.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -4449,15 +5061,15 @@ E1 = [diffP + P * A + A' * P, P * B, Cmat';
       B' * P, -gamma * eye(2), Dmat';
       Cmat, Dmat, -gamma * eye(2)] <= 0;
 E2 = P >= 0;
-numel(E1.Constraints)
-numel(E2.Constraints)
+decayConstraintCount = numel(E1.Constraints)
+positivityConstraintCount = numel(E2.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-ans =
+decayConstraintCount =
      6
 
-ans =
+positivityConstraintCount =
      2
 \end{lstlisting}
 
@@ -4475,7 +5087,7 @@ sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
 assert(sol.problem == 0, sol.info)
 gammaValue = value(objective);
 assert(isfinite(gammaValue))
-fprintf("Optimal H-infinity gamma: %.6g\n", gammaValue)
+gammaValue
 \end{lstlisting}
 
 The constraint counts above follow directly from the three independent
@@ -4725,12 +5337,14 @@ endpoint values.  At \(\alpha=1/2\),
 
 \begin{lstlisting}[style=dpmatlab]
 p = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
-fprintf("p(0.5)=%.2f\n", p.evaluate(0.5));
-disp(bernsteinTable(p, "oneLine"))
+valueAtHalf = p.evaluate(0.5)
+T = bernsteinTable(p, "oneLine")
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-p(0.5)=2.75
+valueAtHalf =
+    2.7500
+T =
     CellSubscript                    Expression
     _____________    __________________________________________
 
@@ -4840,13 +5454,17 @@ indices remain one-based.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20 30 40]}, [1 1], 1);
-fprintf("physical cells=%d, local coefficients/cell=%d\n", ...
-    obj.ncell(), obj.ncoeff());
-disp(obj.lbls())
+physicalCellCount = obj.ncell()
+coefficientsPerCell = obj.ncoeff()
+localLabels = obj.lbls()
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-physical cells=6, local coefficients/cell=4
+physicalCellCount =
+     6
+coefficientsPerCell =
+     4
+localLabels =
      0     0
      0     1
      1     0
@@ -4920,13 +5538,14 @@ Take quadratic coefficients \(P=[1,2,6]\) and affine coefficients
 P = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
 Q = pdmat({[0 1]}, {2, 4}, Degree=1);
 R = P * Q;
-c = R.coeffs(1);
-fprintf("product degree=%d\n", R.Degree);
-disp([c{:}])
+productDegree = R.Degree
+productCoefficients = cell2mat(R.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-product degree=3
+productDegree =
+     3
+productCoefficients =
     2.0000    4.0000    9.3333   24.0000
 \end{lstlisting}
 
@@ -5098,6 +5717,7 @@ it holds at every vertex.  \code{rhodiff} stores one row for each vertex.
 \end{center}
 
 \subsection{de Casteljau Evaluation And Exact Subdivision}
+\index{de Casteljau evaluation}\index{subdivision}
 
 de Casteljau recursion evaluates a Bernstein polynomial using only affine
 combinations.  For one parameter, on a fixed physical cell \(c\), begin with
@@ -5219,6 +5839,7 @@ many PSD matrices and affine coefficient identities.
 \end{center}
 
 \subsection{SOS And Gram Matrices}
+\index{sum of squares}\index{Gram matrix}
 
 \ideastep{Basic idea}
 A scalar polynomial is a sum of squares (SOS) if
@@ -5314,7 +5935,7 @@ the polynomial negative.
   \draw[very thick,dpblue] plot[domain=0:1,samples=60]
     (\x,{\x*\x-\x+0.35});
   \draw[dashed,black!45] (0,0.10)--(1,0.10);
-  \node[font=\scriptsize,anchor=west] at (0.52,0.12) {minimum \(0.10\)};
+  \node[font=\scriptsize,anchor=south] at (0.5,0.28) {minimum \(0.10\)};
   \node[coeff] at (0.12,-0.14) {\(0.35\)};
   \node[coeff,very thick,dashed] at (0.50,-0.14) {\textbf{*}\(-0.15\)};
   \node[coeff] at (0.88,-0.14) {\(0.35\)};
@@ -5628,20 +6249,21 @@ direct = P >= 0;
 polya = direct.applyPolya(1);
 putinar = direct.applyPutinar();
 box = direct.applyFullBoxPreorder();
-fprintf("direct: constraints=%d\n", numel(direct.Constraints));
-fprintf("Polya: increment=%d, constraints=%d\n", ...
-    polya.PolyaDegree, numel(polya.Constraints));
-fprintf("Putinar: order=%d, constraints=%d\n", ...
-    putinar.PutinarOrder, numel(putinar.Constraints));
-fprintf("full box: order=%d, constraints=%d\n", ...
-    box.FullBoxOrder, numel(box.Constraints));
+directConstraintCount = numel(direct.Constraints)
+polyaState = [polya.PolyaDegree, numel(polya.Constraints)]
+putinarState = [putinar.PutinarOrder, numel(putinar.Constraints)]
+fullBoxState = [box.FullBoxOrder, numel(box.Constraints)]
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-direct: constraints=3
-Polya: increment=1, constraints=4
-Putinar: order=1, constraints=5
-full box: order=1, constraints=5
+directConstraintCount =
+     3
+polyaState =
+     1     4
+putinarState =
+     1     5
+fullBoxState =
+     1     5
 \end{lstlisting}
 
 Selections rebuild from the stored original \code{Residual} and
@@ -5656,16 +6278,23 @@ These choices act on different parts of the problem.
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=5mm,
   box/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
-    font=\scriptsize,align=center,minimum width=40mm,minimum height=10mm}]
+    font=\scriptsize,align=center,minimum width=40mm,minimum height=10mm},
+  merge/.style={dp/contribution,font=\scriptsize,align=center,
+    minimum width=20mm,minimum height=12mm}]
   \node[box] (repr) {basis representation\\same polynomial};
   \node[box,below=of repr] (decision) {decision degree\\larger search space};
   \node[box,below=of decision] (grid) {physical subdivision\\more local cells};
   \node[box,below=of grid] (polya) {P\'olya increment\\same residual, elevated basis};
   \node[box,below=of polya] (gram) {Gram order\\larger PSD certificate};
-  \node[box,right=17mm of grid] (ask) {ask what changes:\\polynomial? decisions?\\
-    cells? certificate?};
+  \coordinate (busmid) at ($(grid.east)+(6mm,0)$);
+  \draw[dp/bus] ($(repr.east)+(6mm,0)$) -- ($(gram.east)+(6mm,0)$);
   \foreach \x in {repr,decision,grid,polya,gram}
-    \draw[->,thick,dpblue] (\x.east)--(ask.west);
+    \draw[dp/bus] (\x.east) -- ++(6mm,0);
+  \node[merge,right=4mm of busmid] (merge) {compare\\effects};
+  \node[box,right=5mm of merge] (ask) {ask what changes:\\polynomial? decisions?\\
+    cells? certificate?};
+  \draw[dp/arrow] (busmid) -- (merge.west);
+  \draw[dp/arrow] (merge.east) -- (ask.west);
 \end{tikzpicture}
 \end{center}
 
@@ -5687,22 +6316,19 @@ grid, a larger P\'olya increment, or a higher Putinar or full-box order.
 
 \subsection{Implemented Boundary}
 
-\begin{tabularx}{\textwidth}{@{}p{0.36\textwidth}Y@{}}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.43\textwidth}Y@{}}
 \toprule
 Implemented public behavior & Background only \\
 \midrule
 direct coefficient assembly & general full-space SOS parser \\
 uniform \code{applyPolya([d])} & direction-wise or automatic P\'olya search \\
-dense box-specific \code{applyPutinar([r])} & general-domain/general-generator Putinar interface \\
-dense \code{applyFullBoxPreorder([r])} & general-domain Schm\"udgen parser \\
+\code{applyPutinar([r])} & general-domain/general-generator Putinar interface \\
+\code{applyFullBoxPreorder([r])} & general-domain Schm\"udgen parser \\
 exact one-dimensional parity forms & automatic or adaptive Gram-order search \\
 all cells and active rate rows & sparse Gram selection or adaptive refinement \\
 explicit user margins & package-owned strictness or solver policy \\
 \bottomrule
 \end{tabularx}
-
-Only the left column is callable package behavior.  The background theorems
-explain alternative cones; they do not expand the MATLAB API.
 \clearpage
 \addcontentsline{toc}{section}{References}
 \begin{thebibliography}{99}
@@ -5802,5 +6428,9 @@ pp.~221--229, 2001.
      {doi:10.1016/S0022-4049(00)00155-9}.
 
 \end{thebibliography}
+
+\clearpage
+\addcontentsline{toc}{section}{Index}
+\printindex
 
 \end{document}

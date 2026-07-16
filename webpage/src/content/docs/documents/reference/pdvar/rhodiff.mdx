@@ -126,10 +126,8 @@ derivative evidence cell-local and lets `pdlmi` later check affine
 - Explicit bounds that do not match existing object bounds raise `pdvar:RateBoundsMismatch`.
 - Re-differentiating an existing rate-vertex expression raises `pdvar:InvalidDiff`.
 
-## Limitations
-
-- Products with rate dependence on both sides are rejected.
-- Products between a rate-dependent expression and another decision expression remain rejected.
+- Products with rate dependence on both sides raise the documented product-validation error.
+- A rate-dependent expression can multiply known data; multiplication by another decision expression is rejected to preserve affine YALMIP dependence.
 
 ## See Also
 

@@ -5,8 +5,8 @@ description: Reference-first entry point for PD-LMI classes, methods, and mathem
 
 Use this page as the lookup entry for current PD-LMI behavior. The reference
 pages document implemented code only, including direct, opt-in Pólya,
-fixed-order Putinar box, and fixed-order full-box preordering assembly. Validation and limitations appear
-beside the constructor or method they affect.
+fixed-order Putinar box, and fixed-order full-box preordering assembly. Supported
+inputs and validation errors appear beside the constructor or method they affect.
 
 PD-LMI means **parameter-dependent LMI**. The package represents continuous
 piecewise-polynomial matrix functions on physical grid cells in a cell-local
@@ -60,7 +60,3 @@ entry points.
 - [Examples](/PD-LMI-package/examples/): compact workflows.
 - [Solver Smoke Cases](/PD-LMI-package/examples/solver-smoke/): two tested YALMIP examples from `+tests/+pdlmi/test_solver_smoke.m`.
 - [Bernstein Backend Utilities](/PD-LMI-package/documents/reference/bernstein-utilities/): protected degree, product, and grid-refinement behavior.
-
-## Reference Page Shape
-
-Each class page follows the same manual pattern: Purpose, Syntax, Description, Arguments or Options, Returned Object or Outputs, Examples, Validation And Errors, Limitations, and See Also.

@@ -183,7 +183,7 @@
 
 .sl-markdown-content mjx-container[display="true"] {
   display: block;
-  font-size: 2rem;
+  font-size: 1.5em;
   max-width: 100%;
   margin-inline: auto;
   padding-block: 0.25rem;
@@ -199,6 +199,10 @@
 .sl-markdown-content mjx-container:not([display="true"]) {
   display: inline-block;
   font-size: 1em;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+  vertical-align: -0.08em;
   overflow: visible;
   max-width: none;
   white-space: nowrap;
@@ -274,32 +278,56 @@
 
 .cell-explorer {
   display: grid;
-  grid-template-columns: minmax(13rem, 0.65fr) minmax(0, 1.35fr);
+  grid-template-columns: minmax(13rem, 0.65fr) 4rem minmax(0, 1.35fr);
   gap: 1rem;
-  align-items: start;
+  align-items: center;
+}
+
+.cell-grid-stage {
+  display: grid;
+  grid-template-columns: 1.3rem minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 1.3rem;
+  gap: 0.25rem;
+  min-width: 0;
 }
 
 .cell-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 0.3rem;
   aspect-ratio: 1;
+  border-inline-start: 2px solid var(--sl-color-gray-3);
+  border-block-end: 2px solid var(--sl-color-gray-3);
+  padding: 0 0 0.25rem 0.25rem;
 }
 
 .cell-grid button {
+  box-sizing: border-box;
+  margin: 0;
   border: 1px solid var(--diagram-border);
   border-radius: 8px;
   color: var(--sl-color-text);
   background: var(--sl-color-bg);
   cursor: pointer;
+  transition: background-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
 }
 
 .cell-grid button.selected {
-  border: 3px solid var(--sl-color-accent);
+  border-color: var(--sl-color-accent);
   color: var(--sl-color-text-accent);
   background: var(--sl-color-accent-low);
+  box-shadow: inset 0 0 0 2px var(--sl-color-accent);
   font-weight: 800;
 }
+
+.cell-axis { color: var(--sl-color-gray-2); font-family: "STIX Two Math", Cambria, serif; font-weight: 750; }
+.cell-axis--y { grid-row: 1; align-self: center; justify-self: center; transform: rotate(-90deg); }
+.cell-axis--x { grid-column: 2; justify-self: center; }
+
+.cell-storage-connector { display: grid; gap: 0.25rem; align-items: center; color: var(--sl-color-text-accent); font-size: 0.7rem; font-weight: 800; text-align: center; }
+.cell-storage-connector i { position: relative; display: block; border-block-start: 2px solid var(--sl-color-accent); }
+.cell-storage-connector i::after { position: absolute; content: ""; inset-block-start: -5px; inset-inline-end: -1px; width: 8px; height: 8px; border-block-start: 2px solid var(--sl-color-accent); border-inline-end: 2px solid var(--sl-color-accent); transform: rotate(45deg); }
 
 .cell-readout p,
 .product-result,
@@ -323,6 +351,10 @@
   background: var(--sl-color-bg);
   font-family: "STIX Two Math", Cambria, serif;
   overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell-grid button { transition: none; }
 }
 
 .coefficient-inputs {
@@ -478,6 +510,19 @@
   cursor: pointer;
 }
 
+.certificate-tabs button strong { font-size: 0.86rem; }
+.certificate-tabs button code { overflow-wrap: anywhere; color: var(--sl-color-gray-2); font-size: 0.67rem; }
+
+.certificate-origin {
+  width: fit-content;
+  margin: 0 auto 0.7rem;
+  border: 1px solid var(--diagram-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  background: var(--sl-color-bg);
+  font-weight: 800;
+}
+
 .certificate-tabs button[aria-selected="true"] {
   border-color: var(--diagram-result);
   color: var(--diagram-result);
@@ -502,6 +547,16 @@
 .certificate-formula { display: grid; gap: 0.3rem; max-width: 100%; }
 .certificate-formula__row { min-width: 0; }
 .certificate-formula mjx-container { margin: 0 !important; text-align: start !important; }
+
+.certificate-export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  color: var(--diagram-result);
+}
+.certificate-export code,
+.certificate-export strong { border: 1px solid var(--diagram-border); border-radius: 7px; padding: 0.35rem 0.5rem; background: var(--sl-color-bg); }
 
 .diagram-frame svg {
   display: block;
@@ -747,12 +802,38 @@
 
   .cell-grid { max-width: 20rem; width: 100%; justify-self: center; }
 
+  .cell-storage-connector {
+    width: auto;
+    height: 3.2rem;
+    grid-template-rows: auto 1fr;
+    gap: 0.15rem;
+    justify-self: center;
+  }
+
+  .cell-storage-connector i {
+    width: 0;
+    height: 1.7rem;
+    justify-self: center;
+    border-block-start: 0;
+    border-inline-start: 2px solid var(--sl-color-accent);
+    transform: none;
+  }
+
+  .cell-storage-connector i::after {
+    inset-block-start: auto;
+    inset-block-end: 0;
+    inset-inline-start: -5px;
+    inset-inline-end: auto;
+    border-block-start: 0;
+    border-block-end: 2px solid var(--sl-color-accent);
+    border-inline-end: 2px solid var(--sl-color-accent);
+    transform: rotate(45deg);
+  }
+
   .certificate-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
-  .sl-markdown-content mjx-container[display="true"] { font-size: 1.5rem; }
-
   .contribution-table > div { grid-template-columns: 1fr; gap: 0.2rem; }
 
   .evaluate-expression { display: grid; }

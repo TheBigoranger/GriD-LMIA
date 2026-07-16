@@ -17,10 +17,10 @@ export interface MultiplicationInput {
 }
 
 export const initialMultiplicationInput: MultiplicationInput = {
-  leftText: "1, 3",
-  rightText: "2, 4",
+  leftText: "4, 2",
+  rightText: "0.5, 3",
   errors: { left: "", right: "" },
-  valid: { left: [1, 3], right: [2, 4] },
+  valid: { left: [4, 2], right: [0.5, 3] },
 };
 
 /** Validate one draft independently and commit only when both drafts are valid. */

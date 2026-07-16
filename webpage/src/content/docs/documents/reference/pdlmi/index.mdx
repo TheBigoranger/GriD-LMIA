@@ -4,6 +4,7 @@ description: Cell-local YALMIP constraints for PD-LMI expressions.
 ---
 
 import CertificateChooser from "../../../../../components/CertificateChooser.astro";
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -15,6 +16,8 @@ import CertificateChooser from "../../../../../components/CertificateChooser.ast
 residual expressions. Direct coefficient assembly is the default; Pólya
 degree elevation, fixed-order Putinar box assembly, and fixed-order full box
 Bernstein-Gram preordering are explicit alternatives.
+
+<CertificateNavigation />
 
 <CertificateChooser />
 
@@ -47,25 +50,27 @@ derives these ideas; the API pages below stay focused on callable syntax.
 | :--- | :--- |
 | [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) | Concatenate stored constraints for ordinary YALMIP `optimize` calls. |
 
-## Current Boundary
+## Implemented Behavior
 
-Direct coefficient-wise assembly is the default. Pólya degree elevation is
-available through constructor options and `applyPolya`. The opt-in Putinar
-and full-box paths use independent positive-semidefinite Gram blocks for each
-physical cell and active rate row, with exact coefficient identities. Their
-one-dimensional dispatch is the shared Markov–Lukács interval form. For two
-or more parameters, Putinar uses only the axis generators
-$\alpha_s(1-\alpha_s)$ separately, while full box also uses every subset
-product. They are fixed-order certificates on the local hypercube, not a
-general-domain SOS interface or automatic hierarchy.
-Strictness margins, residual evidence, diagnostics, and package-owned solver
-wrappers remain outside this slice.
+Version 0.3.6 assembles square symmetric or Hermitian `pdvar` residuals with
+`<=` and `>=` relations through four finite certificate paths. Direct
+coefficient-wise assembly is the default. Pólya assembly performs exact degree
+elevation before applying the coefficient test. Putinar and full-box assembly
+create independent positive-semidefinite Gram blocks for every physical cell
+and active rate row, together with exact Bernstein coefficient identities.
+
+In one parameter, Putinar and full box share the parity-specific
+Markov–Lukács interval construction. For two or more parameters, Putinar uses
+an unweighted Gram term plus one term for each axis generator
+$\alpha_s(1-\alpha_s)$, while full box uses every subset product of those
+generators. Both select a fixed absolute order on each local hypercube.
+`toYalmip` concatenates the resulting finite constraints for an ordinary
+YALMIP solver call.
 
 The [SOS certificate map](/PD-LMI-package/documents/math/sos-certificates/)
-explains how the implemented direct, Pólya, Putinar box, and full-box paths
-relate to full-space SOS, general Putinar quadratic modules, Schmüdgen
-preorderings, and the
-one-dimensional Markov–Lukács theorem.
+derives these coefficient and Gram constructions, including the
+one-dimensional Markov–Lukács form and the tensor box generators used in
+higher dimensions.
 
 ## See Also
 

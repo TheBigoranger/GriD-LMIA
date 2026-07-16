@@ -1,5 +1,6 @@
 ---
 import DiagramFrame from "./DiagramFrame.astro";
+import { certificateSources } from "../data/certificate-data";
 
 interface Props {
   selected: "direct" | "polya" | "putinar" | "fullbox";
@@ -7,12 +8,8 @@ interface Props {
 }
 
 const { selected, showDefault = false } = Astro.props;
-const options = [
-  { key: "direct", label: "Direct", note: "coefficient test" },
-  { key: "polya", label: "Pólya", note: "exact elevation" },
-  { key: "putinar", label: "Putinar", note: "dimension-aware Gram" },
-  { key: "fullbox", label: "Full Box", note: "all subsets" },
-] as const;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const notes = { direct: "coefficient test", polya: "exact elevation", putinar: "dimension-aware Gram", fullbox: "all subsets" } as const;
 ---
 
 <DiagramFrame
@@ -21,14 +18,14 @@ const options = [
   class="certificate-spectrum-figure"
 >
   <div class="certificate-spectrum" role="list">
-    {options.map((option) => {
+    {certificateSources.map((option) => {
       const isSelected = option.key === selected;
       return (
-        <section class:list={{ selected: isSelected }} aria-current={isSelected ? "true" : undefined} role="listitem">
+        <a class:list={{ selected: isSelected }} aria-current={isSelected ? "page" : undefined} href={`${base}${option.detailRoute}`} role="listitem">
           {showDefault && option.key === "direct" && <span class="default-marker">Default</span>}
           <strong>{option.label}</strong>
-          <small>{option.note}</small>
-        </section>
+          <small>{notes[option.key]}</small>
+        </a>
       );
     })}
   </div>
@@ -36,14 +33,15 @@ const options = [
 
 <style>
   .certificate-spectrum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--diagram-border); }
-  section { position: relative; display: grid; gap: 0.25rem; min-width: 0; padding: 1.1rem 0.65rem; text-align: center; }
-  section + section { border-inline-start: 1px solid var(--diagram-border); }
-  section.selected { color: var(--diagram-result); background: color-mix(in srgb, var(--diagram-result) 9%, transparent); box-shadow: inset 0 3px var(--diagram-result); }
+  a { position: relative; display: grid; gap: 0.25rem; min-width: 0; padding: 1.1rem 0.65rem; color: var(--sl-color-text); text-align: center; text-decoration: none; }
+  a + a { border-inline-start: 1px solid var(--diagram-border); }
+  a:hover, a:focus-visible { color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); }
+  a.selected { color: var(--diagram-result); background: color-mix(in srgb, var(--diagram-result) 9%, transparent); box-shadow: inset 0 3px var(--diagram-result); }
   small { color: var(--sl-color-gray-2); font-size: 0.72rem; }
   .default-marker { color: var(--sl-color-gray-2); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
   @media (max-width: 560px) {
     .certificate-spectrum { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    section:nth-child(3) { border-inline-start: 0; }
-    section:nth-child(n + 3) { border-block-start: 1px solid var(--diagram-border); }
+    a:nth-child(3) { border-inline-start: 0; }
+    a:nth-child(n + 3) { border-block-start: 1px solid var(--diagram-border); }
   }
 </style>

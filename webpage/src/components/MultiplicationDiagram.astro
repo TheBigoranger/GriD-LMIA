@@ -13,20 +13,20 @@ import DiagramFrame from "./DiagramFrame.astro";
   </div>
   <div class="curve-layout">
     <section class="curve-copy curve-copy--first">
-      <h4>P(ρ) = 1 + 2ρ</h4>
-      <p>Bernstein [1, 3]</p>
+      <h4>P(ρ) = 4 − 2ρ</h4>
+      <p>Bernstein [4, 2]</p>
     </section>
     <section class="curve-copy curve-copy--second">
-      <h4>Q(ρ) = 2 + 2ρ</h4>
-      <p>Bernstein [2, 4]</p>
+      <h4>Q(ρ) = 0.5 + 2.5ρ</h4>
+      <p>Bernstein [0.5, 3]</p>
     </section>
     <section class="curve-copy curve-copy--result">
-      <h4>R(ρ) = 2 + 6ρ + 4ρ²</h4>
-      <p>Bernstein [2, 5, 12]</p>
+      <h4>R(ρ) = 2 + 9ρ − 5ρ²</h4>
+      <p>Bernstein [2, 6.5, 6]</p>
     </section>
     <svg viewBox="0 0 900 300" role="img" aria-labelledby="multiply-title multiply-desc">
       <title id="multiply-title">Two affine functions and their quadratic product on zero to one</title>
-      <desc id="multiply-desc">P rises from one to three, Q rises from two to four, and their product R curves upward from two to twelve.</desc>
+      <desc id="multiply-desc">P descends from four to two while Q rises from one half to three. They cross before their product reaches six.</desc>
       <g class="axes">
         <path d="M60 250 H840"/><path d="M60 250 V35"/>
         <text x="60" y="276" text-anchor="middle">0</text><text x="840" y="276" text-anchor="middle">1</text>
@@ -35,17 +35,17 @@ import DiagramFrame from "./DiagramFrame.astro";
       <g class="grid">
         <path d="M60 215 H840 M60 180 H840 M60 145 H840 M60 110 H840 M60 75 H840 M60 40 H840" />
       </g>
-      <path class="curve curve--first" d="M60 232.5 L840 197.5" />
-      <path class="curve curve--second" d="M60 215 L840 180" />
-      <path class="curve curve--result" d="M60 215 C320 180 580 121.667 840 40" />
+      <path class="curve curve--first" d="M60 130 L840 190" />
+      <path class="curve curve--second" d="M60 235 L840 160" />
+      <path class="curve curve--result" d="M60 190 Q450 55 840 70" />
       <g class="endpoints">
-        <circle class="point--first" cx="60" cy="232.5" r="5"/><circle class="point--first" cx="840" cy="197.5" r="5"/>
-        <circle class="point--second" cx="60" cy="215" r="5"/><circle class="point--second" cx="840" cy="180" r="5"/>
-        <circle class="point--result" cx="60" cy="215" r="5"/><circle class="point--result" cx="840" cy="40" r="5"/>
+        <circle class="point--first" cx="60" cy="130" r="5"/><circle class="point--first" cx="840" cy="190" r="5"/>
+        <circle class="point--second" cx="60" cy="235" r="5"/><circle class="point--second" cx="840" cy="160" r="5"/>
+        <circle class="point--result" cx="60" cy="190" r="5"/><circle class="point--result" cx="840" cy="70" r="5"/>
       </g>
     </svg>
   </div>
-  <p class="middle-coefficient">The middle result is (1·4 + 3·2) / 2 = 5.</p>
+  <p class="middle-coefficient">The middle result is (4·3 + 2·0.5) / 2 = 6.5.</p>
 </DiagramFrame>
 
 <style>

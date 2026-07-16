@@ -42,7 +42,7 @@ test("evaluates the documented cubic represented by [1, 2, 1, 2]", () => {
 });
 
 test("multiplies normalized Bernstein coefficients exactly", () => {
-  assert.deepEqual(bernsteinProduct([1, 3], [2, 4]), [2, 5, 12]);
+  assert.deepEqual(bernsteinProduct([4, 2], [0.5, 3]), [2, 6.5, 6]);
 
   const product = bernsteinProduct([1, 2, 6], [2, 4]);
   const expected = [2, 4, 28 / 3, 24];
@@ -62,9 +62,9 @@ test("reports nonfinite products instead of returning NaN or Infinity", () => {
 });
 
 test("exposes actual normalized anti-diagonal contributions", () => {
-  assert.deepEqual(bernsteinContributionsAt([1, 3], [2, 4], 1), [
-    { i: 0, j: 1, weight: 0.5, value: 2 },
-    { i: 1, j: 0, weight: 0.5, value: 3 },
+  assert.deepEqual(bernsteinContributionsAt([4, 2], [0.5, 3], 1), [
+    { i: 0, j: 1, weight: 0.5, value: 6 },
+    { i: 1, j: 0, weight: 0.5, value: 0.5 },
   ]);
 });
 

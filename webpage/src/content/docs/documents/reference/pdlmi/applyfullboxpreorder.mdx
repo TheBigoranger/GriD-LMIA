@@ -3,7 +3,7 @@ title: pdlmi applyFullBoxPreorder
 description: Rebuild a PD-LMI residual with a fixed-order full box Bernstein-Gram certificate.
 ---
 
-import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -12,6 +12,8 @@ import CertificateSpectrum from "../../../../../components/CertificateSpectrum.a
   <span>/</span>
   <span>applyFullBoxPreorder</span>
 </nav>
+
+<CertificateNavigation selected="fullbox" showSections={false} />
 
 ## Purpose
 
@@ -50,8 +52,6 @@ semidefinite, then exact identities match every Bernstein coefficient. For a
 `<=` relation, the target coefficients are negated before positive-
 semidefinite matching; for `>=`, the residual is matched directly. No implicit
 positivity margin is added.
-
-<CertificateSpectrum selected="fullbox" />
 
 For two parameters the four illustrated blocks correspond to the empty
 subset, each single generator, and their product. In $\ell$ parameters the
@@ -160,8 +160,6 @@ it does not use the already elevated constraints.
   [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/)
   page, including `pdlmi:InvalidUseFullBoxPreorder` and
   `pdlmi:ConflictingRelaxations`.
-
-## Limitations
 
 This method implements the fixed-order full box preordering on each local
 parameter box. In one parameter it shares the parity-specific Markov–Lukács

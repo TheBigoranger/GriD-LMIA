@@ -3,7 +3,7 @@ title: pdlmi Constructor
 description: Select direct, Pólya-elevated, Putinar, or full-box PD-LMI assembly.
 ---
 
-import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -12,6 +12,8 @@ import CertificateSpectrum from "../../../../../components/CertificateSpectrum.a
   <span>/</span>
   <span>constructor</span>
 </nav>
+
+<CertificateNavigation selected="direct" showSections={false} />
 
 ## Purpose
 
@@ -48,8 +50,6 @@ Markov–Lukács interval form. In two or more parameters, `UsePutinar` selects
 one unweighted Gram term plus one $\alpha_s(1-\alpha_s)$-weighted term per
 axis, while `UseFullBoxPreorder` selects a term for every generator-subset
 product. All three opt-in selections are mutually exclusive.
-
-<CertificateSpectrum selected="direct" showDefault />
 
 Use the direct default first. Choose Pólya when you want one exact degree
 elevation followed by the same coefficient test. In one parameter the two
@@ -231,8 +231,6 @@ construction does not call a solver or add a positivity margin.
 - `UsePutinar=false` with an explicit `PutinarOrder` raises `pdlmi:ConflictingPutinarOptions`, even when the order is zero.
 - Enabling more than one of Pólya, Putinar, and full-box assembly raises `pdlmi:ConflictingRelaxations`.
 - Malformed, duplicate, or unknown options raise `pdlmi:InvalidOptions`, `pdlmi:DuplicateOption`, or `pdlmi:UnknownOption`.
-
-## Limitations
 
 In one parameter, Putinar and full-box assembly share the exact
 parity-specific Markov–Lukács form. In two or more parameters, Putinar is

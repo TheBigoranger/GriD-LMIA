@@ -4,8 +4,10 @@ import type { CertificateKey } from "../data/certificate-data.ts";
 
 export interface CertificateOption {
   key: CertificateKey;
+  anchor: string;
   label: string;
   description: string;
+  command: string;
   mathHtml: readonly string[];
   href: string;
 }
@@ -25,6 +27,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
   return (
     <figure className="diagram-frame interactive-figure certificate-chooser">
       <div className="diagram-frame__body">
+        <p className="certificate-origin"><code>L = E &gt;= 0</code></p>
         <div aria-label="Finite certificate method" className="certificate-tabs" role="tablist">
           {options.map((item, index) => (
             <button
@@ -47,12 +50,14 @@ export default function CertificateChooser({ options }: { options: CertificateOp
               tabIndex={selected === index ? 0 : -1}
               type="button"
             >
-              {item.label}{item.key === "direct" ? <small>Default</small> : null}
+              <strong>{item.label}</strong>
+              <code>{item.command}</code>
+              {item.key === "direct" ? <small>Default</small> : null}
             </button>
           ))}
         </div>
         <section aria-labelledby={`${panelId}-tab-${selected}`} id={`${panelId}-panel`} role="tabpanel">
-          <h3>{option.label}</h3>
+          <h3>{option.label}: <code>selected = {option.command}</code></h3>
           <p>{option.description}</p>
           <div className="certificate-formula">
             {option.mathHtml.map((mathHtml, index) => (
@@ -63,10 +68,13 @@ export default function CertificateChooser({ options }: { options: CertificateOp
               />
             ))}
           </div>
+          <div className="certificate-export" aria-label="Selected certificate exported as YALMIP constraints">
+            <code>selected</code><span aria-hidden="true">→</span><code>selected.toYalmip()</code><span aria-hidden="true">→</span><strong>YALMIP Constraint</strong>
+          </div>
           <a href={option.href}>Open the {option.label} reference →</a>
         </section>
       </div>
-      <figcaption>Select a method to compare its finite certificate and follow the link to callable syntax and boundaries.</figcaption>
+      <figcaption>Four alternative assembly commands start from the same residual inequality and share one solver-facing export.</figcaption>
     </figure>
   );
 }
