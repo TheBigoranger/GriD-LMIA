@@ -1,4 +1,4 @@
-\chapter{\texorpdfstring{\code{pdmat}}{pdmat} Reference}
+\chapter{\texorpdfstring{\code{pdmat}}{pdmat}: Known Parameter-Dependent Matrices}
 \label{sec:pdmat}
 
 \code{pdmat} stores known finite real matrix data on a tensor grid.  Objects
@@ -7,7 +7,7 @@ Bernstein coefficient evidence.  Coefficient-backed objects participate in
 algebra.  Function-only objects evaluate exactly through the stored handle, but
 do not expose coefficient evidence for \code{bernsteinTable} or coefficient algebra.
 
-\section{Lookup}
+\section{API Map}
 \label{sec:pdmat-lookup}
 
 \begin{tabularx}{\textwidth}{@{}lY@{}}
@@ -35,7 +35,7 @@ Matrix/index methods &
 \bottomrule
 \end{tabularx}
 
-\section{Construction}
+\section{Construct \texorpdfstring{\code{pdmat}}{pdmat} Objects}
 \label{sec:pdmat-construction}
 
 \syntaxhead
@@ -228,7 +228,7 @@ access is private.
         \codeerr{pdmat}{Discontinuous}\allowbreak\code{LocalValues}.
 \end{itemize}
 
-\section{Properties}
+\section{Inspect Object Properties}
 
 \code{pdmat} adds the read-only \code{FunctionHandle} property to the
 inherited \code{pdbase} properties in \cref{sec:pdbase-fields}.  All use
@@ -355,7 +355,7 @@ val =
      1
 \end{lstlisting}
 
-\section{Visualization And Inspection}
+\section{Inspect Coefficients and Plot Values}
 \label{sec:pdmat-visualization}
 
 \subsection{\texorpdfstring{\code{bernsteinTable}}{bernsteinTable}}
@@ -566,48 +566,42 @@ title("Two-dimensional pdmat surface")
   \label{fig:pdmat-plot-2d}
 \end{figure}
 
-\textit{Two-dimensional slice of a three-parameter object.}
+\textit{Two-dimensional matrix-valued surface.}
 
 \begin{lstlisting}[style=dpmatlab]
-A = pdmat({[-1 1], [0 2], [-2 3]}, ...
-    @(rho1, rho2, rho3) [ ...
-        1 + 0.4*rho1.^2 + 0.1*rho2 + 0.05*rho3, ...
-        2 + 0.3*rho1 + 0.1*rho2 + 0.05*rho3; ...
-        3 - 0.2*rho1 + 0.15*rho2 + 0.05*rho3, ...
-        4 + 0.2*rho1.^2 + 0.25*rho2 + 0.05*rho3]);
+A = pdmat({[-1 1], [0 2]}, @(rho1, rho2) [ ...
+    1 + 0.8*rho1 + 0.25*rho2; ...
+    1 - 0.8*rho1 + 0.25*rho2]);
 h = plot(A, [1 2], SamplesPerCell=45, ...
-    EdgeColor="none", FaceAlpha=0.55);
-faceColors = [35 86 125; 103 127 145; ...
-    154 158 161; 205 205 205]/255;
-for k = 1:numel(h)
-    set(h(k), "FaceColor", faceColors(k,:))
-end
+    EdgeColor="none", FaceAlpha=0.62);
+set(h(1), "FaceColor", [35 86 125]/255)
+set(h(2), "FaceColor", [0.55 0.55 0.55])
 grid on
 view(35, 25)
 xlabel("rho1", "Interpreter", "none")
 ylabel("rho2", "Interpreter", "none")
 zlabel("matrix entry")
-title("2-by-2 three-parameter object: rho3 fixed at -2")
-legend(h, ["A(1,1)", "A(1,2)", "A(2,1)", "A(2,2)"], ...
+title("Two entries of a 2-by-1 pdmat cross at rho1 = 0")
+legend(h, ["A(1,1)", "A(2,1)"], ...
     "Location", "eastoutside")
 \end{lstlisting}
 
-Here \(\rho_3=-2\), the lower bound in the third row of
-\code{A.GridInfo.Bounds}.  The four vertically separated surfaces are the four
-entries of one \(2\)-by-\(2\) matrix-valued slice; separation makes the entry
-identities readable without changing the plotting rule for the fixed
-parameter.
+The two entries are equal for every \(\rho_2\) along \(\rho_1=0\).  Their
+ordering reverses on opposite sides: the first entry is lower when
+\(\rho_1<0\) and higher when \(\rho_1>0\).  The crossing is therefore a
+property of the matrix function, not an artificial plotting offset.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\textwidth]{matlab-figures/pdmat-plot-3d-slice.png}
-  \caption{Four entry surfaces of the matrix-valued three-parameter slice.
-  The plotting API still selects only dimensions 1 and 2, and the outside
-  legend identifies the matrix entry associated with each surface.}
+  \includegraphics[width=0.82\textwidth]{matlab-figures/pdmat-plot-2d-matrix.png}
+  \caption{Two entry surfaces of a \(2\)-by-\(1\) matrix-valued function.  The
+  outside legend distinguishes the entries while their intersection remains
+  visible along \(\rho_1=0\).}
+  \label{fig:pdmat-plot-2d-matrix}
   \label{fig:pdmat-plot-3d-slice}
 \end{figure}
 
-\section{Algebra And Matrix Operations}
+\section{Combine Known Matrices}
 \label{sec:pdmat-algebra}
 
 A \code{pdmat} operation acts on complete matrix coefficients while the
@@ -788,7 +782,7 @@ cannot be merged raise \codeerr{pdmat}{MixedGrid}.  Coefficient algebra on a
 function with an explicit verified \code{Degree} when coefficient evidence is
 required.
 
-\section{Matrix Methods}
+\section{Reshape and Transform Known Matrices}
 \label{sec:pdmat-matrix-ops}
 
 These methods transform every local matrix coefficient in the same way.  They
@@ -1207,7 +1201,7 @@ repeatedAtZero =
 
 Invalid repetition shapes raise \codeerr{pdmat}{InvalidRepmat}.
 
-\section{Indexing And Assignment}
+\section{Index and Assign \texorpdfstring{\code{pdmat}}{pdmat} Entries}
 \label{sec:pdmat-indexing}
 
 Parenthesis indexing selects a matrix block from every coefficient.  Assignment
@@ -1268,7 +1262,7 @@ deletion, or non-parenthesis assignment raises
 \codeerr{pdmat}{UnsupportedAssignment}; an incompatible right-hand side raises
 \codeerr{pdmat}{InvalidAssignment}.  Slicing and assignment require coefficient
 evidence and otherwise raise \codeerr{pdmat}{FunctionOnlyAlgebra}.
-\section{Remarks}
+\section{Boundaries and Related APIs}
 \label{sec:pdmat-limits}
 
 \begin{enumerate}[leftmargin=*]
@@ -1280,6 +1274,6 @@ evidence and otherwise raise \codeerr{pdmat}{FunctionOnlyAlgebra}.
         matching grid bounds.
 \end{enumerate}
 
-\subsection{See Also}
+\paragraph{Related APIs.}
 \code{pdmat}, \code{evaluate}, \code{bernsteinTable}, \code{plot},
 \code{pdbase}.

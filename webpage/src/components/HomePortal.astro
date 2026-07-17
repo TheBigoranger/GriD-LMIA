@@ -1,10 +1,8 @@
 ---
 import CellStorageExplorer from "./CellStorageExplorer.tsx";
 import CertificateChooser from "./CertificateChooser.astro";
-import DifferentiationStorage from "./DifferentiationStorage.astro";
 import ExampleDisclosure from "./ExampleDisclosure.astro";
 import JourneyCurve from "./JourneyCurve.astro";
-import MultiplicationExplorer from "./MultiplicationExplorer.tsx";
 import { renderDisplayMath } from "../lib/mathjax.js";
 import { versionInfo } from "../data/version.js";
 
@@ -21,49 +19,52 @@ const primaryLinks = [
 const lmiSteps = [
   {
     number: "01",
-    title: "State a PD-LMI or DPD-LMI",
-    text: "PD-LMI means parameter-dependent LMI. When bounded scheduling rates and derivatives of decision functions are present, the more specific name is differentiable PD-LMI (DPD-LMI). Removing the derivative term returns an ordinary PD-LMI.",
-    math: "\\begin{aligned}\\dot P(\\rho,\\dot\\rho)+P(\\rho)A(\\rho)+A(\\rho)^{\\mathsf T}P(\\rho)&\\preceq-\\varepsilon I,\\\\ P(\\rho)&\\succeq I.\\end{aligned}",
+    title: "Form the DPD-LMI",
+    text: "Start from a linear parameter-varying (LPV) model, whose scheduling vector ρ(t) selects the matrix A(ρ) in ẋ=A(ρ)x. A differentiable parameter-dependent LMI (DPD-LMI) includes the time derivative of the decision matrix, so the scheduling rates enter through the chain rule.",
+    math: [
+      "\\begin{aligned}\\dot P(\\rho(t))+P(\\rho)A(\\rho)+A(\\rho)^{\\mathsf T}P(\\rho)&\\preceq-\\varepsilon I,\\\\ P(\\rho)&\\succeq I,\\end{aligned}",
+      "\\dot P(\\rho(t))=\\frac{dP}{dt}=\\sum_{s=1}^{\\ell}\\frac{\\partial P}{\\partial\\rho_s}\\dot\\rho_s.",
+    ],
   },
   {
     number: "02",
-    title: "Initialize the grid and cell-local storage",
-    text: "A physical grid says where each polynomial lives. Degree says how many Bernstein labels live inside that cell. Continuity reuses values on shared faces instead of turning the representation into a B-spline.",
-    math: "\\begin{aligned}\\text{two 1-D cells: }&3+3-1=5\\text{ global controls},\\\\ \\text{one 2-D degree-2 cell: }&(2+1)^2=9\\text{ local labels}.\\end{aligned}",
+    title: "Grid the ρ-space",
+    text: "Choose one directional grid for each scheduling coordinate. Their Cartesian products define physical hypercubes; every cell receives its own local Bernstein coordinates and storage leaf, while shared-face values are reused when continuity is required.",
+    math: [
+      "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},",
+      "\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
+    ],
     visual: "storage",
-    visibleCode: "grid = {[0 0.5 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);",
-    fullCode: "yalmip('clear')\ngrid = {[0 0.5 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);\nP.ncell()\nP.ncoeff()",
+    visibleCode: "grid = {[0 0.5 1], [0 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);",
+    fullCode: "yalmip('clear')\ngrid = {[0 0.5 1], [0 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);\nP.cells()\nP.lbls()",
   },
   {
     number: "03",
-    title: "Multiply: pointwise curves become coefficient convolution",
-    text: "On one interval, two affine functions multiply pointwise into a quadratic curve. In coefficient space, the same operation is an ordered Bernstein convolution with binomial normalization.",
-    math: "\\begin{aligned}P(\\rho)&=4-2\\rho,\\quad Q(\\rho)=0.5+2.5\\rho,\\\\ R(\\rho)&=P(\\rho)Q(\\rho).\\end{aligned}",
-    visual: "multiply",
-    coefficients: "[4, 2] × [0.5, 3] → [2, 6.5, 6]",
-    visibleCode: "R = P*Q;",
-    fullCode: "P = pdmat({[0 1]}, {4, 2}, Degree=1);\nQ = pdmat({[0 1]}, {0.5, 3}, Degree=1);\nR = P*Q;\nR.bernsteinTable()",
+    title: "Build constraints inside each hypercube",
+    text: "Map every physical cell to local coordinates α∈[0,1]^ℓ, form the DPD-LMI residual there, and enumerate each admissible rate vertex v. The result is one local polynomial-matrix inequality for every cell-and-rate pair.",
+    math: [
+      "\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{\\rho_s^{(c_s+1)}-\\rho_s^{(c_s)}}\\in[0,1],",
+      "F^{(\\mathbf c,v)}(\\alpha)\\preceq0\\quad\\text{for every }\\mathbf c\\text{ and }v.",
+    ],
+    visibleCode: "D = rhodiff(P, rateBounds);\nL = D + P*A + A'*P <= -epsilon*eye(n);",
+    fullCode: "yalmip('clear')\nP = pdvar(n, grid, \"symmetric\", Degree=2);\nD = rhodiff(P, rateBounds);\nL = D + P*A + A'*P <= -epsilon*eye(n);",
   },
   {
     number: "04",
-    title: "Differentiate a continuous spline into cell-local linear rows",
-    text: "The derivative remains cell-local: c=1 covers ρ ∈ [0, 0.5], while c=2 covers ρ ∈ [0.5, 1]. Their boundary traces need not join into one globally smooth derivative, even though the quadratic decision reuses the value 1.4 at the shared face.",
-    math: [
-      "D^{(c)}_{+}(\\rho)=\\begin{cases}5.6(1-\\alpha_1)-3.2\\alpha_1,&c=1,\\ \\alpha_1=2\\rho,\\\\-6.4(1-\\alpha_2)+8\\alpha_2,&c=2,\\ \\alpha_2=2\\rho-1,\\end{cases}",
-      "D^{(c)}_{-}(\\rho)=-D^{(c)}_{+}(\\rho)",
-    ],
-    visual: "differentiate",
-    visibleCode: "P = pdvar(1, {[0 0.5 1]}, Degree=2);\nD = rhodiff(P, [-1 1]);",
-    fullCode: "yalmip('clear')\nP = pdvar(1, {[0 0.5 1]}, Degree=2);\nc1 = P.coeffs(1);\nc2 = P.coeffs(2);\ncontrols = [c1{:}, c2{2}, c2{3}];\nassign(controls, [0.8 2.2 1.4 -0.2 1.8]);\nD = rhodiff(P, [-1 1]);\ncellfun(@value, D.coeffs(1), UniformOutput=false)\ncellfun(@value, D.coeffs(2), UniformOutput=false)",
+    title: "Select a finite certificate",
+    text: "Choose one finite sufficient representation for the same stored residual. Direct coefficient tests are the default; Pólya elevation, Putinar box certificates, and the full-box preordering are explicit alternatives with different cost and strength.",
+    math: "F^{(\\mathbf c,v)}(\\alpha)\\preceq0\\quad\\Longleftarrow\\quad\\text{direct, P\\'olya, Putinar, or full-box certificate}",
+    visual: "certificate",
+    visibleCode: "selected = L.applyPolya(1);\n% or L, applyPutinar, applyFullBoxPreorder",
+    fullCode: "selected = L;                         % direct\nselected = L.applyPolya(1);           % Pólya\nselected = L.applyPutinar();          % Putinar\nselected = L.applyFullBoxPreorder();  % full box",
   },
   {
     number: "05",
-    title: "Select and assemble a finite certificate",
-    text: "Build one two-cell degree-two symmetric residual, then choose a certificate tab. Each tab shows its own selector, toYalmip call, finite constraint count, and boundary behavior; the residual's shared boundary handles are unchanged.",
-    math: "E(\\alpha)\\succeq0",
-    visual: "certificate",
-    visibleCode: "L = E >= 0;\nselected = L.applyPolya(1);",
-    fullCode: "yalmip('clear')\nE = pdvar(2, {[0 0.5 1]}, \"symmetric\", Degree=2);\nL = E >= 0;\nselected = L.applyPolya(1);\nC = selected.toYalmip();\nnumel(C)   % 8",
+    title: "Export, solve, and recover the decision matrix",
+    text: "Export the finite constraints to YALMIP, call the selected solver, and evaluate the optimized decision matrix. The recovered matrix function uses the same grid, cell ordering, and Bernstein storage created at the start.",
+    math: "\\texttt{toYalmip}\\;\\longrightarrow\\;\\texttt{optimize}\\;\\longrightarrow\\;\\texttt{value(P)}",
+    visibleCode: "optimize(selected.toYalmip(), objective, options);\nPsol = value(P);",
+    fullCode: "constraints = selected.toYalmip();\ndiagnostics = optimize(constraints, objective, options);\nassert(diagnostics.problem == 0)\nPsol = value(P);",
   },
 ];
 ---
@@ -91,7 +92,7 @@ const lmiSteps = [
     <header class="section-heading">
       <p class="home-label">Worked spine · {versionInfo.current}</p>
       <h2 id="walkthrough-title">From one quadratic two-cell DPD-LMI to finite constraints</h2>
-      <p>Read the geometry first. The page keeps only the essential API line in view and puts each complete runnable example one disclosure away.</p>
+      <p>Read the geometry first. The page keeps only the essential API line in view and puts a fuller code excerpt one disclosure away.</p>
     </header>
 
     <div class="lmi-narrative">
@@ -107,12 +108,10 @@ const lmiSteps = [
                   <div class="math-strip__row" set:html={renderDisplayMath(line)} />
                 ))}
               </div>
-              {step.visibleCode && <ExampleDisclosure visibleCode={step.visibleCode} fullCode={step.fullCode} summary={`Show the complete ${step.number} example`} />}
+              {step.visibleCode && <ExampleDisclosure visibleCode={step.visibleCode} fullCode={step.fullCode} summary={`Show the expanded ${step.number} code`} />}
             </div>
             {step.visual === "storage" && <CellStorageExplorer client:visible />}
-            {step.visual === "multiply" && <MultiplicationExplorer client:visible />}
-            {step.visual === "differentiate" && <DifferentiationStorage />}
-            {step.visual === "certificate" && <CertificateChooser />}
+              {step.visual === "certificate" && <CertificateChooser />}
           </div>
         </section>
       ))}

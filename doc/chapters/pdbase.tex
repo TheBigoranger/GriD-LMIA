@@ -1,4 +1,4 @@
-\chapter{\texorpdfstring{\code{pdbase}}{pdbase} Backend Reference}
+\chapter{\texorpdfstring{\code{pdbase}}{pdbase}: Grid and Storage Backend}
 \index{pdbase@\texttt{pdbase}}
 \label{sec:pdbase}
 
@@ -8,7 +8,7 @@ decision expressions with \code{pdvar}.  This section documents \code{pdbase}
 because it explains the shared storage, traversal, and inspection contract used
 by both public modeling classes.
 
-\section{Lookup}
+\section{API Map}
 \label{sec:pdbase-lookup}
 
 \begin{tabularx}{\textwidth}{@{}lY@{}}
@@ -40,7 +40,7 @@ Read storage fields &
 \bottomrule
 \end{tabularx}
 
-\section{\texorpdfstring{\code{pdbase}}{pdbase} Constructor}
+\section{Construct \texorpdfstring{\code{pdbase}}{pdbase} Objects}
 \label{sec:pdbase-constructor}
 
 \syntaxhead
@@ -135,7 +135,7 @@ coefficient for each tensor-product label in the two parameter directions.
         compatible nonempty \code{RateBounds}.
 \end{itemize}
 
-\section{Properties}\index{GridInfo@\texttt{GridInfo}}
+\section{Inspect Grid and Storage Properties}\index{GridInfo@\texttt{GridInfo}}
 \label{sec:pdbase-fields}
 
 Every \code{pdbase} property below is publicly readable through dot access
@@ -202,7 +202,7 @@ source = obj.SourceSummary
 \end{figure}
 
 The nesting follows physical-cell subscripts, not the Bernstein labels.  Start
-with \code{LocalValues\{i1\}}, then take one cell index per remaining
+with \code{LocalValues{i1}}, then take one cell index per remaining
 parameter; this selects physical cell \([i_1,i_2,\ldots,i_\ell]\).  Only
 after that selection does the leaf's flat cell array enumerate the
 \((m+1)^\ell\) local Bernstein coefficients.
@@ -210,7 +210,7 @@ Thus \code{coeffs(obj, [2 1])} returns the lower leaf in
 \cref{fig:localvalues-tree}, while \code{lbls(obj)} explains the order inside
 that leaf.
 
-\section{Inspection: \texorpdfstring{\code{cells}}{cells}, \texorpdfstring{\code{lbls}}{lbls}, And \texorpdfstring{\code{coeffs}}{coeffs}}
+\section{Inspect \texorpdfstring{\code{cells}}{cells}, \texorpdfstring{\code{lbls}}{lbls}, and \texorpdfstring{\code{coeffs}}{coeffs}}
 \label{sec:pdbase-inspection}
 
 \syntaxhead
@@ -275,7 +275,7 @@ coefficientCount =
 \end{lstlisting}
 
 \needspace{16\baselineskip}
-\section{Counts And Shape}
+\section{Inspect Counts and Shape}
 \label{sec:pdbase-counts}
 
 \syntaxhead
@@ -342,7 +342,7 @@ thirdDimension =
      1
 \end{lstlisting}
 
-\section{Bernstein Storage Operations}
+\section{Transform Bernstein Storage}
 
 The following entries separate whole-object elevation from the protected
 helpers used to align degrees, convolve coefficients, and refine grids.  They
@@ -591,7 +591,7 @@ label \(\mathbf i=(i_1,i_2)\in\{0,1\}^2\) is zero-based inside every cell.
 unique minimal same-bound tensor grid containing both inputs.}
 \end{center}
 
-\section{See Also}
+\section{Boundaries and Related APIs}
 \code{pdmat}, \code{pdvar}, \code{cells}, \code{coeffs}, \code{lbls},
 \code{ncell}, \code{ncoeff}, \code{npar}, \code{size}, \code{elevVals},
 \code{elevLocalValues}, \code{bernElev}, \code{bernProd}, \code{mergeGrid}.

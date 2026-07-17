@@ -8,22 +8,30 @@ import DiagramFrame from "./DiagramFrame.astro";
   class="multiplication-diagram"
 >
   <div class="multiplication-formulas">
-    <strong>Parameter space: R(ρ) = P(ρ)Q(ρ)</strong>
-    <span>Coefficient space: rₖ = Σᵢ₊ⱼ₌ₖ [C(1,i)C(1,j)/C(2,k)] pᵢqⱼ</span>
+    <div>
+      <span>Parameter space</span>
+      <strong>R(ρ) = P(ρ)Q(ρ)</strong>
+    </div>
+    <div>
+      <span>Coefficient space</span>
+      <strong>rₖ = Σᵢ₊ⱼ₌ₖ [C(1,i)C(1,j)/C(2,k)] pᵢqⱼ</strong>
+    </div>
   </div>
   <div class="curve-layout">
-    <section class="curve-copy curve-copy--first">
-      <h4>P(ρ) = 4 − 2ρ</h4>
-      <p>Bernstein [4, 2]</p>
-    </section>
-    <section class="curve-copy curve-copy--second">
-      <h4>Q(ρ) = 0.5 + 2.5ρ</h4>
-      <p>Bernstein [0.5, 3]</p>
-    </section>
-    <section class="curve-copy curve-copy--result">
-      <h4>R(ρ) = 2 + 9ρ − 5ρ²</h4>
-      <p>Bernstein [2, 6.5, 6]</p>
-    </section>
+    <div class="curve-legend" aria-label="Function and Bernstein coefficient legend">
+      <section class="curve-copy curve-copy--first">
+        <h4>P(ρ) = 4 − 2ρ</h4>
+        <p>Bernstein [4, 2]</p>
+      </section>
+      <section class="curve-copy curve-copy--second">
+        <h4>Q(ρ) = 0.5 + 2.5ρ</h4>
+        <p>Bernstein [0.5, 3]</p>
+      </section>
+      <section class="curve-copy curve-copy--result">
+        <h4>R(ρ) = 2 + 9ρ − 5ρ²</h4>
+        <p>Bernstein [2, 6.5, 6]</p>
+      </section>
+    </div>
     <svg viewBox="0 0 900 300" role="img" aria-labelledby="multiply-title multiply-desc">
       <title id="multiply-title">Two affine functions and their quadratic product on zero to one</title>
       <desc id="multiply-desc">P descends from four to two while Q rises from one half to three. They cross before their product reaches six.</desc>
@@ -49,18 +57,37 @@ import DiagramFrame from "./DiagramFrame.astro";
 </DiagramFrame>
 
 <style>
-  .multiplication-formulas { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.45rem 1.4rem; padding-block-end: 0.75rem; border-block-end: 1px solid var(--diagram-border); }
-  .multiplication-formulas strong { color: var(--sl-color-text); }
-  .multiplication-formulas span { color: var(--sl-color-gray-2); font-family: "STIX Two Math", Cambria, serif; }
-  .curve-layout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem 1rem; margin-block-start: 0.9rem; }
-  .curve-copy { border-block-start: 3px solid currentColor; padding-block-start: 0.45rem; }
+  .multiplication-formulas {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 0.75rem 1.4rem;
+    padding-block-end: 0.9rem;
+    border-block-end: 1px solid var(--diagram-border);
+  }
+  .multiplication-formulas > div { display: grid; gap: 0.25rem; min-width: 0; margin: 0; }
+  .multiplication-formulas span { color: var(--sl-color-gray-2); font-size: 0.76rem; font-weight: 750; letter-spacing: 0.05em; text-transform: uppercase; }
+  .multiplication-formulas strong { color: var(--sl-color-text); font-family: "STIX Two Math", Cambria, serif; font-size: 0.95rem; overflow-wrap: anywhere; }
+  .curve-layout { display: grid; gap: 0.7rem; margin-block-start: 0.9rem; }
+  .curve-legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; gap: 1rem; }
+  .curve-copy {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: minmax(1.3rem, auto) minmax(1.2rem, auto);
+    align-content: start;
+    gap: 0.2rem;
+    height: 100%;
+    min-height: 4.4rem;
+    margin: 0;
+    border-block-start: 3px solid currentColor;
+    padding: 0.55rem 0.1rem 0;
+  }
   .curve-copy--first { color: var(--diagram-input); }
   .curve-copy--second { color: var(--diagram-second); }
   .curve-copy--result { color: var(--diagram-result); }
   h4, p { margin: 0; }
   h4 { color: currentColor; font-size: 0.9rem; }
   .curve-copy p { color: var(--sl-color-gray-2); font-size: 0.82rem; }
-  svg { grid-column: 1 / -1; overflow: visible; }
+  svg { width: 100%; height: auto; overflow: visible; }
   .axes path { fill: none; stroke: var(--sl-color-text); stroke-width: 2; }
   .axes text { fill: var(--sl-color-text); font-family: system-ui, sans-serif; font-size: 16px; }
   .grid path { fill: none; stroke: var(--diagram-border); stroke-width: 1; stroke-dasharray: 4 8; }
@@ -73,8 +100,8 @@ import DiagramFrame from "./DiagramFrame.astro";
   .point--result { fill: var(--diagram-result); }
   .middle-coefficient { color: var(--diagram-result); text-align: center; font-weight: 750; }
   @media (max-width: 560px) {
-    .curve-layout { grid-template-columns: 1fr; }
-    svg { grid-column: auto; }
-    .multiplication-formulas { display: grid; }
+    .multiplication-formulas,
+    .curve-legend { grid-template-columns: 1fr; }
+    .curve-copy { min-height: 0; }
   }
 </style>

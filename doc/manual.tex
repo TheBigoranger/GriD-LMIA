@@ -3,7 +3,7 @@
 \input{manual-style}
 
 \title{\pkg\\User Manual}
-\author{Version v0.4.1}
+\author{Version v0.4.2}
 \date{July 2026}
 
 \begin{document}
@@ -15,7 +15,10 @@
 This manual teaches the \pkg{} from the continuous matrix inequality to the
 finite semidefinite program.  Its core representation is a continuous
 piecewise-polynomial matrix function on a physical cell grid, expressed in a
-cell-local tensor-product Bernstein basis.  A running example introduces the
+cell-local tensor-product Bernstein basis.  A linear parameter-varying (LPV)
+system is a linear state-space model whose known matrices depend on a
+measurable scheduling vector \(\boldsymbol\rho(t)\), as in
+\(\dot x=A(\boldsymbol\rho)x\).  A running example introduces the
 workflow from physical cells and local Bernstein data through matrix algebra,
 parameter-rate vertices\index{rate vertex}, certificate\index{certificate}
 selection, and the YALMIP boundary.  The
@@ -36,6 +39,7 @@ calculus but have not previously used Bernstein bases or SOS certificates.
 \pagenumbering{arabic}
 \include{chapters/workflow-introduction}
 \include{chapters/installation}
+\include{chapters/workflow-constraints}
 \include{chapters/pdbase}
 \include{chapters/pdmat}
 \include{chapters/pdvar}

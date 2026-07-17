@@ -1,3 +1,13 @@
+---
+const stages = [
+  { number: "01", title: "Form the DPD-LMI" },
+  { number: "02", title: "Grid the ρ-space" },
+  { number: "03", title: "Build constraints in each hypercube" },
+  { number: "04", title: "Select a certificate" },
+  { number: "05", title: "Export, solve, recover" },
+];
+---
+
 <figure
   class="journey-pipeline"
   role="img"
@@ -5,63 +15,55 @@
   aria-describedby="journey-desc"
 >
   <figcaption id="journey-title" class="journey-title">
-    PD-LMI representation, certification, solution, and feedback workflow
+    Five-stage DPD-LMI modeling and solution workflow
   </figcaption>
   <p id="journey-desc" class="journey-description">
-    An irregular wave carries the LPV model through Bernstein data, a finite
-    certificate, and YALMIP. YALMIP produces the solved matrix below, which
-    returns to the LPV model through a feedback arc.
+    A forward-only wave connects formation of the DPD-LMI, gridding the
+    scheduling-parameter space, construction of cellwise constraints, finite
+    certificate selection, and YALMIP export, solution, and recovery.
   </p>
 
-  <!-- The SVG preserves the curved topology on wide screens. Text equivalents
-       live in the shared figure description, so the decorative copies stay hidden. -->
-  <svg class="journey-desktop" viewBox="0 0 1120 390" aria-hidden="true">
-    <defs>
-      <marker id="journey-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-        <path d="M 0 0 L 10 5 L 0 10 z" />
-      </marker>
-    </defs>
-
-    <path class="journey-wave" d="M 78 148 C 190 48, 286 194, 402 112 S 618 44, 730 138 S 914 184, 1034 84" />
-
-    <g class="journey-node">
-      <circle cx="86" cy="141" r="13" />
-      <text x="86" y="104">LPV model</text>
-    </g>
-    <g class="journey-node">
-      <circle cx="390" cy="120" r="13" />
-      <text x="390" y="82">Bernstein data</text>
-    </g>
-    <g class="journey-node">
-      <circle cx="704" cy="130" r="13" />
-      <text x="704" y="92">finite certificate</text>
-    </g>
-    <g class="journey-node">
-      <circle cx="1022" cy="91" r="13" />
-      <text x="1022" y="53">YALMIP</text>
-    </g>
-
-    <path class="journey-arrow" d="M 1012 112 C 990 192, 888 228, 797 257" />
-    <g class="journey-result">
-      <rect x="620" y="248" width="210" height="86" rx="14" />
-      <text class="journey-result__title" x="725" y="276">solved matrix</text>
-      <text class="journey-result__matrix" x="725" y="312">[ P₁₁  P₁₂ ; P₂₁  P₂₂ ]</text>
-    </g>
-    <path class="journey-return" d="M 612 302 C 424 370, 168 354, 92 164" />
-    <text class="journey-return__label" x="335" y="357">feedback to LPV model</text>
-  </svg>
-
-  <!-- Mobile is an intentional vertical rendering, not a scaled desktop SVG. -->
-  <div class="journey-mobile" aria-hidden="true">
-    <ol>
-      <li><span>01</span><strong>LPV model</strong></li>
-      <li><span>02</span><strong>Bernstein data</strong></li>
-      <li><span>03</span><strong>finite certificate</strong></li>
-      <li><span>04</span><strong>YALMIP</strong></li>
-      <li class="journey-mobile__result"><span>05</span><strong>solved matrix</strong><code>[P₁₁ P₁₂; P₂₁ P₂₂]</code></li>
+  <div class="journey-desktop" aria-hidden="true">
+    <svg viewBox="0 0 1120 190">
+      <defs>
+        <marker id="journey-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" />
+        </marker>
+      </defs>
+      <path class="journey-wave" d="M112 132 C186 58 270 152 336 112 S492 70 560 118 S718 160 784 108 S936 148 1008 76" />
+      <g class="journey-leaders">
+        <path d="M112 132 V174" />
+        <path d="M336 112 V174" />
+        <path d="M560 118 V174" />
+        <path d="M784 108 V174" />
+        <path d="M1008 76 V174" />
+      </g>
+      <g class="journey-nodes">
+        <circle cx="112" cy="132" r="13" />
+        <circle cx="336" cy="112" r="13" />
+        <circle cx="560" cy="118" r="13" />
+        <circle cx="784" cy="108" r="13" />
+        <circle cx="1008" cy="76" r="13" />
+      </g>
+    </svg>
+    <ol class="journey-stage-band">
+      {stages.map((stage) => (
+        <li>
+          <span>{stage.number}</span>
+          <strong>{stage.title}</strong>
+        </li>
+      ))}
     </ol>
-    <p>feedback to LPV model</p>
   </div>
+
+  <ol class="journey-mobile" aria-hidden="true">
+    {stages.map((stage) => (
+      <li>
+        <span>{stage.number}</span>
+        <strong>{stage.title}</strong>
+      </li>
+    ))}
+  </ol>
 </figure>
 
 <style>
@@ -84,80 +86,92 @@
     border: 0;
   }
 
-  .journey-desktop {
+  .journey-desktop svg {
     display: block;
     width: 100%;
     height: auto;
     overflow: visible;
   }
 
-  .journey-wave,
-  .journey-arrow,
-  .journey-return {
+  .journey-wave {
     fill: none;
     stroke: var(--sl-color-accent);
-    stroke-width: 4;
+    stroke-width: 5;
     stroke-linecap: round;
+    marker-end: url(#journey-arrow);
   }
 
-  .journey-wave { stroke-width: 5; }
-  .journey-arrow,
-  .journey-return { marker-end: url(#journey-arrow); }
-  .journey-return { stroke-dasharray: 8 8; }
   #journey-arrow path { fill: var(--sl-color-accent); }
 
-  .journey-node circle {
+  .journey-leaders path {
+    fill: none;
+    stroke: var(--diagram-border);
+    stroke-width: 2;
+    stroke-dasharray: 4 5;
+  }
+
+  .journey-nodes circle {
     fill: var(--sl-color-bg);
     stroke: var(--sl-color-accent);
     stroke-width: 5;
   }
 
-  .journey-node text,
-  .journey-result text,
-  .journey-return__label {
-    fill: var(--sl-color-text);
-    font-family: var(--sl-font-system);
-    text-anchor: middle;
+  .journey-stage-band,
+  .journey-mobile {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .journey-node text,
-  .journey-result__title {
-    font-size: 18px;
-    font-weight: 800;
+  .journey-stage-band {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin-block-start: -0.1rem;
   }
 
-  .journey-result rect {
-    fill: var(--diagram-surface);
-    stroke: var(--sl-color-accent);
-    stroke-width: 3;
+  .journey-stage-band li,
+  .journey-mobile li {
+    display: grid;
+    gap: 0.45rem;
+    border: 1px solid var(--diagram-border);
+    border-radius: 12px;
+    padding: 0.7rem;
+    background: var(--diagram-surface);
   }
 
-  .journey-result__matrix { font-size: 17px; }
-  .journey-return__label { font-size: 15px; font-weight: 700; }
+  .journey-stage-band span,
+  .journey-mobile span {
+    color: var(--sl-color-text-accent);
+    font-size: 0.7rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+  }
+
+  .journey-stage-band strong,
+  .journey-mobile strong {
+    line-height: 1.25;
+  }
+
+  .journey-stage-band strong { font-size: 0.78rem; }
   .journey-mobile { display: none; }
 
   @media (max-width: 700px) {
     .journey-desktop { display: none; }
-    .journey-mobile { display: grid; gap: 0.9rem; }
-    .journey-mobile ol { display: grid; gap: 1.35rem; margin: 0; padding: 0; list-style: none; }
+    .journey-mobile { display: grid; gap: 1.2rem; }
     .journey-mobile li {
       position: relative;
-      display: grid;
       grid-template-columns: 2.25rem minmax(0, 1fr);
-      gap: 0.65rem;
       align-items: center;
-      min-height: 4.4rem;
-      border: 1px solid var(--diagram-border);
-      border-radius: var(--diagram-radius);
+      min-height: 4rem;
       padding: 0.75rem;
-      background: var(--diagram-surface);
     }
     .journey-mobile li:not(:last-child)::after {
       position: absolute;
       content: "";
       inset-block-start: 100%;
-      inset-inline-start: 1.85rem;
-      height: 1.35rem;
+      inset-inline-start: 1.83rem;
+      height: 1.2rem;
       border-inline-start: 3px solid var(--sl-color-accent);
     }
     .journey-mobile span {
@@ -167,20 +181,9 @@
       height: 2rem;
       border: 2px solid var(--sl-color-accent);
       border-radius: 50%;
-      color: var(--sl-color-text-accent);
       background: var(--sl-color-bg);
-      font-size: 0.7rem;
-      font-weight: 850;
+      letter-spacing: normal;
     }
     .journey-mobile strong { font-size: 0.95rem; }
-    .journey-mobile__result code { grid-column: 2; width: fit-content; }
-    .journey-mobile p {
-      margin: 0 0 0 1.85rem;
-      border-inline-start: 3px dashed var(--sl-color-accent);
-      padding: 0.35rem 0 0.35rem 1rem;
-      color: var(--sl-color-text-accent);
-      font-size: 0.82rem;
-      font-weight: 750;
-    }
   }
 </style>

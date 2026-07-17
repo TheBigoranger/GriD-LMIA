@@ -1,4 +1,4 @@
-\chapter{Examples}
+\chapter{Worked Solver Examples}
 \label{sec:examples}
 
 \section{Deterministic Putinar And Full-Box Selection}
@@ -60,7 +60,7 @@ and stores two PSD blocks followed by five identities.  The original
 constraints.  Likewise, selecting Putinar from \code{boxHigher} rebuilds from
 the original residual and clears the full-box selection.
 
-\section{Parameter-Dependent Lyapunov Solver Smoke}
+\section{Solve for a Parameter-Dependent Lyapunov Matrix}
 \label{sec:parameter-dependent-lyapunov-smoke}
 
 The first solver smoke test in \code{+tests/+pdlmi/test_solver_smoke.m}
@@ -111,7 +111,7 @@ coefficient-wise constraints supplied to the solver.  The constant-case result
 is retained to exercise the comparison in the smoke test; only a MOSEK solve
 is used there to certify its intended infeasibility distinction.
 
-\section{Rate-Dependent Block LMI Solver Smoke}
+\section{Solve a Rate-Dependent Block LMI}
 \label{sec:solver-example}
 
 This example is adapted from \code{+tests/+pdlmi/test_solver_smoke.m}.  The

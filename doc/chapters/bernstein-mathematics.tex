@@ -1,4 +1,4 @@
-\chapter{Bernstein Basis Mathematics}
+\chapter{Bernstein Representation and Exact Operations}
 \label{app:bernstein-math}
 
 This appendix develops the representation used by the package from the
@@ -94,10 +94,15 @@ For example, \(C^{(c)}[0]=2\) and \(C^{(c)}[1]=4\) give
     plot[domain=0:1,samples=61] (\x,{1-\x});
   \draw[dp/curve-secondary,dp/marker-secondary]
     plot[domain=0:1,samples=61] (\x,{\x});
-  \node[dp/direct-label,anchor=west] at (0.12,0.84) {\(B_0^1=1-\alpha\)};
-  \node[dp/direct-label,anchor=west] at (0.60,0.72) {\(B_1^1=\alpha\)};
   \foreach \x in {0,1}{\draw (\x,0.03)--(\x,-0.03)
     node[below,font=\scriptsize]{\(\x\)};}
+  \node[font=\scriptsize\bfseries,anchor=east] at (-0.03,-0.38) {Legend};
+  \draw[dp/curve-primary] (0.04,-0.38)--(0.16,-0.38);
+  \node[font=\scriptsize,anchor=west] at (0.18,-0.38)
+    {\(B_0^1=1-\alpha\)};
+  \draw[dp/curve-secondary] (0.56,-0.38)--(0.68,-0.38);
+  \node[font=\scriptsize,anchor=west] at (0.70,-0.38)
+    {\(B_1^1=\alpha\)};
 \end{tikzpicture}
 \end{center}
 
@@ -146,9 +151,16 @@ For degree two,
     plot[domain=0:1,samples=61] (\x,{\x^2});
   \foreach \x in {0,0.5,1}{\draw (\x,0.02)--(\x,-0.02)
     node[below,font=\scriptsize]{\(\x\)};}
-  \node[dp/direct-label,anchor=west] at (0.05,0.78) {\(B_0^2\): solid / circle};
-  \node[dp/direct-label,anchor=west] at (0.37,0.58) {\(B_1^2\): dashed / square};
-  \node[dp/direct-label,anchor=east] at (0.95,0.20) {\(B_2^2\): dotted / triangle};
+  \node[font=\scriptsize\bfseries,anchor=east] at (-0.03,-0.28) {Legend};
+  \draw[dp/curve-primary] (0.04,-0.28)--(0.16,-0.28);
+  \node[font=\scriptsize,anchor=west] at (0.18,-0.28)
+    {\(B_0^2=(1-\alpha)^2\)};
+  \draw[dp/curve-secondary] (0.04,-0.48)--(0.16,-0.48);
+  \node[font=\scriptsize,anchor=west] at (0.18,-0.48)
+    {\(B_1^2=2(1-\alpha)\alpha\)};
+  \draw[dp/curve-tertiary] (0.04,-0.68)--(0.16,-0.68);
+  \node[font=\scriptsize,anchor=west] at (0.18,-0.68)
+    {\(B_2^2=\alpha^2\)};
 \end{tikzpicture}
 
 \textit{At every \(\alpha\), the three plotted heights are nonnegative and sum
@@ -323,7 +335,7 @@ localLabels =
 \end{lstlisting}
 
 The nested tree
-\code{LocalValues\{c1\}\{c2\}...\{cell\}} follows physical-cell coordinates.
+\code{LocalValues{c1}{c2}...{cell}} follows physical-cell coordinates.
 Only after reaching a leaf does the flat coefficient cell follow the
 \code{lbls} order.  Earlier dimensions vary more slowly in both
 \code{cells} and \code{lbls}.
@@ -336,7 +348,7 @@ Only after reaching a leaf does the flat coefficient cell follow the
   result/.style={dp/result,font=\scriptsize,align=center,
     minimum width=82mm,minimum height=15mm,inner sep=5pt}]
   \node[box] (tree) {physical cell \((2,3)\)\\
-    \code{LocalValues\{2\}\{3\}}};
+    \code{LocalValues{2}{3}}};
   \node[result,below=of tree] (leaf) {local coefficient labels\\[2pt]
     \(C^{(2,3)}[0,0]\), \(C^{(2,3)}[0,1]\),
     \(C^{(2,3)}[1,0]\), \(C^{(2,3)}[1,1]\)};
@@ -434,7 +446,7 @@ and
       at (0.5,1.38) {Input \(P\)\\degree 2};
     \node[font=\tiny,anchor=east] at (-0.03,0.17) {1};
     \node[font=\tiny,anchor=east] at (-0.03,1) {6};
-    \node[dp/direct-label,font=\tiny,anchor=west] at (0.10,-0.22)
+    \node[font=\tiny,anchor=west] at (0.10,-0.22)
       {\(P=1+2\alpha+3\alpha^2\)\quad\(\bullet\)};
   \end{scope}
   \begin{scope}[xshift=4.3cm]
@@ -447,7 +459,7 @@ and
       at (0.5,1.38) {Input \(Q\)\\degree 1};
     \node[font=\tiny,anchor=east] at (-0.03,0.5) {2};
     \node[font=\tiny,anchor=east] at (-0.03,1) {4};
-    \node[dp/direct-label,font=\tiny,anchor=west] at (0.10,-0.22)
+    \node[font=\tiny,anchor=west] at (0.10,-0.22)
       {\(Q=2+2\alpha\)\quad\(\square\)};
   \end{scope}
   \begin{scope}[xshift=2.15cm,yshift=-3.55cm]
@@ -460,7 +472,7 @@ and
       at (0.5,1.38) {Product \(PQ\)\\degree 3};
     \node[font=\tiny,anchor=east] at (-0.03,0.083) {2};
     \node[font=\tiny,anchor=east] at (-0.03,1) {24};
-    \node[dp/direct-label,font=\tiny,anchor=west] at (0.03,-0.22)
+    \node[font=\tiny,anchor=west] at (0.03,-0.22)
       {\(PQ=2+6\alpha+10\alpha^2+6\alpha^3\)\quad\(\triangle\)};
   \end{scope}
 \end{tikzpicture}

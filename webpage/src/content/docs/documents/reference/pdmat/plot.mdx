@@ -93,45 +93,46 @@ faceAlpha =
 The scalar surface includes both a quadratic term and a mixed term. `plot`
 uses the selected grid axes as the two displayed dimensions.
 
-### Three-parameter object, two-dimensional slice
-
-`plot` accepts at most two selected dimensions. For a three-parameter object,
-choose the two displayed axes; every unselected parameter is fixed at its
-lower grid bound.
+### Two-dimensional matrix-valued surface
 
 ```matlab
-A = pdmat({[-1 1], [0 2], [-2 3]}, ...
-    @(rho1, rho2, rho3) [ ...
-        1 + 0.4*rho1.^2 + 0.1*rho2 + 0.05*rho3, ...
-        2 + 0.3*rho1 + 0.1*rho2 + 0.05*rho3; ...
-        3 - 0.2*rho1 + 0.15*rho2 + 0.05*rho3, ...
-        4 + 0.2*rho1.^2 + 0.25*rho2 + 0.05*rho3]);
+A = pdmat({[-1 1], [0 2]}, @(rho1, rho2) [ ...
+    1 + 0.8*rho1 + 0.25*rho2; ...
+    1 - 0.8*rho1 + 0.25*rho2]);
 h = plot(A, [1 2], SamplesPerCell=45, ...
-    EdgeColor="none", FaceAlpha=0.55);
-faceColors = [35 86 125; 103 127 145; 154 158 161; 205 205 205]/255;
-for k = 1:numel(h)
-    set(h(k), "FaceColor", faceColors(k,:));
-end
-legend(h, ["A(1,1)", "A(1,2)", "A(2,1)", "A(2,2)"], ...
+    EdgeColor="none", FaceAlpha=0.62);
+set(h(1), "FaceColor", [35 86 125]/255)
+set(h(2), "FaceColor", [0.55 0.55 0.55])
+legend(h, ["A(1,1)", "A(2,1)"], ...
     "Location", "eastoutside")
-fixedThirdParameter = A.GridInfo.Bounds(3,1)
+crossValue = A.evaluate([0 1]);
+leftValue = A.evaluate([-1 1]);
+rightValue = A.evaluate([1 1]);
+crossingError = abs(crossValue(1) - crossValue(2))
+ordering = [leftValue(1) < leftValue(2), ...
+    rightValue(1) > rightValue(2)]
 handleCount = numel(h)
 ```
 
 ```text
-fixedThirdParameter =
-    -2
+crossingError =
+     0
+
+ordering =
+  1×2 logical array
+   1   1
 
 handleCount =
-     4
+     2
 ```
 
-![Four vertically separated transparent entry surfaces from a two-by-two three-parameter pdmat object, with an outside legend and rho three fixed at its lower bound](/PD-LMI-package/plots/pdmat-plot-3d-slice.png)
+![Two intersecting entry surfaces from a two-by-one two-parameter pdmat object, with an outside legend](/PD-LMI-package/plots/pdmat-plot-2d-matrix.png)
 
-This is a two-dimensional matrix slice, not a scalar or volume plot. The four
-entry surfaces are vertically separated, use transparent fills, and keep their
-legend outside the axes. The source explicitly selects dimensions `[1 2]`, so
-the third coordinate remains fixed at its lower grid bound, $\rho_3=-2$.
+The two entries are equal for every $\rho_2$ along $\rho_1=0$. Their ordering
+reverses on opposite sides: the first entry is lower for $\rho_1<0$ and higher
+for $\rho_1>0$. The intersection is therefore part of the represented matrix
+function rather than a visual offset. The legend stays outside the axes so it
+cannot cover either surface.
 
 ## Validation And Errors
 

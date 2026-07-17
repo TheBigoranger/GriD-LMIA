@@ -1,4 +1,4 @@
-\chapter{\texorpdfstring{\code{pdlmi}}{pdlmi} Reference}\index{pdlmi@\texttt{pdlmi}}
+\chapter{\texorpdfstring{\code{pdlmi}}{pdlmi}: Finite Certificate Assembly}\index{pdlmi@\texttt{pdlmi}}
 \label{sec:pdlmi}
 
 \code{pdlmi} stores YALMIP constraints assembled from \code{pdvar}
@@ -39,7 +39,7 @@ Putinar, or full-box rebuilding replaces, rather than compounds, the previous
 selection.}
 \end{center}
 
-\section{Lookup}
+\section{API Map}
 \label{sec:pdlmi-lookup}
 
 \begin{tabularx}{\textwidth}{@{}lY@{}}
@@ -67,7 +67,7 @@ Solve &
 \bottomrule
 \end{tabularx}
 
-\section{Properties}
+\section{Inspect Certificate State}
 
 All \code{pdlmi} properties have private set access and are readable with dot
 notation.  \code{Constraints} contains the assembled YALMIP entries;
@@ -90,7 +90,7 @@ For example, \code{C.Relation}, \code{C.Residual.Degree}, and
 \code{C.UsePutinar} inspect a wrapper.  Apply methods return a rebuilt value;
 assigning these properties is unsupported.
 
-\section{Construction And Comparisons}
+\section{Construct \texorpdfstring{\code{pdlmi}}{pdlmi} Comparisons}
 \label{sec:pdlmi-construction}
 
 \syntaxhead
@@ -263,7 +263,7 @@ fullBoxOrder =
         before validating its supplied increment or order.
 \end{enumerate}
 
-\section{Direct Coefficient Assembly}\index{direct assembly}
+\section{Assemble Direct Coefficient Constraints}\index{direct assembly}
 \label{sec:pdlmi-direct}
 
 For each physical cell, local Bernstein coefficient, and rate-vertex row if
@@ -318,7 +318,7 @@ The diagram specializes to one parameter, degree two, and one ordinary
 \end{tikzpicture}
 \end{center}
 
-\section{Opt-In P\'olya Assembly And \texorpdfstring{\code{applyPolya}}{applyPolya}}
+\section{Select P\'olya Assembly with \texorpdfstring{\code{applyPolya}}{applyPolya}}
 \index{Polya@P\'olya}\index{applyPolya@\texttt{applyPolya}}
 \label{sec:pdlmi-polya}
 
@@ -389,7 +389,7 @@ decision degree, a grid refinement, or a Gram order.}
 The mathematical background and the limits of fixed-increment coefficient
 positivity are developed in \cref{app:certificates}.
 
-\section{Putinar Selection And
+\section{Select Putinar Assembly with
 \texorpdfstring{\code{applyPutinar}}{applyPutinar}}
 \index{Putinar}\index{applyPutinar@\texttt{applyPutinar}}
 \label{sec:pdlmi-putinar}
@@ -528,8 +528,8 @@ full-box selection.  It adds no implicit margin and makes no solver call.
         column-major order.
 \end{enumerate}
 
-\section[Full Box Preordering: \texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}]{%
-Full Box Bernstein--Gram Preordering\\[-0.15em]
+\section[Select Full Box Assembly with \texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}]{%
+Select Full Box Bernstein--Gram Assembly with\\[-0.15em]
 \texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}}
 \index{Full Box preordering}\index{applyFullBoxPreorder@\texttt{applyFullBoxPreorder}}
 \label{sec:pdlmi-full-box}
@@ -645,7 +645,7 @@ stored constraints is not the direct coefficient count.
         column-major order.
 \end{enumerate}
 
-\section{\texorpdfstring{\code{toYalmip}}{toYalmip}}
+\section{Export with \texorpdfstring{\code{toYalmip}}{toYalmip}}
 \index{toYalmip@\texttt{toYalmip}}\index{YALMIP}
 \label{sec:pdlmi-toyalmip}
 
@@ -712,11 +712,11 @@ secondConstraintCount =
 After this boundary, the package is no longer assembling Bernstein data; YALMIP
 owns solver choice, diagnostics, and optimization status.
 
-\section{See Also}
+\section{Boundaries and Related APIs}
 \code{pdvar}, \code{rhodiff}, \code{applyPolya}, \code{applyPutinar},
 \code{applyFullBoxPreorder}, \code{toYalmip}, \code{optimize}.
 
-\section{Solver-Facing Use}
+\subsection{Solve with YALMIP}
 \label{sec:pdlmi-solver-use}
 
 \code{pdlmi} does not own solver settings or wrap \code{optimize}.  After

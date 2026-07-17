@@ -23,9 +23,9 @@ import { historyPolicy, versionHistory } from "../../data/version-history.js";
 
 ## Release History
 
-This list records the historical manual snapshots recovered from Git, plus
-the explicitly requested v0.4.1 patch release. A commit suffix identifies the
-release evidence for each previous snapshot.
+This list keeps only the final patch release for each minor line. A commit
+suffix identifies the release evidence for each previous snapshot; the current
+release remains generated from the TeX manual.
 
 <div class="history-list">
   {versionHistory.length === 0 ? (
@@ -56,6 +56,7 @@ release evidence for each previous snapshot.
   <li>History append rule: {historyPolicy.appendRule}</li>
 </ul>
 
-When a future public release requires a recorded snapshot, add a new row in
-`webpage/src/data/version-history.js` and keep the current version synchronized
-from the TeX manual rather than editing the displayed current version manually.
+When a later patch becomes the final release of its minor line, replace that
+line's history row in `webpage/src/data/version-history.js`. Keep the displayed
+current version synchronized from the TeX manual rather than editing generated
+version data manually.

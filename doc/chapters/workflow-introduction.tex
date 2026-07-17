@@ -1,115 +1,130 @@
-\chapter{From a PD-LMI to Solver Constraints}
+\chapter[From LPV Models to Cellwise Bernstein Data]{\texorpdfstring{From LPV Models to\\Cellwise Bernstein Data}{From LPV Models to Cellwise Bernstein Data}}
 \label{sec:canonical-pdlmi}
-
-\section{Begin With The Continuous Inequality}
-
-Let the scheduling vector be
-\(\boldsymbol\rho=(\rho_1,\ldots,\rho_\ell)\in\mathcal P\).  A
-\emph{parameter-dependent LMI}\index{PD-LMI} is abbreviated \emph{PD-LMI} throughout this
-manual and is the umbrella problem class named by the package.  When a model
-also uses the bounded rate
-\(\dot{\boldsymbol\rho}\in\mathcal V\) and derivatives of its decision
-functions, we call it a \emph{differentiable parameter-dependent LMI}, or
-\emph{DPD-LMI}\index{DPD-LMI}.  A canonical DPD-LMI is
-\begin{equation*}
-  \sum_i R_i(\boldsymbol\rho)
-    \left(\sum_{j=1}^{\ell}
-      \frac{\partial x_i(\boldsymbol\rho)}{\partial\rho_j}\dot\rho_j\right)
-  +F_0(\boldsymbol\rho)
-  +\sum_i F_i(\boldsymbol\rho)x_i(\boldsymbol\rho)\prec0.
-\end{equation*}
-The known functions are the \(R_i\) and \(F_i\); the differentiable functions
-\(x_i\) are decisions.  After known data are fixed, every term must remain
-affine in the decision coefficients.  Removing the derivative term recovers
-an ordinary PD-LMI.  Thus ``DPD-LMI'' adds a derivative qualifier; it does not
-replace the package's PD-LMI name.
-
-A concrete one-parameter example is the LPV Lyapunov condition
-\begin{align}
-  P(\rho)&\succeq I, \label{eq:canonical-positive}\\
-  \dot P(\rho,\dot\rho)+P(\rho)A(\rho)
-    +A(\rho)^{\mathsf T}P(\rho)&\preceq-\varepsilon I, \label{eq:lpv-spine}\\
-  \dot P(\rho,\dot\rho)&=
-    \frac{\partial P(\rho)}{\partial\rho}\dot\rho.\notag
-\end{align}
-Taking \(\dot\rho=0\), or removing \(\dot P\), gives the familiar PD-LMI
-Lyapunov inequality.  In the worked path below \(P\) is \(2\)-by-\(2\),
-\(\rho\in[0,1]\), \(\dot\rho\in[-1,1]\), and
-\(\varepsilon=10^{-6}\).  The package inserts no hidden strictness margin;
-the displayed \(\varepsilon I\) is part of the user's model.
-
-\begin{center}
-\begin{tikzpicture}[node distance=13mm and 23mm,>=Latex,
-  box/.style={dp/result,
-    align=center,font=\small,minimum width=40mm,minimum height=11mm,
-    inner sep=5pt}]
-  \node[box] (continuous) {PD-LMI / DPD-LMI\\continuous domain};
-  \node[box,right=of continuous] (coeff) {Bernstein data\\cell by cell};
-  \node[box,below=of coeff] (certificate) {finite certificate\\direct / P\'olya / Putinar / full box};
-  \node[box,left=of certificate] (solver) {YALMIP model\\solver ready};
-  \draw[->,thick,dpblue] (continuous) --
-    node[above=3pt,font=\scriptsize]{represent} (coeff);
-  \draw[->,thick,dpblue] (coeff) --
-    node[right=4pt,font=\scriptsize]{certify} (certificate);
-  \draw[->,thick,dpblue] (certificate) --
-    node[above=3pt,font=\scriptsize]{export} (solver);
-\end{tikzpicture}
-
-\textit{The package changes representation and certificate; it does not
-replace YALMIP's solver interface.}
-\end{center}
-
-\section{Bernstein Cells Support Continuous Lipschitz Matrix Functions}
 \label{sec:bernstein-motivation}
 
-In LPV analysis we often seek a Lyapunov matrix \(P(\boldsymbol\rho)\) that is
-Lipschitz continuous on the compact parameter set \(\mathcal P\).  Gridding
-\(\mathcal P\) makes the model finite and local, but independent cell
-polynomials would not agree on a grid boundary.  The package instead shares
-the complete Bernstein coefficient face between neighboring cells.  Because
-the trace of a tensor-product Bernstein polynomial on a face depends only on
-that face's coefficients, this sharing gives \(C^0\) continuity across every
-cell boundary.  Each cell polynomial has bounded first derivatives, and a
-continuous piecewise-polynomial function on a finite compact grid is therefore
-globally Lipschitz.  Derivatives need not agree across a boundary: the
-construction guarantees \(C^0\) continuity and Lipschitz regularity, not
-\(C^1\) continuity.
+This chapter fixes the vocabulary and data model used throughout the manual.
+It begins with a continuous control inequality, separates the physical grid
+from local polynomial labels, and ends at the exact cell-local Bernstein data
+consumed by the algebra in \cref{sec:cellwise-solver-path}.
 
-On one normalized cell, the degree-\(m\) Bernstein
-polynomial\index{Bernstein polynomial} basis is
-\index{Bernstein basis}
+\section{LPV Systems and Parameter-Dependent LMIs}
+
+A \emph{linear parameter-varying (LPV) system}\index{LPV system} is a linear
+state-space model whose matrices depend on a measurable scheduling vector
+\(\boldsymbol\rho(t)=(\rho_1(t),\ldots,\rho_\ell(t))\).  For the autonomous
+model used here,
 \[
-  B_i^m(\alpha)=\binom mi(1-\alpha)^{m-i}\alpha^i,
-  \qquad i=0,\ldots,m,
+  \dot x(t)=A\bigl(\boldsymbol\rho(t)\bigr)x(t),
 \]
-where \(\alpha\in[0,1]\) is the forward local
-coordinate\index{local coordinate}.  The basis functions are nonnegative and
-form a partition of unity\index{partition of unity}.  Therefore a matrix
-polynomial \(C(\alpha)=\sum_iB_i^m(\alpha)C[i]\) lies in the convex hull of
-its Bernstein coefficients\index{Bernstein coefficient}.  This
-convex-hull property\index{convex-hull property} turns matrix-sign questions
-into finite sufficient coefficient tests.  Exact degree
-elevation\index{degree elevation} aligns operands without changing their
-values, tensor-product bases\index{tensor-product basis} extend the same
-reasoning to boxes, and separate cell-local storage handles nonuniform
-physical partitions without inventing global samples.
+the state equation is linear in \(x\), while the scheduling vector selects the
+current matrix from the known family \(A(\boldsymbol\rho)\).  The admissible
+scheduling values lie in a compact parameter set \(\mathcal P\), and a
+rate-dependent problem also bounds
+\(\dot{\boldsymbol\rho}(t)\in\mathcal V\).
 
-The coefficients are not power-basis coefficients.  For example,
+A \emph{parameter-dependent linear matrix inequality} (PD-LMI)\index{PD-LMI}
+asks a matrix inequality to hold for every
+\(\boldsymbol\rho\in\mathcal P\).  When derivatives of decision functions
+enter through the scheduling rate, this manual calls it a
+\emph{differentiable parameter-dependent LMI} (DPD-LMI)\index{DPD-LMI}.  A
+standard LPV Lyapunov model seeks a symmetric matrix
+\(P(\boldsymbol\rho)\) such that
+\begin{align}
+  P(\boldsymbol\rho)&\succeq I,
+    \label{eq:canonical-positive}\\
+  \dot P(\boldsymbol\rho,\dot{\boldsymbol\rho})
+    +P(\boldsymbol\rho)A(\boldsymbol\rho)
+    +A(\boldsymbol\rho)^{\mathsf T}P(\boldsymbol\rho)
+    &\preceq-\varepsilon I.
+    \label{eq:lpv-spine}
+\end{align}
+After known data are fixed, every term must remain affine in the decision
+coefficients.  Removing \(\dot P\), or fixing
+\(\dot{\boldsymbol\rho}=0\), recovers an ordinary PD-LMI.  The package inserts
+no hidden strictness margin: the displayed \(\varepsilon I\) belongs to the
+user's model.
+
+\section{The Chain Rule in a DPD-LMI}
+
+The dot on \(P\) is a time derivative along the scheduling trajectory, not a
+new independent matrix.  The multivariable chain rule is
 \[
-  p(\alpha)=1+2\alpha+3\alpha^2
-    =B_0^2(\alpha)+2B_1^2(\alpha)+6B_2^2(\alpha).
+  \dot P\bigl(\boldsymbol\rho(t)\bigr)
+  =\frac{dP}{dt}
+  =\sum_{s=1}^{\ell}
+    \frac{\partial P}{\partial\rho_s}
+      \bigl(\boldsymbol\rho(t)\bigr)\dot\rho_s(t).
 \]
-Thus the degree\index{degree} is two and the Bernstein coefficient row is
-\([1,2,6]\).  The basis sum remains one, so elevation can change this row
-while preserving exactly the same polynomial.
+Thus the DPD-LMI depends on both the spatial derivatives of the decision
+matrix and the admissible scheduling rates.  The package first differentiates
+the cell polynomial in each parameter direction and then enumerates the
+vertices of the rate box.  This is the role of \code{rhodiff}; it does not
+differentiate with respect to time symbolically and it does not create a new
+physical grid.
 
-The representation is local even when the physical domain is
-two-dimensional.  The following degree-two matrix example has grid
-\(\{[0,0.5,1],[0,1]\}\), hence two physical cells and nine local coefficient
-matrices per cell.  The public traversal methods return physical-cell rows and
-zero-based local labels; the accessor and the nested
-\code{LocalValues}\index{LocalValues@\texttt{LocalValues}} storage path select
-the same leaf.
+For the running example, \(P\) is \(2\)-by-\(2\),
+\(\rho\in[0,1]\), \(\dot\rho\in[-1,1]\), and
+\(\varepsilon=10^{-6}\).  In one parameter the sum reduces to
+\(\dot P=(\partial P/\partial\rho)\dot\rho\).
+
+\section{Grid the Scheduling-Parameter Space}
+
+Choose a one-dimensional physical grid
+\[
+  \mathcal G_s=
+  \{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\}
+\]
+in every parameter direction \(s\).  The full tensor grid is
+\(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\).  It contains
+\(\prod_s k_s\) physical nodes and partitions \(\mathcal P\) into
+\(\prod_s(k_s-1)\) physical hypercubes.  A hypercube is identified by the
+one-based multi-index
+\(\mathbf c=(c_1,\ldots,c_\ell)\) and has domain
+\[
+  \mathcal H_{\mathbf c}
+  =\prod_{s=1}^{\ell}
+   [\rho_s^{(c_s)},\rho_s^{(c_s+1)}].
+\]
+Inside that hypercube, the forward local coordinate is
+\[
+  \alpha_s=
+  \frac{\rho_s-\rho_s^{(c_s)}}
+       {\rho_s^{(c_s+1)}-\rho_s^{(c_s)}}\in[0,1].
+\]
+Physical-node indices and components of \(\mathbf c\) are one-based.  They
+identify geometry, not coefficient positions.
+
+\section{Physical Hypercubes and Local Bernstein Labels}
+
+On one selected hypercube, a tensor-product polynomial of degree \(m\) is
+\[
+ C^{(\mathbf c)}(\boldsymbol\rho)=
+ \sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
+ \left(\prod_{s=1}^{\ell}B_{i_s}^{m}(\alpha_s)\right)
+ C^{(\mathbf c)}[\mathbf i],
+\]
+where
+\[
+  B_i^m(\alpha)=\binom mi(1-\alpha)^{m-i}\alpha^i.
+\]
+The local Bernstein label \(\mathbf i\) is zero-based.  It chooses one matrix
+coefficient inside the already selected physical hypercube; it is not another
+physical point.  The nonnegative basis functions sum to one, so the polynomial
+value lies in the convex hull of its coefficient matrices.  Exact elevation,
+multiplication, and differentiation operate on these local rows without
+changing the physical identity \(\mathbf c\).
+
+The traversal order used by \code{cells}, \code{lbls}, \code{coeffs}, and
+rate-vertex rows varies later dimensions fastest.  In two dimensions,
+\code{lbls()} therefore lists
+\([0,0],[0,1],\ldots,[0,m],[1,0],\ldots,[m,m]\).
+
+\section{What One Hypercube Stores}
+\label{sec:one-hypercube-storage}
+
+The first two-dimensional example uses
+\(\mathcal G_1=\{0,0.5,1\}\),
+\(\mathcal G_2=\{0,1\}\), and degree two:
 
 \begin{lstlisting}[style=dpmatlab]
 grid2 = {[0 .5 1], [0 1]};
@@ -122,517 +137,85 @@ secondCellCoefficients = A2.coeffs([2 1])
 sameLeaf = A2.LocalValues{2}{1}
 \end{lstlisting}
 
-Both final variables are the flat nine-entry coefficient cell for physical
-cell \([2,1]\); they are not a \(3\)-by-\(3\) grid of point samples.  The
-remaining construction details, exact power-to-Bernstein conversion, and
-tensor ordering are developed in Appendix~\ref{app:bernstein-math}.
+The grid has two physical hypercubes.  The highlighted one below is
+\(\mathbf c=(2,1)\), whose domain is
+\([0.5,1]\times[0,1]\).  Selecting it through
+\code{A2.coeffs([2 1])} reaches the same nested storage leaf as
+\code{A2.LocalValues{2}{1}}.
 
-\section{Separate Physical Nodes, Cells, And Local Labels}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=4.0cm,y=3.2cm,>=Latex]
+  \fill[dpbluewash] (0.5,0) rectangle (1,1);
+  \draw[black!55,very thick] (0,0) rectangle (1,1);
+  \draw[black!55,very thick] (0.5,0)--(0.5,1);
+  \foreach \x/\lab in {0/{0},0.5/{0.5},1/{1}}{
+    \draw (\x,0.02)--(\x,-0.02);
+    \node[below=4pt,font=\scriptsize] at (\x,0) {$\lab$};}
+  \foreach \y/\lab in {0/{0},1/{1}}{
+    \draw (0.01,\y)--(-0.01,\y);
+    \node[left=4pt,font=\scriptsize] at (0,\y) {$\lab$};}
+  \node[font=\scriptsize] at (0.25,0.5) {$\mathbf c=(1,1)$};
+  \node[font=\scriptsize\bfseries] (selected) at (0.75,0.5)
+    {$\mathbf c=(2,1)$};
+  \node[below=10pt,font=\scriptsize] at (0.5,0) {$\rho_1$};
+  \node[rotate=90,above=11pt,font=\scriptsize] at (0,0.5) {$\rho_2$};
 
-For one parameter choose physical grid\index{physical grid} nodes
-\index{physical node}
-\[
-  \rho_1^{(1)}<\rho_1^{(2)}<\rho_1^{(3)}.
-\]
-The subscript identifies the parameter direction, while the parenthesized
-superscript identifies the one-based physical node.  The two physical
-cells\index{physical cell/hypercube} have separate identities \(c=1\) and
-\(c=2\):
-\([\rho_1^{(1)},\rho_1^{(2)}]\) and
-\([\rho_1^{(2)},\rho_1^{(3)}]\).  On cell \(c\), define the
-forward coordinate
-\[
-  \alpha=\frac{\rho_1-\rho_1^{(c)}}
-                   {\rho_1^{(c+1)}-\rho_1^{(c)}}\in[0,1].
-\]
-For local degree \(m=2\), the three coefficient labels are bracketed local
-positions, not additional physical nodes:
-\[
-  C^{(c)}(\rho_1)=\sum_{i=0}^{2}B_i^2(\alpha)C^{(c)}[i].
-\]
-
-\begin{center}
-\begin{tikzpicture}[x=2.65cm,y=1cm,
-  coeff/.style={dp/known,
-    font=\scriptsize,minimum width=20mm,minimum height=7mm}]
-  % Lane 1: physical-node label and line.
-  \node[dp/label] at (1,1.55) {physical nodes};
-  \draw[very thick,black!55] (0,0.62) -- (2,0.62);
-  \foreach \x/\lab in {0/{\rho_1^{(1)}},1/{\rho_1^{(2)}},2/{\rho_1^{(3)}}}{
-    \filldraw[fill=white,draw=black!70] (\x,0.62) circle (1.6pt);
-    \node[above=3pt,font=\small] at (\x,0.62) {$\lab$};}
-  % Lane 2: physical-cell braces and labels.
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (0,0.18) -- (1,0.18)
-    node[midway,below=10pt,font=\scriptsize]{physical cell \(c=1\)};
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (1,0.18) -- (2,0.18)
-    node[midway,below=10pt,font=\scriptsize]{physical cell \(c=2\)};
-  % Lane 3: separate coefficient rows with labels to their left.
-  \node[dp/label,anchor=east,align=right] at (-0.36,-1.08)
-    {cell 1 local\\coefficients};
-  \foreach \x/\i in {0/0,1/1,2/2}
-    \node[coeff] at (\x,-1.08) {$C^{(1)}[\i]$};
-  \node[dp/label,anchor=east,align=right] at (-0.36,-2.12)
-    {cell 2 local\\coefficients};
-  \foreach \x/\i in {0/0,1/1,2/2}
-    \node[coeff] at (\x,-2.12) {$C^{(2)}[\i]$};
-  \node[align=center,font=\scriptsize,text width=120mm] at (1,-3.00)
-    {direction subscripts, parenthesized node indices, cell identity, and local labels have different jobs};
+  \node[dp/panel,anchor=west,text width=63mm,minimum height=48mm,
+    align=left,font=\scriptsize] (leaf) at (1.25,0.5) {%
+    \textbf{Selected physical leaf}\\[-1pt]
+    $\mathcal H_{(2,1)}=[0.5,1]\times[0,1]$\\
+    \code{LocalValues{2}{1}}\\[2pt]
+    \textbf{Nine degree-two matrices}\\[-1pt]
+    $C^{(2,1)}[0,0],\ C^{(2,1)}[0,1],\ C^{(2,1)}[0,2],$\\
+    $C^{(2,1)}[1,0],\ C^{(2,1)}[1,1],\ C^{(2,1)}[1,2],$\\
+    $C^{(2,1)}[2,0],\ C^{(2,1)}[2,1],\ C^{(2,1)}[2,2]$};
+  \draw[dp/arrow] (selected.east) -- node[above,font=\tiny]
+    {\code{coeffs([2 1])}} (leaf.west);
 \end{tikzpicture}
-\end{center}
+\caption{A physical hypercube selects one storage leaf.  Within that leaf,
+\code{A2.lbls()} supplies the nine zero-based local labels in the displayed
+order.  The matrices are Bernstein coefficients, not a \(3\)-by-\(3\) grid of
+point samples.}
+\label{fig:selected-hypercube-storage}
+\end{figure}
 
-In MATLAB, the physical grid and degree are likewise independent choices.
-The example below uses degree two.  Each cell has labels ([0]), ([1]), and
-([2]), while adjacent cells share only their common face value.  The middle
-coefficient of each cell is an interior control, not a physical-grid sample.
+The two accessor forms return the same flat nine-entry coefficient cell.  The
+matrix paired with row \(q\) of \code{A2.lbls()} is entry \(q\) of that leaf;
+the physical cell has already been selected by \([2,1]\).  Appendix
+\ref{app:bernstein-math} derives the conversion and ordering rules.
 
-\begin{lstlisting}[style=dpmatlab]
-M = pdmat([0 0.5 1], {10, 15, 20, 25, 30}, Degree=2);
-physicalCells = M.cells()
-localLabels = M.lbls()
-physicalCellCount = M.ncell()
-coefficientsPerCell = M.ncoeff()
-cell1Coefficients = cell2mat(M.coeffs(1))
-cell2Coefficients = cell2mat(M.coeffs(2))
-\end{lstlisting}
+\section{Continuity Across Shared Faces}
 
-\begin{lstlisting}[style=dpoutput]
-physicalCells =
-     1
-     2
-localLabels =
-     0
-     1
-     2
-physicalCellCount =
-     2
-coefficientsPerCell =
-     3
-cell1Coefficients =
-    10    15    20
-cell2Coefficients =
-    20    25    30
-\end{lstlisting}
+Independent cell polynomials would not necessarily agree on a grid boundary.
+The package instead shares the complete Bernstein coefficient face between
+adjacent continuous cells.  On a face, the tensor polynomial depends only on
+that face's coefficients, so sharing them gives \(C^0\) continuity.
 
-The shared value \(20\) belongs to the physical interface
-\(\rho_1^{(2)}\).  It is
-seen as \(C^{(1)}[2]\) from the left cell and \(C^{(2)}[0]\) from the right.
-This is \(C^0\) face sharing\index{continuity}: values meet, but the two cell-local derivatives
-need not agree.  Consequently the representation is a continuous
-piecewise-polynomial Bernstein representation on a gridding partition, not a
-B-spline construction and not a claim of global differentiability.
-
-\section{Store Known Data And Decisions On The Grid}
-\index{pdmat@\texttt{pdmat}}\index{pdvar@\texttt{pdvar}}
-
-The known LPV matrix in the worked example is affine in \(\rho\).  The
-physical grid has two cells, \([0,0.5]\) and \([0.5,1]\).  Supplying
-\code{Degree=1} asks \code{pdmat} to retain exact function evaluation and
-verified cell-local Bernstein coefficient evidence on both cells.
-
-\begin{lstlisting}[style=dpmatlab]
-yalmip('clear')
-grid = {[0 0.5 1]};
-A = pdmat(grid, @(rho) [-1, 0.5; -1, -2] + ...
-    rho * [-1.3, -20; 2, -10], Degree=1);
-matrixSize = size(A)
-physicalCellCount = A.ncell()
-degree = A.Degree
-coefficientsPerCell = A.ncoeff()
-A0 = A.evaluate(0)
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-matrixSize =
-     2     2
-physicalCellCount =
-     2
-degree =
-     1
-coefficientsPerCell =
-     2
-A0 =
-   -1.0000    0.5000
-   -1.0000   -2.0000
-\end{lstlisting}
-
-The decision \(P(\rho)\) uses the same physical grid but local degree two.
-Each cell stores three full symmetric coefficient matrices.  The right face of
-cell 1 and the left face of cell 2 are the same YALMIP decision handle, so the
-six local positions contain five global control matrices.  Only this face is
-shared; the two interior controls remain independent.
-
-\begin{lstlisting}[style=dpmatlab]
-P = pdvar(2, grid, "symmetric", Degree=2);
-matrixSize = size(P)
-degree = P.Degree
-isContinuous = P.IsContinuous
-localCoefficientsPerCell = numel(P.coeffs(1))
-globalControlCount = 2 * P.Degree + 1
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-matrixSize =
-     2     2
-degree =
-     2
-isContinuous =
-  logical
-   1
-localCoefficientsPerCell =
-     3
-globalControlCount =
-     5
-\end{lstlisting}
+For a one-dimensional degree-two example,
+\[
+  C^{(1)}[2]=C^{(2)}[0]
+\]
+is the common value at the interface.  The two interior coefficients
+\(C^{(1)}[1]\) and \(C^{(2)}[1]\) remain independent.  Derivatives on the two
+sides need not agree: the representation guarantees value continuity and,
+on a finite compact grid, global Lipschitz regularity, but not \(C^1\)
+continuity.  Derivative data produced by \code{rhodiff} are deliberately
+cell-local and may therefore be discontinuous.
 
 \begin{center}
 \begin{tikzpicture}[x=2.05cm,y=1cm,
-  face/.style={dp/decision,minimum width=18mm,minimum height=9mm,
+  face/.style={dp/decision,minimum width=19mm,minimum height=8mm,
     font=\scriptsize,align=center},
-  interior/.style={dp/contribution,minimum width=18mm,minimum height=9mm,
+  interior/.style={dp/contribution,minimum width=19mm,minimum height=8mm,
     font=\scriptsize,align=center}]
-  \node[face] (p0) at (0,0) {$P^{(1)}[0]$\\face};
-  \node[interior] (p1) at (1,0) {$P^{(1)}[1]$\\interior};
-  \node[face] (p2) at (2,0) {$P^{(1)}[2]$\\shared face};
-  \node[interior] (p3) at (3,0) {$P^{(2)}[1]$\\interior};
-  \node[face] (p4) at (4,0) {$P^{(2)}[2]$\\face};
-  \draw[dp/arrow] (p0)--(p1); \draw[dp/arrow] (p1)--(p2);
-  \draw[dp/arrow] (p2)--(p3); \draw[dp/arrow] (p3)--(p4);
-  \node[above=5pt of p2,font=\scriptsize,align=center]
-    {$P^{(1)}[2]=P^{(2)}[0]$};
-  \node[below=7pt of p2,font=\scriptsize,align=center]
-    {six local positions, five global matrix controls; value continuity only};
+  \node[face] (c10) at (0,0) {$C^{(1)}[0]$};
+  \node[interior] (c11) at (1,0) {$C^{(1)}[1]$};
+  \node[face] (shared) at (2,0) {$C^{(1)}[2]$\\$=C^{(2)}[0]$};
+  \node[interior] (c21) at (3,0) {$C^{(2)}[1]$};
+  \node[face] (c22) at (4,0) {$C^{(2)}[2]$};
+  \draw[dp/arrow] (c10)--(c11); \draw[dp/arrow] (c11)--(shared);
+  \draw[dp/arrow] (shared)--(c21); \draw[dp/arrow] (c21)--(c22);
+  \node[below=7pt of shared,font=\scriptsize] {shared value, separate slopes};
 \end{tikzpicture}
 \end{center}
-
-\section{Form Matrix Algebra In Coefficient Space}
-
-Fix a physical cell \(c\).  Its identity remains in the parenthesized
-superscript while the bracketed integers are local Bernstein labels:
-\(P=\sum_iB_i^mP^{(c)}[i]\) and
-\(A=\sum_jB_j^nA^{(c)}[j]\).  Their ordered product is
-\[
-  PA=\sum_{k=0}^{m+n}B_k^{m+n}R^{(c)}[k],
-  \qquad
-  R^{(c)}[k]=\sum_{i+j=k}
-    \frac{\binom mi\binom nj}{\binom{m+n}{k}}
-    P^{(c)}[i]A^{(c)}[j].
-\]
-For the quadratic decision and affine known factor in this worked example,
-write \(P_i=P^{(c)}[i]\) and \(A_j=A^{(c)}[j]\).  The four cubic
-coefficients are
-\[
-  R^{(c)}[0]=P_0A_0,\qquad
-  R^{(c)}[1]=\frac{P_0A_1+2P_1A_0}{3},
-\]
-\[
-  R^{(c)}[2]=\frac{2P_1A_1+P_2A_0}{3},\qquad
-  R^{(c)}[3]=P_2A_1.
-\]
-The pairs are first grouped by the anti-diagonal relation \(k=i+j\), then
-combined with the binomial weights.  This is an ordered
-convolution\index{ordered convolution}, not a
-samplewise product.  Matrix order is preserved in every contribution.
-
-\begin{lstlisting}[style=dpmatlab]
-PA = P * A;
-ATP = A' * P;
-degreePA = PA.Degree
-degreeATP = ATP.Degree
-coefficientCountPA = numel(PA.coeffs(1))
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-degreePA =
-     3
-degreeATP =
-     3
-coefficientCountPA =
-     4
-\end{lstlisting}
-
-\begin{center}
-\begin{tikzpicture}[node distance=7mm,
-  item/.style={minimum width=27mm,minimum height=6mm,font=\scriptsize,
-    align=center},
-  group/.style={minimum width=43mm,minimum height=7mm,font=\scriptsize,
-    align=left},
-  resultrow/.style={minimum width=43mm,minimum height=7mm,font=\scriptsize,
-    align=left}]
-  \matrix (inputs) [matrix of nodes,nodes={item,dp/neutral},row sep=2mm] {
-    \(P_0,P_1,P_2\)\\
-    \(A_0,A_1\)\\
-  };
-  \node[above=3pt of inputs,font=\scriptsize\bfseries,text=black!85]
-    {1. Input rows};
-  \node[group,dp/contribution,right=13mm of inputs] (g0)
-    {\(k=0:\ (0,0)\)};
-  \node[group,dp/contribution,below=2mm of g0] (g1)
-    {\(k=1:\ (0,1),(1,0)\)};
-  \node[group,dp/contribution,below=2mm of g1] (g2)
-    {\(k=2:\ (1,1),(2,0)\)};
-  \node[group,dp/contribution,below=2mm of g2] (g3)
-    {\(k=3:\ (2,1)\)};
-  \node[above=3pt of g0,font=\scriptsize\bfseries,text=black!85]
-    {2. Group \(i+j=k\)};
-  \node[resultrow,dp/result,right=13mm of g0] (r0) {\(R[0]=P_0A_0\)};
-  \node[resultrow,dp/result,below=2mm of r0] (r1)
-    {\(R[1]=(P_0A_1+2P_1A_0)/3\)};
-  \node[resultrow,dp/result,below=2mm of r1] (r2)
-    {\(R[2]=(2P_1A_1+P_2A_0)/3\)};
-  \node[resultrow,dp/result,below=2mm of r2] (r3) {\(R[3]=P_2A_1\)};
-  \node[above=3pt of r0,font=\scriptsize\bfseries,text=black!85]
-    {3. Normalize};
-  \draw[dp/arrow] (inputs.east)--node[above,font=\tiny]{enumerate}(g1.west);
-  \draw[dp/arrow] (g1.east)--node[above,font=\tiny]{weight}(r1.west);
-\end{tikzpicture}
-
-\textit{The staged view replaces a crossing arrow fan: enumerate ordered
-products, group by one anti-diagonal, then apply binomial normalization.}
-\end{center}
-
-\section{Differentiate And Enumerate Rate Vertices}
-
-For a degree-\(m\) cell \(c\) of width \(h_c\), differentiation is a forward
-difference of adjacent local coefficients:
-\[
-  \frac{\partial P}{\partial\rho}
-  =\frac{m}{h_c}\sum_{i=0}^{m-1}
-    \bigl(P^{(c)}[i+1]-P^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
-\]
-Because \(\dot P=(\partial P/\partial\rho)\dot\rho\) is affine in the rate,
-checking both vertices \(-1\) and \(+1\) covers the whole interval
-\(\dot\rho\in[-1,1]\).
-
-\begin{lstlisting}[style=dpmatlab]
-D = rhodiff(P, [-1 1]);
-derivativeDegree = D.Degree
-isContinuous = D.IsContinuous
-rateRowCount = size(D.coeffs(1),1)
-coefficientsPerRow = size(D.coeffs(1),2)
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-derivativeDegree =
-     1
-isContinuous =
-  logical
-   0
-rateRowCount =
-     2
-coefficientsPerRow =
-     2
-\end{lstlisting}
-
-\begin{center}
-\begin{tikzpicture}[>=Latex,node distance=8mm and 13mm,
-  box/.style={dp/result,
-    align=center,font=\scriptsize,minimum width=28mm,minimum height=9mm}]
-  \node[box] (diff) {$\partial P/\partial\rho$\\two degree-one coefficients};
-  \node[box,right=of diff,yshift=7mm] (lo) {$\dot\rho=-1$\\lower rate vertex};
-  \node[box,right=of diff,yshift=-7mm] (hi) {$\dot\rho=+1$\\upper rate vertex};
-  \draw[->,thick,dpblue] (diff.east) -- (lo.west);
-  \draw[->,thick,dpblue] (diff.east) -- (hi.west);
-  \node[below=16mm of diff,font=\scriptsize,align=center]
-    {rate rows are not physical cells and are not extra Bernstein labels};
-\end{tikzpicture}
-\end{center}
-
-\section{Compare The Residual And Choose A Certificate}\index{residual}
-
-The following MATLAB expressions are a direct transcription of
-\cref{eq:canonical-positive,eq:lpv-spine}.  On each cell, addition elevates the
-degree-one derivative rows to the degree-three algebraic residual without
-changing their represented values.
-
-\begin{lstlisting}[style=dpmatlab]
-residual = D + P * A + A' * P;
-Cdecay = residual <= -1e-6 * eye(2);
-Cpositive = P >= eye(2);
-residualDegree = residual.Degree
-decayConstraintCount = numel(Cdecay.Constraints)
-positivityConstraintCount = numel(Cpositive.Constraints)
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-residualDegree =
-     3
-decayConstraintCount =
-    16
-positivityConstraintCount =
-     6
-\end{lstlisting}
-
-There are two physical cells, two rate vertices, and four degree-three local
-labels, hence \(2\times2\times4=16\) decay constraints.  Positivity has no
-rate rows and uses three degree-two labels on each cell, hence
-\(2\times3=6\) direct constraints.  The shared face is deliberately visited
-from each physical cell because direct certification is cell-local.
-
-Direct coefficient constraints are the default.  Three opt-in alternatives keep
-the same stored residual but change the finite sufficient certificate:
-
-\begin{lstlisting}[style=dpmatlab]
-Cpolya = Cdecay.applyPolya(1);
-Cputinar = Cdecay.applyPutinar();
-Cbox = Cdecay.applyFullBoxPreorder();
-directConstraintCount = numel(Cdecay.Constraints)
-polyaConstraintCount = numel(Cpolya.Constraints)
-putinarConstraintCount = numel(Cputinar.Constraints)
-fullBoxConstraintCount = numel(Cbox.Constraints)
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-directConstraintCount =
-    16
-polyaConstraintCount =
-    20
-putinarConstraintCount =
-    28
-fullBoxConstraintCount =
-    24
-\end{lstlisting}
-
-\begin{center}
-\begin{tikzpicture}[node distance=5mm and 4mm]
-  \node[dp/card,text width=23mm] (direct)
-    {\textbf{Direct}\\test coefficient signs};
-  \node[dp/card,text width=23mm,right=of direct] (polya)
-    {\textbf{P\'olya}\\elevate, then test};
-  \node[dp/card,text width=23mm,below=of direct] (putinar)
-    {\textbf{Putinar}\\parity in 1-D;\\singletons in multi-D};
-  \node[dp/card,text width=23mm,right=of putinar] (box)
-    {\textbf{Full Box}\\all generator products};
-  \node[dp/panel,fit=(direct)(polya)(putinar)(box),inner sep=4mm] (options) {};
-  \node[dp/label,above=3pt of options] {choose exactly one};
-  \node[dp/known,left=6mm of options,align=center,font=\scriptsize,
-    text width=24mm,minimum height=18mm] (res)
-    {stored residual\\cells \(\times\) rate rows};
-  \node[dp/contribution,right=6mm of options,align=center,font=\scriptsize,
-    minimum width=15mm,minimum height=17mm] (export) {\code{toYalmip}};
-  \node[dp/result,right=3mm of export,align=center,font=\scriptsize,
-    text width=18mm,minimum height=17mm] (yal) {YALMIP\\Constraint};
-  \draw[dp/arrow] (res.east) -- (options.west);
-  \draw[dp/arrow] (options.east) -- (export.west);
-  \draw[dp/arrow] (export.east) -- (yal.west);
-\end{tikzpicture}
-
-\textit{A failed sufficient certificate does not prove that the continuous
-inequality is infeasible.  Appendix~\ref{app:certificates} derives the four
-implemented choices and places them beside SOS background.}
-\end{center}
-
-\section{Export The Finite Model To YALMIP}
-
-\code{toYalmip} returns exactly the stored finite constraints.  It does not
-select a solver, add an objective, or insert a margin.
-
-\begin{lstlisting}[style=dpmatlab]
-Fdecay = toYalmip(Cdecay);
-Fpositive = Cpositive.toYalmip();
-decayConstraintCount = length(Fdecay)
-positivityConstraintCount = length(Fpositive)
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-decayConstraintCount =
-    16
-positivityConstraintCount =
-     6
-\end{lstlisting}
-
-Use ordinary YALMIP calls after that boundary:
-
-\begin{lstlisting}[style=dpmatlab]
-solver = 'lmilab';
-if exist('mosekopt', 'file') ~= 0
-    solver = 'mosek';
-end
-opts = sdpsettings('solver', solver, 'verbose', 0);
-sol = optimize([Fdecay, Fpositive], [], opts);
-problemCode = sol.problem
-\end{lstlisting}
-
-The final code is produced by the installed solver and should be interpreted
-with \code{sol.info}; it is not a package-owned status.  The complete tested
-solver examples in \cref{sec:parameter-dependent-lyapunov-smoke,sec:solver-example}
-include assertions appropriate to their solver paths.
-
-\section{Generalize From An Interval To A Hypercube}
-
-Different parameter directions need not have the same number of physical
-nodes.  For example, four nodes in the first direction and three in the second
-create a \(3\)-by-\(2\) array of six physical cells:
-
-\begin{lstlisting}[style=dpmatlab]
-grid2 = {[-1 0 0.5 1], [10 15 20]};
-G = pdbase(grid2, [1 1], 1);
-physicalCellCount = G.ncell()
-coefficientsPerCell = G.ncoeff()
-physicalCells = G.cells()
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-physicalCellCount =
-     6
-coefficientsPerCell =
-     4
-physicalCells =
-     1     1
-     1     2
-     2     1
-     2     2
-     3     1
-     3     2
-\end{lstlisting}
-
-\begin{center}
-\begin{tikzpicture}[x=1.55cm,y=1.25cm,>=Latex,
-  cell/.style={dp/label}]
-  \foreach \x/\lab in {0/{\rho_1^{(1)}},1/{\rho_1^{(2)}},2/{\rho_1^{(3)}},3/{\rho_1^{(4)}}}{
-    \draw[black!45] (\x,0) -- (\x,2);
-    \node[below=3pt,font=\scriptsize] at (\x,0) {$\lab$};}
-  \foreach \y/\lab in {0/{\rho_2^{(1)}},1/{\rho_2^{(2)}},2/{\rho_2^{(3)}}}{
-    \draw[black!45] (0,\y) -- (3,\y);
-    \node[left=3pt,font=\scriptsize] at (0,\y) {$\lab$};}
-  \node[cell] at (0.5,0.5) {$\mathbf c=(1,1)$};
-  \node[cell] at (0.5,1.5) {$\mathbf c=(1,2)$};
-  \node[cell] at (1.5,0.5) {$\mathbf c=(2,1)$};
-  \node[cell] at (1.5,1.5) {$\mathbf c=(2,2)$};
-  \node[cell] at (2.5,0.5) {$\mathbf c=(3,1)$};
-  \node[cell] at (2.5,1.5) {$\mathbf c=(3,2)$};
-  \draw[->,thick,dpblue] (0,-0.55) -- (3,-0.55) node[right,font=\scriptsize]{$\rho_1$};
-  \draw[->,thick,dpblue] (-0.55,0) -- (-0.55,2) node[above,font=\scriptsize]{$\rho_2$};
-  \node[draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
-    font=\scriptsize,align=left] at (5.0,1)
-    {inside one degree-one cell:\\local labels\\
-     \(\mathbf i=[0,0],[0,1],\)\\
-     \(\phantom{\mathbf i={}}[1,0],[1,1]\)\\coefficients
-     \(C^{(\mathbf c)}[\mathbf i]\)};
-\end{tikzpicture}
-\end{center}
-
-In \(\ell\) dimensions, direction \(s\) has the one-based nodes
-\(\mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\}\).  The tensor grid is
-\(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\), with
-\(\prod_{s=1}^{\ell}k_s\) physical nodes.  A physical hypercube has the
-separate one-based multi-index
-\(\mathbf c=(c_1,\ldots,c_\ell)\), so there are
-\(\prod_{s=1}^{\ell}(k_s-1)\) hypercubes.  With the forward coordinates
-\[
-  \alpha_s=\frac{\rho_s-\rho_s^{(c_s)}}
-                  {\rho_s^{(c_s+1)}-\rho_s^{(c_s)}},
-\]
-the local degree-\(m\) tensor representation is
-\[
-  C^{(\mathbf c)}(\boldsymbol\rho)=
-  \sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
-  \left(\prod_{s=1}^{\ell}B_{i_s}^{m}(\alpha_s)\right)
-  C^{(\mathbf c)}[\mathbf i].
-\]
-The local Bernstein label \(\mathbf i\) is zero-based, while every
-physical-node index and physical-cell component is one-based.  Earlier
-dimensions vary more slowly in \code{cells},
-\code{lbls}, \code{coeffs}, and rate-vertex traversal.  Cell-local spline and
-gridding constructions for PD-LMIs motivate this architecture
-\cite{masubuchi1998,xu2024}; Appendix~\ref{app:bernstein-math} develops the
-underlying basis from degree-one interpolation to the general tensor case.

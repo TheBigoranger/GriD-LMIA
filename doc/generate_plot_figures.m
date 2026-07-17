@@ -12,7 +12,7 @@ function generate_plot_figures()
 
     makeOneDimensionalFigure(outDir);
     makeTwoDimensionalFigure(outDir);
-    makeThreeParameterSliceFigure(outDir);
+    makeTwoDimensionalMatrixFigure(outDir);
 end
 
 function makeOneDimensionalFigure(outDir)
@@ -57,33 +57,34 @@ function makeTwoDimensionalFigure(outDir)
     clear cleaner
 end
 
-function makeThreeParameterSliceFigure(outDir)
+function makeTwoDimensionalMatrixFigure(outDir)
     fig = figure("Visible", "off", "Color", "w", ...
         "Position", [100 100 760 520]);
     cleaner = onCleanup(@() close(fig));
 
-    A = pdmat({[-1 1], [0 2], [-2 3]}, ...
-        @(rho1, rho2, rho3) [ ...
-            1 + 0.4*rho1.^2 + 0.1*rho2 + 0.05*rho3, ...
-            2 + 0.3*rho1 + 0.1*rho2 + 0.05*rho3; ...
-            3 - 0.2*rho1 + 0.15*rho2 + 0.05*rho3, ...
-            4 + 0.2*rho1.^2 + 0.25*rho2 + 0.05*rho3]);
+    A = pdmat({[-1 1], [0 2]}, @(rho1, rho2) [ ...
+        1 + 0.8*rho1 + 0.25*rho2; ...
+        1 - 0.8*rho1 + 0.25*rho2]);
+    crossValue = A.evaluate([0 1]);
+    leftValue = A.evaluate([-1 1]);
+    rightValue = A.evaluate([1 1]);
+    assert(abs(crossValue(1) - crossValue(2)) < 1e-12)
+    assert(leftValue(1) < leftValue(2))
+    assert(rightValue(1) > rightValue(2))
     h = plot(A, [1 2], SamplesPerCell=45, EdgeColor="none", ...
-        FaceAlpha=0.55);
-    faceColors = [35 86 125; 103 127 145; 154 158 161; 205 205 205]/255;
-    for k = 1:numel(h)
-        set(h(k), "FaceColor", faceColors(k,:));
-    end
+        FaceAlpha=0.62);
+    set(h(1), "FaceColor", [35 86 125]/255);
+    set(h(2), "FaceColor", [0.55 0.55 0.55]);
     grid on
     view(35, 25)
     xlabel("rho1", "Interpreter", "none")
     ylabel("rho2", "Interpreter", "none")
     zlabel("matrix entry")
-    title("2-by-2 three-parameter object: rho3 fixed at -2")
-    legend(h, ["A(1,1)", "A(1,2)", "A(2,1)", "A(2,2)"], ...
+    title("Two entries of a 2-by-1 pdmat cross at rho1 = 0")
+    legend(h, ["A(1,1)", "A(2,1)"], ...
         "Location", "eastoutside")
 
-    exportgraphics(fig, fullfile(outDir, "pdmat-plot-3d-slice.png"), ...
+    exportgraphics(fig, fullfile(outDir, "pdmat-plot-2d-matrix.png"), ...
         "Resolution", 200);
     clear cleaner
 end

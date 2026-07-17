@@ -1,4 +1,4 @@
-\chapter{\texorpdfstring{\code{pdvar}}{pdvar} Reference}
+\chapter{\texorpdfstring{\code{pdvar}}{pdvar}: Decision Matrix Functions}
 \label{sec:pdvar}
 
 \code{pdvar} creates continuous cell-local Bernstein decision expressions backed
@@ -7,7 +7,7 @@ known-data algebra.  It does not choose solvers or call \code{optimize};
 solver-facing work happens after comparison overloads create \code{pdlmi}
 objects and \code{toYalmip} converts them to YALMIP constraints.
 
-\section{Lookup}
+\section{API Map}
 \label{sec:pdvar-lookup}
 
 \begin{tabularx}{\textwidth}{@{}lY@{}}
@@ -31,11 +31,12 @@ Matrix/index methods &
 \hyperref[sec:pdvar-indexing]{indexing and assignment} \\
 Build LMIs &
 \hyperref[sec:pdvar-comparison]{\code{<=}},
-\hyperref[sec:pdvar-comparison]{\code{>=}} \\
+\hyperref[sec:pdvar-comparison]{\code{>=}},
+\hyperref[sec:pdvar-comparison]{\code{==}} \\
 \bottomrule
 \end{tabularx}
 
-\section{Construction}
+\section{Construct \texorpdfstring{\code{pdvar}}{pdvar} Decisions}
 \label{sec:pdvar-construction}
 
 \syntaxhead
@@ -234,7 +235,7 @@ rateBounds =
         \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
 \end{itemize}
 
-\section{Properties}
+\section{Inspect Object Properties}
 
 \code{pdvar} declares no additional class-owned properties.  It exposes the
 read-only inherited \code{pdbase} properties listed in
@@ -428,7 +429,7 @@ other than \code{"oneLine"}, repeated selectors, invalid physical-cell
 selectors, or inconsistent rate-vertex rows raise
 \codeerr{pdvar}{Invalid}\allowbreak\code{BernsteinTableInput}.
 
-\section{Affine Algebra And Known-Data Products}
+\section{Build Affine Algebra with Known Data}
 \label{sec:pdvar-algebra}
 
 A \code{pdvar} result must remain affine in the underlying YALMIP decisions.
@@ -629,7 +630,7 @@ factors, nonlinear symbolic data, or unsupported rate combinations raise
 \codeerr{pdvar}{MixedGrid}; a function-only \code{pdmat} operand raises
 \codeerr{pdvar}{FunctionOnlyAlgebra}.
 
-\section{Matrix Methods}
+\section{Reshape and Transform Decision Matrices}
 \label{sec:pdvar-matrix-ops}
 
 Every method below transforms each local affine YALMIP payload while preserving
@@ -1032,7 +1033,7 @@ containsDecision =
 
 Invalid repetition shapes raise \codeerr{pdvar}{InvalidRepmat}.
 
-\section{Indexing And Assignment}
+\section{Index and Assign \texorpdfstring{\code{pdvar}}{pdvar} Entries}
 \label{sec:pdvar-indexing}
 
 Parenthesis indexing selects a matrix block from every symbolic coefficient.
@@ -1256,7 +1257,7 @@ modeling equality; use \code{isequal} only for MATLAB structural comparison.
 \end{tikzpicture}
 \end{center}
 
-\section{Remarks}
+\section{Boundaries and Related APIs}
 \label{sec:pdvar-limits}
 
 \begin{enumerate}[leftmargin=*]
@@ -1271,6 +1272,6 @@ modeling equality; use \code{isequal} only for MATLAB structural comparison.
         part of the current public workflow.
 \end{enumerate}
 
-\subsection{See Also}
+\paragraph{Related APIs.}
 \code{pdvar}, \code{rhodiff}, \code{bernsteinTable}, \code{pdlmi},
 \code{pdmat}.

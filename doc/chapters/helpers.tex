@@ -1,4 +1,4 @@
-\chapter{Cross-Class Helper Reference}
+\chapter{Public Helper Utilities}
 \label{sec:helpers}
 
 The \code{+helper} namespace contains exactly nine implementation utilities
@@ -319,18 +319,3 @@ secondLeaf =
 \code{mkLeaf} owns the leaf payload.  The helper supplies deterministic
 physical-cell subscripts but does not infer coefficient count, matrix size, or
 rate semantics.
-
-\section{Class-Private Helpers}
-
-Single-class mechanics remain beside their owner rather than in
-\code{+helper}.  The private area of \code{pdbase} owns coefficient-tree
-validation.  The private area of \code{pdmat} owns source fitting, continuity,
-grid conversion, matrix scanning, and algebraic wrapping.  The private area of
-\code{pdvar} owns affine and rate-row packing, product routing, value-tree
-zipping, and symbolic wrapping.  The private area of \code{pdlmi} owns direct
-coefficient, Putinar, and full-box assembly, Gram conversion, and order
-validation.
-These functions have no supported direct call form.  Their placement is an
-ownership boundary: a helper should move into a class when only that class can
-meaningfully use it, and should enter \code{+helper} only after a real
-cross-class contract exists.

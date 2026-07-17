@@ -1,7 +1,7 @@
-\chapter{Installation, Verification, And Lookup}
+\chapter{Install and Verify the Package}
 \label{sec:setup}
 
-\section{Installation}
+\section{Requirements and Path Setup}
 \label{sec:installation}
 
 Start \matlab{} in the repository root, or set \code{projectRoot} to the
@@ -20,7 +20,7 @@ For local work from the repository root, this package also resolves from:
 addpath(pwd)
 \end{lstlisting}
 
-\section{Verification}
+\section{Run the Test Suite}
 \label{sec:verification}
 
 Run the current MATLAB test entry point from the repository root:
@@ -34,7 +34,7 @@ The test entry point covers helper utilities, \code{pdbase}, \code{pdmat},
 \code{pdvar} and \code{pdlmi} tests require YALMIP.  Solver smoke tests
 additionally require an SDP solver.
 
-\section{Smoke Test}
+\section{Run a Minimal Solver Example}
 \label{sec:quick-start}
 
 First confirm that MATLAB resolves the four renamed constructors from this
@@ -81,7 +81,7 @@ ordinary YALMIP calls, for example:
 sol = optimize(F, objective, opts);
 \end{lstlisting}
 
-\section{Global Function Lookup}
+\section{Navigate the Reference}
 \label{sec:global-lookup}
 
 \begin{tabularx}{\textwidth}{@{}lY@{}}
