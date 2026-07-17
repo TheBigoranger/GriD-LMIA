@@ -84,3 +84,35 @@ function testUserBlockLmiSolverExample(testCase)
     testCase.verifyTrue(isfinite(gammaValue));
     fprintf("Optimal H-infinity gamma: %.6g\n", gammaValue);
 end
+
+function testRectangularResidualAcrossAllCertificates(testCase)
+    % Direct, Pólya, Putinar, and full-box wrappers must each reach a solver.
+    yalmip("clear");
+    P = pdvar(2, 1, {[0 1]}, "full", Degree=0);
+    R = P - ones(2, 1);
+    direct = constructEntrywiseSilently(@() R >= 0);
+    wrappers = {direct, ...
+        constructEntrywiseSilently(@() direct.applyPolya(1)), ...
+        constructEntrywiseSilently(@() direct.applyPutinar(0)), ...
+        constructEntrywiseSilently(@() direct.applyFullBoxPreorder(0))};
+
+    solver = 'lmilab';
+    if exist('mosekopt', 'file') ~= 0
+        solver = 'mosek';
+    end
+    opts = sdpsettings('solver', solver, 'verbose', 0);
+    fprintf("Rectangular certificate solver: %s\n", solver);
+    for k = 1:numel(wrappers)
+        sol = optimize(wrappers{k}.toYalmip, [], opts);
+        testCase.verifyEqual(sol.problem, 0, sol.info);
+    end
+end
+
+function out = constructEntrywiseSilently(fun)
+    % Solver smoke output should not repeat dispatch warnings covered elsewhere.
+    warnId = "pdlmi:ElementwiseInequality";
+    state = warning("query", warnId);
+    cleanup = onCleanup(@() warning(state.state, warnId)); %#ok<NASGU>
+    warning("off", warnId);
+    out = fun();
+end

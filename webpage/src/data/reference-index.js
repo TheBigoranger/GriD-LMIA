@@ -97,6 +97,7 @@ const pdvarMethods = [
   ["subsasgn", "Assign numeric or compatible decision blocks."],
   ["le", "Create a nonpositive pdlmi residual."],
   ["ge", "Create a nonnegative pdlmi residual."],
+  ["eq", "Create a direct coefficient-equality pdlmi residual."],
   ["isequal", "Compare normalized symbolic metadata and evidence."],
   ["end", "Resolve end-index syntax."],
   ["numArgumentsFromSubscript", "Preserve scalar MATLAB subscript results."],
@@ -107,6 +108,14 @@ const pdvarMethods = [
   ["width", "Report the second payload dimension."],
   ["size", "Inspect matrix payload dimensions."],
 ];
+
+const algebraMethods = new Set(["plus", "minus", "uplus", "uminus", "mtimes"]);
+const indexingMethods = new Set(["subsref", "subsasgn", "end", "size", "numel", "ndims", "length", "height", "width", "isequal", "disp", "display", "numArgumentsFromSubscript"]);
+const operationRoute = (owner, name) => {
+  if (algebraMethods.has(name)) return `documents/reference/${owner}/algebra`;
+  if (indexingMethods.has(name)) return `documents/reference/${owner}/indexing-and-inspection`;
+  return `documents/reference/${owner}/structural-operations`;
+};
 
 export const referenceEntries = [
   {
@@ -128,7 +137,7 @@ export const referenceEntries = [
     task: "Create coefficient-backed or function-backed known-data matrices.",
     href: "/PD-LMI-package/documents/reference/pdmat/constructor/",
   },
-  ...pdmatMethods.map(([name, task, dedicated]) => entry(name, "pdmat method", task, dedicated ? `documents/reference/pdmat/${dedicated.toLowerCase()}` : "documents/reference/pdmat/matrix-operations", dedicated ? "" : `pdmat-${name}`)),
+  ...pdmatMethods.map(([name, task, dedicated]) => entry(name, "pdmat method", task, dedicated ? `documents/reference/pdmat/${dedicated.toLowerCase()}` : operationRoute("pdmat", name), dedicated ? "" : `pdmat-${name}`)),
   {
     name: "pdvar",
     type: "Decision class",
@@ -141,11 +150,14 @@ export const referenceEntries = [
     task: "Create symmetric or full continuous Bernstein decision variables.",
     href: "/PD-LMI-package/documents/reference/pdvar/constructor/",
   },
-  ...pdvarMethods.map(([name, task, dedicated]) => entry(name, name === "le" || name === "ge" ? "pdvar comparison" : "pdvar method", task, dedicated ? `documents/reference/pdvar/${dedicated.toLowerCase()}` : name === "le" || name === "ge" ? "documents/reference/pdvar/comparisons" : "documents/reference/pdvar/matrix-operations", dedicated ? "" : `${name === "le" || name === "ge" ? "pdvar-comparison" : "pdvar"}-${name}`)),
+  ...pdvarMethods.map(([name, task, dedicated]) => {
+    const comparison = name === "le" || name === "ge" || name === "eq";
+    return entry(name, comparison ? "pdvar comparison" : "pdvar method", task, dedicated ? `documents/reference/pdvar/${dedicated.toLowerCase()}` : comparison ? "documents/reference/pdvar/comparisons" : operationRoute("pdvar", name), dedicated ? "" : `${comparison ? "pdvar-comparison" : "pdvar"}-${name}`);
+  }),
   {
     name: "pdlmi",
     type: "Constraint class",
-    task: "Store direct, Pólya-elevated, Putinar, or full-box YALMIP constraints.",
+    task: "Store direct equality or direct, Pólya-elevated, Putinar, or full-box inequality constraints.",
     href: "/PD-LMI-package/documents/reference/pdlmi/",
   },
   {
@@ -181,4 +193,13 @@ export const referenceEntries = [
   entry("bernElev", "pdbase backend method", "Elevate Bernstein degree for compatible coefficient payloads.", "documents/reference/bernstein-utilities", "bernElev"),
   entry("bernProd", "pdbase backend method", "Multiply local Bernstein coefficient families by label convolution.", "documents/reference/bernstein-utilities", "bernProd"),
   entry("mergeGrid", "pdbase backend method", "Refine compatible physical grids before coefficient algebra.", "documents/reference/bernstein-utilities", "mergeGrid"),
+  entry("helper.bernTbl", "shared backend helper", "Build detailed or one-line Bernstein coefficient tables.", "documents/reference/shared-helpers", "helper-berntbl"),
+  entry("helper.cellGet", "shared backend helper", "Read one nested LocalValues leaf by physical-cell subscripts.", "documents/reference/shared-helpers", "helper-cellget"),
+  entry("helper.chk", "shared backend helper", "Apply common validation predicates with caller-owned errors.", "documents/reference/shared-helpers", "helper-chk"),
+  entry("helper.combRows", "shared backend helper", "Build Cartesian rows in the package tensor order.", "documents/reference/shared-helpers", "helper-combrows"),
+  entry("helper.isZero", "shared backend helper", "Classify numeric, additive, coefficient-tree, or object zero evidence.", "documents/reference/shared-helpers", "helper-iszero"),
+  entry("helper.mapVals", "shared backend helper", "Map a function over a nested LocalValues tree.", "documents/reference/shared-helpers", "helper-mapvals"),
+  entry("helper.matSubs", "shared backend helper", "Normalize two-dimensional matrix subscripts.", "documents/reference/shared-helpers", "helper-matsubs"),
+  entry("helper.mkGrid", "shared backend helper", "Validate grid vectors and construct GridInfo.", "documents/reference/shared-helpers", "helper-mkgrid"),
+  entry("helper.mkNest", "shared backend helper", "Construct nested physical-cell storage.", "documents/reference/shared-helpers", "helper-mknest"),
 ];

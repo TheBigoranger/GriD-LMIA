@@ -25,13 +25,16 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 
 | Reference | Task |
 | :--- | :--- |
-| [`Matrix operations`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/) | Use affine algebra, supported products, structural transforms, indexing, and assignment. |
+| [`Algebra`](/PD-LMI-package/documents/reference/pdvar/algebra/) | Build affine sums, differences, and supported products. |
+| [`Structural operations`](/PD-LMI-package/documents/reference/pdvar/structural-operations/) | Reshape, reduce, assemble, and reorder symbolic payloads. |
+| [`Indexing and inspection`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/) | Index, assign, structurally compare, display, and inspect payload shape. |
+| [`Legacy matrix-operations overview`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/) | Forward old per-symbol anchors to the focused pages. |
 
 ### Constraints
 
 | Reference | Task |
 | :--- | :--- |
-| [`Comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) | Create `pdlmi` constraints with `<=` and `>=`. |
+| [`Comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) | Create semidefinite or entry-wise inequalities with `<=`/`>=`, and direct equalities with `==`. |
 
 ## Scope Boundary
 

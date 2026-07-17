@@ -5,6 +5,8 @@ It represents continuous piecewise-polynomial decision matrices in cell-local
 tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
 models are called differentiable parameter-dependent LMIs (DPD-LMIs).
 
+Current release: **v0.4.0**.
+
 The current implementation provides:
 
 - `pdbase` as the backend parent for tensor-grid metadata, nested `LocalValues`, local Bernstein labels, and coefficient inspection.
@@ -12,8 +14,8 @@ The current implementation provides:
 - `pdvar` for arbitrary-degree continuous YALMIP-backed Bernstein decision
   expressions whose neighboring cells share boundary values.
 - `rhodiff` for discontinuous rate-vertex derivative expressions.
-- `pdlmi` for direct, Pólya-elevated, Putinar box, or full-box-preordering
-  YALMIP constraint assembly and `toYalmip` handoff.
+- `pdlmi` for direct equality constraints and direct, Pólya-elevated, Putinar
+  box, or full-box-preordering inequality assembly with `toYalmip` handoff.
 - `bernsteinTable` methods on both `pdmat` and `pdvar` for command-window
   inspection of local Bernstein coefficient rows.
 
@@ -98,6 +100,39 @@ F = toYalmip(C);
 
 `F` can be used with ordinary YALMIP calls such as `optimize(F, objective, sdpsettings(...))`.
 
+## Comparison Semantics in v0.4.0
+
+For `P >= Q` and `P <= Q`, PD-LMI inspects every original coefficient in
+every physical cell and active rate row. The complete relation is
+semidefinite only when all coefficients are square and Hermitian; otherwise,
+the complete relation is entry-wise and emits
+`pdlmi:ElementwiseInequality`. Entry-wise inequalities support direct, Pólya,
+Putinar, and full-box certificates, with independent scalar certificates in
+MATLAB column-major entry order. Numeric comparisons include the boundary at
+the package tolerance of `1e-10`.
+
+`P == Q` creates direct coefficient equalities. Rectangular and non-Hermitian
+matrices are supported, and compatible derivative expressions compare every
+matching rate row. Equality does not accept certificate selectors or
+`applyPolya`, `applyPutinar`, or `applyFullBoxPreorder`; `P == P` exports an
+empty constraint collection. Use `isequal(P,Q)` when the intent is structural
+object comparison rather than constraint construction.
+
+Incompatible equality row structures raise `pdvar:InvalidEqualityRows`, and
+any equality certificate request raises `pdlmi:UnsupportedEqualityCertificate`.
+
+```matlab
+yalmip('clear')
+X = pdvar([2 3], {[0 1]}, "full");
+entrywise = X >= 0;
+equalities = X == zeros(2, 3);
+F = [entrywise.toYalmip(), equalities.toYalmip()];
+```
+
+See the online [`pdvar` comparison reference](https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdvar/comparisons/)
+and [`pdlmi` reference](https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/)
+for constraint counts, certificate behavior, validation errors, and derivative-row rules.
+
 ## Opt-in Pólya Certificate
 
 Direct coefficient-wise assembly remains the default. `UsePolya` elevates the
@@ -174,6 +209,8 @@ F = preorder.toYalmip();
 - Version history: https://thebigoranger.github.io/PD-LMI-package/version-history/
 - Solver smoke examples: https://thebigoranger.github.io/PD-LMI-package/examples/solver-smoke/
 - `applyPutinar` reference: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/applyputinar/
+- `pdvar` comparisons: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdvar/comparisons/
+- `pdlmi` reference: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/
 - `pdmat/plot` output examples: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdmat/plot/
 - Reference lookup table: https://thebigoranger.github.io/PD-LMI-package/documents/reference-index/
 - Local PDF manual: `doc/manual.pdf`

@@ -17,7 +17,7 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
 
 ## Purpose
 
-Build a `pdlmi` object from a square `pdvar` residual expression.
+Build a `pdlmi` object from a `pdvar` residual expression and one supported relation.
 
 ## Syntax
 
@@ -39,11 +39,17 @@ C = pdlmi(expr, relation, "PutinarOrder", r)
 C = pdlmi(expr, relation, "UsePutinar", true, "PutinarOrder", r)
 C = lhs <= rhs
 C = lhs >= rhs
+C = lhs == rhs
 ```
 
 ## Description
 
-Direct coefficient-wise assembly is the default. `UsePolya` selects exact
+Direct coefficient-wise assembly is the default. For `<=` and `>=`, one scan
+of every original coefficient selects semidefinite mode only when all are
+square Hermitian (numeric tolerance `1e-10` inclusive); otherwise the entire
+inequality is entry-wise and warns once with `pdlmi:ElementwiseInequality`.
+For `==`, direct column-major coefficient equality accepts rectangular and
+non-Hermitian residuals. `UsePolya` selects exact
 degree elevation before coefficient constraints. In one parameter,
 `UsePutinar` and `UseFullBoxPreorder` select the same parity-specific
 Markov–Lukács interval form. In two or more parameters, `UsePutinar` selects
@@ -64,8 +70,8 @@ certificate order, see
 
 | Input | Description |
 | :--- | :--- |
-| `expr` | Square `pdvar` residual expression, such as `P` or `diffP + P*A + A'*P`. |
-| `relation` | Either `"<="` or `">="`. |
+| `expr` | `pdvar` residual expression, such as `P`, `V-Q`, or `diffP + P*A + A'*P`. |
+| `relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya` | Logical option. Default `false`. The bare flag `"UsePolya"` enables Pólya assembly with increment one. |
 | `PolyaDegree` | Finite nonnegative integer scalar. Default `0`. Supplying it without `UsePolya` enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
 | `UseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select full-box assembly at the minimum admissible order. |
@@ -93,6 +99,10 @@ than one of Pólya, Putinar, and full-box assembly is also rejected.
 `UsePutinar`, and `PutinarOrder` properties. `Constraints` contains direct
 coefficient inequalities, Pólya-elevated coefficient inequalities, or the PSD
 blocks and exact identities for the selected Gram mode.
+
+Equality stores direct coefficient equalities only. A proven identity may have
+empty `Constraints`; inspect properties with dot access such as `C.Relation`,
+`C.Residual`, and `C.Constraints`.
 
 ## Examples
 
@@ -221,8 +231,8 @@ construction does not call a solver or add a positivity margin.
 
 ## Validation And Errors
 
-- Nonsquare residual coefficient matrices raise `pdlmi:InvalidMatrixSize`.
-- Nonsymmetric or non-Hermitian coefficient matrices raise `pdlmi:NonSymmetricExpression`.
+- Nonsquare or non-Hermitian inequality coefficients select supported entry-wise mode and warn once with `pdlmi:ElementwiseInequality`.
+- Rectangular and non-Hermitian equality coefficients are supported.
 - A non-`pdvar` residual raises `pdlmi:InvalidExpression`; an unsupported relation raises `pdlmi:InvalidRelation`.
 - Nonlogical selectors raise `pdlmi:InvalidUsePolya`, `pdlmi:InvalidUseFullBoxPreorder`, or `pdlmi:InvalidUsePutinar`.
 - Invalid Pólya increments, full-box orders, or Putinar orders raise `pdlmi:InvalidPolyaDegree`, `pdlmi:InvalidFullBoxOrder`, or `pdlmi:InvalidPutinarOrder`.
@@ -231,6 +241,7 @@ construction does not call a solver or add a positivity margin.
 - `UsePutinar=false` with an explicit `PutinarOrder` raises `pdlmi:ConflictingPutinarOptions`, even when the order is zero.
 - Enabling more than one of Pólya, Putinar, and full-box assembly raises `pdlmi:ConflictingRelaxations`.
 - Malformed, duplicate, or unknown options raise `pdlmi:InvalidOptions`, `pdlmi:DuplicateOption`, or `pdlmi:UnknownOption`.
+- Any Pólya, Putinar, or Full Box option on relation `"=="` raises `pdlmi:UnsupportedEqualityCertificate`.
 
 In one parameter, Putinar and full-box assembly share the exact
 parity-specific Markov–Lukács form. In two or more parameters, Putinar is

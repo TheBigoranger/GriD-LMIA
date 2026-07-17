@@ -84,13 +84,88 @@ function testHighDegreeResidualConstraintCount(testCase)
     verifyConstraintCells(testCase, C);
 end
 
-function testRejectsNonSquareAndNonSymmetric(testCase)
-    % Semidefinite constraints need square symmetric coefficient matrices.
-    V = pdvar(2, 1, {[0 1]}, "full");
-    F = pdvar(2, {[0 1]}, "full");
+function testEntrywiseDispatchAndTolerance(testCase)
+    % Rectangular and structurally full square residuals use vector inequalities.
+    rectangular = pdvar(3, 2, {[0 1]}, "full", Degree=0);
+    rect = constructWithSingleWarning(testCase, @() rectangular >= 0);
+    testCase.verifyEqual(numel(rect.Constraints), 1);
+    verifyVectorConstraints(testCase, rect, 6);
 
-    testCase.verifyError(@() V <= 0, "pdlmi:InvalidMatrixSize");
-    testCase.verifyError(@() F <= 0, "pdlmi:NonSymmetricExpression");
+    fullSquare = pdvar(2, {[0 1]}, "full", Degree=0);
+    square = constructWithSingleWarning(testCase, @() fullSquare <= 0);
+    fullCoeffs = fullSquare.coeffs(1);
+    assign(fullCoeffs{1}, [-1 -2; -3 -4]);
+    testCase.verifyGreaterThan(check(square.Constraints{1}), 0);
+    verifyVectorConstraints(testCase, square, 4);
+
+    symmetric = pdvar(2, {[0 1]}, "symmetric");
+    testCase.verifyWarningFree(@() symmetric >= 0);
+    symmetricLmi = symmetric >= 0;
+    symmetricMeta = struct(symmetricLmi.Constraints{1});
+    testCase.verifySize(symmetricMeta.List{1}, [2 2]);
+
+    % The numeric tolerance is inclusive at exactly 1e-10.
+    atTol = internalPdvar({[0 1]}, [2 2], 0, ...
+        {{[0 1e-10; 0 0]}}, false, [], "test-at-tolerance");
+    aboveTol = internalPdvar({[0 1]}, [2 2], 0, ...
+        {{[0 1.0001e-10; 0 0]}}, false, [], "test-above-tolerance");
+    testCase.verifyWarningFree(@() pdlmi(atTol, ">="));
+    constructWithSingleWarning(testCase, @() pdlmi(aboveTol, ">="));
+end
+
+function testGlobalEntrywiseScanAcrossCellsAndRateRows(testCase)
+    % A later offending coefficient changes every constraint in the wrapper.
+    first = sdpvar(2, 2, 'symmetric');
+    later = sdpvar(2, 2, 'full');
+    acrossCells = internalPdvar({[0 1 2]}, [2 2], 0, ...
+        {{first}, {later}}, false, [], "test-later-cell");
+    cellwise = constructWithSingleWarning(testCase, @() acrossCells >= 0);
+    assign(first, [1 2; 2 1]);
+    assign(later, [1 2; 3 4]);
+
+    testCase.verifyEqual(numel(cellwise.Constraints), 2);
+    testCase.verifyGreaterThan(check(cellwise.Constraints{1}), 0, ...
+        "The earlier indefinite coefficient must be constrained entry-wise.");
+    verifyVectorConstraints(testCase, cellwise, 4);
+
+    earlyRow = sdpvar(2, 2, 'symmetric');
+    lateRow = sdpvar(2, 2, 'full');
+    acrossRows = internalPdvar({[0 1]}, [2 2], 0, ...
+        {{earlyRow; lateRow}}, true, [-1 1], "test-later-rate-row");
+    ratewise = constructWithSingleWarning(testCase, @() acrossRows >= 0);
+    assign(earlyRow, [1 2; 2 1]);
+    assign(lateRow, [1 2; 3 4]);
+
+    testCase.verifyEqual(numel(ratewise.Constraints), 2);
+    testCase.verifyGreaterThan(check(ratewise.Constraints{1}), 0);
+    verifyVectorConstraints(testCase, ratewise, 4);
+end
+
+function testEntrywiseDirectPolyaAndFailureOrdering(testCase)
+    % Direct and elevated paths retain every cell, entry, and derivative row.
+    V = pdvar(3, 2, {[0 1 2]}, "full", Degree=1);
+    direct = constructWithSingleWarning(testCase, @() V >= 0);
+    polya = constructWithSingleWarning(testCase, @() direct.applyPolya(2));
+    D = rhodiff(V, [-1 1]);
+    rate = constructWithSingleWarning(testCase, @() D <= 0);
+    ratePolya = constructWithSingleWarning(testCase, @() rate.applyPolya());
+
+    testCase.verifyEqual(numel(direct.Constraints), 2 * 2);
+    testCase.verifyEqual(numel(polya.Constraints), 2 * 4);
+    testCase.verifyEqual(size(D.coeffs(1)), [2 1]);
+    testCase.verifyEqual(numel(rate.Constraints), 2 * 2);
+    testCase.verifyEqual(numel(ratePolya.Constraints), 2 * 2 * 2);
+    verifyVectorConstraints(testCase, direct, 6);
+    verifyVectorConstraints(testCase, polya, 6);
+    verifyVectorConstraints(testCase, rate, 6);
+    verifyVectorConstraints(testCase, ratePolya, 6);
+
+    % Option validation precedes classification, so failed construction is silent.
+    lastwarn("");
+    testCase.verifyError(@() pdlmi(V, ">=", ...
+        UsePutinar=true, PutinarOrder=-1), "pdlmi:InvalidPutinarOrder");
+    [~, warnId] = lastwarn;
+    testCase.verifyEmpty(warnId);
 end
 
 function testAllowsSymmetricExpression(testCase)
@@ -307,6 +382,52 @@ function out = callWarningOff(fun, warnId)
     cleanup = onCleanup(@() warning(state.state, warnId)); %#ok<NASGU>
     warning("off", warnId);
     out = fun();
+end
+
+function out = constructWithSingleWarning(testCase, fun)
+    % Capture the successful wrapper and assert one emitted dispatch warning.
+    lastwarn("");
+    txt = evalc('out = fun();');
+    [~, warnId] = lastwarn;
+    testCase.verifyEqual(string(warnId), "pdlmi:ElementwiseInequality");
+    testCase.verifyEqual(count(string(txt), ...
+        "The residual is non-square or has a non-Hermitian coefficient"), 1);
+end
+
+function verifyVectorConstraints(testCase, C, nEntry)
+    % Entry-wise assembly stores one column-vector inequality per coefficient.
+    for k = 1:numel(C.Constraints)
+        metadata = struct(C.Constraints{k});
+        testCase.verifySize(metadata.List{1}, [nEntry 1]);
+    end
+end
+
+function obj = internalPdvar(grid, matrixSize, degree, vals, hasRate, rb, summary)
+    % Build targeted coefficient trees that public continuous allocation cannot express.
+    init = struct( ...
+        "PdvarInternal", true, ...
+        "Grid", {grid}, ...
+        "MatrixSize", matrixSize, ...
+        "Degree", degree, ...
+        "LocalValues", {vals}, ...
+        "IsContinuous", false, ...
+        "ContainsDecision", any(cellfun(@(x) isa(x, "sdpvar"), flatten(vals))), ...
+        "HasRateDependence", hasRate, ...
+        "RateBounds", rb, ...
+        "SourceSummary", summary);
+    obj = pdvar(init);
+end
+
+function out = flatten(vals)
+    % Return nested coefficient payloads as a flat cell for fixture metadata.
+    out = {};
+    for k = 1:numel(vals)
+        if iscell(vals{k})
+            out = [out, flatten(vals{k})]; %#ok<AGROW>
+        else
+            out{end + 1} = vals{k}; %#ok<AGROW>
+        end
+    end
 end
 
 function verifyConstraintCells(testCase, C)

@@ -17,19 +17,27 @@ function out = applyFullBoxPreorder(obj, order)
     %
     %   The default is floor(m/2) for one parameter and ceil(m/2) otherwise,
     %   where m is the residual degree. Each physical cell and active rate row
-    %   receives independent PSD Gram blocks. For multiple parameters, the
-    %   certificate includes every subset product of the box generators
-    %   alpha_s(1-alpha_s); it is not a general Putinar or general-domain SOS
-    %   relaxation. No positivity margin is added.
+    %   receives independent PSD Gram blocks; each entry of an entry-wise
+    %   inequality gets an independent scalar Gram certificate in MATLAB
+    %   column-major order. For multiple parameters, the certificate includes
+    %   every subset product of the box generators alpha_s(1-alpha_s); it is not
+    %   a general Putinar or general-domain SOS relaxation. No positivity margin
+    %   is added.
     %
     %   Invalid orders raise pdlmi:InvalidFullBoxOrder; an integer below the
-    %   parity/dimension minimum raises pdlmi:FullBoxOrderTooLow.
+    %   parity/dimension minimum raises pdlmi:FullBoxOrderTooLow. Coefficient
+    %   equality raises pdlmi:UnsupportedEqualityCertificate before order
+    %   validation.
     %
     %   Example:
     %     P = pdvar(2, {[0 1]}, "symmetric", Degree=2);
     %     direct = P >= 0;
     %     preorder = direct.applyFullBoxPreorder(1);
 
+    if obj.Relation == "=="
+        error("pdlmi:UnsupportedEqualityCertificate", ...
+            "Coefficient equality supports direct assembly only.");
+    end
     if nargin < 2
         order = chkFullBoxOrder(obj.Residual);
     else

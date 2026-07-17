@@ -15,13 +15,19 @@ function out = applyPolya(obj, degreeIncrement)
     %   integer replaces any prior selection because assembly always starts
     %   from the stored original Residual rather than existing constraints.
     %   This value-class method returns a new pdlmi and leaves obj unchanged;
-    %   invalid increments raise pdlmi:InvalidPolyaDegree.
+    %   entry-wise inequalities vectorize every elevated matrix coefficient.
+    %   Invalid increments raise pdlmi:InvalidPolyaDegree. Coefficient equality
+    %   raises pdlmi:UnsupportedEqualityCertificate before increment validation.
     %
     %   Example:
     %     P = pdvar(2, {[0 1]}, "symmetric");
     %     direct = P >= 0;
     %     polya = direct.applyPolya(2);
 
+    if obj.Relation == "=="
+        error("pdlmi:UnsupportedEqualityCertificate", ...
+            "Coefficient equality supports direct assembly only.");
+    end
     if nargin < 2
         degreeIncrement = 1;
     end

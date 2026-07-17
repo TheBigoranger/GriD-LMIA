@@ -49,20 +49,82 @@ function testExplicitOrderAndMinimumValidation(testCase)
         "pdlmi:InvalidFullBoxOrder");
 end
 
-function testEveryAssemblerPreservesMatrixValidationIds(testCase)
-    % Direct, Polya, and Gram paths enforce the same semidefinite shape gate.
-    rectangular = pdvar(2, 1, {[0 1]}, "full");
-    nonsymmetric = pdvar(2, {[0 1]}, "full");
+function testEntrywiseScalarBlocksAndColumnMajorTargets(testCase)
+    % Odd interval certificates repeat scalar endpoint blocks per matrix entry.
+    P = pdvar(3, 2, {[0 1]}, "full", Degree=1);
+    C = constructWithWarning(testCase, @() pdlmi(P, ">=", ...
+        UseFullBoxPreorder=true));
+    coeffs = P.coeffs(1);
 
-    verifyAllModesFail(testCase, rectangular, "pdlmi:InvalidMatrixSize");
-    verifyAllModesFail(testCase, nonsymmetric, ...
-        "pdlmi:NonSymmetricExpression");
+    testCase.verifyEqual(numel(C.Constraints), 6 * 4);
+    psdIdx = reshape((0:5)' * 4 + [1 2], 1, []);
+    testCase.verifyEqual(psdDimensionsAt(C, psdIdx), ones(1, 12));
+    verifyDisjointGramVariables(testCase, C, psdIdx);
+    for entry = 1:6
+        base = (entry - 1) * 4;
+        targetIds = [getvariables(coeffs{1, 1}(entry)), ...
+            getvariables(coeffs{1, 2}(entry))];
+        for label = 1:2
+            metadata = struct(C.Constraints{base + 2 + label});
+            matched = intersect(getvariables(metadata.List{1}), targetIds);
+            testCase.verifyEqual(matched, targetIds(label));
+        end
+    end
 end
 
-function verifyAllModesFail(testCase, expr, errorId)
-    testCase.verifyError(@() pdlmi(expr, "<="), errorId);
-    testCase.verifyError(@() pdlmi(expr, "<=", UsePolya=true), errorId);
-    testCase.verifyError(@() pdlmi(expr, "<=", ...
-        UseFullBoxPreorder=true), errorId);
-    testCase.verifyError(@() pdlmi(expr, "<=", UsePutinar=true), errorId);
+function testEntrywiseEveryCellAndRateRow(testCase)
+    % Each cell/rate-row/entry owns its two scalar odd-degree Gram blocks.
+    P = pdvar(2, 1, {[0 1 2]}, "full", Degree=2, ...
+        RateBounds=[-1 1]);
+    D = rhodiff(P);
+    C = constructWithWarning(testCase, @() pdlmi(D, "<=", ...
+        UseFullBoxPreorder=true));
+
+    % 2 cells * 2 rows * 2 entries * (2 PSD + 2 identities).
+    testCase.verifyEqual(size(D.coeffs(1)), [2 2]);
+    testCase.verifyEqual(numel(C.Constraints), 32);
+    psdIdx = reshape((0:7)' * 4 + [1 2], 1, []);
+    testCase.verifyEqual(psdDimensionsAt(C, psdIdx), ones(1, 16));
+    verifyDisjointGramVariables(testCase, C, psdIdx);
+end
+
+function testSymmetricMatrixGramDimensionsRemainUnchanged(testCase)
+    % Semidefinite mode still lifts the matrix dimension into each Gram block.
+    P = pdvar(2, {[0 1]}, "symmetric", Degree=2);
+    C = pdlmi(P, ">=", UseFullBoxPreorder=true);
+
+    testCase.verifyEqual(numel(C.Constraints), 5);
+    testCase.verifyEqual(psdDimensionsAt(C, [1 2]), [4 2]);
+end
+
+function dims = psdDimensionsAt(C, indices)
+    dims = zeros(size(indices));
+    for k = 1:numel(indices)
+        metadata = struct(C.Constraints{indices(k)});
+        dims(k) = size(metadata.List{1}, 1);
+    end
+end
+
+function verifyDisjointGramVariables(testCase, C, indices)
+    % Scalar certificate blocks remain independent across every target slice.
+    vars = cell(size(indices));
+    for k = 1:numel(indices)
+        metadata = struct(C.Constraints{indices(k)});
+        vars{k} = getvariables(metadata.List{1});
+    end
+    for a = 1:numel(vars)
+        for b = (a + 1):numel(vars)
+            testCase.verifyEmpty(intersect(vars{a}, vars{b}));
+        end
+    end
+end
+
+function out = constructWithWarning(testCase, fun)
+    % Retain the wrapper while asserting entry-wise dispatch is visible.
+    out = [];
+    testCase.verifyWarning(@construct, "pdlmi:ElementwiseInequality");
+
+    function construct
+        out = fun();
+    end
 end

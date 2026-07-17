@@ -8,6 +8,9 @@ export interface CertificateOption {
   label: string;
   description: string;
   command: string;
+  exportCommand: string;
+  constraintCount: string;
+  boundaryNote: string;
   mathHtml: readonly string[];
   href: string;
 }
@@ -45,6 +48,16 @@ export default function CertificateChooser({ options }: { options: CertificateOp
                   event.preventDefault();
                   move(index, 1);
                 }
+                if (event.key === "Home") {
+                  event.preventDefault();
+                  setSelected(0);
+                  document.getElementById(`${panelId}-tab-0`)?.focus();
+                }
+                if (event.key === "End") {
+                  event.preventDefault();
+                  setSelected(options.length - 1);
+                  document.getElementById(`${panelId}-tab-${options.length - 1}`)?.focus();
+                }
               }}
               role="tab"
               tabIndex={selected === index ? 0 : -1}
@@ -59,6 +72,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
         <section aria-labelledby={`${panelId}-tab-${selected}`} id={`${panelId}-panel`} role="tabpanel">
           <h3>{option.label}: <code>selected = {option.command}</code></h3>
           <p>{option.description}</p>
+          <pre><code>{`yalmip('clear')\nE = pdvar(2, {[0 0.5 1]}, "symmetric", Degree=2);\nL = E >= 0;\n${option.exportCommand}\nnumel(C)`}</code></pre>
           <div className="certificate-formula">
             {option.mathHtml.map((mathHtml, index) => (
               <div
@@ -68,13 +82,15 @@ export default function CertificateChooser({ options }: { options: CertificateOp
               />
             ))}
           </div>
+          <p><strong>Finite shape:</strong> {option.constraintCount}</p>
+          <p><strong>At the cell boundary:</strong> {option.boundaryNote}</p>
           <div className="certificate-export" aria-label="Selected certificate exported as YALMIP constraints">
             <code>selected</code><span aria-hidden="true">→</span><code>selected.toYalmip()</code><span aria-hidden="true">→</span><strong>YALMIP Constraint</strong>
           </div>
           <a href={option.href}>Open the {option.label} reference →</a>
         </section>
       </div>
-      <figcaption>Four alternative assembly commands start from the same residual inequality and share one solver-facing export.</figcaption>
+      <figcaption>All four tabs use the same two-cell degree-two residual. Only the finite certificate selector changes.</figcaption>
     </figure>
   );
 }

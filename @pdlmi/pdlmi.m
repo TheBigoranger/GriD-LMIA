@@ -2,7 +2,8 @@ classdef pdlmi
     %PDLMI Cell-local YALMIP constraints for PD-LMI expressions.
     %
     %   Syntax:
-    %     C = pdlmi(expr, "<=")
+    %     C = pdlmi(expr, relation)
+    %     C = pdlmi(expr, "==")
     %     C = pdlmi(expr, relation, "UsePolya")
     %     C = pdlmi(expr, relation, UsePolya=true, PolyaDegree=d)
     %     C = pdlmi(expr, relation, "UsePolya", "PolyaDegree", d)
@@ -13,18 +14,27 @@ classdef pdlmi
     %     C = pdlmi(expr, relation, PutinarOrder=r)
     %
     %   Arguments:
-    %     expr     - Square pdvar residual to constrain coefficient-wise.
-    %     relation - "<=" or ">=" applied to every assembled coefficient.
-    %     options  - One optional Pólya, Putinar, or full-box selection.
+    %     expr     - pdvar residual to constrain coefficient-wise.
+    %     relation - "<=", ">=", or "==" applied to assembled coefficients.
+    %     options  - One optional inequality certificate selection.
     %
     %   Output:
-    %     C - Constraint wrapper retaining the residual and assembly settings.
+    %     C - Constraint wrapper retaining the residual and assembly settings;
+    %         C.toYalmip() returns the assembled YALMIP constraints.
     %
-    %   Direct assembly is the default. Pólya uses a nonnegative degree
-    %   increment; Putinar and full-box use absolute Gram orders. The three
-    %   relaxations are mutually exclusive, operate independently per physical
-    %   cell and rate row, and add no implicit positivity margin. Apply methods
-    %   rebuild from Residual, so a new selection replaces the previous one.
+    %   Direct assembly is the default. Inequality classification scans every
+    %   coefficient of the original residual across all physical cells and
+    %   rate rows. A square residual is semidefinite only when every coefficient
+    %   is Hermitian (numeric tolerance 1e-10); otherwise the entire inequality
+    %   is entry-wise and issues pdlmi:ElementwiseInequality once per newly
+    %   constructed wrapper. Equality is entry-wise and direct-only; supplying
+    %   a certificate raises pdlmi:UnsupportedEqualityCertificate.
+    %
+    %   Pólya uses a nonnegative degree increment; Putinar and full-box use
+    %   absolute Gram orders. The three relaxations are mutually exclusive,
+    %   operate independently per physical cell and rate row, and add no
+    %   implicit positivity margin. Apply methods rebuild from Residual, so a
+    %   new selection replaces the previous one.
     %
     %   Example:
     %     P = pdvar(2, {[0 1]}, "symmetric");
@@ -34,6 +44,8 @@ classdef pdlmi
     %     directPos = P >= 0;
     %     putinar = directPos.applyPutinar(1);
     %     preorder = directPos.applyFullBoxPreorder();
+    %     entrywise = pdvar(3, 2, {[0 1]}) >= 0;
+    %     equality = P == eye(2);
 
     properties (SetAccess = private)
         Constraints
@@ -56,15 +68,16 @@ classdef pdlmi
             if ~((ischar(relation) && isrow(relation) && ~isempty(relation)) || ...
                     (isstring(relation) && isscalar(relation) && ~ismissing(relation)))
                 error("pdlmi:InvalidRelation", ...
-                    "relation must be the scalar string '<=' or '>='.");
+                    "relation must be the scalar string '<=', '>=', or '=='.");
             end
             relation = string(relation);
-            if ~isscalar(relation) || ~any(relation == ["<=", ">="])
+            if ~isscalar(relation) || ~any(relation == ["<=", ">=", "=="])
                 error("pdlmi:InvalidRelation", ...
-                    "relation must be the scalar string '<=' or '>='.");
+                    "relation must be the scalar string '<=', '>=', or '=='.");
             end
 
-            opts = parseOpts(varargin{:});
+            opts = parseOpts(relation == "==", varargin{:});
+            mode = classifyComparison(expr, relation);
             obj.Residual = expr;
             obj.Relation = relation;
             obj.UsePolya = opts.UsePolya;
@@ -82,7 +95,7 @@ classdef pdlmi
                 end
                 obj.FullBoxOrder = opts.FullBoxOrder;
                 obj.Constraints = mkFullBoxCons(expr, ...
-                    relation, opts.FullBoxOrder);
+                    relation, opts.FullBoxOrder, mode);
             elseif opts.UsePutinar
                 if opts.PutinarOrderSpecified
                     opts.PutinarOrder = chkPutinarOrder(expr, ...
@@ -92,10 +105,14 @@ classdef pdlmi
                 end
                 obj.PutinarOrder = opts.PutinarOrder;
                 obj.Constraints = mkPutinarCons(expr, relation, ...
-                    opts.PutinarOrder);
+                    opts.PutinarOrder, mode);
             else
                 obj.Constraints = mkCoeffCons(expr, relation, ...
-                    opts.UsePolya, opts.PolyaDegree);
+                    opts.UsePolya, opts.PolyaDegree, mode);
+            end
+            if mode == "elementwise"
+                warning("pdlmi:ElementwiseInequality", ...
+                    "The residual is non-square or has a non-Hermitian coefficient; the inequality is assembled entry-wise.");
             end
         end
 
@@ -105,7 +122,38 @@ classdef pdlmi
     end
 end
 
-function opts = parseOpts(varargin)
+function mode = classifyComparison(expr, relation)
+    %CLASSIFYCOMPARISON Select one global mode from original coefficients.
+    %   Scan every cell, rate row, and coefficient; one fallback classifies the
+    %   complete original residual as entry-wise.
+
+    if relation == "=="
+        mode = "equality";
+        return
+    end
+
+    mode = "semidefinite";
+    cells = expr.cells();
+    for c = 1:size(cells, 1)
+        coeffs = expr.coeffs(cells(c, :));
+        for row = 1:size(coeffs, 1)
+            for k = 1:size(coeffs, 2)
+                mat = coeffs{row, k};
+                if size(mat, 1) ~= size(mat, 2)
+                    mode = "elementwise";
+                elseif isa(mat, "sdpvar")
+                    if ~ishermitian(mat)
+                        mode = "elementwise";
+                    end
+                elseif norm(mat - mat', inf) > 1e-10
+                    mode = "elementwise";
+                end
+            end
+        end
+    end
+end
+
+function opts = parseOpts(isEquality, varargin)
     %PARSEOPTS Normalize selector flags and relaxation-specific orders.
     %   Order-only forms enable their relaxation; conflicting families and
     %   explicit false-plus-order Putinar input are rejected before assembly.
@@ -130,6 +178,10 @@ function opts = parseOpts(varargin)
                 "UseFullBoxPreorder", "FullBoxOrder", ...
                 "UsePutinar", "PutinarOrder"])
             error("pdlmi:UnknownOption", "Unsupported pdlmi option: %s.", name);
+        end
+        if isEquality
+            error("pdlmi:UnsupportedEqualityCertificate", ...
+                "Coefficient equality supports direct assembly only.");
         end
         if seen.(char(name))
             error("pdlmi:DuplicateOption", ...

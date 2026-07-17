@@ -102,4 +102,5 @@ of calling these methods directly.
 
 [`pdmat matrix operations`](/PD-LMI-package/documents/reference/pdmat/matrix-operations/) ·
 [`pdvar matrix operations`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/) ·
+[`shared helper utilities`](/PD-LMI-package/documents/reference/shared-helpers/) ·
 [`pdbase storage inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/)

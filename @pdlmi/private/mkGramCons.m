@@ -1,8 +1,8 @@
-function cons = mkGramCons(expr, relation, targetDeg, specs)
+function cons = mkGramCons(expr, relation, targetDeg, specs, mode)
     %MKGRAMCONS Assemble a specified Bernstein-Gram certificate per cell/row.
     %
     %   Syntax:
-    %     cons = mkGramCons(expr, relation, targetDeg, specs)
+    %     cons = mkGramCons(expr, relation, targetDeg, specs, mode)
     %
     %   Arguments:
     %     expr      - pdvar residual with local Bernstein coefficients.
@@ -10,13 +10,14 @@ function cons = mkGramCons(expr, relation, targetDeg, specs)
     %     targetDeg - Common tensor degree used for exact coefficient matching.
     %     specs     - PSD-block specifications: Gram degree and [alpha; 1-alpha]
     %                 weight exponents in each row.
+    %     mode      - "semidefinite" or "elementwise" inequality assembly.
     %
     %   Output:
     %     cons - Cell column of PSD and exact coefficient-matching constraints.
     %
-    %   The result contains one independent certificate per physical cell and
-    %   active rate row. Invalid matrix payloads raise the same square/symmetry
-    %   errors as direct coefficient assembly.
+    %   The result contains one independent matrix certificate per physical
+    %   cell/rate row in semidefinite mode. Entry-wise mode instead creates an
+    %   independent scalar certificate for each column-major matrix entry.
 
     vals = expr.elevVals(targetDeg - expr.Degree);
     cells = expr.cells();
@@ -30,29 +31,30 @@ function cons = mkGramCons(expr, relation, targetDeg, specs)
             target = coeffs(row, :);
             for k = 1:numel(target)
                 mat = target{k};
-                if size(mat, 1) ~= size(mat, 2)
-                    error("pdlmi:InvalidMatrixSize", ...
-                        "PD-LMI constraints require square coefficient matrices.");
-                end
-                if isa(mat, "sdpvar")
-                    symmetric = ishermitian(mat);
-                else
-                    symmetric = norm(mat - mat', inf) <= 1e-10;
-                end
-                if ~symmetric
-                    error("pdlmi:NonSymmetricExpression", ...
-                        "PD-LMI constraints require symmetric or Hermitian coefficient matrices.");
-                end
                 if relation == "<="
                     target{k} = -mat;
                 end
             end
 
-            [psdCons, represented] = mkCert(expr.MatrixSize(1), nPar, specs);
-            cons = [cons; psdCons]; %#ok<AGROW>
-            % Matching is exact; strictness remains encoded in the residual.
-            for k = 1:numel(target)
-                cons{end + 1, 1} = represented{k} == target{k}; %#ok<AGROW>
+            if mode == "elementwise"
+                for entry = 1:prod(expr.MatrixSize)
+                    % Scalar certificates remain independent across entries;
+                    % MATLAB linear indexing preserves column-major entry order.
+                    scalarTarget = cellfun(@(mat) mat(entry), target, ...
+                        "UniformOutput", false);
+                    [psdCons, represented] = mkCert(1, nPar, specs);
+                    cons = [cons; psdCons]; %#ok<AGROW>
+                    for k = 1:numel(scalarTarget)
+                        cons{end + 1, 1} = represented{k} == scalarTarget{k}; %#ok<AGROW>
+                    end
+                end
+            else
+                [psdCons, represented] = mkCert(expr.MatrixSize(1), nPar, specs);
+                cons = [cons; psdCons]; %#ok<AGROW>
+                % Matching is exact; strictness remains encoded in the residual.
+                for k = 1:numel(target)
+                    cons{end + 1, 1} = represented{k} == target{k}; %#ok<AGROW>
+                end
             end
         end
     end

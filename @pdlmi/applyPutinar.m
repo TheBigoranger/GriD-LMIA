@@ -23,13 +23,20 @@ function out = applyPutinar(obj, order)
     %   by S0 + sum_s alpha_s(1-alpha_s)Ss otherwise. No positivity margin is
     %   inserted and this method does not call a solver. Invalid orders raise
     %   pdlmi:InvalidPutinarOrder; insufficient orders raise
-    %   pdlmi:PutinarOrderTooLow.
+    %   pdlmi:PutinarOrderTooLow. Each entry of an entry-wise inequality gets
+    %   an independent scalar Gram certificate in MATLAB column-major order.
+    %   Coefficient equality raises pdlmi:UnsupportedEqualityCertificate before
+    %   order validation.
     %
     %   Example:
     %     P = pdvar(2, {[0 1]}, "symmetric", Degree=3);
     %     direct = P >= 0;
     %     putinar = direct.applyPutinar(2);
 
+    if obj.Relation == "=="
+        error("pdlmi:UnsupportedEqualityCertificate", ...
+            "Coefficient equality supports direct assembly only.");
+    end
     if nargin < 2
         order = chkPutinarOrder(obj.Residual);
     else

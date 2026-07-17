@@ -3,7 +3,7 @@ import DiagramFrame from "./DiagramFrame.astro";
 ---
 
 <DiagramFrame
-  caption="toYalmip returns the already assembled finite YALMIP constraints; the solver sees ordinary semidefinite constraints, not a parameter-dependent object."
+  caption="toYalmip returns the already assembled finite YALMIP constraints: semidefinite or entry-wise inequalities, direct equalities, or an empty array for a proven identity."
   label="Open coefficient-to-constraint composition for toYalmip"
   class="constraint-assembly-diagram"
 >
@@ -11,7 +11,7 @@ import DiagramFrame from "./DiagramFrame.astro";
     <li><span>1</span><strong>Residual coefficients</strong><small>cell · rate row · local label</small></li>
     <li><span>2</span><strong>Selected certificate</strong><small>direct or opt-in Gram assembly</small></li>
     <li><span>3</span><strong>toYalmip</strong><small>returns the stored finite set</small></li>
-    <li><span>4</span><strong>YALMIP constraints</strong><small>ordinary SDP solver input</small></li>
+    <li><span>4</span><strong>YALMIP constraints</strong><small>ordinary solver input, or []</small></li>
   </ol>
 </DiagramFrame>
 

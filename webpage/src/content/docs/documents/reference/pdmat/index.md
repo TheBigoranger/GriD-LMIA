@@ -25,7 +25,10 @@ description: Known finite real matrix data on a parameter grid.
 
 | Reference | Task |
 | :--- | :--- |
-| [`Matrix operations`](/PD-LMI-package/documents/reference/pdmat/matrix-operations/) | Use algebra, concatenation, indexing, assignment, and structural transforms. |
+| [`Algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) | Add, subtract, negate, and multiply coefficient-backed known data. |
+| [`Structural operations`](/PD-LMI-package/documents/reference/pdmat/structural-operations/) | Reshape, reduce, assemble, and reorder matrix payloads. |
+| [`Indexing and inspection`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) | Index, assign, compare, display, and inspect payload shape. |
+| [`Legacy matrix-operations overview`](/PD-LMI-package/documents/reference/pdmat/matrix-operations/) | Forward old per-symbol anchors to the focused pages. |
 
 ## Inherited Storage
 

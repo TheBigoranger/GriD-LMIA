@@ -96,6 +96,31 @@ faceAlpha =
 
 The two higher-order surfaces include mixed terms and intersect on the physical box. `plot` creates one graphics object per matrix payload entry.
 
+### Three-parameter object, two-dimensional slice
+
+`plot` accepts at most two selected dimensions. For a three-parameter object,
+choose the two displayed axes; every unselected parameter is fixed at its
+lower grid bound.
+
+```matlab
+A = pdmat({[-1 1], [-1 1], [0 2]}, @(rho, eta, zeta) [ ...
+    0.4 + rho.*eta + 0.3*zeta + 0.2*rho.^2, ...
+   -0.1 + 0.6*rho - 0.4*eta + 0.5*zeta + 0.2*eta.^2]);
+h = plot(A, [1 2], SamplesPerCell=45, ...
+    EdgeColor="none", FaceAlpha=0.72);
+fixedThirdParameter = A.GridInfo.Bounds(3,1)
+```
+
+```text
+fixedThirdParameter =
+     0
+```
+
+![Two-dimensional slice of a three-parameter pdmat object with the third parameter fixed at its lower bound](/PD-LMI-package/plots/pdmat-plot-3d-slice.png)
+
+This is a two-dimensional slice, not a volume plot. The source code explicitly
+selects dimensions `[1 2]`, and the third coordinate remains fixed at `0`.
+
 ## Validation And Errors
 
 - Invalid `dims` raises `pdmat:InvalidPlotDimensions`.

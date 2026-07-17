@@ -155,14 +155,38 @@ function testSignsEveryCellAndRateRow(testCase)
     testCase.verifyEqual(psdDimensionsAt(rate, psdIdx), repmat([1 1], 1, 4));
 end
 
-function testMatrixValidationIdentifiers(testCase)
-    rectangular = pdvar(2, 1, {[0 1]}, "full");
-    nonsymmetric = pdvar(2, {[0 1]}, "full");
+function testEntrywiseScalarBlocksAndColumnMajorTargets(testCase)
+    % One independent scalar certificate follows each MATLAB matrix entry.
+    P = pdvar(2, {[0 1]}, "full", Degree=0);
+    C = constructWithWarning(testCase, @() pdlmi(P, ">=", ...
+        UsePutinar=true));
+    coeffs = P.coeffs(1);
+    targetIds = arrayfun(@(k) getvariables(coeffs{1}(k)), 1:4);
 
-    testCase.verifyError(@() pdlmi(rectangular, "<=", ...
-        UsePutinar=true), "pdlmi:InvalidMatrixSize");
-    testCase.verifyError(@() pdlmi(nonsymmetric, "<=", ...
-        UsePutinar=true), "pdlmi:NonSymmetricExpression");
+    testCase.verifyEqual(numel(C.Constraints), 4 * 2);
+    testCase.verifyEqual(psdDimensionsAt(C, 1:2:8), ones(1, 4));
+    verifyDisjointGramVariables(testCase, C, 1:2:8);
+    for entry = 1:4
+        metadata = struct(C.Constraints{2 * entry});
+        matchedTargets = intersect(getvariables(metadata.List{1}), targetIds);
+        testCase.verifyEqual(matchedTargets, targetIds(entry), ...
+            "Coefficient identities must follow column-major entry order.");
+    end
+end
+
+function testEntrywiseEveryCellAndRateRow(testCase)
+    % Rectangular derivative rows receive independent scalar certificates.
+    P = pdvar(2, 1, {[0 1 2]}, "full", RateBounds=[-1 1]);
+    D = rhodiff(P);
+    C = constructWithWarning(testCase, @() pdlmi(D, "<=", ...
+        UsePutinar=true));
+
+    % 2 cells * 2 rate rows * 2 entries * (1 PSD + 1 identity).
+    testCase.verifyEqual(size(D.coeffs(1)), [2 1]);
+    testCase.verifyEqual(numel(C.Constraints), 16);
+    psdIdx = 1:2:16;
+    testCase.verifyEqual(psdDimensionsAt(C, psdIdx), ones(1, 8));
+    verifyDisjointGramVariables(testCase, C, psdIdx);
 end
 
 function verifyInactive(testCase, C)
@@ -194,5 +218,29 @@ function dims = psdDimensionsAt(C, indices)
     for k = 1:numel(indices)
         metadata = struct(C.Constraints{indices(k)});
         dims(k) = size(metadata.List{1}, 1);
+    end
+end
+
+function verifyDisjointGramVariables(testCase, C, indices)
+    % Independent scalar certificates cannot share Gram decision handles.
+    vars = cell(size(indices));
+    for k = 1:numel(indices)
+        metadata = struct(C.Constraints{indices(k)});
+        vars{k} = getvariables(metadata.List{1});
+    end
+    for a = 1:numel(vars)
+        for b = (a + 1):numel(vars)
+            testCase.verifyEmpty(intersect(vars{a}, vars{b}));
+        end
+    end
+end
+
+function out = constructWithWarning(testCase, fun)
+    % Retain the wrapper while asserting entry-wise dispatch is visible.
+    out = [];
+    testCase.verifyWarning(@construct, "pdlmi:ElementwiseInequality");
+
+    function construct
+        out = fun();
     end
 end

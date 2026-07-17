@@ -64,7 +64,8 @@ component. Every present Gram matrix is constrained positive semidefinite.
 The target is exactly elevated and matched coefficient by coefficient at
 tensor degree $2r\mathbf 1$.
 
-Each cell and rate row receives independent dense Gram blocks and independent
+For an entry-wise inequality, each MATLAB column-major scalar entry receives
+an independent scalar certificate. Each cell and rate row receives independent dense Gram blocks and independent
 coefficient equalities. The method does not share Gram variables across cells,
 insert a positivity margin, call `optimize`, or choose a solver.
 
@@ -126,9 +127,8 @@ stored degree-two residual; it does not use the already elevated constraints.
 
 - A malformed `order` raises `pdlmi:InvalidPutinarOrder`.
 - A valid integer below $\lfloor m/2\rfloor$ in one parameter or $\lceil m/2\rceil$ in two or more parameters raises `pdlmi:PutinarOrderTooLow`.
-- Rebuilding retains the ordinary `pdlmi` expression, relation, square-matrix,
-  and symmetry checks, including `pdlmi:InvalidMatrixSize` and
-  `pdlmi:NonSymmetricExpression`.
+- Semidefinite and entry-wise inequalities retain their original global mode.
+- Equality is direct-only; this method raises `pdlmi:UnsupportedEqualityCertificate` before validating `order`.
 - Constructor selection errors are documented on the
   [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/)
   page, including `pdlmi:InvalidUsePutinar`,

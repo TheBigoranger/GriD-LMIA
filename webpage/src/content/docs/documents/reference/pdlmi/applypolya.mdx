@@ -64,8 +64,10 @@ ans =
 The increment must be a finite nonnegative integer scalar. Invalid values raise
 `pdlmi:InvalidPolyaDegree`.
 
-The residual must still meet the ordinary `pdlmi` square and
-symmetric/Hermitian requirements.
+Semidefinite inequalities retain semidefinite coefficient tests. Entry-wise
+inequalities retain their global entry-wise mode after elevation. Equality is
+direct-only, so calling this method on relation `"=="` raises
+`pdlmi:UnsupportedEqualityCertificate` before degree validation.
 
 Pólya elevation is an exact re-expression of the stored residual followed by
 the direct coefficient test. It does not search for a successful exponent,

@@ -1,13 +1,14 @@
-function cons = mkFullBoxCons(expr, relation, order)
+function cons = mkFullBoxCons(expr, relation, order, mode)
     %MKFULLBOXCONS Define and assemble full-box-preordering constraints.
     %
     %   Syntax:
-    %     cons = mkFullBoxCons(expr, relation, order)
+    %     cons = mkFullBoxCons(expr, relation, order, mode)
     %
     %   Arguments:
     %     expr     - pdvar residual with local Bernstein coefficients.
     %     relation - Normalized "<=" or ">=" comparison relation.
     %     order    - Validated absolute full-box Gram order.
+    %     mode     - Transient semidefinite or entry-wise assembly mode.
     %
     %   Output:
     %     cons - Cell column of YALMIP Gram and coefficient-matching constraints.
@@ -38,5 +39,5 @@ function cons = mkFullBoxCons(expr, relation, order)
         end
     end
 
-    cons = mkGramCons(expr, relation, targetDeg, specs);
+    cons = mkGramCons(expr, relation, targetDeg, specs, mode);
 end

@@ -54,6 +54,9 @@ export default defineConfig({
                 { label: "plot", slug: "documents/reference/pdmat/plot" },
                 { label: "bernsteinTable", slug: "documents/reference/pdmat/bernsteintable" },
                 { label: "Matrix Operations", slug: "documents/reference/pdmat/matrix-operations" },
+                { label: "Algebra", slug: "documents/reference/pdmat/algebra" },
+                { label: "Structural Operations", slug: "documents/reference/pdmat/structural-operations" },
+                { label: "Indexing And Inspection", slug: "documents/reference/pdmat/indexing-and-inspection" },
               ],
             },
             {
@@ -65,6 +68,9 @@ export default defineConfig({
                 { label: "rhodiff", slug: "documents/reference/pdvar/rhodiff" },
                 { label: "bernsteinTable", slug: "documents/reference/pdvar/bernsteintable" },
                 { label: "Matrix Operations", slug: "documents/reference/pdvar/matrix-operations" },
+                { label: "Algebra", slug: "documents/reference/pdvar/algebra" },
+                { label: "Structural Operations", slug: "documents/reference/pdvar/structural-operations" },
+                { label: "Indexing And Inspection", slug: "documents/reference/pdvar/indexing-and-inspection" },
                 { label: "Comparisons", slug: "documents/reference/pdvar/comparisons" },
               ],
             },
@@ -87,6 +93,7 @@ export default defineConfig({
               ],
             },
             { label: "Bernstein Utilities", slug: "documents/reference/bernstein-utilities" },
+            { label: "Shared Helpers", slug: "documents/reference/shared-helpers" },
           ],
         },
         {

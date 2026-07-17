@@ -1,5 +1,12 @@
 export const versionHistory = [
   {
+    version: "v0.4.0",
+    date: "2026-07-16",
+    status: "current",
+    summary:
+      "Added global semidefinite-versus-entry-wise inequality dispatch, direct coefficient equality constraints, and a redesigned TeX/Web reference with clearer examples, diagrams, properties, operation pages, and helper coverage.",
+  },
+  {
     version: "v0.3.2",
     date: "2026-07-14",
     status: "previous",

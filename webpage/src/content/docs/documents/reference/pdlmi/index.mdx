@@ -12,8 +12,10 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>pdlmi</span>
 </nav>
 
-`pdlmi` stores finite YALMIP constraints generated from square `pdvar`
-residual expressions. Direct coefficient assembly is the default; Pólya
+`pdlmi` stores finite YALMIP constraints generated from `pdvar` residual
+expressions. Inequalities use semidefinite meaning only when every original
+coefficient is square Hermitian; otherwise the whole inequality is entry-wise.
+Equality is direct coefficient equality and may be rectangular. Direct coefficient assembly is the default; Pólya
 degree elevation, fixed-order Putinar box assembly, and fixed-order full box
 Bernstein-Gram preordering are explicit alternatives.
 
@@ -39,7 +41,7 @@ derives these ideas; the API pages below stay focused on callable syntax.
 | Reference | Task |
 | :--- | :--- |
 | [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) | Select direct, Pólya-elevated, fixed-order Putinar, or fixed-order full-box assembly. |
-| [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) | Create `pdlmi` constraints with `<=` and `>=`. |
+| [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) | Create semidefinite or entry-wise inequalities with `<=`/`>=`, and direct equalities with `==`. |
 | [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) | Rebuild the original residual with a selected Pólya degree increment. |
 | [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) | Rebuild the original residual with the minimum or a selected absolute Putinar order. |
 | [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
@@ -52,8 +54,10 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 ## Implemented Behavior
 
-Version 0.3.6 assembles square symmetric or Hermitian `pdvar` residuals with
-`<=` and `>=` relations through four finite certificate paths. Direct
+Version 0.4.0 assembles `<=`, `>=`, and `==` relations. Inequalities select
+one global semidefinite or entry-wise interpretation from all original
+coefficients. Equality is always direct and supports rectangular or
+non-Hermitian residuals. Direct
 coefficient-wise assembly is the default. Pólya assembly performs exact degree
 elevation before applying the coefficient test. Putinar and full-box assembly
 create independent positive-semidefinite Gram blocks for every physical cell
@@ -66,6 +70,21 @@ $\alpha_s(1-\alpha_s)$, while full box uses every subset product of those
 generators. Both select a fixed absolute order on each local hypercube.
 `toYalmip` concatenates the resulting finite constraints for an ordinary
 YALMIP solver call.
+
+## Properties
+
+The constructor exposes private-set, read-only properties through dot access:
+
+| Property | Example | Meaning |
+| :--- | :--- | :--- |
+| `Constraints` | `C.Constraints` | Stored direct conditions, Gram-block conditions, and/or exact identities. May be empty for a proven equality. |
+| `Residual` | `C.Residual` | Promoted `lhs-rhs` expression used to rebuild alternative inequality certificates. |
+| `Relation` | `C.Relation` | `"<="`, `">="`, or `"=="`. |
+| `UsePolya`, `PolyaDegree` | `C.UsePolya`, `C.PolyaDegree` | Pólya selector and degree increment. |
+| `UsePutinar`, `PutinarOrder` | `C.UsePutinar`, `C.PutinarOrder` | Putinar selector and absolute order. |
+| `UseFullBoxPreorder`, `FullBoxOrder` | `C.UseFullBoxPreorder`, `C.FullBoxOrder` | Full-box selector and absolute order. |
+
+Certificate selectors apply only to inequalities. Any selector on equality raises `pdlmi:UnsupportedEqualityCertificate`.
 
 The [SOS certificate map](/PD-LMI-package/documents/math/sos-certificates/)
 derives these coefficient and Gram constructions, including the

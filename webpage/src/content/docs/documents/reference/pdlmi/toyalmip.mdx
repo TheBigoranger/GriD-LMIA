@@ -32,7 +32,7 @@ F = C.toYalmip()
 
 ## Output
 
-`F` is a YALMIP constraint array suitable for ordinary solver calls such as `optimize(F, objective, sdpsettings(...))`.
+`F` is a YALMIP constraint array suitable for ordinary solver calls such as `optimize(F, objective, sdpsettings(...))`, or `[]` when a direct equality is proven identically zero.
 
 ## Description
 
@@ -47,13 +47,17 @@ $$
 F = [F_1,\ldots,F_N].
 $$
 
-For direct and Pólya objects, $N$ is the number of physical cells times the
+For direct and Pólya inequalities, $N$ is the number of physical cells times the
 number of active rate rows times the number of assembled Bernstein
 coefficients. For Putinar and full-box objects, $N$ instead counts every stored
 PSD Gram condition and exact coefficient identity across those cells and rows.
 
 It does not choose a solver, create an objective, apply relaxation margins, or
 run `optimize`.
+
+For equality, direct coefficient groups are concatenated in MATLAB
+column-major entry order. Proven zero groups are omitted; consequently
+`toYalmip(P == P)` returns `[]`.
 
 <ConstraintAssemblyDiagram />
 
@@ -104,6 +108,19 @@ ans =
 
 The dot-call form is equivalent and is convenient when chaining from a stored
 `pdlmi` object.
+
+### Empty identity equality
+
+```matlab
+yalmip('clear')
+V = pdvar(3, 2, {[0 1]}, "full");
+F = (V == V).toYalmip()
+```
+
+```text
+F =
+     []
+```
 
 `toYalmip` does not select solvers, add objectives, apply relaxation margins, or run `optimize`.
 

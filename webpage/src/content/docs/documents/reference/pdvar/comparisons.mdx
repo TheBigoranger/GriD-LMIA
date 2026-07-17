@@ -1,120 +1,90 @@
 ---
-title: pdvar Comparisons
-description: Create pdlmi constraints using <= and >=.
+title: pdvar Comparisons And Equality
+description: Create semidefinite or entry-wise inequalities with <= and >=, and direct coefficient equalities with ==.
 ---
 
-import ParameterCurveDiagram from "../../../../../components/ParameterCurveDiagram.astro";
-
-export const residualSeries = [{ label: "R(ρ)=lhs−rhs", path: "M58 104 C230 138 470 174 680 190", tone: "result" }];
-
-<nav class="manual-trail">
-  <a href="/PD-LMI-package/documents/">Documents</a>
-  <span>/</span>
-  <a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a>
-  <span>/</span>
-  <span>comparisons</span>
-</nav>
-
-<ParameterCurveDiagram series={residualSeries} label="A comparison residual traced over the parameter interval" caption="A comparison stores the residual lhs minus rhs. The selected certificate subsequently proves the required matrix sign over every physical cell." />
+<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><span>comparisons and equality</span></nav>
 
 ## Purpose
 
-Convert a square `pdvar` residual into direct coefficient-wise `pdlmi` constraints.
+Overloaded `<=`, `>=`, and `==` promote compatible operands, store `lhs-rhs` as a `pdvar` residual, and return a [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) wrapper. They assemble finite constraints; they do not choose a solver or call `optimize`.
 
 ## Syntax
 
 ```matlab
-C = P <= rhs
-C = P >= rhs
+Cneg = lhs <= rhs;
+Cpos = lhs >= rhs;
+Ceq  = lhs == rhs;
 ```
 
-## Arguments
+`lhs` and `rhs` may be compatible numeric, `pdmat`, affine `sdpvar`, or `pdvar` values. Ordinary operands are promoted through subtraction. Derivative expressions retain their rate-vertex rows.
 
-| Argument | Description |
-| :--- | :--- |
-| `P` | Square `pdvar` expression or compatible expression after promotion, such as `P` from `pdvar(2,{[0 1]},"symmetric")`. |
-| `rhs` | Numeric, `pdmat`, affine `sdpvar`, or `pdvar` expression that can form a residual; the most common value is `0`. |
+## <span id="pdvar-comparison-le"></span><span id="pdvar-comparison-ge"></span>Inequalities: `le`/`<=` and `ge`/`>=`
 
-## Output
+Each inequality is classified **once for the complete original residual**:
 
-`C` is a [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) object.
+1. Scan every original coefficient in every physical cell and active rate row.
+2. Use semidefinite meaning only when every coefficient is square and Hermitian. Numeric Hermitian checks use the inclusive tolerance `1e-10`.
+3. If any coefficient fails, the whole inequality is entry-wise and construction emits one `pdlmi:ElementwiseInequality` warning. A relation never mixes semidefinite and entry-wise coefficient groups.
 
-## Description
+Direct semidefinite assembly stores one matrix-sign condition per cell, rate row, and local coefficient. Direct entry-wise assembly vectorizes each coefficient in MATLAB column-major order and stores one vector inequality for the complete entry family at that coefficient.
 
-The comparison overloads do not solve an optimization problem. They assemble a
-coefficient-wise residual and wrap it in `pdlmi` so it can later be converted to
-YALMIP constraints.
-
-For an ordinary continuous expression with `Nc` physical cells and `Nb`
-Bernstein coefficients per cell, the direct constraint count is
-
-$$
-N_c N_b.
-$$
-
-If the expression includes rate-vertex rows from `rhodiff`, the count is
-multiplied by the number of rate vertices.
-
-## Per-symbol reference anchors
-
-### <span id="pdvar-comparison-le"></span>`le` and `<=`
-
-Forms the residual for a nonpositive inequality and returns a `pdlmi` object.
-The comparison is coefficient-wise after expression promotion and symmetry
-validation.
-
-### <span id="pdvar-comparison-ge"></span>`ge` and `>=`
-
-Forms the residual for a nonnegative inequality and returns a `pdlmi` object.
-The comparison is coefficient-wise after expression promotion and symmetry
-validation.
-
-## Examples
-
-### Positive-semidefinite comparison
+Pólya preserves the global mode after exact degree elevation. Putinar and Full Box give every column-major scalar entry its own independent scalar Gram certificate. Gram variables remain independent across entries, cells, and rate rows.
 
 ```matlab
 yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric");
-C = P >= 0;
-class(C)
-numel(C.Constraints)
+V = pdvar(3, 2, {[0 1]}, "full");
+warning("off", "pdlmi:ElementwiseInequality")
+C = V >= 0;
+numel(C.Constraints)   % 2 coefficient groups; each contains 6 scalar entries
 ```
 
-```text
-ans =
-    'pdlmi'
+## <span id="pdvar-comparison-eq"></span>Equality: `eq`/`==`
 
-ans =
-     2
-```
+Equality is direct coefficient equality by definition. It accepts rectangular and non-Hermitian residuals, vectorizes each coefficient in column-major order, and emits no inequality warning.
 
-One physical cell with degree one has two local Bernstein coefficients, so the
-comparison stores two direct coefficient constraints.
-
-### Negative-semidefinite residual
+Ordinary value rows may equal ordinary value rows, and derivative-row objects
+may equal derivative-row objects. `pdvar:InvalidEqualityRows` is reserved for
+an ordinary operand compared with a derivative operand, or for an operand that
+itself mixes ordinary and derivative row kinds across physical cells. Once
+both operands are derivative-row objects, incompatible grids, `RateBounds`,
+or matrix shapes remain subtraction-owned failures such as `pdvar:MixedGrid`
+or `pdvar:InvalidSubtraction`.
 
 ```matlab
 yalmip('clear')
-P = pdvar(2, {[0 0.5 1]}, "symmetric");
-C = P <= 0;
-numel(C.Constraints)
+V = pdvar(3, 2, {[0 1]}, "full");
+Q = sdpvar(3, 2, "full");
+C = V == Q;
+identity = V == V;
+identity.toYalmip()    % []
 ```
 
-```text
-ans =
-     4
+Proven numeric-zero identities are omitted, so `V == V` has empty `Constraints` and `toYalmip` returns `[]`. Equality is direct-only: constructor certificate options and `applyPolya`, `applyPutinar`, or `applyFullBoxPreorder` raise `pdlmi:UnsupportedEqualityCertificate` before validating an order.
+
+Use `==` to construct modeling equalities. Use [`isequal`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-isequal) only for MATLAB structural comparison of package objects.
+
+## Returned object and properties
+
+All three operators return `pdlmi`. Inspect the result with dot access:
+
+```matlab
+C.Relation
+C.Residual
+C.Constraints
 ```
 
-Two physical cells times two local degree-one coefficients gives four stored
-constraints.
+`Relation` is `"<="`, `">="`, or `"=="`; `Residual` is the promoted `lhs-rhs`; `Constraints` is the already assembled finite cell array.
 
-## Validation And Errors
+## Validation and errors
 
-- Comparison residuals must produce square symmetric or Hermitian coefficient matrices before `pdlmi` assembly succeeds.
-- Nonsquare residuals raise `pdlmi:InvalidMatrixSize`.
-- Nonsymmetric residual coefficient matrices raise `pdlmi:NonSymmetricExpression`.
+- Incompatible operand promotion raises the owning `pdvar` grid, degree, matrix-size, or rate-row error.
+- Entry-wise inequality fallback is supported behavior and warns once with `pdlmi:ElementwiseInequality`; it is not an invalid-matrix error.
+- Ordinary-versus-derivative operands, or one operand mixing row kinds across cells, raise `pdvar:InvalidEqualityRows`.
+- When both operands are derivative-row objects, incompatible grids, `RateBounds`, or shapes retain subtraction-owned errors such as `pdvar:MixedGrid` or `pdvar:InvalidSubtraction`.
+- Equality certificate selection raises `pdlmi:UnsupportedEqualityCertificate`.
+- No comparison adds strictness, a positivity margin, or a solver call.
 
 ## See Also
 
-[`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) · [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`pdlmi properties`](/PD-LMI-package/documents/reference/pdlmi/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)

@@ -61,6 +61,7 @@
 }
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.3em}
+\setlength{\emergencystretch}{3em}
 \hbadness=10000
 \titleformat{\section}[display]
   {\normalfont\Huge\bfseries}
@@ -84,7 +85,7 @@
   framerule=0.45pt,
   aboveskip=0.45\baselineskip,
   belowskip=0.85\baselineskip,
-  title={\textcolor{dpblue}{\sffamily\bfseries\footnotesize MATLAB input}},
+  title={\textcolor{dpblue}{\sffamily\bfseries\footnotesize Example}},
   numbers=none
 }
 
@@ -156,7 +157,7 @@
   \noindent\textcolor{dpblue}{\sffamily\bfseries #1.}\enspace}
 
 \title{\pkg\\User Manual}
-\author{Version v0.3.6}
+\author{Version v0.4.0}
 \date{July 2026}
 
 \begin{document}
@@ -179,6 +180,16 @@ calculus but have not previously used Bernstein bases or SOS certificates.
 \end{abstract}
 
 \tableofcontents
+
+\section*{Release History}
+\addcontentsline{toc}{section}{Release History}
+
+\textbf{v0.4.0 (July 2026).}  Inequalities now select one global comparison
+mode from the original coefficient data: square Hermitian families use
+semidefinite constraints, while every other family uses entry-wise scalar
+constraints.  The release also adds direct coefficient equality through
+\code{==}, including rectangular and nonsymmetric expressions, and reorganizes
+the class-property, plotting, and Bernstein-storage documentation.
 
 \section{From a PD-LMI to Solver Constraints}
 \label{sec:canonical-pdlmi}
@@ -241,15 +252,21 @@ the displayed \(\varepsilon I\) is part of the user's model.
 replace YALMIP's solver interface.}
 \end{center}
 
-Figures do not use color to encode meaning.  A solid border marks known data,
-a double border marks a decision, a dashed border marks an intermediate
-contribution, a heavy border marks a result, and a dotted border marks a
-certificate choice.  Explicit labels repeat every role, and arrows show
-reading order.  When a relation has many contributions, separate panels
-replace crossing edge fans.  Blue is reserved for decorative framing.
-
-\subsection{Why The Package Uses Bernstein Polynomials}
+\subsection{Bernstein Cells Support Continuous Lipschitz Matrix Functions}
 \label{sec:bernstein-motivation}
+
+In LPV analysis we often seek a Lyapunov matrix \(P(\boldsymbol\rho)\) that is
+Lipschitz continuous on the compact parameter set \(\mathcal P\).  Gridding
+\(\mathcal P\) makes the model finite and local, but independent cell
+polynomials would not agree on a grid boundary.  The package instead shares
+the complete Bernstein coefficient face between neighboring cells.  Because
+the trace of a tensor-product Bernstein polynomial on a face depends only on
+that face's coefficients, this sharing gives \(C^0\) continuity across every
+cell boundary.  Each cell polynomial has bounded first derivatives, and a
+continuous piecewise-polynomial function on a finite compact grid is therefore
+globally Lipschitz.  Derivatives need not agree across a boundary: the
+construction guarantees \(C^0\) continuity and Lipschitz regularity, not
+\(C^1\) continuity.
 
 On one normalized cell, the degree-\(m\) Bernstein
 polynomial\index{Bernstein polynomial} basis is
@@ -328,27 +345,30 @@ positions, not additional physical nodes:
 \]
 
 \begin{center}
-\begin{tikzpicture}[x=3.0cm,y=1cm,
+\begin{tikzpicture}[x=2.65cm,y=1cm,
   coeff/.style={draw=dpblue!75!black,rounded corners=2pt,fill=dpbluewash,
-    font=\scriptsize,minimum width=10mm,minimum height=6mm}]
-  \draw[very thick,black!55] (0,0) -- (2,0);
+    font=\scriptsize,minimum width=20mm,minimum height=7mm}]
+  % Lane 1: physical-node label and line.
+  \node[dp/label] at (1,1.55) {physical nodes};
+  \draw[very thick,black!55] (0,0.62) -- (2,0.62);
   \foreach \x/\lab in {0/{\rho_1^{(1)}},1/{\rho_1^{(2)}},2/{\rho_1^{(3)}}}{
-    \filldraw[fill=white,draw=black!70] (\x,0) circle (1.6pt);
-    \node[above=2pt,font=\small] at (\x,0) {$\lab$};}
-  \node[dp/label,anchor=east] at (-0.08,0.38) {physical\\nodes};
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (0,-0.22) -- (1,-0.22)
-    node[midway,below=7pt,font=\scriptsize]{cell \(c=1\)};
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (1,-0.22) -- (2,-0.22)
-    node[midway,below=7pt,font=\scriptsize]{cell \(c=2\)};
-  \node[dp/label,anchor=east] at (-0.08,-0.48) {physical\\cells};
-  \node[coeff] at (0.13,-1.05) {$C^{(1)}[0]$};
-  \node[coeff] at (0.50,-1.05) {$C^{(1)}[1]$};
-  \node[coeff] at (0.87,-1.05) {$C^{(1)}[2]$};
-  \node[coeff] at (1.13,-1.05) {$C^{(2)}[0]$};
-  \node[coeff] at (1.50,-1.05) {$C^{(2)}[1]$};
-  \node[coeff] at (1.87,-1.05) {$C^{(2)}[2]$};
-  \node[dp/label,anchor=east] at (-0.08,-1.05) {local\\coefficients};
-  \node[align=center,font=\scriptsize] at (1,-1.65)
+    \filldraw[fill=white,draw=black!70] (\x,0.62) circle (1.6pt);
+    \node[above=3pt,font=\small] at (\x,0.62) {$\lab$};}
+  % Lane 2: physical-cell braces and labels.
+  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (0,0.18) -- (1,0.18)
+    node[midway,below=10pt,font=\scriptsize]{physical cell \(c=1\)};
+  \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (1,0.18) -- (2,0.18)
+    node[midway,below=10pt,font=\scriptsize]{physical cell \(c=2\)};
+  % Lane 3: separate coefficient rows with labels to their left.
+  \node[dp/label,anchor=east,align=right] at (-0.36,-1.08)
+    {cell 1 local\\coefficients};
+  \foreach \x/\i in {0/0,1/1,2/2}
+    \node[coeff] at (\x,-1.08) {$C^{(1)}[\i]$};
+  \node[dp/label,anchor=east,align=right] at (-0.36,-2.12)
+    {cell 2 local\\coefficients};
+  \foreach \x/\i in {0/0,1/1,2/2}
+    \node[coeff] at (\x,-2.12) {$C^{(2)}[\i]$};
+  \node[align=center,font=\scriptsize,text width=120mm] at (1,-3.00)
     {direction subscripts, parenthesized node indices, cell identity, and local labels have different jobs};
 \end{tikzpicture}
 \end{center}
@@ -1057,29 +1077,35 @@ The printed \code{ncoeff} value is \((1+1)^2=4\), one local Bernstein
 coefficient for each tensor-product label in the two parameter directions.
 
 \remarkshead
-Malformed grid containers and node vectors raise
-\codeerr{pdbase}{InvalidGrid} and
-\codeerr{pdbase}{Invalid}\allowbreak\code{GridVector}.
-Invalid matrix sizes, degrees, or rate bounds raise
-\codeerr{pdbase}{Invalid}\allowbreak\code{MatrixSize},
-\codeerr{pdbase}{InvalidDegree}, and
-\codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.  The nested tree must contain exactly one
-leaf per physical cell and \((m+1)^\ell\) coefficient columns per leaf;
-violations raise
-\codeerr{pdbase}{Invalid}\allowbreak\code{LocalValues} or
-\codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientCell}.  Payload matrices must have the
-declared size and be finite, real, and either numeric or supported real YALMIP
-expressions.  Malformed payloads raise
-\codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientPayload}.  Rate-affine payload structures
-and \code{HasRateDependence=true} require compatible nonempty
-\code{RateBounds}.
+\begin{itemize}[leftmargin=*]
+  \item Malformed grids and node vectors raise \codeerr{pdbase}{InvalidGrid}
+        or \codeerr{pdbase}{Invalid}\allowbreak\code{GridVector}.
+  \item Invalid matrix sizes, degrees, or rate bounds raise
+        \codeerr{pdbase}{Invalid}\allowbreak\code{MatrixSize},
+        \codeerr{pdbase}{InvalidDegree}, or
+        \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
+  \item The nested tree must contain one leaf per physical cell and
+        \((m+1)^\ell\) coefficient columns per leaf.  Violations raise
+        \codeerr{pdbase}{Invalid}\allowbreak\code{LocalValues} or
+        \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientCell}.
+  \item Payload matrices must have the declared size and be finite, real, and
+        numeric or supported real YALMIP expressions.  Malformed payloads
+        raise \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientPayload}.
+  \item Rate-affine payloads and \code{HasRateDependence=true} require
+        compatible nonempty \code{RateBounds}.
+\end{itemize}
 
-\subsection{Storage Fields}\index{GridInfo@\texttt{GridInfo}}
+\subsection{Properties}\index{GridInfo@\texttt{GridInfo}}
 \label{sec:pdbase-fields}
+
+Every \code{pdbase} property below is publicly readable through dot access
+but has private set access.  Users inspect \code{obj.Degree} or
+\code{obj.GridInfo.Vectors}; construction and package algebra create new
+objects instead of assigning these properties.
 
 \begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}Y@{}}
 \toprule
-Field & Meaning \\
+Property & Meaning \\
 \midrule
 \code{GridInfo} & Grid vectors, node counts, and grid bounds. \\
 \code{MatrixSize} & Size of each matrix coefficient or matrix expression. \\
@@ -1092,6 +1118,14 @@ Field & Meaning \\
 \code{SourceSummary} & Short origin label such as \code{coefficient-backed}, \code{decision}, or \code{derivative}. \\
 \bottomrule
 \end{tabularx}
+
+\begin{lstlisting}[style=dpmatlab]
+obj = pdbase({[0 1 2], [10 20]}, [2 3], 1);
+degree = obj.Degree
+matrixSize = obj.MatrixSize
+firstGrid = obj.GridInfo.Vectors{1}
+source = obj.SourceSummary
+\end{lstlisting}
 
 \begin{figure}[H]
   \centering
@@ -1200,6 +1234,7 @@ coefficientCount =
      4
 \end{lstlisting}
 
+\needspace{16\baselineskip}
 \subsection{Counts And Shape}
 \label{sec:pdbase-counts}
 
@@ -1232,9 +1267,12 @@ d = size(obj, dim)
 \end{itemize}
 
 \examplehead
-For a two-parameter degree-one backend object, the first grid has two physical
+For a two-parameter (\(\ell=2\)) degree-one backend object, the first grid has two physical
 intervals and the second has one.  The matrix payload is \(2\)-by-\(3\),
-independently of the grid shape.
+independently of the grid shape.  Thus
+\(n_{\mathrm{cell}}=(3-1)(2-1)=2\) and each cell stores
+\(n_{\mathrm{coeff}}=(1+1)^2=4\) entries, ordered by the explicit labels
+\([0,0],[0,1],[1,0],[1,1]\).
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20]}, [2 3], 1);
@@ -1263,6 +1301,14 @@ columnCount =
 thirdDimension =
      1
 \end{lstlisting}
+
+\subsection{Bernstein Storage Operations}
+
+The following entries separate whole-object elevation from the protected
+helpers used to align degrees, convolve coefficients, and refine grids.  They
+change coefficient representations or temporary storage trees; they do not
+change the meanings of \code{ncell}, \code{ncoeff}, \code{npar}, or
+\code{size} described above.
 
 \subsubsection{\texorpdfstring{\code{elevVals}}{elevVals}}
 \label{sec:pdbase-elevvals}
@@ -1445,6 +1491,7 @@ grid = obj.mergeGrid(errId, other1, other2, ...)
 This protected helper is invoked by public algebra methods rather than called
 directly by users.
 
+\needspace{24\baselineskip}
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
@@ -1462,23 +1509,23 @@ The example invokes the protected helper through public addition; users do not
 call \code{mergeGrid} directly.
 
 \begin{center}
-\begin{tikzpicture}[x=4.9cm,y=0.9cm]
-  \node[dp/label,anchor=east] at (-0.08,1.05) {grid \(A\)};
-  \draw[very thick,black!60] (0,1.05)--(1,1.05);
-  \foreach \x in {0,1}{\filldraw[fill=white] (\x,1.05) circle (1.5pt);}
-  \node[dp/label,anchor=east] at (-0.08,0.45) {grid \(B\)};
-  \draw[very thick,black!60] (0,0.45)--(1,0.45);
-  \foreach \x in {0,0.5,1}{\filldraw[fill=white] (\x,0.45) circle (1.5pt);}
+\begin{tikzpicture}[x=6.0cm,y=0.9cm]
+  \node[dp/label,anchor=east] at (-0.08,1.35) {grid \(A\)};
+  \draw[very thick,black!60] (0,1.35)--(1,1.35);
+  \foreach \x in {0,1}{\filldraw[fill=white] (\x,1.35) circle (1.5pt);}
+  \node[dp/label,anchor=east] at (-0.08,0.75) {grid \(B\)};
+  \draw[very thick,black!60] (0,0.75)--(1,0.75);
+  \foreach \x in {0,0.5,1}{\filldraw[fill=white] (\x,0.75) circle (1.5pt);}
   \node[dp/contribution,align=center,font=\scriptsize] (union)
-    at (1.55,0.75) {sorted union of\\interior nodes};
-  \draw[dp/arrow] (1.02,1.05)--(union.west);
-  \draw[dp/arrow] (1.02,0.45)--(union.west);
-  \node[dp/label,anchor=east] at (-0.08,-0.45) {common refinement};
-  \draw[very thick,dpblue] (0,-0.45)--(1,-0.45);
+    at (0.5,0.10) {sorted union of interior nodes};
+  \draw[dp/arrow] (0.28,1.25) -- (0.42,0.32);
+  \draw[dp/arrow] (0.72,0.65) -- (0.58,0.32);
+  \node[dp/label,anchor=east] at (-0.08,-0.72) {common refinement};
+  \draw[very thick,dpblue] (0,-0.72)--(1,-0.72);
   \foreach \x/\lab in {0/0,0.5/{0.5},1/1}{
-    \filldraw[fill=white,draw=black!70] (\x,-0.45) circle (1.6pt);
-    \node[below=2pt,font=\scriptsize] at (\x,-0.45) {\(\lab\)};}
-  \draw[dp/arrow] (union.south) |- (1.02,-0.45);
+    \filldraw[fill=white,draw=black!70] (\x,-0.72) circle (1.6pt);
+    \node[below=2pt,font=\scriptsize] at (\x,-0.72) {\(\lab\)};}
+  \draw[dp/arrow] (union.south) -- (0.5,-0.58);
 \end{tikzpicture}
 
 \textit{No extra breakpoint is introduced: the sorted union is the unique
@@ -1697,33 +1744,51 @@ and function-Bernstein sources; it is empty for cell-backed sources.  Its set
 access is private.
 
 \remarkshead
-Constructor options must be name--value pairs.  Malformed syntax raises
-\codeerr{pdmat}{InvalidOptions}; backend-only options raise
-\codeerr{pdmat}{Unsupported}\allowbreak\code{Option}; unknown names raise
-\codeerr{pdmat}{Unknown}\allowbreak\code{Option}.  Grid errors use
-\codeerr{pdmat}{InvalidGrid} or
-\codeerr{pdmat}{Invalid}\allowbreak\code{GridVector}.
+\begin{itemize}[leftmargin=*]
+  \item Constructor option errors use \codeerr{pdmat}{InvalidOptions},
+        \codeerr{pdmat}{Unsupported}\allowbreak\code{Option}, or
+        \codeerr{pdmat}{Unknown}\allowbreak\code{Option}; grid errors use
+        \codeerr{pdmat}{InvalidGrid} or
+        \codeerr{pdmat}{Invalid}\allowbreak\code{GridVector}.
+  \item Source and function validation uses \codeerr{pdmat}{InvalidSource},
+        \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionHandle},
+        \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionOutput}, or
+        \codeerr{pdmat}{InvalidData}.
+  \item Degree and storage failures use \codeerr{pdmat}{InvalidDegree},
+        \codeerr{pdmat}{Invalid}\allowbreak\code{LocalValues},
+        \codeerr{pdmat}{Invalid}\allowbreak\code{CoefficientCell}, or
+        \codeerr{pdmat}{Invalid}\allowbreak\code{CoefficientPayload}.
+  \item With explicit \code{Degree}, nonrepresentable functions raise
+        \codeerr{pdmat}{NonBernstein}\allowbreak\code{Polynomial}; invalid
+        validation probes raise
+        \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionValue}.
+  \item Mismatched shared faces are retained as discontinuous local data and
+        emit warning
+        \codeerr{pdmat}{Discontinuous}\allowbreak\code{LocalValues}.
+\end{itemize}
 
-An unsupported source kind raises \codeerr{pdmat}{InvalidSource}.  Function
-arity or initial-call failures raise
-\codeerr{pdmat}{Invalid}\allowbreak\code{FunctionHandle}; empty, complex, or
-otherwise invalid initial outputs raise
-\codeerr{pdmat}{Invalid}\allowbreak\code{FunctionOutput}.  Global coefficient
-grids with inconsistent finite-real payload sizes raise
-\codeerr{pdmat}{InvalidData}.  Incompatible inferred or explicit degrees raise
-\codeerr{pdmat}{InvalidDegree}; malformed nested cell storage raises
-\codeerr{pdmat}{Invalid}\allowbreak\code{LocalValues}.  Malformed explicit
-coefficient-leaf counts or shapes raise
-\codeerr{pdmat}{Invalid}\allowbreak\code{CoefficientCell}; invalid, nonfinite,
-nonreal, or wrong-size coefficient payloads raise
-\codeerr{pdmat}{Invalid}\allowbreak\code{CoefficientPayload}.  With an explicit
-\code{Degree}, a function that is not representable at that degree raises
-\codeerr{pdmat}{NonBernstein}\allowbreak\code{Polynomial}; a failed or
-size-inconsistent validation probe raises
-\codeerr{pdmat}{Invalid}\allowbreak\code{FunctionValue}.  Nested local data
-with mismatched shared faces is retained as discontinuous data and emits
-warning \codeerr{pdmat}{Discontinuous}\allowbreak\code{LocalValues}.
+\subsection{Properties}
 
+\code{pdmat} adds the read-only \code{FunctionHandle} property to the
+inherited \code{pdbase} properties in \cref{sec:pdbase-fields}.  All use
+private set access.  \code{FunctionHandle} contains the supplied handle for
+function and function-Bernstein sources and is empty for cell-backed sources.
+The inherited properties describe the grid, matrix size, Bernstein degree,
+cell-local evidence, continuity, and origin.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, @(rho) rho.^2, Degree=2);
+degree = A.Degree
+source = A.SourceSummary
+hasFunction = ~isempty(A.FunctionHandle)
+firstCell = A.LocalValues{1}
+\end{lstlisting}
+
+Assigning \code{A.Degree}, \code{A.LocalValues}, or
+\code{A.FunctionHandle} is not a supported update operation; construct a new
+\code{pdmat} instead.
+
+\needspace{14\baselineskip}
 \subsection{\texorpdfstring{\code{evaluate}}{evaluate}}
 \index{evaluate@\texttt{evaluate}}
 \label{sec:pdmat-evaluate}
@@ -1986,50 +2051,77 @@ two plotting dimensions raises
 \codeerr{pdmat}{Invalid}\allowbreak\code{PlotDimensions}.  Malformed plotting
 options or a nonpositive integer \code{SamplesPerCell} raise
 \codeerr{pdmat}{Invalid}\allowbreak\code{PlotOptions}.  Errors from MATLAB
-graphics options remain MATLAB graphics errors.
+graphics options remain MATLAB graphics errors.  Every unselected parameter is
+fixed at its lower grid bound, \code{A.GridInfo.Bounds(:,1)}.  A plot of a
+three-parameter object is therefore a one- or two-dimensional slice, not a
+volume plot.
 
 \examplehead
-The one-dimensional call returns one graphics handle per matrix entry.  The
-example inspects the generated sample count and line styling without relying on
-an interactive figure window.
+Each source listing below is the complete source used by
+\code{generate_plot_figures.m} for the adjacent result.
+
+\textit{One-dimensional entries.}
 
 \begin{lstlisting}[style=dpmatlab]
-fig = figure('Visible','off');
-A = pdmat({[0 1]}, @(rho) [rho, rho^2]);
-h = plot(A, SamplesPerCell=4, LineWidth=2);
-graphicsHandleCount = numel(h)
-sampleCount = numel(h(1).XData)
-lineWidth = h(1).LineWidth
-endpointValues = h(1).YData([1 end])
-close(fig)
+A = pdmat({[-1 1]}, @(rho) [rho, rho.^2]);
+plot(A, SamplesPerCell=80, LineWidth=2)
+grid on
+xlabel("rho")
+ylabel("matrix entry")
+title("One-dimensional pdmat entries")
+legend(["A(1,1)", "A(1,2)"], "Location", "eastoutside")
 \end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-graphicsHandleCount =
-     2
-sampleCount =
-     5
-lineWidth =
-     2
-endpointValues =
-     0     1
-\end{lstlisting}
-
-With four samples per cell on one physical interval, MATLAB stores five plotted
-node values including both endpoints.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.78\textwidth]{matlab-figures/pdmat-plot-1d.png}
-  \caption{One-dimensional \code{pdmat/plot} output generated from MATLAB.}
+  \includegraphics[width=0.82\textwidth]{matlab-figures/pdmat-plot-1d.png}
+  \caption{Result of the one-dimensional source above.  The method returns
+  one line handle per matrix entry.}
   \label{fig:pdmat-plot-1d}
 \end{figure}
 
+\textit{Two-dimensional surface.}
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[-1 1], [0 2]}, ...
+    @(rho1, rho2) 1 + rho1.^2 + 0.5*rho2 + rho1.*rho2);
+plot(A, [1 2], SamplesPerCell=45, EdgeColor="none")
+grid on
+view(35, 25)
+xlabel("rho1", "Interpreter", "none")
+ylabel("rho2", "Interpreter", "none")
+zlabel("matrix entry")
+title("Two-dimensional pdmat surface")
+\end{lstlisting}
+
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.78\textwidth]{matlab-figures/pdmat-plot-2d.png}
-  \caption{Two-dimensional \code{pdmat/plot} surface output generated from MATLAB.}
+  \includegraphics[width=0.82\textwidth]{matlab-figures/pdmat-plot-2d.png}
+  \caption{Result of the two-dimensional source above.}
   \label{fig:pdmat-plot-2d}
+\end{figure}
+
+\textit{Two-dimensional slice of a three-parameter object.}
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[-1 1], [0 2], [-2 3]}, ...
+    @(rho1, rho2, rho3) rho1.^2 + rho2 + 2*rho3);
+plot(A, [1 2], SamplesPerCell=45, EdgeColor="none")
+grid on
+view(35, 25)
+title("Three-parameter object: rho3 fixed at -2")
+\end{lstlisting}
+
+Here \(\rho_3=-2\), the lower bound in the third row of
+\code{A.GridInfo.Bounds}.  The plotted surface is
+\(\rho_1^2+\rho_2-4\).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{matlab-figures/pdmat-plot-3d-slice.png}
+  \caption{Result of the three-parameter slice source above; the plotting API
+  still selects only dimensions 1 and 2.}
+  \label{fig:pdmat-plot-3d-slice}
 \end{figure}
 
 \subsection{Algebra And Matrix Operations}
@@ -2787,25 +2879,22 @@ P = pdvar(..., RateBounds=rb)
 \end{itemize}
 
 \begin{center}
-\begin{tikzpicture}[x=1.85cm,y=1cm,>=Latex,
+\begin{tikzpicture}[x=2.5cm,y=1cm,>=Latex,
   c/.style={draw=dpblue!75!black,fill=dpbluewash,rounded corners=2pt,
-    font=\scriptsize,align=center,minimum width=18mm,minimum height=8mm}]
-  \node[c] (p0) at (0,0) {\(P^{(1)}[0]\)};
-  \node[c] (p1) at (1,0) {\(P^{(1)}[1]\)};
-  \node[c,minimum width=22mm] (p2) at (2,0)
-    {\(P^{(1)}[2]\)\\\(=P^{(2)}[0]\)};
-  \node[c] (p3) at (3,0) {\(P^{(2)}[1]\)};
-  \node[c] (p4) at (4,0) {\(P^{(2)}[2]\)};
-  \draw[thick,dpblue] (p0) -- (p1) -- (p2) -- (p3) -- (p4);
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt}]
-    (-0.25,-0.45) -- (2.25,-0.45)
-    node[midway,below=6pt,font=\scriptsize]{cell 1 view, degree 2};
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt}]
-    (1.75,-0.45) -- (4.25,-0.45)
-    node[midway,below=6pt,font=\scriptsize]{cell 2 view, degree 2};
-  \node[dp/contribution,above=13pt of p2,font=\scriptsize,align=center]
-    (shared) {one shared interface handle};
-  \draw[dp/arrow] (shared.south)--(p2.north);
+    font=\scriptsize,align=center,minimum width=20mm,minimum height=8mm}]
+  \node[dp/label] at (1,1.05) {cell 1: degree-two local row};
+  \node[c] (p10) at (0,0.55) {\(P^{(1)}[0]\)};
+  \node[c] (p11) at (1,0.55) {\(P^{(1)}[1]\)};
+  \node[c] (p12) at (2,0.55) {\(P^{(1)}[2]\)};
+  \draw[thick,dpblue] (p10) -- (p11) -- (p12);
+  \node[dp/label] at (3,-1.35) {cell 2: degree-two local row};
+  \node[c] (p20) at (2,-0.75) {\(P^{(2)}[0]\)};
+  \node[c] (p21) at (3,-0.75) {\(P^{(2)}[1]\)};
+  \node[c] (p22) at (4,-0.75) {\(P^{(2)}[2]\)};
+  \draw[thick,dpblue] (p20) -- (p21) -- (p22);
+  \draw[dp/arrow,<->] (p12.south) -- (p20.north);
+  \node[dp/label,anchor=west] at (2.18,-0.10)
+    {same YALMIP handle: \(P^{(1)}[2]=P^{(2)}[0]\)};
 \end{tikzpicture}
 
 \textit{For positive degree, neighboring physical cells reuse complete
@@ -2931,21 +3020,43 @@ rateBounds =
 \end{lstlisting}
 
 \remarkshead
-Missing dimensions, a missing grid, or a grid in the wrong argument position
-raises \codeerr{pdvar}{InvalidInput}.  Nonpositive or noninteger matrix sizes
-raise \codeerr{pdvar}{Invalid}\allowbreak\code{MatrixSize}; malformed degrees
-raise \codeerr{pdvar}{InvalidDegree}.  Malformed option sequences raise
-\codeerr{pdvar}{InvalidOptions}; an unknown option raises
-\codeerr{pdvar}{UnknownOption}; attempts to set subclass-owned metadata raise
-\codeerr{pdvar}{UnsupportedOption}.  A symmetric request for a nonsquare
-matrix raises \codeerr{pdvar}{InvalidStructure}.  Grid validation uses
-\codeerr{pdvar}{InvalidGrid} and
-\codeerr{pdvar}{Invalid}\allowbreak\code{GridVector}.
+\begin{itemize}[leftmargin=*]
+  \item Missing or misplaced dimensions and grids raise
+        \codeerr{pdvar}{InvalidInput}; invalid sizes and degrees raise
+        \codeerr{pdvar}{Invalid}\allowbreak\code{MatrixSize} or
+        \codeerr{pdvar}{InvalidDegree}.
+  \item Option failures use \codeerr{pdvar}{Invalid}\allowbreak\code{Options},
+        \codeerr{pdvar}{Unknown}\allowbreak\code{Option}, or
+        \codeerr{pdvar}{Unsupported}\allowbreak\code{Option}.
+  \item A symmetric nonsquare request raises
+        \codeerr{pdvar}{InvalidStructure}; grid failures use
+        \codeerr{pdvar}{InvalidGrid} or
+        \codeerr{pdvar}{Invalid}\allowbreak\code{GridVector}.
+  \item \code{RateBounds} must be a finite \(\ell\)-by-2 matrix with each
+        lower bound no greater than its upper bound; violations raise
+        \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
+\end{itemize}
 
-\code{RateBounds} is validated by the inherited storage contract and must be a
-finite \(\ell\)-by-2 matrix with lower bounds no greater than upper bounds.
-Constructor violations therefore raise
-\codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
+\subsection{Properties}
+
+\code{pdvar} declares no additional class-owned properties.  It exposes the
+read-only inherited \code{pdbase} properties listed in
+\cref{sec:pdbase-fields}; their private set access prevents user assignment.
+In particular, decision coefficients are inspected through
+\code{P.LocalValues}, while \code{P.Degree}, \code{P.IsContinuous}, and
+\code{P.RateBounds} describe their representation and rate metadata.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(2, {[0 1]}, "symmetric", Degree=2, RateBounds=[-1 1]);
+degree = P.Degree
+isContinuous = P.IsContinuous
+rateBounds = P.RateBounds
+firstCellCoefficients = P.LocalValues{1}
+\end{lstlisting}
+
+Use public algebra to create a modified value; direct assignments such as
+\code{P.Degree = 1} are not supported.
 
 \subsection{\texorpdfstring{\code{rhodiff}}{rhodiff}}
 \index{rhodiff@\texttt{rhodiff}}
@@ -3825,7 +3936,10 @@ assignedCoefficients =
 \subsection{Comparisons To \texorpdfstring{\code{pdlmi}}{pdlmi}}
 \label{sec:pdvar-comparison}
 
-The \code{le} and \code{ge} overloads implement \code{<=} and \code{>=}.
+The \code{le}, \code{ge}, and \code{eq} overloads implement \code{<=},
+\code{>=}, and \code{==}.  Inequalities select either semidefinite or
+entry-wise meaning once for the complete original residual; equality is always
+direct coefficient equality.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -3833,16 +3947,29 @@ C = P <= 0
 C = P >= 0
 C = lhs <= rhs
 C = lhs >= rhs
+C = lhs == rhs
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{P} and \code{lhs} are square, coefficient-wise symmetric or
-        Hermitian \code{pdvar} expressions after residual assembly.
-  \item \code{rhs} is commonly \code{0}; compatible numeric, \code{pdmat},
-        affine \code{sdpvar}, and \code{pdvar} expressions are also accepted.
-  \item \code{C} is a \code{pdlmi} wrapper.  The comparison creates direct
-        coefficient constraints but does not solve an optimization problem.
+  \item \code{rhs} may be compatible numeric, coefficient-backed \code{pdmat},
+        affine \code{sdpvar}, or \code{pdvar} data.  Ordinary operands use the
+        same grid refinement, degree alignment, and promotion as subtraction.
+  \item For \code{<=} and \code{>=}, every coefficient in every physical cell
+        and rate row is scanned before assembly.  The complete relation is
+        semidefinite only if every original coefficient is square Hermitian.
+        Numeric Hermitian testing uses the inclusive rule
+        \(\lVert A-A^{\mathsf T}\rVert_\infty\le10^{-10}\); symbolic
+        coefficients use YALMIP's \code{ishermitian}.  If any coefficient
+        fails, the complete inequality is entry-wise and warning
+        \codeerr{pdlmi}{ElementwiseInequality} is issued once.  Modes are never
+        mixed coefficient by coefficient or entry by entry.
+  \item \code{==} accepts rectangular and nonsymmetric residuals without that
+        warning.  It equates corresponding coefficient entries directly.
+        Ordinary rows compare with ordinary rows; derivative rows compare only
+        with compatible derivative rows.
+  \item \code{C} is a \code{pdlmi} wrapper.  A comparison assembles constraints
+        but does not solve an optimization problem.
 \end{itemize}
 
 \examplehead
@@ -3871,10 +3998,48 @@ positiveConstraintCount =
      4
 \end{lstlisting}
 
+A rectangular residual selects entry-wise inequality globally.  Equality is
+entry-wise by definition and is warning-free.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+V = pdvar(3, 2, {[0 1]}, "full");
+warnId = "pdlmi:ElementwiseInequality";
+warnState = warning("off", warnId);
+restoreWarning = onCleanup(@() warning(warnState));
+Centry = V >= 0;
+Ceq = V == sdpvar(3, 2, 'full');
+entrywiseConstraintGroups = numel(Centry.Constraints)
+equalityConstraintGroups = numel(Ceq.Constraints)
+identity = V == V;
+identityConstraints = identity.toYalmip()
+clear restoreWarning
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+entrywiseConstraintGroups =
+     2
+equalityConstraintGroups =
+     2
+identityConstraints =
+     []
+\end{lstlisting}
+
+Each group above corresponds to one local coefficient and contains six scalar
+entries in MATLAB column-major order.  Under P\'olya, Putinar, or Full Box,
+each entry of an entry-wise inequality receives an independent scalar
+certificate.  Equality is direct-only: constructor certificate options and
+\code{applyPolya}, \code{applyPutinar}, or
+\code{applyFullBoxPreorder} raise
+\codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before
+validating an order.  Mixed ordinary/derivative row kinds raise
+\codeerr{pdvar}{InvalidEqualityRows}.  Use overloaded \code{==} to build a
+modeling equality; use \code{isequal} only for MATLAB structural comparison.
+
 \begin{center}
 \begin{tikzpicture}[node distance=7mm and 12mm]
   \node[dp/decision,align=center,font=\scriptsize,text width=34mm,
-    minimum height=11mm] (lhs) {\code{lhs}\\affine square \code{pdvar}};
+    minimum height=11mm] (lhs) {\code{lhs}\\affine \code{pdvar}};
   \node[dp/known,align=center,font=\scriptsize,text width=34mm,
     minimum height=11mm,below=of lhs] (rhs)
     {\code{rhs}\\one or more compatible terms};
@@ -3883,7 +4048,7 @@ positiveConstraintCount =
     {\code{lhs-rhs}\\stored residual};
   \node[dp/certificate,right=of res,align=center,font=\scriptsize,
     text width=27mm,minimum height=15mm] (relation)
-    {relation\\\code{<=} or \code{>=}};
+    {relation\\\code{<=}, \code{>=}, or \code{==}};
   \node[dp/result,right=of relation,align=center,font=\scriptsize,
     text width=25mm,minimum height=15mm] (c)
     {\code{pdlmi}\\direct by default};
@@ -3916,11 +4081,14 @@ positiveConstraintCount =
 \section{\texorpdfstring{\code{pdlmi}}{pdlmi} Reference}\index{pdlmi@\texttt{pdlmi}}
 \label{sec:pdlmi}
 
-\code{pdlmi} stores YALMIP constraints assembled from square symmetric
-\code{pdvar} expressions.  Direct coefficient-wise assembly is the default;
-cell-local P\'olya elevation, a dimension-aware Putinar selector, and the full box
-Bernstein--Gram preordering are explicit alternatives.  It is the package
-boundary between Bernstein objects and ordinary YALMIP solver calls.
+\code{pdlmi} stores YALMIP constraints assembled from \code{pdvar}
+expressions.  Square Hermitian inequality families use semidefinite
+constraints; other inequalities use entry-wise scalar constraints; equality
+uses direct coefficient equations.  Direct assembly is the default, while
+cell-local P\'olya elevation, a dimension-aware Putinar selector, and the full
+box Bernstein--Gram preordering are explicit inequality alternatives.  It is
+the package boundary between Bernstein objects and ordinary YALMIP solver
+calls.
 
 \begin{center}
 \begin{tikzpicture}[node distance=5mm and 4mm]
@@ -3960,7 +4128,7 @@ Task & Entry \\
 \midrule
 Construct wrapper &
 \hyperref[sec:pdlmi-construction]{\code{pdlmi}},
-\hyperref[sec:pdvar-comparison]{\code{<=}/\code{>=}} \\
+\hyperref[sec:pdvar-comparison]{\code{<=}/\code{>=}/\code{==}} \\
 Count constraints &
 \hyperref[sec:pdlmi-direct]{direct coefficient constraints} \\
 Select P\'olya elevation &
@@ -3979,12 +4147,36 @@ Solve &
 \bottomrule
 \end{tabularx}
 
+\subsection{Properties}
+
+All \code{pdlmi} properties have private set access and are readable with dot
+notation.  \code{Constraints} contains the assembled YALMIP entries;
+\code{Residual} and \code{Relation} retain the original comparison for
+rebuilding.  The remaining properties record the selected certificate state.
+
+\begin{tabularx}{\textwidth}{@{}p{0.27\textwidth}Y@{}}
+\toprule
+Property & Meaning \\
+\midrule
+\code{Constraints} & Stored finite YALMIP constraint entries. \\
+\code{Residual}, \code{Relation} & Original \code{pdvar} residual and one of \code{"<="}, \code{">="}, or \code{"=="}. \\
+\code{UsePolya}, \code{PolyaDegree} & P\'olya selector and nonnegative degree increment. \\
+\code{UsePutinar}, \code{PutinarOrder} & Putinar selector and absolute Gram order. \\
+\code{UseFullBoxPreorder}, \code{FullBoxOrder} & Full-box selector and absolute Gram order. \\
+\bottomrule
+\end{tabularx}
+
+For example, \code{C.Relation}, \code{C.Residual.Degree}, and
+\code{C.UsePutinar} inspect a wrapper.  Apply methods return a rebuilt value;
+assigning these properties is unsupported.
+
 \subsection{Construction And Comparisons}
 \label{sec:pdlmi-construction}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 C = pdlmi(expr, relation)
+C = pdlmi(expr, "==")
 C = pdlmi(expr, relation, "UsePolya")
 C = pdlmi(expr, relation, UsePolya=true, PolyaDegree=d)
 C = pdlmi(expr, relation, "UsePolya", "PolyaDegree", d)
@@ -3998,13 +4190,16 @@ C = pdlmi(expr, relation, UseFullBoxPreorder=true, FullBoxOrder=r)
 C = pdlmi(expr, relation, UseFullBoxPreorder=false, FullBoxOrder=r)
 C = lhs <= rhs
 C = lhs >= rhs
+C = lhs == rhs
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{expr} is a square \code{pdvar} expression whose coefficient
-        matrices are symmetric or Hermitian; \code{relation} is exactly
-        \code{"<="} or \code{">="}.
+  \item \code{expr} is a \code{pdvar} residual; \code{relation} is exactly
+        \code{"<="}, \code{">="}, or \code{"=="}.  Inequalities are
+        classified globally from the original coefficient family.  Equality
+        is entry-wise direct coefficient assembly and accepts rectangular or
+        nonsymmetric residuals.
   \item \code{UsePolya} is a logical scalar option with default
         \code{false}. Its bare form, \code{"UsePolya"}, and
         \code{UsePolya=true} without a degree select increment one.
@@ -4037,11 +4232,14 @@ C = lhs >= rhs
         \code{UseFullBoxPreorder=false} with \code{FullBoxOrder=r} suppresses
         that automatic selection: \code{C} remains direct and records \code{r}
         only as inspectable metadata; the order is not applied to assembly.
-  \item P\'olya, Putinar, and full-box selection are mutually exclusive.
-        Enabling more than one
+  \item P\'olya, Putinar, and full-box selection are mutually exclusive and
+        apply only to inequalities.  Any recognized certificate option on an
+        equality raises
+        \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate}.
+        Enabling more than one inequality family
         raises \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}.
-  \item \code{C} is direct coefficient-wise assembly unless one opt-in mode is
-        selected. Comparisons such as \code{lhs >= rhs} are the ordinary
+  \item \code{C} is direct coefficient-wise assembly unless one opt-in
+        inequality mode is selected. Comparisons such as \code{lhs >= rhs} are the ordinary
         user-facing entry point and accept compatible numeric, \code{pdmat},
         affine \code{sdpvar}, and \code{pdvar} right-hand sides.
 \end{itemize}
@@ -4114,7 +4312,7 @@ fullBoxOrder =
 \end{center}
 
 \remarkshead
-\begin{enumerate}[leftmargin=*]
+\begin{enumerate}[leftmargin=*,itemsep=0.55\baselineskip]
   \item A non-\code{pdvar} residual raises
         \codeerr{pdlmi}{InvalidExpression}; an unsupported relation raises
         \codeerr{pdlmi}{InvalidRelation}.
@@ -4135,20 +4333,28 @@ fullBoxOrder =
         positive P\'olya increment raises
         \codeerr{pdlmi}{ConflictingPolyaOptions}.  The full-box explicit-false
         form remains direct and retains the supplied order as metadata.
-  \item Every assembly path validates square symmetric or Hermitian
-        coefficients and raises \codeerr{pdlmi}{InvalidMatrixSize} or
-        \codeerr{pdlmi}{NonSymmetricExpression}.
+  \needspace{9\baselineskip}
+  \item An inequality with any nonsquare or non-Hermitian original coefficient
+        is assembled entry-wise and emits
+        \codeerr{pdlmi}{ElementwiseInequality}; it is not rejected.  Numeric
+        Hermitian testing accepts equality at the inclusive \(10^{-10}\)
+        infinity-norm tolerance.
+  \item Equality is direct-only.  Every \code{apply...} method raises\newline
+        \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate}
+        before validating its supplied increment or order.
 \end{enumerate}
 
 \subsection{Direct Coefficient Assembly}\index{direct assembly}
 \label{sec:pdlmi-direct}
 
 For each physical cell, local Bernstein coefficient, and rate-vertex row if
-present, \code{pdlmi} creates one YALMIP semidefinite constraint.  For an
+present, \code{pdlmi} creates one stored YALMIP constraint entry.  For an
 ordinary expression with \(N_c\) physical cells and \(N_b\) Bernstein
-coefficients per cell, the number of stored constraints is \(N_cN_b\).  For a
-\code{rhodiff} expression with \(N_v\) rate vertices, the count becomes
-\(N_cN_bN_v\).
+coefficients per cell, the number of entries is \(N_cN_b\); with \(N_v\) rate
+vertices it is \(N_cN_bN_v\).  A semidefinite-mode entry is one matrix
+constraint.  An entry-wise-mode entry is the column-major vector of scalar
+matrix entries compared independently.  An equality entry is the corresponding
+direct coefficient equation and may be rectangular.
 
 The idea is the Bernstein convex-hull property.  After orienting the relation
 as a positive-semidefinite target
@@ -4157,10 +4363,18 @@ as a positive-semidefinite target
   \sum_{\mathbf i}B_{\mathbf i}^m(\boldsymbol\alpha)
   C^{(\mathbf c,v)}[\mathbf i],
 \]
-the direct certificate requires
+the semidefinite direct certificate requires
 \(C^{(\mathbf c,v)}[\mathbf i]\succeq0\) for every physical cell
 \(\mathbf c\), active rate vertex \(v\), and local label
 \(\mathbf i\).  This is sufficient, not necessary.
+
+For an entry-wise inequality, replace each matrix coefficient by
+\code{C(:)} and impose the oriented scalar sign on every component.  The
+global classification is made before P\'olya elevation or Gram assembly, so
+every coefficient and every certificate in one wrapper uses the same mode.
+Putinar and Full Box create one independent scalar Gram certificate for each
+column-major entry.  Direct equality simply imposes \code{C(:) == 0}; it does
+not use a positivity certificate or an implicit tolerance.
 
 \begin{center}
 The diagram specializes to one parameter, degree two, and one ordinary
@@ -4196,6 +4410,9 @@ degree is \(m\), the count is
 \(N_c (m+d+1)^\ell\) for ordinary expressions and
 \(N_c (m+d+1)^\ell N_v\) for rate-vertex expressions. An increment of zero is
 valid and has the same coefficient count as direct assembly.
+For an entry-wise inequality, elevation preserves the global mode and the
+oriented sign is applied independently to every column-major scalar entry of
+each elevated coefficient.  Equality wrappers reject this method.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -4257,6 +4474,10 @@ positivity are developed in \cref{app:certificates}.
 \texorpdfstring{\code{applyPutinar}}{applyPutinar}}
 \index{Putinar}\index{applyPutinar@\texttt{applyPutinar}}
 \label{sec:pdlmi-putinar}
+
+For an entry-wise inequality, the constructions below are applied independently
+to each scalar matrix entry in MATLAB column-major order.  Gram variables are
+not shared between entries.  Equality wrappers reject Putinar selection.
 
 The Putinar selector is dimension-aware.  With one parameter it deliberately
 uses the same exact even/odd Markov--Luk\'acs
@@ -4379,9 +4600,13 @@ full-box selection.  It adds no implicit margin and makes no solver call.
         explicit false plus any supplied order raises
         \codeerr{pdlmi}{ConflictingPutinarOptions}.
   \item Simultaneous relaxation families raise
-        \codeerr{pdlmi}{ConflictingRelaxations}; the expression, relation,
-        square-matrix, and symmetry checks in
-        \cref{sec:pdlmi-construction} apply unchanged.
+        \codeerr{pdlmi}{ConflictingRelaxations}; expression, relation, and
+        option validation in \cref{sec:pdlmi-construction} still applies.
+        Global inequality classification is unchanged: the family is
+        semidefinite only when every original coefficient across all cells and
+        rate rows is square Hermitian.  Otherwise the complete family uses
+        independent entry-wise scalar Putinar certificates in MATLAB
+        column-major order.
 \end{enumerate}
 
 \subsection{Full Box Bernstein--Gram Preordering And
@@ -4393,6 +4618,9 @@ The full-box mode is a cell-local positive-semidefinite representation in the
 forward local coordinates \(\alpha_s\in[0,1]\).  It is a box-specific Bernstein--Gram
 preordering, not a general Putinar certificate, general-domain SOS interface,
 or full-space SOS representation.  It adds no implicit positivity margin.
+For an entry-wise inequality, every column-major scalar entry receives an
+independent copy of the selected Gram construction.  Equality wrappers reject
+full-box selection.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -4480,14 +4708,22 @@ equalities matching every Bernstein coefficient.  Consequently, the number of
 stored constraints is not the direct coefficient count.
 
 \remarkshead
-Malformed orders raise \codeerr{pdlmi}{InvalidFullBoxOrder}; an admissible
-integer below the minimum raises \codeerr{pdlmi}{FullBoxOrderTooLow}.  The
-constructor rejects malformed selectors with
-\codeerr{pdlmi}{InvalidUse}\allowbreak\code{FullBox}\allowbreak\code{Preorder},
-and simultaneous P\'olya, Putinar, or full-box selection raises\newline
-\codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}.  The usual
-expression, relation, option, square-matrix, and symmetry checks described in
-\cref{sec:pdlmi-construction} apply unchanged.
+\begin{enumerate}[leftmargin=*,nosep]
+  \item Malformed orders raise \codeerr{pdlmi}{InvalidFullBoxOrder}; an
+        admissible integer below the minimum raises
+        \codeerr{pdlmi}{FullBoxOrderTooLow}.  The constructor rejects malformed
+        selectors with
+        \codeerr{pdlmi}{InvalidUse}\allowbreak\code{FullBox}\allowbreak\code{Preorder}.
+  \item Simultaneous P\'olya, Putinar, or full-box selection raises
+        \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}; expression,
+        relation, and option validation in \cref{sec:pdlmi-construction} still
+        applies.
+  \item Global inequality classification is unchanged: the family is
+        semidefinite only when every original coefficient across all cells and
+        rate rows is square Hermitian.  Otherwise the complete family uses
+        independent entry-wise scalar Full Box certificates in MATLAB
+        column-major order.
+\end{enumerate}
 
 \subsection{\texorpdfstring{\code{toYalmip}}{toYalmip}}
 \index{toYalmip@\texttt{toYalmip}}\index{YALMIP}
@@ -5075,7 +5311,7 @@ positivityConstraintCount =
 
 \begin{lstlisting}[
   style=dpmatlab,
-  title={\textcolor{dpblue}{\sffamily\bfseries\footnotesize MATLAB input (continued)}}
+  title={\textcolor{dpblue}{\sffamily\bfseries\footnotesize Example (continued)}}
 ]
 objective = gamma.LocalValues{1}{1};
 solver = 'lmilab';
@@ -5293,11 +5529,14 @@ For degree two,
   \draw[very thick,black!85,densely dashed] plot[domain=0:1,samples=60]
     (\x,{2*(1-\x)*\x});
   \draw[very thick,black!85,dash dot] plot[domain=0:1,samples=60] (\x,{\x^2});
-  \node[black!85,font=\scriptsize] at (0.12,0.78) {\(B_0^2\)};
-  \node[black!85,font=\scriptsize] at (0.50,0.57) {\(B_1^2\)};
-  \node[black!85,font=\scriptsize] at (0.87,0.78) {\(B_2^2\)};
   \foreach \x in {0,0.5,1}{\draw (\x,0.02)--(\x,-0.02)
     node[below,font=\scriptsize]{\(\x\)};}
+  \draw[very thick,black!85] (0.02,-0.28)--(0.12,-0.28);
+  \node[anchor=west,font=\scriptsize] at (0.14,-0.28) {\(B_0^2\)};
+  \draw[very thick,black!85,densely dashed] (0.36,-0.28)--(0.46,-0.28);
+  \node[anchor=west,font=\scriptsize] at (0.48,-0.28) {\(B_1^2\)};
+  \draw[very thick,black!85,dash dot] (0.70,-0.28)--(0.80,-0.28);
+  \node[anchor=west,font=\scriptsize] at (0.82,-0.28) {\(B_2^2\)};
 \end{tikzpicture}
 
 \textit{At every \(\alpha\), the three plotted heights are nonnegative and sum
@@ -5421,7 +5660,10 @@ The new coefficients are fixed convex combinations of the old ones.  Elevation
 therefore changes representation but adds no decision freedom.  Constructing a
 new higher-degree \code{pdvar} does enlarge the decision parameterization.
 
-\subsection{Physical Tensor Grids And Local Tensor Labels}
+\clearpage
+\subsection[Physical Tensor Grids And Local Tensor Labels]{%
+  \texorpdfstring{Physical Tensor Grids And\\Local Tensor Labels}%
+  {Physical Tensor Grids And Local Tensor Labels}}
 
 Suppose direction \(s\) has physical nodes
 \[
@@ -5477,6 +5719,7 @@ Only after reaching a leaf does the flat coefficient cell follow the
 \code{lbls} order.  Earlier dimensions vary more slowly in both
 \code{cells} and \code{lbls}.
 
+\needspace{16\baselineskip}
 \begin{center}
 \begin{tikzpicture}[node distance=11mm,
   box/.style={dp/neutral,font=\scriptsize,align=center,
@@ -5495,6 +5738,7 @@ Only after reaching a leaf does the flat coefficient cell follow the
 coefficient labels in \code{lbls} order.}
 \end{center}
 
+\needspace{14\baselineskip}
 \subsection{Products As Ordered Weighted Convolution}
 \label{sec:bernstein-product-math}
 
@@ -5522,6 +5766,7 @@ gives
 This is an ordered matrix convolution.  In general
 \(P^{(c)}[i]Q^{(c)}[j]\ne Q^{(c)}[j]P^{(c)}[i]\).
 
+\newpage
 \ideastep{Worked example}
 Take quadratic coefficients \(P=[1,2,6]\) and affine coefficients
 \(Q=[2,4]\).  The anti-diagonals give
@@ -5534,6 +5779,7 @@ Take quadratic coefficients \(P=[1,2,6]\) and affine coefficients
 \end{aligned}
 \]
 
+\needspace{22\baselineskip}
 \begin{lstlisting}[style=dpmatlab]
 P = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
 Q = pdmat({[0 1]}, {2, 4}, Degree=1);
@@ -5566,7 +5812,7 @@ and
 \]
 
 \begin{center}
-\begin{tikzpicture}[x=2.55cm,y=2.05cm]
+\begin{tikzpicture}[x=2.15cm,y=1.85cm]
   % Each panel has its own vertical normalization so all three shapes remain
   % readable; the formulas and endpoint labels state the physical values.
   \begin{scope}
@@ -5574,30 +5820,33 @@ and
     \draw[->,black!60] (0,0)--(0,1.08);
     \draw[very thick,black!85] plot[domain=0:1,samples=60]
       (\x,{(1+2*\x+3*\x*\x)/6});
-    \node[font=\scriptsize\bfseries] at (0.5,1.18) {Input \(P\), degree 2};
+    \node[font=\footnotesize\bfseries,align=center,text width=34mm]
+      at (0.5,1.38) {Input \(P\)\\degree 2};
     \node[font=\tiny,anchor=east] at (-0.03,0.17) {1};
     \node[font=\tiny,anchor=east] at (-0.03,1) {6};
     \draw[very thick,black!85] (0.12,-0.22)--(0.30,-0.22);
     \node[font=\tiny,anchor=west] at (0.34,-0.22)
       {\(P=1+2\alpha+3\alpha^2\)};
   \end{scope}
-  \begin{scope}[xshift=3.3cm]
+  \begin{scope}[xshift=4.3cm]
     \draw[->,black!60] (0,0)--(1.08,0) node[right,font=\tiny]{\(\alpha\)};
     \draw[->,black!60] (0,0)--(0,1.08);
     \draw[very thick,black!85,densely dashed] plot[domain=0:1,samples=60]
       (\x,{(2+2*\x)/4});
-    \node[font=\scriptsize\bfseries] at (0.5,1.18) {Input \(Q\), degree 1};
+    \node[font=\footnotesize\bfseries,align=center,text width=34mm]
+      at (0.5,1.38) {Input \(Q\)\\degree 1};
     \node[font=\tiny,anchor=east] at (-0.03,0.5) {2};
     \node[font=\tiny,anchor=east] at (-0.03,1) {4};
     \draw[very thick,black!85,densely dashed] (0.12,-0.22)--(0.30,-0.22);
     \node[font=\tiny,anchor=west] at (0.34,-0.22) {\(Q=2+2\alpha\)};
   \end{scope}
-  \begin{scope}[xshift=6.6cm]
+  \begin{scope}[xshift=2.15cm,yshift=-3.55cm]
     \draw[->,black!60] (0,0)--(1.08,0) node[right,font=\tiny]{\(\alpha\)};
     \draw[->,black!60] (0,0)--(0,1.08);
     \draw[ultra thick,black!85,dash dot] plot[domain=0:1,samples=60]
       (\x,{(2+6*\x+10*\x*\x+6*\x*\x*\x)/24});
-    \node[font=\scriptsize\bfseries] at (0.5,1.18) {Product \(PQ\), degree 3};
+    \node[font=\footnotesize\bfseries,align=center,text width=40mm]
+      at (0.5,1.38) {Product \(PQ\)\\degree 3};
     \node[font=\tiny,anchor=east] at (-0.03,0.083) {2};
     \node[font=\tiny,anchor=east] at (-0.03,1) {24};
     \draw[ultra thick,black!85,dash dot] (0.06,-0.22)--(0.24,-0.22);
@@ -5611,6 +5860,7 @@ regions.  Solid, dashed, and dash--dot strokes distinguish the functions
 without color; no label lies on a curve.}
 \end{center}
 
+\newpage
 \ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[node distance=11mm,
@@ -5641,6 +5891,7 @@ This is the algorithm behind protected \code{bernProd}
 (\cref{sec:pdbase-bernprod}) and public \code{pdmat}/\code{pdvar}
 multiplication (\cref{sec:pdmat-operator-entries,sec:pdvar-algebra}).
 
+\needspace{14\baselineskip}
 For tensor labels,
 \[
   (PQ)^{(\mathbf c)}[\mathbf k]=
@@ -5653,6 +5904,7 @@ For tensor labels,
 \]
 Labels add componentwise; physical-cell identity does not change.
 
+\needspace{14\baselineskip}
 \subsection{Differentiation And Rate Vertices}
 
 \ideastep{Basic idea}
@@ -5838,6 +6090,7 @@ many PSD matrices and affine coefficient identities.
 \end{tikzpicture}
 \end{center}
 
+\needspace{14\baselineskip}
 \subsection{SOS And Gram Matrices}
 \index{sum of squares}\index{Gram matrix}
 

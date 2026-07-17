@@ -46,7 +46,8 @@ certificate contains one Gram term for every subset product of the box
 generators $\alpha_s(1-\alpha_s)$. A term whose tensor Gram degree would have
 a negative component is omitted.
 
-Assembly creates independent Gram variables for every physical cell and every
+For an entry-wise inequality, each MATLAB column-major scalar entry receives
+an independent scalar certificate. Assembly creates independent Gram variables for every physical cell and every
 active rate-vertex row. Each present Gram matrix is constrained positive
 semidefinite, then exact identities match every Bernstein coefficient. For a
 `<=` relation, the target coefficients are negated before positive-
@@ -154,8 +155,8 @@ it does not use the already elevated constraints.
 
 - A malformed `order` raises `pdlmi:InvalidFullBoxOrder`.
 - A valid integer below the applicable minimum raises `pdlmi:FullBoxOrderTooLow`.
-- Rebuilding retains the ordinary `pdlmi` expression, relation, square-matrix,
-  and symmetry checks.
+- Semidefinite and entry-wise inequalities retain their original global mode.
+- Equality is direct-only; this method raises `pdlmi:UnsupportedEqualityCertificate` before validating `order`.
 - Constructor selection errors are documented on the
   [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/)
   page, including `pdlmi:InvalidUseFullBoxPreorder` and

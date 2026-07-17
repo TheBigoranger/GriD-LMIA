@@ -1,13 +1,14 @@
-function cons = mkPutinarCons(expr, relation, order)
+function cons = mkPutinarCons(expr, relation, order, mode)
     %MKPUTINARCONS Define and assemble Putinar quadratic-module constraints.
     %
     %   Syntax:
-    %     cons = mkPutinarCons(expr, relation, order)
+    %     cons = mkPutinarCons(expr, relation, order, mode)
     %
     %   Arguments:
     %     expr     - pdvar residual with local Bernstein coefficients.
     %     relation - Normalized "<=" or ">=" comparison relation.
     %     order    - Validated absolute Putinar Gram order.
+    %     mode     - Transient semidefinite or entry-wise assembly mode.
     %
     %   Output:
     %     cons - Cell column of YALMIP Gram and coefficient-matching constraints.
@@ -20,7 +21,7 @@ function cons = mkPutinarCons(expr, relation, order)
 
     nPar = numel(expr.GridInfo.Vectors);
     if nPar == 1
-        cons = mkFullBoxCons(expr, relation, order);
+        cons = mkFullBoxCons(expr, relation, order, mode);
         return
     end
 
@@ -31,5 +32,5 @@ function cons = mkPutinarCons(expr, relation, order)
         specs{k, 2} = [masks(k, :); masks(k, :)];
     end
 
-    cons = mkGramCons(expr, relation, 2 * order, specs);
+    cons = mkGramCons(expr, relation, 2 * order, specs, mode);
 end
