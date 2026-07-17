@@ -47,11 +47,10 @@ const lmiSteps = [
   {
     number: "04",
     title: "Differentiate a continuous spline into cell-local linear rows",
-    text: "On grid [0, 0.5, 1], each cell has width h_c=0.5 and the two quadratic cells reuse one shared boundary handle with value 1.4. rhodiff applies (2/h_c)(P⁽ᶜ⁾[i+1]−P⁽ᶜ⁾[i]) inside each cell. The +1 rate row is [5.6, −3.2] | [−6.4, 8]; the −1 row is its negative.",
+    text: "The derivative remains cell-local: c=1 covers ρ ∈ [0, 0.5], while c=2 covers ρ ∈ [0.5, 1]. Their boundary traces need not join into one globally smooth derivative, even though the quadratic decision reuses the value 1.4 at the shared face.",
     math: [
-      "P:\\;[0.8,2.2,1.4]\\mid[1.4,-0.2,1.8]",
-      "D^{(c)}[i]=\\frac{2}{h_c}\\left(P^{(c)}[i+1]-P^{(c)}[i]\\right),\\quad h_c=0.5",
-      "\\operatorname{rhodiff}(P)\\big|_{\\dot\\rho=+1}=[5.6,-3.2]\\mid[-6.4,8]",
+      "D^{(c)}_{+}(\\rho)=\\begin{cases}5.6(1-\\alpha_1)-3.2\\alpha_1,&c=1,\\ \\alpha_1=2\\rho,\\\\-6.4(1-\\alpha_2)+8\\alpha_2,&c=2,\\ \\alpha_2=2\\rho-1,\\end{cases}",
+      "D^{(c)}_{-}(\\rho)=-D^{(c)}_{+}(\\rho)",
     ],
     visual: "differentiate",
     visibleCode: "P = pdvar(1, {[0 0.5 1]}, Degree=2);\nD = rhodiff(P, [-1 1]);",

@@ -1,31 +1,66 @@
 export const versionHistory = [
   {
-    version: "v0.4.0",
+    version: "v0.4.1",
     date: "2026-07-16",
     status: "current",
     summary:
-      "Added global semidefinite-versus-entry-wise inequality dispatch, direct coefficient equality constraints, and a redesigned TeX/Web reference with clearer examples, diagrams, properties, operation pages, and helper coverage.",
+      "Restructured the printable manual into chapter files, unified the TeX and Web visual grammar, and revised the grid, plotting, certificate, and release-history presentations.",
+  },
+  {
+    version: "v0.4.0",
+    date: "2026-07-16",
+    status: "previous · 9b8a34c",
+    summary:
+      "Documented one global comparison mode per inequality family, direct coefficient equality, reorganized class properties, and the three-parameter plotting slice.",
+  },
+  {
+    version: "v0.3.5",
+    date: "2026-07-16",
+    status: "previous · 75d70dc",
+    summary: "Published the expanded manual and interactive Web guide.",
+  },
+  {
+    version: "v0.3.4",
+    date: "2026-07-15",
+    status: "previous · 2d420cc",
+    summary: "Checkpointed the expanded manual and accompanying package documentation.",
+  },
+  {
+    version: "v0.3.3",
+    date: "2026-07-15",
+    status: "previous · d896146",
+    summary: "Added the Putinar certificate manual coverage.",
   },
   {
     version: "v0.3.2",
     date: "2026-07-14",
-    status: "previous",
+    status: "previous · eb5ac24",
+    summary: "Published the synchronized PD-LMI manual and Web guide.",
+  },
+  {
+    version: "v0.3.1",
+    date: "2026-07-14",
+    status: "previous · aa71a2a",
     summary:
-      "Standardized the PD-LMI identity, replaced the introductory linear case with a quadratic two-cell DPD-LMI, expanded ordered Bernstein convolution, and rebuilt the Web diagrams for responsive reading.",
+      "Expanded the manual and renamed the plotting assets from the earlier dpmat spelling to pdmat.",
   },
   {
     version: "v0.3.0",
     date: "2026-07-13",
-    status: "previous",
-    summary:
-      "Renamed the public MATLAB API to pdbase, pdmat, pdvar, and pdlmi; tightened helper ownership; and expanded the manual and website with hypercube SOS certificate mathematics.",
+    status: "previous · 7fc820f",
+    summary: "Published the first synchronized printable manual and Web reference.",
   },
   {
     version: "v0.2.0",
     date: "2026-07-09",
-    status: "previous",
-    summary:
-      "Expanded the Bernstein and PD-LMI background, synchronized the TeX and online manuals, and consolidated the implemented pdmat, pdvar, and pdlmi reference surface.",
+    status: "previous · b1e0d51",
+    summary: "Published the second documentation milestone.",
+  },
+  {
+    version: "v0.1.0",
+    date: "2026-07-03",
+    status: "previous · 63c06ee",
+    summary: "Introduced the pdbase foundation and the first package manual.",
   },
 ];
 

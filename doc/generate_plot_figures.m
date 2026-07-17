@@ -21,7 +21,9 @@ function makeOneDimensionalFigure(outDir)
     cleaner = onCleanup(@() close(fig));
 
     A = pdmat({[-1 1]}, @(rho) [rho, rho.^2]);
-    plot(A, SamplesPerCell=80, LineWidth=2);
+    h = plot(A, SamplesPerCell=80, LineWidth=2);
+    set(h(1), "Color", [35 86 125]/255, "LineStyle", "-");
+    set(h(2), "Color", [0.25 0.25 0.25], "LineStyle", "--");
     grid on
     xlabel("rho")
     ylabel("matrix entry")
@@ -40,7 +42,9 @@ function makeTwoDimensionalFigure(outDir)
 
     A = pdmat({[-1 1], [0 2]}, ...
         @(rho1, rho2) 1 + rho1.^2 + 0.5*rho2 + rho1.*rho2);
-    plot(A, [1 2], SamplesPerCell=45, EdgeColor="none");
+    h = plot(A, [1 2], SamplesPerCell=45, EdgeColor="none", ...
+        FaceAlpha=0.78);
+    set(h, "FaceColor", [35 86 125]/255);
     grid on
     view(35, 25)
     xlabel("rho1", "Interpreter", "none")
@@ -59,11 +63,25 @@ function makeThreeParameterSliceFigure(outDir)
     cleaner = onCleanup(@() close(fig));
 
     A = pdmat({[-1 1], [0 2], [-2 3]}, ...
-        @(rho1, rho2, rho3) rho1.^2 + rho2 + 2*rho3);
-    plot(A, [1 2], SamplesPerCell=45, EdgeColor="none");
+        @(rho1, rho2, rho3) [ ...
+            1 + 0.4*rho1.^2 + 0.1*rho2 + 0.05*rho3, ...
+            2 + 0.3*rho1 + 0.1*rho2 + 0.05*rho3; ...
+            3 - 0.2*rho1 + 0.15*rho2 + 0.05*rho3, ...
+            4 + 0.2*rho1.^2 + 0.25*rho2 + 0.05*rho3]);
+    h = plot(A, [1 2], SamplesPerCell=45, EdgeColor="none", ...
+        FaceAlpha=0.55);
+    faceColors = [35 86 125; 103 127 145; 154 158 161; 205 205 205]/255;
+    for k = 1:numel(h)
+        set(h(k), "FaceColor", faceColors(k,:));
+    end
     grid on
     view(35, 25)
-    title("Three-parameter object: rho3 fixed at -2")
+    xlabel("rho1", "Interpreter", "none")
+    ylabel("rho2", "Interpreter", "none")
+    zlabel("matrix entry")
+    title("2-by-2 three-parameter object: rho3 fixed at -2")
+    legend(h, ["A(1,1)", "A(1,2)", "A(2,1)", "A(2,2)"], ...
+        "Location", "eastoutside")
 
     exportgraphics(fig, fullfile(outDir, "pdmat-plot-3d-slice.png"), ...
         "Resolution", 200);

@@ -53,10 +53,15 @@ export default defineConfig({
                 { label: "evaluate", slug: "documents/reference/pdmat/evaluate" },
                 { label: "plot", slug: "documents/reference/pdmat/plot" },
                 { label: "bernsteinTable", slug: "documents/reference/pdmat/bernsteintable" },
-                { label: "Matrix Operations", slug: "documents/reference/pdmat/matrix-operations" },
-                { label: "Algebra", slug: "documents/reference/pdmat/algebra" },
-                { label: "Structural Operations", slug: "documents/reference/pdmat/structural-operations" },
-                { label: "Indexing And Inspection", slug: "documents/reference/pdmat/indexing-and-inspection" },
+                {
+                  label: "Matrix Operations",
+                  items: [
+                    { label: "Overview", slug: "documents/reference/pdmat/matrix-operations" },
+                    { label: "Algebra", slug: "documents/reference/pdmat/algebra" },
+                    { label: "Structural Operations", slug: "documents/reference/pdmat/structural-operations" },
+                    { label: "Indexing And Inspection", slug: "documents/reference/pdmat/indexing-and-inspection" },
+                  ],
+                },
               ],
             },
             {
@@ -67,10 +72,15 @@ export default defineConfig({
                 { label: "value", slug: "documents/reference/pdvar/value" },
                 { label: "rhodiff", slug: "documents/reference/pdvar/rhodiff" },
                 { label: "bernsteinTable", slug: "documents/reference/pdvar/bernsteintable" },
-                { label: "Matrix Operations", slug: "documents/reference/pdvar/matrix-operations" },
-                { label: "Algebra", slug: "documents/reference/pdvar/algebra" },
-                { label: "Structural Operations", slug: "documents/reference/pdvar/structural-operations" },
-                { label: "Indexing And Inspection", slug: "documents/reference/pdvar/indexing-and-inspection" },
+                {
+                  label: "Matrix Operations",
+                  items: [
+                    { label: "Overview", slug: "documents/reference/pdvar/matrix-operations" },
+                    { label: "Algebra", slug: "documents/reference/pdvar/algebra" },
+                    { label: "Structural Operations", slug: "documents/reference/pdvar/structural-operations" },
+                    { label: "Indexing And Inspection", slug: "documents/reference/pdvar/indexing-and-inspection" },
+                  ],
+                },
                 { label: "Comparisons", slug: "documents/reference/pdvar/comparisons" },
               ],
             },
@@ -79,10 +89,15 @@ export default defineConfig({
               items: [
                 { label: "Overview", slug: "documents/reference/pdlmi" },
                 { label: "Constructor", slug: "documents/reference/pdlmi/constructor" },
-                { label: "applyPolya", slug: "documents/reference/pdlmi/applypolya" },
-                { label: "applyPutinar", slug: "documents/reference/pdlmi/applyputinar" },
-                { label: "applyFullBoxPreorder", slug: "documents/reference/pdlmi/applyfullboxpreorder" },
                 { label: "toYalmip", slug: "documents/reference/pdlmi/toyalmip" },
+                {
+                  label: "Certificates",
+                  items: [
+                    { label: "Pólya", slug: "documents/reference/pdlmi/applypolya" },
+                    { label: "Putinar", slug: "documents/reference/pdlmi/applyputinar" },
+                    { label: "Full Box", slug: "documents/reference/pdlmi/applyfullboxpreorder" },
+                  ],
+                },
               ],
             },
             {

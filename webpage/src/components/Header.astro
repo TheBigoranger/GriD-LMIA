@@ -41,9 +41,10 @@ const shouldRenderSearch = config.pagefind
     .site-header__links a { border-radius: 999px; padding: 0.42rem 0.62rem; color: var(--sl-color-gray-2); text-decoration: none; font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
     .site-header__links a:hover,
     .site-header__links a:focus-visible { color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); }
-    .site-header__controls,
-    .site-header__social { gap: 1rem; align-items: center; }
-    .site-header__social::after { content: ""; height: 2rem; border-inline-end: 1px solid var(--sl-color-gray-5); }
+    .site-header__controls { gap: 1rem; align-items: center; border-inline-start: 1px solid var(--sl-color-gray-5); padding-inline-start: 1rem; }
+    .site-header__social { display: flex; flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; align-items: center; justify-content: center; }
+    .site-header__social :global(a) { display: inline-flex; width: 2.25rem; height: 2.25rem; align-items: center; justify-content: center; border-radius: 50%; }
+    .site-header__social :global(svg) { width: 1.25rem; height: 1.25rem; }
     .site-header__more { position: relative; flex: none; }
     .site-header__more summary { list-style: none; cursor: pointer; border-radius: 999px; padding: 0.42rem 0.62rem; color: var(--sl-color-gray-2); font-size: 0.82rem; font-weight: 700; }
     .site-header__more summary::-webkit-details-marker { display: none; }

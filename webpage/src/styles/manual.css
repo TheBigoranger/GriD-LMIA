@@ -344,13 +344,35 @@
 }
 
 .cell-coeffs span {
+  box-sizing: border-box;
   min-width: 0;
-  border-block-start: 2px solid var(--diagram-input);
-  padding: 0.55rem 0.2rem;
+  border: 1px solid var(--diagram-border);
+  border-block-start: 2px solid var(--sl-color-accent);
+  border-radius: 8px;
+  padding: 0.55rem 0.3rem;
   text-align: center;
   background: var(--sl-color-bg);
   font-family: "STIX Two Math", Cambria, serif;
   overflow-wrap: anywhere;
+}
+
+.portfolio-cta {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--sl-color-accent);
+  border-radius: 999px;
+  padding: 0.68rem 1rem;
+  color: white;
+  background: var(--sl-color-accent);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.portfolio-cta:hover,
+.portfolio-cta:focus-visible {
+  color: white;
+  box-shadow: 0 0 0 3px var(--sl-color-accent-low);
 }
 
 @media (prefers-reduced-motion: reduce) {

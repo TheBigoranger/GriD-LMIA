@@ -1,0 +1,597 @@
+\chapter{\texorpdfstring{\code{pdbase}}{pdbase} Backend Reference}
+\index{pdbase@\texttt{pdbase}}
+\label{sec:pdbase}
+
+\code{pdbase} is the developer-facing backend parent for \code{pdmat} and
+\code{pdvar}.  Ordinary users should model known data with \code{pdmat} and
+decision expressions with \code{pdvar}.  This section documents \code{pdbase}
+because it explains the shared storage, traversal, and inspection contract used
+by both public modeling classes.
+
+\section{Lookup}
+\label{sec:pdbase-lookup}
+
+\begin{tabularx}{\textwidth}{@{}lY@{}}
+\toprule
+Task & Function or field \\
+\midrule
+Create backend object &
+\hyperref[sec:pdbase-constructor]{\code{pdbase}} \\
+Inspect cells/labels &
+\hyperref[sec:pdbase-inspection]{\code{cells}},
+\hyperref[sec:pdbase-inspection]{\code{lbls}},
+\hyperref[sec:pdbase-inspection]{\code{coeffs}} \\
+Count sizes &
+\hyperref[sec:pdbase-counts]{\code{ncell}},
+\hyperref[sec:pdbase-counts]{\code{ncoeff}},
+\hyperref[sec:pdbase-counts]{\code{npar}},
+\hyperref[sec:pdbase-counts]{\code{size}} \\
+Elevate stored coefficients &
+\hyperref[sec:pdbase-elevvals]{\code{elevVals}} \\
+Backend algebra mechanisms &
+\hyperref[sec:pdbase-elevlocalvalues]{\code{elevLocalValues}},
+\hyperref[sec:pdbase-bernelev]{\code{bernElev}},
+\hyperref[sec:pdbase-bernprod]{\code{bernProd}},
+\hyperref[sec:pdbase-mergegrid]{\code{mergeGrid}} \\
+Read storage fields &
+\hyperref[sec:pdbase-fields]{\code{GridInfo}},
+\hyperref[sec:pdbase-fields]{\code{LocalValues}},
+\hyperref[sec:pdbase-fields]{metadata fields} \\
+\bottomrule
+\end{tabularx}
+
+\section{\texorpdfstring{\code{pdbase}}{pdbase} Constructor}
+\label{sec:pdbase-constructor}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+obj = pdbase(gridVectors, matrixSize, degree)
+obj = pdbase(gridVectors, matrixSize, degree, localValues)
+obj = pdbase(..., IsContinuous=tf)
+obj = pdbase(..., ContainsDecision=tf)
+obj = pdbase(..., HasRateDependence=tf)
+obj = pdbase(..., RateBounds=rb)
+obj = pdbase(..., SourceSummary=txt)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{gridVectors} is a cell vector with one strictly increasing node
+        vector per parameter, such as \code{{[0 1 2], [10 20]}}.
+  \item \code{matrixSize} is a positive two-element matrix size, such as
+        \code{[2 2]}.
+  \item \code{degree} is a nonnegative integer Bernstein degree, such as
+        \code{1}.
+  \item \code{localValues} is the nested physical-cell storage.  When omitted,
+        \code{pdbase} creates a zero coefficient-backed object.
+  \item \code{IsContinuous}, \code{ContainsDecision}, and
+        \code{HasRateDependence} are logical metadata scalars.  They default
+        to false; subclasses set them to describe their own payload contract.
+  \item \code{RateBounds} is empty or an \(\ell\times2\) matrix of finite lower
+        and upper rate bounds, such as \code{RateBounds=[-1 1; -2 2]}.
+        Nonempty bounds also mark the object as rate-dependent.
+  \item \code{SourceSummary} is inspectable origin text and defaults to
+        \code{"coefficient-backed"}.
+\end{itemize}
+
+\examplehead
+This backend example constructs a two-parameter parent object.  The object has
+two physical cells because the first parameter has two intervals and the second
+parameter has one interval.
+
+\begin{lstlisting}[style=dpmatlab]
+obj = pdbase({[0 1 2], [10 20]}, [2 2], 1);
+objectClass = class(obj)
+matrixSize = obj.MatrixSize
+degree = obj.Degree
+cellCount = obj.ncell()
+coefficientCount = obj.ncoeff()
+parameterCount = obj.npar()
+objectSize = size(obj)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+objectClass =
+    'pdbase'
+
+matrixSize =
+     2     2
+
+degree =
+     1
+
+cellCount =
+     2
+
+coefficientCount =
+     4
+
+parameterCount =
+     2
+
+objectSize =
+     2     2
+\end{lstlisting}
+
+The printed \code{ncoeff} value is \((1+1)^2=4\), one local Bernstein
+coefficient for each tensor-product label in the two parameter directions.
+
+\remarkshead
+\begin{itemize}[leftmargin=*]
+  \item Malformed grids and node vectors raise \codeerr{pdbase}{InvalidGrid}
+        or \codeerr{pdbase}{Invalid}\allowbreak\code{GridVector}.
+  \item Invalid matrix sizes, degrees, or rate bounds raise
+        \codeerr{pdbase}{Invalid}\allowbreak\code{MatrixSize},
+        \codeerr{pdbase}{InvalidDegree}, or
+        \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
+  \item The nested tree must contain one leaf per physical cell and
+        \((m+1)^\ell\) coefficient columns per leaf.  Violations raise
+        \codeerr{pdbase}{Invalid}\allowbreak\code{LocalValues} or
+        \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientCell}.
+  \item Payload matrices must have the declared size and be finite, real, and
+        numeric or supported real YALMIP expressions.  Malformed payloads
+        raise \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientPayload}.
+  \item Rate-affine payloads and \code{HasRateDependence=true} require
+        compatible nonempty \code{RateBounds}.
+\end{itemize}
+
+\section{Properties}\index{GridInfo@\texttt{GridInfo}}
+\label{sec:pdbase-fields}
+
+Every \code{pdbase} property below is publicly readable through dot access
+but has private set access.  Users inspect \code{obj.Degree} or
+\code{obj.GridInfo.Vectors}; construction and package algebra create new
+objects instead of assigning these properties.
+
+\begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}Y@{}}
+\toprule
+Property & Meaning \\
+\midrule
+\code{GridInfo} & Grid vectors, node counts, and grid bounds. \\
+\code{MatrixSize} & Size of each matrix coefficient or matrix expression. \\
+\code{Degree} & Local Bernstein degree stored in every physical cell. \\
+\code{LocalValues} & Nested cell tree indexed by physical-cell subscript; each leaf stores coefficient cells. \\
+\code{IsContinuous} & Metadata flag; subclasses are responsible for boundary sharing if continuity is true. \\
+\code{ContainsDecision} & True when coefficient payloads include YALMIP decision variables. \\
+\code{HasRateDependence} & True when the object carries rate metadata or rate-vertex rows. \\
+\code{RateBounds} & Parameter-rate lower and upper bounds used by \code{rhodiff} and \code{pdlmi}. \\
+\code{SourceSummary} & Short origin label such as \code{coefficient-backed}, \code{decision}, or \code{derivative}. \\
+\bottomrule
+\end{tabularx}
+
+\begin{lstlisting}[style=dpmatlab]
+obj = pdbase({[0 1 2], [10 20]}, [2 3], 1);
+degree = obj.Degree
+matrixSize = obj.MatrixSize
+firstGrid = obj.GridInfo.Vectors{1}
+source = obj.SourceSummary
+\end{lstlisting}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=7mm and 12mm,
+      store/.style={dp/known,align=center,font=\scriptsize,
+        minimum width=33mm,minimum height=10mm,inner sep=4pt},
+      leaf/.style={dp/result,align=left,font=\scriptsize,
+        text width=58mm,minimum height=18mm,inner sep=5pt}]
+    \node[store] (root) {\texttt{LocalValues}\\nested root};
+    \node[store,below left=of root] (first)
+      {first index \texttt{\{1\}}\\cell path \([1,\cdot]\)};
+    \node[store,below right=of root] (second)
+      {first index \texttt{\{2\}}\\cell path \([2,\cdot]\)};
+    \node[leaf,below=of first] (leafone)
+      {\texttt{LocalValues\{1\}\{1\}}\\
+       labels \([0,0],[0,1],[1,0],[1,1]\)\\
+       values \(C^{(1,1)}[\mathbf i]\)};
+    \node[leaf,below=of second] (leaftwo)
+      {\texttt{LocalValues\{2\}\{1\}}\\
+       labels \([0,0],[0,1],[1,0],[1,1]\)\\
+       values \(C^{(2,1)}[\mathbf i]\)};
+    \draw[dp/arrow] (root.south) -- ++(0,-3mm) -| (first.north);
+    \draw[dp/arrow] (root.south) -- ++(0,-3mm) -| (second.north);
+    \draw[dp/arrow] (first.south) -- (leafone.north);
+    \draw[dp/arrow] (second.south) -- (leaftwo.north);
+    \node[dp/label,above=3pt of root]
+      {second physical index is \texttt{\{1\}} on both paths};
+  \end{tikzpicture}
+  \caption{Nested cell-local storage for a two-parameter, degree-one object
+  on \code{{[0 1 2], [10 20]}}.  There are two physical cells, \([1,1]\)
+  and \([2,1]\).  Each leaf is a flat local coefficient cell in \code{lbls}
+  order: \([0,0]\), \([0,1]\), \([1,0]\), \([1,1]\).}
+  \label{fig:localvalues-tree}
+\end{figure}
+
+The nesting follows physical-cell subscripts, not the Bernstein labels.  Start
+with \code{LocalValues\{i1\}}, then take one cell index per remaining
+parameter; this selects physical cell \([i_1,i_2,\ldots,i_\ell]\).  Only
+after that selection does the leaf's flat cell array enumerate the
+\((m+1)^\ell\) local Bernstein coefficients.
+Thus \code{coeffs(obj, [2 1])} returns the lower leaf in
+\cref{fig:localvalues-tree}, while \code{lbls(obj)} explains the order inside
+that leaf.
+
+\section{Inspection: \texorpdfstring{\code{cells}}{cells}, \texorpdfstring{\code{lbls}}{lbls}, And \texorpdfstring{\code{coeffs}}{coeffs}}
+\label{sec:pdbase-inspection}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+subs = cells(obj)
+subs = obj.cells()
+
+labels = lbls(obj)
+labels = obj.lbls()
+
+c = coeffs(obj, cellSubs)
+c = obj.coeffs(cellSubs)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{obj} is a \code{pdbase} object or a \code{pdmat}/\code{pdvar}
+        subclass instance using the shared cell-local storage convention.
+  \item \code{cellSubs} selects one physical cell for \code{coeffs}.  Supply a
+        numeric row vector such as \code{[2 1]} or a cell array of scalar
+        subscripts such as \code{{2,1}}.
+  \item \code{cells} returns physical hypercube subscripts in the shared
+        traversal order; \code{lbls} returns local Bernstein labels in the
+        shared coefficient order.
+  \item \code{c} is the flat coefficient cell array for the selected physical
+        cell, ordered consistently with \code{lbls(obj)}.  Rate-dependent
+        leaves return one row per active rate vertex in the stored row order.
+\end{itemize}
+
+\remarkshead
+\code{coeffs} requires one positive integer physical-cell index per parameter,
+within the corresponding cell count.  Invalid numeric or cell-array selectors
+raise \codeerr{pdbase}{InvalidCellSubs}.
+
+\examplehead
+The label order is shared by \code{pdmat}, \code{pdvar}, and \code{pdlmi}.  In
+this two-parameter degree-one object, each physical cell stores four
+coefficient entries with labels \([0,0]\), \([0,1]\), \([1,0]\), and
+\([1,1]\).
+
+\begin{lstlisting}[style=dpmatlab]
+obj = pdbase({[0 1 2], [10 20]}, [1 1], 1);
+labels = lbls(obj)
+physicalCells = cells(obj)
+c = coeffs(obj, [2 1]);
+coefficientCount = numel(c)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+labels =
+     0     0
+     0     1
+     1     0
+     1     1
+
+physicalCells =
+     1     1
+     2     1
+
+coefficientCount =
+     4
+\end{lstlisting}
+
+\needspace{16\baselineskip}
+\section{Counts And Shape}
+\label{sec:pdbase-counts}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+n = ncell(obj)
+n = obj.ncell()
+
+n = ncoeff(obj)
+n = obj.ncoeff()
+
+n = npar(obj)
+n = obj.npar()
+
+sz = size(obj)
+d = size(obj, dim)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{obj} is a \code{pdbase} object or subclass instance.
+  \item \code{dim} is a positive integer matrix dimension for \code{size}; it
+        follows MATLAB's ordinary \code{size(obj,dim)} convention.
+  \item \code{ncell} returns \(\prod_s(k_s-1)\), the number of physical
+        hypercube cells.
+  \item \code{ncoeff} returns \((m+1)^\ell\), the number of local Bernstein
+        coefficients stored per physical cell.
+  \item \code{npar} returns the parameter dimension \(\ell\).  \code{size}
+        returns the matrix payload size, never the physical grid size.
+\end{itemize}
+
+\examplehead
+For a two-parameter (\(\ell=2\)) degree-one backend object, the first grid has two physical
+intervals and the second has one.  The matrix payload is \(2\)-by-\(3\),
+independently of the grid shape.  Thus
+\(n_{\mathrm{cell}}=(3-1)(2-1)=2\) and each cell stores
+\(n_{\mathrm{coeff}}=(1+1)^2=4\) entries, ordered by the explicit labels
+\([0,0],[0,1],[1,0],[1,1]\).
+
+\begin{lstlisting}[style=dpmatlab]
+obj = pdbase({[0 1 2], [10 20]}, [2 3], 1);
+physicalCellCount = obj.ncell()
+coefficientCount = obj.ncoeff()
+parameterCount = obj.npar()
+matrixSize = size(obj)
+rowCount = size(obj, 1)
+columnCount = size(obj, 2)
+thirdDimension = size(obj, 3)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+physicalCellCount =
+     2
+coefficientCount =
+     4
+parameterCount =
+     2
+matrixSize =
+     2     3
+rowCount =
+     2
+columnCount =
+     3
+thirdDimension =
+     1
+\end{lstlisting}
+
+\section{Bernstein Storage Operations}
+
+The following entries separate whole-object elevation from the protected
+helpers used to align degrees, convolve coefficients, and refine grids.  They
+change coefficient representations or temporary storage trees; they do not
+change the meanings of \code{ncell}, \code{ncoeff}, \code{npar}, or
+\code{size} described above.
+
+\subsection{\texorpdfstring{\code{elevVals}}{elevVals}}
+\label{sec:pdbase-elevvals}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+vals = obj.elevVals(degreeIncrement)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{degreeIncrement} is a finite nonnegative integer scalar.  It is
+        added to \code{obj.Degree} in every parameter direction; zero returns
+        coefficient evidence at the current degree.
+\end{itemize}
+
+\descriptionhead
+\code{vals} is a nested \code{LocalValues}-shaped cell tree.  Each physical
+cell contains coefficients of degree \code{obj.Degree + degreeIncrement}, with
+the represented polynomial, physical-cell tree, and any rate-row ordering
+preserved.  The method does not modify \code{obj} or its stored coefficient
+evidence.
+
+\remarkshead
+An invalid increment raises \code{pdbase:InvalidDegreeIncrement}.  A
+function-only \code{pdmat} has no stored Bernstein coefficient evidence, so
+this method raises \code{pdbase:MissingCoefficientEvidence}.
+
+\textit{Relationship to backend and public algebra.}  Unlike protected
+\code{bernElev}, which elevates one flat cell coefficient family for internal
+alignment, \code{elevVals} is a public whole-object query returning elevated
+\code{LocalValues}.  Public coefficient algebra uses \code{bernElev}
+internally when compatible operands need degree alignment; it does not mutate
+either operand.
+
+\subsection{\texorpdfstring{\code{elevLocalValues}}{elevLocalValues}}
+\label{sec:pdbase-elevlocalvalues}
+
+\textit{Internal/protected mechanism.}  This method elevates a temporary
+nested coefficient tree after public algebra has remapped operands to a common
+physical grid.  It is documented as backend context, not as a supported user
+call form.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+vals = elevLocalValues(obj, vals, fromDeg, toDeg)
+vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
+\end{lstlisting}
+
+Each leaf must be a cell array with one column per degree-\code{fromDeg}
+Bernstein label.  The method elevates each rate-vertex row independently to
+\code{toDeg}; it never mixes rows.  The optional \code{grid} supplies the
+temporary physical-cell layout, and otherwise defaults to
+\code{obj.GridInfo.Vectors}.  Equal source and target degrees return the input
+tree unchanged.  A malformed leaf raises
+\code{pdbase:InvalidCoefficientCell}.  Public users encounter this behavior
+through grid merging, assignment, concatenation, and arithmetic rather than by
+calling the protected method directly.
+
+\subsection{\texorpdfstring{\code{bernElev}}{bernElev}}
+\label{sec:pdbase-bernelev}
+
+\textit{Internal/protected mechanism.}  This signature documents the backend
+algorithm used by public algebra; it is not a supported user call form.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+out = bernElev(obj, coeffs, fromDeg, toDeg)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{coeffs} is a flat coefficient-cell family in the same label
+        order as \code{lbls(obj)}.
+  \item \code{fromDeg} and \code{toDeg} are nonnegative integer degrees, with
+        \code{toDeg >= fromDeg}.
+  \item \code{out} contains \((\code{toDeg}+1)^\ell\) elevated coefficients
+        in the same label order.
+\end{itemize}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+B = pdmat({[0 1]}, {1, 2, 3}, Degree=2);
+C = A + B;
+degree = C.Degree
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+degree =
+     2
+\end{lstlisting}
+
+The example invokes the protected helper through public addition; users do not
+call \code{bernElev} directly.  Invalid degree values raise
+\codeerr{pdbase}{InvalidDegree}; a target below the source degree raises
+\codeerr{pdbase}{InvalidDegreeElevation}; a coefficient count inconsistent
+with the source degree and parameter dimension raises
+\codeerr{pdbase}{InvalidCoefficientCell}.
+
+\subsection{\texorpdfstring{\code{bernProd}}{bernProd}}
+\index{bernProd@\texttt{bernProd}}
+\label{sec:pdbase-bernprod}
+
+\textit{Internal/protected mechanism.}  This signature documents the backend
+algorithm used by public matrix multiplication; it is not a supported user
+call form.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{lhs} and \code{rhs} are flat coefficient-cell families whose
+        matrix payload inner dimensions are compatible for multiplication.
+  \item \code{lhsDeg} and \code{rhsDeg} are their nonnegative local Bernstein
+        degrees.
+  \item \code{out} is the binomial-normalized coefficient convolution at
+        degree \code{lhsDeg + rhsDeg}; payload products follow MATLAB matrix
+        multiplication rules.
+\end{itemize}
+
+For one parameter, the protected helper implements
+\[
+  C[k]=\sum_{i+j=k}
+  \frac{\binom mi\binom nj}{\binom{m+n}{k}}\,A[i]B[j].
+\]
+It enumerates ordered payload products, groups them by the anti-diagonal
+\(i+j=k\), and only then applies the binomial normalization.  For tensor
+labels the same rule is applied componentwise.  See the public
+\code{pdmat} multiplication entry in \cref{sec:pdmat-operator-entries}, the
+\code{pdvar} known-data boundary in \cref{sec:pdvar-algebra}, and the full
+derivation in Appendix~\ref{app:bernstein-math}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+P = A * A;
+degree = P.Degree
+coefficients = cell2mat(P.coeffs(1))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+degree =
+     2
+coefficients =
+     1     2     4
+\end{lstlisting}
+
+The example invokes the protected helper through public matrix multiplication;
+users do not call \code{bernProd} directly.  Even for scalar data, the middle
+coefficient comes from two ordered contributions rather than from one sample.
+
+\subsection{\texorpdfstring{\code{mergeGrid}}{mergeGrid}}\index{mergeGrid@\texttt{mergeGrid}}
+\label{sec:pdbase-mergegrid}
+
+\textit{Internal/protected mechanism.}  This signature documents the backend
+grid-refinement algorithm used by public algebra; it is not a supported user
+call form.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+grid = obj.mergeGrid(errId, other1, other2, ...)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{errId} is the error identifier used when parameter counts or
+        physical bounds are incompatible.
+  \item \code{other1, other2, ...} are coefficient-backed operands, including
+        function-backed operands constructed with an explicit \code{Degree}.
+        They must have equal parameter counts and matching first and last nodes
+        on every parameter axis.
+  \item \code{grid} has the sorted union of the interior nodes.  Public
+        algebra re-expresses operands on these cells before degree elevation,
+        coefficient-wise addition, or product convolution.
+\end{itemize}
+This protected helper is invoked by public algebra methods rather than called
+directly by users.
+
+\needspace{28\baselineskip}
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+gridA = {[0 1], [0 0.5 1]};
+gridB = {[0 0.5 1], [0 1]};
+A = pdmat(gridA, @(rho1, rho2) rho1 + 2*rho2, Degree=1);
+B = pdmat(gridB, @(rho1, rho2) 2*rho1 - rho2, Degree=1);
+C = A + B;
+fprintf("rho1: %g %g %g\n", C.GridInfo.Vectors{1});
+fprintf("rho2: %g %g %g\n", C.GridInfo.Vectors{2});
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+rho1: 0 0.5 1
+rho2: 0 0.5 1
+\end{lstlisting}
+
+The example invokes the protected helper through public addition; users do not
+call \code{mergeGrid} directly.  Here \(\ell=2\).  The physical-cell index
+\(\mathbf c=(c_1,c_2)\) is one-based, while the degree-one local Bernstein
+label \(\mathbf i=(i_1,i_2)\in\{0,1\}^2\) is zero-based inside every cell.
+
+\begin{center}
+\begin{tikzpicture}[x=1.25cm,y=1.25cm]
+  \node[dp/label,font=\scriptsize\bfseries] at (0.9,2.30)
+    {\(G_A=\{[0,1],[0,0.5,1]\}\)};
+  \draw[dp/grid-line] (0,0)--(1.8,0)--(1.8,1.8)--(0,1.8)--cycle;
+  \draw[dp/grid-line] (0,0.9)--(1.8,0.9);
+  \node[dp/label] at (0.9,0.45) {\(\mathbf c=(1,1)\)};
+  \node[dp/label] at (0.9,1.35) {\(\mathbf c=(1,2)\)};
+
+  \node[dp/label,font=\scriptsize\bfseries] at (3.5,2.30)
+    {\(G_B=\{[0,0.5,1],[0,1]\}\)};
+  \draw[dp/grid-line] (2.6,0)--(4.4,0)--(4.4,1.8)--(2.6,1.8)--cycle;
+  \draw[dp/grid-line] (3.5,0)--(3.5,1.8);
+  \node[dp/label,font=\tiny] at (3.05,0.9)
+    {\(\mathbf c=\)\\\((1,1)\)};
+  \node[dp/label,font=\tiny] at (3.95,0.9)
+    {\(\mathbf c=\)\\\((2,1)\)};
+
+  \draw[dp/arrow] (4.65,0.9)--(5.20,0.9)
+    node[midway,above,font=\tiny]{merge};
+  \node[dp/label,font=\scriptsize\bfseries] at (6.35,2.30)
+    {\(G=\{[0,0.5,1],[0,0.5,1]\}\)};
+  \draw[dp/grid-line,very thick] (5.45,0)--(7.25,0)--(7.25,1.8)--(5.45,1.8)--cycle;
+  \draw[dp/grid-line,very thick] (6.35,0)--(6.35,1.8);
+  \draw[dp/grid-line,very thick] (5.45,0.9)--(7.25,0.9);
+  \node[dp/label] at (5.90,0.45) {\((1,1)\)};
+  \node[dp/label] at (6.80,0.45) {\((2,1)\)};
+  \node[dp/label] at (5.90,1.35) {\((1,2)\)};
+  \node[dp/label] at (6.80,1.35) {\((2,2)\)};
+  \node[dp/label,text width=45mm] at (6.35,-0.55)
+    {four physical cells; local labels in each cell:\\
+     \(\mathbf i\in\{0,1\}^2\) (zero-based)};
+\end{tikzpicture}
+
+\textit{Each axis uses the sorted union of its input nodes.  The result is the
+unique minimal same-bound tensor grid containing both inputs.}
+\end{center}
+
+\section{See Also}
+\code{pdmat}, \code{pdvar}, \code{cells}, \code{coeffs}, \code{lbls},
+\code{ncell}, \code{ncoeff}, \code{npar}, \code{size}, \code{elevVals},
+\code{elevLocalValues}, \code{bernElev}, \code{bernProd}, \code{mergeGrid}.

@@ -23,9 +23,9 @@ import { historyPolicy, versionHistory } from "../../data/version-history.js";
 
 ## Release History
 
-Patch-only documentation updates change the current version above but do not
-create release-history rows. This list is reserved for intentional minor
-documentation/API snapshots or user-requested patch release notes.
+This list records the historical manual snapshots recovered from Git, plus
+the explicitly requested v0.4.1 patch release. A commit suffix identifies the
+release evidence for each previous snapshot.
 
 <div class="history-list">
   {versionHistory.length === 0 ? (
@@ -56,6 +56,6 @@ documentation/API snapshots or user-requested patch release notes.
   <li>History append rule: {historyPolicy.appendRule}</li>
 </ul>
 
-When future public versions roll forward, add a new row in
+When a future public release requires a recorded snapshot, add a new row in
 `webpage/src/data/version-history.js` and keep the current version synchronized
 from the TeX manual rather than editing the displayed current version manually.

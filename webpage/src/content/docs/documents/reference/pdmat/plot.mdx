@@ -18,7 +18,7 @@ export const plotSeries = [
   <span>plot</span>
 </nav>
 
-<ParameterCurveDiagram series={plotSeries} label="Two crossing higher-order pdmat entries plotted across rho" caption="plot samples represented matrix entries over the physical parameter interval; each visible curve remains tied to its matrix index." />
+<ParameterCurveDiagram series={plotSeries} label="Linear and quadratic pdmat entries plotted across rho" caption="plot samples represented matrix entries over the physical parameter interval; each visible curve remains tied to its matrix index." />
 
 ## Purpose
 
@@ -47,12 +47,10 @@ h = plot(A, SamplesPerCell=n)
 
 ## Examples
 
-### One-dimensional crossing higher-order data
+### One-dimensional matrix entries
 
 ```matlab
-A = pdmat({[-1 1]}, @(rho) [ ...
-    0.4 + 0.9*rho - 0.8*rho.^2 + 0.5*rho.^3, ...
-   -0.2 + 0.3*rho + 1.1*rho.^2 - 0.7*rho.^3 + 0.2*rho.^4]);
+A = pdmat({[-1 1]}, @(rho) [rho, rho.^2]);
 h = plot(A, SamplesPerCell=80, LineWidth=2);
 handleCount = numel(h)
 sampleCount = numel(h(1).XData)
@@ -68,18 +66,16 @@ sampleCount =
 
 ![One-dimensional pdmat plot showing rho and rho squared entries](/PD-LMI-package/plots/pdmat-plot-1d.png)
 
-The two cubic/quartic entries cross on $[-1,1]$, making entry identity and nonlinear sampling visible.
+The linear and quadratic entries show that one graphics handle is returned for
+each matrix payload entry.
 
 ### Two-dimensional surface
 
 ```matlab
-A = pdmat({[-1 1], [-1 1]}, @(rho, eta) [ ...
-    0.5 + 0.7*rho - 0.6*eta + 0.9*rho.*eta + ...
-        0.4*rho.^2 - 0.3*eta.^3 + 0.25*rho.^2.*eta.^2, ...
-    0.2 - 0.5*rho + 0.8*eta - 0.7*rho.*eta - ...
-        0.3*rho.^2 + 0.35*eta.^2 + 0.3*rho.^3.*eta]);
+A = pdmat({[-1 1], [0 2]}, ...
+    @(rho1, rho2) 1 + rho1.^2 + 0.5*rho2 + rho1.*rho2);
 h = plot(A, [1 2], SamplesPerCell=45, ...
-    EdgeColor="none", FaceAlpha=0.72);
+    EdgeColor="none", FaceAlpha=0.78);
 surfaceSize = size(h(1).XData)
 faceAlpha = h(1).FaceAlpha
 ```
@@ -89,12 +85,13 @@ surfaceSize =
     46    46
 
 faceAlpha =
-    0.7200
+    0.7800
 ```
 
-![Two-dimensional pdmat surface plot showing two matrix entries over rho one and rho two](/PD-LMI-package/plots/pdmat-plot-2d.png)
+![Two-dimensional scalar pdmat surface over rho one and rho two](/PD-LMI-package/plots/pdmat-plot-2d.png)
 
-The two higher-order surfaces include mixed terms and intersect on the physical box. `plot` creates one graphics object per matrix payload entry.
+The scalar surface includes both a quadratic term and a mixed term. `plot`
+uses the selected grid axes as the two displayed dimensions.
 
 ### Three-parameter object, two-dimensional slice
 
@@ -103,23 +100,38 @@ choose the two displayed axes; every unselected parameter is fixed at its
 lower grid bound.
 
 ```matlab
-A = pdmat({[-1 1], [-1 1], [0 2]}, @(rho, eta, zeta) [ ...
-    0.4 + rho.*eta + 0.3*zeta + 0.2*rho.^2, ...
-   -0.1 + 0.6*rho - 0.4*eta + 0.5*zeta + 0.2*eta.^2]);
+A = pdmat({[-1 1], [0 2], [-2 3]}, ...
+    @(rho1, rho2, rho3) [ ...
+        1 + 0.4*rho1.^2 + 0.1*rho2 + 0.05*rho3, ...
+        2 + 0.3*rho1 + 0.1*rho2 + 0.05*rho3; ...
+        3 - 0.2*rho1 + 0.15*rho2 + 0.05*rho3, ...
+        4 + 0.2*rho1.^2 + 0.25*rho2 + 0.05*rho3]);
 h = plot(A, [1 2], SamplesPerCell=45, ...
-    EdgeColor="none", FaceAlpha=0.72);
+    EdgeColor="none", FaceAlpha=0.55);
+faceColors = [35 86 125; 103 127 145; 154 158 161; 205 205 205]/255;
+for k = 1:numel(h)
+    set(h(k), "FaceColor", faceColors(k,:));
+end
+legend(h, ["A(1,1)", "A(1,2)", "A(2,1)", "A(2,2)"], ...
+    "Location", "eastoutside")
 fixedThirdParameter = A.GridInfo.Bounds(3,1)
+handleCount = numel(h)
 ```
 
 ```text
 fixedThirdParameter =
-     0
+    -2
+
+handleCount =
+     4
 ```
 
-![Two-dimensional slice of a three-parameter pdmat object with the third parameter fixed at its lower bound](/PD-LMI-package/plots/pdmat-plot-3d-slice.png)
+![Four vertically separated transparent entry surfaces from a two-by-two three-parameter pdmat object, with an outside legend and rho three fixed at its lower bound](/PD-LMI-package/plots/pdmat-plot-3d-slice.png)
 
-This is a two-dimensional slice, not a volume plot. The source code explicitly
-selects dimensions `[1 2]`, and the third coordinate remains fixed at `0`.
+This is a two-dimensional matrix slice, not a scalar or volume plot. The four
+entry surfaces are vertically separated, use transparent fills, and keep their
+legend outside the axes. The source explicitly selects dimensions `[1 2]`, so
+the third coordinate remains fixed at its lower grid bound, $\rho_3=-2$.
 
 ## Validation And Errors
 
