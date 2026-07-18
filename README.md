@@ -5,7 +5,7 @@ It represents continuous piecewise-polynomial decision matrices in cell-local
 tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
 models are called differentiable parameter-dependent LMIs (DPD-LMIs).
 
-Current release: **v0.4.0**.
+Current release: **v0.4.2** (in progress).
 
 The current implementation provides:
 
@@ -34,18 +34,25 @@ boundary.
 ## Requirements
 
 - MATLAB.
-- YALMIP on the MATLAB path for `pdvar` and `pdlmi` workflows.
-- An SDP solver supported by YALMIP when solving assembled constraints.
+- A complete YALMIP installation already on the current MATLAB path.
+- One working SDP solver visible to YALMIP. The installer probes MOSEK,
+  COPT, SeDuMi, SDPT3, then LMILAB in that order; it does not download
+  dependencies or obtain solver licenses.
 
 ## Installation
 
-From MATLAB, add the package root recursively and remove the documentation folder from the path:
+From MATLAB with YALMIP already on the path, run the one-shot installer:
 
 ```matlab
-projectRoot = "path/to/PD-LMI-package";
-addpath(genpath(projectRoot));
-rmpath(genpath(fullfile(projectRoot, "doc")));
+report = install_pd_lmi();
 ```
+
+The report records `PackageRoot`, `YALMIPRoot`, the working `Solver`, newly
+`AddedPaths`, and whether the path was `Persisted`. Installation stops without
+saving any path change when YALMIP is missing or incomplete, no supported SDP
+solver completes its bounded probe, another PD-LMI class shadows this package,
+or `savepath` fails. The installer never edits `startup.m` or changes your
+solver defaults.
 
 ## Verification
 
@@ -55,7 +62,9 @@ Run the current test suite from MATLAB:
 results = tests.run_all();
 ```
 
-The test entry point covers helper utilities, `pdbase`, `pdmat`, `pdvar`, and `pdlmi`. The YALMIP-backed tests require YALMIP to be available.
+The test entry point covers installer behavior, helper utilities, `pdbase`,
+`pdmat`, `pdvar`, and `pdlmi`. Its solver smoke tests use the same
+commercial-first working-solver policy as `install_pd_lmi`.
 
 ## Quick Start
 

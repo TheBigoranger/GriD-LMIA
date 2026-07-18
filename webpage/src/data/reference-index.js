@@ -1,9 +1,18 @@
 const page = (path, anchor = "") => `/PD-LMI-package/${path}/${anchor ? `#${anchor}` : ""}`;
 
-const entry = (name, type, task, path, anchor = "") => ({
+export const referenceGroups = [
+  { id: "pdmat", label: "pdmat", description: "Known matrix data and coefficient-backed operations." },
+  { id: "pdvar", label: "pdvar", description: "YALMIP-backed decision expressions and differentiation." },
+  { id: "pdlmi", label: "pdlmi", description: "Finite direct and opt-in certificate constraints." },
+  { id: "pdbase-backend", label: "pdbase / backend", description: "Cell-local storage and Bernstein backend utilities." },
+  { id: "shared-helpers", label: "Shared helpers", description: "Implementation helpers shared across the package." },
+];
+
+const entry = (name, type, task, path, anchor = "", group = "shared-helpers") => ({
   name,
   type,
   task,
+  group,
   href: page(path, anchor),
 });
 
@@ -123,76 +132,87 @@ export const referenceEntries = [
     type: "Backend class",
     task: "Inspect cell-local Bernstein storage shared by pdmat and pdvar.",
     href: "/PD-LMI-package/documents/reference/pdbase/",
+    group: "pdbase-backend",
   },
-  ...pdbaseMethods.map(([name, task]) => entry(name, "pdbase method", task, "documents/reference/pdbase/storage-inspection", `pdbase-${name}`)),
+  ...pdbaseMethods.map(([name, task]) => entry(name, "pdbase method", task, "documents/reference/pdbase/storage-inspection", `pdbase-${name}`, "pdbase-backend")),
   {
     name: "pdmat",
     type: "Known-data class",
     task: "Represent finite real matrix data on a parameter grid.",
     href: "/PD-LMI-package/documents/reference/pdmat/",
+    group: "pdmat",
   },
   {
     name: "pdmat constructor",
     type: "pdmat function",
     task: "Create coefficient-backed or function-backed known-data matrices.",
     href: "/PD-LMI-package/documents/reference/pdmat/constructor/",
+    group: "pdmat",
   },
-  ...pdmatMethods.map(([name, task, dedicated]) => entry(name, "pdmat method", task, dedicated ? `documents/reference/pdmat/${dedicated.toLowerCase()}` : operationRoute("pdmat", name), dedicated ? "" : `pdmat-${name}`)),
+  ...pdmatMethods.map(([name, task, dedicated]) => entry(name, "pdmat method", task, dedicated ? `documents/reference/pdmat/${dedicated.toLowerCase()}` : operationRoute("pdmat", name), dedicated ? "" : `pdmat-${name}`, "pdmat")),
   {
     name: "pdvar",
     type: "Decision class",
     task: "Create continuous YALMIP-backed Bernstein decision expressions.",
     href: "/PD-LMI-package/documents/reference/pdvar/",
+    group: "pdvar",
   },
   {
     name: "pdvar constructor",
     type: "pdvar function",
     task: "Create symmetric or full continuous Bernstein decision variables.",
     href: "/PD-LMI-package/documents/reference/pdvar/constructor/",
+    group: "pdvar",
   },
   ...pdvarMethods.map(([name, task, dedicated]) => {
     const comparison = name === "le" || name === "ge" || name === "eq";
-    return entry(name, comparison ? "pdvar comparison" : "pdvar method", task, dedicated ? `documents/reference/pdvar/${dedicated.toLowerCase()}` : comparison ? "documents/reference/pdvar/comparisons" : operationRoute("pdvar", name), dedicated ? "" : `${comparison ? "pdvar-comparison" : "pdvar"}-${name}`);
+    return entry(name, comparison ? "pdvar comparison" : "pdvar method", task, dedicated ? `documents/reference/pdvar/${dedicated.toLowerCase()}` : comparison ? "documents/reference/pdvar/comparisons" : operationRoute("pdvar", name), dedicated ? "" : `${comparison ? "pdvar-comparison" : "pdvar"}-${name}`, "pdvar");
   }),
   {
     name: "pdlmi",
     type: "Constraint class",
     task: "Store direct equality or direct, Pólya-elevated, Putinar, or full-box inequality constraints.",
     href: "/PD-LMI-package/documents/reference/pdlmi/",
+    group: "pdlmi",
   },
   {
     name: "pdlmi constructor",
     type: "pdlmi function",
     task: "Select direct, Pólya-elevated, fixed-order Putinar, or fixed-order full-box assembly.",
     href: "/PD-LMI-package/documents/reference/pdlmi/constructor/",
+    group: "pdlmi",
   },
   {
     name: "toYalmip",
     type: "pdlmi method",
     task: "Concatenate stored constraints for YALMIP optimize calls.",
     href: "/PD-LMI-package/documents/reference/pdlmi/toyalmip/",
+    group: "pdlmi",
   },
   {
     name: "applyPolya",
     type: "pdlmi method",
     task: "Rebuild a residual with a selected Pólya degree increment.",
     href: "/PD-LMI-package/documents/reference/pdlmi/applypolya/",
+    group: "pdlmi",
   },
   {
     name: "applyPutinar",
     type: "pdlmi method",
     task: "Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate.",
     href: "/PD-LMI-package/documents/reference/pdlmi/applyputinar/",
+    group: "pdlmi",
   },
   {
     name: "applyFullBoxPreorder",
     type: "pdlmi method",
     task: "Rebuild a residual with a fixed-order full box Bernstein-Gram certificate.",
     href: "/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/",
+    group: "pdlmi",
   },
-  entry("bernElev", "pdbase backend method", "Elevate Bernstein degree for compatible coefficient payloads.", "documents/reference/bernstein-utilities", "bernElev"),
-  entry("bernProd", "pdbase backend method", "Multiply local Bernstein coefficient families by label convolution.", "documents/reference/bernstein-utilities", "bernProd"),
-  entry("mergeGrid", "pdbase backend method", "Refine compatible physical grids before coefficient algebra.", "documents/reference/bernstein-utilities", "mergeGrid"),
+  entry("bernElev", "pdbase backend method", "Elevate Bernstein degree for compatible coefficient payloads.", "documents/reference/bernstein-utilities", "bernElev", "pdbase-backend"),
+  entry("bernProd", "pdbase backend method", "Multiply local Bernstein coefficient families by label convolution.", "documents/reference/bernstein-utilities", "bernProd", "pdbase-backend"),
+  entry("mergeGrid", "pdbase backend method", "Refine compatible physical grids before coefficient algebra.", "documents/reference/bernstein-utilities", "mergeGrid", "pdbase-backend"),
   entry("helper.bernTbl", "shared backend helper", "Build detailed or one-line Bernstein coefficient tables.", "documents/reference/shared-helpers", "helper-berntbl"),
   entry("helper.cellGet", "shared backend helper", "Read one nested LocalValues leaf by physical-cell subscripts.", "documents/reference/shared-helpers", "helper-cellget"),
   entry("helper.chk", "shared backend helper", "Apply common validation predicates with caller-owned errors.", "documents/reference/shared-helpers", "helper-chk"),

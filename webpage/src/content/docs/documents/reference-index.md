@@ -3,19 +3,14 @@ title: Reference Lookup Table
 description: Generated lookup table for implemented PD-LMI classes and methods.
 ---
 
-This generated page lists implemented public classes and methods that are documented in the online manual. The source data lives in `src/data/reference-index.js`; regenerate this page with `npm --prefix webpage run generate:index`.
+This generated page groups implemented public classes, methods, backend utilities, and shared helpers. The source data lives in `src/data/reference-index.js`; regenerate this page with `npm --prefix webpage run generate:index`.
+
+## pdmat
+
+Known matrix data and coefficient-backed operations.
 
 | Name | Type | Lookup Task |
 | :--- | :--- | :--- |
-| [`pdbase`](/PD-LMI-package/documents/reference/pdbase/) | Backend class | Inspect cell-local Bernstein storage shared by pdmat and pdvar. |
-| [`cells`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-cells) | pdbase method | Enumerate physical tensor-grid cells. |
-| [`coeffs`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-coeffs) | pdbase method | Read local Bernstein coefficient families. |
-| [`lbls`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-lbls) | pdbase method | Inspect flat local Bernstein labels. |
-| [`elevVals`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-elevVals) | pdbase method | Degree-elevate every cell-local coefficient family. |
-| [`ncell`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncell) | pdbase method | Count physical cells. |
-| [`ncoeff`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncoeff) | pdbase method | Count coefficients in one local cell. |
-| [`npar`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-npar) | pdbase method | Count parameter dimensions. |
-| [`size`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-size) | pdbase method | Inspect matrix payload dimensions. |
 | [`pdmat`](/PD-LMI-package/documents/reference/pdmat/) | Known-data class | Represent finite real matrix data on a parameter grid. |
 | [`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) | pdmat function | Create coefficient-backed or function-backed known-data matrices. |
 | [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/) | pdmat method | Inspect coefficient rows and optional one-line expressions. |
@@ -60,6 +55,13 @@ This generated page lists implemented public classes and methods that are docume
 | [`height`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-height) | pdmat method | Report the first payload dimension. |
 | [`width`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-width) | pdmat method | Report the second payload dimension. |
 | [`size`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-size) | pdmat method | Inspect matrix payload dimensions. |
+
+## pdvar
+
+YALMIP-backed decision expressions and differentiation.
+
+| Name | Type | Lookup Task |
+| :--- | :--- | :--- |
 | [`pdvar`](/PD-LMI-package/documents/reference/pdvar/) | Decision class | Create continuous YALMIP-backed Bernstein decision expressions. |
 | [`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/) | pdvar function | Create symmetric or full continuous Bernstein decision variables. |
 | [`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/) | pdvar method | Inspect symbolic coefficient rows and rate vertices. |
@@ -105,15 +107,45 @@ This generated page lists implemented public classes and methods that are docume
 | [`height`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-height) | pdvar method | Report the first payload dimension. |
 | [`width`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-width) | pdvar method | Report the second payload dimension. |
 | [`size`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-size) | pdvar method | Inspect matrix payload dimensions. |
+
+## pdlmi
+
+Finite direct and opt-in certificate constraints.
+
+| Name | Type | Lookup Task |
+| :--- | :--- | :--- |
 | [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) | Constraint class | Store direct equality or direct, Pólya-elevated, Putinar, or full-box inequality constraints. |
 | [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) | pdlmi function | Select direct, Pólya-elevated, fixed-order Putinar, or fixed-order full-box assembly. |
 | [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) | pdlmi method | Concatenate stored constraints for YALMIP optimize calls. |
 | [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) | pdlmi method | Rebuild a residual with a selected Pólya degree increment. |
 | [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) | pdlmi method | Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate. |
 | [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) | pdlmi method | Rebuild a residual with a fixed-order full box Bernstein-Gram certificate. |
+
+## pdbase / backend
+
+Cell-local storage and Bernstein backend utilities.
+
+| Name | Type | Lookup Task |
+| :--- | :--- | :--- |
+| [`pdbase`](/PD-LMI-package/documents/reference/pdbase/) | Backend class | Inspect cell-local Bernstein storage shared by pdmat and pdvar. |
+| [`cells`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-cells) | pdbase method | Enumerate physical tensor-grid cells. |
+| [`coeffs`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-coeffs) | pdbase method | Read local Bernstein coefficient families. |
+| [`lbls`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-lbls) | pdbase method | Inspect flat local Bernstein labels. |
+| [`elevVals`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-elevVals) | pdbase method | Degree-elevate every cell-local coefficient family. |
+| [`ncell`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncell) | pdbase method | Count physical cells. |
+| [`ncoeff`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncoeff) | pdbase method | Count coefficients in one local cell. |
+| [`npar`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-npar) | pdbase method | Count parameter dimensions. |
+| [`size`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-size) | pdbase method | Inspect matrix payload dimensions. |
 | [`bernElev`](/PD-LMI-package/documents/reference/bernstein-utilities/#bernElev) | pdbase backend method | Elevate Bernstein degree for compatible coefficient payloads. |
 | [`bernProd`](/PD-LMI-package/documents/reference/bernstein-utilities/#bernProd) | pdbase backend method | Multiply local Bernstein coefficient families by label convolution. |
 | [`mergeGrid`](/PD-LMI-package/documents/reference/bernstein-utilities/#mergeGrid) | pdbase backend method | Refine compatible physical grids before coefficient algebra. |
+
+## Shared helpers
+
+Implementation helpers shared across the package.
+
+| Name | Type | Lookup Task |
+| :--- | :--- | :--- |
 | [`helper.bernTbl`](/PD-LMI-package/documents/reference/shared-helpers/#helper-berntbl) | shared backend helper | Build detailed or one-line Bernstein coefficient tables. |
 | [`helper.cellGet`](/PD-LMI-package/documents/reference/shared-helpers/#helper-cellget) | shared backend helper | Read one nested LocalValues leaf by physical-cell subscripts. |
 | [`helper.chk`](/PD-LMI-package/documents/reference/shared-helpers/#helper-chk) | shared backend helper | Apply common validation predicates with caller-owned errors. |

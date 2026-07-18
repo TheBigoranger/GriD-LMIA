@@ -978,7 +978,7 @@ blockDiagonalSize =
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=10mm,
+\begin{tikzpicture}[>=Latex,node distance=18mm,
   b/.style={dp/neutral,font=\scriptsize,
     minimum width=18mm,minimum height=10mm},
   o/.style={dp/result,
@@ -1088,7 +1088,7 @@ containsDecision =
     \(\boxed{p_{21}}\ p_{22}\ p_{23}\)};
   \node[o,right=of p] (q) {\(\boxed{0}\ p_{12}\ p_{13}\)\\
     \(\boxed{0}\ p_{22}\ p_{23}\)};
-  \draw[->,thick,dpblue] (p) -- node[above,font=\scriptsize]
+  \draw[->,thick,dpblue] (p) -- node[dp/direct-label,above=2pt]
     {\code{P(:,1)=0}} (q);
 \end{tikzpicture}
 \end{center}

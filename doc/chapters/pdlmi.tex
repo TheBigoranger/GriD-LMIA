@@ -483,6 +483,21 @@ identities.  The result is identical to
 \code{direct.applyFullBoxPreorder()}.  Each physical cell and each active
 rate-vertex row receives independent copies of these PSD blocks and identities.
 
+\remarkshead
+For the multivariate backend, the smallest useful worked case is
+\(\ell=2\).  Let \(g_s=\alpha_s(1-\alpha_s)\).  At absolute order \(r\),
+Putinar uses exactly the singleton-generator module
+\[
+  F=S_0+g_1S_1+g_2S_2,
+\]
+where \(S_0\) has Bernstein basis degree \((r,r)\), \(S_1\) has degree
+\((r-1,r)\), and \(S_2\) has degree \((r,r-1)\).  Each \(S_j\) is a
+PSD Gram form.  MATLAB elevates the sign-normalized target and all present
+terms to tensor degree \((2r,2r)\), then creates one exact coefficient match
+per local Bernstein label.  These PSD blocks and equalities are assembled
+independently for every physical cell, active rate row, and scalar matrix entry;
+they are never shared across those axes.
+
 \begin{center}
 The diagram below specializes to the even one-parameter example above.
 
@@ -596,6 +611,21 @@ fullBoxConstraintCount =
 
 At this order the scalar degree-two cell has two PSD Gram constraints followed
 by three exact Bernstein coefficient identities.
+
+\remarkshead
+For \(\ell=2\), Full Box differs from Putinar by retaining the product
+generator.  With \(g_s=\alpha_s(1-\alpha_s)\), its exact backend form is
+\[
+  F=S_0+g_1S_1+g_2S_2+g_1g_2S_{12}.
+\]
+The Bernstein basis degrees are respectively \((r,r)\), \((r-1,r)\),
+\((r,r-1)\), and \((r-1,r-1)\); each present term is a PSD Gram block.
+All four terms are elevated and coefficient-matched at tensor degree
+\((2r,2r)\).  Thus the additional \(S_{12}\) block is precisely the
+two-generator distinction from the singleton Putinar module, not a change to
+the residual, grid, or decision degree.  The implementation builds the PSD
+blocks and exact equalities independently for each cell, rate row, and scalar
+matrix entry.
 
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,

@@ -1,55 +1,75 @@
 \chapter{Install and Verify the Package}
 \label{sec:setup}
 
-\section{Requirements and Path Setup}
+\section{One-Call Installation}
 \label{sec:installation}
 
-Start \matlab{} in the repository root, or set \code{projectRoot} to the
-absolute path of the checked-out repository.  Add the package recursively, then
-remove the documentation directory from the executable path.
+Start \matlab{} in the checked-out repository and run the root-level installer
+once.  The installer adds the package source tree recursively while excluding
+documentation, the Web site, independent SOS validation material, Git/agent
+metadata, and generated build directories.  It does not download dependencies
+or edit \code{startup.m}.
 
 \begin{lstlisting}[style=dpmatlab]
-projectRoot = "path/to/Differential Parameter-Dependent Linear Matrix Inequality";
-addpath(genpath(projectRoot));
-rmpath(genpath(fullfile(projectRoot, "doc")));
+report = install_pd_lmi();
 \end{lstlisting}
 
-For local work from the repository root, this package also resolves from:
+The returned structure records the package root, the YALMIP root discovered on
+the current MATLAB path, the working SDP solver, the paths added by this run,
+and whether the path was persisted:
 
-\begin{lstlisting}[style=dpmatlab]
-addpath(pwd)
+\begin{lstlisting}[style=dpoutput]
+report.PackageRoot
+report.YALMIPRoot
+report.Solver
+report.AddedPaths
+report.Persisted
 \end{lstlisting}
 
-\section{Run the Test Suite}
+YALMIP must already be on the active MATLAB path.  The installer validates
+\code{yalmip}, \code{sdpvar}, \code{sdpsettings}, \code{optimize}, and
+\code{getavailablesolvers}; it then probes available SDP solvers in the fixed
+commercial-first order MOSEK, COPT, SeDuMi, SDPT3, and LMILAB using a tiny
+bounded SDP.  A failed probe falls through to the next candidate.  If any
+precondition, shadow check, solver probe, or path persistence operation fails,
+the installer restores the original MATLAB path and stops with one of these
+stable errors:
+
+\begin{lstlisting}[style=dpoutput]
+install_pd_lmi:MissingYALMIP
+install_pd_lmi:IncompleteYALMIP
+install_pd_lmi:NoWorkingSDPSolver
+install_pd_lmi:PathConflict
+install_pd_lmi:PathSaveFailed
+\end{lstlisting}
+
+Repeated successful calls are idempotent.
+
+\section{Validate the Installation}
 \label{sec:verification}
 
-Run the current MATLAB test entry point from the repository root:
+After the installer has selected and recorded a working solver, run the current
+MATLAB test entry point from the repository root:
 
 \begin{lstlisting}[style=dpmatlab]
 results = tests.run_all();
 \end{lstlisting}
 
-The test entry point covers helper utilities, \code{pdbase}, \code{pdmat},
-\code{pdvar}, and ordinary \code{pdlmi} behavior.  The YALMIP-backed
-\code{pdvar} and \code{pdlmi} tests require YALMIP.  Solver smoke tests
-additionally require an SDP solver.
+The entry point covers installer rollback and persistence behavior, helper
+utilities, \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}.
+YALMIP-backed tests and the solver smoke tests use the same automatic
+commercial-first solver policy as the installer; their diagnostics identify the
+actual solver used.
 
 \section{Run a Minimal Solver Example}
 \label{sec:quick-start}
 
-First confirm that MATLAB resolves the four renamed constructors from this
-repository and not from another toolbox:
+The installer already rejects shadowed package classes before it persists the
+path.  To inspect the selected solver and exercise the solver-facing assembly
+boundary, use the report together with a small known-data example:
 
 \begin{lstlisting}[style=dpmatlab]
-which pdbase -all
-which pdmat -all
-which pdvar -all
-which pdlmi -all
-\end{lstlisting}
-
-Then exercise known-data inspection and the solver-facing assembly boundary:
-
-\begin{lstlisting}[style=dpmatlab]
+report.Solver
 A = pdmat({[0 1]}, {1, 3}, Degree=1);
 T = bernsteinTable(A, "oneLine")
 \end{lstlisting}
@@ -74,10 +94,11 @@ Fbox = toYalmip(Cbox);
 
 \code{F} is the direct coefficient certificate; \code{Fputinar} and
 \code{Fbox} are the default Putinar and full-box certificates for the same
-stored residual.  Any one can be passed to
-ordinary YALMIP calls, for example:
+stored residual.  Any one can be passed to ordinary YALMIP calls.  Use the
+selected solver from the report when an explicit solver setting is useful:
 
 \begin{lstlisting}[style=dpsyntax]
+opts = sdpsettings('solver', report.Solver, 'verbose', 0);
 sol = optimize(F, objective, opts);
 \end{lstlisting}
 

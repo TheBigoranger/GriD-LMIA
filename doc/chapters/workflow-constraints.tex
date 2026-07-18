@@ -1,4 +1,4 @@
-\chapter{From Cellwise Algebra to Solver Constraints}
+\section{From Cellwise Algebra to Solver Constraints}
 \label{sec:cellwise-solver-path}
 
 This chapter continues the two-cell Lyapunov example from
@@ -6,7 +6,7 @@ This chapter continues the two-cell Lyapunov example from
 chapters document in detail: known matrices are stored as \code{pdmat}, decision
 matrices as \code{pdvar}, and finite certificate selections as \code{pdlmi}.
 
-\section{Store Known Matrices and Decision Matrices}
+\subsection{Store Known Matrices and Decision Matrices}
 \index{pdmat@\texttt{pdmat}}\index{pdvar@\texttt{pdvar}}
 
 The known LPV matrix is affine in \(\rho\) on the two-cell grid
@@ -65,7 +65,7 @@ independent.
 \end{tikzpicture}
 \end{center}
 
-\section{Multiply in Bernstein Coefficient Space}
+\subsection{Multiply in Bernstein Coefficient Space}
 
 On one physical cell, write
 \(P=\sum_iB_i^mP^{(c)}[i]\) and
@@ -104,7 +104,7 @@ coefficientCountPA =
      4
 \end{lstlisting}
 
-\section{Differentiate and Enumerate Rate Vertices}
+\subsection{Differentiate and Enumerate Rate Vertices}
 
 For a degree-\(m\) cell of width \(h_c\), differentiation is the forward
 difference
@@ -138,7 +138,7 @@ coefficientsPerRow =
 
 Rate rows are neither physical cells nor additional Bernstein labels.
 
-\section{Form a Residual on Every Hypercube}
+\subsection{Form a Residual on Every Hypercube}
 
 The MATLAB residual is a direct transcription of
 \cref{eq:canonical-positive,eq:lpv-spine}.  Addition performs exact degree
@@ -167,7 +167,7 @@ degree-three labels.  Positivity has no rate rows and has three degree-two
 labels per cell.  Shared faces are visited from each adjoining cell because
 certification remains cell-local.
 
-\section{Choose a Finite Certificate}
+\subsection{Choose a Finite Certificate}
 
 Direct Bernstein-coefficient constraints are the default.  Three opt-in
 selectors rebuild from the same original residual and relation; selections
@@ -196,7 +196,7 @@ Full Box uses all box-generator products.
 All four are finite sufficient representations.  Failure of one representation
 does not prove that the continuous inequality is infeasible.
 
-\section{Export to YALMIP and Recover the Solution}
+\subsection{Export to YALMIP and Recover the Solution}
 
 \code{toYalmip} returns exactly the stored finite constraints.  It does not
 select a solver, add an objective, or insert a strictness margin.

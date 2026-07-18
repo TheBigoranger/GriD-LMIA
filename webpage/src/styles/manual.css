@@ -294,7 +294,7 @@
 .cell-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(5rem, 1fr);
   gap: 0.3rem;
   aspect-ratio: 1;
   border-inline-start: 2px solid var(--sl-color-gray-3);
@@ -344,6 +344,8 @@
 }
 
 .cell-coeffs span {
+  display: grid;
+  gap: 0.25rem;
   box-sizing: border-box;
   min-width: 0;
   border: 1px solid var(--diagram-border);
@@ -355,6 +357,9 @@
   font-family: "STIX Two Math", Cambria, serif;
   overflow-wrap: anywhere;
 }
+
+.cell-coeffs small { color: var(--sl-color-gray-2); font-size: 0.66rem; }
+.cell-coeffs code { font-size: 0.68rem; line-height: 1.35; }
 
 .portfolio-cta {
   display: inline-flex;
@@ -518,14 +523,17 @@
 .certificate-tabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
   gap: 0.35rem;
 }
 
 .certificate-tabs button {
+  position: relative;
   display: grid;
   gap: 0.15rem;
   border: 1px solid var(--diagram-border);
   border-radius: 8px;
+  block-size: 5.7rem;
   padding: 0.7rem 0.35rem;
   color: var(--sl-color-text);
   background: var(--sl-color-bg);
@@ -551,7 +559,13 @@
   box-shadow: inset 0 3px var(--diagram-result);
 }
 
-.certificate-tabs small {
+.certificate-tabs .certificate-default {
+  position: absolute;
+  inset-block-start: 0.35rem;
+  inset-inline-end: 0.35rem;
+  border-radius: 999px;
+  padding: 0.12rem 0.3rem;
+  background: var(--sl-color-accent-low);
   color: var(--sl-color-gray-2);
   font-size: 0.64rem;
   letter-spacing: 0.06em;

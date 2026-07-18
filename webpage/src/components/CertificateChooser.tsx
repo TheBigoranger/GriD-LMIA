@@ -65,7 +65,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             >
               <strong>{item.label}</strong>
               <code>{item.command}</code>
-              {item.key === "direct" ? <small>Default</small> : null}
+              {item.key === "direct" ? <small className="certificate-default">Default</small> : null}
             </button>
           ))}
         </div>

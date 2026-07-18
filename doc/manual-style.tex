@@ -174,3 +174,12 @@
   \needspace{3\baselineskip}%
   \noindent\textcolor{dpblue}{\sffamily\bfseries #1.}\enspace}
 \newcommand{\shortpairspace}{\needspace{12\baselineskip}}
+% A high-contrast, grayscale-safe callout for the central mathematical form.
+% The frame, title weight, and pale fill remain distinct when printed without
+% color, so the box does not encode meaning through color alone.
+\newcommand{\keyequation}[2]{%
+  \par\addvspace{0.7\baselineskip}%
+  \noindent\fcolorbox{black!65}{dpbluewash}{%
+    \begin{minipage}{0.94\linewidth}%
+    \textbf{#1}\par\vspace{0.35\baselineskip}\centering #2\end{minipage}}%
+  \par\addvspace{0.7\baselineskip}}

@@ -27,16 +27,37 @@ snapshot.
 ## Requirements
 
 - MATLAB.
-- YALMIP on the MATLAB path for `pdvar`, `pdlmi`, and solver-facing examples.
-- A solver supported by YALMIP. The smoke tests prefer MOSEK when available and otherwise fall back to `lmilab`.
+- YALMIP already on the current MATLAB path. The installer requires its `yalmip`,
+  `sdpvar`, `sdpsettings`, `optimize`, and `getavailablesolvers` entry points;
+  it does not download YALMIP or scan disks for it.
+- A working SDP solver exposed by YALMIP. The installer probes MOSEK, COPT,
+  SeDuMi, SDPT3, then LMILAB, accepting the first candidate that solves a
+  small bounded SDP successfully.
 
-## Path Setup
+## One-Call Setup
 
 ```matlab
-projectRoot = "path/to/PD-LMI-package";
-addpath(genpath(projectRoot));
-rmpath(genpath(fullfile(projectRoot, "doc")));
+report = install_pd_lmi();
 ```
+
+Run the command from the package root. It adds the package source paths while
+excluding documentation, the Web site, independent SOS validation, metadata,
+and generated build directories. It checks for class shadowing before saving
+the MATLAB path, so a failure restores the previous path instead of leaving a
+partial installation.
+
+`report` contains `PackageRoot`, `YALMIPRoot`, the working `Solver`, the
+`AddedPaths`, and whether the path was `Persisted`. Calling `install_pd_lmi()`
+without an output performs the same idempotent installation.
+
+## Failure Behavior
+
+The installer stops with a stable error identifier rather than guessing a
+configuration. Typical failures are `install_pd_lmi:MissingYALMIP`,
+`install_pd_lmi:IncompleteYALMIP`, `install_pd_lmi:NoWorkingSDPSolver`,
+`install_pd_lmi:PathConflict`, and `install_pd_lmi:PathSaveFailed`. Resolve
+the reported dependency, solver, or path conflict and run the one command
+again; do not add package paths manually or edit `startup.m` for this setup.
 
 ## Verify
 

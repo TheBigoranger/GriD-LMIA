@@ -105,9 +105,9 @@ export default defineConfig({
               items: [
                 { label: "Overview", slug: "documents/reference/pdbase" },
                 { label: "Storage Inspection", slug: "documents/reference/pdbase/storage-inspection" },
+                { label: "Bernstein Backend Utilities", slug: "documents/reference/bernstein-utilities" },
               ],
             },
-            { label: "Bernstein Utilities", slug: "documents/reference/bernstein-utilities" },
             { label: "Shared Helpers", slug: "documents/reference/shared-helpers" },
           ],
         },

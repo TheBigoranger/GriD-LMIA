@@ -1,0 +1,28 @@
+---
+import { referenceEntries, referenceGroups } from "../data/reference-index.js";
+---
+
+<div class="reference-category-hub">
+  {referenceGroups.map((group) => {
+    const entries = referenceEntries.filter((entry) => entry.group === group.id);
+    const overview = entries[0];
+    return (
+      <section aria-labelledby={`reference-${group.id}`}>
+        <h3 id={`reference-${group.id}`}>{group.label}</h3>
+        <p>{group.description}</p>
+        <a href={`${overview?.href ?? "/PD-LMI-package/documents/reference-index/"}`}>Open {group.label} overview</a>
+        <span>{entries.length} indexed entries</span>
+      </section>
+    );
+  })}
+</div>
+
+<style>
+  .reference-category-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; margin-block: 1rem 1.6rem; }
+  .reference-category-hub section { display: grid; gap: 0.45rem; min-width: 0; border: 1px solid var(--diagram-border); border-radius: 12px; padding: 0.9rem; background: var(--diagram-surface); }
+  .reference-category-hub h3, .reference-category-hub p { margin: 0; }
+  .reference-category-hub h3 { color: var(--sl-color-text-accent); }
+  .reference-category-hub p, .reference-category-hub span { color: var(--sl-color-gray-2); }
+  .reference-category-hub a { width: fit-content; font-weight: 750; }
+  @media (max-width: 620px) { .reference-category-hub { grid-template-columns: 1fr; } }
+</style>

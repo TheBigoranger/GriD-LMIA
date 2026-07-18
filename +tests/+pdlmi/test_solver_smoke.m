@@ -3,9 +3,11 @@ function tests = test_solver_smoke
     tests = functiontests(localfunctions);
 end
 
-function setupOnce(~)
+function setupOnce(testCase)
     % Clear YALMIP global state so each solver smoke test builds fresh LMIs.
     yalmip("clear");
+    testCase.TestData.Solver = tests.select_sdp_solver();
+    fprintf("PD-LMI solver smoke policy selected: %s\n", testCase.TestData.Solver);
 end
 
 function testParameterDependentPBeatsConstantP(testCase)
@@ -13,12 +15,7 @@ function testParameterDependentPBeatsConstantP(testCase)
     grid = {[0 1]};
     A = pdmat(grid, @(x) (1 - x) * [-1 -1; 1 -1] ...
         + x * [-1 -10; 0.1 -1], Degree=1);
-    useMosek = exist('mosekopt', 'file') ~= 0;
-    solver = 'lmilab';
-    if useMosek
-        solver = 'mosek';
-    end
-    opts = sdpsettings('solver', solver, 'verbose', 0);
+    opts = sdpsettings('solver', testCase.TestData.Solver, 'verbose', 0);
 
     Pc = pdvar(2, grid, Degree=0);
     Cdecay = Pc * A + A' * Pc <= -1e-10 * eye(2);
@@ -30,13 +27,7 @@ function testParameterDependentPBeatsConstantP(testCase)
     Cpos = Pd >= eye(2);
     solDp = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
 
-    if useMosek
-        testCase.verifyEqual(solConst.problem, 1, solConst.info);
-    else
-        % LMILAB is only a fallback smoke path; do not use it to certify the
-        % infeasibility distinction that MOSEK reports for this example.
-        testCase.verifyTrue(any(solConst.problem == [0 1]), solConst.info);
-    end
+    testCase.verifyEqual(solConst.problem, 1, solConst.info);
     testCase.verifyEqual(solDp.problem, 0, solDp.info);
 
     % Convert solved symbolic Bernstein coefficients to known data so the
@@ -72,10 +63,7 @@ function testUserBlockLmiSolverExample(testCase)
     testCase.verifyEqual(numel(E2.Constraints), 2);
 
     objective = gamma.LocalValues{1}{1};
-    solver = 'lmilab';
-    if exist('mosekopt', 'file') ~= 0
-        solver = 'mosek';
-    end
+    solver = testCase.TestData.Solver;
     opts = sdpsettings('solver', solver, 'verbose', 0);
     sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
 
@@ -96,10 +84,7 @@ function testRectangularResidualAcrossAllCertificates(testCase)
         constructEntrywiseSilently(@() direct.applyPutinar(0)), ...
         constructEntrywiseSilently(@() direct.applyFullBoxPreorder(0))};
 
-    solver = 'lmilab';
-    if exist('mosekopt', 'file') ~= 0
-        solver = 'mosek';
-    end
+    solver = testCase.TestData.Solver;
     opts = sdpsettings('solver', solver, 'verbose', 0);
     fprintf("Rectangular certificate solver: %s\n", solver);
     for k = 1:numel(wrappers)

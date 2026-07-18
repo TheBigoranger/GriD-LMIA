@@ -20,23 +20,23 @@ const lmiSteps = [
   {
     number: "01",
     title: "Form the DPD-LMI",
-    text: "Start from a linear parameter-varying (LPV) model, whose scheduling vector ρ(t) selects the matrix A(ρ) in ẋ=A(ρ)x. A differentiable parameter-dependent LMI (DPD-LMI) includes the time derivative of the decision matrix, so the scheduling rates enter through the chain rule.",
+    text: "Use the fully general DPD-LMI: known matrix functions multiply the parameter-dependent decision functions and their scheduling derivatives. A Lyapunov inequality is one useful specialization, not the defining form.",
     math: [
-      "\\begin{aligned}\\dot P(\\rho(t))+P(\\rho)A(\\rho)+A(\\rho)^{\\mathsf T}P(\\rho)&\\preceq-\\varepsilon I,\\\\ P(\\rho)&\\succeq I,\\end{aligned}",
-      "\\dot P(\\rho(t))=\\frac{dP}{dt}=\\sum_{s=1}^{\\ell}\\frac{\\partial P}{\\partial\\rho_s}\\dot\\rho_s.",
+      "\\mathcal F(\\rho,\\dot\\rho)=\\sum_{i=1}^{N}R_i(\\rho)\\sum_{s=1}^{\\ell}\\frac{\\partial x_i}{\\partial\\rho_s}(\\rho)\\dot\\rho_s+F_0(\\rho)+\\sum_{i=1}^{N}F_i(\\rho)x_i(\\rho)\\prec0.",
+      "\\forall(\\rho,\\dot\\rho)\\in\\mathcal P\\times\\mathcal V,\\qquad x_i(\\rho)\\text{ are parameter-dependent decision functions}.",
     ],
   },
   {
     number: "02",
     title: "Grid the ρ-space",
-    text: "Choose one directional grid for each scheduling coordinate. Their Cartesian products define physical hypercubes; every cell receives its own local Bernstein coordinates and storage leaf, while shared-face values are reused when continuity is required.",
+    text: "The concrete known matrix A below lives on two physical hypercubes. Click either cell to inspect its domain and the exact degree-two local coefficient matrices stored under its LocalValues leaf.",
     math: [
       "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},",
       "\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
     ],
     visual: "storage",
-    visibleCode: "grid = {[0 0.5 1], [0 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);",
-    fullCode: "yalmip('clear')\ngrid = {[0 0.5 1], [0 1]};\nP = pdvar(2, grid, \"symmetric\", Degree=2);\nP.cells()\nP.lbls()",
+    visibleCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);",
+    fullCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);\nA.cells()\nA.LocalValues{c1}{1}",
   },
   {
     number: "03",
