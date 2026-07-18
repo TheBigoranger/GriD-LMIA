@@ -1,17 +1,11 @@
 \chapter{Public Helper Utilities}
 \label{sec:helpers}
 
-The \code{+helper} namespace contains exactly nine implementation utilities
-whose ownership genuinely crosses class boundaries.  They are developer-facing
-building blocks, not an alternative modeling API: ordinary users should enter
-through \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}.  Their
-signatures and current consumers are documented below so maintainers can
-distinguish shared contracts from class-local implementation details.
+The \code{+helper} namespace contains exactly nine implementation utilities whose ownership genuinely crosses class boundaries.  They are developer-facing building blocks, not an alternative modeling API: ordinary users should enter through \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}.  Their signatures and current consumers are documented below so maintainers can distinguish shared contracts from class-local implementation details.
 
 \section{\texorpdfstring{\code{helper.bernTbl}}{helper.bernTbl}}
 
-\textit{Purpose.} Build the shared detailed or one-line Bernstein inspection
-table used by \code{pdmat} and \code{pdvar}.
+\textit{Purpose.} Build the shared detailed or one-line Bernstein inspection table used by \code{pdmat} and \code{pdvar}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -21,11 +15,7 @@ T = helper.bernTbl(..., "oneLine")
 \end{lstlisting}
 
 \descriptionhead
-\code{obj} supplies \code{cells}, \code{lbls}, and \code{coeffs};
-\code{valFcn} maps each coefficient to a table value and \code{exprFcn} maps
-it to expression text.  \code{rateVerts} is empty for ordinary data or has one
-row per active rate vertex.  The optional \code{cellSubs} selects one physical
-cell; \code{"oneLine"} returns one expression per cell and rate row.
+\code{obj} supplies \code{cells}, \code{lbls}, and \code{coeffs}; \code{valFcn} maps each coefficient to a table value and \code{exprFcn} maps it to expression text.  \code{rateVerts} is empty for ordinary data or has one row per active rate vertex.  The optional \code{cellSubs} selects one physical cell; \code{"oneLine"} returns one expression per cell and rate row.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -41,15 +31,11 @@ T =
 \end{lstlisting}
 
 \remarkshead
-Only one cell selector and the case-insensitive \code{"oneLine"} option are
-accepted.  Invalid selectors, unknown text, repeated selectors, or rate-row
-count mismatches raise the caller-owned \code{errId}, preserving the public
-class error namespace.
+Only one cell selector and the case-insensitive \code{"oneLine"} option are accepted.  Invalid selectors, unknown text, repeated selectors, or rate-row count mismatches raise the caller-owned \code{errId}, preserving the public class error namespace.
 
 \section{\texorpdfstring{\code{helper.cellGet}}{helper.cellGet}}
 
-\textit{Purpose.} Read one flat coefficient leaf from a nested physical-cell
-tree.
+\textit{Purpose.} Read one flat coefficient leaf from a nested physical-cell tree.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -57,10 +43,7 @@ leaf = helper.cellGet(vals, subs)
 \end{lstlisting}
 
 \descriptionhead
-\code{vals} is addressed as
-\code{vals{i1}{i2}...{i_ell}} and \code{subs} supplies one index per level.
-The returned \code{leaf} is the selected flat coefficient cell or rate-row
-table; no copy, reshaping, or multi-index cell interpretation is introduced.
+\code{vals} is addressed as \code{vals{i1}{i2}...{i_ell}} and \code{subs} supplies one index per level. The returned \code{leaf} is the selected flat coefficient cell or rate-row table; no copy, reshaping, or multi-index cell interpretation is introduced.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -74,13 +57,11 @@ leaf =
 \end{lstlisting}
 
 \remarkshead
-The helper deliberately relies on ordinary MATLAB cell indexing.  Callers
-validate the subscript length and bounds before traversal.
+The helper deliberately relies on ordinary MATLAB cell indexing.  Callers validate the subscript length and bounds before traversal.
 
 \section{\texorpdfstring{\code{helper.chk}}{helper.chk}}
 
-\textit{Purpose.} Apply shared validation predicates while retaining a
-caller-owned error identifier and message.
+\textit{Purpose.} Apply shared validation predicates while retaining a caller-owned error identifier and message.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -89,12 +70,7 @@ val = helper.chk(val, errId, msg, tags..., Name, Value)
 \end{lstlisting}
 
 \descriptionhead
-Predicate tags are \code{numeric}, \code{real}, \code{cell}, \code{struct},
-\code{nonempty}, \code{scalar}, \code{vector}, \code{matrix}, \code{finite},
-\code{integer}, \code{positive}, \code{nonnegative}, \code{increasing}, and
-\code{rowbounds}.  Named tests are \code{Size}, \code{Numel},
-\code{MinNumel}, \code{Min}, and \code{Max}.  Successful validation returns
-\code{val} unchanged.
+Predicate tags are \code{numeric}, \code{real}, \code{cell}, \code{struct}, \code{nonempty}, \code{scalar}, \code{vector}, \code{matrix}, \code{finite}, \code{integer}, \code{positive}, \code{nonnegative}, \code{increasing}, and \code{rowbounds}.  Named tests are \code{Size}, \code{Numel}, \code{MinNumel}, \code{Min}, and \code{Max}.  Successful validation returns \code{val} unchanged.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -107,14 +83,11 @@ validated =
 \end{lstlisting}
 
 \remarkshead
-A failed data predicate raises \code{errId}.  An unknown predicate, or a named
-test without a value, raises \codeerr{helper}{InvalidValidatorCall}; these
-errors signal a validator-programming defect rather than bad caller data.
+A failed data predicate raises \code{errId}.  An unknown predicate, or a named test without a value, raises \codeerr{helper}{InvalidValidatorCall}; these errors signal a validator-programming defect rather than bad caller data.
 
 \section{\texorpdfstring{\code{helper.combRows}}{helper.combRows}}
 
-\textit{Purpose.} Enumerate Cartesian combinations in the ordering shared by
-physical cells, local labels, and rate vertices.
+\textit{Purpose.} Enumerate Cartesian combinations in the ordering shared by physical cells, local labels, and rate vertices.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -122,9 +95,7 @@ rows = helper.combRows(vecs)
 \end{lstlisting}
 
 \descriptionhead
-\code{vecs} is a cell array containing one vector per tensor axis.
-\code{rows} contains every Cartesian combination, with earlier dimensions
-varying more slowly.
+\code{vecs} is a cell array containing one vector per tensor axis. \code{rows} contains every Cartesian combination, with earlier dimensions varying more slowly.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -139,13 +110,11 @@ rows =
 \end{lstlisting}
 
 \remarkshead
-This ordering is part of the storage contract.  Reordering the rows would
-misalign tensor labels, physical-cell traversal, and derivative rate vertices.
+This ordering is part of the storage contract.  Reordering the rows would misalign tensor labels, physical-cell traversal, and derivative rate vertices.
 
 \section{\texorpdfstring{\code{helper.isZero}}{helper.isZero}}
 
-\textit{Purpose.} Prove the distinct zero notions used by known-data and affine
-algebra fast paths.
+\textit{Purpose.} Prove the distinct zero notions used by known-data and affine algebra fast paths.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -156,11 +125,7 @@ tf = helper.isZero(obj, "obj")
 \end{lstlisting}
 
 \descriptionhead
-\code{"num"} requires a nonempty finite real numeric zero;
-\code{"add"} additionally enforces scalar expansion or the supplied matrix
-shape; \code{"vals"} recursively checks nested, symbolic, and rate-structured
-payloads; and \code{"obj"} accepts coefficient-backed \code{pdmat} or
-\code{pdvar} evidence.
+\code{"num"} requires a nonempty finite real numeric zero; \code{"add"} additionally enforces scalar expansion or the supplied matrix shape; \code{"vals"} recursively checks nested, symbolic, and rate-structured payloads; and \code{"obj"} accepts coefficient-backed \code{pdmat} or \code{pdvar} evidence.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -178,15 +143,11 @@ objectZero =
 \end{lstlisting}
 
 \remarkshead
-Function-only \code{pdmat} placeholders are not coefficient evidence and
-therefore do not prove object zero.  Invalid modes raise
-\codeerr{helper}{InvalidZeroMode}; the wrong mode-specific arity raises
-\codeerr{helper}{InvalidZeroCall}.
+Function-only \code{pdmat} placeholders are not coefficient evidence and therefore do not prove object zero.  Invalid modes raise \codeerr{helper}{InvalidZeroMode}; the wrong mode-specific arity raises \codeerr{helper}{InvalidZeroCall}.
 
 \section{\texorpdfstring{\code{helper.mapVals}}{helper.mapVals}}
 
-\textit{Purpose.} Map one payload function across every leaf of a nested
-\code{LocalValues} tree.
+\textit{Purpose.} Map one payload function across every leaf of a nested \code{LocalValues} tree.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -194,9 +155,7 @@ mapped = helper.mapVals(vals, fcn, grid)
 \end{lstlisting}
 
 \descriptionhead
-\code{grid} determines the nested physical-cell shape and \code{fcn} is
-applied with \code{cellfun} to every payload in every selected leaf.  The
-result retains the original physical-cell tree and coefficient ordering.
+\code{grid} determines the nested physical-cell shape and \code{fcn} is applied with \code{cellfun} to every payload in every selected leaf.  The result retains the original physical-cell tree and coefficient ordering.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -211,14 +170,11 @@ secondLeaf =
 \end{lstlisting}
 
 \remarkshead
-The mapping preserves nesting but does not validate payload semantics; the
-owning class remains responsible for matrix sizes, symbolic affinity, and
-rate-row structure.
+The mapping preserves nesting but does not validate payload semantics; the owning class remains responsible for matrix sizes, symbolic affinity, and rate-row structure.
 
 \section{\texorpdfstring{\code{helper.matSubs}}{helper.matSubs}}
 
-\textit{Purpose.} Normalize supported two-dimensional payload subscripts into
-explicit row and column index vectors.
+\textit{Purpose.} Normalize supported two-dimensional payload subscripts into explicit row and column index vectors.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -226,10 +182,7 @@ explicit row and column index vectors.
 \end{lstlisting}
 
 \descriptionhead
-\code{subs} is a two-element cell array.  Each element may be a finite
-positive integer vector, a matching logical vector, or \code{":"};
-\code{sz=[m n]} supplies the available matrix size.  Errors use the
-caller-owned \code{errId}.
+\code{subs} is a two-element cell array.  Each element may be a finite positive integer vector, a matching logical vector, or \code{":"}; \code{sz=[m n]} supplies the available matrix size.  Errors use the caller-owned \code{errId}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -243,14 +196,11 @@ cols =
 \end{lstlisting}
 
 \remarkshead
-The helper rejects linear indexing, empty or out-of-range numeric indices, and
-logical selectors whose lengths do not match the indexed dimension.  It never
-permits array growth.
+The helper rejects linear indexing, empty or out-of-range numeric indices, and logical selectors whose lengths do not match the indexed dimension.  It never permits array growth.
 
 \section{\texorpdfstring{\code{helper.mkGrid}}{helper.mkGrid}}
 
-\textit{Purpose.} Validate tensor-grid vectors and construct the shared
-\code{GridInfo} record.
+\textit{Purpose.} Validate tensor-grid vectors and construct the shared \code{GridInfo} record.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -259,11 +209,7 @@ info = helper.mkGrid(grid, owner)
 \end{lstlisting}
 
 \descriptionhead
-\code{grid} is a nonempty cell array of finite, real, strictly increasing
-vectors with at least two nodes each.  \code{owner} defaults to
-\code{"pdbase"} and prefixes validation identifiers.  The result contains
-\code{Vectors}, Cartesian-product \code{Points}, per-axis \code{Bounds}, and
-\code{NumNodes}.
+\code{grid} is a nonempty cell array of finite, real, strictly increasing vectors with at least two nodes each.  \code{owner} defaults to \code{"pdbase"} and prefixes validation identifiers.  The result contains \code{Vectors}, Cartesian-product \code{Points}, per-axis \code{Bounds}, and \code{NumNodes}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -283,14 +229,11 @@ points =
 \end{lstlisting}
 
 \remarkshead
-Malformed containers use \code{owner + ":InvalidGrid"}; malformed individual
-axes use \code{owner + ":InvalidGridVector"}.  Cell counts are derived by
-consumers and are not duplicated in \code{GridInfo}.
+Malformed containers use \code{owner + ":InvalidGrid"}; malformed individual axes use \code{owner + ":InvalidGridVector"}.  Cell counts are derived by consumers and are not duplicated in \code{GridInfo}.
 
 \section{\texorpdfstring{\code{helper.mkNest}}{helper.mkNest}}
 
-\textit{Purpose.} Allocate recursive physical-cell storage and construct each
-leaf from its complete cell subscript.
+\textit{Purpose.} Allocate recursive physical-cell storage and construct each leaf from its complete cell subscript.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -299,10 +242,7 @@ vals = helper.mkNest(nCell, mkLeaf, prefix)
 \end{lstlisting}
 
 \descriptionhead
-\code{nCell} gives the positive cell count per parameter direction and
-\code{mkLeaf} receives one completed one-based subscript row.  \code{prefix}
-is recursion state used internally; ordinary callers omit it.  The result is
-addressed as \code{vals{i1}{i2}...{i_ell}}.
+\code{nCell} gives the positive cell count per parameter direction and \code{mkLeaf} receives one completed one-based subscript row.  \code{prefix} is recursion state used internally; ordinary callers omit it.  The result is addressed as \code{vals{i1}{i2}...{i_ell}}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -316,6 +256,4 @@ secondLeaf =
 \end{lstlisting}
 
 \remarkshead
-\code{mkLeaf} owns the leaf payload.  The helper supplies deterministic
-physical-cell subscripts but does not infer coefficient count, matrix size, or
-rate semantics.
+\code{mkLeaf} owns the leaf payload.  The helper supplies deterministic physical-cell subscripts but does not infer coefficient count, matrix size, or rate semantics.

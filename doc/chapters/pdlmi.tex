@@ -1,14 +1,7 @@
 \chapter{\texorpdfstring{\code{pdlmi}}{pdlmi}: Finite Certificate Assembly}\index{pdlmi@\texttt{pdlmi}}
 \label{sec:pdlmi}
 
-\code{pdlmi} stores YALMIP constraints assembled from \code{pdvar}
-expressions.  Square Hermitian inequality families use semidefinite
-constraints; other inequalities use entry-wise scalar constraints; equality
-uses direct coefficient equations.  Direct assembly is the default, while
-cell-local P\'olya elevation, a dimension-aware Putinar selector, and the full
-box Bernstein--Gram preordering are explicit inequality alternatives.  It is
-the package boundary between Bernstein objects and ordinary YALMIP solver
-calls.
+\code{pdlmi} stores YALMIP constraints assembled from \code{pdvar} expressions.  Square Hermitian inequality families use semidefinite constraints; other inequalities use entry-wise scalar constraints; equality uses direct coefficient equations.  Direct assembly is the default, while cell-local P\'olya elevation, a dimension-aware Putinar selector, and the full box Bernstein--Gram preordering are explicit inequality alternatives.  It is the package boundary between Bernstein objects and ordinary YALMIP solver calls.
 
 \begin{center}
 \begin{tikzpicture}[node distance=5mm and 4mm]
@@ -34,9 +27,7 @@ calls.
   \draw[dp/arrow] (export)--(yal);
 \end{tikzpicture}
 
-\textit{The four certificate paths are alternatives.  Selecting P\'olya,
-Putinar, or full-box rebuilding replaces, rather than compounds, the previous
-selection.}
+\textit{The four certificate paths are alternatives.  Selecting P\'olya, Putinar, or full-box rebuilding replaces, rather than compounds, the previous selection.}
 \end{center}
 
 \section{API Map}
@@ -69,10 +60,7 @@ Solve &
 
 \section{Inspect Certificate State}
 
-All \code{pdlmi} properties have private set access and are readable with dot
-notation.  \code{Constraints} contains the assembled YALMIP entries;
-\code{Residual} and \code{Relation} retain the original comparison for
-rebuilding.  The remaining properties record the selected certificate state.
+All \code{pdlmi} properties have private set access and are readable with dot notation.  \code{Constraints} contains the assembled YALMIP entries; \code{Residual} and \code{Relation} retain the original comparison for rebuilding.  The remaining properties record the selected certificate state.
 
 \begin{tabularx}{\textwidth}{@{}p{0.27\textwidth}Y@{}}
 \toprule
@@ -86,9 +74,7 @@ Property & Meaning \\
 \bottomrule
 \end{tabularx}
 
-For example, \code{C.Relation}, \code{C.Residual.Degree}, and
-\code{C.UsePutinar} inspect a wrapper.  Apply methods return a rebuilt value;
-assigning these properties is unsupported.
+For example, \code{C.Relation}, \code{C.Residual.Degree}, and \code{C.UsePutinar} inspect a wrapper.  Apply methods return a rebuilt value; assigning these properties is unsupported.
 
 \section{Construct \texorpdfstring{\code{pdlmi}}{pdlmi} Comparisons}
 \label{sec:pdlmi-construction}
@@ -114,70 +100,13 @@ C = lhs == rhs
 \end{lstlisting}
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{expr} is a \code{pdvar} residual; \code{relation} is exactly
-        \code{"<="}, \code{">="}, or \code{"=="}.  Inequalities are
-        classified globally from the original coefficient family.  Equality
-        is entry-wise direct coefficient assembly and accepts rectangular or
-        nonsymmetric residuals.
-  \item \code{UsePolya} is a logical scalar option with default
-        \code{false}. Its bare form, \code{"UsePolya"}, and
-        \code{UsePolya=true} without a degree select increment one.
-  \item \code{PolyaDegree=d} is a finite nonnegative integer scalar. It
-        elevates the residual by \code{d} in every parameter direction before
-        assembling constraints. Supplying it without \code{UsePolya} enables
-        P\'olya and issues \codeerr{pdlmi}{ImplicitUsePolya};
-        \code{UsePolya=false} with positive \code{d} raises
-        \codeerr{pdlmi}{ConflictingPolyaOptions}.
-  \item \code{UsePutinar} is a logical scalar option with default
-        \code{false}.  Its bare form and the explicit value \code{true} select
-        the dimension-appropriate Putinar certificate at the smallest
-        admissible order.
-  \item \code{PutinarOrder=r} is a finite nonnegative integer scalar and is an
-        absolute Bernstein Gram order, not a degree increment.  For residual
-        degree \(m\), its default and minimum are \(\lfloor m/2\rfloor\) in
-        one parameter and \(\lceil m/2\rceil\) in two or more parameters.
-        Supplying the order without \code{UsePutinar} enables Putinar assembly.
-        Pairing \code{UsePutinar=false} with any explicit order, including
-        zero, raises \codeerr{pdlmi}{ConflictingPutinarOptions}.
-  \item \code{UseFullBoxPreorder} is a logical scalar option with default
-        \code{false}.  Its bare form and the explicit value \code{true} select
-        full-box assembly at the smallest admissible order.
-  \item \code{FullBoxOrder=r} is a finite nonnegative integer scalar and is an
-        absolute order, not a degree increment.  Supplying it without
-        \code{UseFullBoxPreorder} enables full-box assembly.  When full-box
-        assembly is enabled, the minimum is \(\lfloor m/2\rfloor\) for a
-        one-parameter residual of degree \(m\), and \(\lceil m/2\rceil\) for
-        two or more parameters.  Explicitly pairing
-        \code{UseFullBoxPreorder=false} with \code{FullBoxOrder=r} suppresses
-        that automatic selection: \code{C} remains direct and records \code{r}
-        only as inspectable metadata; the order is not applied to assembly.
-  \item P\'olya, Putinar, and full-box selection are mutually exclusive and
-        apply only to inequalities.  Any recognized certificate option on an
-        equality raises
-        \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate}.
-        Enabling more than one inequality family
-        raises \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}.
-  \item \code{C} is direct coefficient-wise assembly unless one opt-in
-        inequality mode is selected. Comparisons such as \code{lhs >= rhs} are the ordinary
-        user-facing entry point and accept compatible numeric, \code{pdmat},
-        affine \code{sdpvar}, and \code{pdvar} right-hand sides.
+  \item \code{expr} is a \code{pdvar} residual; \code{relation} is exactly \code{"<="}, \code{">="}, or \code{"=="}.  Inequalities are classified globally from the original coefficient family.  Equality is entry-wise direct coefficient assembly and accepts rectangular or nonsymmetric residuals. \item \code{UsePolya} is a logical scalar option with default \code{false}. Its bare form, \code{"UsePolya"}, and \code{UsePolya=true} without a degree select increment one. \item \code{PolyaDegree=d} is a finite nonnegative integer scalar. It elevates the residual by \code{d} in every parameter direction before assembling constraints. Supplying it without \code{UsePolya} enables P\'olya and issues \codeerr{pdlmi}{ImplicitUsePolya}; \code{UsePolya=false} with positive \code{d} raises \codeerr{pdlmi}{ConflictingPolyaOptions}. \item \code{UsePutinar} is a logical scalar option with default \code{false}.  Its bare form and the explicit value \code{true} select the dimension-appropriate Putinar certificate at the smallest admissible order. \item \code{PutinarOrder=r} is a finite nonnegative integer scalar and is an absolute Bernstein Gram order, not a degree increment.  For residual degree \(m\), its default and minimum are \(\lfloor m/2\rfloor\) in one parameter and \(\lceil m/2\rceil\) in two or more parameters. Supplying the order without \code{UsePutinar} enables Putinar assembly. Pairing \code{UsePutinar=false} with any explicit order, including zero, raises \codeerr{pdlmi}{ConflictingPutinarOptions}. \item \code{UseFullBoxPreorder} is a logical scalar option with default \code{false}.  Its bare form and the explicit value \code{true} select full-box assembly at the smallest admissible order. \item \code{FullBoxOrder=r} is a finite nonnegative integer scalar and is an absolute order, not a degree increment.  Supplying it without \code{UseFullBoxPreorder} enables full-box assembly.  When full-box assembly is enabled, the minimum is \(\lfloor m/2\rfloor\) for a one-parameter residual of degree \(m\), and \(\lceil m/2\rceil\) for two or more parameters.  Explicitly pairing \code{UseFullBoxPreorder=false} with \code{FullBoxOrder=r} suppresses that automatic selection: \code{C} remains direct and records \code{r} only as inspectable metadata; the order is not applied to assembly. \item P\'olya, Putinar, and full-box selection are mutually exclusive and apply only to inequalities.  Any recognized certificate option on an equality raises \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate}. Enabling more than one inequality family raises \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}. \item \code{C} is direct coefficient-wise assembly unless one opt-in inequality mode is selected. Comparisons such as \code{lhs >= rhs} are the ordinary user-facing entry point and accept compatible numeric, \code{pdmat}, affine \code{sdpvar}, and \code{pdvar} right-hand sides.
 \end{itemize}
 
-The inspectable properties \code{Constraints}, \code{Residual}, and
-\code{Relation} expose the assembled finite constraints and the original
-comparison data used for rebuilding.  \code{UsePolya}, \code{PolyaDegree},
-\code{UsePutinar}, \code{PutinarOrder},
-\code{UseFullBox}\allowbreak\code{Preorder}, and \code{FullBoxOrder} report the
-selected mode and order metadata.  Their set access is private.
-Comparison-created direct objects have all three selectors false and all three
-numeric properties zero.  The full-box explicit-false combination described
-above is the exception: it retains \code{FullBoxOrder=r} while
-\code{UseFullBoxPreorder} remains false and the stored constraints remain
-direct.  Putinar deliberately has no corresponding exception.
+The inspectable properties \code{Constraints}, \code{Residual}, and \code{Relation} expose the assembled finite constraints and the original comparison data used for rebuilding.  \code{UsePolya}, \code{PolyaDegree}, \code{UsePutinar}, \code{PutinarOrder}, \code{UseFullBox}\allowbreak\code{Preorder}, and \code{FullBoxOrder} report the selected mode and order metadata.  Their set access is private. Comparison-created direct objects have all three selectors false and all three numeric properties zero.  The full-box explicit-false combination described above is the exception: it retains \code{FullBoxOrder=r} while \code{UseFullBoxPreorder} remains false and the stored constraints remain direct.  Putinar deliberately has no corresponding exception.
 
 \examplehead
-The direct constructor is equivalent to the comparison path when the relation
-and options are explicit.
+The direct constructor is equivalent to the comparison path when the relation and options are explicit.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -232,73 +161,26 @@ fullBoxOrder =
 
 \remarkshead
 \begin{enumerate}[leftmargin=*,itemsep=0.55\baselineskip]
-  \item A non-\code{pdvar} residual raises
-        \codeerr{pdlmi}{InvalidExpression}; an unsupported relation raises
-        \codeerr{pdlmi}{InvalidRelation}.
-  \item Malformed, unknown, or duplicate options raise
-        \codeerr{pdlmi}{InvalidOptions}, \codeerr{pdlmi}{UnknownOption}, or
-        \codeerr{pdlmi}{DuplicateOption}; nonlogical selectors use their
-        corresponding \code{InvalidUse...} identifier.
-  \item Malformed P\'olya increments, Putinar orders, and full-box orders raise,
-        respectively,
-        \codeerr{pdlmi}{Invalid}\allowbreak\code{PolyaDegree},
-        \codeerr{pdlmi}{Invalid}\allowbreak\code{PutinarOrder}, and
-        \codeerr{pdlmi}{Invalid}\allowbreak\code{FullBoxOrder}.  An integer
-        below an active Gram-family minimum raises
-        \codeerr{pdlmi}{PutinarOrder}\allowbreak\code{TooLow} or
-        \codeerr{pdlmi}{FullBoxOrder}\allowbreak\code{TooLow}.
-  \item Explicit false plus a Putinar order raises
-        \codeerr{pdlmi}{ConflictingPutinarOptions}; explicit false plus a
-        positive P\'olya increment raises
-        \codeerr{pdlmi}{ConflictingPolyaOptions}.  The full-box explicit-false
-        form remains direct and retains the supplied order as metadata.
-  \needspace{9\baselineskip}
-  \item An inequality with any nonsquare or non-Hermitian original coefficient
-        is assembled entry-wise and emits
-        \codeerr{pdlmi}{ElementwiseInequality}; it is not rejected.  Numeric
-        Hermitian testing accepts equality at the inclusive \(10^{-10}\)
-        infinity-norm tolerance.
-  \item Equality is direct-only.  Every \code{apply...} method raises\newline
-        \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate}
-        before validating its supplied increment or order.
+  \item A non-\code{pdvar} residual raises \codeerr{pdlmi}{InvalidExpression}; an unsupported relation raises \codeerr{pdlmi}{InvalidRelation}. \item Malformed, unknown, or duplicate options raise \codeerr{pdlmi}{InvalidOptions}, \codeerr{pdlmi}{UnknownOption}, or \codeerr{pdlmi}{DuplicateOption}; nonlogical selectors use their corresponding \code{InvalidUse...} identifier. \item Malformed P\'olya increments, Putinar orders, and full-box orders raise, respectively, \codeerr{pdlmi}{Invalid}\allowbreak\code{PolyaDegree}, \codeerr{pdlmi}{Invalid}\allowbreak\code{PutinarOrder}, and \codeerr{pdlmi}{Invalid}\allowbreak\code{FullBoxOrder}.  An integer below an active Gram-family minimum raises \codeerr{pdlmi}{PutinarOrder}\allowbreak\code{TooLow} or \codeerr{pdlmi}{FullBoxOrder}\allowbreak\code{TooLow}. \item Explicit false plus a Putinar order raises \codeerr{pdlmi}{ConflictingPutinarOptions}; explicit false plus a positive P\'olya increment raises \codeerr{pdlmi}{ConflictingPolyaOptions}.  The full-box explicit-false form remains direct and retains the supplied order as metadata. \needspace{9\baselineskip} \item An inequality with any nonsquare or non-Hermitian original coefficient is assembled entry-wise and emits \codeerr{pdlmi}{ElementwiseInequality}; it is not rejected.  Numeric Hermitian testing accepts equality at the inclusive \(10^{-10}\) infinity-norm tolerance. \item Equality is direct-only.  Every \code{apply...} method raises\newline \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before validating its supplied increment or order.
 \end{enumerate}
 
 \section{Assemble Direct Coefficient Constraints}\index{direct assembly}
 \label{sec:pdlmi-direct}
 
-For each physical cell, local Bernstein coefficient, and rate-vertex row if
-present, \code{pdlmi} creates one stored YALMIP constraint entry.  For an
-ordinary expression with \(N_c\) physical cells and \(N_b\) Bernstein
-coefficients per cell, the number of entries is \(N_cN_b\); with \(N_v\) rate
-vertices it is \(N_cN_bN_v\).  A semidefinite-mode entry is one matrix
-constraint.  An entry-wise-mode entry is the column-major vector of scalar
-matrix entries compared independently.  An equality entry is the corresponding
-direct coefficient equation and may be rectangular.
+For each physical cell, local Bernstein coefficient, and rate-vertex row if present, \code{pdlmi} creates one stored YALMIP constraint entry.  For an ordinary expression with \(N_c\) physical cells and \(N_b\) Bernstein coefficients per cell, the number of entries is \(N_cN_b\); with \(N_v\) rate vertices it is \(N_cN_bN_v\).  A semidefinite-mode entry is one matrix constraint.  An entry-wise-mode entry is the column-major vector of scalar matrix entries compared independently.  An equality entry is the corresponding direct coefficient equation and may be rectangular.
 
-The idea is the Bernstein convex-hull property.  After orienting the relation
-as a positive-semidefinite target
+The idea is the Bernstein convex-hull property.  After orienting the relation as a positive-semidefinite target
 \[
-  S_{\mathbf c,v}(\boldsymbol\alpha)=
+S_{\mathbf c,v}(\boldsymbol\alpha)=
   \sum_{\mathbf i}B_{\mathbf i}^m(\boldsymbol\alpha)
   C^{(\mathbf c,v)}[\mathbf i],
 \]
-the semidefinite direct certificate requires
-\(C^{(\mathbf c,v)}[\mathbf i]\succeq0\) for every physical cell
-\(\mathbf c\), active rate vertex \(v\), and local label
-\(\mathbf i\).  This is sufficient, not necessary.
+the semidefinite direct certificate requires \(C^{(\mathbf c,v)}[\mathbf i]\succeq0\) for every physical cell \(\mathbf c\), active rate vertex \(v\), and local label \(\mathbf i\).  This is sufficient, not necessary.
 
-For an entry-wise inequality, replace each matrix coefficient by
-\code{C(:)} and impose the oriented scalar sign on every component.  The
-global classification is made before P\'olya elevation or Gram assembly, so
-every coefficient and every certificate in one wrapper uses the same mode.
-Putinar and Full Box create one independent scalar Gram certificate for each
-column-major entry.  Direct equality simply imposes \code{C(:) == 0}; it does
-not use a positivity certificate or an implicit tolerance.
+For an entry-wise inequality, replace each matrix coefficient by \code{C(:)} and impose the oriented scalar sign on every component.  The global classification is made before P\'olya elevation or Gram assembly, so every coefficient and every certificate in one wrapper uses the same mode. Putinar and Full Box create one independent scalar Gram certificate for each column-major entry.  Direct equality simply imposes \code{C(:) == 0}; it does not use a positivity certificate or an implicit tolerance.
 
 \begin{center}
-The diagram specializes to one parameter, degree two, and one ordinary
-(non-rate) row; therefore \(c\) is a scalar one-based cell index and
-\(i\in\{0,1,2\}\).
+The diagram specializes to one parameter, degree two, and one ordinary (non-rate) row; therefore \(c\) is a scalar one-based cell index and \(i\in\{0,1,2\}\).
 
 \begin{tikzpicture}[>=Latex,node distance=5mm and 7mm,
   c/.style={dp/neutral,font=\scriptsize,
@@ -322,16 +204,7 @@ The diagram specializes to one parameter, degree two, and one ordinary
 \index{Polya@P\'olya}\index{applyPolya@\texttt{applyPolya}}
 \label{sec:pdlmi-polya}
 
-With \code{UsePolya=true}, \code{pdlmi} first elevates the stored residual by
-\code{PolyaDegree} in every parameter direction, then constrains every
-elevated local coefficient and every active rate row. Thus, if the original
-degree is \(m\), the count is
-\(N_c (m+d+1)^\ell\) for ordinary expressions and
-\(N_c (m+d+1)^\ell N_v\) for rate-vertex expressions. An increment of zero is
-valid and has the same coefficient count as direct assembly.
-For an entry-wise inequality, elevation preserves the global mode and the
-oriented sign is applied independently to every column-major scalar entry of
-each elevated coefficient.  Equality wrappers reject this method.
+With \code{UsePolya=true}, \code{pdlmi} first elevates the stored residual by \code{PolyaDegree} in every parameter direction, then constrains every elevated local coefficient and every active rate row. Thus, if the original degree is \(m\), the count is \(N_c (m+d+1)^\ell\) for ordinary expressions and \(N_c (m+d+1)^\ell N_v\) for rate-vertex expressions. An increment of zero is valid and has the same coefficient count as direct assembly. For an entry-wise inequality, elevation preserves the global mode and the oriented sign is applied independently to every column-major scalar entry of each elevated coefficient.  Equality wrappers reject this method.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -339,11 +212,7 @@ Cpolya = C.applyPolya()
 Cpolya = C.applyPolya(d)
 \end{lstlisting}
 
-\code{applyPolya} is a value-class method: it returns a new \code{pdlmi},
-leaves \code{C} unchanged, and rebuilds from \code{C.Residual}. Selecting a
-new increment therefore replaces rather than compounds a previous selection.
-The no-argument form uses one; an invalid increment raises
-\code{pdlmi:InvalidPolyaDegree}.
+\code{applyPolya} is a value-class method: it returns a new \code{pdlmi}, leaves \code{C} unchanged, and rebuilds from \code{C.Residual}. Selecting a new increment therefore replaces rather than compounds a previous selection. The no-argument form uses one; an invalid increment raises \code{pdlmi:InvalidPolyaDegree}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -382,53 +251,36 @@ constraintCount =
     {\(\prod_s((1-\alpha_s)+\alpha_s)^d=1\)};
 \end{tikzpicture}
 
-\textit{P\'olya degree is a uniform representation increment, not a new
-decision degree, a grid refinement, or a Gram order.}
+\textit{P\'olya degree is a uniform representation increment, not a new decision degree, a grid refinement, or a Gram order.}
 \end{center}
 
-The mathematical background and the limits of fixed-increment coefficient
-positivity are developed in \cref{app:certificates}.
+The mathematical background and the limits of fixed-increment coefficient positivity are developed in \cref{app:certificates}.
 
 \section{Select Putinar Assembly with
 \texorpdfstring{\code{applyPutinar}}{applyPutinar}}
 \index{Putinar}\index{applyPutinar@\texttt{applyPutinar}}
 \label{sec:pdlmi-putinar}
 
-For an entry-wise inequality, the constructions below are applied independently
-to each scalar matrix entry in MATLAB column-major order.  Gram variables are
-not shared between entries.  Equality wrappers reject Putinar selection.
+For an entry-wise inequality, the constructions below are applied independently to each scalar matrix entry in MATLAB column-major order.  Gram variables are not shared between entries.  Equality wrappers reject Putinar selection.
 
-The Putinar selector is dimension-aware.  With one parameter it deliberately
-uses the same exact even/odd Markov--Luk\'acs
+The Putinar selector is dimension-aware.  With one parameter it deliberately uses the same exact even/odd Markov--Luk\'acs
 \index{Markov--Lukacs@Markov--Luk\'acs} assembly as
-\code{applyFullBoxPreorder}.  For selected absolute order \(r\), the even form
-matches at degree \(2r\),
+\code{applyFullBoxPreorder}.  For selected absolute order \(r\), the even form matches at degree \(2r\),
 \[
-  F=\mathcal Z_r^{\mathsf T}Q_0\mathcal Z_r
-    +\alpha(1-\alpha)
+F=\mathcal Z_r^{\mathsf T}Q_0\mathcal Z_r +\alpha(1-\alpha)
       \mathcal Z_{r-1}^{\mathsf T}Q_1\mathcal Z_{r-1},
 \]
-where the second block is omitted at \(r=0\).  The odd form matches at degree
-\(2r+1\),
+where the second block is omitted at \(r=0\).  The odd form matches at degree \(2r+1\),
 \[
-  F=(1-\alpha)\mathcal Z_r^{\mathsf T}Q_L\mathcal Z_r
-    +\alpha\mathcal Z_r^{\mathsf T}Q_U\mathcal Z_r.
+F=(1-\alpha)\mathcal Z_r^{\mathsf T}Q_L\mathcal Z_r +\alpha\mathcal Z_r^{\mathsf T}Q_U\mathcal Z_r.
 \]
-All present Gram matrices are positive semidefinite.  The one-parameter
-default and minimum are \(r=\lfloor m/2\rfloor\) for residual degree \(m\).
+All present Gram matrices are positive semidefinite.  The one-parameter default and minimum are \(r=\lfloor m/2\rfloor\) for residual degree \(m\).
 
-For two or more parameters, the selector instead uses the fixed-order,
-box-specific singleton-generator Bernstein--Gram quadratic module.  After
-normalizing the relation so that
-\(F(\boldsymbol\alpha)\) is positive semidefinite, it represents
+For two or more parameters, the selector instead uses the fixed-order, box-specific singleton-generator Bernstein--Gram quadratic module.  After normalizing the relation so that \(F(\boldsymbol\alpha)\) is positive semidefinite, it represents
 \[
-  F(\boldsymbol\alpha)=S_0(\boldsymbol\alpha)
-    +\sum_{s=1}^{\ell}\alpha_s(1-\alpha_s)
-      S_s(\boldsymbol\alpha).
+F(\boldsymbol\alpha)=S_0(\boldsymbol\alpha) +\sum_{s=1}^{\ell}\alpha_s(1-\alpha_s) S_s(\boldsymbol\alpha).
 \]
-Only singleton box generators appear in this multivariate branch: products such as
-\(\alpha_1(1-\alpha_1)\alpha_2(1-\alpha_2)\) belong to the full-box
-preordering, not this module.
+Only singleton box generators appear in this multivariate branch: products such as \(\alpha_1(1-\alpha_1)\alpha_2(1-\alpha_2)\) belong to the full-box preordering, not this module.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -436,14 +288,7 @@ Cputinar = C.applyPutinar()
 Cputinar = C.applyPutinar(r)
 \end{lstlisting}
 
-Here \code{r} is an absolute Bernstein Gram order.  The no-argument form uses
-the dimension-dependent minima above; an explicit order must satisfy the same
-applicable bound.  In the multivariate branch, the unweighted block \(S_0\)
-uses tensor basis degree \(r\boldsymbol1\), while \(S_s\) uses degree
-\(r\boldsymbol1-\boldsymbol e_s\).  A nominal block with a negative component
-is omitted, which occurs for every multiplier at \(r=0\).  The target is
-degree-elevated without changing its represented polynomial, and the
-multivariate Gram sum is matched exactly at tensor degree \(2r\).
+Here \code{r} is an absolute Bernstein Gram order.  The no-argument form uses the dimension-dependent minima above; an explicit order must satisfy the same applicable bound.  In the multivariate branch, the unweighted block \(S_0\) uses tensor basis degree \(r\boldsymbol1\), while \(S_s\) uses degree \(r\boldsymbol1-\boldsymbol e_s\).  A nominal block with a negative component is omitted, which occurs for every multiplier at \(r=0\).  The target is degree-elevated without changing its represented polynomial, and the multivariate Gram sum is matched exactly at tensor degree \(2r\).
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -476,27 +321,14 @@ selectedConstraintCount =
      5
 \end{lstlisting}
 
-For this one-parameter scalar degree-two cell, order one uses the exact even
-Markov--Luk\'acs form: an unweighted Gram block of dimension two and one
-generator-weighted block of dimension one, followed by three exact coefficient
-identities.  The result is identical to
-\code{direct.applyFullBoxPreorder()}.  Each physical cell and each active
-rate-vertex row receives independent copies of these PSD blocks and identities.
+For this one-parameter scalar degree-two cell, order one uses the exact even Markov--Luk\'acs form: an unweighted Gram block of dimension two and one generator-weighted block of dimension one, followed by three exact coefficient identities.  The result is identical to \code{direct.applyFullBoxPreorder()}.  Each physical cell and each active rate-vertex row receives independent copies of these PSD blocks and identities.
 
 \remarkshead
-For the multivariate backend, the smallest useful worked case is
-\(\ell=2\).  Let \(g_s=\alpha_s(1-\alpha_s)\).  At absolute order \(r\),
-Putinar uses exactly the singleton-generator module
+For the multivariate backend, the smallest useful worked case is \(\ell=2\).  Let \(g_s=\alpha_s(1-\alpha_s)\).  At absolute order \(r\), Putinar uses exactly the singleton-generator module
 \[
   F=S_0+g_1S_1+g_2S_2,
 \]
-where \(S_0\) has Bernstein basis degree \((r,r)\), \(S_1\) has degree
-\((r-1,r)\), and \(S_2\) has degree \((r,r-1)\).  Each \(S_j\) is a
-PSD Gram form.  MATLAB elevates the sign-normalized target and all present
-terms to tensor degree \((2r,2r)\), then creates one exact coefficient match
-per local Bernstein label.  These PSD blocks and equalities are assembled
-independently for every physical cell, active rate row, and scalar matrix entry;
-they are never shared across those axes.
+where \(S_0\) has Bernstein basis degree \((r,r)\), \(S_1\) has degree \((r-1,r)\), and \(S_2\) has degree \((r,r-1)\).  Each \(S_j\) is a PSD Gram form.  MATLAB elevates the sign-normalized target and all present terms to tensor degree \((2r,2r)\), then creates one exact coefficient match per local Bernstein label.  These PSD blocks and equalities are assembled independently for every physical cell, active rate row, and scalar matrix entry; they are never shared across those axes.
 
 \begin{center}
 The diagram below specializes to the even one-parameter example above.
@@ -515,47 +347,22 @@ The diagram below specializes to the even one-parameter example above.
   \draw[dp/arrow] (grams) -- (match);
 \end{tikzpicture}
 
-\textit{The method changes the finite certificate, not the stored residual,
-decision degree, or physical grid.}
+\textit{The method changes the finite certificate, not the stored residual, decision degree, or physical grid.}
 \end{center}
 
-\code{applyPutinar} is a value-class method: it returns a new \code{pdlmi},
-leaves \code{C} unchanged, and rebuilds from the original \code{Residual} and
-\code{Relation}.  Reapplication replaces any earlier P\'olya, Putinar, or
-full-box selection.  It adds no implicit margin and makes no solver call.
+\code{applyPutinar} is a value-class method: it returns a new \code{pdlmi}, leaves \code{C} unchanged, and rebuilds from the original \code{Residual} and \code{Relation}.  Reapplication replaces any earlier P\'olya, Putinar, or full-box selection.  It adds no implicit margin and makes no solver call.
 
 \remarkshead
 \begin{enumerate}[leftmargin=*]
-  \item Malformed orders raise \codeerr{pdlmi}{InvalidPutinarOrder}; an integer
-        below \(\lfloor m/2\rfloor\) in one parameter, or below
-        \(\lceil m/2\rceil\) in two or more parameters, raises
-        \codeerr{pdlmi}{PutinarOrderTooLow}.
-  \item A malformed selector raises \codeerr{pdlmi}{InvalidUsePutinar};
-        explicit false plus any supplied order raises
-        \codeerr{pdlmi}{ConflictingPutinarOptions}.
-  \item Simultaneous relaxation families raise
-        \codeerr{pdlmi}{ConflictingRelaxations}; expression, relation, and
-        option validation in \cref{sec:pdlmi-construction} still applies.
-        Global inequality classification is unchanged: the family is
-        semidefinite only when every original coefficient across all cells and
-        rate rows is square Hermitian.  Otherwise the complete family uses
-        independent entry-wise scalar Putinar certificates in MATLAB
-        column-major order.
+  \item Malformed orders raise \codeerr{pdlmi}{InvalidPutinarOrder}; an integer below \(\lfloor m/2\rfloor\) in one parameter, or below \(\lceil m/2\rceil\) in two or more parameters, raises \codeerr{pdlmi}{PutinarOrderTooLow}. \item A malformed selector raises \codeerr{pdlmi}{InvalidUsePutinar}; explicit false plus any supplied order raises \codeerr{pdlmi}{ConflictingPutinarOptions}. \item Simultaneous relaxation families raise \codeerr{pdlmi}{ConflictingRelaxations}; expression, relation, and option validation in \cref{sec:pdlmi-construction} still applies. Global inequality classification is unchanged: the family is semidefinite only when every original coefficient across all cells and rate rows is square Hermitian.  Otherwise the complete family uses independent entry-wise scalar Putinar certificates in MATLAB column-major order.
 \end{enumerate}
 
 \section[Select Full Box Assembly with \texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}]{%
-Select Full Box Bernstein--Gram Assembly with\\[-0.15em]
-\texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}}
+Select Full Box Bernstein--Gram Assembly with\\[-0.15em] \texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}}
 \index{Full Box preordering}\index{applyFullBoxPreorder@\texttt{applyFullBoxPreorder}}
 \label{sec:pdlmi-full-box}
 
-The full-box mode is a cell-local positive-semidefinite representation in the
-forward local coordinates \(\alpha_s\in[0,1]\).  It is a box-specific Bernstein--Gram
-preordering, not a general Putinar certificate, general-domain SOS interface,
-or full-space SOS representation.  It adds no implicit positivity margin.
-For an entry-wise inequality, every column-major scalar entry receives an
-independent copy of the selected Gram construction.  Equality wrappers reject
-full-box selection.
+The full-box mode is a cell-local positive-semidefinite representation in the forward local coordinates \(\alpha_s\in[0,1]\).  It is a box-specific Bernstein--Gram preordering, not a general Putinar certificate, general-domain SOS interface, or full-space SOS representation.  It adds no implicit positivity margin. For an entry-wise inequality, every column-major scalar entry receives an independent copy of the selected Gram construction.  Equality wrappers reject full-box selection.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -563,28 +370,18 @@ Cbox = C.applyFullBoxPreorder()
 Cbox = C.applyFullBoxPreorder(r)
 \end{lstlisting}
 
-The no-argument form selects the smallest admissible absolute order.  The
-explicit form selects \code{r}; it does not add \code{r} to the residual
-degree.  Both forms are value-class selectors: they return a new \code{pdlmi},
-leave \code{C} unchanged, and rebuild from \code{C.Residual}.  Reapplication
-therefore replaces an earlier full-box order or a P\'olya or Putinar selection
-rather than compounding it.
+The no-argument form selects the smallest admissible absolute order.  The explicit form selects \code{r}; it does not add \code{r} to the residual degree.  Both forms are value-class selectors: they return a new \code{pdlmi}, leave \code{C} unchanged, and rebuild from \code{C.Residual}.  Reapplication therefore replaces an earlier full-box order or a P\'olya or Putinar selection rather than compounding it.
 
-The idea is to represent the oriented positive target as a sum of PSD Gram
-forms multiplied by functions that are nonnegative on the local box:
+The idea is to represent the oriented positive target as a sum of PSD Gram forms multiplied by functions that are nonnegative on the local box:
 \[
-  S(\boldsymbol\alpha)=
+S(\boldsymbol\alpha)=
   \sum_{J\subseteq\{1,\ldots,\ell\}}
   \left(\prod_{s\in J}\alpha_s(1-\alpha_s)\right)
   \mathcal Z_J(\boldsymbol\alpha)^{\mathsf T}
-  Q_J\mathcal Z_J(\boldsymbol\alpha),
+Q_J\mathcal Z_J(\boldsymbol\alpha),
   \qquad Q_J\succeq0.
 \]
-In one parameter the implementation uses the even/odd Markov--Luk\'acs forms,
-with minimum absolute order \(\lfloor m/2\rfloor\) for residual degree \(m\).
-For two or more parameters it uses every subset product of the \(\ell\) box
-generators and minimum order \(\lceil m/2\rceil\).  The selected order fixes the
-dense Bernstein Gram bases; it is not added to \(m\).
+In one parameter the implementation uses the even/odd Markov--Luk\'acs forms, with minimum absolute order \(\lfloor m/2\rfloor\) for residual degree \(m\). For two or more parameters it uses every subset product of the \(\ell\) box generators and minimum order \(\lceil m/2\rceil\).  The selected order fixes the dense Bernstein Gram bases; it is not added to \(m\).
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -609,23 +406,14 @@ fullBoxConstraintCount =
      5
 \end{lstlisting}
 
-At this order the scalar degree-two cell has two PSD Gram constraints followed
-by three exact Bernstein coefficient identities.
+At this order the scalar degree-two cell has two PSD Gram constraints followed by three exact Bernstein coefficient identities.
 
 \remarkshead
-For \(\ell=2\), Full Box differs from Putinar by retaining the product
-generator.  With \(g_s=\alpha_s(1-\alpha_s)\), its exact backend form is
+For \(\ell=2\), Full Box differs from Putinar by retaining the product generator.  With \(g_s=\alpha_s(1-\alpha_s)\), its exact backend form is
 \[
-  F=S_0+g_1S_1+g_2S_2+g_1g_2S_{12}.
+F=S_0+g_1S_1+g_2S_2+g_1g_2S_{12}.
 \]
-The Bernstein basis degrees are respectively \((r,r)\), \((r-1,r)\),
-\((r,r-1)\), and \((r-1,r-1)\); each present term is a PSD Gram block.
-All four terms are elevated and coefficient-matched at tensor degree
-\((2r,2r)\).  Thus the additional \(S_{12}\) block is precisely the
-two-generator distinction from the singleton Putinar module, not a change to
-the residual, grid, or decision degree.  The implementation builds the PSD
-blocks and exact equalities independently for each cell, rate row, and scalar
-matrix entry.
+The Bernstein basis degrees are respectively \((r,r)\), \((r-1,r)\), \((r,r-1)\), and \((r-1,r-1)\); each present term is a PSD Gram block. All four terms are elevated and coefficient-matched at tensor degree \((2r,2r)\).  Thus the additional \(S_{12}\) block is precisely the two-generator distinction from the singleton Putinar module, not a change to the residual, grid, or decision degree.  The implementation builds the PSD blocks and exact equalities independently for each cell, rate row, and scalar matrix entry.
 
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
@@ -644,35 +432,11 @@ matrix entry.
 \end{tikzpicture}
 \end{center}
 
-Appendix~\ref{app:certificates} derives the one-dimensional parity forms,
-explains the multivariate subset masks, and distinguishes this implemented
-  box preordering from the multivariate singleton-generator Putinar branch,
-  full-space SOS,
-  and general polynomial parsers.
-Assembly is independent for every physical cell and every active rate-vertex
-row; Gram variables are not shared across either boundary.  For \code{>=}, the
-method represents the residual.  For \code{<=}, it negates the target before
-forming the positive-semidefinite representation.  Within each cell and row,
-the stored constraints are ordered as all PSD Gram blocks followed by exact
-equalities matching every Bernstein coefficient.  Consequently, the number of
-stored constraints is not the direct coefficient count.
+Appendix~\ref{app:certificates} derives the one-dimensional parity forms, explains the multivariate subset masks, and distinguishes this implemented box preordering from the multivariate singleton-generator Putinar branch, full-space SOS, and general polynomial parsers. Assembly is independent for every physical cell and every active rate-vertex row; Gram variables are not shared across either boundary.  For \code{>=}, the method represents the residual.  For \code{<=}, it negates the target before forming the positive-semidefinite representation.  Within each cell and row, the stored constraints are ordered as all PSD Gram blocks followed by exact equalities matching every Bernstein coefficient.  Consequently, the number of stored constraints is not the direct coefficient count.
 
 \remarkshead
 \begin{enumerate}[leftmargin=*,nosep]
-  \item Malformed orders raise \codeerr{pdlmi}{InvalidFullBoxOrder}; an
-        admissible integer below the minimum raises
-        \codeerr{pdlmi}{FullBoxOrderTooLow}.  The constructor rejects malformed
-        selectors with
-        \codeerr{pdlmi}{InvalidUse}\allowbreak\code{FullBox}\allowbreak\code{Preorder}.
-  \item Simultaneous P\'olya, Putinar, or full-box selection raises
-        \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}; expression,
-        relation, and option validation in \cref{sec:pdlmi-construction} still
-        applies.
-  \item Global inequality classification is unchanged: the family is
-        semidefinite only when every original coefficient across all cells and
-        rate rows is square Hermitian.  Otherwise the complete family uses
-        independent entry-wise scalar Full Box certificates in MATLAB
-        column-major order.
+  \item Malformed orders raise \codeerr{pdlmi}{InvalidFullBoxOrder}; an admissible integer below the minimum raises \codeerr{pdlmi}{FullBoxOrderTooLow}.  The constructor rejects malformed selectors with \codeerr{pdlmi}{InvalidUse}\allowbreak\code{FullBox}\allowbreak\code{Preorder}. \item Simultaneous P\'olya, Putinar, or full-box selection raises \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}; expression, relation, and option validation in \cref{sec:pdlmi-construction} still applies. \item Global inequality classification is unchanged: the family is semidefinite only when every original coefficient across all cells and rate rows is square Hermitian.  Otherwise the complete family uses independent entry-wise scalar Full Box certificates in MATLAB column-major order.
 \end{enumerate}
 
 \section{Export with \texorpdfstring{\code{toYalmip}}{toYalmip}}
@@ -685,16 +449,10 @@ F = toYalmip(C)
 F = C.toYalmip()
 \end{lstlisting}
 
-\arghead
-\code{toYalmip} concatenates the stored constraint cells into a YALMIP
-constraint array for direct, P\'olya, Putinar, and full-box objects.  It has no
-package-specific options and does not add a solver wrapper, objective, margin,
-or diagnostic layer.  The output is suitable for \code{optimize},
-concatenation with other YALMIP constraints, or ordinary YALMIP inspection.
+\arghead \code{toYalmip} concatenates the stored constraint cells into a YALMIP constraint array for direct, P\'olya, Putinar, and full-box objects.  It has no package-specific options and does not add a solver wrapper, objective, margin, or diagnostic layer.  The output is suitable for \code{optimize}, concatenation with other YALMIP constraints, or ordinary YALMIP inspection.
 
 \examplehead
-The function-call and dot-call forms return equivalent YALMIP constraint
-arrays.
+The function-call and dot-call forms return equivalent YALMIP constraint arrays.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -739,18 +497,15 @@ secondConstraintCount =
 \end{tikzpicture}
 \end{center}
 
-After this boundary, the package is no longer assembling Bernstein data; YALMIP
-owns solver choice, diagnostics, and optimization status.
+After this boundary, the package is no longer assembling Bernstein data; YALMIP owns solver choice, diagnostics, and optimization status.
 
 \section{Boundaries and Related APIs}
-\code{pdvar}, \code{rhodiff}, \code{applyPolya}, \code{applyPutinar},
-\code{applyFullBoxPreorder}, \code{toYalmip}, \code{optimize}.
+\code{pdvar}, \code{rhodiff}, \code{applyPolya}, \code{applyPutinar}, \code{applyFullBoxPreorder}, \code{toYalmip}, \code{optimize}.
 
 \subsection{Solve with YALMIP}
 \label{sec:pdlmi-solver-use}
 
-\code{pdlmi} does not own solver settings or wrap \code{optimize}.  After
-\code{toYalmip}, use ordinary YALMIP:
+\code{pdlmi} does not own solver settings or wrap \code{optimize}.  After \code{toYalmip}, use ordinary YALMIP:
 
 \begin{lstlisting}[style=dpsyntax]
 opts = sdpsettings("solver", solverName, "verbose", 0);

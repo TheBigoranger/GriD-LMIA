@@ -296,10 +296,6 @@ function matched = gamma_matched_complexity(degrees, gridCounts, relaxations, ..
 end
 
 function opts = solver_options
-    % Use the same preference order as the existing solver smoke test.
-    solver = "lmilab";
-    if exist("mosekopt", "file") ~= 0
-        solver = "mosek";
-    end
-    opts = sdpsettings('solver', char(solver), 'verbose', 0);
+    % Keep benchmark solves on the same default as solver smoke tests.
+    opts = sdpsettings('solver', 'sedumi', 'verbose', 0);
 end

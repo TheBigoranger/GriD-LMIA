@@ -1,44 +1,28 @@
 \chapter{\texorpdfstring{Polynomial-Matrix Certificates on \mbox{Hypercubes}}{Polynomial-Matrix Certificates on Hypercubes}}
 \label{app:certificates}
 
-This appendix starts with positive semidefinite matrices, builds SOS and Gram
-representations, and then explains the four certificate choices implemented
-by \code{pdlmi}.  Background constructions are included so a new reader can
-recognize the mathematical landscape; only explicitly marked methods are
-package APIs.
+This appendix starts with positive semidefinite matrices, builds SOS and Gram representations, and then explains the four certificate choices implemented by \code{pdlmi}.  Background constructions are included so a new reader can recognize the mathematical landscape; only explicitly marked methods are package APIs.
 
-As in the preceding appendix, each major certificate is revealed as
-\emph{Basic idea} \(\rightarrow\) \emph{Formula} \(\rightarrow\)
-\emph{Worked example} \(\rightarrow\) \emph{Visual conclusion}.  Keep two
-questions separate while reading: what polynomial matrix is represented, and
-what finite cone is being used to certify its sign?
+As in the preceding appendix, each major certificate is revealed as \emph{Basic idea} \(\rightarrow\) \emph{Formula} \(\rightarrow\) \emph{Worked example} \(\rightarrow\) \emph{Visual conclusion}.  Keep two questions separate while reading: what polynomial matrix is represented, and what finite cone is being used to certify its sign?
 
-For a residual \(F\preceq0\), define \(S=-F\).  For \(F\succeq0\), define
-\(S=F\).  The common problem is
+For a residual \(F\preceq0\), define \(S=-F\).  For \(F\succeq0\), define \(S=F\).  The common problem is
 \[
-  S(\boldsymbol\alpha)\succeq0
+S(\boldsymbol\alpha)\succeq0
   \quad\text{for every }\boldsymbol\alpha\in[0,1]^\ell.
 \]
-All Gram constraints below prove non-strict inequalities.  A strict model must
-state its own margin, for example \(S-\varepsilon I\succeq0\).  The package
-adds no hidden margin.
+All Gram constraints below prove non-strict inequalities.  A strict model must state its own margin, for example \(S-\varepsilon I\succeq0\).  The package adds no hidden margin.
 
 \section{Positive Semidefinite Matrices And LMIs}
 
-\ideastep{Basic idea}
-A real symmetric matrix \(Q\) is positive semidefinite when
+\ideastep{Basic idea} A real symmetric matrix \(Q\) is positive semidefinite when
 \[
-  z^{\mathsf T}Qz\ge0\qquad\text{for every vector }z.
+z^{\mathsf T}Qz\ge0\qquad\text{for every vector }z.
 \]
-\ideastep{Formula}
-An LMI is an affine matrix expression constrained to the PSD cone:
+\ideastep{Formula} An LMI is an affine matrix expression constrained to the PSD cone:
 \[
-  Q(x)=Q_0+x_1Q_1+\cdots+x_rQ_r\succeq0.
+Q(x)=Q_0+x_1Q_1+\cdots+x_rQ_r\succeq0.
 \]
-The unknowns enter affinely, so this is a semidefinite program.  A polynomial
-matrix sign condition appears infinite because it asks for one PSD matrix at
-every point.  A certificate replaces those pointwise conditions by finitely
-many PSD matrices and affine coefficient identities.
+The unknowns enter affinely, so this is a semidefinite program.  A polynomial matrix sign condition appears infinite because it asks for one PSD matrix at every point.  A certificate replaces those pointwise conditions by finitely many PSD matrices and affine coefficient identities.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -57,30 +41,21 @@ many PSD matrices and affine coefficient identities.
 \section{SOS And Gram Matrices}
 \index{sum of squares}\index{Gram matrix}
 
-\ideastep{Basic idea}
-A scalar polynomial is a sum of squares (SOS) if
+\ideastep{Basic idea} A scalar polynomial is a sum of squares (SOS) if
 \[
-  p(z)=q_1(z)^2+\cdots+q_s(z)^2.
+p(z)=q_1(z)^2+\cdots+q_s(z)^2.
 \]
-Every SOS polynomial is nonnegative.  Choose a polynomial basis vector
-\(v_d(z)\).  The Gram form
+Every SOS polynomial is nonnegative.  Choose a polynomial basis vector \(v_d(z)\).  The Gram form
 \[
   p(z)=v_d(z)^{\mathsf T}Qv_d(z),\qquad Q\succeq0,
 \]
-is SOS because a factorization \(Q=L^{\mathsf T}L\) yields
-\(p=\lVert Lv_d\rVert_2^2\).  Expanding the Gram form and matching every
-coefficient of \(p\) gives equations linear in the entries of \(Q\).  Thus an
-SOS search is a finite PSD constraint plus affine equalities.
+is SOS because a factorization \(Q=L^{\mathsf T}L\) yields \(p=\lVert Lv_d\rVert_2^2\).  Expanding the Gram form and matching every coefficient of \(p\) gives equations linear in the entries of \(Q\).  Thus an SOS search is a finite PSD constraint plus affine equalities.
 
-\ideastep{Formula}
-For a symmetric \(n\)-by-\(n\) polynomial matrix, set
+\ideastep{Formula} For a symmetric \(n\)-by-\(n\) polynomial matrix, set
 \[
-  Z_d(z)=v_d(z)\otimes I_n,\qquad
-  S(z)=Z_d(z)^{\mathsf T}QZ_d(z),\quad Q\succeq0.
+Z_d(z)=v_d(z)\otimes I_n,\qquad S(z)=Z_d(z)^{\mathsf T}QZ_d(z),\quad Q\succeq0.
 \]
-Then \(y^{\mathsf T}S(z)y=(Z_dy)^{\mathsf T}Q(Z_dy)\ge0\) for every \(y\), so
-\(S(z)\succeq0\).  Matrix-SOS relaxations are developed in
-\cite{schererhol2006}.
+Then \(y^{\mathsf T}S(z)y=(Z_dy)^{\mathsf T}Q(Z_dy)\ge0\) for every \(y\), so \(S(z)\succeq0\).  Matrix-SOS relaxations are developed in \cite{schererhol2006}.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -99,47 +74,34 @@ Then \(y^{\mathsf T}S(z)y=(Z_dy)^{\mathsf T}Q(Z_dy)\ge0\) for every \(y\), so
 
 \section{Full-Space SOS}
 
-An unweighted Gram form proves \(S(z)\succeq0\) on all of
-\(\mathbb R^\ell\).  That can be much stronger than positivity only on a box.
-For example, \(\alpha(1-\alpha)\) is nonnegative on \([0,1]\) but negative
-outside it.  The package does not expose a general full-space SOS parser; this
-construction is background for understanding weighted certificates.
+An unweighted Gram form proves \(S(z)\succeq0\) on all of \(\mathbb R^\ell\).  That can be much stronger than positivity only on a box. For example, \(\alpha(1-\alpha)\) is nonnegative on \([0,1]\) but negative outside it.  The package does not expose a general full-space SOS parser; this construction is background for understanding weighted certificates.
 
 \section{Direct Bernstein Coefficients}
 
-\ideastep{Basic idea}
-If every local coefficient matrix has the requested sign, every convex
-combination of those coefficients has the same sign.  This yields a small,
-transparent sufficient certificate.
+\ideastep{Basic idea} If every local coefficient matrix has the requested sign, every convex combination of those coefficients has the same sign.  This yields a small, transparent sufficient certificate.
 
-\ideastep{Formula}
-On physical cell \(\mathbf c\) and one rate row, write
+\ideastep{Formula} On physical cell \(\mathbf c\) and one rate row, write
 \[
-  S(\boldsymbol\alpha)=
+S(\boldsymbol\alpha)=
   \sum_{\mathbf i}B_{\mathbf i}^m(\boldsymbol\alpha)
-  C^{(\mathbf c)}[\mathbf i].
+C^{(\mathbf c)}[\mathbf i].
 \]
 Because the basis weights are nonnegative and sum to one,
 \[
-  C^{(\mathbf c)}[\mathbf i]\succeq0\ \forall\mathbf i
+C^{(\mathbf c)}[\mathbf i]\succeq0\ \forall\mathbf i
   \quad\Longrightarrow\quad S(\boldsymbol\alpha)\succeq0.
 \]
-This is the package default.  It introduces no Gram variables and creates one
-constraint per physical cell, rate row, and local label.  The converse is
-false.
+This is the package default.  It introduces no Gram variables and creates one constraint per physical cell, rate row, and local label.  The converse is false.
 
-\ideastep{Worked example}
-Consider
+\ideastep{Worked example} Consider
 \[
-  p(\alpha)=\alpha^2-\alpha+0.35=(\alpha-0.5)^2+0.10.
+p(\alpha)=\alpha^2-\alpha+0.35=(\alpha-0.5)^2+0.10.
 \]
-It is strictly positive, with minimum \(0.10\), but its degree-two Bernstein
-coefficients are
+It is strictly positive, with minimum \(0.10\), but its degree-two Bernstein coefficients are
 \[
-  [\,0.35,\,-0.15,\,0.35\,].
+[\,0.35,\,-0.15,\,0.35\,].
 \]
-The negative middle coefficient defeats the direct certificate without making
-the polynomial negative.
+The negative middle coefficient defeats the direct certificate without making the polynomial negative.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -157,8 +119,7 @@ the polynomial negative.
   \node[coeff] at (0.88,-0.14) {\(0.35\)};
 \end{tikzpicture}
 
-\medskip
-\textit{One negative Bernstein coefficient does not imply a negative curve.}
+\medskip \textit{One negative Bernstein coefficient does not imply a negative curve.}
 \end{center}
 
 The same polynomial has the PSD Bernstein Gram representation
@@ -167,19 +128,13 @@ The same polynomial has the PSD Bernstein Gram representation
   Q=\begin{bmatrix}0.35&-0.15\\-0.15&0.35\end{bmatrix}\succeq0,
   \qquad p=\zeta_1^{\mathsf T}Q\zeta_1.
 \]
-The eigenvalues of \(Q\) are \(0.20\) and \(0.50\).  A complete Gram
-certificate can therefore succeed when coefficient-wise signs fail.
+The eigenvalues of \(Q\) are \(0.20\) and \(0.50\).  A complete Gram certificate can therefore succeed when coefficient-wise signs fail.
 
 \section{P\'olya As Lossless Elevation}
 
-\ideastep{Basic idea}
-P\'olya selection does not change the residual polynomial.  It rewrites that
-same polynomial at a higher Bernstein degree and then retries the direct
-coefficient test.
+\ideastep{Basic idea} P\'olya selection does not change the residual polynomial.  It rewrites that same polynomial at a higher Bernstein degree and then retries the direct coefficient test.
 
-\ideastep{Formula}
-Classical P\'olya theory concerns homogeneous polynomials strictly positive on
-a simplex \cite{powersreznick2001}.  For one box coordinate,
+\ideastep{Formula} Classical P\'olya theory concerns homogeneous polynomials strictly positive on a simplex \cite{powersreznick2001}.  For one box coordinate,
 \[
   \lambda_0=1-\alpha,\quad \lambda_1=\alpha,\quad
   \lambda_0+\lambda_1=1.
@@ -187,20 +142,17 @@ a simplex \cite{powersreznick2001}.  For one box coordinate,
 For \(\ell\) coordinates, the implemented multiplier is
 \[
   \prod_{s=1}^{\ell}
-  (\lambda_{s,0}+\lambda_{s,1})^d=1.
+(\lambda_{s,0}+\lambda_{s,1})^d=1.
 \]
-Regrouping is exactly Bernstein degree elevation: the represented residual does
-not change.
+Regrouping is exactly Bernstein degree elevation: the represented residual does not change.
 
-\ideastep{Worked example}
-For the worked coefficients,
+\ideastep{Worked example} For the worked coefficients,
 \[
-  [\,0.35,-0.15,0.35\,]
+[\,0.35,-0.15,0.35\,]
   \longrightarrow
   \left[\,0.35,\frac1{60},\frac1{60},0.35\,\right]
 \]
-after one elevation.  Every new coefficient is positive, so the elevated
-coefficient test succeeds.
+after one elevation.  Every new coefficient is positive, so the elevated coefficient test succeeds.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -223,30 +175,21 @@ coefficient test succeeds.
 \end{tikzpicture}
 \end{center}
 
-\code{applyPolya(d)} applies one scalar increment in every parameter direction
-and then coefficient constraints to every cell and rate row.  It adds neither
-Gram variables nor decision freedom.  A fixed-level failure is inconclusive;
-the package makes no tensor-box completeness claim.
+\code{applyPolya(d)} applies one scalar increment in every parameter direction and then coefficient constraints to every cell and rate row.  It adds neither Gram variables nor decision freedom.  A fixed-level failure is inconclusive; the package makes no tensor-box completeness claim.
 
 \section{Exact Interval Markov--Luk\'acs Forms}
 
-\ideastep{Basic idea}
-On one interval, endpoint factors can encode the domain exactly.  Even and odd
-target degrees require different weighted Gram patterns, so parity is a
-structural choice rather than a cosmetic one.
+\ideastep{Basic idea} On one interval, endpoint factors can encode the domain exactly.  Even and odd target degrees require different weighted Gram patterns, so parity is a structural choice rather than a cosmetic one.
 
-\ideastep{Formula}
-In one variable, interval nonnegativity has exact parity-specific descriptions
-\cite{lukacs1918,deklerkhesslaurent2017}.  If \(\deg p\le2r\),
+\ideastep{Formula} In one variable, interval nonnegativity has exact parity-specific descriptions \cite{lukacs1918,deklerkhesslaurent2017}.  If \(\deg p\le2r\),
 \[
-  p\ge0\text{ on }[0,1]
+p\ge0\text{ on }[0,1]
   \Longleftrightarrow
   p=s_0+\alpha(1-\alpha)s_1,
 \]
-where \(s_0,s_1\) are SOS of degrees at most \(2r\) and \(2r-2\).  If
-\(\deg p\le2r+1\),
+where \(s_0,s_1\) are SOS of degrees at most \(2r\) and \(2r-2\).  If \(\deg p\le2r+1\),
 \[
-  p\ge0\text{ on }[0,1]
+p\ge0\text{ on }[0,1]
   \Longleftrightarrow
   p=(1-\alpha)s_L+\alpha s_U,
 \]
@@ -269,14 +212,9 @@ and
     +\alpha\mathcal Z_r^{\mathsf T}Q_U\mathcal Z_r,
   \qquad Q_L,Q_U\succeq0.
 \]
-The second even block is absent at \(r=0\).  See
-\cite{aylwarditaniparrilo2007,schererhol2006} for polynomial-matrix context.
+The second even block is absent at \(r=0\).  See \cite{aylwarditaniparrilo2007,schererhol2006} for polynomial-matrix context.
 
-\ideastep{Worked example}
-A cubic residual has degree \(2r+1\) with \(r=1\).  It therefore uses two
-degree-one Gram bases: one multiplied by \(1-\alpha\) and one by
-\(\alpha\).  This is the one-dimensional full-box pattern used for the cubic
-residual in the introductory DPD-LMI example.
+\ideastep{Worked example} A cubic residual has degree \(2r+1\) with \(r=1\).  It therefore uses two degree-one Gram bases: one multiplied by \(1-\alpha\) and one by \(\alpha\).  This is the one-dimensional full-box pattern used for the cubic residual in the introductory DPD-LMI example.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -291,20 +229,14 @@ residual in the introductory DPD-LMI example.
 \end{tikzpicture}
 \end{center}
 
-Partition \(Q\) into \(n\)-by-\(n\) blocks \(Q_{ij}\).  The Bernstein
-coefficient at label \(k\) of
-\(\alpha^a(1-\alpha)^b\mathcal Z_d^{\mathsf T}Q\mathcal Z_d\), expressed at
-total degree \(2d+a+b\), is
+Partition \(Q\) into \(n\)-by-\(n\) blocks \(Q_{ij}\).  The Bernstein coefficient at label \(k\) of \(\alpha^a(1-\alpha)^b\mathcal Z_d^{\mathsf T}Q\mathcal Z_d\), expressed at total degree \(2d+a+b\), is
 \[
   \mathcal G_k^{d,a,b}(Q)=
   \frac{1}{\binom{2d+a+b}{k}}
   \sum_{\substack{0\le i,j\le d\\i+j=k-a}}
   \binom di\binom dj\,Q_{ij}.
 \]
-Equating this affine map to each target coefficient gives exact linear
-identities; \(Q\succeq0\) supplies the LMIs.  For one parameter,
-\code{applyFullBoxPreorder} implements these exact parity forms.  Its minimum
-absolute order is \(\lfloor m/2\rfloor\).
+Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs.  For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms.  Its minimum absolute order is \(\lfloor m/2\rfloor\).
 
 \section{Putinar Modules And Schm\"udgen Preorderings}
 
@@ -316,17 +248,9 @@ a Putinar quadratic module has the form
 \[
   \sigma_0+\sum_{j=1}^{q}\sigma_jg_j,\qquad \sigma_j\text{ SOS}.
 \]
-Under the Archimedean hypothesis, every polynomial strictly positive on \(K\)
-has such a representation at some degree \cite{putinar1993}.  Compactness
-alone is not that theorem statement.  The package implements one box-specific,
-fixed-order selector, not a general-domain or general-generator parser.
+Under the Archimedean hypothesis, every polynomial strictly positive on \(K\) has such a representation at some degree \cite{putinar1993}.  Compactness alone is not that theorem statement.  The package implements one box-specific, fixed-order selector, not a general-domain or general-generator parser.
 
-For one parameter, \code{applyPutinar(r)} dispatches to the same exact
-even/odd Markov--Luk\'acs forms as \code{applyFullBoxPreorder(r)}.  Its absolute
-default and minimum are \(r=\lfloor m/2\rfloor\).  Even targets use the
-unweighted and \(\alpha(1-\alpha)\)-weighted Gram blocks and match at degree
-\(2r\); odd targets use the two endpoint-weighted Gram blocks and match at
-degree \(2r+1\).
+For one parameter, \code{applyPutinar(r)} dispatches to the same exact even/odd Markov--Luk\'acs forms as \code{applyFullBoxPreorder(r)}.  Its absolute default and minimum are \(r=\lfloor m/2\rfloor\).  Even targets use the unweighted and \(\alpha(1-\alpha)\)-weighted Gram blocks and match at degree \(2r\); odd targets use the two endpoint-weighted Gram blocks and match at degree \(2r+1\).
 
 For \(\ell\ge2\), use the local box generators
 \[
@@ -341,12 +265,7 @@ and \code{applyPutinar(r)} uses
   S_s=\mathcal Z_{r\boldsymbol1-\boldsymbol e_s}^{\mathsf T}Q_s
        \mathcal Z_{r\boldsymbol1-\boldsymbol e_s},
 \]
-where every present \(Q_s\succeq0\).  In this multivariate branch the order is
-absolute and satisfies \(r\ge\lceil m/2\rceil\).  Exact identities match the sign-normalized target,
-elevated without changing it, at tensor degree \(2r\).  Negative-degree
-multiplier blocks are omitted at \(r=0\).  Each physical cell and active rate
-row owns independent Gram and equality blocks; no generator products, implicit
-margin, or solver call are introduced.
+where every present \(Q_s\succeq0\).  In this multivariate branch the order is absolute and satisfies \(r\ge\lceil m/2\rceil\).  Exact identities match the sign-normalized target, elevated without changing it, at tensor degree \(2r\).  Negative-degree multiplier blocks are omitted at \(r=0\).  Each physical cell and active rate row owns independent Gram and equality blocks; no generator products, implicit margin, or solver call are introduced.
 
 A Schm\"udgen full preordering includes every square-free generator product:
 \[
@@ -354,26 +273,18 @@ A Schm\"udgen full preordering includes every square-free generator product:
   \sigma_{\boldsymbol\nu}\prod_{j=1}^{q}g_j^{\nu_j},
   \qquad \sigma_{\boldsymbol\nu}\text{ SOS}.
 \]
-Strict positivity on a compact basic closed semialgebraic set has such a
-representation \cite{schmudgen1991}.  A finite truncation is still a sufficient
-certificate, and up to \(2^q\) multiplier blocks may be required.
+Strict positivity on a compact basic closed semialgebraic set has such a representation \cite{schmudgen1991}.  A finite truncation is still a sufficient certificate, and up to \(2^q\) multiplier blocks may be required.
 
 \section{The Implemented Multivariate Full Box Preordering}
 
-\ideastep{Basic idea}
-For several parameters, use every square-free product of the box generators.
-Each subset selects one weighted Gram block, and exact coefficient identities
-make the sum equal the stored residual on one physical cell and rate row.
+\ideastep{Basic idea} For several parameters, use every square-free product of the box generators. Each subset selects one weighted Gram block, and exact coefficient identities make the sum equal the stored residual on one physical cell and rate row.
 
-\ideastep{Formula}
-For the hypercube, use
+\ideastep{Formula} For the hypercube, use
 \[
   g_s(\boldsymbol\alpha)=\alpha_s(1-\alpha_s),
   \qquad s=1,\ldots,\ell.
 \]
-\ideastep{Worked example}
-For two parameters, the four subset products are
-\(1,g_1,g_2,g_1g_2\).
+\ideastep{Worked example} For two parameters, the four subset products are \(1,g_1,g_2,g_1g_2\).
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -408,22 +319,14 @@ Terms with negative tensor degree are omitted.  A present block has dimension
 \[
   n\prod_{s=1}^{\ell}\left(r+1-\mathbf1_{s\in J}\right).
 \]
-Every physical cell and active rate row gets independent dense Gram blocks and
-exact coefficient identities.  The minimum order is \(\lceil m/2\rceil\) for
-\(\ell\ge2\).  This is a specific dense Bernstein realization of the complete
-box preordering, not a full-space SOS, Putinar-only, sparse, or general-domain
-parser.  A fixed multivariate order is sufficient rather than exact.
+Every physical cell and active rate row gets independent dense Gram blocks and exact coefficient identities.  The minimum order is \(\lceil m/2\rceil\) for \(\ell\ge2\).  This is a specific dense Bernstein realization of the complete box preordering, not a full-space SOS, Putinar-only, sparse, or general-domain parser.  A fixed multivariate order is sufficient rather than exact.
 
-\ideastep{Finite SDP example: \(\ell=2\), \(m=3\)}
-Let \((a,b)\in[0,1]^2\) be the local coordinates of one cell, and suppose the
-sign-normalized residual is
+\ideastep{Finite SDP example: \(\ell=2\), \(m=3\)} Let \((a,b)\in[0,1]^2\) be the local coordinates of one cell, and suppose the sign-normalized residual is
 \[
   F(a,b)=\sum_{i=0}^3\sum_{k=0}^3
     B_i^3(a)B_k^3(b)F_{i,k}\succeq0.
 \]
-The default order is \(r=\lceil3/2\rceil=2\).  After exact elevation to
-degree \((4,4)\), the implementation introduces four independent PSD Gram
-matrices and enforces the identity
+The default order is \(r=\lceil3/2\rceil=2\).  After exact elevation to degree \((4,4)\), the implementation introduces four independent PSD Gram matrices and enforces the identity
 \begin{align*}
   F(a,b)={}&
     \mathcal Z_{(2,2)}^{\mathsf T}Q_{\varnothing}\mathcal Z_{(2,2)}
@@ -434,18 +337,12 @@ matrices and enforces the identity
   Q_{\varnothing}&\succeq0,\qquad Q_1\succeq0,\qquad
     Q_2\succeq0,\qquad Q_{12}\succeq0.
 \end{align*}
-For an \(n\)-by-\(n\) residual, these blocks have dimensions
-\(9n\), \(6n\), \(6n\), and \(4n\).  If
+For an \(n\)-by-\(n\) residual, these blocks have dimensions \(9n\), \(6n\), \(6n\), and \(4n\).  If
 \[
   F(a,b)=\sum_{p=0}^4\sum_{q=0}^4
     B_p^4(a)B_q^4(b)\widetilde F_{p,q},
 \]
-then \(\widetilde F_{0,0}=F_{0,0}\) and
-\(\widetilde F_{1,0}=F_{0,0}/4+3F_{1,0}/4\).  The finite SDP has the four
-PSD-LMI constraints above and one exact matrix equality for each of the
-\(5\times5=25\) elevated Bernstein labels.  With \([Q]_{u,v}\) denoting the
-\(n\)-by-\(n\) Gram block indexed by labels \(u,v\), two illustrative
-equalities are
+then \(\widetilde F_{0,0}=F_{0,0}\) and \(\widetilde F_{1,0}=F_{0,0}/4+3F_{1,0}/4\).  The finite SDP has the four PSD-LMI constraints above and one exact matrix equality for each of the \(5\times5=25\) elevated Bernstein labels.  With \([Q]_{u,v}\) denoting the \(n\)-by-\(n\) Gram block indexed by labels \(u,v\), two illustrative equalities are
 \begin{align*}
   F_{0,0}={}&[Q_{\varnothing}]_{(0,0),(0,0)},\\
   \frac14F_{0,0}+\frac34F_{1,0}={}&
@@ -453,10 +350,7 @@ equalities are
     +\frac12[Q_{\varnothing}]_{(1,0),(0,0)}
     +\frac14[Q_1]_{(0,0),(0,0)}.
 \end{align*}
-The remaining 23 are generated by the same weighted Bernstein coefficient
-map.  Thus the identities are affine equalities, not 25 additional LMIs.  A
-\(\preceq0\) comparison instead matches the negatives of the elevated target
-coefficients.
+The remaining 23 are generated by the same weighted Bernstein coefficient map.  Thus the identities are affine equalities, not 25 additional LMIs.  A \(\preceq0\) comparison instead matches the negatives of the elevated target coefficients.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -482,10 +376,7 @@ fullBoxState =
      1     5
 \end{lstlisting}
 
-Selections rebuild from the stored original \code{Residual} and
-\code{Relation}.  Reapplying P\'olya, Putinar, or full-box replaces the previous
-selection; the certificates never compound, and the three opt-in families are
-mutually exclusive.
+Selections rebuild from the stored original \code{Residual} and \code{Relation}.  Reapplying P\'olya, Putinar, or full-box replaces the previous selection; the certificates never compound, and the three opt-in families are mutually exclusive.
 
 \section{Five Different Modeling Choices}
 
@@ -526,9 +417,7 @@ Putinar/full-box order & Gram bases and PSD block sizes & decision degree \\
 \bottomrule
 \end{tabularx}
 
-When a certificate fails, do not infer continuous infeasibility.  Decide
-separately whether the model needs a richer decision degree, a finer physical
-grid, a larger P\'olya increment, or a higher Putinar or full-box order.
+When a certificate fails, do not infer continuous infeasibility.  Decide separately whether the model needs a richer decision degree, a finer physical grid, a larger P\'olya increment, or a higher Putinar or full-box order.
 
 \section{Implemented Boundary}
 
@@ -547,10 +436,4 @@ explicit user margins & package-owned strictness or solver policy \\
 \end{tabularx}
 
 \section{Further Reading}
-The primary papers by Putinar \cite{putinar1993} and Schm\"udgen
-\cite{schmudgen1991} remain the mathematical authority for their respective
-theorems.  For implementation-oriented background, YALMIP maintains an
-\href{https://yalmip.github.io/tutorial/sumofsquaresprogramming/}{SOS tutorial},
-and the \href{https://en.wikipedia.org/wiki/Positivstellensatz}{Positivstellensatz
-overview} gives a compact map of the surrounding result family.  Neither link
-changes the fixed-order, box-specific package boundary described above.
+The primary papers by Putinar \cite{putinar1993} and Schm\"udgen \cite{schmudgen1991} remain the mathematical authority for their respective theorems.  For implementation-oriented background, YALMIP maintains an \href{https://yalmip.github.io/tutorial/sumofsquaresprogramming/}{SOS tutorial}, and the \href{https://en.wikipedia.org/wiki/Positivstellensatz}{Positivstellensatz overview} gives a compact map of the surrounding result family.  Neither link changes the fixed-order, box-specific package boundary described above.

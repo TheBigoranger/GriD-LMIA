@@ -1,34 +1,20 @@
-\chapter[From LPV Models to Cellwise Bernstein Data]{\texorpdfstring{From LPV Models to\\Cellwise Bernstein Data}{From LPV Models to Cellwise Bernstein Data}}
+\chapter[From LPV Models to Finite Solver Constraints]{\texorpdfstring{From LPV Models to\\Finite Solver Constraints}{From LPV Models to Finite Solver Constraints}}
 \label{sec:canonical-pdlmi}
 \label{sec:bernstein-motivation}
 
-This chapter fixes the vocabulary and data model used throughout the manual.
-It begins with a continuous control inequality, separates the physical grid
-from local polynomial labels, and ends at the exact cell-local Bernstein data
-consumed by the algebra in \cref{sec:cellwise-solver-path}.
+This chapter introduces the purpose, object model, and complete solution path of the package. It begins with a continuous LPV control inequality, separates the physical grid from local polynomial labels, and ends with finite YALMIP constraints and recovery of the solved parameter-dependent matrix.
 
-\section{LPV Systems and Parameter-Dependent LMIs}
+\section{Motivation: LPV Systems and Parameter-Dependent LMIs}
 
-A \emph{linear parameter-varying (LPV) system}\index{LPV system} is a linear
-state-space model whose matrices depend on a measurable scheduling vector
-\(\boldsymbol\rho(t)=(\rho_1(t),\ldots,\rho_\ell(t))\).  For the autonomous
-model used here,
+Many systems are usefully linear only after their operating condition is made explicit. An aircraft changes with altitude and speed, a chemical process changes with temperature and concentration, and a gain-scheduled controller changes with its measured scheduling variables. Treating those conditions as unrelated LTI models discards their shared structure. Requiring one constant Lyapunov matrix or one constant certificate for every condition can be equally unsatisfactory, because the resulting test is often unnecessarily conservative.
+
+An \emph{linear parameter-varying (LPV) system}\index{LPV system} keeps the linear state-space structure while allowing its known matrices to depend on a measurable scheduling vector \(\boldsymbol\rho(t)=(\rho_1(t),\ldots,\rho_\ell(t))\in\mathcal P\subset \mathbb{R}^\ell\). For example, an autonomous model is written as
 \[
     \dot x(t)=A\bigl(\boldsymbol\rho(t)\bigr)x(t),
 \]
-the state equation is linear in \(x\), while the scheduling vector selects the
-current matrix from the known family \(A(\boldsymbol\rho)\).  The admissible
-scheduling values lie in a compact parameter set \(\mathcal P\), and a
-rate-dependent problem also bounds
-\(\dot{\boldsymbol\rho}(t)\in\mathcal V\).
+where \(x\) is the state vector and \(\boldsymbol\rho\) selects the current member of the known matrix family \(A(\boldsymbol\rho)\). The central question is therefore not whether each frozen model works in isolation, but whether one structured certificate proves the required property throughout the full parameter set \(\mathcal P\).
 
-A \emph{parameter-dependent linear matrix inequality} (PD-LMI)\index{PD-LMI}
-asks a matrix inequality to hold for every
-\(\boldsymbol\rho\in\mathcal P\).  When derivatives of decision functions
-enter through the scheduling rate, this manual calls it a
-\emph{differentiable parameter-dependent LMI} (DPD-LMI)\index{DPD-LMI}.  A
-standard LPV Lyapunov model seeks a symmetric matrix
-\(P(\boldsymbol\rho)\) such that
+A \emph{parameter-dependent linear matrix inequality} (PD-LMI)\index{PD-LMI} supplies that certificate by allowing the decision matrix itself to vary with \(\boldsymbol\rho\). A standard LPV Lyapunov construction seeks a symmetric \(P(\boldsymbol\rho)\) such that the following inequalities hold throughout the parameter and rate domains:
 \begin{align}
     P(\boldsymbol\rho) & \succeq I,
     \label{eq:canonical-positive}               \\
@@ -38,42 +24,43 @@ standard LPV Lyapunov model seeks a symmetric matrix
     & \preceq-\varepsilon I.
     \label{eq:lpv-spine}
 \end{align}
-After known data are fixed, every term must remain affine in the decision
-coefficients.  Removing \(\dot P\), or fixing
-\(\dot{\boldsymbol\rho}=0\), recovers an ordinary PD-LMI.  The package inserts
-no hidden strictness margin: the displayed \(\varepsilon I\) belongs to the
-user's model.
+The first inequality keeps the certificate positive; the second requires it to decrease along every admissible scheduling trajectory. When \(\boldsymbol\rho\) moves, the chain-rule term \(\dot P\) matters, so this manual calls the problem a \emph{differentiable parameter-dependent LMI} (DPD-LMI)\index{DPD-LMI}. Removing \(\dot P\), or fixing \(\dot{\boldsymbol\rho}=0\), recovers an ordinary PD-LMI. After known data are fixed, every term must remain affine in the decision coefficients, and the displayed \(\varepsilon I\) remains an explicit user choice rather than a hidden package margin.
+
+\subsection{Package roles and the end-to-end path}
+
+The package starts after the user has chosen an LPV model, a parameter box, any scheduling-rate bounds, and the matrix inequality to certify. Its role is to represent the known and decision matrices, convert the parameter continuum into finite certificate constraints, and hand those constraints to YALMIP. It does not generate the plant or controller structure, choose an objective or SDP solver, or interpret solver diagnostics on the user's behalf.
+
+The main objects follow the same four-stage path used in the rest of the manual:
+\begin{enumerate}
+    \item \code{pdmat} stores known parameter-dependent matrices, while \code{pdvar} creates continuous parameter-dependent decision matrices on a physical grid. Both inherit grid, degree, label, and cell-local storage mechanics from the backend class \code{pdbase}; ordinary users normally begin with \code{pdmat} and \code{pdvar}, not \code{pdbase}. \item Matrix operations form an affine cell-local residual. When scheduling-rate terms are present, \code{rhodiff} differentiates a \code{pdvar} on each cell and stores one derivative row for every rate-box vertex. \item A comparison such as \code{residual <= 0} creates a \code{pdlmi}. Direct Bernstein-coefficient constraints are the default; \code{applyPolya}, \code{applyPutinar}, and \code{applyFullBoxPreorder} replace that selection with an implemented opt-in certificate. \item \code{toYalmip} exports the stored finite constraints. The user calls YALMIP \code{optimize} with an explicit objective and solver configuration, checks the returned diagnostics, and calls \code{value} to recover solved coefficient data.
+\end{enumerate}
+
+Two finite reductions in this path have different logical status. Traversing all rate-box vertices is exact when the residual is affine in \(\dot{\boldsymbol\rho}\). By contrast, the selected Bernstein or Bernstein--Gram certificate supplies a finite sufficient condition over the remaining \(\boldsymbol\rho\)-continuum; failure of that certificate does not prove that the original continuous inequality is infeasible. The next four sections explain the representation behind these reductions, and \cref{sec:cellwise-solver-path} executes the complete path in MATLAB.
 
 \section{The Chain Rule in a DPD-LMI}
 
-The dot on \(P\) is a time derivative along the scheduling trajectory, not a
-new independent matrix.  The multivariable chain rule is
+The dot on \(P\) is a time derivative along the scheduling trajectory, not a new independent matrix. Applying the multivariable chain rule gives
 \[
     \dot P\bigl(\boldsymbol\rho(t)\bigr)
-    =\frac{dP}{dt}
-    =\sum_{s=1}^{\ell}
+=\frac{dP}{dt} =\sum_{s=1}^{\ell}
     \frac{\partial P}{\partial\rho_s}
     \bigl(\boldsymbol\rho(t)\bigr)\dot\rho_s(t).
 \]
-Write \(\boldsymbol\nu=\dot{\boldsymbol\rho}\) and give every scheduling
-direction independent finite rate bounds,
+Write \(\boldsymbol\nu=\dot{\boldsymbol\rho}\) and give every scheduling direction independent finite rate bounds,
 \[
     \mathcal V
-    =\prod_{s=1}^{\ell}[\underline\nu_s,\overline\nu_s].
+=\prod_{s=1}^{\ell}[\underline\nu_s,\overline\nu_s].
 \]
-For a residual that is affine in \(\boldsymbol\nu\), the rate box is handled
-exactly by traversing its \(2^\ell\) lower/upper vertices
-\(\boldsymbol v^{(r)}\).  Thus, rather than retaining a rate continuum, the
-rate-dependent inequality can be written in the block-diagonal form
-\[
-    \operatorname{diag}_{r=1}^{2^\ell}
+For a residual that is affine in \(\boldsymbol\nu\), the rate box is handled exactly by traversing its \(2^\ell\) lower/upper vertices \(\boldsymbol v^{(r)}\).  Thus, rather than retaining a rate continuum, the rate-dependent inequality can be written in the block-diagonal form
+\begin{gather}
+\label{eq:rate-vertex-block-diagonal}
+\operatorname{diag}_{r=1}^{2^\ell}
     \mathcal F\bigl(\boldsymbol\rho,\boldsymbol v^{(r)}\bigr)
     \prec 0,
     \qquad \boldsymbol\rho\in\mathcal P.
-\]
-Each diagonal block is the residual at one rate vertex.  The remaining
-continuum is only the scheduling parameter \(\boldsymbol\rho\), which the
-package treats cellwise with its Bernstein certificates.
+\end{gather}
+
+Each diagonal block is the residual at one rate vertex.  The remaining continuum is only the scheduling parameter \(\boldsymbol\rho\), which the package treats cellwise with its Bernstein certificates.
 
 We therefore focus on the following general DPD-LMI.
 \keyequation{General form of the differentiable parameter-dependent LMI}{%
@@ -88,104 +75,159 @@ We therefore focus on the following general DPD-LMI.
   \prec 0, \qquad \forall (\boldsymbol\rho,\dot{\boldsymbol\rho}) \in\mathcal P\times\mathcal V.
 \label{eq:general-dpdlmi}
 \end{equation}
-}
-Here \(R_i\), \(F_0\), and \(F_i\) are known matrix functions, while the
-\(x_i\) are the parameter-dependent decision functions.  The construction is
-dimension-generic in \(\ell\), subject to the cost of the resulting tensor
-data, and requires the displayed affine dependence on the rate.  Setting
-\(R_i\equiv0\) for every \(i\) (collectively, \(R=0\)) removes the derivative
-term and recovers an ordinary PD-LMI.
+} Here \(R_i\), \(F_0\), and \(F_i\) are known matrix functions, while the \(x_i\) are parameter-dependent decision functions. The affine dependence on \(\dot{\boldsymbol\rho}\) reduces exactly to the finite rate vertices in \cref{eq:rate-vertex-block-diagonal}, but \(\boldsymbol\rho\in\mathcal P\) remains a continuum. The construction is dimension-generic in \(\ell\), subject to the cost of the resulting tensor data. The package handles the remaining continuum by representing each \(x_i\) as a continuous piecewise-polynomial function on a physical grid, with cell-local tensor-product Bernstein coefficients.
+
+Setting \(R_i\equiv0\) for every \(i\) (collectively, \(R=0\)) removes the derivative term and recovers an ordinary PD-LMI.
 
 \section{Grid the Scheduling-Parameter Space}
 
-Choose a one-dimensional physical grid
+The package currently considers only an axis-aligned box parameter domain,
+\[
+    \mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s].
+\]
+This restriction is deliberate, as a compact box is easy to partition into hypercubes for cellwise modelling. General polytopic or curved parameter domains are outside the implemented modelling contract.
+
+Gridding starts independently in each parameter direction. For each direction, choose the physical grid
 \[
     \mathcal G_s=
-    \{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\}
+    \{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},\qquad s=1,\ldots,\ell.
 \]
-in every parameter direction \(s\).  The full tensor grid is
-\(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\).  It contains
-\(\prod_s k_s\) physical nodes and partitions \(\mathcal P\) into
-\(\prod_s(k_s-1)\) physical hypercubes.  A hypercube is identified by the
-one-based multi-index
-\(\mathbf c=(c_1,\ldots,c_\ell)\) and has domain
+The full tensor grid is \(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\).  It contains \(\prod_{s=1}^{\ell} k_s\) physical nodes and partitions \(\mathcal P\) into \(\prod_{s=1}^{\ell}(k_s-1)\) physical hypercubes.  A hypercube is identified by the one-based multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\) and has domain
+\begin{gather}
+    \label{eq:physical-hypercube}
+    \mathcal H_{\mathbf c}=\prod_{s=1}^{\ell} [\rho_s^{(c_s)},\rho_s^{(c_s+1)}].
+\end{gather}
+Physical-node indices and components of \(\mathbf c\) are one-based.  They identify geometry, not coefficient positions.
+
+\section{Desired Behaviour Across Cell Boundaries}
+\label{sec:desired-cross-cell-behaviour}
+
+The package represents coefficient-backed known data and decision matrices by local polynomials, so products, degree elevation, and differentiation can be performed one physical cell at a time. A Lyapunov matrix or comparable decision function must not jump when the scheduling trajectory crosses a shared face, so \code{pdvar} guarantees global \(C^0\) continuity. It does not require \(C^1\) continuity; one-sided derivatives may differ, and \code{rhodiff} retains the corresponding cell-local derivative data\index{derivative data}. Known \code{pdmat} data are different: the object records whether adjacent numeric faces match, but it preserves explicitly supplied discontinuous local data rather than adding decision constraints to repair them.
+
+A monomial parameterization makes the additional continuity condition explicit.  For two adjacent one-dimensional cells, write
 \[
-    \mathcal H_{\mathbf c}
-    =\prod_{s=1}^{\ell}
-    [\rho_s^{(c_s)},\rho_s^{(c_s+1)}].
+    A^{(c)}(\alpha_c)=\sum_{i=0}^{m}\alpha_c^i A_i^{(c)},
+    \qquad \alpha_c\in[0,1].
 \]
-Inside that hypercube, the forward local coordinate is
+At their shared physical node, \(\alpha_1=1\) in the left cell and \(\alpha_2=0\) in the right cell.  Enforcing \(C^0\) continuity therefore requires the extra matrix equality
+\[
+    \underbrace{\sum_{i=0}^{m}A_i^{(1)}}_{A^{(1)}(1)}
+    =\underbrace{A_0^{(2)}}_{A^{(2)}(0)}.
+\]
+When \(\ell>1\), equality along a shared face is a polynomial identity in the tangential coordinates and produces a corresponding family of linear coefficient equalities. The number of such conditions grows with the polynomial degree and the number of shared faces.
+
+The right panel of \cref{fig:shared-face-lipschitz} shows the intended behaviour: the two polynomial pieces share their boundary value, while their one-sided slopes remain different. A globally \(C^0\), piecewise-polynomial matrix function on the compact parameter box is Lipschitz. At a shared face, its Clarke generalized derivative is the convex hull of the limiting derivatives from the adjacent cells. The package consequently imposes \cref{eq:general-dpdlmi} using the relevant cellwise derivative and rate-vertex data without claiming that the derivative itself is globally continuous.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[x=1cm,y=0.62cm,font=\scriptsize]
+        % Before: separate endpoint controls allow a jump at the shared face.
+        \begin{scope}
+            \draw[dp/axis] (0,0) -- (5.2,0) node[below] {\(\rho\)};
+            \draw[dp/axis] (0,-1.2) -- (0,3.25) node[left] {\(C\)};
+            \draw[dp/grid-line,densely dashed] (2.5,-1.1) -- (2.5,3.1);
+            \draw[dp/curve-primary] plot[smooth] coordinates
+                {(0,0.8) (1.25,2.2) (2.5,1.4)};
+            \draw[dp/curve-secondary] plot[smooth] coordinates
+                {(2.5,0.8) (3.75,-0.2) (5,1.8)};
+            \fill[black] (2.5,1.4) circle (1.3pt);
+            \fill[white,draw=black!70] (2.5,0.8) circle (1.3pt);
+            \node[align=center] at (2.5,3.1) {Before: unshared controls\\can jump at the face};
+            \node[below=3pt] at (2.5,0) {\(0.5\)};
+        \end{scope}
+        % After: the control face is shared, but tangent labels deliberately differ.
+        \begin{scope}[xshift=7cm]
+            \draw[dp/axis] (0,0) -- (5.2,0) node[below] {\(\rho\)};
+            \draw[dp/axis] (0,-1.2) -- (0,3.25) node[left] {\(C\)};
+            \draw[dp/grid-line,densely dashed] (2.5,-1.1) -- (2.5,3.1);
+            \draw[dp/curve-primary] plot[smooth] coordinates
+                {(0,0.8) (1.25,2.2) (2.5,1.4)};
+            \draw[dp/curve-primary] plot[smooth] coordinates
+                {(2.5,1.4) (3.75,-0.2) (5,1.8)};
+            \fill[white,draw=black!90,thick] (2.5,1.4) circle (1.7pt);
+            \node[align=center] at (2.5,3.1) {After: one shared value\\(continuous and Lipschitz)};
+            \node[above left=1pt] at (2.5,1.4) {\(1.4\)};
+            \node[below=3pt] at (2.5,0) {\(0.5\)};
+            \node[align=right,anchor=east] at (2.35,0.35) {left slope\\\(-3.2\)};
+            \node[align=left,anchor=west] at (2.65,0.35) {right slope\\\(-6.4\)};
+            \node[below,align=center] at (2.5,-1.0) {\(\lvert C'(\rho)\rvert\le8\), but the derivative is not continuous};
+        \end{scope}
+    \end{tikzpicture}
+    \caption{The required cell-interface behaviour.  Enforcing one shared boundary value removes the jump while allowing unequal one-sided derivatives.}
+    \label{fig:shared-face-lipschitz}
+\end{figure}
+
+\section{Bernstein Basis and Cell-Local Storage}
+\label{sec:continuous-bernstein-representation}
+
+For its cell-local polynomial representation, the package uses the Bernstein basis rather than the monomial basis in the preceding comparison. Bernstein endpoint identities expose each face polynomial directly through its face coefficients; shared decision storage can therefore impose \(C^0\) continuity without adding separate cross-cell equalities. Inside a physical hypercube \cref{eq:physical-hypercube}, the forward local coordinate in direction \(s\) is
 \[
     \alpha_s=
     \frac{\rho_s-\rho_s^{(c_s)}}
     {\rho_s^{(c_s+1)}-\rho_s^{(c_s)}}\in[0,1].
 \]
-Physical-node indices and components of \(\mathbf c\) are one-based.  They
-identify geometry, not coefficient positions.
-
-\section{Physical Hypercubes and Local Bernstein Labels}
-
-On one selected hypercube, a tensor-product polynomial of degree \(m\) is
+On one local coordinate \(\alpha\in[0,1]\), the normalized degree-\(m\) Bernstein basis is
+\[
+    B_i^m(\alpha)=\binom mi(1-\alpha)^{m-i}\alpha^i,
+    \qquad i=0,\ldots,m.
+\]
+The basis functions are nonnegative and sum to one.  The first three positive degrees are
+\[
+\begin{aligned}
+    m=1:\quad
+      &B_0^1=1-\alpha,                 &
+      &B_1^1=\alpha,\\
+    m=2:\quad
+      &B_0^2=(1-\alpha)^2,             &
+      &B_1^2=2(1-\alpha)\alpha,        &
+      &B_2^2=\alpha^2,\\
+    m=3:\quad
+      &B_0^3=(1-\alpha)^3,             &
+      &B_1^3=3(1-\alpha)^2\alpha,      &
+      &B_2^3=3(1-\alpha)\alpha^2,      &
+      &B_3^3=\alpha^3.
+\end{aligned}
+\]
+In \(\ell\) parameter directions, the package uses the tensor-product expansion
 \[
     C^{(\mathbf c)}(\boldsymbol\rho)=
     \sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
     \left(\prod_{s=1}^{\ell}B_{i_s}^{m}(\alpha_s)\right)
-    C^{(\mathbf c)}[\mathbf i],
+    C^{(\mathbf c)}[\mathbf i].
 \]
-where
-\[
-    B_i^m(\alpha)=\binom mi(1-\alpha)^{m-i}\alpha^i.
-\]
-In one dimension, the first three degrees make the zero-based local labels
-explicit.  For \(m=1\), \(B_0^1=1-\alpha\) and \(B_1^1=\alpha\), so
-\[
-    C^{(c)}(\rho)=(1-\alpha)C^{(c)}[0]
-    +\alpha C^{(c)}[1].
-\]
-For degrees two and three, the individual basis functions are
-\[
-    \begin{aligned}
-        m=2:\quad
-         & B_0^2=(1-\alpha)^2,\qquad
-        B_1^2=2(1-\alpha)\alpha,\qquad
-        B_2^2=\alpha^2,                     \\
-        m=3:\quad
-         & B_0^3=(1-\alpha)^3,\qquad
-        B_1^3=3(1-\alpha)^2\alpha,          \\[-1pt]
-         & B_2^3=3(1-\alpha)\alpha^2,\qquad
-        B_3^3=\alpha^3.
-    \end{aligned}
-\]
-The corresponding matrix expansions add one local coefficient at a time:
-\begin{align*}
-    C^{(c)}(\rho)\big|_{m=2}
-     & =(1-\alpha)^2C^{(c)}[0]
-    +2(1-\alpha)\alpha C^{(c)}[1]
-    +\alpha^2C^{(c)}[2],       \\
-    C^{(c)}(\rho)\big|_{m=3}
-     & =(1-\alpha)^3C^{(c)}[0]
-    +3(1-\alpha)^2\alpha C^{(c)}[1]
-    +3(1-\alpha)\alpha^2C^{(c)}[2]
-    +\alpha^3C^{(c)}[3].
-\end{align*}
-The local Bernstein label \(\mathbf i\) is zero-based.  It chooses one matrix
-coefficient inside the already selected physical hypercube; it is not another
-physical point.  The nonnegative basis functions sum to one, so the polynomial
-value lies in the convex hull of its coefficient matrices.  Exact elevation,
-multiplication, and differentiation operate on these local rows without
-changing the physical identity \(\mathbf c\).
+The matrix value is a convex combination of the local coefficient matrices. Exact degree elevation, multiplication, and differentiation operate on those coefficients without changing the identity of the physical cell.
 
-The traversal order used by \code{cells}, \code{lbls}, \code{coeffs}, and
-rate-vertex rows varies later dimensions fastest.  In two dimensions,
-\code{lbls()} therefore lists
-\([0,0],[0,1],\ldots,[0,m],[1,0],\ldots,[m,m]\).
+\subsection{Physical nodes, local labels, and continuity by storage}
 
-\section{What One Hypercube Stores}
+The two index systems have different meanings:
+\begin{itemize}
+    \item the physical node \(\rho_s^{(j)}\) and the cell component \(c_s\) are one-based and identify geometry; \item the local Bernstein label \(i_s\in\{0,\ldots,m\}\) is zero-based and selects one coefficient inside an already chosen cell.
+\end{itemize}
+A degree-\(m\) tensor polynomial stores \((m+1)^\ell\) local coefficient positions per physical cell.  These positions are not another grid of point samples.  The traversal order used by \code{cells}, \code{lbls}, \code{coeffs}, and rate-vertex rows varies later dimensions fastest; in two dimensions, \code{lbls()} lists \([0,0],[0,1],\ldots,[0,m],[1,0],\ldots,[m,m]\).
+
+The endpoint identities \(B_0^m(0)=1\) and \(B_m^m(1)=1\) make continuity easy to encode in coefficient data. For a \code{pdvar}, adjacent cells reuse the same YALMIP decision handles on their common face; in one dimension, \(C^{(1)}[m]\) and \(C^{(2)}[0]\) are the same decision matrix. Tensor cells similarly share every handle on a common face, so continuity requires no later equality constraint. For a coefficient-backed \code{pdmat}, \code{IsContinuous} instead reports whether the two numeric face-coefficient sets agree; explicitly mismatched local data remain cell-local and produce a warning.
+
+\begin{center}
+    \begin{tikzpicture}[y=1cm,
+            face/.style={dp/decision,minimum width=22mm,minimum height=8mm,
+                    font=\scriptsize,align=center},
+            interior/.style={dp/contribution,minimum width=22mm,minimum height=8mm,
+                    font=\scriptsize,align=center}]
+        \node[face] (c10) {$C^{(1)}[0]$};
+        \node[interior,right=7mm of c10] (c11) {$C^{(1)}[1]$};
+        \node[face,minimum width=40mm,right=10mm of c11] (shared) {$C^{(1)}[2]=C^{(2)}[0]$};
+        \node[interior,right=10mm of shared] (c21) {$C^{(2)}[1]$};
+        \node[face,right=7mm of c21] (c22) {$C^{(2)}[2]$};
+        \draw[dp/arrow] (c10)--(c11); \draw[dp/arrow] (c11)--(shared);
+        \draw[dp/arrow] (shared)--(c21); \draw[dp/arrow] (c21)--(c22);
+        \node[below=7pt of shared,font=\scriptsize] {shared value, independent interiors};
+    \end{tikzpicture}
+\end{center}
+
+\subsection{A two-dimensional storage example}
 \label{sec:one-hypercube-storage}
 
-The first two-dimensional example uses
-\(\mathcal G_1=\{0,0.5,1\}\),
-\(\mathcal G_2=\{0,1\}\), and degree two:
+The first two-dimensional example uses \(\mathcal G_1=\{0,0.5,1\}\), \(\mathcal G_2=\{0,1\}\), and degree two:
 
 \begin{lstlisting}[style=dpmatlab]
 grid2 = {[0 .5 1], [0 1]};
@@ -198,14 +240,7 @@ secondCellCoefficients = A2.coeffs([2 1])
 sameLeaf = A2.LocalValues{2}{1}
 \end{lstlisting}
 
-The figure lists the nine matrices in \code{A2.lbls()} order, with \(i_1\)
-varying more slowly than \(i_2\).
-
-The grid has two physical hypercubes.  The highlighted one below is
-\(\mathbf c=(2,1)\), whose domain is
-\([0.5,1]\times[0,1]\).  Selecting it through
-\code{A2.coeffs([2 1])} reaches the same nested storage leaf as
-\code{A2.LocalValues{2}{1}}.
+The grid has two physical hypercubes. The highlighted one below is \(\mathbf c=(2,1)\), whose domain is \([0.5,1]\times[0,1]\). Selecting it through \code{A2.coeffs([2 1])} reaches the same nested storage leaf as \code{A2.LocalValues{2}{1}}. The figure lists the nine matrices in \code{A2.lbls()} order, with \(i_1\) varying more slowly than \(i_2\).
 
 \begin{figure}[H]
 \centering
@@ -248,94 +283,10 @@ The grid has two physical hypercubes.  The highlighted one below is
         \draw[dp/arrow] (selected.east) -- node[above,font=\tiny]
         {\code{A2.coeffs([2 1])}} (leaf.west);
         \end{tikzpicture}
-    \caption{A physical hypercube selects one storage leaf.  Within that leaf,
-        \code{A2.lbls()} supplies the nine zero-based local labels in the displayed
-        order.  The matrices are Bernstein coefficients, not a \(3\)-by-\(3\) grid of
-        point samples.}
+    \caption{A physical hypercube selects one storage leaf. Within that leaf, \code{A2.lbls()} supplies the nine zero-based local labels in the displayed order. The matrices are Bernstein coefficients, not a \(3\)-by-\(3\) grid of point samples.}
     \label{fig:selected-hypercube-storage}
     \end{figure}
 
-The selected leaf is a flat nine-entry coefficient cell: row \(q\) of
-\code{A2.lbls()} labels entry \(q\).  Appendix~\ref{app:bernstein-math}
-derives the conversion and ordering rules.
-
-\section{Continuity Across Shared Faces}
-
-Independent cell polynomials would not necessarily agree on a grid boundary.
-The package instead shares the complete Bernstein coefficient face between
-adjacent continuous cells.  On a face, the tensor polynomial depends only on
-that face's coefficients, so sharing them gives \(C^0\) continuity.
-
-For a one-dimensional degree-two example, take the two cells on the grid
-\([0,0.5,1]\), with Bernstein controls
-\[
-  [0.8,\ 2.2,\ 1.4]\qquad\text{and}\qquad[1.4,\ -0.2,\ 1.8].
-\]
-Thus \(C^{(1)}[2]=C^{(2)}[0]=1.4\) is the shared value at
-\(\rho=0.5\), while the interior controls remain independent.  The
-one-sided physical derivatives there are \(-3.2\) from the left and
-\(-6.4\) from the right.  The function is therefore continuous but not
-\(C^1\).  Its derivative is bounded in magnitude by \(8\) on the two
-cells, so it is globally Lipschitz with Lipschitz constant at most \(8\).
-This is the intended contract: the package shares values on every shared
-face\index{shared face}, but \code{rhodiff} produces cell-local derivative
-data\index{derivative data} that may be discontinuous.
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[x=1cm,y=0.62cm,font=\scriptsize]
-  % Before: separate endpoint controls allow a jump at the shared face.
-  \begin{scope}
-    \draw[dp/axis] (0,0) -- (5.2,0) node[below] {\(\rho\)};
-    \draw[dp/axis] (0,-1.2) -- (0,3.25) node[left] {\(C\)};
-    \draw[dp/grid-line,densely dashed] (2.5,-1.1) -- (2.5,3.1);
-    \draw[dp/curve-primary] plot[smooth] coordinates
-      {(0,0.8) (1.25,2.2) (2.5,1.4)};
-    \draw[dp/curve-secondary] plot[smooth] coordinates
-      {(2.5,0.8) (3.75,-0.2) (5,1.8)};
-    \fill[black] (2.5,1.4) circle (1.3pt);
-    \fill[white,draw=black!70] (2.5,0.8) circle (1.3pt);
-    \node[align=center] at (2.5,3.1) {Before: unshared controls\\can jump at the face};
-    \node[below=3pt] at (2.5,0) {\(0.5\)};
-  \end{scope}
-  % After: the control face is shared, but tangent labels deliberately differ.
-  \begin{scope}[xshift=7cm]
-    \draw[dp/axis] (0,0) -- (5.2,0) node[below] {\(\rho\)};
-    \draw[dp/axis] (0,-1.2) -- (0,3.25) node[left] {\(C\)};
-    \draw[dp/grid-line,densely dashed] (2.5,-1.1) -- (2.5,3.1);
-    \draw[dp/curve-primary] plot[smooth] coordinates
-      {(0,0.8) (1.25,2.2) (2.5,1.4)};
-    \draw[dp/curve-primary] plot[smooth] coordinates
-      {(2.5,1.4) (3.75,-0.2) (5,1.8)};
-    \fill[white,draw=black!90,thick] (2.5,1.4) circle (1.7pt);
-    \node[align=center] at (2.5,3.1) {After: one shared value\\(continuous and Lipschitz)};
-    \node[above left=1pt] at (2.5,1.4) {\(1.4\)};
-    \node[below=3pt] at (2.5,0) {\(0.5\)};
-    \node[align=right,anchor=east] at (2.35,0.35) {left slope\\\(-3.2\)};
-    \node[align=left,anchor=west] at (2.65,0.35) {right slope\\\(-6.4\)};
-    \node[below,align=center] at (2.5,-1.0) {\(\lvert C'(\rho)\rvert\le8\), but the derivative is not continuous};
-  \end{scope}
-\end{tikzpicture}
-\caption{Sharing the face control changes a jump into a continuous piecewise
-quadratic curve.  It does not force the two one-sided derivatives to agree.}
-\label{fig:shared-face-lipschitz}
-\end{figure}
-
-\begin{center}
-    \begin{tikzpicture}[y=1cm,
-        face/.style={dp/decision,minimum width=22mm,minimum height=8mm,
-                    font=\scriptsize,align=center},
-        interior/.style={dp/contribution,minimum width=22mm,minimum height=8mm,
-                    font=\scriptsize,align=center}]
-    \node[face] (c10) {$C^{(1)}[0]$};
-    \node[interior,right=7mm of c10] (c11) {$C^{(1)}[1]$};
-    \node[face,minimum width=40mm,right=10mm of c11] (shared) {$C^{(1)}[2]=C^{(2)}[0]$};
-    \node[interior,right=10mm of shared] (c21) {$C^{(2)}[1]$};
-    \node[face,right=7mm of c21] (c22) {$C^{(2)}[2]$};
-        \draw[dp/arrow] (c10)--(c11); \draw[dp/arrow] (c11)--(shared);
-        \draw[dp/arrow] (shared)--(c21); \draw[dp/arrow] (c21)--(c22);
-        \node[below=7pt of shared,font=\scriptsize] {shared value, separate slopes};
-    \end{tikzpicture}
-\end{center}
+The selected leaf is a flat nine-entry coefficient cell: row \(q\) of \code{A2.lbls()} labels entry \(q\). Appendix~\ref{app:bernstein-math} derives the conversion and ordering rules.
 
 \input{chapters/workflow-constraints}
