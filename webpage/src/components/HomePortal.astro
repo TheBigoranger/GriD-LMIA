@@ -53,7 +53,7 @@ const lmiSteps = [
     number: "04",
     title: "Select a finite certificate",
     text: "Choose one finite sufficient representation for the same stored residual. Direct coefficient tests are the default; Pólya elevation, Putinar box certificates, and the full-box preordering are explicit alternatives with different cost and strength.",
-    math: "F^{(\\mathbf c,v)}(\\alpha)\\preceq0\\quad\\Longleftarrow\\quad\\text{direct, P\\'olya, Putinar, or full-box certificate}",
+    math: "F^{(\\mathbf c,v)}(\\alpha)\\preceq0\\quad\\Longleftarrow\\quad\\text{direct, Pólya, Putinar, or full-box certificate}",
     visual: "certificate",
     visibleCode: "selected = L.applyPolya(1);\n% or L, applyPutinar, applyFullBoxPreorder",
     fullCode: "selected = L;                         % direct\nselected = L.applyPolya(1);           % Pólya\nselected = L.applyPutinar();          % Putinar\nselected = L.applyFullBoxPreorder();  % full box",

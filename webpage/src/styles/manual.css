@@ -181,7 +181,86 @@
   color: var(--sl-color-gray-2);
 }
 
-.sl-markdown-content mjx-container[display="true"] {
+/* Three-level generated reference navigation: groups and pages are visible;
+   individual symbol lists remain opt-in for a compact lookup surface. */
+.reference-index {
+  display: grid;
+  gap: 0.8rem;
+  margin-block: 1.25rem;
+}
+
+.reference-index details {
+  min-width: 0;
+  border: 1px solid var(--diagram-border);
+  border-radius: 10px;
+  background: var(--sl-color-bg);
+}
+
+.reference-index summary {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.75rem 0.9rem;
+  color: var(--sl-color-text);
+  font-weight: 800;
+}
+
+.reference-index summary:hover,
+.reference-index summary:focus-visible {
+  color: var(--sl-color-text-accent);
+  background: var(--sl-color-accent-low);
+}
+
+.reference-index__group > summary > span,
+.reference-index__family > summary > span {
+  color: var(--sl-color-gray-2);
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-align: end;
+}
+
+.reference-index__family {
+  margin: 0.65rem;
+}
+
+.reference-index__page {
+  display: inline-block;
+  margin: 0 0.9rem 0.65rem;
+  font-weight: 700;
+}
+
+.reference-index__symbols {
+  margin: 0 0.65rem 0.65rem;
+  border-color: var(--sl-color-gray-5) !important;
+}
+
+.reference-index__symbols summary {
+  padding-block: 0.55rem;
+  font-size: 0.88rem;
+}
+
+.reference-index__symbols ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0 0.75rem 0.75rem 2rem;
+}
+
+.reference-index__symbols li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  justify-content: space-between;
+}
+
+.reference-index__symbols li span {
+  color: var(--sl-color-gray-2);
+  font-size: 0.8rem;
+}
+
+mjx-container[display="true"] {
   display: block;
   font-size: 1.5em;
   max-width: 100%;
@@ -190,13 +269,13 @@
   text-align: center;
 }
 
-.sl-markdown-content mjx-container[display="true"] svg {
+mjx-container[display="true"] svg {
   display: inline-block;
   max-width: 100%;
   height: auto;
 }
 
-.sl-markdown-content mjx-container:not([display="true"]) {
+mjx-container:not([display="true"]) {
   display: inline-block;
   font-size: 1em;
   line-height: inherit;
@@ -559,19 +638,6 @@
   box-shadow: inset 0 3px var(--diagram-result);
 }
 
-.certificate-tabs .certificate-default {
-  position: absolute;
-  inset-block-start: 0.35rem;
-  inset-inline-end: 0.35rem;
-  border-radius: 999px;
-  padding: 0.12rem 0.3rem;
-  background: var(--sl-color-accent-low);
-  color: var(--sl-color-gray-2);
-  font-size: 0.64rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
 .certificate-chooser section {
   margin-block-start: 0.8rem;
   border-inline-start: 3px solid var(--diagram-result);
@@ -870,6 +936,10 @@
 }
 
 @media (max-width: 520px) {
+  .reference-index summary { display: block; }
+  .reference-index__group > summary > span,
+  .reference-index__family > summary > span { display: block; margin-block-start: 0.2rem; text-align: start; }
+
   .contribution-table > div { grid-template-columns: 1fr; gap: 0.2rem; }
 
   .evaluate-expression { display: grid; }

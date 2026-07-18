@@ -41,7 +41,7 @@ export default defineConfig({
           label: "Documents",
           items: [
             { label: "Manual Index", slug: "documents" },
-            { label: "Lookup Table", slug: "documents/reference-index" },
+            { label: "Reference Lookup", slug: "documents/reference-index" },
             { label: "Bernstein Polynomial", slug: "documents/math/bernstein-polynomial" },
             { label: "Gridding And Bernstein Degree", slug: "documents/math/gridding-and-degree" },
             { label: "SOS Certificates On A Hypercube", slug: "documents/math/sos-certificates" },

@@ -2,7 +2,6 @@
 import config from "virtual:starlight/user-config";
 import LanguageSelect from "virtual:starlight/components/LanguageSelect";
 import Search from "virtual:starlight/components/Search";
-import SiteTitle from "virtual:starlight/components/SiteTitle";
 import SocialIcons from "virtual:starlight/components/SocialIcons";
 import ThemeSelect from "virtual:starlight/components/ThemeSelect";
 import { headerLinks } from "../data/header-links";
@@ -13,7 +12,7 @@ const shouldRenderSearch = config.pagefind
 ---
 
 <div class="site-header">
-  <div class="site-header__title"><SiteTitle /></div>
+  <a class="site-header__brand" href={base} aria-label="PD-LMI Manual home">PD-LMI</a>
   <div class="site-header__search print:hidden">{shouldRenderSearch && <Search />}</div>
   <nav class="site-header__links" aria-label="Common destinations">
     {headerLinks.map((link) => <a href={`${base}${link.path}`}>{link.label}</a>)}
@@ -34,9 +33,9 @@ const shouldRenderSearch = config.pagefind
 
 <style>
   @layer starlight.core {
-    .site-header { display: flex; gap: var(--sl-nav-gap); align-items: center; height: 100%; }
-    .site-header__title { min-width: 0; overflow: clip; padding: 0.25rem; margin: -0.25rem; }
-    .site-header__search { flex: 1 1 22rem; min-width: 9rem; max-width: 34rem; margin-inline-start: clamp(0.5rem, 1.2vw, 1rem); }
+    .site-header { display: flex; gap: 0.35rem; align-items: center; height: 100%; }
+    .site-header__brand { flex: none; color: var(--sl-color-text-accent); font-size: 0.88rem; font-weight: 800; text-decoration: none; white-space: nowrap; }
+    .site-header__search { flex: 1 1 22rem; min-width: 9rem; max-width: 34rem; margin-inline-start: 0; }
     .site-header__links { display: none; gap: 0.2rem; align-items: center; margin-inline-start: auto; }
     .site-header__links a { border-radius: 999px; padding: 0.42rem 0.62rem; color: var(--sl-color-gray-2); text-decoration: none; font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
     .site-header__links a:hover,

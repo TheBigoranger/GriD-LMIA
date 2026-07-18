@@ -962,29 +962,20 @@ blockDiagonalAtZero =
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,x=1cm,y=1cm,
-  input/.style={dp/known,font=\scriptsize,align=center,
-    minimum width=13mm,minimum height=7mm},
-  operation/.style={dp/contribution,font=\scriptsize,align=center,
-    minimum width=20mm,minimum height=9mm},
-  output/.style={dp/result,font=\scriptsize,align=center,
-    minimum width=26mm,minimum height=10mm}]
-  \node[input] (ha) at (0,0.45) {\(a\)};
-  \node[input] (hb) at (0,-0.45) {\(b\)};
-  \node[operation] (hop) at (2.1,0) {\code{horzcat}};
-  \node[output] (hout) at (4.6,0) {\([a\ b]\)};
-  \draw[dp/arrow] (ha.east) -- ++(4mm,0) |- ([yshift=2mm]hop.west);
-  \draw[dp/arrow] (hb.east) -- ++(4mm,0) |- ([yshift=-2mm]hop.west);
-  \draw[dp/arrow] (hop.east) -- (hout.west);
+\begin{tikzpicture}[node distance=8mm and 8mm,
+  flow/.style={dp/stage,text width=27mm}]
+  \node[flow] (hinput) {inputs\(a,\ b\)};
+  \node[flow,right=of hinput] (hop) {\code{horzcat}};
+  \node[flow,dp/result,right=of hop] (hout) {result\([a\ b]\)};
+  \draw[dp/arrow] (hinput) -- (hop);
+  \draw[dp/arrow] (hop) -- (hout);
 
-  \node[input] (da) at (0,-2.05) {\(a\)};
-  \node[input] (five) at (0,-2.95) {\(5\)};
-  \node[operation] (dop) at (2.1,-2.5) {\code{blkdiag}};
-  \node[output] (dout) at (4.6,-2.5)
-    {\(\left[\begin{smallmatrix}a&0\\0&5\end{smallmatrix}\right]\)};
-  \draw[dp/arrow] (da.east) -- ++(4mm,0) |- ([yshift=2mm]dop.west);
-  \draw[dp/arrow] (five.east) -- ++(4mm,0) |- ([yshift=-2mm]dop.west);
-  \draw[dp/arrow] (dop.east) -- (dout.west);
+  \node[flow,below=7mm of hinput] (dinput) {inputs\(a,\ 5\)};
+  \node[flow,right=of dinput] (dop) {\code{blkdiag}};
+  \node[flow,dp/result,right=of dop] (dout)
+    {result\(\left[\begin{smallmatrix}a&0\\0&5\end{smallmatrix}\right]\)};
+  \draw[dp/arrow] (dinput) -- (dop);
+  \draw[dp/arrow] (dop) -- (dout);
 \end{tikzpicture}
 \end{center}
 
@@ -1060,15 +1051,16 @@ assignedAtZero =
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=10mm,
-  b/.style={dp/neutral,font=\scriptsize,
-    align=center,minimum width=31mm,minimum height=13mm},
-  o/.style={dp/result,
-    font=\scriptsize,align=center,minimum width=31mm,minimum height=13mm}]
-  \node[b] (a) {\(1\ \boxed{2}\ 3\)\\\(4\ \boxed{5}\ 6\)};
-  \node[o,right=of a] (u) {\(1\ \boxed{5}\ 3\)\\\(4\ \boxed{5}\ 6\)};
-  \draw[->,thick,dpblue] (a) -- node[above,font=\scriptsize]
-    {\code{A(:,2)=5}} (u);
+\begin{tikzpicture}[node distance=9mm,
+  b/.style={dp/stage,text width=30mm},
+  o/.style={dp/result,font=\scriptsize,align=center,text width=30mm,
+    minimum height=12mm,inner sep=4pt}]
+  \node[b] (a) {selected column\(2,\ 5\)};
+  \node[dp/contribution,right=of a,font=\scriptsize,align=center,
+    text width=23mm,minimum height=12mm] (assign) {assign \code{5}\\to column 2};
+  \node[o,right=of assign] (u) {updated matrix\(\left[\begin{smallmatrix}1&5&3\\4&5&6\end{smallmatrix}\right]\)};
+  \draw[dp/arrow] (a) -- (assign);
+  \draw[dp/arrow] (assign) -- (u);
 \end{tikzpicture}
 \end{center}
 

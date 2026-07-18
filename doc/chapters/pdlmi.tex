@@ -416,19 +416,21 @@ F=S_0+g_1S_1+g_2S_2+g_1g_2S_{12}.
 The Bernstein basis degrees are respectively \((r,r)\), \((r-1,r)\), \((r,r-1)\), and \((r-1,r-1)\); each present term is a PSD Gram block. All four terms are elevated and coefficient-matched at tensor degree \((2r,2r)\).  Thus the additional \(S_{12}\) block is precisely the two-generator distinction from the singleton Putinar module, not a change to the residual, grid, or decision degree.  The implementation builds the PSD blocks and exact equalities independently for each cell, rate row, and scalar matrix entry.
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
-  box/.style={dp/result,
-    font=\scriptsize,align=center,minimum width=34mm,minimum height=12mm}]
-  \node[box] (target) {one-parameter cell \(c\)\\target coefficients\\
-    \(C^{(c)}[0],C^{(c)}[1],C^{(c)}[2]\)};
-  \node[box,right=15mm of target,yshift=9mm] (q0) {unweighted Gram block\\\(Q_0\succeq0\)};
-  \node[box,right=15mm of target,yshift=-9mm] (q1) {box-weighted block\\
-    \(\alpha(1-\alpha)Q_1\succeq0\)};
-  \node[box,right=14mm of q0,yshift=-9mm] (match) {exact coefficient\\identities};
-  \draw[->,thick,dpblue] ([yshift=2.5mm]target.east) -- ++(5mm,0) |- (q0.west);
-  \draw[->,thick,dpblue] ([yshift=-2.5mm]target.east) -- ++(5mm,0) |- (q1.west);
-  \draw[->,thick,dpblue] (q0.east) -- ++(5mm,0) |- ([yshift=3mm]match.west);
-  \draw[->,thick,dpblue] (q1.east) -- ++(5mm,0) |- ([yshift=-3mm]match.west);
+\begin{tikzpicture}[node distance=8mm and 9mm,
+  flow/.style={font=\scriptsize,align=center,text width=31mm,
+    minimum height=12mm,inner sep=4pt},
+  certificate/.style={flow,dp/certificate}]
+  \node[flow,dp/neutral] (target) {cell \(c\) target\\Bernstein coefficients};
+  \node[certificate,right=22mm of target,yshift=9mm] (q0)
+    {unweighted Gram block\\\(Q_0\succeq0\)};
+  \node[certificate,right=22mm of target,yshift=-9mm] (q1)
+    {box-weighted block\\\(\alpha(1-\alpha)Q_1\succeq0\)};
+  \node[flow,dp/result,right=22mm of q0,yshift=-9mm] (match)
+    {exact coefficient\\identities};
+  \draw[dp/arrow] ([yshift=3mm]target.east) -- ++(8mm,0) |- (q0.west);
+  \draw[dp/arrow] ([yshift=-3mm]target.east) -- ++(8mm,0) |- (q1.west);
+  \draw[dp/arrow] (q0.east) -| ([yshift=3mm]match.west);
+  \draw[dp/arrow] (q1.east) -| ([yshift=-3mm]match.west);
 \end{tikzpicture}
 \end{center}
 

@@ -931,17 +931,16 @@ containsDecision =
 \end{lstlisting}
 
 \begin{center}
-\begin{tikzpicture}[>=Latex,node distance=10mm,
-  b/.style={dp/neutral,font=\scriptsize,
-    align=center,minimum width=34mm,minimum height=13mm},
-  o/.style={dp/result,
-    font=\scriptsize,align=center,minimum width=34mm,minimum height=13mm}]
-  \node[b] (p) {\(\boxed{p_{11}}\ p_{12}\ p_{13}\)\\
-    \(\boxed{p_{21}}\ p_{22}\ p_{23}\)};
-  \node[o,right=of p] (q) {\(\boxed{0}\ p_{12}\ p_{13}\)\\
-    \(\boxed{0}\ p_{22}\ p_{23}\)};
-  \draw[->,thick,dpblue] (p) -- node[dp/direct-label,above=2pt]
-    {\code{P(:,1)=0}} (q);
+\begin{tikzpicture}[node distance=9mm,
+  b/.style={dp/stage,text width=32mm},
+  o/.style={dp/result,font=\scriptsize,align=center,text width=32mm,
+    minimum height=12mm,inner sep=4pt}]
+  \node[b] (p) {decision column\((p_{11},\ p_{21})^{\mathsf T}\)};
+  \node[dp/contribution,right=of p,font=\scriptsize,align=center,
+    text width=23mm,minimum height=12mm] (assign) {assign \code{0}\\to column 1};
+  \node[o,right=of assign] (q) {updated decision matrix\(\left[\begin{smallmatrix}0&p_{12}&p_{13}\\0&p_{22}&p_{23}\end{smallmatrix}\right]\)};
+  \draw[dp/arrow] (p) -- (assign);
+  \draw[dp/arrow] (assign) -- (q);
 \end{tikzpicture}
 \end{center}
 
