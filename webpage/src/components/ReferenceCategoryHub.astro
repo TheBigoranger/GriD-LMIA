@@ -18,10 +18,10 @@ import { referenceEntries, referenceGroups } from "../data/reference-index.js";
 </div>
 
 <style>
-  .reference-category-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; margin-block: 1rem 1.6rem; }
-  .reference-category-hub section { display: grid; gap: 0.45rem; min-width: 0; border: 1px solid var(--diagram-border); border-radius: 12px; padding: 0.9rem; background: var(--diagram-surface); }
+  .reference-category-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; margin-block: 0.8rem 1.25rem; }
+  .reference-category-hub section { display: grid; gap: 0.35rem; min-width: 0; border: 1px solid var(--diagram-border); border-radius: 10px; padding: 0.72rem 0.82rem; background: var(--diagram-surface); }
   .reference-category-hub h3, .reference-category-hub p { margin: 0; }
-  .reference-category-hub h3 { color: var(--sl-color-text-accent); }
+  .reference-category-hub h3 { color: var(--sl-color-text-accent); font-size: clamp(1.3rem, 2.2vw, 1.7rem); line-height: 1.12; }
   .reference-category-hub p, .reference-category-hub span { color: var(--sl-color-gray-2); }
   .reference-category-hub a { width: fit-content; font-weight: 750; }
   @media (max-width: 620px) { .reference-category-hub { grid-template-columns: 1fr; } }

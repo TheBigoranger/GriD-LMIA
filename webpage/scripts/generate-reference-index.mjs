@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { referenceEntries, referenceGroups } from "../src/data/reference-index.js";
+import { referenceEntries } from "../src/data/reference-index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const outFile = resolve(here, "../src/content/docs/documents/reference-index.mdx");
@@ -29,42 +29,40 @@ function symbolList(entries) {
   }).join("\n");
 }
 
-function group(definition) {
-  const entries = referenceEntries.filter((item) => item.group === definition.id);
-  const families = new Map();
-  for (const entry of entries) {
-    const route = routeOf(entry.href);
-    if (!families.has(route)) families.set(route, []);
-    families.get(route).push(entry);
-  }
-
-  const familyMarkup = [...families].map(([route, familyEntries]) => `
-<details class="reference-index__family" open>
-<summary>${escapeHtml(familyLabel(route, familyEntries))}<span>${familyEntries.length} symbol${familyEntries.length === 1 ? "" : "s"}</span></summary>
-<a class="reference-index__page" href="${route}">Open reference page</a>
+function family(route, familyEntries) {
+  const singleEntry = familyEntries.length === 1 ? familyEntries[0] : undefined;
+  const directLink = singleEntry
+    ? `<a class="reference-index__direct-symbol" href="${singleEntry.href}">Open <code>${escapeHtml(singleEntry.name)}</code><span>${escapeHtml(singleEntry.type)}</span></a>`
+    : `<a class="reference-index__page" href="${route}">Open reference page</a>
 <details class="reference-index__symbols">
 <summary>Symbols and anchors</summary>
 <ul>
 ${symbolList(familyEntries)}
 </ul>
-</details>
-</details>`).join("\n");
-
-  return `<details class="reference-index__group" open>
-<summary>${escapeHtml(definition.label)}<span>${escapeHtml(definition.description)}</span></summary>
-${familyMarkup}
 </details>`;
+
+  return `
+<details class="reference-index__family" open>
+<summary>${escapeHtml(familyLabel(route, familyEntries))}<span>${familyEntries.length} symbol${familyEntries.length === 1 ? "" : "s"}</span></summary>
+</details>`.replace("</summary>\n</details>", `</summary>\n${directLink}\n</details>`);
+}
+
+const families = new Map();
+for (const entry of referenceEntries) {
+  const route = routeOf(entry.href);
+  if (!families.has(route)) families.set(route, []);
+  families.get(route).push(entry);
 }
 
 const body = `---
 title: Reference Lookup
-description: Generated three-level lookup for implemented PD-LMI classes, pages, and symbols.
+description: Generated lookup for implemented PD-LMI reference pages and symbols.
 ---
 
-This generated menu follows the manual navigation: module or class, reference-page family, then each symbol or anchor. Modules and page families start expanded; symbol lists remain collapsed until needed. The source data lives in \`src/data/reference-index.js\`; regenerate this page with \`npm --prefix webpage run generate:index\`.
+This generated menu starts directly from each reference-page family. Families start expanded; symbol lists remain collapsed until needed, while a one-symbol family links straight to that symbol. The source data lives in \`src/data/reference-index.js\`; regenerate this page with \`npm --prefix webpage run generate:index\`.
 
 <nav class="reference-index" aria-label="PD-LMI reference lookup">
-${referenceGroups.map(group).join("\n")}
+${[...families].map(([route, familyEntries]) => family(route, familyEntries)).join("\n")}
 </nav>
 `;
 

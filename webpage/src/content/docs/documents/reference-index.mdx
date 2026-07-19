@@ -1,67 +1,58 @@
 ---
 title: Reference Lookup
-description: Generated three-level lookup for implemented PD-LMI classes, pages, and symbols.
+description: Generated lookup for implemented PD-LMI reference pages and symbols.
 ---
 
-This generated menu follows the manual navigation: module or class, reference-page family, then each symbol or anchor. Modules and page families start expanded; symbol lists remain collapsed until needed. The source data lives in `src/data/reference-index.js`; regenerate this page with `npm --prefix webpage run generate:index`.
+This generated menu starts directly from each reference-page family. Families start expanded; symbol lists remain collapsed until needed, while a one-symbol family links straight to that symbol. The source data lives in `src/data/reference-index.js`; regenerate this page with `npm --prefix webpage run generate:index`.
 
 <nav class="reference-index" aria-label="PD-LMI reference lookup">
-<details class="reference-index__group" open>
-<summary>pdmat<span>Known matrix data and coefficient-backed operations.</span></summary>
 
 <details class="reference-index__family" open>
-<summary>pdmat<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/">Open reference page</a>
+<summary>pdbase<span>1 symbol</span></summary>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdbase/">Open <code>pdbase</code><span>Backend class</span></a>
+</details>
+
+<details class="reference-index__family" open>
+<summary>Storage Inspection<span>8 symbols</span></summary>
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/">Open reference page</a>
 <details class="reference-index__symbols">
 <summary>Symbols and anchors</summary>
 <ul>
-<li><a href="/PD-LMI-package/documents/reference/pdmat/"><code>pdmat</code></a><span>Known-data class</span></li>
+<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-cells"><code>cells — pdbase-cells</code></a><span>pdbase method</span></li>
+<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-coeffs"><code>coeffs — pdbase-coeffs</code></a><span>pdbase method</span></li>
+<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-lbls"><code>lbls — pdbase-lbls</code></a><span>pdbase method</span></li>
+<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-elevVals"><code>elevVals — pdbase-elevVals</code></a><span>pdbase method</span></li>
+<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncell"><code>ncell — pdbase-ncell</code></a><span>pdbase method</span></li>
+<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncoeff"><code>ncoeff — pdbase-ncoeff</code></a><span>pdbase method</span></li>
+<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-npar"><code>npar — pdbase-npar</code></a><span>pdbase method</span></li>
+<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-size"><code>size — pdbase-size</code></a><span>pdbase method</span></li>
 </ul>
 </details>
+</details>
+
+<details class="reference-index__family" open>
+<summary>pdmat<span>1 symbol</span></summary>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/">Open <code>pdmat</code><span>Known-data class</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>pdmat constructor<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/constructor/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdmat/constructor/"><code>pdmat constructor</code></a><span>pdmat function</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/constructor/">Open <code>pdmat constructor</code><span>pdmat function</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>bernsteinTable<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/bernsteintable/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdmat/bernsteintable/"><code>bernsteinTable</code></a><span>pdmat method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/bernsteintable/">Open <code>bernsteinTable</code><span>pdmat method</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>evaluate<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/evaluate/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdmat/evaluate/"><code>evaluate</code></a><span>pdmat method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/evaluate/">Open <code>evaluate</code><span>pdmat method</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>plot<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/plot/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdmat/plot/"><code>plot</code></a><span>pdmat method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/plot/">Open <code>plot</code><span>pdmat method</span></a>
 </details>
 
 <details class="reference-index__family" open>
@@ -132,63 +123,30 @@ This generated menu follows the manual navigation: module or class, reference-pa
 </ul>
 </details>
 </details>
-</details>
-<details class="reference-index__group" open>
-<summary>pdvar<span>YALMIP-backed decision expressions and differentiation.</span></summary>
 
 <details class="reference-index__family" open>
 <summary>pdvar<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdvar/"><code>pdvar</code></a><span>Decision class</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/">Open <code>pdvar</code><span>Decision class</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>pdvar constructor<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/constructor/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdvar/constructor/"><code>pdvar constructor</code></a><span>pdvar function</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/constructor/">Open <code>pdvar constructor</code><span>pdvar function</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>bernsteinTable<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/bernsteintable/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdvar/bernsteintable/"><code>bernsteinTable</code></a><span>pdvar method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/bernsteintable/">Open <code>bernsteinTable</code><span>pdvar method</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>rhodiff<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/rhodiff/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdvar/rhodiff/"><code>rhodiff</code></a><span>pdvar method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/rhodiff/">Open <code>rhodiff</code><span>pdvar method</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>value<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/value/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdvar/value/"><code>value</code></a><span>pdvar method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/value/">Open <code>value</code><span>pdvar method</span></a>
 </details>
 
 <details class="reference-index__family" open>
@@ -270,106 +228,35 @@ This generated menu follows the manual navigation: module or class, reference-pa
 </ul>
 </details>
 </details>
-</details>
-<details class="reference-index__group" open>
-<summary>pdlmi<span>Finite direct and opt-in certificate constraints.</span></summary>
 
 <details class="reference-index__family" open>
 <summary>pdlmi<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdlmi/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdlmi/"><code>pdlmi</code></a><span>Constraint class</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/">Open <code>pdlmi</code><span>Constraint class</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>pdlmi constructor<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdlmi/constructor/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdlmi/constructor/"><code>pdlmi constructor</code></a><span>pdlmi function</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/constructor/">Open <code>pdlmi constructor</code><span>pdlmi function</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>toYalmip<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdlmi/toyalmip/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdlmi/toyalmip/"><code>toYalmip</code></a><span>pdlmi method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/toyalmip/">Open <code>toYalmip</code><span>pdlmi method</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>applyPolya<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdlmi/applypolya/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdlmi/applypolya/"><code>applyPolya</code></a><span>pdlmi method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/applypolya/">Open <code>applyPolya</code><span>pdlmi method</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>applyPutinar<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdlmi/applyputinar/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdlmi/applyputinar/"><code>applyPutinar</code></a><span>pdlmi method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/applyputinar/">Open <code>applyPutinar</code><span>pdlmi method</span></a>
 </details>
 
 <details class="reference-index__family" open>
 <summary>applyFullBoxPreorder<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/"><code>applyFullBoxPreorder</code></a><span>pdlmi method</span></li>
-</ul>
-</details>
-</details>
-</details>
-<details class="reference-index__group" open>
-<summary>pdbase / backend<span>Cell-local storage and Bernstein backend utilities.</span></summary>
-
-<details class="reference-index__family" open>
-<summary>pdbase<span>1 symbol</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/"><code>pdbase</code></a><span>Backend class</span></li>
-</ul>
-</details>
-</details>
-
-<details class="reference-index__family" open>
-<summary>Storage Inspection<span>8 symbols</span></summary>
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/">Open reference page</a>
-<details class="reference-index__symbols">
-<summary>Symbols and anchors</summary>
-<ul>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-cells"><code>cells — pdbase-cells</code></a><span>pdbase method</span></li>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-coeffs"><code>coeffs — pdbase-coeffs</code></a><span>pdbase method</span></li>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-lbls"><code>lbls — pdbase-lbls</code></a><span>pdbase method</span></li>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-elevVals"><code>elevVals — pdbase-elevVals</code></a><span>pdbase method</span></li>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncell"><code>ncell — pdbase-ncell</code></a><span>pdbase method</span></li>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncoeff"><code>ncoeff — pdbase-ncoeff</code></a><span>pdbase method</span></li>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-npar"><code>npar — pdbase-npar</code></a><span>pdbase method</span></li>
-<li><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-size"><code>size — pdbase-size</code></a><span>pdbase method</span></li>
-</ul>
-</details>
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/">Open <code>applyFullBoxPreorder</code><span>pdlmi method</span></a>
 </details>
 
 <details class="reference-index__family" open>
@@ -384,9 +271,6 @@ This generated menu follows the manual navigation: module or class, reference-pa
 </ul>
 </details>
 </details>
-</details>
-<details class="reference-index__group" open>
-<summary>Shared helpers<span>Implementation helpers shared across the package.</span></summary>
 
 <details class="reference-index__family" open>
 <summary>Shared Helpers<span>9 symbols</span></summary>
@@ -404,7 +288,6 @@ This generated menu follows the manual navigation: module or class, reference-pa
 <li><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-mkgrid"><code>helper.mkGrid — helper-mkgrid</code></a><span>shared backend helper</span></li>
 <li><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-mknest"><code>helper.mkNest — helper-mknest</code></a><span>shared backend helper</span></li>
 </ul>
-</details>
 </details>
 </details>
 </nav>

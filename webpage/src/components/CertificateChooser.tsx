@@ -115,7 +115,6 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             <button type="button" onClick={() => calculate()}>Calculate finite shape</button>
             <p className="explorer-error" role="alert">{error}</p>
           </div>
-          <pre><code>{`yalmip('clear')\nE = pdvar(2, {[0 0.5 1]}, "symmetric", Degree=2);\nL = E >= 0;\n${option.exportCommand}\nnumel(C)`}</code></pre>
           <div className="certificate-formula">
             {option.mathHtml.map((mathHtml, index) => (
               <div
@@ -132,6 +131,10 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             <p><strong>PSD blocks:</strong> {shape.psdBlocks}</p>
             <p><strong>Total stored constraints:</strong> {shape.totalConstraints}</p>
           </div>
+          <details className="certificate-transcript">
+            <summary>Show the matching MATLAB transcript</summary>
+            <pre><code>{`yalmip('clear')\nE = pdvar(2, {[0 0.5 1]}, "symmetric", Degree=2);\nL = E >= 0;\n${option.exportCommand}\nnumel(C)`}</code></pre>
+          </details>
           {shape.blocks.length ? <div className="gram-block-list"><strong>One certificate copy uses:</strong><ul>{shape.blocks.map((block) => <li key={block.label}><code>{block.label}</code>: Gram degree [{block.gramDegree.join(", ")}], block {block.dimension} × {block.dimension}</li>)}</ul></div> : null}
           <p><strong>Source-verified fixture:</strong> {option.constraintCount}</p>
           <p><strong>At the cell boundary:</strong> {option.boundaryNote}</p>
