@@ -4,6 +4,7 @@ description: Rate-weighted cell-local derivative of a pdvar expression.
 ---
 
 import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
+import RateVertexExplorer from "../../../../../components/RateVertexExplorer.tsx";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -46,6 +47,8 @@ rate rows. The coefficient columns still follow the Bernstein label order
 returned by `D.lbls()`.
 
 <RhodiffDiagram />
+
+<RateVertexExplorer client:visible />
 
 The forward differences stay inside physical cell $c$. Rate rows are neither
 new cells nor new local Bernstein labels; they enumerate the vertices needed

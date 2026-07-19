@@ -59,6 +59,7 @@ Solve &
 \end{tabularx}
 
 \section{Inspect Certificate State}
+\index{PutinarOrder@\texttt{PutinarOrder}}\index{FullBoxOrder@\texttt{FullBoxOrder}}
 
 All \code{pdlmi} properties have private set access and are readable with dot notation.  \code{Constraints} contains the assembled YALMIP entries; \code{Residual} and \code{Relation} retain the original comparison for rebuilding.  The remaining properties record the selected certificate state.
 
@@ -164,7 +165,7 @@ fullBoxOrder =
   \item A non-\code{pdvar} residual raises \codeerr{pdlmi}{InvalidExpression}; an unsupported relation raises \codeerr{pdlmi}{InvalidRelation}. \item Malformed, unknown, or duplicate options raise \codeerr{pdlmi}{InvalidOptions}, \codeerr{pdlmi}{UnknownOption}, or \codeerr{pdlmi}{DuplicateOption}; nonlogical selectors use their corresponding \code{InvalidUse...} identifier. \item Malformed P\'olya increments, Putinar orders, and full-box orders raise, respectively, \codeerr{pdlmi}{Invalid}\allowbreak\code{PolyaDegree}, \codeerr{pdlmi}{Invalid}\allowbreak\code{PutinarOrder}, and \codeerr{pdlmi}{Invalid}\allowbreak\code{FullBoxOrder}.  An integer below an active Gram-family minimum raises \codeerr{pdlmi}{PutinarOrder}\allowbreak\code{TooLow} or \codeerr{pdlmi}{FullBoxOrder}\allowbreak\code{TooLow}. \item Explicit false plus a Putinar order raises \codeerr{pdlmi}{ConflictingPutinarOptions}; explicit false plus a positive P\'olya increment raises \codeerr{pdlmi}{ConflictingPolyaOptions}.  The full-box explicit-false form remains direct and retains the supplied order as metadata. \needspace{9\baselineskip} \item An inequality with any nonsquare or non-Hermitian original coefficient is assembled entry-wise and emits \codeerr{pdlmi}{ElementwiseInequality}; it is not rejected.  Numeric Hermitian testing accepts equality at the inclusive \(10^{-10}\) infinity-norm tolerance. \item Equality is direct-only.  Every \code{apply...} method raises\newline \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before validating its supplied increment or order.
 \end{enumerate}
 
-\section{Assemble Direct Coefficient Constraints}\index{direct assembly}
+\section{Assemble Direct Coefficient Constraints}\index{direct assembly}\index{direct coefficient assembly}
 \label{sec:pdlmi-direct}
 
 For each physical cell, local Bernstein coefficient, and rate-vertex row if present, \code{pdlmi} creates one stored YALMIP constraint entry.  For an ordinary expression with \(N_c\) physical cells and \(N_b\) Bernstein coefficients per cell, the number of entries is \(N_cN_b\); with \(N_v\) rate vertices it is \(N_cN_bN_v\).  A semidefinite-mode entry is one matrix constraint.  An entry-wise-mode entry is the column-major vector of scalar matrix entries compared independently.  An equality entry is the corresponding direct coefficient equation and may be rectangular.
@@ -200,8 +201,56 @@ The diagram specializes to one parameter, degree two, and one ordinary (non-rate
 \end{tikzpicture}
 \end{center}
 
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+C = pdlmi(expr, relation)
+C = lhs <= rhs
+C = lhs >= rhs
+C = lhs == rhs
+\end{lstlisting}
+
+The constructor and comparison forms above create direct coefficient constraints
+when no inequality certificate is selected.  For an inequality, each stored
+coefficient is tested in the oriented positive-semidefinite or entry-wise mode;
+for an equality, each coefficient entry is constrained directly to zero.  The
+number of stored constraints is therefore the number of physical cells times
+the number of local Bernstein coefficients, with an additional factor for
+active rate vertices.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(1, {[0 1]}, Degree=2);
+C = P >= 0;
+
+constraintCount = numel(C.Constraints)
+usePolya = C.UsePolya
+usePutinar = C.UsePutinar
+useFullBox = C.UseFullBoxPreorder
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+constraintCount =
+     3
+usePolya =
+  logical
+   0
+usePutinar =
+  logical
+   0
+useFullBox =
+  logical
+   0
+\end{lstlisting}
+
+Here the degree-two, one-parameter residual has three local Bernstein
+coefficients, so direct assembly stores three coefficient constraints.  The
+wrapper remains direct because no certificate selector was enabled; a call such
+as \code{C.applyPolya(1)} returns a new wrapper with an elevated coefficient
+family and leaves \code{C} unchanged.
+
 \section{Select P\'olya Assembly with \texorpdfstring{\code{applyPolya}}{applyPolya}}
-\index{Polya@P\'olya}\index{applyPolya@\texttt{applyPolya}}
+\index{Polya@P\'olya}\index{applyPolya@\texttt{applyPolya}}\index{P\'olya certificate}\index{P\'olya elevation}
 \label{sec:pdlmi-polya}
 
 With \code{UsePolya=true}, \code{pdlmi} first elevates the stored residual by \code{PolyaDegree} in every parameter direction, then constrains every elevated local coefficient and every active rate row. Thus, if the original degree is \(m\), the count is \(N_c (m+d+1)^\ell\) for ordinary expressions and \(N_c (m+d+1)^\ell N_v\) for rate-vertex expressions. An increment of zero is valid and has the same coefficient count as direct assembly. For an entry-wise inequality, elevation preserves the global mode and the oriented sign is applied independently to every column-major scalar entry of each elevated coefficient.  Equality wrappers reject this method.
@@ -259,6 +308,7 @@ The mathematical background and the limits of fixed-increment coefficient positi
 \section{Select Putinar Assembly with
 \texorpdfstring{\code{applyPutinar}}{applyPutinar}}
 \index{Putinar}\index{applyPutinar@\texttt{applyPutinar}}
+\index{Putinar certificate}\index{Putinar order}
 \label{sec:pdlmi-putinar}
 
 For an entry-wise inequality, the constructions below are applied independently to each scalar matrix entry in MATLAB column-major order.  Gram variables are not shared between entries.  Equality wrappers reject Putinar selection.
@@ -359,7 +409,7 @@ The diagram below specializes to the even one-parameter example above.
 
 \section[Select Full Box Assembly with \texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}]{%
 Select Full Box Bernstein--Gram Assembly with\\[-0.15em] \texorpdfstring{\code{applyFullBoxPreorder}}{applyFullBoxPreorder}}
-\index{Full Box preordering}\index{applyFullBoxPreorder@\texttt{applyFullBoxPreorder}}
+\index{Full Box preordering}\index{Full Box certificate}\index{applyFullBoxPreorder@\texttt{applyFullBoxPreorder}}
 \label{sec:pdlmi-full-box}
 
 The full-box mode is a cell-local positive-semidefinite representation in the forward local coordinates \(\alpha_s\in[0,1]\).  It is a box-specific Bernstein--Gram preordering, not a general Putinar certificate, general-domain SOS interface, or full-space SOS representation.  It adds no implicit positivity margin. For an entry-wise inequality, every column-major scalar entry receives an independent copy of the selected Gram construction.  Equality wrappers reject full-box selection.
@@ -383,6 +433,7 @@ Q_J\mathcal Z_J(\boldsymbol\alpha),
 \]
 In one parameter the implementation uses the even/odd Markov--Luk\'acs forms, with minimum absolute order \(\lfloor m/2\rfloor\) for residual degree \(m\). For two or more parameters it uses every subset product of the \(\ell\) box generators and minimum order \(\lceil m/2\rceil\).  The selected order fixes the dense Bernstein Gram bases; it is not added to \(m\).
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(1, {[0 1]}, Degree=2);

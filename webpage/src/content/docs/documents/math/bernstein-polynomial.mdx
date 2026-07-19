@@ -5,6 +5,7 @@ description: Bernstein history, tensor-product cell storage, coefficient algebra
 
 import BernsteinConceptDiagram from "../../../../components/BernsteinConceptDiagram.astro";
 import MultiplicationDiagram from "../../../../components/MultiplicationDiagram.astro";
+import DegreeElevationExplorer from "../../../../components/DegreeElevationExplorer.tsx";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -213,6 +214,8 @@ documents the supported call forms and validation rules.
 <BernsteinConceptDiagram kind="derivative" />
 
 ## Degree Elevation For Any Target Degree
+
+<DegreeElevationExplorer client:visible />
 
 A degree-$m$ polynomial can be represented exactly at any degree $M\ge m$.
 For one parameter, the package-indexed coefficients are

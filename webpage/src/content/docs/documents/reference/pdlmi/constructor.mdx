@@ -160,7 +160,11 @@ implicit = pdlmi(P, "<=", PolyaDegree=2);
 `one` uses an increment of one. `two` uses two, while `implicit` also uses two
 and emits `pdlmi:ImplicitUsePolya`. Pólya assembly rebuilds the stored residual
 at the selected degree, constraining every elevated coefficient and active
-rate-vertex row. It does not mutate the input expression.
+rate-vertex row. It does not mutate the input expression or source `pdlmi`:
+`one = direct.applyPolya()` leaves `direct.UsePolya` false and returns
+`one.UsePolya` true. Reapplying another selector likewise rebuilds a new
+object from `Residual`; it never accumulates certificate constraints in the
+existing object.
 
 ### Full-box option forms
 

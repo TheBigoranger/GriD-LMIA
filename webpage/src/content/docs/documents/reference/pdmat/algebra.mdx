@@ -57,6 +57,26 @@ $$
 
 Matrix order is preserved. Numeric scalars and matrices use the corresponding MATLAB-compatible left or right product. Degrees and tensor labels add componentwise.
 
+The implementation visits contribution pairs in increasing left label, with
+`j = k-i`, and keeps matrix multiplication in that order. A scalar
+degree-one check makes the normalized middle coefficient explicit:
+
+```matlab
+A = pdmat({[0 1]}, {4, 2}, Degree=1);
+B = pdmat({[0 1]}, {0.5, 3}, Degree=1);
+K = A * B;
+cK = K.coeffs(1);
+[cK{:}]
+```
+
+```text
+ans =
+    2.0000    6.5000    6.0000
+```
+
+Here `6.5 = 0.5*(4*3) + 0.5*(2*0.5)`; this is an ordered coefficient
+convolution, not a pointwise product of sampled rows.
+
 <ExampleDisclosure
   visibleCode={"K = A * B;\ncK = K.coeffs([1 1]);"}
   fullCode={"grid = {[0 1], [10 20]};\nA = pdmat(grid, {1 2; 3 4}, Degree=1);\nB = pdmat(grid, {5 6; 7 8}, Degree=1);\nK = A * B;\ncK = K.coeffs([1 1]);\nfprintf('degree=%d, coefficients=%d\\n', K.Degree, K.ncoeff());\ndisp([cK{:}])\n% degree=2, coefficients=9\n% 5  8  12  11  15  20  21  26  32"}

@@ -80,6 +80,8 @@ At the lower physical face, \(\alpha=0\) and the value is \(C^{(c)}[0]\); at the
 \end{center}
 
 \section{Higher Degree And The Partition Of Unity}
+\label{sec:bernstein-higher-degree}
+\index{Bernstein basis}\index{Bernstein coefficient}\index{degree reduction}
 
 \ideastep{Basic idea} Higher degree adds interior shape controls while keeping the same physical cell.  It does not add physical grid nodes.
 
@@ -137,6 +139,7 @@ The label \(i\) identifies a basis position inside the selected physical cell. I
 
 \section{Worked Conversion: \texorpdfstring{\(1+2\alpha+3\alpha^2\)}
 {1+2 alpha+3 alpha squared}}
+\label{sec:bernstein-power-conversion}
 
 Consider
 \[
@@ -197,6 +200,8 @@ a[j]=\binom{n}{j}\sum_{i=0}^{j}
 These are changes of basis inside the same degree-\(n\) polynomial space. For matrix polynomials they act entrywise.  For tensor polynomials they act along one coordinate axis at a time.
 
 \section{Lossless Degree Elevation}
+\label{sec:bernstein-degree-elevation}
+\index{degree elevation}
 
 In one parameter, a polynomial on physical cell \(c\) with degree \(m\) has a Bernstein representation of every higher degree.  One elevation step gives
 \[
@@ -239,6 +244,7 @@ The new coefficients are fixed convex combinations of the old ones.  Elevation t
 \section[Physical Tensor Grids And Local Tensor Labels]{%
   \texorpdfstring{Physical Tensor Grids And\\Local Tensor Labels}%
   {Physical Tensor Grids And Local Tensor Labels}}
+\label{sec:bernstein-tensor-grids}
 
 Suppose direction \(s\) has physical nodes
 \[
@@ -453,6 +459,7 @@ Labels add componentwise; physical-cell identity does not change.
 
 \needspace{14\baselineskip}
 \section{Differentiation And Rate Vertices}
+\label{sec:bernstein-differentiation}
 
 \ideastep{Basic idea} Differentiate inside each physical cell.  Adjacent control differences produce the derivative coefficients; multiplying by a bounded rate then creates one stored row per rate-box vertex.  Value continuity of \(P\) does not force the cell-local derivatives to match across a face.
 
@@ -496,10 +503,33 @@ This matrix expression is affine in \(\dot{\boldsymbol\rho}\).  Every value insi
   \node[box,right=of sum,yshift=4mm] (v2) {\((\underline v_1,\overline v_2)\)};
   \node[box,right=of sum,yshift=-5mm] (v3) {\((\overline v_1,\underline v_2)\)};
   \node[box,right=of sum,yshift=-14mm] (v4) {\((\overline v_1,\overline v_2)\)};
-  \draw[->,dpblue] (p1)--(sum); \draw[->,dpblue] (p2)--(sum);
-  \foreach \v in {v1,v2,v3,v4}\draw[->,dpblue] (sum)--(\v);
+\draw[->,dpblue] (p1)--(sum); \draw[->,dpblue] (p2)--(sum);
+\foreach \v in {v1,v2,v3,v4}\draw[->,dpblue] (sum)--(\v);
 \end{tikzpicture}
 \end{center}
+
+\subsection{Rate-Vertex Row Storage}
+\label{sec:bernstein-rate-vertex-storage}
+
+Let \(\code{RateBounds}(s,:)=[\underline{\dot\rho}_s\ \overline{\dot\rho}_s]\).  The rate box has the finite vertex set
+\[
+  \mathcal V=\prod_{s=1}^{\ell}\{\underline{\dot\rho}_s,\overline{\dot\rho}_s\},
+  \qquad |\mathcal V|=2^\ell.
+\]
+For a derivative object \(D=\code{rhodiff}(P,\code{RateBounds})\) and one physical hypercube \(c=(c_1,\ldots,c_\ell)\), the leaf \(\code{D.LocalValues}\{c_1\}\cdots\{c_\ell\}\) is a \(2^\ell\)-by-\((\code{D.Degree}+1)^\ell\) cell array.  Its rows enumerate \(\mathcal V\); its columns enumerate the local Bernstein labels in \code{combRows} order.  Each entry already contains the rate-weighted sum \(\sum_s v_s\,\partial P^{(c)}/\partial\rho_s\) at that row's vertex \(v\).  The rows add rate alternatives inside one existing hypercube; they do not add physical cells.
+
+For \(\ell=2\), the lower/upper tensor order is
+\[
+\begin{array}{c|cc}
+\text{row} & \dot\rho_1 & \dot\rho_2\\
+\hline
+1 & \underline{\dot\rho}_1 & \underline{\dot\rho}_2\\
+2 & \underline{\dot\rho}_1 & \overline{\dot\rho}_2\\
+3 & \overline{\dot\rho}_1 & \underline{\dot\rho}_2\\
+4 & \overline{\dot\rho}_1 & \overline{\dot\rho}_2
+\end{array}
+\]
+The last parameter direction changes fastest.  This is the same tensor ordering used by the package's coefficient and cell traversal, so \code{pdlmi} can constrain every rate row without reconstructing the rate box.
 
 \section{de Casteljau Evaluation And Exact Subdivision}
 \index{de Casteljau evaluation}\index{subdivision}

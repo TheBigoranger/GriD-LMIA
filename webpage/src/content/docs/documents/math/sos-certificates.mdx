@@ -4,6 +4,7 @@ description: Mathematical map from global SOS and Bernstein tests to Pólya, Put
 ---
 
 import CertificateSpectrum from "../../../../components/CertificateSpectrum.astro";
+import CertificateChooser from "../../../../components/CertificateChooser.astro";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -86,6 +87,16 @@ defines the forward coordinate and exact coefficient algebra. The
 rows of this table are callable.
 
 <CertificateSpectrum selected="direct" />
+
+## Explore The Stored Constraint Shape
+
+Choose a selector and a source-valid residual shape below. Ordinary residuals
+have one active coefficient row per cell; `rhodiff` residuals have exactly
+$2^\ell$ rate-vertex rows. Semidefinite mode creates one matrix certificate
+per cell and active row. Entrywise mode creates an independent scalar Gram
+certificate for every entry of the displayed square residual.
+
+<CertificateChooser />
 
 ## A Tiny Example: Positive Polynomial, Failed Direct Test
 

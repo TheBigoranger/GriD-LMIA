@@ -336,12 +336,16 @@ mjx-container:not([display="true"]) {
 
 /* React islands reuse the route-wide frame and keep every legend outside SVG. */
 .interactive-figure button,
-.interactive-figure input {
+.interactive-figure input,
+.interactive-figure textarea,
+.interactive-figure select {
   font: inherit;
 }
 
 .interactive-figure button:focus-visible,
 .interactive-figure input:focus-visible,
+.interactive-figure textarea:focus-visible,
+.interactive-figure select:focus-visible,
 .interactive-plot:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--sl-color-accent) 65%, transparent);
   outline-offset: 2px;
@@ -354,6 +358,36 @@ mjx-container:not([display="true"]) {
   display: grid;
   gap: 0.75rem;
 }
+
+.manual-explorer .diagram-frame__body { display: grid; grid-template-columns: minmax(13rem, 0.8fr) minmax(0, 1.2fr); gap: 1rem; align-items: start; }
+.manual-explorer .explorer-stack { grid-column: 1 / -1; }
+.explorer-controls { display: grid; gap: 0.45rem; min-width: 0; }
+.explorer-controls label { color: var(--sl-color-gray-2); font-size: 0.82rem; font-weight: 750; }
+.explorer-controls input,
+.explorer-controls textarea,
+.explorer-controls select,
+.tensor-selectors select { box-sizing: border-box; width: 100%; min-width: 0; border: 1px solid var(--diagram-border); border-radius: 7px; padding: 0.48rem 0.55rem; color: var(--sl-color-text); background: var(--sl-color-bg); }
+.explorer-controls button,
+.certificate-shape-controls button { width: fit-content; border: 1px solid var(--sl-color-accent); border-radius: 7px; padding: 0.48rem 0.7rem; color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); cursor: pointer; font-weight: 750; }
+.explorer-error { min-height: 1.4em; margin: 0; color: var(--sl-color-red-high); font-size: 0.82rem; }
+.explorer-readout { min-width: 0; border-inline-start: 3px solid var(--diagram-result); padding-inline-start: 0.8rem; }
+.explorer-readout > :first-child { margin-block-start: 0; }
+.vertex-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem; margin: 0.65rem 0; padding: 0; list-style: none; }
+.vertex-list li,
+.storage-strip { min-width: 0; border: 1px solid var(--diagram-border); border-radius: 7px; padding: 0.4rem 0.5rem; background: var(--sl-color-bg); overflow-wrap: anywhere; }
+.tensor-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.tensor-counts span { border: 1px solid var(--diagram-border); border-block-start: 3px solid var(--diagram-result); border-radius: 8px; padding: 0.6rem; text-align: center; }
+.tensor-counts strong { display: block; font-size: 1.3rem; }
+.tensor-selectors { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.5rem 0.8rem; align-items: center; }
+.certificate-shape-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.55rem; padding: 0.75rem; border: 1px solid var(--diagram-border); border-radius: 9px; background: var(--sl-color-bg); }
+.certificate-shape-controls label { display: grid; gap: 0.25rem; min-width: 0; color: var(--sl-color-gray-2); font-size: 0.75rem; }
+.certificate-shape-controls input,
+.certificate-shape-controls select { box-sizing: border-box; width: 100%; min-width: 0; border: 1px solid var(--diagram-border); border-radius: 6px; padding: 0.38rem; color: var(--sl-color-text); background: var(--diagram-surface); }
+.certificate-shape-controls .explorer-error { grid-column: 1 / -1; }
+.certificate-shape-readout { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.35rem; }
+.certificate-shape-readout p { border: 1px solid var(--diagram-border); border-radius: 7px; padding: 0.45rem; font-size: 0.76rem; }
+.certificate-shape-readout strong { display: block; color: var(--sl-color-text); }
+.gram-block-list { font-size: 0.85rem; }
 
 .cell-explorer {
   display: grid;
@@ -933,9 +967,17 @@ mjx-container:not([display="true"]) {
   }
 
   .certificate-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .manual-explorer .diagram-frame__body { grid-template-columns: 1fr; }
+  .certificate-shape-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .certificate-shape-readout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
+  .vertex-list,
+  .tensor-counts,
+  .certificate-shape-controls,
+  .certificate-shape-readout { grid-template-columns: 1fr; }
+  .tensor-selectors { grid-template-columns: 1fr; }
   .reference-index summary { display: block; }
   .reference-index__group > summary > span,
   .reference-index__family > summary > span { display: block; margin-block-start: 0.2rem; text-align: start; }

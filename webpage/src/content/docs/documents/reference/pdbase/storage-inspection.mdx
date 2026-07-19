@@ -92,6 +92,28 @@ increment must be a finite nonnegative integer scalar. `pdlmi` uses this
 backend method for Pólya assembly; ordinary users normally select it through
 `pdlmi(..., UsePolya=true, PolyaDegree=d)` or `C.applyPolya(d)`.
 
+The public method can expose the exact temporary representation used by
+coefficient algebra:
+
+```matlab
+A = pdmat({[0 1]}, {0, 1}, Degree=1);
+elevated = A.elevVals(1);
+original = A.coeffs(1);
+[A.Degree numel(original) numel(elevated{1})]
+[elevated{1}{:}]
+```
+
+```text
+ans =
+     1     2     3
+
+ans =
+         0    0.5000    1.0000
+```
+
+`A` remains degree one with two stored coefficients. Only the returned tree
+uses the elevated row `[0, 0.5, 1]`; the physical cell `[0,1]` is unchanged.
+
 ### <span id="pdbase-ncell"></span>`ncell`
 
 ```matlab

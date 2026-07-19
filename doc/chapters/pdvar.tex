@@ -1,7 +1,7 @@
 \chapter{\texorpdfstring{\code{pdvar}}{pdvar}: Decision Matrix Functions}
 \label{sec:pdvar}
 
-\code{pdvar} creates continuous cell-local Bernstein decision expressions backed by YALMIP \code{sdpvar} coefficients.  It participates in supported affine and known-data algebra.  It does not choose solvers or call \code{optimize}; solver-facing work happens after comparison overloads create \code{pdlmi} objects and \code{toYalmip} converts them to YALMIP constraints.
+\code{pdvar} creates continuous cell-local Bernstein decision expressions backed by YALMIP \code{sdpvar} coefficients.  It participates in supported affine and known-data algebra.  It does not choose solvers or call \code{optimize}. Comparison overloads is created and handled by \code{pdlmi} objects, of which the member function \code{toYalmip} later converts them to YALMIP constraints.
 
 \section{API Map}
 \label{sec:pdvar-lookup}
@@ -33,6 +33,7 @@ Build LMIs &
 \end{tabularx}
 
 \section{Construct \texorpdfstring{\code{pdvar}}{pdvar} Decisions}
+\index{affine decision expression}\index{decision matrix}
 \label{sec:pdvar-construction}
 
 \syntaxhead
@@ -54,21 +55,21 @@ P = pdvar(..., RateBounds=rb)
 \end{itemize}
 
 \begin{center}
-\begin{tikzpicture}[x=2.5cm,y=1cm,>=Latex,
+\begin{tikzpicture}[node distance=8mm and 9mm,>=Latex,
   c/.style={dp/result,
     font=\scriptsize,align=center,minimum width=20mm,minimum height=8mm}]
-  \node[dp/label] at (1,1.05) {cell 1: degree-two local row};
-  \node[c] (p10) at (0,0.55) {\(P^{(1)}[0]\)};
-  \node[c] (p11) at (1,0.55) {\(P^{(1)}[1]\)};
-  \node[c] (p12) at (2,0.55) {\(P^{(1)}[2]\)};
+  \node[c] (p10) {\(P^{(1)}[0]\)};
+  \node[c,right=of p10] (p11) {\(P^{(1)}[1]\)};
+  \node[c,right=of p11] (p12) {\(P^{(1)}[2]\)};
+  \node[dp/label,above=of p11] {cell 1: degree-two local row};
   \draw[thick,dpblue] (p10) -- (p11) -- (p12);
-  \node[dp/label] at (3,-1.35) {cell 2: degree-two local row};
-  \node[c] (p20) at (2,-0.75) {\(P^{(2)}[0]\)};
-  \node[c] (p21) at (3,-0.75) {\(P^{(2)}[1]\)};
-  \node[c] (p22) at (4,-0.75) {\(P^{(2)}[2]\)};
+  \node[c,below=of p12] (p20) {\(P^{(2)}[0]\)};
+  \node[c,right=of p20] (p21) {\(P^{(2)}[1]\)};
+  \node[c,right=of p21] (p22) {\(P^{(2)}[2]\)};
+  \node[dp/label,above=of p21] {cell 2: degree-two local row};
   \draw[thick,dpblue] (p20) -- (p21) -- (p22);
   \draw[dp/arrow,<->] (p12.south) -- (p20.north);
-  \node[dp/label,anchor=west] at (2.18,-0.10)
+  \node[dp/label,below=of p21,align=center]
     {same YALMIP handle: \(P^{(1)}[2]=P^{(2)}[0]\)};
 \end{tikzpicture}
 
@@ -81,6 +82,9 @@ The square shorthand creates a \(2\times2\) continuous decision object.  The def
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 Ps = pdvar(2, {[0 1]});
+P= Ps.coeffs([1]);
+P{1}
+symmetricCoefficient = ishermitian(P{1})
 variableClass = class(Ps)
 matrixSize = size(Ps)
 degree = Ps.Degree
@@ -88,12 +92,21 @@ rateDependent = Ps.HasRateDependence
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
+Linear matrix variable 2x2 (symmetric, real, 3 variables)
+Coefficient range: 1 to 1
+
+symmetricCoefficient =
+ logical
+  1
+
 variableClass =
     'pdvar'
 
-matrixSize = 2     2
+matrixSize =
+     2     2
 
-degree = 1
+degree =
+     1
 
 rateDependent =
   logical
@@ -114,7 +127,8 @@ degree = Pf.Degree
 variableClass =
     'pdvar'
 
-matrixSize = 2     3
+matrixSize =
+     2     3
 
 degree =
      1
@@ -125,22 +139,35 @@ The structure flag makes the coefficient structure explicit.  This is useful whe
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 Pfull = pdvar(2, 2, {[0 1]}, "full");
+P = Pfull.coeffs([1]);
+P{1}
+fullCoefficient = ishermitian(P{1})
 variableClass = class(Pfull)
 matrixSize = Pfull.MatrixSize
 degree = Pfull.Degree
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
+Linear matrix variable 2x2 (full, real, 4 variables)
+Coefficient range: 1 to 1
+
+fullCoefficient =
+ logical
+  0
+
 variableClass =
     'pdvar'
 
-matrixSize = 2     2
+matrixSize =
+     2     2
 
 degree =
      1
 \end{lstlisting}
 
+\shortpairspace
 Use \code{Degree=0} for a parameter-independent decision variable stored with grid metadata.
+
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -154,12 +181,14 @@ cellCount = P0.ncell()
 variableClass =
     'pdvar'
 
-degree = 0
+degree =
+     0
 
 cellCount =
      2
 \end{lstlisting}
 
+\shortpairspace
 Rate bounds are metadata for later \code{rhodiff(P)} calls.  \code{pdlmi} constrains rate vertices only after an expression such as \code{rhodiff} has stored rate-vertex rows.
 
 \begin{lstlisting}[style=dpmatlab]
@@ -174,11 +203,13 @@ rateBounds = Pr.RateBounds
 variableClass =
     'pdvar'
 
-rateDependent = logical 1
+rateDependent =
+ logical
+  1
 
 rateBounds =
-    -1     2
-    -3     4
+     -1     2
+     -3     4
 \end{lstlisting}
 
 \remarkshead
@@ -196,7 +227,23 @@ P = pdvar(2, {[0 1]}, "symmetric", Degree=2, RateBounds=[-1 1]);
 degree = P.Degree
 isContinuous = P.IsContinuous
 rateBounds = P.RateBounds
-firstCellCoefficients = P.LocalValues{1}
+firstCellCoefficients = P.coeffs(1)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+degree =
+     2
+
+isContinuous =
+ logical
+  1
+
+rateBounds =
+     -1     1
+
+firstCellCoefficients =
+1x3 cell array
+    {[2x2 sdpvar]}    {[2x2 sdpvar]}    {[2x2 sdpvar]}
 \end{lstlisting}
 
 Use public algebra to create a modified value; direct assignments such as \code{P.Degree = 1} are not supported.
@@ -216,12 +263,13 @@ D = rhodiff(P, rb)
   \item \code{P} is a \code{pdvar} without existing rate-vertex rows. \item \code{rb} is a finite \(\ell\)-by-\(2\) numeric matrix of lower and upper parameter-rate bounds, with each lower bound no greater than its upper bound.  It must equal \code{P.RateBounds} when the object already carries nonempty bounds. \item Without \code{rb}, \code{rhodiff(P)} requires nonempty \code{P.RateBounds}. \item \code{D} is a discontinuous \code{pdvar} with one coefficient row per rate vertex.  In one parameter a degree-\(m\) derivative has degree \(m-1\), while a degree-zero derivative remains zero; multivariate partials are elevated into the implementation's common tensor degree.
 \end{itemize}
 
-For a one-parameter degree-one coefficient pair \(P^{(c)}[0],P^{(c)}[1]\) on physical cell \(c\) of width \(h_c\), the rate-dependent derivative row is
+For a one-parameter degree-one coefficient pair \(P^{(c)}[0],P^{(c)}[1]\) on the physical cell
+\(c=[\rho_c,\rho_{c+1}]\), define the positive cell length explicitly by \(h_c := \rho_{c+1}-\rho_c\). The rate-dependent derivative row is then
 \[
   \dot P(\rho,\dot\rho)
 =\dot\rho\,\frac{P^{(c)}[1]-P^{(c)}[0]}{h_c}.
 \]
-The implementation stores one row for each allowed rate vertex.
+This is the one-dimensional special case: the two rows correspond to the lower and upper allowed scheduling rates.
 
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=7mm and 10mm,
@@ -241,6 +289,12 @@ The implementation stores one row for each allowed rate vertex.
 
 \textit{Differentiation changes local coefficients; rate substitution creates rows.  Neither operation adds physical cells.}
 \end{center}
+
+For \(\ell\) parameters, work cell by cell with \(h_s^{(c)}:=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0\) in direction \(s\) of the physical hypercube \(c=(c_1,\ldots,c_\ell)\).  Thus nonuniform grids use a distinct step length in every direction and cell:
+\[
+    \dot P^{(c)}(\rho,\dot\rho)=\sum_{s=1}^{\ell}\dot\rho_s\,\frac{\partial P^{(c)}}{\partial\rho_s}(\rho).
+\]
+\code{RateBounds} fixes a lower/upper box for \(\dot{\boldsymbol\rho}\), so \code{rhodiff} evaluates this affine expression at its \(2^\ell\) vertices and stores one row per vertex.  Supply those bounds explicitly as \code{rhodiff(P, rb)}, or initialize \code{P} with \code{RateBounds=rb}; if both are present they must match.  Without bounds there is no finite vertex set to store, so \code{rhodiff(P)} raises \codeerr{pdvar}{MissingRateBounds}.  \Cref{sec:bernstein-rate-vertex-storage} gives the exact hypercube-local row and coefficient layout.
 
 \remarkshead
 Unsupported call arity or differentiating an expression that already contains rate-vertex rows raises \codeerr{pdvar}{InvalidDiff}.  Explicit malformed rate bounds raise \codeerr{pdvar}{Invalid}\allowbreak\code{RateBounds}.  Calling \code{rhodiff(P)} without stored bounds raises \codeerr{pdvar}{Missing}\allowbreak\code{RateBounds}; explicit bounds that disagree with \code{P.RateBounds} raise \codeerr{pdvar}{RateBounds}\allowbreak\code{Mismatch}.
@@ -270,7 +324,7 @@ isContinuous =
 coefficientTableSize =
      2     1
 rateBounds =
-    -1     1
+     -1     1
 \end{lstlisting}
 
 For a two-parameter object, the rate-vertex rows enumerate all lower/upper combinations from the two rows of \code{RateBounds}.
@@ -279,9 +333,12 @@ For a two-parameter object, the rate-vertex rows enumerate all lower/upper combi
 yalmip('clear')
 Q = pdvar(1, {[0 1], [10 20]}, RateBounds=[-1 1; -2 2]);
 E = rhodiff(Q);
+% Rows 1:4 use [-1 -2], [-1 2], [1 -2], and [1 2], respectively.
 derivativeClass = class(E)
 derivativeDegree = E.Degree
 coefficientTableSize = size(E.coeffs([1 1]))
+rateVertexCount = coefficientTableSize(1)
+coefficientsPerRateVertex = coefficientTableSize(2)
 rateBounds = E.RateBounds
 \end{lstlisting}
 
@@ -292,9 +349,13 @@ derivativeDegree =
      1
 coefficientTableSize =
      4     4
+rateVertexCount =
+     4
+coefficientsPerRateVertex =
+     4
 rateBounds =
-    -1     1
-    -2     2
+     -1     1
+     -2     2
 \end{lstlisting}
 
 \section{\texorpdfstring{\code{bernsteinTable}}{bernsteinTable}}
@@ -332,14 +393,44 @@ T = bernsteinTable(P, cellSubs, "oneLine")
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(1, {[0 1]});
-T = bernsteinTable(P, "oneLine")
+bernsteinTable(P, "oneLine")
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-    CellSubscript       Expression
-    _____________    ________________
+    CellSubscript                     Expression
+    _____________    _____________________________________________
 
-        {[1]}        "(1-alpha)*internal(1) + alpha*internal(2)"
+        {[1]}        "(1-alpha)*internal(10) + alpha*internal(11)"
+\end{lstlisting}
+
+\shortpairspace
+For \code{D = rhodiff(P)}, \code{bernsteinTable(D, cellSubs, "oneLine")} emits one row for every selected physical cell and rate-box vertex, rather than one row per local Bernstein coefficient.  \code{RateVertexIndex} and \code{RateVertex} identify the lower/upper rate tuple; their tensor order is defined in \Cref{sec:bernstein-rate-vertex-storage}.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(1, {[0 1], [0 1]}, RateBounds=[-1 1; -2 2]);
+D = rhodiff(P);
+T = bernsteinTable(D, [1 1], "oneLine");
+vertexIndices = T.RateVertexIndex
+rateVertices = vertcat(T.RateVertex{:})
+expressionCount = height(T)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+vertexIndices =
+     1
+     2
+     3
+     4
+
+rateVertices =
+     -1    -2
+     -1     2
+     1    -2
+     1     2
+
+expressionCount =
+     4
 \end{lstlisting}
 
 \remarkshead
@@ -374,6 +465,7 @@ R = -P
 
 Here \code{A} is coefficient-backed \code{pdmat}, \code{M} is numeric, and \code{X} is affine \code{sdpvar}.  A numeric scalar broadcasts to the payload size; an affine \code{sdpvar} is promoted as parameter-independent data.
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, {[0 1]}, "full");
@@ -436,6 +528,7 @@ R = P * M
 
 The first example shows numeric left and right matrix products without exposing incidental YALMIP variable identifiers.
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, 1, {[0 1]}, "full");
@@ -541,6 +634,7 @@ idx = end(P, k, n)
 n = numArgumentsFromSubscript(P, S, ctx)
 \end{lstlisting}
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
@@ -586,6 +680,7 @@ T = P.'
 H = P'
 \end{lstlisting}
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
@@ -631,6 +726,7 @@ R = reshape(P, m, n)
 S = squeeze(P)
 \end{lstlisting}
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
@@ -666,6 +762,7 @@ D = diag(v, k)
 t = trace(P)
 \end{lstlisting}
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(3, {[0 1]}, "full");
@@ -711,6 +808,7 @@ C = cumsum(P, dim)
 
 First form the two triangular views.
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(3, {[0 1]}, "full");
@@ -769,6 +867,7 @@ Q = rot90(P)
 Q = rot90(P, k)
 \end{lstlisting}
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
@@ -820,6 +919,7 @@ C = cat(dim, P, Q, ...)
 D = blkdiag(P, Q, ...)
 \end{lstlisting}
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, {[0 1]}, "full");
@@ -867,6 +967,7 @@ Q = repmat(P, m, n)
 Q = repmat(P, [m n])
 \end{lstlisting}
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(1, 2, {[0 1]}, "full");
@@ -904,6 +1005,7 @@ P(rows, cols) = A
 P(rows, cols) = X
 \end{lstlisting}
 
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, 3, {[0 1]}, "full");
@@ -946,6 +1048,7 @@ containsDecision =
 
 Invalid selectors raise \codeerr{pdvar}{InvalidSubscript}.  Linear indexing, deletion, or non-parenthesis assignment raises \codeerr{pdvar}{UnsupportedAssignment}; incompatible or nonlinear right-hand sides raise \codeerr{pdvar}{InvalidAssignment}.
 \section{\texorpdfstring{\code{value}}{value}}
+\index{value@\texttt{value}}
 \label{sec:pdvar-value}
 
 \syntaxhead

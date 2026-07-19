@@ -93,6 +93,31 @@ Bernstein labels, not a particular internal `sdpvar` name. The diagnostic uses
 the public forward coordinate directly, so local label `0` multiplies
 `(1-alpha)` and local label `1` multiplies `alpha`.
 
+### Rate-vertex metadata without unstable symbolic names
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, RateBounds=[-1 2]);
+D = rhodiff(P);
+T = bernsteinTable(D);
+T(:, ["RateVertexIndex", "RateVertex", "LocalIndex"])
+```
+
+```text
+ans =
+  2x3 table
+
+    RateVertexIndex    RateVertex    LocalIndex
+    _______________    __________    __________
+
+           1             {[-1]}         {[0]}
+           2             {[ 2]}         {[0]}
+```
+
+The derivative has degree zero, so each rate vertex contributes one local
+label. Selecting metadata columns makes the ordering reproducible without
+promising the workspace-dependent YALMIP text in `Value`.
+
 ## Validation And Errors
 
 - The object must be a `pdvar` instance.

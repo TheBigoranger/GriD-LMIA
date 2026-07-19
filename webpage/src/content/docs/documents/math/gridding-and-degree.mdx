@@ -4,6 +4,7 @@ description: Read parameter-grid inputs, global coefficient grids, cell-local st
 ---
 
 import CellStorageDiagram from "../../../../components/CellStorageDiagram.astro";
+import TensorTraversalExplorer from "../../../../components/TensorTraversalExplorer.tsx";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -44,6 +45,8 @@ finite nonnegative degrees represent continuous piecewise-polynomial data on
 the same physical partition.
 
 <CellStorageDiagram />
+
+<TensorTraversalExplorer client:visible />
 
 ## One-Dimensional Input
 

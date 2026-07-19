@@ -10,6 +10,7 @@
 \usepackage{xcolor}
 \usepackage{enumitem}
 \usepackage{needspace}
+\usepackage{etoolbox}
 \usepackage{titlesec}
 \usepackage{graphicx}
 \usepackage{float}
@@ -23,6 +24,7 @@
 
 \crefname{equation}{}{}
 \crefname{figure}{Fig}{Figs}
+\crefname{chapter}{Chapter}{Chapters}
 \usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,
   decorations.pathreplacing,plotmarks}
 
@@ -90,6 +92,8 @@
 \titlespacing*{\chapter}{0pt}{-1.5\baselineskip}{1.2\baselineskip}
 \titlespacing*{\section}{0pt}{1.25\baselineskip}{0.55\baselineskip}
 \titlespacing*{\subsection}{0pt}{1.05\baselineskip}{0.4\baselineskip}
+\pretocmd{\section}{\needspace{5\baselineskip}}{}{}
+\pretocmd{\subsection}{\needspace{4\baselineskip}}{}{}
 
 \lstdefinestyle{dpmatlab}{
   style=Matlab-editor,
@@ -157,17 +161,15 @@
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\codeerr}[2]{\code{#1:}\allowbreak\code{#2}}
 \newcommand{\refhead}[1]{%
-  \par\addvspace{0.75\baselineskip}%
-  \needspace{4\baselineskip}%
   \noindent\textcolor{black!75}{\sffamily\bfseries\normalsize #1}\par
-  \nopagebreak\vspace{0.22\baselineskip}%
+  \nopagebreak
   \noindent\textcolor{black!55}{\rule{\linewidth}{0.45pt}}\par
-  \vspace{0.48\baselineskip}\nopagebreak}
-\newcommand{\syntaxhead}{\refhead{Syntax}}
+  \vspace{0.25\baselineskip}\nopagebreak}
+  \newcommand{\syntaxhead}{\needspace{5\baselineskip}\refhead{Syntax}}
 \newcommand{\arghead}{\refhead{Arguments}}
 \newcommand{\descriptionhead}{\refhead{Description}}
-\newcommand{\examplehead}{\refhead{Examples and output}}
-\newcommand{\remarkshead}{\refhead{Remarks}}
+\newcommand{\examplehead}{\needspace{4\baselineskip}\refhead{Examples and output}}
+\newcommand{\remarkshead}{\needspace{4\baselineskip}\refhead{Remarks}}
 \newcommand{\seealsohead}{\refhead{See Also}}
 \newcommand{\ideastep}[1]{%
   \par\addvspace{0.65\baselineskip}%
@@ -179,7 +181,10 @@
 % color, so the box does not encode meaning through color alone.
 \newcommand{\keyequation}[2]{%
   \par\addvspace{0.7\baselineskip}%
-  \noindent\fcolorbox{black!65}{dpbluewash}{%
+  \begin{center}
+  \fcolorbox{black!65}{dpbluewash}{%
     \begin{minipage}{0.94\linewidth}%
-    \textbf{#1}\par\vspace{0.35\baselineskip}\centering #2\end{minipage}}%
-  \par\addvspace{0.7\baselineskip}}
+    \textbf{#1}\centering #2\end{minipage}}%
+    \par\addvspace{0.7\baselineskip}
+    \end{center}
+    }

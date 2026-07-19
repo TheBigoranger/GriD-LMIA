@@ -13,6 +13,8 @@ S(\boldsymbol\alpha)\succeq0
 All Gram constraints below prove non-strict inequalities.  A strict model must state its own margin, for example \(S-\varepsilon I\succeq0\).  The package adds no hidden margin.
 
 \section{Positive Semidefinite Matrices And LMIs}
+\label{sec:certificate-psd}
+\index{positive semidefinite}
 
 \ideastep{Basic idea} A real symmetric matrix \(Q\) is positive semidefinite when
 \[
@@ -77,6 +79,8 @@ Then \(y^{\mathsf T}S(z)y=(Z_dy)^{\mathsf T}Q(Z_dy)\ge0\) for every \(y\), so \(
 An unweighted Gram form proves \(S(z)\succeq0\) on all of \(\mathbb R^\ell\).  That can be much stronger than positivity only on a box. For example, \(\alpha(1-\alpha)\) is nonnegative on \([0,1]\) but negative outside it.  The package does not expose a general full-space SOS parser; this construction is background for understanding weighted certificates.
 
 \section{Direct Bernstein Coefficients}
+\label{sec:certificate-direct}
+\index{coefficient matching}
 
 \ideastep{Basic idea} If every local coefficient matrix has the requested sign, every convex combination of those coefficients has the same sign.  This yields a small, transparent sufficient certificate.
 
@@ -131,6 +135,7 @@ The same polynomial has the PSD Bernstein Gram representation
 The eigenvalues of \(Q\) are \(0.20\) and \(0.50\).  A complete Gram certificate can therefore succeed when coefficient-wise signs fail.
 
 \section{P\'olya As Lossless Elevation}
+\label{sec:certificate-polya}
 
 \ideastep{Basic idea} P\'olya selection does not change the residual polynomial.  It rewrites that same polynomial at a higher Bernstein degree and then retries the direct coefficient test.
 
@@ -178,6 +183,8 @@ after one elevation.  Every new coefficient is positive, so the elevated coeffic
 \code{applyPolya(d)} applies one scalar increment in every parameter direction and then coefficient constraints to every cell and rate row.  It adds neither Gram variables nor decision freedom.  A fixed-level failure is inconclusive; the package makes no tensor-box completeness claim.
 
 \section{Exact Interval Markov--Luk\'acs Forms}
+\label{sec:certificate-markov-lukacs}
+\index{Markov--Luk\'acs form}
 
 \ideastep{Basic idea} On one interval, endpoint factors can encode the domain exactly.  Even and odd target degrees require different weighted Gram patterns, so parity is a structural choice rather than a cosmetic one.
 
@@ -239,6 +246,8 @@ Partition \(Q\) into \(n\)-by-\(n\) blocks \(Q_{ij}\).  The Bernstein coefficien
 Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs.  For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms.  Its minimum absolute order is \(\lfloor m/2\rfloor\).
 
 \section{Putinar Modules And Schm\"udgen Preorderings}
+\label{sec:certificate-putinar-schmudgen}
+\index{quadratic module}\index{Schm\"udgen preordering}\index{Positivstellensatz}
 
 For
 \[
@@ -276,6 +285,7 @@ A Schm\"udgen full preordering includes every square-free generator product:
 Strict positivity on a compact basic closed semialgebraic set has such a representation \cite{schmudgen1991}.  A finite truncation is still a sufficient certificate, and up to \(2^q\) multiplier blocks may be required.
 
 \section{The Implemented Multivariate Full Box Preordering}
+\label{sec:certificate-full-box}
 
 \ideastep{Basic idea} For several parameters, use every square-free product of the box generators. Each subset selects one weighted Gram block, and exact coefficient identities make the sum equal the stored residual on one physical cell and rate row.
 
@@ -379,6 +389,7 @@ fullBoxState =
 Selections rebuild from the stored original \code{Residual} and \code{Relation}.  Reapplying P\'olya, Putinar, or full-box replaces the previous selection; the certificates never compound, and the three opt-in families are mutually exclusive.
 
 \section{Five Different Modeling Choices}
+\label{sec:certificate-five-choices}
 
 These choices act on different parts of the problem.
 
@@ -420,6 +431,7 @@ Putinar/full-box order & Gram bases and PSD block sizes & decision degree \\
 When a certificate fails, do not infer continuous infeasibility.  Decide separately whether the model needs a richer decision degree, a finer physical grid, a larger P\'olya increment, or a higher Putinar or full-box order.
 
 \section{Implemented Boundary}
+\label{sec:certificate-boundary}
 
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.43\textwidth}Y@{}}
 \toprule

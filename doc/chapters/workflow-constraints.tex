@@ -73,7 +73,7 @@ R[0]=P_0A_0,\quad
 \[
 R[2]=(2P_1A_1+P_2A_0)/3,\quad R[3]=P_2A_1.
 \]
-The anti-diagonal grouping \(k=i+j\) and binomial normalization are exact; this is not a pointwise sample product, and matrix order is preserved.
+The anti-diagonal grouping \(k=i+j\) and binomial normalization are exact; this is not a pointwise sample product, and matrix order is preserved. \Cref{sec:bernstein-product-math} derives the general tensor-product rule.
 
 \begin{lstlisting}[style=dpmatlab]
 PA = P * A;
@@ -100,7 +100,7 @@ For a degree-\(m\) cell of width \(h_c\), differentiation is the forward differe
 =\frac{m}{h_c}\sum_{i=0}^{m-1}
    \bigl(P^{(c)}[i+1]-P^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
 \]
-Because the chain-rule term is affine in the bounded rate, checking the two vertices \(-1\) and \(+1\) covers \(\dot\rho\in[-1,1]\).
+Because the chain-rule term is affine in the bounded rate, checking the two vertices \(-1\) and \(+1\) covers \(\dot\rho\in[-1,1]\). \Cref{sec:bernstein-differentiation} gives the coefficient derivation and its physical-cell scaling.
 
 For \(\ell\) parameters, let \(h_{\mathbf c,s}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}\) be the width of physical hypercube \(\mathbf c\) in direction \(s\), and let \(\mathbf e_s\) be the corresponding unit multi-index. Differentiating the tensor-product representation in \cref{sec:continuous-bernstein-representation} gives
 \[
@@ -125,14 +125,14 @@ coefficientsPerRow = size(D.coeffs(1),2)
 
 \begin{lstlisting}[style=dpoutput]
 derivativeDegree =
-     1
+    1
 isContinuous =
   logical
    0
 rateRowCount =
-     2
+    2
 coefficientsPerRow =
-     2
+    2
 \end{lstlisting}
 
 For example, a degree-one decision on one two-parameter cell has four rate vertices and four tensor-Bernstein labels:
@@ -148,16 +148,17 @@ coefficientsPerRow2D = size(D2.coeffs([1 1]), 2)
 
 \begin{lstlisting}[style=dpoutput]
 tensorDerivativeDegree =
-     1
+    1
 rateRowCount2D =
-     4
+    4
 coefficientsPerRow2D =
-     4
+    4
 \end{lstlisting}
 
 Thus a coefficient table is indexed independently by physical hypercube, rate-vertex row, and tensor-Bernstein label. Rate rows are neither physical cells nor additional Bernstein labels; a later comparison constrains every combination of these three indices.
 
 \subsection{Form a Residual on Every Hypercube}
+\index{residual}
 
 The MATLAB residual is a direct transcription of \cref{eq:canonical-positive,eq:lpv-spine}.  Addition performs exact degree elevation before the cell-local terms are combined.
 
@@ -172,11 +173,11 @@ positivityConstraintCount = numel(Cpositive.Constraints)
 
 \begin{lstlisting}[style=dpoutput]
 residualDegree =
-     3
+    3
 decayConstraintCount =
     16
 positivityConstraintCount =
-     6
+    6
 \end{lstlisting}
 
 The decay count is two physical cells times two rate vertices times four degree-three labels.  Positivity has no rate rows and has three degree-two labels per cell.  Shared faces are visited from each adjoining cell because certification remains cell-local.
@@ -200,9 +201,10 @@ counts =
     16    20    24    24
 \end{lstlisting}
 
-Direct tests coefficient signs. P\'olya elevates the residual before testing. For this one-parameter residual, the default Putinar selector delegates to the full-box parity construction, so both return 24 stored constraints. In multiple parameters, Putinar uses the singleton-generator box module, whereas Full Box uses all box-generator products. All four are finite sufficient certificates for the continuous inequality. Failure of a selected certificate to yield feasibility does not prove that the continuous inequality itself is infeasible.
+Direct tests coefficient signs. P\'olya elevates the residual before testing. For this one-parameter residual, the default Putinar selector delegates to the full-box parity construction, so both return 24 stored constraints. In multiple parameters, Putinar uses the singleton-generator box module, whereas Full Box uses all box-generator products. All four are finite sufficient certificates for the continuous inequality. Failure of a selected certificate to yield feasibility does not prove that the continuous inequality itself is infeasible. \Cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen,sec:certificate-full-box} give the corresponding mathematical constructions, while \cref{sec:certificate-boundary} states the implemented boundary.
 
 \subsection{Export to YALMIP and Recover the Solution}
+\index{strictness margin}\index{solver diagnostics}
 
 \code{toYalmip} returns exactly the stored finite constraints.  It does not select a solver, add an objective, or insert a strictness margin.
 
