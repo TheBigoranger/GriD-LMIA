@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "webpage/**"
+      - "webpage/dist/**"
       - ".github/workflows/deploy-pd-lmi-manual.yml"
   workflow_dispatch:
 
@@ -24,11 +24,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Install, build, and upload site
-        uses: withastro/action@v6
+      - name: Upload prebuilt static site
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: webpage
-          node-version: 24
+          path: webpage/dist
 
   deploy:
     needs: build
