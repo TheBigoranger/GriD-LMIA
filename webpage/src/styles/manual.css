@@ -676,9 +676,6 @@ mjx-container:not([display="true"]) {
 
 .certificate-tabs button strong { font-size: 0.9rem; }
 .certificate-tabs button code { overflow-wrap: anywhere; color: var(--sl-color-gray-2); font-size: 0.72rem; }
-/* The surrounding Starlight tab baseline lifts the first grid item. Keep all
-   four certificate choices on the same visual row, regardless of selection. */
-.certificate-tabs button:first-child { transform: translateY(1rem); }
 
 .certificate-origin {
   width: fit-content;
