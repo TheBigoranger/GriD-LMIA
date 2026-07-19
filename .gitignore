@@ -1,15 +1,6 @@
-.codex/
-/DLMI with Berstain Polynomial.pdf
-/For multivariate and an software idea.pdf
-webpage/node_modules/
-webpage/dist/
-webpage/.astro/
-webpage/.vite/
-webpage/.vscode/
-doc/*.aux
-doc/*.fdb_latexmk
-doc/*.fls
-doc/*.log
-doc/*.out
-doc/*.synctex.gz
-doc/*.toc
+# Publication branch: source lives in the local-full worktree.
+webpage/*
+!webpage/dist/
+!webpage/dist/**
+doc/*
+!doc/manual.pdf
