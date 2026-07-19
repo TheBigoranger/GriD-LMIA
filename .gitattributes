@@ -1,2 +1,0 @@
-# Generated static website artifacts may contain minifier-owned whitespace.
-webpage/dist/** -whitespace

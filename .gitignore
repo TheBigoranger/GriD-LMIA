@@ -1,6 +1,0 @@
-# Publication branch: source lives in the local-full worktree.
-webpage/*
-!webpage/dist/
-!webpage/dist/**
-doc/*
-!doc/manual.pdf
