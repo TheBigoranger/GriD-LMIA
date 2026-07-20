@@ -1,0 +1,779 @@
+---
+title: Reference Lookup
+description: Generated lookup for implemented PD-LMI reference pages and symbols.
+---
+
+This generated lookup groups every reference-page family by its package role. A one-symbol family links directly to that symbol; multi-symbol families keep their direct symbol and anchor links in one compact disclosure. The source data lives in `src/data/reference-index.js`; regenerate this page with `npm --prefix webpage run generate:index`.
+
+<div class="reference-index">
+<details class="reference-index__group" id="pdmat">
+<summary class="reference-index__group-summary">
+<span class="reference-index__group-copy"><strong>pdmat</strong><span>Function-backed known data and coefficient-backed Bernstein operations.</span></span>
+<span>44 indexed entries</span>
+</summary>
+<div class="reference-index__families">
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/"><code>pdmat</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>Known-data class</span>
+<p>Represent finite real matrix data on a parameter grid.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/constructor/"><code>pdmat constructor</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdmat function</span>
+<p>Create coefficient-backed or function-backed known-data matrices.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/bernsteintable/"><code>bernsteinTable</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdmat method</span>
+<p>Inspect coefficient rows and optional one-line expressions.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/evaluate/"><code>evaluate</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdmat method</span>
+<p>Evaluate known data at a parameter point.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/plot/"><code>plot</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdmat method</span>
+<p>Plot one- or two-parameter known data.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/algebra/">Algebra</a>
+<span>5 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/algebra/#pdmat-plus"><code>plus</code></a><span>pdmat method</span></div>
+<p>Add coefficient-backed data or a compatible numeric constant.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/algebra/#pdmat-minus"><code>minus</code></a><span>pdmat method</span></div>
+<p>Subtract coefficient-backed data or a compatible numeric constant.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/algebra/#pdmat-mtimes"><code>mtimes</code></a><span>pdmat method</span></div>
+<p>Multiply compatible matrix data and scalar constants.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/algebra/#pdmat-uplus"><code>uplus</code></a><span>pdmat method</span></div>
+<p>Return coefficient-backed data unchanged.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/algebra/#pdmat-uminus"><code>uminus</code></a><span>pdmat method</span></div>
+<p>Negate coefficient-backed data.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/structural-operations/">Structural Operations</a>
+<span>21 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-transpose"><code>transpose</code></a><span>pdmat method</span></div>
+<p>Transpose matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-ctranspose"><code>ctranspose</code></a><span>pdmat method</span></div>
+<p>Conjugate-transpose matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-reshape"><code>reshape</code></a><span>pdmat method</span></div>
+<p>Reshape matrix payloads with preserved coefficient storage.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-squeeze"><code>squeeze</code></a><span>pdmat method</span></div>
+<p>Remove singleton matrix dimensions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-vec"><code>vec</code></a><span>pdmat method</span></div>
+<p>Vectorize matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-diag"><code>diag</code></a><span>pdmat method</span></div>
+<p>Extract or build diagonal matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-trace"><code>trace</code></a><span>pdmat method</span></div>
+<p>Compute coefficient-wise matrix traces.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-sum"><code>sum</code></a><span>pdmat method</span></div>
+<p>Sum along a matrix dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-mean"><code>mean</code></a><span>pdmat method</span></div>
+<p>Average along a matrix dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-cumsum"><code>cumsum</code></a><span>pdmat method</span></div>
+<p>Cumulative sum along a matrix dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-tril"><code>tril</code></a><span>pdmat method</span></div>
+<p>Keep the lower triangular part.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-triu"><code>triu</code></a><span>pdmat method</span></div>
+<p>Keep the upper triangular part.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-horzcat"><code>horzcat</code></a><span>pdmat method</span></div>
+<p>Concatenate payloads horizontally.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-vertcat"><code>vertcat</code></a><span>pdmat method</span></div>
+<p>Concatenate payloads vertically.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-cat"><code>cat</code></a><span>pdmat method</span></div>
+<p>Concatenate payloads along a selected dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-blkdiag"><code>blkdiag</code></a><span>pdmat method</span></div>
+<p>Build block-diagonal payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-repmat"><code>repmat</code></a><span>pdmat method</span></div>
+<p>Repeat payloads by matrix dimensions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-flip"><code>flip</code></a><span>pdmat method</span></div>
+<p>Flip payloads along a dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-fliplr"><code>fliplr</code></a><span>pdmat method</span></div>
+<p>Flip payloads left to right.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-flipud"><code>flipud</code></a><span>pdmat method</span></div>
+<p>Flip payloads up to down.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-rot90"><code>rot90</code></a><span>pdmat method</span></div>
+<p>Rotate payloads by quarter turns.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/">Indexing And Inspection</a>
+<span>13 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-subsref"><code>subsref</code></a><span>pdmat method</span></div>
+<p>Index and inspect matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-subsasgn"><code>subsasgn</code></a><span>pdmat method</span></div>
+<p>Assign numeric or compatible pdmat blocks.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-disp"><code>disp</code></a><span>pdmat method</span></div>
+<p>Display a concise object summary.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-display"><code>display</code></a><span>pdmat method</span></div>
+<p>Display using MATLAB display dispatch.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-isequal"><code>isequal</code></a><span>pdmat method</span></div>
+<p>Compare normalized object metadata and evidence.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-end"><code>end</code></a><span>pdmat method</span></div>
+<p>Resolve end-index syntax.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-numArgumentsFromSubscript"><code>numArgumentsFromSubscript</code></a><span>pdmat method</span></div>
+<p>Preserve scalar MATLAB subscript results.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-numel"><code>numel</code></a><span>pdmat method</span></div>
+<p>Count payload elements.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-ndims"><code>ndims</code></a><span>pdmat method</span></div>
+<p>Report the matrix payload dimension count.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-length"><code>length</code></a><span>pdmat method</span></div>
+<p>Report the largest payload dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-height"><code>height</code></a><span>pdmat method</span></div>
+<p>Report the first payload dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-width"><code>width</code></a><span>pdmat method</span></div>
+<p>Report the second payload dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-size"><code>size</code></a><span>pdmat method</span></div>
+<p>Inspect matrix payload dimensions.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+</div>
+</details>
+<details class="reference-index__group" id="pdvar">
+<summary class="reference-index__group-summary">
+<span class="reference-index__group-copy"><strong>pdvar</strong><span>Continuous arbitrary-degree affine decisions and rate-vertex differentiation.</span></span>
+<span>45 indexed entries</span>
+</summary>
+<div class="reference-index__families">
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/"><code>pdvar</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>Decision class</span>
+<p>Create continuous YALMIP-backed Bernstein decision expressions.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/constructor/"><code>pdvar constructor</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdvar function</span>
+<p>Create symmetric or full continuous Bernstein decision variables.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/bernsteintable/"><code>bernsteinTable</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdvar method</span>
+<p>Inspect symbolic coefficient rows and rate vertices.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/rhodiff/"><code>rhodiff</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdvar method</span>
+<p>Build rate-vertex derivative expressions.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdvar/value/"><code>value</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdvar method</span>
+<p>Convert assigned symbolic coefficients to known pdmat data.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/algebra/">Algebra</a>
+<span>5 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/algebra/#pdvar-plus"><code>plus</code></a><span>pdvar method</span></div>
+<p>Add affine decision expressions and compatible constants.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/algebra/#pdvar-minus"><code>minus</code></a><span>pdvar method</span></div>
+<p>Subtract affine decision expressions and compatible constants.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/algebra/#pdvar-mtimes"><code>mtimes</code></a><span>pdvar method</span></div>
+<p>Multiply while keeping decision dependence on one side.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/algebra/#pdvar-uminus"><code>uminus</code></a><span>pdvar method</span></div>
+<p>Negate affine decision expressions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/algebra/#pdvar-uplus"><code>uplus</code></a><span>pdvar method</span></div>
+<p>Return an affine decision expression unchanged.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/structural-operations/">Structural Operations</a>
+<span>21 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-transpose"><code>transpose</code></a><span>pdvar method</span></div>
+<p>Transpose symbolic matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-ctranspose"><code>ctranspose</code></a><span>pdvar method</span></div>
+<p>Conjugate-transpose symbolic matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-reshape"><code>reshape</code></a><span>pdvar method</span></div>
+<p>Reshape symbolic matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-squeeze"><code>squeeze</code></a><span>pdvar method</span></div>
+<p>Remove singleton symbolic matrix dimensions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-vec"><code>vec</code></a><span>pdvar method</span></div>
+<p>Vectorize symbolic matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-diag"><code>diag</code></a><span>pdvar method</span></div>
+<p>Extract or build symbolic diagonal payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-trace"><code>trace</code></a><span>pdvar method</span></div>
+<p>Compute symbolic matrix traces.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-sum"><code>sum</code></a><span>pdvar method</span></div>
+<p>Sum symbolic payloads along a dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-mean"><code>mean</code></a><span>pdvar method</span></div>
+<p>Average symbolic payloads along a dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-cumsum"><code>cumsum</code></a><span>pdvar method</span></div>
+<p>Cumulative sum symbolic payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-tril"><code>tril</code></a><span>pdvar method</span></div>
+<p>Keep the lower triangular symbolic part.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-triu"><code>triu</code></a><span>pdvar method</span></div>
+<p>Keep the upper triangular symbolic part.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-horzcat"><code>horzcat</code></a><span>pdvar method</span></div>
+<p>Concatenate symbolic payloads horizontally.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-vertcat"><code>vertcat</code></a><span>pdvar method</span></div>
+<p>Concatenate symbolic payloads vertically.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-cat"><code>cat</code></a><span>pdvar method</span></div>
+<p>Concatenate symbolic payloads along a dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-blkdiag"><code>blkdiag</code></a><span>pdvar method</span></div>
+<p>Build symbolic block-diagonal payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-repmat"><code>repmat</code></a><span>pdvar method</span></div>
+<p>Repeat symbolic payloads by matrix dimensions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-flip"><code>flip</code></a><span>pdvar method</span></div>
+<p>Flip symbolic payloads along a dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-fliplr"><code>fliplr</code></a><span>pdvar method</span></div>
+<p>Flip symbolic payloads left to right.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-flipud"><code>flipud</code></a><span>pdvar method</span></div>
+<p>Flip symbolic payloads up to down.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-rot90"><code>rot90</code></a><span>pdvar method</span></div>
+<p>Rotate symbolic payloads by quarter turns.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/">Indexing And Inspection</a>
+<span>11 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-subsref"><code>subsref</code></a><span>pdvar method</span></div>
+<p>Index and inspect symbolic matrix payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-subsasgn"><code>subsasgn</code></a><span>pdvar method</span></div>
+<p>Assign numeric or compatible decision blocks.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-isequal"><code>isequal</code></a><span>pdvar method</span></div>
+<p>Compare normalized symbolic metadata and evidence.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-end"><code>end</code></a><span>pdvar method</span></div>
+<p>Resolve end-index syntax.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-numArgumentsFromSubscript"><code>numArgumentsFromSubscript</code></a><span>pdvar method</span></div>
+<p>Preserve scalar MATLAB subscript results.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-numel"><code>numel</code></a><span>pdvar method</span></div>
+<p>Count symbolic payload elements.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-ndims"><code>ndims</code></a><span>pdvar method</span></div>
+<p>Report the matrix payload dimension count.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-length"><code>length</code></a><span>pdvar method</span></div>
+<p>Report the largest payload dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-height"><code>height</code></a><span>pdvar method</span></div>
+<p>Report the first payload dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-width"><code>width</code></a><span>pdvar method</span></div>
+<p>Report the second payload dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-size"><code>size</code></a><span>pdvar method</span></div>
+<p>Inspect matrix payload dimensions.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/comparisons/">Comparisons</a>
+<span>3 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/comparisons/#pdvar-comparison-le"><code>le</code></a><span>pdvar comparison</span></div>
+<p>Create a nonpositive pdlmi residual.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/comparisons/#pdvar-comparison-ge"><code>ge</code></a><span>pdvar comparison</span></div>
+<p>Create a nonnegative pdlmi residual.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/comparisons/#pdvar-comparison-eq"><code>eq</code></a><span>pdvar comparison</span></div>
+<p>Create a direct coefficient-equality pdlmi residual.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+</div>
+</details>
+<details class="reference-index__group" id="pdlmi">
+<summary class="reference-index__group-summary">
+<span class="reference-index__group-copy"><strong>pdlmi</strong><span>Direct constraints and opt-in Pólya, Putinar, and full-box certificates.</span></span>
+<span>6 indexed entries</span>
+</summary>
+<div class="reference-index__families">
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/"><code>pdlmi</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>Constraint class</span>
+<p>Store direct equality or direct, Pólya-elevated, Putinar, or full-box inequality constraints.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/constructor/"><code>pdlmi constructor</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdlmi function</span>
+<p>Select direct, Pólya-elevated, fixed-order Putinar, or fixed-order full-box assembly.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/toyalmip/"><code>toYalmip</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdlmi method</span>
+<p>Concatenate stored constraints for YALMIP optimize calls.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/applypolya/"><code>applyPolya</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdlmi method</span>
+<p>Rebuild a residual with a selected Pólya degree increment.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/applyputinar/"><code>applyPutinar</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdlmi method</span>
+<p>Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/"><code>applyFullBoxPreorder</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdlmi method</span>
+<p>Rebuild a residual with a fixed-order full box Bernstein-Gram certificate.</p>
+</div>
+</div>
+</div>
+</div>
+</details>
+<details class="reference-index__group" id="pdbase-backend">
+<summary class="reference-index__group-summary">
+<span class="reference-index__group-copy"><strong>pdbase / backend</strong><span>Cell-local storage and Bernstein backend utilities.</span></span>
+<span>12 indexed entries</span>
+</summary>
+<div class="reference-index__families">
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdbase/"><code>pdbase</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>Backend class</span>
+<p>Inspect cell-local Bernstein storage shared by pdmat and pdvar.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/">Storage Inspection</a>
+<span>8 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-cells"><code>cells</code></a><span>pdbase method</span></div>
+<p>Enumerate physical tensor-grid cells.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-coeffs"><code>coeffs</code></a><span>pdbase method</span></div>
+<p>Read local Bernstein coefficient families.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-lbls"><code>lbls</code></a><span>pdbase method</span></div>
+<p>Inspect flat local Bernstein labels.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-elevVals"><code>elevVals</code></a><span>pdbase method</span></div>
+<p>Degree-elevate every cell-local coefficient family.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncell"><code>ncell</code></a><span>pdbase method</span></div>
+<p>Count physical cells.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncoeff"><code>ncoeff</code></a><span>pdbase method</span></div>
+<p>Count coefficients in one local cell.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-npar"><code>npar</code></a><span>pdbase method</span></div>
+<p>Count parameter dimensions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-size"><code>size</code></a><span>pdbase method</span></div>
+<p>Inspect matrix payload dimensions.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/bernstein-utilities/">Bernstein Utilities</a>
+<span>3 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#bernElev"><code>bernElev</code></a><span>pdbase backend method</span></div>
+<p>Elevate Bernstein degree for compatible coefficient payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#bernProd"><code>bernProd</code></a><span>pdbase backend method</span></div>
+<p>Multiply local Bernstein coefficient families by label convolution.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#mergeGrid"><code>mergeGrid</code></a><span>pdbase backend method</span></div>
+<p>Refine compatible physical grids before coefficient algebra.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+</div>
+</details>
+<details class="reference-index__group" id="shared-helpers">
+<summary class="reference-index__group-summary">
+<span class="reference-index__group-copy"><strong>Shared helpers</strong><span>Implementation helpers shared across the package.</span></span>
+<span>9 indexed entries</span>
+</summary>
+<div class="reference-index__families">
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/shared-helpers/">Shared Helpers</a>
+<span>9 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-berntbl"><code>helper.bernTbl</code></a><span>shared backend helper</span></div>
+<p>Build detailed or one-line Bernstein coefficient tables.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-cellget"><code>helper.cellGet</code></a><span>shared backend helper</span></div>
+<p>Read one nested LocalValues leaf by physical-cell subscripts.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-chk"><code>helper.chk</code></a><span>shared backend helper</span></div>
+<p>Apply common validation predicates with caller-owned errors.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-combrows"><code>helper.combRows</code></a><span>shared backend helper</span></div>
+<p>Build Cartesian rows in the package tensor order.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-iszero"><code>helper.isZero</code></a><span>shared backend helper</span></div>
+<p>Classify numeric, additive, coefficient-tree, or object zero evidence.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-mapvals"><code>helper.mapVals</code></a><span>shared backend helper</span></div>
+<p>Map a function over a nested LocalValues tree.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-matsubs"><code>helper.matSubs</code></a><span>shared backend helper</span></div>
+<p>Normalize two-dimensional matrix subscripts.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-mkgrid"><code>helper.mkGrid</code></a><span>shared backend helper</span></div>
+<p>Validate grid vectors and construct GridInfo.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-mknest"><code>helper.mkNest</code></a><span>shared backend helper</span></div>
+<p>Construct nested physical-cell storage.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+</div>
+</details>
+</div>

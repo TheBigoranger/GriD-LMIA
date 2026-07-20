@@ -1,0 +1,430 @@
+---
+title: SOS Certificates On A Hypercube
+description: Mathematical map from global SOS and Bernstein tests to Pólya, Putinar, Schmüdgen, and Markov–Lukács certificates.
+---
+
+import CertificateSpectrum from "../../../../components/CertificateSpectrum.astro";
+import CertificateChooser from "../../../../components/CertificateChooser.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/math/bernstein-polynomial/">Bernstein Mathematics</a>
+  <span>/</span>
+  <span>SOS Certificates</span>
+</nav>
+
+This page separates the polynomial representation from the certificate used
+to prove a matrix sign. For a residual $F\preceq0$, set $S=-F$; for
+$F\succeq0$, set $S=F$. The mathematical question is then
+
+$$
+S(\boldsymbol\alpha)\succeq0,
+\qquad \boldsymbol\alpha\in[0,1]^\ell.
+$$
+
+Scalar formulas extend to polynomial matrices through matrix-SOS Gram
+representations, or by applying the structured certificate to
+$y^{\mathsf T}S(\boldsymbol\alpha)y$. Positive-semidefinite Gram matrices
+certify non-strict inequalities. A strict margin must already be present in
+the residual; the package does not insert one.
+
+## Certificate Map
+
+<table class="mobile-stack-table">
+  <caption>Certificate domains, hypotheses, and implementation status</caption>
+  <thead>
+    <tr>
+      <th scope="col">Certificate</th>
+      <th scope="col">Domain used by the proof</th>
+      <th scope="col">Central hypothesis</th>
+      <th scope="col">Package status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" data-label="Certificate">Full-space SOS</th>
+      <td data-label="Proof domain">All of ℝ<sup>ℓ</sup></td>
+      <td data-label="Central hypothesis">A positive-semidefinite Gram representation exists</td>
+      <td data-label="Package status">Mathematical background</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Direct Bernstein coefficients</th>
+      <td data-label="Proof domain">One local hypercube</td>
+      <td data-label="Central hypothesis">Every Bernstein coefficient matrix has the required sign</td>
+      <td data-label="Package status">Implemented default</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Pólya-type coefficient test</th>
+      <td data-label="Proof domain">Simplex pairs (1 − α<sub>s</sub>, α<sub>s</sub>)</td>
+      <td data-label="Central hypothesis">Classical convergence uses strict positivity</td>
+      <td data-label="Package status">Implemented as fixed elevation plus the direct test</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Putinar quadratic module</th>
+      <td data-label="Proof domain">Basic closed semialgebraic set; implemented path is one local hypercube</td>
+      <td data-label="Central hypothesis">Strict positivity and an Archimedean quadratic module in the general theorem</td>
+      <td data-label="Package status">Fixed-order box module implemented</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Schmüdgen preordering</th>
+      <td data-label="Proof domain">Compact basic closed semialgebraic set</td>
+      <td data-label="Central hypothesis">Strict positivity and compactness</td>
+      <td data-label="Package status">Box-specific full preordering implemented</td>
+    </tr>
+    <tr>
+      <th scope="row" data-label="Certificate">Markov–Lukács</th>
+      <td data-label="Proof domain">One closed interval</td>
+      <td data-label="Central hypothesis">Degree-parity Gram form</td>
+      <td data-label="Package status">Implemented by both one-parameter Putinar and full-box selectors</td>
+    </tr>
+  </tbody>
+</table>
+
+The [Bernstein page](/PD-LMI-package/documents/math/bernstein-polynomial/)
+defines the forward coordinate and exact coefficient algebra. The
+[`pdlmi` overview](/PD-LMI-package/documents/reference/pdlmi/) documents which
+rows of this table are callable.
+
+<CertificateSpectrum selected="direct" />
+
+## Explore The Stored Constraint Shape
+
+Choose a selector and a source-valid residual shape below. Ordinary residuals
+have one active coefficient row per cell; `rhodiff` residuals have exactly
+$2^\ell$ rate-vertex rows. Semidefinite mode creates one matrix certificate
+per cell and active row. Entrywise mode creates an independent scalar Gram
+certificate for every entry of the displayed square residual.
+
+<CertificateChooser />
+
+## A Tiny Example: Positive Polynomial, Failed Direct Test
+
+Consider
+
+$$
+p(\alpha)=(\alpha-\tfrac12)^2+0.1
+=\alpha^2-\alpha+0.35.
+$$
+
+It is strictly positive on `[0,1]`, with minimum `0.1`. Its degree-two
+Bernstein representation is
+
+$$
+p(\alpha)=0.35B_0^2(\alpha)-0.15B_1^2(\alpha)+0.35B_2^2(\alpha).
+$$
+
+The negative middle coefficient means the direct Bernstein test cannot prove
+positivity. It does **not** mean the polynomial is negative. A stronger box
+certificate can use the identity
+
+$$
+p(\alpha)=(\alpha-\tfrac12)^2+0.1
+$$
+
+as a sum of squares with a positive constant. This one example explains why
+the package separates the stored polynomial from the certificate selected for
+it.
+
+## Full-Space SOS
+
+The simplest Gram certificate ignores the box and proves global
+nonnegativity:
+
+$$
+p(z)=v_d(z)^{\mathsf T}Qv_d(z),
+\qquad Q\succeq0,
+$$
+
+where $v_d$ contains monomials through a selected degree. Coefficient
+matching is linear in $Q$. This is an SOS certificate on all of
+$\mathbb R^\ell$, so it may be much stronger than positivity only on a box.
+It is sufficient, but a multivariate nonnegative polynomial need not be SOS.
+The package has no full-space SOS constructor.
+
+## Direct Bernstein Coefficient Certificate
+
+On a local box, write
+
+$$
+S^{(\mathbf c)}(\boldsymbol\alpha)=
+\sum_{\boldsymbol i}
+B_{\boldsymbol i}^{m}(\boldsymbol\alpha)C^{(\mathbf c)}[\boldsymbol i].
+$$
+
+Because the tensor Bernstein basis is nonnegative and sums to one,
+
+$$
+C^{(\mathbf c)}[\boldsymbol i]\succeq0\quad\text{for every }\boldsymbol i
+\quad\Longrightarrow\quad
+S^{(\mathbf c)}(\boldsymbol\alpha)\succeq0
+\quad\text{on the box}.
+$$
+
+This is the default [`pdlmi` constructor](/PD-LMI-package/documents/reference/pdlmi/constructor/)
+certificate after residual and rate-vertex assembly. It introduces no Gram
+matrices. The converse is false: an indefinite coefficient defeats this
+certificate, not the continuous inequality.
+
+<CertificateSpectrum selected="direct" />
+
+## <span id="polya-type-coefficient-relaxation"></span>Pólya-Type Coefficient Relaxation
+
+Pólya's theorem concerns a homogeneous polynomial strictly positive on a
+simplex. After multiplication by a sufficiently high power of the sum of the
+simplex coordinates, all coefficients become positive. For each box axis,
+$(1-\alpha_s,\alpha_s)$ is a point on a one-simplex and its entries sum to
+one. Therefore
+
+$$
+\prod_{s=1}^{\ell}
+\bigl((1-\alpha_s)+\alpha_s\bigr)^r=1
+$$
+
+changes only the tensor Bernstein degree, not the residual. A higher degree
+can expose coefficient positivity that was not visible at the original
+degree.
+
+[`applyPolya(r)`](/PD-LMI-package/documents/reference/pdlmi/applypolya/)
+implements one selected elevation increment followed by the same direct
+coefficient test. It does not search for an exponent, add a margin, or create
+SOS multipliers. Failure at one increment is inconclusive. Quantitative Pólya
+bounds also retain strict-positivity assumptions; see
+[Powers and Reznick (2001)](https://doi.org/10.1016/S0022-4049(00)00155-9).
+
+<CertificateSpectrum selected="polya" />
+
+## Putinar Quadratic Modules
+
+For
+
+$$
+K=\{z:g_j(z)\ge0,\ j=1,\ldots,q\},
+$$
+
+the quadratic module generated by the constraints contains polynomials
+
+$$
+\sigma_0(z)+\sum_{j=1}^{q}\sigma_j(z)g_j(z),
+\qquad \sigma_j\ \text{SOS}.
+$$
+
+Putinar's Positivstellensatz states that every polynomial strictly positive on
+$K$ has such a representation when the quadratic module is Archimedean.
+Compactness alone is not Putinar's hypothesis. Truncating multiplier degrees
+produces finite SDP relaxations, but failure at one order is not a
+nonnegativity counterexample. See
+[Putinar (1993)](https://www.jstor.org/stable/24897130).
+
+### Implemented Putinar selector
+
+In one parameter, the package dispatches `applyPutinar` to the exact
+parity-specific Markov–Lukács form described below. Its minimum and default
+order are $\lfloor m/2\rfloor$, the same as `applyFullBoxPreorder`.
+
+For two or more parameters, the package uses one fixed-order specialization on
+every local hypercube. With the axis generators
+$h_s=\alpha_s(1-\alpha_s)$, the sign-normalized target is represented as
+
+$$
+S(\boldsymbol\alpha)=S_0(\boldsymbol\alpha)
++\sum_{s=1}^{\ell}
+\alpha_s(1-\alpha_s)S_s(\boldsymbol\alpha).
+$$
+
+For a target of stored degree $m$ in two or more parameters, the absolute
+order satisfies
+
+$$
+r\ge\left\lceil\frac m2\right\rceil.
+$$
+
+The no-argument method uses equality in either dimension case. For two or more
+parameters at order $r$, the unweighted Gram term
+uses tensor Bernstein basis degree $r\mathbf1$. The $s$th multiplier uses
+$r\mathbf1-\mathbf e_s$; blocks with a negative degree component are omitted.
+After multiplication by $h_s$, every term has tensor degree $2r\mathbf1$.
+The stored target is elevated to that degree and matched exactly, coefficient
+by coefficient.
+
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/)
+creates independent dense PSD Gram blocks and equalities for every physical
+cell and active rate row. It adds no strictness margin and does not call a
+solver. This callable path is not a general-domain or general-generator
+Putinar interface.
+
+<CertificateSpectrum selected="putinar" />
+
+## Schmüdgen And Full Preorderings
+
+The preordering generated by $g_1,\ldots,g_q$ also includes every
+square-free product:
+
+$$
+p(z)=
+\sum_{\nu\in\{0,1\}^{q}}
+\sigma_\nu(z)
+\prod_{j=1}^{q}g_j(z)^{\nu_j},
+\qquad \sigma_\nu\ \text{SOS}.
+$$
+
+Schmüdgen's Positivstellensatz gives such a representation for polynomials
+strictly positive on a compact basic closed semialgebraic set. Compared with a
+quadratic module, the full preordering can require many more multiplier
+blocks. See [Schmüdgen (1991)](https://doi.org/10.1007/BF01446568).
+
+For the hypercube, the package uses the $\ell$ generators
+$h_s=\alpha_s(1-\alpha_s)$. Their nonnegative set is exactly
+$[0,1]^\ell$, and the $2^\ell$ subset products form the implemented
+box-specific full preordering. At a selected absolute order,
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
+creates independent Gram blocks for every physical cell and active rate row,
+then matches the resulting Bernstein coefficients exactly. This is not a
+general-domain Schmüdgen interface.
+
+<CertificateSpectrum selected="fullbox" />
+
+### Worked full-box example: two parameters, degree three
+
+This example shows the finite SDP that the package assembles, rather than an
+inequality that remains quantified over the box. Fix one physical cell and
+one active rate row. Write its sign-normalized residual in local coordinates
+$(a,b)\in[0,1]^2$ as
+
+$$
+F(a,b)=\sum_{i=0}^{3}\sum_{k=0}^{3}
+B_i^3(a)B_k^3(b)F_{i,k}.
+$$
+
+Here $m=3$ and $\ell=2$, so the default full-box order is
+$r=\lceil m/2\rceil=2$. The implementation first elevates $F$ exactly to
+tensor degree $(4,4)$:
+
+$$
+F(a,b)=\sum_{p=0}^{4}\sum_{q=0}^{4}
+B_p^4(a)B_q^4(b)\widetilde F_{p,q}.
+$$
+
+For example,
+$\widetilde F_{0,0}=F_{0,0}$ and
+$\widetilde F_{1,0}=\tfrac14F_{0,0}+\tfrac34F_{1,0}$. It then introduces
+four independent positive-semidefinite Gram matrices and imposes the
+identity
+
+$$
+\begin{aligned}
+F(a,b)={}&Z_{2,2}^{\mathsf T}Q_{\varnothing}Z_{2,2}
+ +a(1-a)Z_{1,2}^{\mathsf T}Q_{\{1\}}Z_{1,2}\\
+&+b(1-b)Z_{2,1}^{\mathsf T}Q_{\{2\}}Z_{2,1}\\
+&+a(1-a)b(1-b)
+ Z_{1,1}^{\mathsf T}Q_{\{1,2\}}Z_{1,1}.
+\end{aligned}
+$$
+
+$Z_{u,v}$ is the tensor Bernstein basis of degree $(u,v)$, with each scalar
+basis function tensored with the identity of the residual-matrix size $n$.
+Consequently, the four Gram matrices have dimensions
+
+$$
+9n\mathbin{\times}9n,\quad 6n\mathbin{\times}6n,\quad
+6n\mathbin{\times}6n,\quad 4n\mathbin{\times}4n,
+$$
+
+respectively, and the finite LMI part is
+
+$$
+Q_{\varnothing}\succeq0,\qquad Q_{\{1\}}\succeq0,\qquad
+Q_{\{2\}}\succeq0,\qquad Q_{\{1,2\}}\succeq0.
+$$
+
+The polynomial identity above is implemented as 25 exact matrix equalities,
+one for each $(p,q)\in\{0,\ldots,4\}^2$. If $[Q]_{u,v}$ denotes the
+$n\mathbin{\times}n$ block indexed by two tensor-basis labels, the first two
+equalities make the mechanism concrete:
+
+$$
+F_{0,0}=[Q_{\varnothing}]_{(0,0),(0,0)},
+$$
+
+$$
+\tfrac14F_{0,0}+\tfrac34F_{1,0}
+=\tfrac12[Q_{\varnothing}]_{(0,0),(1,0)}
++\tfrac12[Q_{\varnothing}]_{(1,0),(0,0)}
++\tfrac14[Q_{\{1\}}]_{(0,0),(0,0)}.
+$$
+
+The $b(1-b)$-weighted blocks cannot contribute to the coefficient labelled
+$(1,0)$, which is why they do not appear in the second equality. Thus this
+one cell/rate-row certificate is **four PSD-LMI constraints plus 25 affine
+matrix equalities**. It is an SDP formulation, not 25 further LMIs. Other
+cells and active rate rows receive independent copies of exactly this system.
+For a `<=` residual, the same construction matches the coefficients of
+$-F$ instead.
+
+## One-Dimensional Markov–Lukács Forms
+
+On $[0,1]$, interval nonnegativity has exact parity-specific forms. For
+degree at most $2d$,
+
+$$
+p(\alpha)=
+v_d(\alpha)^{\mathsf T}Q_0v_d(\alpha)
++\alpha(1-\alpha)
+v_{d-1}(\alpha)^{\mathsf T}Q_1v_{d-1}(\alpha),
+\qquad Q_0,Q_1\succeq0.
+$$
+
+For degree at most $2d+1$,
+
+$$
+p(\alpha)=
+(1-\alpha)v_d(\alpha)^{\mathsf T}Q_0v_d(\alpha)
++\alpha v_d(\alpha)^{\mathsf T}Q_1v_d(\alpha),
+\qquad Q_0,Q_1\succeq0.
+$$
+
+These forms characterize interval nonnegativity at the stated parity rather
+than supplying only one hierarchy level. The one-parameter full-box path uses
+their Bernstein-basis matrix-Gram counterpart.
+
+## Four Operations That Are Not Interchangeable
+
+1. **Higher decision degree** enlarges the decision-function search space.
+2. **Degree elevation** re-expresses one fixed residual exactly.
+3. **Physical subdivision** re-expresses the residual on smaller cells.
+4. **Higher Gram order** enlarges a positivity certificate.
+
+Only the second operation is performed by `applyPolya`; the fourth is selected
+at one explicit or default order by `applyPutinar` or
+`applyFullBoxPreorder`. Their method pages place unsupported adaptive and
+general-purpose boundaries beside the callable syntax.
+
+## Exact Software Boundary
+
+The callable package boundary is limited to:
+
+- direct coefficient assembly;
+- fixed-increment Pólya elevation followed by direct assembly;
+- fixed-order Putinar assembly, using the parity-specific one-dimensional
+  Markov–Lukács form or the separate box generators
+  $\alpha_s(1-\alpha_s)$ in two or more parameters; and
+- fixed-order full box preordering, sharing that one-dimensional form and
+  using every generator-subset product in multiple parameters.
+
+Full-space SOS, general-domain or general-generator Putinar modules,
+general-domain preorderings, adaptive order search or automatic escalation,
+adaptive subdivision, automatic strictness margins, and post-solve residual
+certificates are mathematical background, not public package APIs. Both
+no-argument Gram selectors use $\lfloor m/2\rfloor$ in one parameter and
+$\lceil m/2\rceil$ in two or more parameters. Their one-dimensional
+Markov–Lukács assembly is the same; their multiple-parameter generator sets
+differ as described above.
+
+## See Also
+
+[`Bernstein Polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
+[`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) ·
+[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
+[`Solver Examples`](/PD-LMI-package/examples/solver-smoke/)

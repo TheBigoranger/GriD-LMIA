@@ -1,0 +1,139 @@
+---
+title: pdvar bernsteinTable
+description: Inspect symbolic Bernstein coefficients and rate-vertex rows.
+---
+
+import DiagramFrame from "../../../../../components/DiagramFrame.astro";
+import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a>
+  <span>/</span>
+  <span>bernsteinTable</span>
+</nav>
+
+<DiagramFrame caption="bernsteinTable keeps each physical cell, local tensor label, and symbolic coefficient value in one inspectable row." label="Local Bernstein labels mapped to symbolic table rows">
+  <div class="coefficient-row-map" role="img" aria-label="Local labels zero zero, zero one, and one zero map to symbolic coefficient rows">
+    <code>[0,0]</code><span>→</span><strong>row: X₀₀</strong>
+    <code>[0,1]</code><span>→</span><strong>row: X₀₁</strong>
+    <code>[1,0]</code><span>→</span><strong>row: X₁₀</strong>
+  </div>
+</DiagramFrame>
+
+<RhodiffDiagram compact />
+
+## Purpose
+
+Inspect a `pdvar` object's local Bernstein coefficient rows. This is a diagnostic
+view for checking tensor labels, symbolic payloads, and the rate rows produced
+by [`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/). It does not
+change the decision expression or send anything to YALMIP's optimizer.
+
+## Syntax
+
+```matlab
+T = bernsteinTable(P)
+T = bernsteinTable(P, "oneLine")
+T = bernsteinTable(P, cellSubscript)
+T = bernsteinTable(P, cellSubscript, "oneLine")
+T = P.bernsteinTable(...)
+```
+
+## Description
+
+The ordinary form returns a MATLAB table with one row for each local
+coefficient. Its metadata includes the physical cell, local label, Bernstein
+basis, and a symbolic or numeric value representation. The optional
+`"oneLine"` mode returns a compact table of coefficient expressions, useful
+when a full symbolic table would be too wide. Supplying a cell subscript limits
+the inspection to one physical cell.
+
+For a rate-dependent object, each rate vertex is represented as a separate row
+family. Use this page together with `rhodiff` when checking how a rate-bound
+box becomes finite vertex rows.
+
+## Arguments And Options
+
+| Input | Meaning |
+| :--- | :--- |
+| `P` | A `pdvar` object. |
+| `cellSubscript` | Optional tensor-cell subscript accepted by `P.coeffs(...)`. Omit it to inspect all cells. |
+| `"oneLine"` | Optional display mode that prints one compact expression per local row. The default is the expanded table. |
+
+Unsupported names, malformed cell subscripts, and unsupported display modes are
+rejected by the current validation path.
+
+## Returned Table
+
+`T` is a MATLAB `table`. Use `disp(T)` for a stable command-window view, or
+select the metadata columns when comparing adjacent cells. The table is a
+snapshot of the object state; editing it does not edit `P`.
+
+## Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, "symmetric");
+T = bernsteinTable(P, "oneLine");
+disp(T)
+```
+
+```text
+    CellSubscript       Expression
+    _____________    ________________
+
+        {[1]}        "(1-alpha)*internal(1) + alpha*internal(2)"
+```
+
+The exact symbolic labels depend on the current YALMIP variable allocation;
+the stable contract is the row structure and the association with local
+Bernstein labels, not a particular internal `sdpvar` name. The diagnostic uses
+the public forward coordinate directly, so local label `0` multiplies
+`(1-alpha)` and local label `1` multiplies `alpha`.
+
+### Rate-vertex metadata without unstable symbolic names
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, RateBounds=[-1 2]);
+D = rhodiff(P);
+T = bernsteinTable(D);
+T(:, ["RateVertexIndex", "RateVertex", "LocalIndex"])
+```
+
+```text
+ans =
+  2x3 table
+
+    RateVertexIndex    RateVertex    LocalIndex
+    _______________    __________    __________
+
+           1             {[-1]}         {[0]}
+           2             {[ 2]}         {[0]}
+```
+
+The derivative has degree zero, so each rate vertex contributes one local
+label. Selecting metadata columns makes the ordering reproducible without
+promising the workspace-dependent YALMIP text in `Value`.
+
+## Validation And Errors
+
+- The object must be a `pdvar` instance.
+- A requested cell must exist in the tensor grid.
+- Rate-row inspection requires the derivative object's rate metadata to be
+  present and internally consistent.
+- The table helper is diagnostic; it does not enable unsupported products or
+  relaxation modes.
+
+`pdvar` accepts any nonnegative constructor degree, and products may elevate
+coefficient degree further. `bernsteinTable` reports the resulting stored rows;
+it is an inspection aid, not a serialization format for the internal
+coefficient tree.
+
+## See Also
+
+[`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/) ·
+[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
+[`pdmat bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/)

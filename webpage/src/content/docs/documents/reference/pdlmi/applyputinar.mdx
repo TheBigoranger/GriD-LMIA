@@ -1,0 +1,156 @@
+---
+title: pdlmi applyPutinar
+description: Rebuild a PD-LMI residual with a fixed-order Putinar box Bernstein-Gram certificate.
+---
+
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/reference/pdlmi/">pdlmi</a>
+  <span>/</span>
+  <span>applyPutinar</span>
+</nav>
+
+<CertificateNavigation selected="putinar" showSections={false} />
+
+## Purpose
+
+Create a new `pdlmi` that represents the stored residual with the implemented
+cell-local Putinar box Bernstein-Gram certificate.
+
+## Syntax
+
+```matlab
+Cputinar = C.applyPutinar()
+Cputinar = C.applyPutinar(order)
+```
+
+## Description
+
+The no-argument form selects the smallest admissible absolute order
+
+$$
+r=\begin{cases}
+\left\lfloor m/2\right\rfloor,&\ell=1,\\
+\left\lceil m/2\right\rceil,&\ell\ge2,
+\end{cases}
+$$
+
+where $m$ is `C.Residual.Degree` and $\ell$ is the parameter count. The
+explicit form selects `order`; it does
+not add `order` to the residual degree. Both forms rebuild from `C.Residual`
+and `C.Relation`, return a new value object, and leave `C` unchanged. Applying
+Putinar after Pólya, full box, or an earlier Putinar order therefore replaces
+that selection rather than compounding it.
+
+For each physical cell and active rate row, `pdlmi` first sign-normalizes the
+target: a `>=` residual is used directly and a `<=` residual is negated. In
+one parameter, the method dispatches to the same parity-specific
+Markov–Lukács form as `applyFullBoxPreorder`. For two or more parameters, it
+represents the target as
+
+$$
+S_0(\boldsymbol\alpha)
++\sum_{s=1}^{\ell}
+\alpha_s(1-\alpha_s)S_s(\boldsymbol\alpha).
+$$
+
+At order $r$, $S_0$ uses a tensor Bernstein Gram basis of degree
+$r\mathbf 1$. The multiplier $S_s$ uses degree
+$r\mathbf 1-\mathbf e_s$; a block is omitted if that vector has a negative
+component. Every present Gram matrix is constrained positive semidefinite.
+The target is exactly elevated and matched coefficient by coefficient at
+tensor degree $2r\mathbf 1$.
+
+For an entry-wise inequality, each MATLAB column-major scalar entry receives
+an independent scalar certificate. Each cell and rate row receives independent dense Gram blocks and independent
+coefficient equalities. The method does not share Gram variables across cells,
+insert a positivity margin, call `optimize`, or choose a solver.
+
+## Arguments
+
+| Input | Description |
+| :--- | :--- |
+| `C` | Any `pdlmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
+| `order` | Optional finite nonnegative integer scalar. It is an absolute Gram order and must satisfy $r\ge\lfloor m/2\rfloor$ in one parameter or $r\ge\lceil m/2\rceil$ in two or more parameters. |
+
+## Returned Object
+
+`Cputinar` is a new `pdlmi` with `UsePolya=false`,
+`UseFullBoxPreorder=false`, `UsePutinar=true`, and `PutinarOrder` equal to the
+selected order. Within each cell and rate row, `Constraints` stores the PSD
+Gram-block conditions before the exact coefficient identities.
+`toYalmip(Cputinar)` concatenates those stored entries without changing them.
+
+## Deterministic Transcript Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, Degree=2);
+direct = P >= 0;
+putinarDefault = direct.applyPutinar();
+putinarHigher = putinarDefault.applyPutinar(2);
+polya = direct.applyPolya(1);
+putinarFromPolya = polya.applyPutinar();
+Fputinar = toYalmip(putinarDefault);
+
+fprintf("direct: putinar=%d, order=%d, constraints=%d\n", ...
+    direct.UsePutinar, direct.PutinarOrder, ...
+    numel(direct.Constraints));
+fprintf("default: putinar=%d, order=%d, constraints=%d\n", ...
+    putinarDefault.UsePutinar, putinarDefault.PutinarOrder, ...
+    numel(putinarDefault.Constraints));
+fprintf("higher: order=%d, constraints=%d\n", ...
+    putinarHigher.PutinarOrder, numel(putinarHigher.Constraints));
+fprintf("replacement: polya=%d, putinar=%d, order=%d\n", ...
+    putinarFromPolya.UsePolya, putinarFromPolya.UsePutinar, ...
+    putinarFromPolya.PutinarOrder);
+fprintf("exported constraints=%d\n", length(Fputinar));
+```
+
+```text
+direct: putinar=0, order=0, constraints=3
+default: putinar=1, order=1, constraints=5
+higher: order=2, constraints=7
+replacement: polya=0, putinar=1, order=1
+exported constraints=5
+```
+
+For the degree-two scalar residual, order one stores two PSD blocks followed
+by three exact coefficient identities. Order two stores two PSD blocks
+followed by five identities. Selecting Putinar from `polya` returns to the
+stored degree-two residual; it does not use the already elevated constraints.
+
+## Validation And Errors
+
+- A malformed `order` raises `pdlmi:InvalidPutinarOrder`.
+- A valid integer below $\lfloor m/2\rfloor$ in one parameter or $\lceil m/2\rceil$ in two or more parameters raises `pdlmi:PutinarOrderTooLow`.
+- Semidefinite and entry-wise inequalities retain their original global mode.
+- Equality is direct-only; this method raises `pdlmi:UnsupportedEqualityCertificate` before validating `order`.
+- Constructor selection errors are documented on the
+  [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/)
+  page, including `pdlmi:InvalidUsePutinar`,
+  `pdlmi:ConflictingPutinarOptions`, and `pdlmi:ConflictingRelaxations`.
+
+In one parameter, this selector uses the parity-specific Markov–Lukács
+interval certificate. In two or more parameters it implements only the
+local-hypercube module generated by the separate factors
+$\alpha_s(1-\alpha_s)$. It is not a general-domain or general-generator
+Putinar interface, a full-space SOS representation, an automatic order search,
+or a solver call. Failure at one order does not prove that the target is
+negative somewhere.
+
+For two or more parameters, the distinct
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
+method includes every subset product of the same generators. The two selectors
+share the one-parameter parity rule and default order.
+
+## See Also
+
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
+[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
+[`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) ·
+[`SOS Certificates`](/PD-LMI-package/documents/math/sos-certificates/)

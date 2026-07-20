@@ -1,0 +1,147 @@
+---
+title: pdmat plot
+description: Plot pdmat matrix entries over one or two grid dimensions.
+---
+
+import ParameterCurveDiagram from "../../../../../components/ParameterCurveDiagram.astro";
+
+export const plotSeries = [
+  { label: "A₁₁(ρ)", path: "M58 180 C180 208 286 66 420 120 S568 184 680 58", tone: "first" },
+  { label: "A₁₂(ρ)", path: "M58 74 C190 170 288 194 408 138 S565 65 680 142", tone: "second" },
+];
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <span>/</span>
+  <span>plot</span>
+</nav>
+
+<ParameterCurveDiagram series={plotSeries} label="Linear and quadratic pdmat entries plotted across rho" caption="plot samples represented matrix entries over the physical parameter interval; each visible curve remains tied to its matrix index." />
+
+## Purpose
+
+Sample a `pdmat` object through `evaluate` and plot each matrix entry over one or two selected parameter dimensions.
+
+## Syntax
+
+```matlab
+h = plot(A)
+h = plot(A, dims, Name, Value)
+h = plot(A, SamplesPerCell=n)
+```
+
+## Arguments And Options
+
+| Input | Description |
+| :--- | :--- |
+| `A` | A `pdmat` object. |
+| `dims` | One or two positive parameter indices. Defaults to `1` for scalar objects and `[1 2]` for multi-parameter objects. |
+| `SamplesPerCell` | Positive integer scalar. Default is `15`. |
+| `Name, Value` | Additional plotting arguments passed to MATLAB `plot` or `surf`. |
+
+## Output
+
+`h` is a graphics object array, one entry per matrix payload element.
+
+## Examples
+
+### One-dimensional matrix entries
+
+```matlab
+A = pdmat({[-1 1]}, @(rho) [rho, rho.^2]);
+h = plot(A, SamplesPerCell=80, LineWidth=2);
+handleCount = numel(h)
+sampleCount = numel(h(1).XData)
+```
+
+```text
+handleCount =
+     2
+
+sampleCount =
+    81
+```
+
+![One-dimensional pdmat plot showing rho and rho squared entries](/PD-LMI-package/plots/pdmat-plot-1d.png)
+
+The linear and quadratic entries show that one graphics handle is returned for
+each matrix payload entry.
+
+### Two-dimensional surface
+
+```matlab
+A = pdmat({[-1 1], [0 2]}, ...
+    @(rho1, rho2) 1 + rho1.^2 + 0.5*rho2 + rho1.*rho2);
+h = plot(A, [1 2], SamplesPerCell=45, ...
+    EdgeColor="none", FaceAlpha=0.78);
+surfaceSize = size(h(1).XData)
+faceAlpha = h(1).FaceAlpha
+```
+
+```text
+surfaceSize =
+    46    46
+
+faceAlpha =
+    0.7800
+```
+
+![Two-dimensional scalar pdmat surface over rho one and rho two](/PD-LMI-package/plots/pdmat-plot-2d.png)
+
+The scalar surface includes both a quadratic term and a mixed term. `plot`
+uses the selected grid axes as the two displayed dimensions.
+
+### Two-dimensional matrix-valued surface
+
+```matlab
+A = pdmat({[-1 1], [0 2]}, @(rho1, rho2) [ ...
+    1 + 0.8*rho1 + 0.25*rho2; ...
+    1 - 0.8*rho1 + 0.25*rho2]);
+h = plot(A, [1 2], SamplesPerCell=45, ...
+    EdgeColor="none", FaceAlpha=0.62);
+set(h(1), "FaceColor", [35 86 125]/255)
+set(h(2), "FaceColor", [0.55 0.55 0.55])
+legend(h, ["A(1,1)", "A(2,1)"], ...
+    "Location", "eastoutside")
+crossValue = A.evaluate([0 1]);
+leftValue = A.evaluate([-1 1]);
+rightValue = A.evaluate([1 1]);
+crossingError = abs(crossValue(1) - crossValue(2))
+ordering = [leftValue(1) < leftValue(2), ...
+    rightValue(1) > rightValue(2)]
+handleCount = numel(h)
+```
+
+```text
+crossingError =
+     0
+
+ordering =
+  1×2 logical array
+   1   1
+
+handleCount =
+     2
+```
+
+![Two intersecting entry surfaces from a two-by-one two-parameter pdmat object, with an outside legend](/PD-LMI-package/plots/pdmat-plot-2d-matrix.png)
+
+The two entries are equal for every $\rho_2$ along $\rho_1=0$. Their ordering
+reverses on opposite sides: the first entry is lower for $\rho_1<0$ and higher
+for $\rho_1>0$. The intersection is therefore part of the represented matrix
+function rather than a visual offset. The legend stays outside the axes so it
+cannot cover either surface.
+
+## Validation And Errors
+
+- Invalid `dims` raises `pdmat:InvalidPlotDimensions`.
+- Invalid or missing `SamplesPerCell` raises `pdmat:InvalidPlotOptions`.
+
+- Plotting is diagnostic and samples through `evaluate`.
+- For higher-dimensional objects, unselected dimensions are fixed at their lower grid bounds.
+
+## See Also
+
+[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) · [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/)

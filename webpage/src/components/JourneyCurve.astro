@@ -1,0 +1,71 @@
+---
+import { renderInlineMath } from "../lib/katex.js";
+
+const stages = [
+  { number: "01", title: "Form the DPD-LMI", href: "documents/reference/pdlmi/constructor/" },
+  { number: "02", title: "Grid the ", math: "\\rho", suffix: "-space", href: "documents/math/gridding-and-degree/" },
+  { number: "03", title: "Build constraints in each hypercube", href: "documents/reference/pdvar/rhodiff/" },
+  { number: "04", title: "Select a certificate", href: "documents/math/sos-certificates/" },
+  { number: "05", title: "Export, solve, recover", href: "documents/reference/pdlmi/toyalmip/" },
+];
+
+const base = import.meta.env.BASE_URL;
+const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}`;
+---
+
+<figure class="journey-pipeline" role="img" aria-labelledby="journey-title" aria-describedby="journey-desc">
+  <figcaption id="journey-title" class="journey-title">Five-stage DPD-LMI modeling and solution workflow</figcaption>
+  <p id="journey-desc" class="journey-description">A forward-only wave connects formation of the DPD-LMI, gridding the scheduling-parameter space, construction of cellwise constraints, finite certificate selection, and YALMIP export, solution, and recovery.</p>
+
+  <div class="journey-desktop" aria-hidden="true">
+    <svg viewBox="0 0 1120 310">
+      <defs>
+        <marker id="journey-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" /></marker>
+      </defs>
+      <path class="journey-wave" d="M112 156 C186 92 270 178 336 140 S492 98 560 148 S718 184 784 138 S936 180 1008 102" />
+      <g class="journey-leaders">
+        <path d="M112 156 V94" /><path d="M336 140 V220" /><path d="M560 148 V94" /><path d="M784 138 V220" /><path d="M1008 102 V94" />
+      </g>
+      <g class="journey-nodes"><circle cx="112" cy="156" r="13" /><circle cx="336" cy="140" r="13" /><circle cx="560" cy="148" r="13" /><circle cx="784" cy="138" r="13" /><circle cx="1008" cy="102" r="13" /></g>
+    </svg>
+    <ol class="journey-stage-map">
+      {stages.map((stage) => <li><a href={local(stage.href)}><span>{stage.number}</span><strong>{stage.title}{stage.math && <i class="journey-math" set:html={renderInlineMath(stage.math)} />}{stage.suffix}</strong></a></li>)}
+    </ol>
+  </div>
+
+  <ol class="journey-mobile" aria-hidden="true">
+    {stages.map((stage) => <li><a href={local(stage.href)}><span>{stage.number}</span><strong>{stage.title}{stage.math && <i class="journey-math" set:html={renderInlineMath(stage.math)} />}{stage.suffix}</strong></a></li>)}
+  </ol>
+</figure>
+
+<style>
+  .journey-pipeline { min-width: 0; margin: 0; color: var(--sl-color-text); }
+  .journey-title, .journey-description { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .journey-desktop { position: relative; }
+  .journey-desktop svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .journey-wave { fill: none; stroke: var(--sl-color-accent); stroke-width: 5; stroke-linecap: round; marker-end: url(#journey-arrow); }
+  #journey-arrow path { fill: var(--sl-color-accent); }
+  .journey-leaders path { fill: none; stroke: var(--diagram-border); stroke-width: 2; stroke-dasharray: 4 5; }
+  .journey-nodes circle { fill: var(--sl-color-bg); stroke: var(--sl-color-accent); stroke-width: 5; }
+  .journey-stage-map, .journey-mobile { margin: 0; padding: 0; list-style: none; }
+  .journey-stage-map { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.65rem; pointer-events: auto; }
+  .journey-stage-map li, .journey-mobile li { display: grid; gap: 0.45rem; border: 1px solid var(--diagram-border); border-radius: 12px; padding: 0.7rem; background: var(--diagram-surface); }
+  .journey-stage-map a, .journey-mobile a { display: grid; gap: 0.45rem; color: inherit; text-decoration: none; }
+  .journey-stage-map a:focus-visible, .journey-mobile a:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 4px; border-radius: 6px; }
+  .journey-stage-map li:nth-child(odd) { align-self: start; margin-block-start: 0; }
+  .journey-stage-map li:nth-child(even) { align-self: end; margin-block-end: 0.25rem; }
+  .journey-stage-map span, .journey-mobile span { color: var(--sl-color-text-accent); font-size: clamp(0.74rem, 1.1vw, 0.92rem); font-weight: 850; letter-spacing: 0.08em; }
+  .journey-stage-map strong, .journey-mobile strong { line-height: 1.24; }
+  .journey-stage-map strong { font-size: clamp(0.84rem, 1.3vw, 1.05rem); }
+  .journey-math { font-style: normal; }
+  .journey-math :global(.katex) { font-size: 1em; }
+  .journey-mobile { display: none; }
+  @media (max-width: 900px) {
+    .journey-desktop { display: none; }
+    .journey-mobile { display: grid; gap: 1.2rem; }
+    .journey-mobile li { position: relative; grid-template-columns: 2.25rem minmax(0, 1fr); align-items: center; min-height: 4rem; padding: 0.75rem; }
+    .journey-mobile li:not(:last-child)::after { position: absolute; content: ""; inset-block-start: 100%; inset-inline-start: 1.83rem; height: 1.2rem; border-inline-start: 3px solid var(--sl-color-accent); }
+    .journey-mobile span { display: grid; place-items: center; width: 2rem; height: 2rem; border: 2px solid var(--sl-color-accent); border-radius: 50%; background: var(--sl-color-bg); letter-spacing: normal; }
+    .journey-mobile strong { font-size: clamp(1rem, 4.5vw, 1.15rem); }
+  }
+</style>

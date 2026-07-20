@@ -5,7 +5,7 @@ It represents continuous piecewise-polynomial decision matrices in cell-local
 tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
 models are called differentiable parameter-dependent LMIs (DPD-LMIs).
 
-Current release: **v0.4.2** (in progress).
+Current release: **v1.0.0**.
 
 The current implementation provides:
 
@@ -109,7 +109,7 @@ F = toYalmip(C);
 
 `F` can be used with ordinary YALMIP calls such as `optimize(F, objective, sdpsettings(...))`.
 
-## Comparison Semantics in v0.4.0
+## Comparison Semantics
 
 For `P >= Q` and `P <= Q`, PD-LMI inspects every original coefficient in
 every physical cell and active rate row. The complete relation is
@@ -176,8 +176,10 @@ S0 + sum_s alpha_s(1-alpha_s) Ss
 
 using an order-`r` Bernstein Gram basis for `S0` and an order-`r-e_s` basis
 for each `Ss`. Coefficients are matched exactly at tensor degree `2*r`. The
-default and minimum order is `ceil(Residual.Degree/2)`; the method adds no
-implicit positivity margin and does not call a solver.
+one-parameter default and minimum is `floor(Residual.Degree/2)`, using the
+parity-specific Markov–Lukács form. For two or more parameters, the default
+and minimum is `ceil(Residual.Degree/2)`. The method adds no implicit
+positivity margin and does not call a solver.
 
 ```matlab
 yalmip('clear')

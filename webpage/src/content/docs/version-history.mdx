@@ -1,0 +1,64 @@
+---
+title: Version History
+description: Current manual version and release-history policy for the PD-LMI documentation.
+---
+
+import { versionInfo } from "../../data/version.js";
+import { historyPolicy, versionHistory } from "../../data/version-history.js";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/">Welcome</a>
+  <span>/</span>
+  <span>Version History</span>
+</nav>
+
+<section class="version-panel">
+  <p class="portal-kicker">Current Manual Version</p>
+  <div class="version-number">{versionInfo.current}</div>
+  <p>
+    This value is generated from <code>{versionInfo.source}</code>, using
+    <code>{versionInfo.sourcePattern}</code> as the source pattern.
+  </p>
+</section>
+
+## Release History
+
+This list retains the current release and the final patch release from each
+completed minor line. A commit suffix identifies the release evidence for each
+previous snapshot; the displayed current-version number remains generated from
+the TeX manual.
+
+<div class="history-list">
+  {versionHistory.length === 0 ? (
+    <article>
+      <div>
+        <strong>No minor snapshots yet</strong>
+        <span>policy</span>
+      </div>
+      <p>The current version is synchronized from the TeX manual during build.</p>
+    </article>
+  ) : versionHistory.map((entry) => (
+    <article>
+      <div>
+        <strong>{entry.version}</strong>
+        <span>{entry.status}</span>
+      </div>
+      <time>{entry.date}</time>
+      <p>{entry.summary}</p>
+    </article>
+  ))}
+</div>
+
+## Update Rule
+
+<ul>
+  <li>Version source of truth: <code>{historyPolicy.sourceOfTruth}</code>.</li>
+  <li>Current-version sync: {historyPolicy.updateRule}</li>
+  <li>History append rule: {historyPolicy.appendRule}</li>
+</ul>
+
+When a later patch becomes the final release of its minor line, replace that
+line's retained row in `webpage/src/data/version-history.js`. Keep the current
+release row aligned with the TeX history, and keep the displayed current-version
+number synchronized from the TeX manual rather than editing generated version
+data manually.

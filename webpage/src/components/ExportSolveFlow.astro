@@ -1,0 +1,38 @@
+---
+import DiagramFrame from "./DiagramFrame.astro";
+---
+
+<DiagramFrame
+  caption="A pdlmi residual selects one finite certificate, exports YALMIP constraints, then solves and evaluates the decision matrix."
+  label="pdlmi certificate to YALMIP export flow"
+  class="export-solve-flow-figure"
+>
+  <div class="export-solve-flow">
+    <div class="export-solve-flow__node"><strong>pdlmi</strong><code>L</code></div>
+    <span class="export-solve-flow__arrow" aria-hidden="true">→</span>
+    <div class="export-solve-flow__certificates" aria-label="Certificate choices">
+      <span>Direct</span><span>Pólya</span><span>Putinar</span><span>Full Box</span>
+    </div>
+    <span class="export-solve-flow__arrow" aria-hidden="true">→</span>
+    <div class="export-solve-flow__node"><strong>YALMIP constraints</strong><code>selected.toYalmip()</code></div>
+    <span class="export-solve-flow__arrow" aria-hidden="true">→</span>
+    <div class="export-solve-flow__node"><strong>solve</strong><code>optimize(...)</code></div>
+    <span class="export-solve-flow__arrow" aria-hidden="true">→</span>
+    <div class="export-solve-flow__node export-solve-flow__node--result"><strong>value</strong><code>value(P)</code></div>
+  </div>
+</DiagramFrame>
+
+<style>
+  .export-solve-flow { display: grid; grid-template-columns: auto auto minmax(13rem, 1fr) auto auto auto auto auto auto; gap: 0.5rem; align-items: center; }
+  .export-solve-flow__node { display: grid; gap: 0.2rem; min-width: 0; border: 1px solid var(--diagram-border); border-radius: 8px; padding: 0.65rem; text-align: center; background: var(--sl-color-bg); }
+  .export-solve-flow__node code { overflow-wrap: anywhere; font-size: 0.72rem; }
+  .export-solve-flow__node--result { border-color: var(--diagram-result); color: var(--diagram-result); background: color-mix(in srgb, var(--diagram-result) 8%, transparent); }
+  .export-solve-flow__node--result code { color: inherit; }
+  .export-solve-flow__certificates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.25rem; }
+  .export-solve-flow__certificates span { border: 1px solid var(--diagram-border); border-radius: 6px; padding: 0.35rem; color: var(--sl-color-text); font-size: 0.78rem; font-weight: 700; text-align: center; background: var(--sl-color-bg); }
+  .export-solve-flow__arrow { color: var(--sl-color-text-accent); font-size: 1.2rem; font-weight: 800; }
+  @media (max-width: 760px) {
+    .export-solve-flow { grid-template-columns: 1fr; justify-items: stretch; }
+    .export-solve-flow__arrow { justify-self: center; transform: rotate(90deg); }
+  }
+</style>

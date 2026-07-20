@@ -1,0 +1,17 @@
+\chapter*{Release History}
+\addcontentsline{toc}{chapter}{Release History}
+
+The entries below retain the current release and the latest release from each completed minor line.
+
+\begin{description}[
+  style=nextline, leftmargin=1.5em, labelindent=0pt, labelwidth=1em, labelsep=0.5em, itemindent=0pt, font=\normalfont\bfseries]
+  \item[v1.0.0 --- July 19, 2026] Marks the first stable public release of the documented package workflow. It consolidates installation and test-suite verification, the \code{pdbase}/\code{pdmat}/\code{pdvar}/\code{pdlmi} object model, continuous arbitrary-degree decision storage and rate-vertex differentiation, MATLAB-style matrix operations and indexing, and direct, P\'olya, Putinar, and full-box finite certificate assembly. The 1.0 documentation also makes the affine-expression, tensor-box, certificate-sufficiency, and solver-ownership boundaries explicit; this milestone does not add new runtime behavior beyond the implementation covered by the current code and tests.
+
+  \item[v0.4.7 --- July 18, 2026] Completed the v0.4 manual and Web explorer refresh around the LPV-to-cellwise-Bernstein-to-solver workflow, including installer guidance, the public API reference, mathematical cross-references, and storage-transformation examples. Released by commit \code{c6a2e25}.
+
+  \item[v0.3.6 --- July 16, 2026] Completed the public rename to \code{pdbase}/\code{pdmat}/\code{pdvar}/\code{pdlmi}, corrected forward Bernstein coordinates, added Full Box and Putinar certificates with independent SOS validation, hardened API boundaries, and defined entry-wise inequality behavior. Released by commit \code{fe74a65}.
+
+  \item[v0.2.12 --- July 13, 2026] Completed the \code{pdmat}/\code{pdvar}/\code{pdlmi} layers, rate-aware differentiation, display, plotting, structural algebra, direct finite assembly, P\'olya selection, and deterministic reference examples and tests. Released by commit \code{98b63e5}.
+
+  \item[v0.1.0 --- July 3, 2026] Introduced the original grid-and-storage foundation and the first package manual, including Bernstein traversal, validation, and helper contracts. Released by commit \code{63c06ee}.
+\end{description}

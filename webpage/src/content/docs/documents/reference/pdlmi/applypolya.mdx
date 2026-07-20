@@ -1,0 +1,80 @@
+---
+title: pdlmi applyPolya
+description: Rebuild a PD-LMI residual with a Pólya degree increment.
+---
+
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/reference/pdlmi/">pdlmi</a>
+  <span>/</span>
+  <span>applyPolya</span>
+</nav>
+
+<CertificateNavigation selected="polya" showSections={false} />
+
+## Purpose
+
+Create a new `pdlmi` using the original stored residual and a selected Pólya
+degree increment.
+
+## Syntax
+
+```matlab
+Cpolya = C.applyPolya()
+Cpolya = C.applyPolya(degreeIncrement)
+```
+
+## Description
+
+The no-argument form selects increment one. A finite nonnegative integer
+increment elevates the residual in every parameter direction before `pdlmi`
+constrains every elevated coefficient and every active rate-vertex row. The
+method is value-like: it returns a new object and leaves `C` unchanged.
+
+Each call rebuilds from `C.Residual`, rather than compounding a previous
+elevation. Thus `C.applyPolya(2)` and `C.applyPolya().applyPolya(2)` both use
+an increment of two from the original residual. A prior Putinar or full-box
+selection is replaced in the same way.
+
+The diagram's first and second boxes represent the same residual polynomial.
+Only its Bernstein coefficient row is longer. The final arrow is the ordinary
+direct sign test; no multiplier search occurs.
+
+## Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, [0 1], Degree=1);
+direct = P >= 0;
+one = direct.applyPolya();
+two = one.applyPolya(2);
+[direct.PolyaDegree one.PolyaDegree two.PolyaDegree]
+```
+
+```text
+ans =
+     0     1     2
+```
+
+## Validation And Errors
+
+The increment must be a finite nonnegative integer scalar. Invalid values raise
+`pdlmi:InvalidPolyaDegree`.
+
+Semidefinite inequalities retain semidefinite coefficient tests. Entry-wise
+inequalities retain their global entry-wise mode after elevation. Equality is
+direct-only, so calling this method on relation `"=="` raises
+`pdlmi:UnsupportedEqualityCertificate` before degree validation.
+
+Pólya elevation is an exact re-expression of the stored residual followed by
+the direct coefficient test. It does not search for a successful exponent,
+insert a strict margin, or create SOS multipliers. See the
+[certificate map](/PD-LMI-package/documents/math/sos-certificates/#polya-type-coefficient-relaxation)
+for the theorem's strict-positivity setting and the narrower runtime contract.
+
+## See Also
+
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/PD-LMI-package/documents/math/sos-certificates/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) · [`pdbase storage and inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/)

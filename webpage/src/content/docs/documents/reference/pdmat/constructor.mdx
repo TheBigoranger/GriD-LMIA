@@ -1,0 +1,224 @@
+---
+title: pdmat Constructor
+description: Construct known finite real matrix data on a parameter grid.
+---
+
+import CellStorageDiagram from "../../../../../components/CellStorageDiagram.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <span>/</span>
+  <span>constructor</span>
+</nav>
+
+<CellStorageDiagram />
+
+## Purpose
+
+Create a known-data `pdmat` object over one or more parameter-grid dimensions.
+
+## Syntax
+
+```matlab
+A = pdmat(gridVector, source)
+A = pdmat(gridVector, source, Degree=m)
+A = pdmat(gridVectors, source)
+A = pdmat(gridVectors, source, Degree=m)
+```
+
+## Arguments
+
+| Argument | Description |
+| :--- | :--- |
+| `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of strictly increasing vectors, such as `{[0 1], [10 20]}`. |
+| `source` | Function handle, global cell grid of numeric Bernstein coefficients such as `{1, 2, 3}`, or explicit nested `LocalValues` such as `{{[1 0], [0 1]}, {[2 0], [0 2]}}`. |
+| `Degree` | Nonnegative integer Bernstein degree, such as `Degree=1` or `Degree=2`. Required when a function handle should be validated as Bernstein coefficient evidence. |
+
+Unsupported options: `IsContinuous`, `ContainsDecision`, `HasRateDependence`, and `RateBounds`.
+
+For diagrams of one- and two-parameter grid inputs, the global
+coefficient-grid shape, and the separate role of Bernstein `Degree`, see
+[Gridding And Bernstein Degree](/PD-LMI-package/documents/math/gridding-and-degree/).
+
+## Returned Object
+
+`A` is a `pdmat < pdbase` object. All inherited `pdbase` properties are
+readable through dot syntax and have private set access:
+
+| Field | How to inspect it | Meaning for `pdmat` |
+| :--- | :--- | :--- |
+| `GridInfo` | `A.GridInfo.Vectors{1}`, `A.GridInfo.Points`, `A.GridInfo.Bounds` | Validated tensor-grid metadata. |
+| `MatrixSize` | `A.MatrixSize` | Matrix size of each numeric payload. |
+| `Degree` | `A.Degree` | Local Bernstein degree. |
+| `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | Cell-local numeric Bernstein coefficients. |
+| `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces; otherwise the constructor warns and returns `false`. |
+| `ContainsDecision` | `A.ContainsDecision` | Always `false`; no YALMIP decisions are stored. |
+| `HasRateDependence` | `A.HasRateDependence` | Always `false`; rate dependence belongs to `pdvar`/`rhodiff`. |
+| `RateBounds` | `A.RateBounds` | Always empty for `pdmat`. |
+| `SourceSummary` | `A.SourceSummary` | Source label such as `coefficient-backed`, `function`, or `function-bernstein`. |
+| `FunctionHandle` | `A.FunctionHandle` | Exact evaluator for function-backed objects; empty for coefficient-backed data. |
+
+These fields are exposed for inspection rather than mutation. The constructor
+and algebra methods keep `GridInfo`, `Degree`, `LocalValues`, and matrix sizes
+consistent; direct assignment would break the coefficient-label contract.
+
+## Examples
+
+### Coefficient-backed scalar data
+
+```matlab
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
+A.MatrixSize
+A.Degree
+A.SourceSummary
+A.FunctionHandle
+T = bernsteinTable(A);
+T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
+```
+
+```text
+ans =
+     1     1
+
+ans =
+     1
+
+ans =
+    "coefficient-backed"
+
+ans =
+     []
+
+ans =
+  2x4 table
+
+    TermIndex    LocalIndex     Basis     Value
+    _________    __________    _______    _____
+
+        1          {[0]}       "(1-alpha)"    {[1]}
+        2          {[1]}       "alpha"        {[3]}
+```
+
+The runtime diagnostic uses the same public forward coordinate
+$\alpha=(\rho-\rho_1^{(c)})/(\rho_1^{(c+1)}-\rho_1^{(c)})$. The rows therefore run directly from
+$(1-\alpha)$ at local label `0` to $\alpha$ at local label `1`.
+
+### Tensor-grid coefficient ordering
+
+```matlab
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A.GridInfo.Vectors{2}
+A.coeffs([1 1])
+A.lbls()
+T = bernsteinTable(A);
+T(:, ["TermIndex", "CellSubscript", "LocalIndex", "Value"])
+```
+
+```text
+ans =
+    10    20
+
+ans =
+  1x4 cell array
+    {[1]}    {[3]}    {[5]}    {[7]}
+
+ans =
+     0     0
+     0     1
+     1     0
+     1     1
+
+ans =
+  4x4 table
+
+    TermIndex    CellSubscript    LocalIndex    Value
+    _________    _____________    __________    _____
+
+        1           {[1 1]}        {[0 0]}      {[1]}
+        2           {[1 1]}        {[0 1]}      {[3]}
+        3           {[1 1]}        {[1 0]}      {[5]}
+        4           {[1 1]}        {[1 1]}      {[7]}
+```
+
+### Function-backed exact evaluator
+
+```matlab
+F = pdmat({[0 pi]}, @(rho) sin(rho));
+F.evaluate(pi/2)
+```
+
+```text
+ans =
+     1
+```
+
+Function-backed objects route evaluation through the retained function handle.
+
+### Explicit nested LocalValues
+
+```matlab
+localVals = {{[1 0], [0 1]}, {[2 0], [0 2]}};
+C = pdmat({[0 1 2]}, localVals, Degree=1);
+C.MatrixSize
+C.coeffs(2)
+```
+
+```text
+ans =
+     1     2
+
+ans =
+  1x2 cell array
+    {[2 0]}    {[0 2]}
+```
+
+Nested `LocalValues` are useful when each physical cell has its own local
+coefficient matrices.
+
+### Function-backed Bernstein evidence
+
+```matlab
+G = pdmat({[0 1]}, @(rho) rho.^2, Degree=2);
+G.SourceSummary
+G.coeffs(1)
+```
+
+```text
+ans =
+    "function-bernstein"
+
+ans =
+  1x3 cell array
+    {[0]}    {[0]}    {[1]}
+```
+
+Adding `Degree=2` tells the constructor to validate and store Bernstein
+coefficient evidence while retaining the exact function handle for evaluation.
+
+## Validation And Errors
+
+- Malformed option sequences raise `pdmat:InvalidOptions`.
+- Unknown options raise `pdmat:UnknownOption`.
+- Internal metadata options raise `pdmat:UnsupportedOption`.
+- Function-handle probing or validation may raise `pdmat:InvalidFunctionHandle` or `pdmat:InvalidFunctionOutput`.
+- Unsupported source forms raise `pdmat:InvalidSource`; inconsistent global
+  coefficient grids raise `pdmat:InvalidData`.
+- Invalid degrees and malformed nested storage raise `pdmat:InvalidDegree` and
+  `pdmat:InvalidLocalValues`.
+- Malformed explicit coefficient-leaf counts or shapes raise
+  `pdmat:InvalidCoefficientCell`; invalid, nonfinite, nonreal, or wrong-size
+  payloads raise `pdmat:InvalidCoefficientPayload`.
+- A function that is not representable at an explicit degree raises
+  `pdmat:NonBernsteinPolynomial`; a failed or size-inconsistent validation
+  probe raises `pdmat:InvalidFunctionValue`.
+- Mismatched shared faces are retained as discontinuous local data and emit
+  `pdmat:DiscontinuousLocalValues`.
+
+- Function-only objects without `Degree` keep exact evaluation but are not coefficient evidence.
+- Mixed physical bounds are rejected by coefficient algebra until a compatible common grid exists.
+
+## See Also
+
+[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) · [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/) · [`pdbase`](/PD-LMI-package/documents/reference/pdbase/)

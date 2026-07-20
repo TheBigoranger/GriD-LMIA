@@ -1,0 +1,1117 @@
+\chapter{\texorpdfstring{\code{pdmat}}{pdmat}: Known Parameter-Dependent Matrices}
+\label{sec:pdmat}
+
+\code{pdmat} stores known finite real matrix data on a tensor grid.  Objects can be coefficient-backed, function-only, or function-backed with explicit Bernstein coefficient evidence.  Coefficient-backed objects participate in algebra.  Function-only objects evaluate exactly through the stored handle, but do not expose coefficient evidence for \code{bernsteinTable} or coefficient algebra.
+
+\section{API Map}
+\label{sec:pdmat-lookup}
+
+\begin{tabularx}{\textwidth}{@{}lY@{}}
+\toprule
+Task & Entry \\
+\midrule
+Construct data &
+\hyperref[sec:pdmat-construction]{\code{pdmat}} \\
+Evaluate &
+\hyperref[sec:pdmat-evaluate]{\code{evaluate}} \\
+Inspect/display &
+\hyperref[sec:pdmat-table]{\code{bernsteinTable}},
+\hyperref[sec:pdmat-display]{\code{disp}},
+\hyperref[sec:pdmat-display]{\code{display}} \\
+Plot &
+\hyperref[sec:pdmat-plot]{\code{plot}} \\
+Arithmetic &
+\hyperref[sec:pdmat-algebra]{\code{+}},
+\hyperref[sec:pdmat-algebra]{\code{-}},
+\hyperref[sec:pdmat-algebra]{unary \code{+}/\code{-}},
+\hyperref[sec:pdmat-algebra]{\code{*}} \\
+Matrix/index methods &
+\hyperref[sec:pdmat-matrix-ops]{shape and structural methods},
+\hyperref[sec:pdmat-indexing]{indexing and assignment} \\
+\bottomrule
+\end{tabularx}
+
+\section{Construct \texorpdfstring{\code{pdmat}}{pdmat} Objects}
+\label{sec:pdmat-construction}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+A = pdmat(gridVector, source)
+A = pdmat(gridVector, source, Degree=m)
+A = pdmat(gridVectors, source)
+A = pdmat(gridVectors, source, Degree=m)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{gridVector} is a numeric vector used as a one-parameter grid shorthand, such as \code{[0 1 2]}.
+  \item \code{gridVectors} is a cell vector with one numeric grid vector per parameter, such as \code{{[0 1], [10 20]}}.
+  \item \code{source} may be:
+  \begin{enumerate}
+      \item A function handle, e.g., \code{@(rho) [rho rho^2]} is a one-parameter function with two matrix entries.
+      \item A global cell grid of numeric Bernstein coefficients, e.g., \code{{[1 2], [3 4]}} is a two-cell degree-one grid with two \(1\times1\) coefficients per cell.
+      \item A explicit nested \code{LocalValues}, e.g., \code{{1, 2, 3}} is scalar degree-two data on one cell.
+  \end{enumerate}
+  \item \code{Degree=m} sets the local Bernstein degree.  For function handles, omitting \code{Degree} creates a function-only object; passing a value such as \code{Degree=2} validates and stores Bernstein coefficient evidence while retaining the exact function handle for \code{evaluate}.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[node distance=5mm and 9mm]
+  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
+    minimum height=11mm] (f) {function handle\\exact evaluator};
+  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
+    minimum height=11mm,below=of f] (g)
+    {global coefficient grid\\shared physical nodes};
+  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
+    minimum height=11mm,below=of g] (l)
+    {nested \code{LocalValues}\\cell-local coefficients};
+  \node[dp/contribution,right=of g,align=center,font=\scriptsize,
+    minimum width=17mm,minimum height=17mm] (or) {\textbf{one}\\source};
+  \node[dp/result,right=of or,align=center,font=\scriptsize,text width=39mm,
+    minimum height=17mm] (a) {\code{pdmat}\\grid, size, degree,\\
+    optional coefficient evidence};
+  \draw[dp/arrow] (f.east) -| ([xshift=-2mm]or.north);
+  \draw[dp/arrow] (g.east) -- (or.west);
+  \draw[dp/arrow] (l.east) -| ([xshift=-2mm]or.south);
+  \draw[dp/arrow] (or.east) -- (a.west);
+\end{tikzpicture}
+\end{center}
+
+\examplehead
+The scalar-grid shorthand is the shortest coefficient-backed form.  The three numeric cells below are the global Bernstein coefficients for two physical cells with degree one.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat([0 1 2], {10, 20, 30}, Degree=1);
+disp(A)
+matrixSize = size(A)
+degree = A.Degree
+sourceSummary = A.SourceSummary
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+pdmat [1 1] over 1-D grid, degree 1, source coefficient-backed
+
+matrixSize =
+1     1
+
+degree =
+1
+
+sourceSummary =
+    "coefficient-backed"
+\end{lstlisting}
+
+For tensor grids, pass one grid vector per parameter.  The source cell array matches the global coefficient grid implied by the two parameter directions.
+
+\begin{lstlisting}[style=dpmatlab]
+B = pdmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1);
+disp(B)
+secondGridVector = B.GridInfo.Vectors{2}
+labels = B.lbls()
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+pdmat [1 1] over 2-D grid, degree 1, source coefficient-backed
+
+secondGridVector =
+10    20
+
+labels =
+     0     0
+     0     1
+     1     0
+     1     1
+\end{lstlisting}
+
+Use explicit nested \code{LocalValues} when each physical cell must be written directly.  Here each cell stores two \(1\times2\) row-vector coefficients.
+
+\begin{lstlisting}[style=dpmatlab]
+localVals = {{[1 0], [0 1]}, {[0 1], [0 2]}};
+C = pdmat({[0 1 2]}, localVals, Degree=1);
+disp(C)
+matrixSize = size(C)
+secondCellCoefficients = C.coeffs(2)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+pdmat [1 2] over 1-D grid, degree 1, source coefficient-backed
+
+matrixSize =
+1     2
+
+secondCellCoefficients =
+  1x2 cell array
+    {[2 0]}    {[0 2]}
+\end{lstlisting}
+
+When \code{source} is a function handle and \code{Degree} is omitted, the object keeps the exact evaluator but does not claim coefficient evidence.
+
+\begin{lstlisting}[style=dpmatlab]
+F = pdmat({[0 1]}, @(rho) [rho rho^2]);
+disp(F)
+sourceSummary = F.SourceSummary
+evaluatedValue = F.evaluate(0.5)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+pdmat [1 2] over 1-D grid, degree 1, source function
+
+sourceSummary =
+"function"
+
+evaluatedValue =
+     0.5000    0.2500
+\end{lstlisting}
+
+Add \code{Degree} for a polynomial function when later coefficient inspection or algebra should use Bernstein evidence.  The exact function handle is still used for point evaluation.
+
+\begin{lstlisting}[style=dpmatlab]
+G = pdmat({[0 1]}, @(rho) rho.^2, Degree=2);
+disp(G)
+sourceSummary = G.SourceSummary
+firstCellCoefficients = G.coeffs(1)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+pdmat [1 1] over 1-D grid, degree 2, source function-bernstein
+
+sourceSummary =
+"function-bernstein"
+
+firstCellCoefficients =
+  1x3 cell array
+    {[0]}    {[0]}    {[1]}
+\end{lstlisting}
+
+These forms all create finite known-data objects, but only the coefficient- backed and function-Bernstein forms can participate in coefficient algebra.
+
+\remarkshead
+\code{FunctionHandle} retains the supplied function handle for function-only and function-Bernstein sources; it is empty for cell-backed sources. Its set access is private.
+\begin{itemize}[leftmargin=*]
+  \item Constructor option errors use \codeerr{pdmat}{InvalidOptions}, \codeerr{pdmat}{Unsupported}\allowbreak\code{Option}, or \codeerr{pdmat}{Unknown}\allowbreak\code{Option}; grid errors use \codeerr{pdmat}{InvalidGrid} or \codeerr{pdmat}{Invalid}\allowbreak\code{GridVector}. \item Source and function validation uses \codeerr{pdmat}{InvalidSource}, \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionHandle}, \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionOutput}, or \codeerr{pdmat}{InvalidData}. \item Degree and storage failures use \codeerr{pdmat}{InvalidDegree}, \codeerr{pdmat}{Invalid}\allowbreak\code{LocalValues}, \codeerr{pdmat}{Invalid}\allowbreak\code{CoefficientCell}, or \codeerr{pdmat}{Invalid}\allowbreak\code{CoefficientPayload}. \item With explicit \code{Degree}, nonrepresentable functions raise \codeerr{pdmat}{NonBernstein}\allowbreak\code{Polynomial}; invalid validation probes raise \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionValue}. \item Mismatched shared faces are retained as discontinuous local data and emit warning \codeerr{pdmat}{Discontinuous}\allowbreak\code{LocalValues}.
+\end{itemize}
+
+\section{Inspect Object Properties}
+
+\code{pdmat} adds the read-only \code{FunctionHandle} property to the inherited \code{pdbase} properties in \cref{sec:pdbase-fields}.  All use private set access.  \code{FunctionHandle} contains the supplied handle for function and function-Bernstein sources and is empty for cell-backed sources. The inherited properties describe the grid, matrix size, Bernstein degree, cell-local evidence, continuity, and origin.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, @(rho) rho.^2, Degree=2);
+degree = A.Degree
+source = A.SourceSummary
+hasFunction = ~isempty(A.FunctionHandle)
+firstCell = A.LocalValues{1}
+\end{lstlisting}
+
+Assigning \code{A.Degree}, \code{A.LocalValues}, or \code{A.FunctionHandle} is not a supported update operation; construct a new \code{pdmat} instead.
+
+\section{\texorpdfstring{\code{evaluate}}{evaluate}}
+\index{evaluate@\texttt{evaluate}}
+\label{sec:pdmat-evaluate}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+val = evaluate(A, point)
+val = A.evaluate(point)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{A} is a \code{pdmat} object. \item \code{point} is a finite real scalar for a one-parameter object, such as \code{0.25}, or a finite real row vector with one entry per parameter, such as \code{[0.25 12]}.  Every entry must lie within the corresponding grid bounds. \item \code{val} is a numeric matrix with \code{size(A)}.  Coefficient-backed objects use local Bernstein interpolation; function-backed objects call their stored function handle.
+\end{itemize}
+
+\remarkshead
+A point with the wrong type, length, or finite-real shape raises \codeerr{pdmat}{InvalidPoint}; a point outside any grid bound raises \codeerr{pdmat}{PointOutOfBounds}.  If a stored function fails or returns a nonfinite, complex, empty, or size-inconsistent matrix at the requested point, \code{evaluate} raises \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionValue}.
+
+For a degree-one scalar coefficient-backed object on \([\rho_1^{(1)},\rho_1^{(2)}]\),
+\[
+A(\rho) = (1-\alpha)A^{(c)}[0]+\alpha A^{(c)}[1],\qquad
+  \alpha = \frac{\rho_1-\rho_1^{(1)}}
+                 {\rho_1^{(2)}-\rho_1^{(1)}}.
+\]
+The same local-coordinate rule is applied entrywise for matrix-valued data.
+
+\begin{center}
+\begin{tikzpicture}[x=5.4cm,y=0.72cm]
+  \draw[->,black!65] (0,0)--(1.08,0) node[right,font=\scriptsize] {\(\rho\)};
+  \draw[->,black!65] (0,0)--(0,4.35) node[above,font=\scriptsize] {\(A(\rho)\)};
+  \draw[very thick,dpblue,domain=0:1,samples=70,smooth]
+    plot (\x,{2+6*\x-5*\x*\x});
+  \filldraw[fill=white,draw=black!70] (0,2) circle (1.5pt);
+  \node[above=3pt,anchor=east,font=\scriptsize] at (-0.03,2)
+  {\(A^{(c)}[0]=2\)};
+  \foreach \x/\y/\lab in {0.5/3.75/{A^{(c)}[1]=5},1/3/{A^{(c)}[2]=3}}{
+    \filldraw[fill=white,draw=black!70] (\x,\y) circle (1.5pt);
+    \node[above=3pt,font=\scriptsize] at (\x,\y) {\(\lab\)};}
+  \def\evalx{0.35}
+  \def\evaly{3.4875}
+  \draw[densely dashed,black!60] (\evalx,0)--(\evalx,\evaly);
+  \filldraw[fill=dpblue,draw=dpblue] (\evalx,\evaly) circle (1.7pt);
+  \node[below=3pt,font=\scriptsize] at (\evalx,0)
+    {\(\rho_\star\)};
+  \node[dp/label,anchor=west] at (0.39,2.65)
+    {\(\code{Astar=A.evaluate(rhoStar)}\)};
+\end{tikzpicture}
+
+\textit{Evaluation follows the degree-two Bernstein curve with coefficients \([2,5,3]\); the dashed line locates the requested physical point.}
+\end{center}
+
+\examplehead
+Use the function-call form when the object is naturally one input among several MATLAB expressions.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {2, 4}, Degree=1);
+val = evaluate(A, 0.25)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+val =
+     2.5000
+\end{lstlisting}
+
+At \(\rho=0.25\), the public local coordinate is \(\alpha=0.25\), so the interpolated value is \(0.75\cdot2+0.25\cdot4=2.5\).
+
+The dot-call form is equivalent and can be convenient in command-window exploration.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {2, 4}, Degree=1);
+val = A.evaluate(0.75)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+val =
+     3.5000
+\end{lstlisting}
+
+Function-backed objects route through the retained function handle, so non-polynomial expressions can still be evaluated exactly at a point.
+
+\begin{lstlisting}[style=dpmatlab]
+F = pdmat({[0 pi]}, @(rho) sin(rho));
+val = F.evaluate(pi/2)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+val =
+     1
+\end{lstlisting}
+
+\section{Inspect Coefficients and Plot Values}
+\label{sec:pdmat-visualization}
+
+\subsection{\texorpdfstring{\code{bernsteinTable}}{bernsteinTable}}
+\index{bernsteinTable@\texttt{bernsteinTable}}
+\label{sec:pdmat-table}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+T = bernsteinTable(A)
+T = bernsteinTable(A, cellSubs)
+T = bernsteinTable(A, "oneLine")
+T = bernsteinTable(A, cellSubs, "oneLine")
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{cellSubs} selects one physical cell. \item \code{"oneLine"} returns one row per selected physical cell with a compact Bernstein expression. \item Without \code{"oneLine"}, the full table uses seven metadata columns; the output below shows their exact MATLAB names.
+\end{itemize}
+
+For one parameter, the \code{Basis} column reports
+\[
+  \binom{m}{j}(1-\alpha)^{m-j}\alpha^j.
+\]
+For multiple parameters, the basis is the tensor product of that expression in each local coordinate, using \code{alpha1}, \code{alpha2}, and so on. \code{LocalIndex} is the local Bernstein label. \code{CoeffSubscript} maps the local label back to the global coefficient subscript on the physical grid.  \code{IsPhysicalNode} is true when that coefficient lies on a physical grid node.
+
+\begin{center}
+\begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
+  box/.style={dp/neutral,font=\scriptsize,
+    align=center,minimum width=31mm,minimum height=10mm},
+  result/.style={dp/result,
+    font=\scriptsize,align=center,minimum width=36mm,minimum height=10mm}]
+  \node[box] (cell) {physical cell selector\\\code{cellSubs}};
+  \node[box,below=of cell] (labels) {local labels\\\code{lbls(A)}};
+  \node[result,right=of cell,yshift=-7mm] (table) {\code{bernsteinTable}\\
+    cell + label + basis + value};
+  \draw[->,thick,dpblue] (cell.east) -- (table.west);
+  \draw[->,thick,dpblue] (labels.east) -- (table.west);
+\end{tikzpicture}
+
+\textit{The table reports stored coefficient evidence.  It does not sample a function and does not create solver constraints.}
+\end{center}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 0.2 1]}, {[0 1], [1 1], [1 2]}, Degree=1);
+bernsteinTable(A, "oneLine")
+bernsteinTable(A, 1, "oneLine")
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+    CellSubscript          Expression
+    _____________    _______________________
+
+        {[1]}        "(1-alpha)*[0 1] + alpha*[1 1]"
+        {[2]}        "(1-alpha)*[1 1] + alpha*[1 2]"
+
+        CellSubscript          Expression
+            _____________    _______________________
+
+            {[1]}        "(1-alpha)*[0 1] + alpha*[1 1]"
+\end{lstlisting}
+
+Use the full table when the metadata columns are the point of the example:
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2, 3}, Degree=2);
+bernsteinTable(A)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpwideoutput]
+    TermIndex    CellSubscript    CoeffSubscript    LocalIndex          Basis          IsPhysicalNode    Value
+    _________    _____________    ______________    __________    _________________    ______________    _____
+
+        1            {[1]}            {[1]}           {[0]}       "(1-alpha)^2"            true          {[1]}
+            2            {[1]}            {[2]}           {[1]}       "2(1-alpha)alpha"        false         {[2]}
+            3            {[1]}            {[3]}           {[2]}       "alpha^2"                true          {[3]}
+\end{lstlisting}
+
+\remarkshead
+A function-only object has no coefficient evidence and raises \codeerr{pdmat}{FunctionOnly}\allowbreak\code{BernsteinTable}.  Unknown text options, repeated selectors, or invalid physical-cell selectors raise \codeerr{pdmat}{Invalid}\allowbreak\code{BernsteinTableInput}.
+
+\subsection{\texorpdfstring{\code{disp}}{disp} And \texorpdfstring{\code{display}}{display}}
+\index{disp@\texttt{disp}}\index{display@\texttt{display}}
+\label{sec:pdmat-display}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+disp(A)
+display(A)
+A
+\end{lstlisting}
+
+\arghead \code{disp(A)} prints a compact one-line summary.  \code{display(A)} is the command-window display used when an expression is not terminated by a semicolon; it prints grid, degree, coefficient, and source metadata.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+disp(A)
+display(A)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+pdmat [1 1] over 1-D grid, degree 1, source coefficient-backed
+A =
+  pdmat with 1-by-1 matrix values
+  Parameters: 1
+    rho_1: [0, 1], 2 nodes
+  Degree: 1
+  Physical cells: 1
+  Coefficients per cell: 2
+  Continuous: true
+  Source: coefficient-backed
+  Function handle: false
+\end{lstlisting}
+
+\subsection{\texorpdfstring{\code{plot}}{plot}}\index{plot@\texttt{plot}}
+\label{sec:pdmat-plot}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+h = plot(A)
+h = plot(A, dims)
+h = plot(A, SamplesPerCell=n)
+h = plot(A, dims, SamplesPerCell=n)
+h = plot(A, ..., Name, Value)
+\end{lstlisting}
+
+\arghead
+\begin{itemize}[leftmargin=*]
+  \item \code{dims} is one or two parameter indices.  For one-parameter objects, the default is \code{1}; otherwise the default is \code{[1 2]}, as in \code{plot(A, [1 2])}. \item \code{SamplesPerCell} is the package-owned sampling option.  The default is \code{15}; use \code{SamplesPerCell=4} for a coarse diagnostic plot. \item Remaining name-value pairs pass through to MATLAB graphics.  One- dimensional plots pass them to \code{plot}; two-dimensional plots pass them to \code{surf}.  Examples include \code{LineWidth}, \code{FaceAlpha}, and \code{EdgeColor}. \item The output \code{h} is the vector of graphics handles, one entry per matrix element.
+\end{itemize}
+
+\remarkshead
+An invalid parameter index, a repeated dimension, or a request for more than two plotting dimensions raises \codeerr{pdmat}{Invalid}\allowbreak\code{PlotDimensions}.  Malformed plotting options or a nonpositive integer \code{SamplesPerCell} raise \codeerr{pdmat}{Invalid}\allowbreak\code{PlotOptions}.  Errors from MATLAB graphics options remain MATLAB graphics errors.  Every unselected parameter is fixed at its lower grid bound, \code{A.GridInfo.Bounds(:,1)}.  A plot of a three-parameter object is therefore a one- or two-dimensional slice, not a volume plot.
+
+\examplehead
+Each source listing below is the complete source used by \code{generate_plot_figures.m} for the adjacent result.
+
+\textit{One-dimensional entries.}
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[-1 1]}, @(rho) [rho, rho.^2]);
+h = plot(A, SamplesPerCell=80, LineWidth=2);
+set(h(1), "Color", [35 86 125]/255, "LineStyle", "-")
+set(h(2), "Color", [0.25 0.25 0.25], "LineStyle", "--")
+grid on
+xlabel("rho")
+ylabel("matrix entry")
+title("One-dimensional pdmat entries")
+legend(["A(1,1)", "A(1,2)"], "Location", "eastoutside")
+\end{lstlisting}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.65\textwidth]{matlab-figures/pdmat-plot-1d.png}
+  \caption{Result of the one-dimensional source above.  The method returns one line handle per matrix entry.}
+  \label{fig:pdmat-plot-1d}
+\end{figure}
+
+\textit{Two-dimensional surface.}
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[-1 1], [0 2]}, ...
+    @(rho1, rho2) 1 + rho1.^2 + 0.5*rho2 + rho1.*rho2);
+h = plot(A, [1 2], SamplesPerCell=45, ...
+    EdgeColor="none", FaceAlpha=0.78);
+set(h, "FaceColor", [35 86 125]/255)
+grid on
+view(35, 25)
+xlabel("rho1", "Interpreter", "none")
+ylabel("rho2", "Interpreter", "none")
+zlabel("matrix entry")
+title("Two-dimensional pdmat surface")
+\end{lstlisting}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.65\textwidth]{matlab-figures/pdmat-plot-2d.png}
+  \caption{Result of the two-dimensional source above.}
+  \label{fig:pdmat-plot-2d}
+\end{figure}
+
+\textit{Two-dimensional matrix-valued surface.}
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[-1 1], [0 2]}, @(rho1, rho2) [ ...
+    1 + 0.8*rho1 + 0.25*rho2; ...
+    1 - 0.8*rho1 + 0.25*rho2]);
+h = plot(A, [1 2], SamplesPerCell=45, ...
+    EdgeColor="none", FaceAlpha=0.62);
+set(h(1), "FaceColor", [35 86 125]/255)
+set(h(2), "FaceColor", [0.55 0.55 0.55])
+grid on
+view(35, 25)
+xlabel("rho1", "Interpreter", "none")
+ylabel("rho2", "Interpreter", "none")
+zlabel("matrix entry")
+title("Two entries of a 2-by-1 pdmat cross at rho1 = 0")
+legend(h, ["A(1,1)", "A(2,1)"], ...
+    "Location", "eastoutside")
+\end{lstlisting}
+
+The two entries are equal for every \(\rho_2\) along \(\rho_1=0\).  Their ordering reverses on opposite sides: the first entry is lower when \(\rho_1<0\) and higher when \(\rho_1>0\).  The crossing is therefore a property of the matrix function, not an artificial plotting offset.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.65\textwidth]{matlab-figures/pdmat-plot-2d-matrix.png}
+  \caption{Two entry surfaces of a \(2\)-by-\(1\) matrix-valued function.  The outside legend distinguishes the entries while their intersection remains visible along \(\rho_1=0\).}
+  \label{fig:pdmat-plot-2d-matrix}
+  \label{fig:pdmat-plot-3d-slice}
+\end{figure}
+
+\section{Combine Known Matrices}
+\label{sec:pdmat-algebra}
+
+A \code{pdmat} operation acts on complete matrix coefficients while the physical grid remains attached to the result.  The blocks below deliberately show one operation family at a time: purpose, supported syntax, input, immediate output, and---when the result is spatial---a before/after picture.
+
+\subsection{Signs, Addition, And Subtraction}
+
+Use signs, sums, and differences to build known matrix expressions.  Compatible physical bounds are refined to the union grid, and lower-degree operands are elevated exactly before matching coefficients are combined.  The corresponding MATLAB overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+S = A + B
+S = A + M
+S = M + A
+D = A - B
+D = A - M
+D = M - A
+P = +A
+N = -A
+\end{lstlisting}
+
+Here \code{M} is a finite real scalar or size-compatible matrix.  A scalar broadcasts to the matrix payload size.  The first example makes the degree alignment visible.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
+S = A + B;
+sumDegree = S.Degree
+sumCoefficients = cell2mat(S.coeffs(1))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+sumDegree =
+     2
+sumCoefficients =
+     11.0000   21.5000   32.0000
+\end{lstlisting}
+
+The middle coefficient of the elevated \(A\) is \((1+2)/2=1.5\), so the middle sum is \(1.5+20=21.5\). Subtraction and unary signs act immediately on the same local coefficients.
+
+\begin{lstlisting}[style=dpmatlab]
+D = 5 - A;
+N = -A;
+differenceCoefficients = cell2mat(D.coeffs(1))
+negativeAtOne = N.evaluate(1)
+positiveClass = class(+A)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+differenceCoefficients =
+     4     3
+negativeAtOne =
+     -2
+positiveClass =
+    'pdmat'
+\end{lstlisting}
+
+\begin{center}
+\begin{tikzpicture}[>=Latex,node distance=7mm and 10mm,
+  box/.style={dp/neutral,font=\scriptsize,
+    minimum width=31mm,minimum height=8mm},
+  result/.style={dp/result,
+    font=\scriptsize,align=center,minimum width=35mm,minimum height=8mm}]
+  \node[box] (a) {degree 1: \([1,2]\)};
+  \node[box,below=of a] (b) {degree 2: \([10,20,30]\)};
+  \node[result,right=of a,yshift=-7mm] (s) {elevate, then add:\\
+    \([11,21.5,32]\)};
+  \draw[->,thick,dpblue] (a.east) -- (s.west);
+  \draw[->,thick,dpblue] (b.east) -- (s.west);
+\end{tikzpicture}
+\end{center}
+
+When grids have the same outer bounds but different interior nodes, the union grid is used before addition or subtraction.  For example, \code{pdmat({[0 1]},...)+pdmat({[0 .5 1]},...)} has grid \code{[0 .5 1]}; each operand is represented exactly on both resulting cells.
+
+\subsection{Ordered Matrix Multiplication}
+\index{ordered matrix multiplication}\index{Bernstein product}\index{known data}
+\label{sec:pdmat-operator-entries}
+
+Use \code{mtimes} for a matrix product.  The inner payload dimensions must match.  Two parameter-dependent factors produce the degree sum; a numeric factor is constant and does not raise the degree.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+K = A * B
+K = A * M
+K = M * A
+\end{lstlisting}
+
+For one parameter, fix physical cell \(c\) and let \(A=\sum_iB_i^mA^{(c)}[i]\) and \(D=\sum_jB_j^nD^{(c)}[j]\).  Then \(K=AD\) has coefficients
+\[
+K^{(c)}[k]=\sum_{i+j=k}
+  \frac{\binom mi\binom nj}{\binom{m+n}{k}}\,
+A^{(c)}[i]D^{(c)}[j].
+\]
+The left/right matrix order is never exchanged. It is worthnoting that the above formula is a weighted convolution of the local coefficients, not a simple sum of products.  The binomial weights are the Bernstein basis evaluations at the local coordinate \(\alpha=i/(m+n)\) for each anti-diagonal \(i+j=k\).
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
+K = A * B;
+productDegree = K.Degree
+productCoefficients = cell2mat(K.coeffs(1))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+productDegree =
+     3
+productCoefficients =
+   10.0000   20.0000   36.6667   60.0000
+\end{lstlisting}
+
+\begin{center}
+\begin{tikzpicture}[node distance=11mm,
+  panel/.style={minimum width=42mm,minimum height=32mm,font=\scriptsize,
+    align=left,inner sep=5pt}]
+  \node[panel,dp/neutral] (input) {\textbf{1. Inputs}\\[2pt]
+    \(A:[A_0,A_1]\)\\
+    \(D:[D_0,D_1,D_2]\)};
+  \node[panel,dp/contribution,right=of input] (groups) {
+    \textbf{2. Anti-diagonals}\\[2pt]
+    \(k=0:(0,0)\)\\
+    \(k=1:(0,1),(1,0)\)\\
+    \(k=2:(0,2),(1,1)\)\\
+    \(k=3:(1,2)\)};
+  \node[panel,dp/result,right=of groups] (output) {
+    \textbf{3. Weighted sums}\\[2pt]
+    \(K[0]=10\)\\
+    \(K[1]=20\)\\
+    \(K[2]=110/3\)\\
+    \(K[3]=60\)};
+  \draw[dp/arrow] (input)--node[above,font=\tiny]{group \(i+j\)}(groups);
+  \draw[dp/arrow] (groups)--node[above,font=\tiny]{normalize}(output);
+\end{tikzpicture}
+
+\textit{Coefficient labels add under the weighted convolution; payload matrices multiply in the written order.  The three panels make the convolution readable without crossing contribution arrows.}
+\end{center}
+
+For tensor data, label addition and binomial weights are applied independently in each parameter direction.  If \(\mathbf m,\mathbf n\in\mathbb N^\ell\) are direction-wise basis degrees, the \(\ell\)-dimensional ordered convolution is
+\[
+K^{(\mathbf c)}[\mathbf k] =\sum_{\mathbf i+\mathbf j=\mathbf k}
+   \left(\prod_{s=1}^{\ell}
+   \frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
+        {\binom{m_s+n_s}{k_s}}\right)
+A^{(\mathbf c)}[\mathbf i]D^{(\mathbf c)}[\mathbf j].
+\]
+Two degree-one factors in two parameters produce degree two and \(3^2=9\) coefficients per physical cell.
+
+\remarkshead
+Incompatible operands for \code{+}, \code{-}, and \code{*} raise \codeerr{pdmat}{InvalidAddition}, \codeerr{pdmat}{InvalidSubtraction}, or \codeerr{pdmat}{InvalidMultiplication}.  Parameter counts or outer bounds that cannot be merged raise \codeerr{pdmat}{MixedGrid}.  Coefficient algebra on a function-only object raises \code{pdmat:}\allowbreak\code{FunctionOnly}%
+  \allowbreak\code{Algebra}; construct the function with an explicit verified \code{Degree} when coefficient evidence is required.
+
+\section{Reshape and Transform Known Matrices}
+\label{sec:pdmat-matrix-ops}
+
+These methods transform every local matrix coefficient in the same way.  They do not transpose, reshape, or concatenate the physical grid.  Except for the documented evaluator/display/shape paths, structural methods require coefficient evidence.
+
+\subsection{Shape, Equality, And Display Protocols}
+\index{numel@\texttt{numel}}
+\label{sec:pdmat-matrix-shape}
+\label{sec:pdmat-matrix-protocol}
+
+Shape queries describe the matrix payload, not the grid.  Equality compares coefficient-backed functions after compatible grid refinement and degree elevation.  The protocol methods support ordinary MATLAB indexing syntax and dot access; they are not a second storage API.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+sz = size(A)
+d = size(A, dim)
+n = height(A)
+n = width(A)
+n = length(A)
+n = numel(A)
+n = ndims(A)
+tf = isequal(A, B, ...)
+idx = end(A, k, n)
+n = numArgumentsFromSubscript(A, S, ctx)
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, ...
+    {[1 2 3; 4 5 6], [10 20 30; 40 50 60]}, Degree=1);
+matrixSize = size(A)
+rowCount = height(A)
+columnCount = width(A)
+longestDimension = length(A)
+elementCount = numel(A)
+dimensionCount = ndims(A)
+equalsUnaryPlus = isequal(A,+A)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+matrixSize =
+     2     3
+rowCount =
+     2
+columnCount =
+     3
+longestDimension =
+     3
+elementCount =
+     6
+dimensionCount =
+     2
+equalsUnaryPlus =
+  logical
+   1
+\end{lstlisting}
+
+A function-only object can use shape queries and compares its stored metadata and function handle.  A coefficient-backed equality that cannot form a common comparison grid raises \codeerr{pdmat}{InvalidEquality}.  The detailed multi-line \code{display} transcript is shown in \cref{sec:pdmat-display}.
+
+\subsection{Transpose And Conjugate Transpose}
+\index{transpose}\index{conjugate transpose}
+\label{sec:pdmat-matrix-transform}
+
+Both transpose forms act on every coefficient.  Because \code{pdmat} payloads are finite and real, conjugation does not change their values.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+T = transpose(A)
+H = ctranspose(A)
+T = A.'
+H = A'
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, ...
+    {[1 2 3; 4 5 6], [10 20 30; 40 50 60]}, Degree=1);
+T = A.';
+H = A';
+transposeSize = size(T)
+formsEqual = isequal(T,H)
+transposeAtZero = T.evaluate(0)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+transposeSize =
+     3     2
+formsEqual =
+  logical
+   1
+transposeAtZero =
+     1     4
+     2     5
+     3     6
+\end{lstlisting}
+
+\begin{center}
+\begin{tikzpicture}[>=Latex,node distance=28mm,
+  a/.style={matrix of math nodes,nodes={draw=black!45,minimum size=6mm,
+    font=\scriptsize},column sep=-\pgflinewidth,row sep=-\pgflinewidth},
+  lab/.style={font=\scriptsize,align=center}]
+  \matrix[a] (m) {1&2&3\\4&5&6\\};
+  \matrix[a,right=of m] (t) {1&4\\2&5\\3&6\\};
+  \draw[->,thick,dpblue] (m.east) -- node[above,lab]{transpose each\\coefficient} (t.west);
+  \node[below=3pt of m,lab]{\(2\times3\)};
+  \node[below=3pt of t,lab]{\(3\times2\)};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Vectorization, Reshape, And Squeeze}
+\index{vectorization}\index{reshape}
+
+Use these methods to change the matrix view while preserving column-major element order, the parameter grid, the degree, and every coefficient value. \code{reshape} accepts exactly two positive dimensions with at most one inferred \code{[]} dimension.  \code{squeeze} retains the package's two-dimensional matrix convention.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+V = vec(A)
+R = reshape(A, [m n])
+R = reshape(A, m, n)
+S = squeeze(A)
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, ...
+    {[1 2 3; 4 5 6], [10 20 30; 40 50 60]}, Degree=1);
+V = vec(A);
+R = reshape(A, [3 2]);
+S = squeeze(A);
+vectorSize = size(V)
+reshapeSize = size(R)
+squeezeSize = size(S)
+vectorAtZero = V.evaluate(0).'
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+vectorSize =
+     6     1
+reshapeSize =
+     3     2
+squeezeSize =
+     2     3
+vectorAtZero =
+     1     4     2     5     3     6
+\end{lstlisting}
+
+Malformed or element-count-changing reshape requests raise \codeerr{pdmat}{InvalidReshape}.
+
+\subsection{Diagonals And Trace}
+\index{diagonal}\index{trace}
+
+\code{diag} extracts a selected diagonal from a matrix, or builds a square diagonal matrix from a vector.  A finite integer offset \code{k} may not select an empty diagonal.  \code{trace} returns a \(1\)-by-\(1\) \code{pdmat}.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+d = diag(A)
+d = diag(A, k)
+D = diag(v)
+D = diag(v, k)
+t = trace(A)
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
+d = diag(A);
+D = diag(d);
+t = trace(A);
+diagonalAtZero = d.evaluate(0)
+rebuiltAtZero = D.evaluate(0)
+traceAtZero = t.evaluate(0)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+diagonalAtZero =
+     1
+     4
+rebuiltAtZero =
+     1     0
+     0     4
+traceAtZero =
+     5
+\end{lstlisting}
+
+Invalid offsets or empty selections raise \codeerr{pdmat}{InvalidDiag}.
+
+\subsection{Triangular Parts And Reductions}
+\index{triangular part}
+\label{sec:pdmat-matrix-reductions}
+
+Triangular extraction preserves or zeros entries relative to a selected diagonal.  Reductions act along matrix dimensions; \code{"all"} is supported by \code{sum} and \code{mean}.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+L = tril(A)
+L = tril(A, k)
+U = triu(A)
+U = triu(A, k)
+S = sum(A)
+S = sum(A, dim)
+S = sum(A, "all")
+M = mean(A)
+M = mean(A, dim)
+M = mean(A, "all")
+C = cumsum(A)
+C = cumsum(A, dim)
+\end{lstlisting}
+
+First inspect the two triangular results.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
+L = tril(A);
+U = triu(A);
+lowerAtZero = L.evaluate(0)
+upperAtZero = U.evaluate(0)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+lowerAtZero =
+     1     0
+     3     4
+upperAtZero =
+     1     2
+     0     4
+\end{lstlisting}
+
+Then apply reductions to the same coefficient matrix.
+
+\begin{lstlisting}[style=dpmatlab]
+rowSum = sum(A, 2);
+allMean = mean(A, "all");
+running = cumsum(A, 2);
+rowSumAtZero = rowSum.evaluate(0)
+allMeanAtZero = allMean.evaluate(0)
+runningAtZero = running.evaluate(0)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+rowSumAtZero =
+     3
+     7
+allMeanAtZero =
+    2.5000
+runningAtZero =
+     1     3
+     3     7
+\end{lstlisting}
+
+Invalid triangular offsets raise \codeerr{pdmat}{InvalidTriangularPart}.  Invalid reduction calls raise \codeerr{pdmat}{InvalidSum}, \codeerr{pdmat}{InvalidMean}, or \codeerr{pdmat}{InvalidCumsum}.
+
+\subsection{Reordering And Rotation}
+\label{sec:pdmat-matrix-reorder}
+
+These methods reorder rows or columns inside every coefficient; they never reverse the scheduling grid.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = flip(A)
+B = flip(A, dim)
+B = flipud(A)
+B = fliplr(A)
+B = rot90(A)
+B = rot90(A, k)
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
+F = flipud(A);
+R = rot90(A);
+flippedAtZero = F.evaluate(0)
+rotatedAtZero = R.evaluate(0)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+flippedAtZero =
+     3     4
+     1     2
+rotatedAtZero =
+     2     4
+     1     3
+\end{lstlisting}
+
+\begin{center}
+\begin{tikzpicture}[>=Latex,node distance=9mm,
+  b/.style={dp/result,
+    font=\scriptsize,align=center,minimum width=22mm,minimum height=10mm}]
+  \node[b] (a) {\(1\ \ 2\)\\\(3\ \ 4\)};
+  \node[b,right=of a] (f) {\(3\ \ 4\)\\\(1\ \ 2\)};
+  \node[b,right=of f] (r) {\(2\ \ 4\)\\\(1\ \ 3\)};
+  \draw[->,thick,dpblue] (a) -- node[above,font=\scriptsize]{\code{flipud}} (f);
+  \draw[->,thick,dpblue] (a) to[bend left=22]
+    node[above,font=\scriptsize]{\code{rot90}} (r);
+\end{tikzpicture}
+\end{center}
+
+Invalid dimensions or quarter-turn counts raise \codeerr{pdmat}{InvalidFlip} or \codeerr{pdmat}{InvalidRot90}.
+
+\subsection{Concatenation And Block Assembly}
+\index{concatenation}\index{block assembly}
+\label{sec:pdmat-matrix-assembly}
+
+Concatenation joins payload matrices after compatible grid refinement and degree elevation.  Numeric blocks are promoted to constant known data. \code{cat} supports only dimensions 1 and 2.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+H = horzcat(A, B, ...)
+V = vertcat(A, B, ...)
+H = [A, B]
+V = [A; B]
+C = cat(dim, A, B, ...)
+D = blkdiag(A, B, ...)
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+a = pdmat({[0 1]}, {1, 2}, Degree=1);
+b = pdmat({[0 1]}, {10, 20}, Degree=1);
+H = [a, b];
+V = [a; b];
+D = blkdiag(a, 5);
+horizontalAtZero = H.evaluate(0)
+verticalAtZero = V.evaluate(0)
+blockDiagonalAtZero = D.evaluate(0)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+horizontalAtZero =
+     1    10
+verticalAtZero =
+     1
+    10
+blockDiagonalAtZero =
+     1     0
+     0     5
+\end{lstlisting}
+
+\begin{center}
+\begin{tikzpicture}[node distance=8mm and 8mm,
+  flow/.style={dp/stage,text width=27mm}]
+  \node[flow] (hinput) {inputs\(a,\ b\)};
+  \node[flow,right=of hinput] (hop) {\code{horzcat}};
+  \node[flow,dp/result,right=of hop] (hout) {result\([a\ b]\)};
+  \draw[dp/arrow] (hinput) -- (hop);
+  \draw[dp/arrow] (hop) -- (hout);
+
+  \node[flow,below=7mm of hinput] (dinput) {inputs\(a,\ 5\)};
+  \node[flow,right=of dinput] (dop) {\code{blkdiag}};
+  \node[flow,dp/result,right=of dop] (dout)
+    {result\(\left[\begin{smallmatrix}a&0\\0&5\end{smallmatrix}\right]\)};
+  \draw[dp/arrow] (dinput) -- (dop);
+  \draw[dp/arrow] (dop) -- (dout);
+\end{tikzpicture}
+\end{center}
+
+Incompatible blocks or syntax raise \codeerr{pdmat}{InvalidConcatenation}; unsupported dimensions raise \codeerr{pdmat}{UnsupportedCatDimension}; invalid block-diagonal inputs raise \codeerr{pdmat}{InvalidBlkdiag}.  Function-only operands raise \codeerr{pdmat}{FunctionOnlyAlgebra}.
+
+\subsection{Repetition}
+
+\code{repmat} tiles the matrix payload.  It accepts a positive scalar \code{m}, interpreted as \code{[m m]}, two positive counts, or a two-element count vector.  Grid and Bernstein degree remain unchanged.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+R = repmat(A, m)
+R = repmat(A, m, n)
+R = repmat(A, [m n])
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+v = pdmat({[0 1]}, {[1 2], [3 4]}, Degree=1);
+R = repmat(v, [2 2]);
+repeatedSize = size(R)
+repeatedDegree = R.Degree
+repeatedAtZero = R.evaluate(0)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+repeatedSize =
+     2     4
+repeatedDegree =
+     1
+repeatedAtZero =
+     1     2     1     2
+     1     2     1     2
+\end{lstlisting}
+
+Invalid repetition shapes raise \codeerr{pdmat}{InvalidRepmat}.
+
+\section{Index and Assign \texorpdfstring{\code{pdmat}}{pdmat} Entries}
+\index{subsref@\texttt{subsref}}\index{subsasgn@\texttt{subsasgn}}\index{end@\texttt{end}}\index{numArgumentsFromSubscript@\texttt{numArgumentsFromSubscript}}
+\label{sec:pdmat-indexing}
+
+Parenthesis indexing selects a matrix block from every coefficient.  Assignment writes the selected block into every coefficient after compatible promotion and degree alignment.  It does not select a physical cell; use \code{coeffs} for cell inspection.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = A(rows, cols)
+B = A(1:end, end)
+value = A.PropertyName
+A(rows, cols) = numericValue
+A(rows, cols) = B
+\end{lstlisting}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, ...
+    {[1 2 3; 4 5 6], [10 20 30; 40 50 60]}, Degree=1);
+lastCol = A(:, end);
+A(:, 2) = 5;
+selectedSize = size(lastCol)
+assignedSize = size(A)
+selectedAtZero = lastCol.evaluate(0)
+assignedAtZero = A.evaluate(0)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+selectedSize =
+     2     1
+assignedSize =
+     2     3
+selectedAtZero =
+     3
+     6
+assignedAtZero =
+     1     5     3
+     4     5     6
+\end{lstlisting}
+
+\begin{center}
+\begin{tikzpicture}[node distance=9mm,
+  b/.style={dp/stage,text width=30mm},
+  o/.style={dp/result,font=\scriptsize,align=center,text width=30mm,
+    minimum height=12mm,inner sep=4pt}]
+  \node[b] (a) {selected column\(2,\ 5\)};
+  \node[dp/contribution,right=of a,font=\scriptsize,align=center,
+    text width=23mm,minimum height=12mm] (assign) {assign \code{5}\\to column 2};
+  \node[o,right=of assign] (u) {updated matrix\(\left[\begin{smallmatrix}1&5&3\\4&5&6\end{smallmatrix}\right]\)};
+  \draw[dp/arrow] (a) -- (assign);
+  \draw[dp/arrow] (assign) -- (u);
+\end{tikzpicture}
+\end{center}
+
+\code{subsref}, \code{subsasgn}, \code{end}, and \code{numArgumentsFromSubscript} implement this two-index MATLAB protocol. Invalid selectors raise \codeerr{pdmat}{InvalidSubscript}.  Linear indexing, deletion, or non-parenthesis assignment raises \codeerr{pdmat}{UnsupportedAssignment}; an incompatible right-hand side raises \codeerr{pdmat}{InvalidAssignment}.  Slicing and assignment require coefficient evidence and otherwise raise \codeerr{pdmat}{FunctionOnlyAlgebra}.
+\section{Boundaries and Related APIs}
+\label{sec:pdmat-limits}
+
+\begin{enumerate}[leftmargin=*]
+  \item Function-only objects created without \code{Degree} do not have Bernstein coefficient evidence for \code{bernsteinTable} or coefficient algebra. \item Numeric operands must be finite real nonempty matrices with compatible sizes, or finite real scalars that can broadcast to the required size. \item Grid refinement is supported for matching parameter dimensions and matching grid bounds.
+\end{enumerate}
+
+\paragraph{Related APIs.}
+\code{pdmat}, \code{evaluate}, \code{bernsteinTable}, \code{plot}, \code{pdbase}.

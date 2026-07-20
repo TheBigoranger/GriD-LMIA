@@ -1,0 +1,71 @@
+---
+import config from "virtual:starlight/user-config";
+import LanguageSelect from "virtual:starlight/components/LanguageSelect";
+import Search from "virtual:starlight/components/Search";
+import SocialIcons from "virtual:starlight/components/SocialIcons";
+import ThemeSelect from "virtual:starlight/components/ThemeSelect";
+import { headerLinks } from "../data/header-links";
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const shouldRenderSearch = config.pagefind
+  || config.components.Search !== "@astrojs/starlight/components/Search.astro";
+---
+
+<div class="site-header">
+  <a class="site-header__brand" href={base} aria-label="PD-LMI Manual home">PD-LMI</a>
+  <div class="site-header__search print:hidden">{shouldRenderSearch && <Search />}</div>
+  <div class="site-header__end">
+    <nav class="site-header__links" aria-label="Common destinations">
+      {headerLinks.map((link) => <a href={`${base}${link.path}`}>{link.label}</a>)}
+    </nav>
+    <div class="site-header__controls sl-hidden md:sl-flex print:hidden">
+      <div class="site-header__social"><SocialIcons /></div>
+      <ThemeSelect />
+      <LanguageSelect />
+    </div>
+    <!-- Native details keeps these links keyboard-reachable without hydrating the header. -->
+    <details class="site-header__more print:hidden">
+      <summary aria-label="Open common destinations">Explore</summary>
+      <nav aria-label="Common destinations">
+        {headerLinks.map((link) => <a href={`${base}${link.path}`}>{link.label}</a>)}
+      </nav>
+    </details>
+  </div>
+</div>
+
+<style>
+  @layer starlight.core {
+    .site-header { position: relative; display: flex; gap: 0.35rem; align-items: center; height: 100%; }
+    .site-header__brand { flex: none; color: var(--sl-color-text-accent); font-size: 0.88rem; font-weight: 800; text-decoration: none; white-space: nowrap; }
+    .site-header__search { position: absolute; inset-inline-start: 50%; width: clamp(9rem, 28vw, 28rem); min-width: 0; transform: translateX(-50%); }
+    .site-header__search :global(site-search) { display: flex; width: 100%; justify-content: center; }
+    .site-header__end { display: flex; gap: 0.35rem; align-items: center; margin-inline-start: auto; min-width: 0; }
+    .site-header__links { display: none; gap: 0.2rem; align-items: center; }
+    .site-header__links a { border-radius: 999px; padding: 0.42rem 0.62rem; color: var(--sl-color-gray-2); text-decoration: none; font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
+    .site-header__links a:hover,
+    .site-header__links a:focus-visible { color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); }
+    .site-header__controls { gap: 1rem; align-items: center; border-inline-start: 1px solid var(--sl-color-gray-5); padding-inline-start: 1rem; }
+    .site-header__social { display: flex; flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; align-items: center; justify-content: center; }
+    .site-header__social :global(a) { display: inline-flex; width: 2.25rem; height: 2.25rem; align-items: center; justify-content: center; border-radius: 50%; }
+    .site-header__social :global(svg) { width: 1.25rem; height: 1.25rem; }
+    .site-header__more { position: relative; flex: none; }
+    .site-header__more summary { list-style: none; cursor: pointer; border-radius: 999px; padding: 0.42rem 0.62rem; color: var(--sl-color-gray-2); font-size: 0.82rem; font-weight: 700; }
+    .site-header__more summary::-webkit-details-marker { display: none; }
+    .site-header__more summary:hover,
+    .site-header__more summary:focus-visible,
+    .site-header__more[open] summary { color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); }
+    .site-header__more nav { position: absolute; z-index: 10; inset-block-start: calc(100% + 0.5rem); inset-inline-end: 0; display: grid; min-width: 10rem; padding: 0.45rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.75rem; background: var(--sl-color-bg-nav); box-shadow: var(--sl-shadow-md); }
+    .site-header__more a { border-radius: 0.45rem; padding: 0.55rem 0.7rem; color: var(--sl-color-gray-2); text-decoration: none; font-size: 0.9rem; font-weight: 700; }
+    .site-header__more a:hover,
+    .site-header__more a:focus-visible { color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); }
+    @media (min-width: 72rem) {
+      .site-header__links { display: flex; }
+      .site-header__more { display: none; }
+    }
+    @media (max-width: 40rem) {
+      .site-header { gap: 0.45rem; }
+      .site-header__search { width: auto; }
+      .site-header__more summary { padding-inline: 0.45rem; }
+    }
+  }
+</style>

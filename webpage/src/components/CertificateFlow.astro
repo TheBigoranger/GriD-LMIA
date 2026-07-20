@@ -1,0 +1,22 @@
+---
+import CertificateFlow from "./CertificateFlow.tsx";
+import { certificateSources } from "../data/certificate-data";
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const cardNotation = {
+  direct: "",
+  polya: "\\begin{gathered}\\widetilde C_{\\mathbf i}^{(\\mathbf c,v)}\\preceq0,\\quad\\mathbf i\\in\\mathcal I_{m+p}\\\\\\mathcal I_{m+p}=\\{0,\\ldots,m+p\\}^{\\ell}\\end{gathered}",
+  putinar: "\\begin{gathered}S_0,S_s\\succeq0:\\text{ PSD Gram/SOS polynomial matrices};\\quad\\deg S_0\\le2d,\\;\\deg S_s\\le2d-2\\\\g_s=\\alpha_s(1-\\alpha_s):\\text{ box generator}\\end{gathered}",
+  fullbox: "S_{J}\\succeq0:\\text{ PSD Gram/SOS multiplier};\\quad J\\subseteq[\\ell]:\\text{ generator subset}",
+} as const;
+const options = certificateSources.map((item) => ({
+  key: item.key,
+  label: item.label,
+  command: item.command,
+  formula: item.cardFormula,
+  notation: cardNotation[item.key],
+  href: `${base}${item.detailRoute}`,
+}));
+---
+
+<CertificateFlow options={options} client:load />

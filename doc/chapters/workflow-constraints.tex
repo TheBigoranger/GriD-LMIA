@@ -1,0 +1,221 @@
+\section{From Cellwise Algebra to Solver Constraints}
+\label{sec:cellwise-solver-path}
+
+This section executes a two-cell instance of the Lyapunov model in \cref{eq:canonical-positive,eq:lpv-spine}. It follows the object roles established above: known matrices are stored as \code{pdmat}, decision matrices as \code{pdvar}, cellwise rate derivatives are produced by \code{rhodiff}, and finite certificate selections are stored as \code{pdlmi}.
+
+\subsection{Store Known Matrices and Decision Matrices}
+\index{pdmat@\texttt{pdmat}}\index{pdvar@\texttt{pdvar}}
+
+The known LPV matrix is affine in \(\rho\) on the two-cell grid \([0,0.5]\cup[0.5,1]\).  Supplying \code{Degree=1} retains exact function evaluation together with cell-local Bernstein coefficient evidence.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+grid = {[0 0.5 1]};
+A = pdmat(grid, @(rho) [-1, 0.5; -1, -2] + ...
+    rho * [-1.3, -20; 2, -10], Degree=1);
+P = pdvar(2, grid, "symmetric", Degree=2);
+matrixSize = size(P)
+physicalCellCount = A.ncell()
+knownDegree = A.Degree
+decisionDegree = P.Degree
+isContinuous = P.IsContinuous
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+matrixSize =
+     2     2
+physicalCellCount =
+     2
+knownDegree =
+     1
+decisionDegree =
+     2
+isContinuous =
+  logical
+   1
+\end{lstlisting}
+
+Each cell stores three local symmetric decision matrices.  The upper face of cell 1 and lower face of cell 2 share one YALMIP decision handle, so six local positions contain five global controls.  The interior controls remain independent.
+
+\begin{center}
+\begin{tikzpicture}[x=2.05cm,y=1cm,
+  face/.style={dp/decision,minimum width=18mm,minimum height=9mm,
+    font=\scriptsize,align=center},
+  interior/.style={dp/contribution,minimum width=18mm,minimum height=9mm,
+    font=\scriptsize,align=center}]
+  \node[face] (p0) at (0,0) {$P^{(1)}[0]$\\face};
+  \node[interior] (p1) at (1,0) {$P^{(1)}[1]$\\interior};
+  \node[face] (p2) at (2,0) {$P^{(1)}[2]$\\shared face};
+  \node[interior] (p3) at (3,0) {$P^{(2)}[1]$\\interior};
+  \node[face] (p4) at (4,0) {$P^{(2)}[2]$\\face};
+  \draw[dp/arrow] (p0)--(p1); \draw[dp/arrow] (p1)--(p2);
+  \draw[dp/arrow] (p2)--(p3); \draw[dp/arrow] (p3)--(p4);
+  \node[above=5pt of p2,font=\scriptsize,align=center]
+    {$P^{(1)}[2]=P^{(2)}[0]$};
+  \node[below=7pt of p2,font=\scriptsize,align=center]
+    {six local positions, five global matrix controls};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Multiply in Bernstein Coefficient Space}
+
+On one physical cell, write \(P=\sum_iB_i^mP^{(c)}[i]\) and \(A=\sum_jB_j^nA^{(c)}[j]\).  The ordered product is
+\[
+PA=\sum_{k=0}^{m+n}B_k^{m+n}R^{(c)}[k],\qquad R^{(c)}[k]=\sum_{i+j=k}
+    \frac{\binom mi\binom nj}{\binom{m+n}{k}}
+P^{(c)}[i]A^{(c)}[j].
+\]
+For quadratic \(P\) and affine \(A\), the four result coefficients are
+\[
+R[0]=P_0A_0,\quad
+ R[1]=(P_0A_1+2P_1A_0)/3,
+\]
+\[
+R[2]=(2P_1A_1+P_2A_0)/3,\quad R[3]=P_2A_1.
+\]
+The anti-diagonal grouping \(k=i+j\) and binomial normalization are exact; this is not a pointwise sample product, and matrix order is preserved. \Cref{sec:bernstein-product-math} derives the general tensor-product rule.
+
+\begin{lstlisting}[style=dpmatlab]
+PA = P * A;
+ATP = A' * P;
+degreePA = PA.Degree
+degreeATP = ATP.Degree
+coefficientCountPA = numel(PA.coeffs(1))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+degreePA =
+     3
+degreeATP =
+     3
+coefficientCountPA =
+     4
+\end{lstlisting}
+
+\subsection{Differentiate and Enumerate Rate Vertices}
+
+For a degree-\(m\) cell of width \(h_c\), differentiation is the forward difference
+\[
+  \frac{\partial P}{\partial\rho}
+=\frac{m}{h_c}\sum_{i=0}^{m-1}
+   \bigl(P^{(c)}[i+1]-P^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
+\]
+Because the chain-rule term is affine in the bounded rate, checking the two vertices \(-1\) and \(+1\) covers \(\dot\rho\in[-1,1]\). \Cref{sec:bernstein-differentiation} gives the coefficient derivation and its physical-cell scaling.
+
+For \(\ell\) parameters, let \(h_{\mathbf c,s}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}\) be the width of physical hypercube \(\mathbf c\) in direction \(s\), and let \(\mathbf e_s\) be the corresponding unit multi-index. Differentiating the tensor-product representation in \cref{sec:continuous-bernstein-representation} gives
+\[
+\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}
+=\frac{m}{h_{\mathbf c,s}}
+\sum_{\substack{\mathbf i\in\{0,\ldots,m\}^{\ell}\\ i_s<m}}
+\bigl(P^{(\mathbf c)}[\mathbf i+\mathbf e_s]-P^{(\mathbf c)}[\mathbf i]\bigr)
+B_{i_s}^{m-1}(\alpha_s)
+\prod_{r\ne s}B_{i_r}^{m}(\alpha_r),
+\qquad
+\dot P^{(\mathbf c)}=\sum_{s=1}^{\ell}\dot\rho_s\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}.
+\]
+Each partial derivative has degree \(m-1\) in its differentiated direction and degree \(m\) in every other direction. For \(\ell>1\), \code{rhodiff} therefore elevates the shortened direction back to degree \(m\) before summing the rate-weighted partials. If \(\dot\rho_s\in[\underline v_s,\overline v_s]\), the rate box has \(2^\ell\) Cartesian vertices \(\mathbf v\); because \(\dot P\) is affine in \(\dot{\boldsymbol\rho}\), traversing those vertices is exact. For \(m>0\), each multidimensional cell consequently stores \(2^\ell\) rate rows with \((m+1)^\ell\) tensor-Bernstein coefficients per row.
+
+\begin{lstlisting}[style=dpmatlab]
+D = rhodiff(P, [-1 1]);
+derivativeDegree = D.Degree
+isContinuous = D.IsContinuous
+rateRowCount = size(D.coeffs(1),1)
+coefficientsPerRow = size(D.coeffs(1),2)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+derivativeDegree =
+    1
+isContinuous =
+  logical
+   0
+rateRowCount =
+    2
+coefficientsPerRow =
+    2
+\end{lstlisting}
+
+For example, a degree-one decision on one two-parameter cell has four rate vertices and four tensor-Bernstein labels:
+
+\begin{lstlisting}[style=dpmatlab]
+rb2 = [-1 2; -3 5];
+P2 = pdvar(1, {[0 2], [10 20]}, Degree=1, RateBounds=rb2);
+D2 = rhodiff(P2);
+tensorDerivativeDegree = D2.Degree
+rateRowCount2D = size(D2.coeffs([1 1]), 1)
+coefficientsPerRow2D = size(D2.coeffs([1 1]), 2)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+tensorDerivativeDegree =
+    1
+rateRowCount2D =
+    4
+coefficientsPerRow2D =
+    4
+\end{lstlisting}
+
+Thus a coefficient table is indexed independently by physical hypercube, rate-vertex row, and tensor-Bernstein label. Rate rows are neither physical cells nor additional Bernstein labels; a later comparison constrains every combination of these three indices.
+
+\subsection{Form a Residual on Every Hypercube}
+\index{residual}
+
+The MATLAB residual is a direct transcription of \cref{eq:canonical-positive,eq:lpv-spine}.  Addition performs exact degree elevation before the cell-local terms are combined.
+
+\begin{lstlisting}[style=dpmatlab]
+residual = D + P * A + A' * P;
+Cdecay = residual <= -1e-6 * eye(2);
+Cpositive = P >= eye(2);
+residualDegree = residual.Degree
+decayConstraintCount = numel(Cdecay.Constraints)
+positivityConstraintCount = numel(Cpositive.Constraints)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+residualDegree =
+    3
+decayConstraintCount =
+    16
+positivityConstraintCount =
+    6
+\end{lstlisting}
+
+The decay count is two physical cells times two rate vertices times four degree-three labels.  Positivity has no rate rows and has three degree-two labels per cell.  Shared faces are visited from each adjoining cell because certification remains cell-local.
+
+\subsection{Choose a Finite Certificate}
+
+Direct Bernstein-coefficient constraints are the default.  Three opt-in selectors rebuild from the same original residual and relation; selections replace rather than compound one another.
+
+\begin{lstlisting}[style=dpmatlab]
+Cpolya = Cdecay.applyPolya(1);
+Cputinar = Cdecay.applyPutinar();
+Cbox = Cdecay.applyFullBoxPreorder();
+counts = [numel(Cdecay.Constraints), ...
+    numel(Cpolya.Constraints), ...
+    numel(Cputinar.Constraints), ...
+    numel(Cbox.Constraints)]
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+counts =
+    16    20    24    24
+\end{lstlisting}
+
+Direct tests coefficient signs. P\'olya elevates the residual before testing. For this one-parameter residual, the default Putinar selector delegates to the full-box parity construction, so both return 24 stored constraints. In multiple parameters, Putinar uses the singleton-generator box module, whereas Full Box uses all box-generator products. All four are finite sufficient certificates for the continuous inequality. Failure of a selected certificate to yield feasibility does not prove that the continuous inequality itself is infeasible. \Cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen,sec:certificate-full-box} give the corresponding mathematical constructions, while \cref{sec:certificate-boundary} states the implemented boundary.
+
+\subsection{Export to YALMIP and Recover the Solution}
+\index{strictness margin}\index{solver diagnostics}
+
+\code{toYalmip} returns exactly the stored finite constraints.  It does not select a solver, add an objective, or insert a strictness margin.
+
+\begin{lstlisting}[style=dpmatlab]
+Fdecay = toYalmip(Cdecay);
+Fpositive = Cpositive.toYalmip();
+opts = sdpsettings('solver', 'sedumi', 'verbose', 0);
+sol = optimize([Fdecay, Fpositive], [], opts);
+if sol.problem == 0
+    solvedP = value(P);
+end
+\end{lstlisting}
+
+The solver choice and \code{sol.problem} semantics belong to YALMIP and the installed solver.  After a successful solve, \code{value(P)} replaces the symbolic coefficient payloads with numeric values while preserving the grid, degree, matrix shape, and cell ordering.  Complete solver examples appear in \cref{sec:examples}; certificate syntax and order boundaries appear in \cref{sec:pdlmi}.

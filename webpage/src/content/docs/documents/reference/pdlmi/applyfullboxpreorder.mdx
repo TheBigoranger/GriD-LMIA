@@ -1,0 +1,180 @@
+---
+title: pdlmi applyFullBoxPreorder
+description: Rebuild a PD-LMI residual with a fixed-order full box Bernstein-Gram certificate.
+---
+
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/reference/pdlmi/">pdlmi</a>
+  <span>/</span>
+  <span>applyFullBoxPreorder</span>
+</nav>
+
+<CertificateNavigation selected="fullbox" showSections={false} />
+
+## Purpose
+
+Create a new `pdlmi` that represents the stored residual with the implemented
+cell-local full box Bernstein-Gram preordering.
+
+## Syntax
+
+```matlab
+Cbox = C.applyFullBoxPreorder()
+Cbox = C.applyFullBoxPreorder(order)
+```
+
+## Description
+
+The no-argument form selects the smallest admissible absolute order. The
+explicit form selects `order`; it does not add `order` to the residual degree.
+Both forms rebuild from `C.Residual` and `C.Relation`, return a new object, and
+leave `C` unchanged. Reapplication therefore replaces an earlier full-box
+order, a Pólya selection, or a Putinar selection instead of compounding it.
+
+For a one-parameter residual of degree $m$, the minimum is
+$\lfloor m/2\rfloor$. Even-degree residuals use an unweighted Gram block plus
+an $\alpha(1-\alpha)$-weighted block when that block has a nonempty basis.
+Odd-degree residuals use separate $\alpha$- and
+$(1-\alpha)$-weighted blocks.
+
+For two or more parameters, the minimum is $\lceil m/2\rceil$. The
+certificate contains one Gram term for every subset product of the box
+generators $\alpha_s(1-\alpha_s)$. A term whose tensor Gram degree would have
+a negative component is omitted.
+
+For an entry-wise inequality, each MATLAB column-major scalar entry receives
+an independent scalar certificate. Assembly creates independent Gram variables for every physical cell and every
+active rate-vertex row. Each present Gram matrix is constrained positive
+semidefinite, then exact identities match every Bernstein coefficient. For a
+`<=` relation, the target coefficients are negated before positive-
+semidefinite matching; for `>=`, the residual is matched directly. No implicit
+positivity margin is added.
+
+For two parameters the four illustrated blocks correspond to the empty
+subset, each single generator, and their product. In $\ell$ parameters the
+same pattern has up to $2^\ell$ subset products. The
+[SOS certificate chapter](/PD-LMI-package/documents/math/sos-certificates/)
+develops the Gram and Markov–Lukács background step by step.
+
+### Finite-SDP shape: two parameters, degree three
+
+For one cell and one active rate row, let the sign-normalized residual have
+Bernstein coefficients $F_{i,k}$ at tensor degree $(3,3)$. The default order
+is $r=2$, so the residual is exactly elevated to degree $(4,4)$. The returned
+constraint list has four PSD Gram constraints, followed by 25 exact affine
+matrix equalities:
+
+$$
+\begin{gathered}
+Q_{\varnothing}\succeq0,\quad Q_{\{1\}}\succeq0,\quad
+Q_{\{2\}}\succeq0,\quad Q_{\{1,2\}}\succeq0,\\
+\widetilde F_{p,q}=
+\mathcal A_{p,q}(Q_{\varnothing},Q_{\{1\}},Q_{\{2\}},Q_{\{1,2\}}),
+\qquad p,q=0,\ldots,4.
+\end{gathered}
+$$
+
+Each $\mathcal A_{p,q}$ is a fixed affine Bernstein-coefficient map of the
+Gram blocks. For instance,
+
+$$
+F_{0,0}=[Q_{\varnothing}]_{(0,0),(0,0)},
+$$
+
+while
+
+$$
+\tfrac14F_{0,0}+\tfrac34F_{1,0}
+=\tfrac12[Q_{\varnothing}]_{(0,0),(1,0)}
++\tfrac12[Q_{\varnothing}]_{(1,0),(0,0)}
++\tfrac14[Q_{\{1\}}]_{(0,0),(0,0)}.
+$$
+
+The detailed identity, basis degrees, and Gram dimensions are in the
+[worked two-parameter example](/PD-LMI-package/documents/math/sos-certificates/#worked-full-box-example-two-parameters-degree-three).
+
+## Arguments And Options
+
+| Input | Description |
+| :--- | :--- |
+| `C` | Any `pdlmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
+| `order` | Optional finite nonnegative integer scalar. It is an absolute full-box order and must meet the dimension-dependent minimum. |
+
+## Returned Object
+
+`Cbox` is a new `pdlmi` with `UsePolya=false`, `UsePutinar=false`,
+`UseFullBoxPreorder=true`, and `FullBoxOrder` equal to the selected order.
+Within each cell and rate row, `Constraints` stores all PSD Gram-block
+conditions before the exact coefficient identities. `toYalmip(Cbox)` returns
+those stored constraints in the same order.
+
+## Deterministic Transcript Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, Degree=2);
+direct = P >= 0;
+boxDefault = direct.applyFullBoxPreorder();
+boxHigher = boxDefault.applyFullBoxPreorder(2);
+polya = direct.applyPolya(1);
+boxFromPolya = polya.applyFullBoxPreorder();
+Fbox = toYalmip(boxDefault);
+
+fprintf("direct: fullBox=%d, order=%d, constraints=%d\n", ...
+    direct.UseFullBoxPreorder, direct.FullBoxOrder, ...
+    numel(direct.Constraints));
+fprintf("default: fullBox=%d, order=%d, constraints=%d\n", ...
+    boxDefault.UseFullBoxPreorder, boxDefault.FullBoxOrder, ...
+    numel(boxDefault.Constraints));
+fprintf("higher: order=%d, constraints=%d\n", ...
+    boxHigher.FullBoxOrder, numel(boxHigher.Constraints));
+fprintf("replacement: polya=%d, fullBox=%d, order=%d\n", ...
+    boxFromPolya.UsePolya, boxFromPolya.UseFullBoxPreorder, ...
+    boxFromPolya.FullBoxOrder);
+fprintf("exported constraints=%d\n", length(Fbox));
+```
+
+```text
+direct: fullBox=0, order=0, constraints=3
+default: fullBox=1, order=1, constraints=5
+higher: order=2, constraints=7
+replacement: polya=0, fullBox=1, order=1
+exported constraints=5
+```
+
+For the degree-two scalar residual, order one stores two PSD blocks followed by
+three exact coefficient identities. Order two stores two PSD blocks followed
+by five identities. The selection made from `polya` replaces Pólya assembly;
+it does not use the already elevated constraints.
+
+## Validation And Errors
+
+- A malformed `order` raises `pdlmi:InvalidFullBoxOrder`.
+- A valid integer below the applicable minimum raises `pdlmi:FullBoxOrderTooLow`.
+- Semidefinite and entry-wise inequalities retain their original global mode.
+- Equality is direct-only; this method raises `pdlmi:UnsupportedEqualityCertificate` before validating `order`.
+- Constructor selection errors are documented on the
+  [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/)
+  page, including `pdlmi:InvalidUseFullBoxPreorder` and
+  `pdlmi:ConflictingRelaxations`.
+
+This method implements the fixed-order full box preordering on each local
+parameter box. In one parameter it shares the parity-specific Markov–Lukács
+assembly with
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/).
+For two or more parameters it is distinct because full box includes every
+generator-subset product. It is not a general-domain SOS interface, a
+full-space SOS representation, or an automatic hierarchy selector.
+
+## See Also
+
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
+[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
+[`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) ·
+[`Bernstein Polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
+[`SOS Certificates`](/PD-LMI-package/documents/math/sos-certificates/)

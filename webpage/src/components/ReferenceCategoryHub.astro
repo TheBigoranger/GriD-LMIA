@@ -1,0 +1,60 @@
+---
+import { referenceEntries, referenceGroups } from "../data/reference-index.js";
+---
+
+<div class="reference-category-hub">
+  <table>
+    <caption>Reference families and indexed entry counts</caption>
+    <thead>
+      <tr>
+        <th scope="col">Family</th>
+        <th scope="col">Description</th>
+        <th scope="col">Overview</th>
+        <th scope="col">Indexed entries</th>
+      </tr>
+    </thead>
+    <tbody>
+      {referenceGroups.map((group) => {
+        const entries = referenceEntries.filter((entry) => entry.group === group.id);
+        const overview = entries[0];
+        return (
+          <tr>
+            <th scope="row">{group.label}</th>
+            <td data-label="Description">{group.description}</td>
+            <td data-label="Overview"><a href={`${overview?.href ?? "/PD-LMI-package/documents/reference-index/"}`}>Open {group.label} overview</a></td>
+            <td data-label="Indexed entries">{entries.length} indexed entries</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .reference-category-hub { max-width: 100%; min-width: 0; margin-block: 0.8rem 1.25rem; border: 1px solid var(--diagram-border); border-radius: 10px; background: var(--diagram-surface); }
+  .reference-category-hub table { display: table; width: 100%; table-layout: fixed; border-collapse: collapse; background: transparent; }
+  .reference-category-hub caption { padding: 0.72rem 0.82rem; color: var(--sl-color-text-accent); font-weight: 750; text-align: start; }
+  .reference-category-hub th,
+  .reference-category-hub td { min-width: 0; border-block-start: 1px solid var(--diagram-border); padding: 0.72rem 0.82rem; overflow-wrap: anywhere; text-align: start; vertical-align: top; }
+  .reference-category-hub th:nth-child(1) { width: 18%; }
+  .reference-category-hub th:nth-child(2) { width: 39%; }
+  .reference-category-hub th:nth-child(3) { width: 27%; }
+  .reference-category-hub th:nth-child(4) { width: 16%; }
+  .reference-category-hub thead th { color: var(--sl-color-gray-2); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+  .reference-category-hub tbody th { color: var(--sl-color-text-accent); font-size: 1rem; line-height: 1.25; }
+  .reference-category-hub tbody td:nth-child(2),
+  .reference-category-hub tbody td:last-child { color: var(--sl-color-gray-2); }
+  .reference-category-hub a { font-weight: 750; }
+  @media (max-width: 620px) {
+    .reference-category-hub { border: 0; background: transparent; }
+    .reference-category-hub table { display: block; table-layout: auto; }
+    .reference-category-hub caption { display: block; border: 1px solid var(--diagram-border); border-radius: 8px; background: var(--diagram-surface); }
+    .reference-category-hub thead { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .reference-category-hub tbody { display: grid; gap: 0.65rem; margin-block-start: 0.65rem; }
+    .reference-category-hub tbody tr { display: grid; min-width: 0; border: 1px solid var(--diagram-border); border-radius: 8px; background: var(--diagram-surface); overflow: hidden; }
+    .reference-category-hub tbody th,
+    .reference-category-hub tbody td { display: grid; grid-template-columns: minmax(6.5rem, 0.42fr) minmax(0, 1fr); width: auto; padding: 0.58rem 0.68rem; }
+    .reference-category-hub tbody th { display: block; width: auto; border-block-start: 0; }
+    .reference-category-hub tbody td::before { content: attr(data-label); color: var(--sl-color-gray-2); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+  }
+</style>
