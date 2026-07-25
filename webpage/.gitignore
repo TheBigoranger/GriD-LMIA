@@ -9,6 +9,13 @@ public/manual.pdf
 # dependencies
 node_modules/
 
+# browser testing
+.playwright/
+blob-report/
+playwright-report/
+test-results/
+playwright.config.*
+
 # logs
 npm-debug.log*
 yarn-debug.log*
