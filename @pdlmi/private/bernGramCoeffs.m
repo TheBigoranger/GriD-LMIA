@@ -1,14 +1,16 @@
-function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPower)
+function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPower, basisLabels)
     %BERNGRAMCOEFFS Map a weighted tensor Bernstein-Gram form to coefficients.
     %
     %   Syntax:
     %     coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPower)
+    %     coeffs = bernGramCoeffs(..., basisLabels)
     %
     %   Arguments:
     %     gram               - Square basis-major block Gram matrix.
     %     gramDegree         - Tensor Bernstein degree of the Gram basis.
     %     alphaPower         - Per-axis powers of alpha.
     %     oneMinusAlphaPower - Per-axis powers of 1-alpha.
+    %     basisLabels        - Optional explicit tensor-basis label rows.
     %
     %   Output:
     %     coeffs - Flat matrix coefficients in helper.combRows order.
@@ -17,7 +19,8 @@ function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPowe
     %   (1-alpha).^oneMinusAlphaPower .* Z_d' * Q * Z_d.
     %   gramDegree, alphaPower, and oneMinusAlphaPower each contain one
     %   nonnegative integer per parameter direction. gram uses basis-major
-    %   blocks, with one matrix block per tensor label. The tensor degree is
+    %   blocks, with one matrix block per selected tensor label. Omitting
+    %   basisLabels selects the complete tensor basis. The tensor degree is
     %   2*gramDegree + alphaPower + oneMinusAlphaPower.
     %   Labels count alpha powers: label 0 is lower/left and label d is
     %   upper/right in each parameter direction.
@@ -36,15 +39,19 @@ function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPowe
         error("pdlmi:InvalidGramPowers", ...
             "Gram degrees and weight powers must be nonnegative integer vectors of equal length.");
     end
-    nBasis = prod(gramDegree + 1);
+    if nargin < 5
+        basisLabels = helper.combRows(arrayfun(@(d) 0:d, gramDegree, ...
+            "UniformOutput", false));
+    else
+        basisLabels = chkBasisLabels(basisLabels, gramDegree);
+    end
+    nBasis = size(basisLabels, 1);
     if size(gram, 1) ~= size(gram, 2) || mod(size(gram, 1), nBasis) ~= 0
         error("pdlmi:InvalidGramShape", ...
             "Gram matrix size must be a square multiple of the tensor basis size.");
     end
     n = size(gram, 1) / nBasis;
     targetDegree = 2 * gramDegree + alphaPower + oneMinusAlphaPower;
-    basisLabels = helper.combRows(arrayfun(@(d) 0:d, gramDegree, ...
-        "UniformOutput", false));
     targetLabels = helper.combRows(arrayfun(@(d) 0:d, targetDegree, ...
         "UniformOutput", false));
     coeffs = repmat({zeros(n)}, 1, size(targetLabels, 1));
@@ -68,6 +75,20 @@ function coeffs = bernGramCoeffs(gram, gramDegree, alphaPower, oneMinusAlphaPowe
             coeffs{out} = coeffs{out} + scale * gram(iBlock, jBlock);
         end
     end
+end
+
+function labels = chkBasisLabels(labels, gramDegree)
+    %CHKBASISLABELS Validate an explicit subset of tensor Gram labels.
+    nPar = numel(gramDegree);
+    if ~isnumeric(labels) || ~isreal(labels) || isempty(labels) || ...
+            size(labels, 2) ~= nPar || any(~isfinite(labels), "all") || ...
+            any(mod(labels, 1) ~= 0, "all") || any(labels < 0, "all") || ...
+            any(labels > gramDegree, "all") || ...
+            size(unique(labels, "rows"), 1) ~= size(labels, 1)
+        error("pdlmi:InvalidGramBasis", ...
+            "basisLabels must contain unique valid tensor Gram labels.");
+    end
+    labels = double(labels);
 end
 
 function out = rowVec(val, name)

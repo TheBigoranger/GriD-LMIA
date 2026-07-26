@@ -15,8 +15,8 @@ function out = applyPutinar(obj, order)
     %   parity-specific Markov-Lukacs form used by applyFullBoxPreorder.
     %   For two or more parameters, the default order is
     %   ceil(Residual.Degree/2) and the quadratic-module form is used.
-    %   Reapplication rebuilds from Residual and replaces any Pólya,
-    %   Putinar, or full-box selection.
+    %   Reapplication rebuilds from Residual and replaces any Pólya, Putinar,
+    %   sparse full-box, or FullBox selection.
     %
     %   In every physical cell and active rate row, the sign-normalized target
     %   is represented by the Markov-Lukacs parity form in one parameter, and

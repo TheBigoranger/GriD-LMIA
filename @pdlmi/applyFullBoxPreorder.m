@@ -13,7 +13,8 @@ function out = applyFullBoxPreorder(obj, order)
     %
     %   The no-argument form chooses the smallest admissible absolute order.
     %   Reapplication starts from Residual, so it replaces any Pólya, Putinar,
-    %   or earlier full-box selection rather than compounding it.
+    %   sparse full-box, or earlier FullBox selection rather than compounding
+    %   it.
     %
     %   The default is floor(m/2) for one parameter and ceil(m/2) otherwise,
     %   where m is the residual degree. Each physical cell and active rate row

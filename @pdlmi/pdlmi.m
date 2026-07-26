@@ -12,11 +12,17 @@ classdef pdlmi
     %     C = pdlmi(expr, relation, "UsePutinar")
     %     C = pdlmi(expr, relation, UsePutinar=true, PutinarOrder=r)
     %     C = pdlmi(expr, relation, PutinarOrder=r)
+    %     C = pdlmi(expr, relation, "UseSparseFullBoxPreorder")
+    %     C = pdlmi(expr, relation, UseSparseFullBoxPreorder=true, BandWidth=b)
+    %     C = pdlmi(expr, relation, BandWidth=b)
+    %     C = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
     %
     %   Arguments:
-    %     expr     - pdvar residual to constrain coefficient-wise.
+    %     expr     - pdvar residual to constrain relative to zero.
     %     relation - "<=", ">=", or "==" applied to assembled coefficients.
-    %     options  - One optional inequality certificate selection.
+    %     options  - One optional inequality certificate selection. Sparse
+    %                full-box options are UseSparseFullBoxPreorder,
+    %                SparseFullBoxOrder, and BandWidth.
     %
     %   Output:
     %     C - Constraint wrapper retaining the residual and assembly settings;
@@ -30,11 +36,29 @@ classdef pdlmi
     %   constructed wrapper. Equality is entry-wise and direct-only; supplying
     %   a certificate raises pdlmi:UnsupportedEqualityCertificate.
     %
-    %   Pólya uses a nonnegative degree increment; Putinar and full-box use
-    %   absolute Gram orders. The three relaxations are mutually exclusive,
-    %   operate independently per physical cell and rate row, and add no
-    %   implicit positivity margin. Apply methods rebuild from Residual, so a
-    %   new selection replaces the previous one.
+    %   Pólya uses a nonnegative degree increment; Putinar, sparse full-box,
+    %   and full-box use absolute Gram orders. The four relaxations are mutually
+    %   exclusive, operate independently per physical cell and rate row, and
+    %   add no implicit positivity margin. Entry-wise Gram certificates are
+    %   also independent for every MATLAB column-major matrix entry. Apply
+    %   methods rebuild from Residual, so a new selection replaces the previous
+    %   one.
+    %
+    %   Sparse full-box defaults to BandWidth=2. Its default order is
+    %   floor(expr.Degree/2) for one parameter and ceil(expr.Degree/2)
+    %   otherwise. Width one always returns actual Direct state. Above that
+    %   endpoint, width at least SparseFullBoxOrder+1 returns actual FullBox
+    %   state. Intermediate widths use free PSD blocks on every axis-aligned
+    %   tensor-basis window and exact Bernstein coefficient matching. In one
+    %   parameter, widths two and three give block-tridiagonal and
+    %   block-pentadiagonal Gram support. Larger widths form a nested sufficient
+    %   hierarchy, but strict improvement is not guaranteed.
+    %
+    %   BandWidth or SparseFullBoxOrder alone enables sparse full-box.
+    %   Explicit UseSparseFullBoxPreorder=false conflicts with either parameter.
+    %   Invalid widths and orders raise pdlmi:InvalidBandWidth and
+    %   pdlmi:InvalidSparseFullBoxOrder; an order below the dimension-dependent
+    %   minimum raises pdlmi:SparseFullBoxOrderTooLow.
     %
     %   Example:
     %     P = pdvar(2, {[0 1]}, "symmetric");
@@ -44,6 +68,7 @@ classdef pdlmi
     %     directPos = P >= 0;
     %     putinar = directPos.applyPutinar(1);
     %     preorder = directPos.applyFullBoxPreorder();
+    %     sparse = directPos.applySparseFullBoxPreorder(2);
     %     entrywise = pdvar(3, 2, {[0 1]}) >= 0;
     %     equality = P == eye(2);
 
@@ -57,6 +82,9 @@ classdef pdlmi
         FullBoxOrder
         UsePutinar
         PutinarOrder
+        UseSparseFullBoxPreorder
+        SparseFullBoxOrder
+        BandWidth
     end
 
     methods
@@ -86,6 +114,9 @@ classdef pdlmi
             obj.FullBoxOrder = opts.FullBoxOrder;
             obj.UsePutinar = opts.UsePutinar;
             obj.PutinarOrder = opts.PutinarOrder;
+            obj.UseSparseFullBoxPreorder = false;
+            obj.SparseFullBoxOrder = 0;
+            obj.BandWidth = 0;
             if opts.UseFullBoxPreorder
                 if opts.FullBoxOrderSpecified
                     opts.FullBoxOrder = chkFullBoxOrder(expr, ...
@@ -106,6 +137,32 @@ classdef pdlmi
                 obj.PutinarOrder = opts.PutinarOrder;
                 obj.Constraints = mkPutinarCons(expr, relation, ...
                     opts.PutinarOrder, mode);
+            elseif opts.UseSparseFullBoxPreorder
+                if opts.SparseFullBoxOrderSpecified
+                    order = chkSparseFullBoxOrder(expr, ...
+                        opts.SparseFullBoxOrder);
+                else
+                    order = chkSparseFullBoxOrder(expr);
+                end
+                bandWidth = chkBandWidth(opts.BandWidth);
+
+                % Canonical endpoints preserve the established public states
+                % and avoid auxiliary Gram variables when they add no freedom.
+                if bandWidth == 1
+                    obj.Constraints = mkCoeffCons(expr, relation, ...
+                        false, 0, mode);
+                elseif bandWidth >= order + 1
+                    obj.UseFullBoxPreorder = true;
+                    obj.FullBoxOrder = order;
+                    obj.Constraints = mkFullBoxCons(expr, relation, ...
+                        order, mode);
+                else
+                    obj.UseSparseFullBoxPreorder = true;
+                    obj.SparseFullBoxOrder = order;
+                    obj.BandWidth = bandWidth;
+                    obj.Constraints = mkSparseFullBoxCons(expr, relation, ...
+                        order, bandWidth, mode);
+                end
             else
                 obj.Constraints = mkCoeffCons(expr, relation, ...
                     opts.UsePolya, opts.PolyaDegree, mode);
@@ -117,8 +174,9 @@ classdef pdlmi
         end
 
         out = applyPolya(obj, degreeIncrement)
-        out = applyFullBoxPreorder(obj, order)
-        out = applyPutinar(obj, order)
+        out = applyFullBoxPreorder(obj, varargin)
+        out = applyPutinar(obj, varargin)
+        out = applySparseFullBoxPreorder(obj, varargin)
     end
 end
 
@@ -161,10 +219,14 @@ function opts = parseOpts(isEquality, varargin)
     opts = struct("UsePolya", false, "PolyaDegree", 0, ...
         "UseFullBoxPreorder", false, "FullBoxOrder", 0, ...
         "FullBoxOrderSpecified", false, "UsePutinar", false, ...
-        "PutinarOrder", 0, "PutinarOrderSpecified", false);
+        "PutinarOrder", 0, "PutinarOrderSpecified", false, ...
+        "UseSparseFullBoxPreorder", false, "SparseFullBoxOrder", 0, ...
+        "SparseFullBoxOrderSpecified", false, "BandWidth", 0);
     seen = struct("UsePolya", false, "PolyaDegree", false, ...
         "UseFullBoxPreorder", false, "FullBoxOrder", false, ...
-        "UsePutinar", false, "PutinarOrder", false);
+        "UsePutinar", false, "PutinarOrder", false, ...
+        "UseSparseFullBoxPreorder", false, ...
+        "SparseFullBoxOrder", false, "BandWidth", false);
     k = 1;
     while k <= numel(varargin)
         rawName = varargin{k};
@@ -176,7 +238,9 @@ function opts = parseOpts(isEquality, varargin)
         name = string(rawName);
         if ~any(name == ["UsePolya", "PolyaDegree", ...
                 "UseFullBoxPreorder", "FullBoxOrder", ...
-                "UsePutinar", "PutinarOrder"])
+                "UsePutinar", "PutinarOrder", ...
+                "UseSparseFullBoxPreorder", "SparseFullBoxOrder", ...
+                "BandWidth"])
             error("pdlmi:UnknownOption", "Unsupported pdlmi option: %s.", name);
         end
         if isEquality
@@ -191,7 +255,7 @@ function opts = parseOpts(isEquality, varargin)
 
         % Relaxation selector flags may appear without an explicit value.
         if any(name == ["UsePolya", "UseFullBoxPreorder", ...
-                "UsePutinar"]) && ...
+                "UsePutinar", "UseSparseFullBoxPreorder"]) && ...
                 (k == numel(varargin) || ...
                 ((ischar(varargin{k + 1}) && isrow(varargin{k + 1}) && ...
                 ~isempty(varargin{k + 1})) || ...
@@ -212,11 +276,14 @@ function opts = parseOpts(isEquality, varargin)
             nextName = string(varargin{k + 1});
             if any(nextName == ["UsePolya", "PolyaDegree", ...
                     "UseFullBoxPreorder", "FullBoxOrder", ...
-                    "UsePutinar", "PutinarOrder"])
+                    "UsePutinar", "PutinarOrder", ...
+                    "UseSparseFullBoxPreorder", "SparseFullBoxOrder", ...
+                    "BandWidth"])
                 error("pdlmi:InvalidOptions", ...
                     "pdlmi option %s requires a value.", name);
             end
-            if name ~= "PutinarOrder"
+            if ~any(name == ["PutinarOrder", "SparseFullBoxOrder", ...
+                    "BandWidth"])
                 error("pdlmi:UnknownOption", ...
                     "Unsupported pdlmi option: %s.", nextName);
             end
@@ -261,6 +328,21 @@ function opts = parseOpts(isEquality, varargin)
                     "numeric", "real", "finite", "integer", ...
                     "nonnegative", "scalar"));
                 opts.PutinarOrderSpecified = true;
+            case "UseSparseFullBoxPreorder"
+                if ~islogical(val) || ~isscalar(val)
+                    error("pdlmi:InvalidUseSparseFullBoxPreorder", ...
+                        "UseSparseFullBoxPreorder must be a logical scalar.");
+                end
+                opts.UseSparseFullBoxPreorder = val;
+            case "SparseFullBoxOrder"
+                opts.SparseFullBoxOrder = double(helper.chk(val, ...
+                    "pdlmi:InvalidSparseFullBoxOrder", ...
+                    "SparseFullBoxOrder must be a finite nonnegative integer scalar.", ...
+                    "numeric", "real", "finite", "integer", ...
+                    "nonnegative", "scalar"));
+                opts.SparseFullBoxOrderSpecified = true;
+            case "BandWidth"
+                opts.BandWidth = chkBandWidth(val);
         end
         k = k + 2;
     end
@@ -286,8 +368,22 @@ function opts = parseOpts(isEquality, varargin)
     if seen.PutinarOrder && ~seen.UsePutinar
         opts.UsePutinar = true;
     end
-    if sum([opts.UsePolya, opts.UseFullBoxPreorder, opts.UsePutinar]) > 1
+    if seen.UseSparseFullBoxPreorder && ...
+            ~opts.UseSparseFullBoxPreorder && ...
+            (seen.SparseFullBoxOrder || seen.BandWidth)
+        error("pdlmi:ConflictingSparseFullBoxOptions", ...
+            "UseSparseFullBoxPreorder=false conflicts with sparse full-box parameters.");
+    end
+    if (seen.SparseFullBoxOrder || seen.BandWidth) && ...
+            ~seen.UseSparseFullBoxPreorder
+        opts.UseSparseFullBoxPreorder = true;
+    end
+    if opts.UseSparseFullBoxPreorder && ~seen.BandWidth
+        opts.BandWidth = 2;
+    end
+    if sum([opts.UsePolya, opts.UseFullBoxPreorder, opts.UsePutinar, ...
+            opts.UseSparseFullBoxPreorder]) > 1
         error("pdlmi:ConflictingRelaxations", ...
-            "Pólya, Putinar, and full box preordering cannot be enabled together.");
+            "Pólya, Putinar, sparse full box, and full box preordering cannot be enabled together.");
     end
 end

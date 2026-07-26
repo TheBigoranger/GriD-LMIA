@@ -12,8 +12,9 @@ function out = applyPolya(obj, degreeIncrement)
     %     out - New pdlmi rebuilt with Pólya elevation enabled.
     %
     %   The no-argument form uses increment one. Passing a finite nonnegative
-    %   integer replaces any prior selection because assembly always starts
-    %   from the stored original Residual rather than existing constraints.
+    %   integer replaces any prior Pólya, Putinar, sparse full-box, or FullBox
+    %   selection because assembly always starts from the stored original
+    %   Residual rather than existing constraints.
     %   This value-class method returns a new pdlmi and leaves obj unchanged;
     %   entry-wise inequalities vectorize every elevated matrix coefficient.
     %   Invalid increments raise pdlmi:InvalidPolyaDegree. Coefficient equality
