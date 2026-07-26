@@ -76,6 +76,10 @@ classdef pdmat < pdbase
         end
     end
 
+    methods (Access = protected)
+        out = mkUnOp(obj, vals, sz)
+    end
+
 end
 
 function degOpt = parseOpts(varargin)

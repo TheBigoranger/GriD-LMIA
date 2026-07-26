@@ -65,6 +65,10 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
         end
     end
 
+    methods (Access = protected)
+        out = mkUnOp(obj, vals, sz)
+    end
+
 end
 
 function [grid, sz, deg, vals, hasRate, rb] = ctorArgs(varargin)

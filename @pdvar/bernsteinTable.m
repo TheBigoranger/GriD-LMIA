@@ -23,7 +23,7 @@ function tbl = bernsteinTable(obj, varargin)
     nCoeff = (obj.Degree + 1) ^ obj.npar();
     rateVerts = [];
     if isRateRows(obj.LocalValues, obj.GridInfo.Vectors, nCoeff)
-        % Expand RateBounds into the vertex rows consumed by helper.bernTbl.
+        % Expand RateBounds into the vertex rows consumed by pdbase.bernTbl.
         vecs = cell(1, size(obj.RateBounds, 1));
         for k = 1:size(obj.RateBounds, 1)
             vecs{k} = obj.RateBounds(k, :);
@@ -31,8 +31,16 @@ function tbl = bernsteinTable(obj, varargin)
         rateVerts = helper.combRows(vecs);
     end
 
-    tbl = helper.bernTbl(obj, "pdvar:InvalidBernsteinTableInput", ...
-        @sdpText, @sdpText, rateVerts, varargin{:});
+    tbl = bernTbl(obj, "pdvar:InvalidBernsteinTableInput", ...
+        @sdpText, @exprText, rateVerts, varargin{:});
+end
+
+function txt = exprText(val)
+    %EXPRTEXT Group each complete coefficient before basis multiplication.
+    txt = sdpText(val);
+    if ~(startsWith(txt, "[") && endsWith(txt, "]"))
+        txt = "[" + txt + "]";
+    end
 end
 
 function txt = sdpText(val)

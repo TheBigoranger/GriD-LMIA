@@ -28,7 +28,7 @@ function out = value(obj)
     %     A = value(P);
 
     grid = obj.GridInfo.Vectors;
-    vals = helper.mapVals(obj.LocalValues, @evalCoeff, grid);
+    vals = pdbase.mapVals(obj.LocalValues, @evalCoeff, grid);
     nCoeff = (obj.Degree + 1) ^ obj.npar();
     if ~isRateRows(vals, grid, nCoeff)
         out = mkPdmat(obj, vals);

@@ -41,8 +41,8 @@ function out = binOp(lhs, rhs, fcn, errId)
     deg = max(ld.Degree, rd.Degree);
     % Degree elevation changes representation only; it does not change the
     % represented polynomial before coefficient-wise algebra is applied.
-    lhsVals = elevLocalValues(anchor, ld.LocalValues, ld.Degree, deg, grid);
-    rhsVals = elevLocalValues(anchor, rd.LocalValues, rd.Degree, deg, grid);
+    lhsVals = pdbase.elevLocalValues(ld.LocalValues, ld.Degree, deg, grid);
+    rhsVals = pdbase.elevLocalValues(rd.LocalValues, rd.Degree, deg, grid);
     vals = zipRows(lhsVals, rhsVals, fcn, grid);
 
     if helper.isZero(vals, "vals")

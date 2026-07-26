@@ -17,7 +17,8 @@ function out = cat(dim, varargin)
     deg = max(arrayfun(@(d) d.Degree, data));
 
     for k = 1:numel(data)
-        data(k).LocalValues = elevLocalValues(anchor, data(k).LocalValues, data(k).Degree, deg, grid);
+        data(k).LocalValues = pdbase.elevLocalValues( ...
+            data(k).LocalValues, data(k).Degree, deg, grid);
     end
 
     nCell = cellfun(@numel, grid) - 1;

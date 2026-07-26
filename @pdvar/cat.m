@@ -25,7 +25,7 @@ function out = cat(dim, varargin)
     deg = max(arrayfun(@(d) d.Degree, data));
 
     for k = 1:numel(data)
-        data(k).LocalValues = elevLocalValues(anchor, data(k).LocalValues, ...
+        data(k).LocalValues = pdbase.elevLocalValues(data(k).LocalValues, ...
             data(k).Degree, deg, grid);
     end
 
@@ -87,7 +87,7 @@ function [data, outSize] = catData(dim, args, grid, rb)
 
     for k = find(isScalar)
         data(k).MatrixSize = sz(k, :);
-        data(k).LocalValues = helper.mapVals(data(k).LocalValues, ...
+        data(k).LocalValues = pdbase.mapVals(data(k).LocalValues, ...
             @(a) repmat(a, sz(k, :)), grid);
     end
 end

@@ -16,6 +16,13 @@ function val = evaluate(obj, pt)
     %     A = pdmat({[0 1]}, {1, 3}, Degree=1);
     %     val = A.evaluate(0.25);
 
+    if isempty(obj.FunctionHandle)
+        % Coefficient-backed data uses the same row-aware reconstruction as
+        % pdbase and pdvar; only exact function sources remain class-specific.
+        val = evaluate@pdbase(obj, pt);
+        return
+    end
+
     pt = helper.chk(pt, "pdmat:InvalidPoint", ...
         "Evaluation point must be a finite real vector with one entry per parameter.", ...
         "numeric", "real", "vector", "finite", "Numel", obj.npar());
@@ -25,27 +32,7 @@ function val = evaluate(obj, pt)
         error("pdmat:PointOutOfBounds", ...
             "Evaluation point must lie inside the pdmat grid bounds.");
     end
-
-    if ~isempty(obj.FunctionHandle)
-        val = evalHandle(obj, pt);
-        return
-    end
-
-    [subs, alpha] = localPoint(obj, pt);
-    coeffs = obj.coeffs(subs);
-    lbls = obj.lbls();
-    val = zeros(obj.MatrixSize);
-    % Keep the Bernstein weight formula at the evaluation site to avoid a
-    % one-use helper chain around local coefficient reconstruction.
-    for k = 1:numel(coeffs)
-        w = 1;
-        for p = 1:numel(alpha)
-            j = lbls(k, p);
-            w = w * nchoosek(obj.Degree, j) * ...
-                (1 - alpha(p))^(obj.Degree - j) * alpha(p)^j;
-        end
-        val = val + coeffs{k} .* w;
-    end
+    val = evalHandle(obj, pt);
 end
 
 function val = evalHandle(obj, pt)
@@ -65,25 +52,4 @@ function val = evalHandle(obj, pt)
             "Function handle must return the pdmat matrix size during evaluation.");
     end
     val = raw;
-end
-
-function [subs, alpha] = localPoint(obj, pt)
-    %LOCALPOINT Locate pt's physical cell and forward Bernstein coordinates.
-    nPar = obj.npar();
-    subs = zeros(1, nPar);
-    alpha = zeros(1, nPar);
-    for p = 1:nPar
-        v = obj.GridInfo.Vectors{p};
-        x = pt(p);
-        if x == v(end)
-            subs(p) = numel(v) - 1;
-        else
-            subs(p) = find(v <= x, 1, "last");
-        end
-
-        lo = v(subs(p));
-        hi = v(subs(p) + 1);
-        % alpha=(x-lo)/(hi-lo) keeps label 0 lower and label m upper.
-        alpha(p) = (x - lo) / (hi - lo);
-    end
 end

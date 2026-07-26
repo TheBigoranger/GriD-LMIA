@@ -35,8 +35,8 @@ function out = binOp(lhs, rhs, fcn, errId)
 
     % Elevate both operands before applying the cell-local coefficient operation.
     deg = max(ld.Degree, rd.Degree);
-    lhsVals = elevLocalValues(anchor, ld.LocalValues, ld.Degree, deg, grid);
-    rhsVals = elevLocalValues(anchor, rd.LocalValues, rd.Degree, deg, grid);
+    lhsVals = pdbase.elevLocalValues(ld.LocalValues, ld.Degree, deg, grid);
+    rhsVals = pdbase.elevLocalValues(rd.LocalValues, rd.Degree, deg, grid);
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) cellfun(fcn, ...
         helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), ...

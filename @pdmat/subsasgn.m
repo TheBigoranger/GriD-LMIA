@@ -20,8 +20,8 @@ function obj = subsasgn(obj, S, rhs)
     rhsData = asData(grid, rhs, [numel(rows), numel(cols)], "pdmat:InvalidAssignment");
 
     deg = max(lhsData.Degree, rhsData.Degree);
-    lhsVals = elevLocalValues(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
-    rhsVals = elevLocalValues(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
+    lhsVals = pdbase.elevLocalValues(lhsData.LocalValues, lhsData.Degree, deg, grid);
+    rhsVals = pdbase.elevLocalValues(rhsData.LocalValues, rhsData.Degree, deg, grid);
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) assignCell( ...
         helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), rows, cols));
@@ -44,7 +44,7 @@ function [rows, cols] = sanChk(obj, S, rhs)
         error("pdmat:FunctionOnlyAlgebra", ...
             "Function-backed pdmat objects need explicit Bernstein coefficient evidence for this operation.");
     end
-    [rows, cols] = helper.matSubs(S(1).subs, obj.MatrixSize, ...
+    [rows, cols] = pdbase.matSubs(S(1).subs, obj.MatrixSize, ...
         "pdmat:InvalidAssignment");
 end
 

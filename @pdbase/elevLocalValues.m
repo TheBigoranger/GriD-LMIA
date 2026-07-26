@@ -1,22 +1,18 @@
-function vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
+function vals = elevLocalValues(vals, fromDeg, toDeg, grid)
     %ELEVLOCALVALUES Elevate temporary cell-local coefficient tables.
     %
     %   Syntax:
-    %     vals = elevLocalValues(obj, vals, fromDeg, toDeg)
-    %     vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
+    %     vals = pdbase.elevLocalValues(vals, fromDeg, toDeg, grid)
     %
     %   Arguments:
     %     vals     - Nested coefficient tree on grid.
     %     fromDeg  - Current scalar degree in every parameter direction.
     %     toDeg    - Target scalar degree.
-    %     grid     - Optional grid owning vals; defaults to obj's grid.
+    %     grid     - Parameter grid owning vals.
     %
     %   Output:
     %     vals - Elevated tree with each rate-vertex row handled separately.
 
-    if nargin < 5
-        grid = obj.GridInfo.Vectors;
-    end
     if fromDeg == toDeg
         return
     end
@@ -25,11 +21,11 @@ function vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
     nCell = cellfun(@numel, grid) - 1;
     nFrom = (fromDeg + 1) ^ nPar;
     nTo = (toDeg + 1) ^ nPar;
-    vals = helper.mkNest(nCell, @(subs) elevLeaf(obj, ...
-        helper.cellGet(vals, subs), fromDeg, toDeg, nFrom, nTo));
+    vals = helper.mkNest(nCell, @(subs) elevLeaf( ...
+        helper.cellGet(vals, subs), fromDeg, toDeg, nFrom, nTo, nPar));
 end
 
-function out = elevLeaf(obj, leaf, fromDeg, toDeg, nFrom, nTo)
+function out = elevLeaf(leaf, fromDeg, toDeg, nFrom, nTo, nPar)
     % Rate vertices occupy rows and must not be mixed by degree elevation.
     if ~iscell(leaf) || size(leaf, 2) ~= nFrom
         error("pdbase:InvalidCoefficientCell", ...
@@ -38,6 +34,7 @@ function out = elevLeaf(obj, leaf, fromDeg, toDeg, nFrom, nTo)
 
     out = cell(size(leaf, 1), nTo);
     for row = 1:size(leaf, 1)
-        out(row, :) = obj.bernElev(leaf(row, :), fromDeg, toDeg);
+        out(row, :) = pdbase.bernElev( ...
+            leaf(row, :), fromDeg, toDeg, nPar);
     end
 end

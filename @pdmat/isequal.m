@@ -55,8 +55,8 @@ function tf = sameOne(a, b)
         end
 
         deg = max(ad.Degree, bd.Degree);
-        av = elevLocalValues(a, ad.LocalValues, ad.Degree, deg, grid);
-        bv = elevLocalValues(a, bd.LocalValues, bd.Degree, deg, grid);
+        av = pdbase.elevLocalValues(ad.LocalValues, ad.Degree, deg, grid);
+        bv = pdbase.elevLocalValues(bd.LocalValues, bd.Degree, deg, grid);
         tf = valsEqual(av, bv);
         return
     end

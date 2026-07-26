@@ -22,7 +22,7 @@ function obj = subsasgn(obj, S, rhs)
             "pdvar does not support deletion assignment.");
     end
 
-    [rows, cols] = helper.matSubs(S(1).subs, obj.MatrixSize, ...
+    [rows, cols] = pdbase.matSubs(S(1).subs, obj.MatrixSize, ...
         "pdvar:InvalidAssignment");
     grid = obj.mergeGrid("pdvar:MixedGrid", rhs);
     rb = pickRb("pdvar:InvalidAssignment", obj, rhs);
@@ -32,8 +32,8 @@ function obj = subsasgn(obj, S, rhs)
         rb, "pdvar:InvalidAssignment");
 
     deg = max(lhsData.Degree, rhsData.Degree);
-    lhsVals = elevLocalValues(obj, lhsData.LocalValues, lhsData.Degree, deg, grid);
-    rhsVals = elevLocalValues(obj, rhsData.LocalValues, rhsData.Degree, deg, grid);
+    lhsVals = pdbase.elevLocalValues(lhsData.LocalValues, lhsData.Degree, deg, grid);
+    rhsVals = pdbase.elevLocalValues(rhsData.LocalValues, rhsData.Degree, deg, grid);
     vals = zipRows(lhsVals, rhsVals, @(lhs, rhs) assignBlock(lhs, rhs, rows, cols), grid);
 
     hasDec = lhsData.ContainsDecision || rhsData.ContainsDecision;

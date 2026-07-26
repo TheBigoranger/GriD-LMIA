@@ -30,6 +30,6 @@ function vals = elevVals(obj, degreeIncrement)
             "Degree elevation requires stored Bernstein coefficient evidence.");
     end
 
-    vals = obj.elevLocalValues(obj.LocalValues, obj.Degree, ...
+    vals = pdbase.elevLocalValues(obj.LocalValues, obj.Degree, ...
         obj.Degree + inc, obj.GridInfo.Vectors);
 end

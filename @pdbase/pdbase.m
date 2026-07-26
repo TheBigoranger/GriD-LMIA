@@ -103,13 +103,22 @@ classdef pdbase
         end
 
         vals = elevVals(obj, degreeIncrement)
+        out = elevate(obj, degreeIncrement)
     end
 
     methods (Access = protected)
-        out = bernElev(obj, coeffs, fromDeg, toDeg)
-        vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
         out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
+        tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
         grid = mergeGrid(obj, errId, varargin)
+        out = unOp(obj, fcn, sz)
+        out = mkUnOp(obj, vals, sz)
+    end
+
+    methods (Static, Access = protected)
+        out = bernElev(coeffs, fromDeg, toDeg, nPar)
+        vals = elevLocalValues(vals, fromDeg, toDeg, grid)
+        vals = mapVals(vals, fcn, grid)
+        [rows, cols] = matSubs(subs, sz, errId)
     end
 
 end

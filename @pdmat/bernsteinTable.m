@@ -25,6 +25,6 @@ function tbl = bernsteinTable(obj, varargin)
             "Function-only pdmat objects do not have Bernstein coefficient evidence to tabulate.");
     end
 
-    tbl = helper.bernTbl(obj, "pdmat:InvalidBernsteinTableInput", ...
+    tbl = bernTbl(obj, "pdmat:InvalidBernsteinTableInput", ...
         @(val) val, @(val) string(mat2str(val)), [], varargin{:});
 end

@@ -1,13 +1,14 @@
-function out = bernElev(obj, coeffs, fromDeg, toDeg)
+function out = bernElev(coeffs, fromDeg, toDeg, nPar)
     %BERNELEV Degree-elevate one cell's flat Bernstein coefficients.
     %
     %   Syntax:
-    %     out = bernElev(obj, coeffs, fromDeg, toDeg)
+    %     out = pdbase.bernElev(coeffs, fromDeg, toDeg, nPar)
     %
     %   Arguments:
     %     coeffs - Flat coefficients for one physical cell.
     %     fromDeg - Current scalar degree in every parameter direction.
     %     toDeg   - Target degree, not smaller than fromDeg.
+    %     nPar    - Number of parameter directions.
     %
     %   Output:
     %     out - Equivalent flat coefficients at toDeg.
@@ -16,8 +17,7 @@ function out = bernElev(obj, coeffs, fromDeg, toDeg)
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     vals = A.elevVals(1);
 
-    % sanity check inputs
-    nPar = obj.npar();
+    % Validate the explicit tensor dimension before forming label tables.
     sanChk(fromDeg, toDeg, coeffs, nPar);
 
     if toDeg == fromDeg
