@@ -1,61 +1,125 @@
 ---
 title: pdvar Indexing And Inspection
-description: Detailed indexing, assignment, shape, equality, and display reference for pdvar.
+description: Complete symbolic indexing, assignment, shape, equality, display, and MATLAB dispatch reference.
 ---
 
 import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>indexing and inspection</span></nav>
 
-## <span id="pdvar-subsref"></span><span id="pdvar-subsasgn"></span><span id="pdvar-end"></span>Index and assign symbolic blocks
+## <span id="pdvar-subsref"></span>`subsref` and <span id="pdvar-end"></span>`end`
 
 ```matlab
-block = P(rows,cols); P(rows,cols) = value; last = P(:,end);
+block = P(rows,columns)
+last = P(:,end)
+property = P.Degree
 ```
 
-Two-dimensional `subsref` selects the same symbolic block from every local coefficient. `subsasgn` accepts numeric or compatible decision blocks and keeps grid/rate metadata. `end` resolves against payload dimensions. Dot access exposes properties and methods.
+Two-dimensional parentheses indexing selects the same symbolic block from
+every local coefficient and derivative row. Subscripts may be `:`, matching
+logical vectors, or finite in-range positive integers. `end` resolves against
+the payload dimensions.
+
+## <span id="pdvar-subsasgn"></span>`subsasgn`
+
+```matlab
+P(rows,columns) = numericValue
+P(rows,columns) = compatibleDecisionOrKnownValue
+```
+
+Assignment accepts compatible numeric, affine `sdpvar`, `pdmat`, or `pdvar`
+blocks and preserves grid, degree, ordinary/rate row structure, and rate
+bounds. Dot and brace assignment are rejected with
+`pdvar:UnsupportedAssignment`.
 
 ```matlab
 yalmip('clear')
 P = pdvar(2, {[0 1]}, "full");
-entry = P(1,end); P(2,1) = 0;
-fprintf('entry=%d-by-%d, assigned=%d-by-%d\n',size(entry,1),size(entry,2),size(P,1),size(P,2));
+entry = P(1,end);
+P(2,1) = 0;
+shapes = [size(entry); size(P)]
 ```
 
 ```text
-entry=1-by-1, assigned=2-by-2
+shapes =
+     1     1
+     2     2
 ```
 
-<MatrixGlyphDiagram before={[["x₁₁", "x₁₂"], ["x₂₁", "x₂₂"]]} after={[["x₁₂"]]} beforeLabel="each symbolic matrix" afterLabel="P(1,2)" caption="Indexing selects one matrix position across all symbolic coefficient rows without changing the parameter grid." />
+<MatrixGlyphDiagram before={[["x₁₁", "x₁₂"], ["x₂₁", "x₂₂"]]} after={[["x₁₂"]]} beforeLabel="each symbolic matrix" afterLabel="P(1,2)" caption="The same symbolic matrix position is selected or replaced across all coefficients and rate rows." />
 
-## <span id="pdvar-size"></span><span id="pdvar-numel"></span><span id="pdvar-ndims"></span><span id="pdvar-length"></span><span id="pdvar-height"></span><span id="pdvar-width"></span>Inspect payload shape
+## Payload shape
 
-Shape methods report one symbolic matrix payload, not cells, local labels, or rate vertices.
+### <span id="pdvar-size"></span>`size`
 
-## <span id="pdvar-isequal"></span>Structural versus modeling equality
+```matlab
+shape = size(P)
+[rows,columns] = size(P)
+extent = size(P,dim)
+```
 
-`isequal(P,Q)` compares normalized metadata and symbolic coefficient evidence. It returns a MATLAB logical. Overloaded `P == Q` instead creates a direct [`pdlmi` modeling equality](/PD-LMI-package/documents/reference/pdvar/comparisons/#pdvar-comparison-eq).
+### <span id="pdvar-numel"></span>`numel`, <span id="pdvar-ndims"></span>`ndims`, <span id="pdvar-length"></span>`length`, <span id="pdvar-height"></span>`height`, and <span id="pdvar-width"></span>`width`
+
+```matlab
+entryCount = numel(P)
+dimensionCount = ndims(P)
+largestExtent = length(P)
+rows = height(P)
+columns = width(P)
+```
+
+All report one always-two-dimensional symbolic payload. Cells, labels, and
+rate rows have separate counts.
+
+## <span id="pdvar-isequal"></span>`isequal`
+
+```matlab
+tf = isequal(P,Q)
+```
+
+Returns a MATLAB logical after comparing normalized grids, shapes, degree,
+metadata, and symbolic coefficient evidence. Overloaded `P == Q` instead
+creates a direct [`pdlmi` equality](/PD-LMI-package/documents/reference/pdvar/comparisons/#pdvar-comparison-eq).
 
 ```matlab
 yalmip('clear')
 P = pdvar(2, {[0 1]}, "symmetric");
-fprintf('size=%d-by-%d, length=%d, numel=%d, ndims=%d\n',height(P),width(P),length(P),numel(P),ndims(P));
-fprintf('isequal(P,P)=%d\n', isequal(P,P));
+shapeSummary = [height(P) width(P) length(P) numel(P) ndims(P)]
+selfEqual = isequal(P,P)
 ```
 
 ```text
-size=2-by-2, length=2, numel=4, ndims=2
-isequal(P,P)=1
+shapeSummary =
+     2     2     2     4     2
+
+selfEqual =
+  logical
+   1
 ```
 
-## <span id="pdvar-disp"></span><span id="pdvar-display"></span><span id="pdvar-numArgumentsFromSubscript"></span>Display and dispatch
+## <span id="pdvar-disp"></span>`disp` and <span id="pdvar-display"></span>`display`
 
-`disp` and `display` provide an object summary; `bernsteinTable` is the stable coefficient-row diagnostic. `numArgumentsFromSubscript` keeps indexed results scalar for MATLAB dot dispatch.
+```matlab
+disp(P)
+P
+```
 
-## Validation and operation boundaries
+Display prints a concise object summary. It does not promise workspace-dependent
+YALMIP variable names; use
+[`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/)
+for stable row-oriented diagnostics.
 
-Indexing requires exactly two `:`, logical, or finite in-range positive-integer subscripts. Logical masks must match the indexed dimension. Assignments must preserve compatible matrix shape, grid, degree, and ordinary/derivative row structure. Display output does not promise YALMIP workspace-dependent variable names.
+## <span id="pdvar-numArgumentsFromSubscript"></span>`numArgumentsFromSubscript`
 
-## See Also
+The inherited MATLAB protocol returns one so an indexed `pdvar` stays a scalar
+object for chained dot access. Users do not call it for modeling.
 
-[`pdvar matrix operations`](/PD-LMI-package/documents/reference/pdvar/matrix-operations/) · [`comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) · [`shared helpers`](/PD-LMI-package/documents/reference/shared-helpers/)
+## Validation, limitations, and See Also
+
+Malformed subscripts and incompatible assignments use `pdvar`-owned errors.
+Indexing never selects cells, labels, or derivative rows and never calls
+`value` or a solver.
+
+[`storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) ·
+[`comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) ·
+[`pdbase indexing protocol`](/PD-LMI-package/documents/reference/pdbase/indexing-protocol/)

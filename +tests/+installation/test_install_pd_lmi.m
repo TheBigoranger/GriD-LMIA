@@ -24,8 +24,8 @@ function testFallbackReportAndRepeatRun(testCase)
     testCase.verifyEqual(second.Solver, first.Solver);
     testCase.verifyTrue(isfolder(first.PackageRoot));
     testCase.verifyTrue(isfolder(first.YALMIPRoot));
-    testCase.verifyFalse(any(contains(string(first.AddedPaths), "doc")));
-    testCase.verifyFalse(any(contains(string(first.AddedPaths), "webpage")));
+    testCase.verifyTrue(all(strcmpi(first.AddedPaths, first.PackageRoot)));
+    testCase.verifyEmpty(second.AddedPaths);
 end
 
 function testFailedProbeRollsBackPath(testCase)
@@ -46,6 +46,9 @@ end
 
 function testShadowedClassRollsBackPath(testCase)
     setMock("fallback", 0);
+    originalFolder = pwd;
+    cd(tempdir);
+    folderCleanup = onCleanup(@() cd(originalFolder)); %#ok<NASGU>
     conflictDir = tempname;
     mkdir(fullfile(conflictDir, "@pdmat"));
     writelines(["function obj = pdmat(varargin)", "obj = [];", "end"], ...
@@ -89,7 +92,13 @@ function temporarilyHideYalmip(mockDir)
     entry = which('sdpvar');
     root = fileparts(fileparts(entry));
     if ~isempty(entry) && isfolder(root)
-        rmpath(genpath(root));
+        entries = strsplit(path, pathsep);
+        prefix = [root filesep];
+        underRoot = strcmpi(entries, root) | ...
+            startsWith(entries, prefix, "IgnoreCase", true);
+        for k = find(underRoot)
+            rmpath(entries{k});
+        end
     end
     rehash;
 end

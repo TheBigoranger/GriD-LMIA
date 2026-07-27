@@ -1,0 +1,135 @@
+---
+title: pdmat Storage And Elevation
+description: Class-specific cell traversal, coefficient evidence, labels, counts, and exact degree elevation for known data.
+---
+
+<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><span>storage and elevation</span></nav>
+
+The implementation is inherited from `pdbase`, but these methods are complete
+public `pdmat` behavior. They expose known numeric coefficient evidence and
+return `pdmat` values rather than generic backend objects.
+
+## <span id="pdmat-cells"></span>`cells`
+
+```matlab
+cellSubscripts = cells(A)
+```
+
+Returns `A.ncell() × A.npar()` physical-cell subscript rows, with earlier axes
+varying more slowly.
+
+## <span id="pdmat-coeffs"></span>`coeffs`
+
+```matlab
+knownCoefficients = coeffs(A,cellSubscript)
+```
+
+Returns the known numeric coefficient row for one physical cell. `cellSubscript`
+must contain one finite, in-range positive integer per parameter. Failures use
+`pdbase:InvalidCellSubs`. A function-only `pdmat` has an empty placeholder
+rather than coefficient evidence; use [`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/)
+for that source.
+
+## <span id="pdmat-lbls"></span>`lbls`
+
+```matlab
+labels = lbls(A)
+```
+
+Returns the tensor Bernstein multi-index row associated with every coefficient
+column.
+
+## <span id="pdmat-ncell"></span>`ncell`, <span id="pdmat-ncoeff"></span>`ncoeff`, and <span id="pdmat-npar"></span>`npar`
+
+```matlab
+physicalCellCount = ncell(A)
+coefficientColumns = ncoeff(A)
+parameterCount = npar(A)
+```
+
+`ncell` counts physical tensor cells, `ncoeff` returns
+`(Degree+1)^npar`, and `npar` counts grid vectors. None of these counts matrix
+entries.
+
+```matlab
+A = pdmat({[0 1 2], [10 20]}, {1 3; 5 7}, Degree=1);
+cellSubscripts = A.cells()
+counts = [A.ncell() A.ncoeff() A.npar()]
+labels = A.lbls()
+firstCell = [A.coeffs([1 1]){:}]
+```
+
+```text
+cellSubscripts =
+     1     1
+     2     1
+
+counts =
+     2     4     2
+
+labels =
+     0     0
+     0     1
+     1     0
+     1     1
+
+firstCell =
+     1     3     5     7
+```
+
+## <span id="pdmat-elevVals"></span>`elevVals`
+
+```matlab
+elevatedTree = elevVals(A,degreeIncrement)
+```
+
+Returns numeric `LocalValues` elevated by the finite nonnegative integer
+increment in every parameter direction. `A` remains unchanged.
+
+## <span id="pdmat-elevate"></span>`elevate`
+
+```matlab
+B = elevate(A,degreeIncrement)
+B = A.elevate(degreeIncrement)
+```
+
+Returns a `pdmat` with the same grid, matrix shape, continuity metadata,
+`SourceSummary`, and `FunctionHandle`, but with elevated degree and coefficient
+evidence. Evaluation is exactly preserved.
+
+```matlab
+A = pdmat({[0 1]}, @(rho) 1 + 2*rho, Degree=1);
+B = A.elevate(2);
+classes = [string(class(A)) string(class(B))]
+degrees = [A.Degree B.Degree]
+sameValue = [A.evaluate(0.4) B.evaluate(0.4)]
+sourceUnchanged = A.Degree
+```
+
+```text
+classes =
+  1x2 string array
+    "pdmat"    "pdmat"
+
+degrees =
+     1     3
+
+sameValue =
+    1.8000    1.8000
+
+sourceUnchanged =
+     1
+```
+
+An invalid increment raises `pdbase:InvalidDegreeIncrement`. A function-only
+object constructed without explicit `Degree` raises
+`pdbase:MissingCoefficientEvidence` for both elevation methods. Elevation is
+representation-only: it does not refine the physical grid or sample a
+function-only source.
+
+## See Also
+
+[`pdmat evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
+[`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
+[`pdbase evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/) ·
+[`pdvar storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/)

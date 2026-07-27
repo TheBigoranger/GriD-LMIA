@@ -1,0 +1,131 @@
+---
+title: pdbase Evaluation And Elevation
+description: Shared coefficient evaluation and Bernstein degree-elevation protocols inherited by pdmat and pdvar.
+---
+
+<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdbase/">pdbase</a><span>/</span><span>evaluation and elevation</span></nav>
+
+These public methods are implemented once by `pdbase` and inherited by
+`pdmat` and `pdvar`. The common implementation preserves the dynamic class and
+payload type, while each derived class retains its own known-data, symbolic,
+and rate-row meaning.
+
+## <span id="pdbase-evaluate"></span>`evaluate`
+
+### Syntax
+
+```matlab
+valueAtPoint = evaluate(obj, point)
+valueAtPoint = obj.evaluate(point)
+```
+
+`point` is a finite real vector with one coordinate per parameter, inside the
+closed physical bounds. The method locates one physical cell, converts to
+local coordinates, and evaluates the tensor Bernstein row.
+
+At an interior grid node the cell on the right owns the evaluation. At the
+last grid node, the final cell owns it. Numeric coefficients return a numeric
+matrix; symbolic coefficients return an `sdpvar` expression. A derivative
+leaf returns a `1 × 2^npar` cell array, one reconstructed payload per stored
+rate row in `helper.combRows` order.
+
+```matlab
+obj = pdbase({[0 1 2]}, [1 1], 1, {{0, 2}, {20, 40}});
+leftInterior = obj.evaluate(1)
+rightInterior = obj.evaluate(1 + eps)
+```
+
+```text
+leftInterior =
+    20
+
+rightInterior =
+   20.0000
+```
+
+The example uses discontinuous backend evidence deliberately: the exact
+interior point uses the second cell, demonstrating right-cell ownership.
+
+Invalid point shape or values use `<dynamic-class>:InvalidPoint`; an
+out-of-bounds point uses `<dynamic-class>:PointOutOfBounds`. Thus a `pdmat`
+call reports a `pdmat:` identifier and a `pdvar` call reports a `pdvar:`
+identifier.
+
+## <span id="pdbase-elevVals"></span>`elevVals`
+
+### Syntax
+
+```matlab
+values = elevVals(obj, degreeIncrement)
+values = obj.elevVals(degreeIncrement)
+```
+
+The finite nonnegative integer `degreeIncrement` is added in every parameter
+direction. The returned value is an elevated nested `LocalValues` tree, not an
+object. Physical cells, numeric or symbolic payloads, and independent rate-row
+order are preserved; `obj` is unchanged.
+
+```matlab
+A = pdmat({[0 1]}, {0, 1}, Degree=1);
+values = A.elevVals(1);
+sourceDegree = A.Degree
+elevatedRow = [values{1}{:}]
+```
+
+```text
+sourceDegree =
+     1
+
+elevatedRow =
+         0    0.5000    1.0000
+```
+
+An invalid increment raises `pdbase:InvalidDegreeIncrement`. A function-only
+`pdmat` has no stored Bernstein evidence and raises
+`pdbase:MissingCoefficientEvidence`.
+
+## <span id="pdbase-elevate"></span>`elevate`
+
+### Syntax
+
+```matlab
+out = elevate(obj, degreeIncrement)
+out = obj.elevate(degreeIncrement)
+```
+
+`elevate` returns a new object with `Degree + degreeIncrement` and the
+elevated coefficients. It preserves the exact dynamic class, parameter grid,
+payload shape, source metadata, `pdmat.FunctionHandle`, YALMIP variables,
+continuity metadata, rate bounds, and rate-row order. The source value remains
+unchanged.
+
+```matlab
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
+B = A.elevate(2);
+classes = [string(class(A)) string(class(B))]
+degrees = [A.Degree B.Degree]
+values = [A.evaluate(0.3) B.evaluate(0.3)]
+```
+
+```text
+classes =
+  1x2 string array
+    "pdmat"    "pdmat"
+
+degrees =
+     1     3
+
+values =
+    1.6000    1.6000
+```
+
+Validation matches `elevVals`, including the function-only missing-evidence
+boundary. Degree elevation changes the Bernstein representation, not the
+represented polynomial, physical grid, or ownership of interior boundaries.
+
+## See Also
+
+[`pdmat storage and elevation`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
+[`pdvar storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) ·
+[`Pólya certificate`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`Bernstein polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/)

@@ -2,7 +2,7 @@
 \index{pdbase@\texttt{pdbase}}
 \label{sec:pdbase}
 
-\code{pdbase} is the developer-facing backend parent for \code{pdmat} and \code{pdvar}.  Ordinary users should model known data with \code{pdmat} and decision expressions with \code{pdvar}.  This section documents \code{pdbase} because it explains the shared storage, traversal, and inspection contract used by both public modeling classes.
+\code{pdbase} is the developer-facing backend parent for \code{pdmat} and \code{pdvar}. Ordinary users should model known data with \code{pdmat} and decision expressions with \code{pdvar}. This section documents \code{pdbase} because it owns the shared storage, traversal, inspection, matrix-shape, unary-transformation, reduction, and reordering implementations inherited by both public modeling classes. Central implementation does not remove these methods from \code{pdmat} or \code{pdvar}; their class-specific syntax, examples, validation, and limitations remain documented in \cref{sec:pdmat-matrix-ops,sec:pdvar-matrix-ops}.
 
 \section{API Map}
 \label{sec:pdbase-lookup}
@@ -17,17 +17,23 @@
     \hyperref[sec:pdbase-inspection]{\code{cells}},
     \hyperref[sec:pdbase-inspection]{\code{lbls}},
     \hyperref[sec:pdbase-inspection]{\code{coeffs}}   \\
-    Count sizes                 &
+    Evaluate a stored function  &
+    \hyperref[sec:pdbase-evaluate]{\code{evaluate}}   \\
+    Count sizes and query shape &
     \hyperref[sec:pdbase-counts]{\code{ncell}},
     \hyperref[sec:pdbase-counts]{\code{ncoeff}},
     \hyperref[sec:pdbase-counts]{\code{npar}},
-    \hyperref[sec:pdbase-counts]{\code{size}}         \\
+    \hyperref[sec:pdbase-counts]{\code{size}/\code{height}/\code{width}/\code{length}/\code{ndims}/\code{numel}} \\
+    Transform matrix payloads   &
+    \hyperref[sec:pdbase-matrix-ops]{unary signs, transpose, diagonal, reshape, reductions, reordering, repetition, and concatenation dispatch} \\
     Elevate stored coefficients &
+    \hyperref[sec:pdbase-elevate]{\code{elevate}},
     \hyperref[sec:pdbase-elevvals]{\code{elevVals}}   \\
     Backend algebra mechanisms  &
     \hyperref[sec:pdbase-elevlocalvalues]{\code{elevLocalValues}},
     \hyperref[sec:pdbase-bernelev]{\code{bernElev}},
     \hyperref[sec:pdbase-bernprod]{\code{bernProd}},
+    \hyperref[sec:pdbase-backend-utilities]{\code{bernTbl}/\code{mapVals}/\code{matSubs}},
     \hyperref[sec:pdbase-mergegrid]{\code{mergeGrid}} \\
     Read storage fields         &
     \hyperref[sec:pdbase-fields]{\code{GridInfo}},
@@ -215,6 +221,39 @@ coefficientCount =
      4
 \end{lstlisting}
 
+\section{\texorpdfstring{\code{evaluate}}{evaluate} Stored Coefficients}
+\label{sec:pdbase-evaluate}
+\index{evaluate@\texttt{evaluate}}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+val = evaluate(obj, point)
+val = obj.evaluate(point)
+\end{lstlisting}
+
+\arghead
+\code{point} is a finite real scalar for one parameter or a finite real vector with one coordinate per parameter, inside the physical grid bounds. The method locates one physical cell using right-cell ownership at interior grid nodes, converts the point to local coordinates, and reconstructs the tensor-product Bernstein polynomial. One ordinary coefficient row returns one numeric matrix or symbolic YALMIP expression with \code{size(obj)}; rate-row storage returns a \(1\)-by-\(N\) cell array in stored row order.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+obj = pdbase({[0 2]}, [1 1], 2, {{1, 3, 9}});
+valueAtOne = obj.evaluate(1)
+rateObj = pdbase({[0 2]}, [1 1], 1, ...
+    {{1, 3; 10, 14}}, HasRateDependence=true, ...
+    RateBounds=[-1 1]);
+rateRows = rateObj.evaluate(0.5)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+valueAtOne =
+     4
+rateRows =
+  1x2 cell array
+    {[1.5000]}    {[11]}
+\end{lstlisting}
+
+\remarkshead
+Malformed points raise \code{class(obj) + ":InvalidPoint"} and out-of-bounds points raise \code{class(obj) + ":PointOutOfBounds"}. \code{pdmat} overrides the function-backed path so exact stored handles remain exact, while coefficient-backed \code{pdmat} and all \code{pdvar} data use this row-aware backend reconstruction. Evaluation does not change the object, select a certificate, or assign YALMIP variables.
+
 \needspace{16\baselineskip}
 \section{Inspect Counts and Shape}
 \index{ncell@\texttt{ncell}}\index{ncoeff@\texttt{ncoeff}}\index{npar@\texttt{npar}}
@@ -233,15 +272,19 @@ n = obj.npar()
 
 sz = size(obj)
 d = size(obj, dim)
+[m, n] = size(obj)
+n = height(obj)
+n = width(obj)
+n = length(obj)
+n = ndims(obj)
+n = numel(obj)
+idx = end(obj, k, n)
+n = numArgumentsFromSubscript(obj, S, ctx)
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-    \item \code{obj} is a \code{pdbase} object or subclass instance.
-    \item \code{dim} is a positive integer matrix dimension for \code{size}; it follows MATLAB's ordinary \code{size(obj,dim)} convention.
-    \item \code{ncell} returns \(\prod_s(k_s-1)\), the number of physical hypercube cells.
-    \item \code{ncoeff} returns \((m+1)^\ell\), the number of local Bernstein coefficients stored per physical cell.
-    \item \code{npar} returns the parameter dimension \(\ell\).  \item \code{size} returns the matrix payload size, never the physical grid size.
+    \item \code{obj} is a \code{pdbase} object or subclass instance. \item \code{dim} is a positive integer matrix dimension for \code{size}; dimensions after row and column are singleton, and multiple outputs split the stored two-dimensional shape with trailing outputs equal to one. \item \code{ncell} returns \(\prod_s(k_s-1)\), the number of physical hypercube cells. \item \code{ncoeff} returns \((m+1)^\ell\), the number of local Bernstein coefficients stored per physical cell. \item \code{npar} returns the parameter dimension \(\ell\). \item \code{size}, \code{height}, \code{width}, \code{length}, \code{ndims}, and one-argument \code{numel} report the matrix payload: respectively its two-element shape, row count, column count, largest dimension, the value two, and the product of the two dimensions. \item \code{end} reports the payload boundary used by inherited two-index syntax; one-index use returns the product of the dimensions, dimensions after two return one. \item \code{numArgumentsFromSubscript} always returns one so dot access and subclass indexing do not create comma-separated expansion even though \code{numel} follows payload semantics.
 \end{itemize}
 
 \examplehead
@@ -256,6 +299,11 @@ matrixSize = size(obj)
 rowCount = size(obj, 1)
 columnCount = size(obj, 2)
 thirdDimension = size(obj, 3)
+rowCountByName = height(obj)
+columnCountByName = width(obj)
+longestDimension = length(obj)
+elementCount = numel(obj)
+dimensionCount = ndims(obj)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
@@ -273,11 +321,270 @@ columnCount =
      3
 thirdDimension =
      1
+rowCountByName =
+     2
+columnCountByName =
+     3
+longestDimension =
+     3
+elementCount =
+     6
+dimensionCount =
+     2
 \end{lstlisting}
+
+\remarkshead
+\code{pdbase} is a scalar value container whose overloaded \code{numel(obj)} describes the payload rather than a MATLAB object array. MATLAB may call \code{numel} with subscripts while resolving indexing; that internal form returns one. Direct \code{pdbase} does not expose matrix \code{subsref}/\code{subsasgn}; \code{end} and \code{numArgumentsFromSubscript} support the derived \code{pdmat}/\code{pdvar} implementations documented in \cref{sec:pdmat-indexing,sec:pdvar-indexing}.
+
+\section{Apply Shared Matrix Operations}
+\label{sec:pdbase-matrix-ops}
+\index{matrix operations}\index{inherited methods}
+
+The methods in this section are implemented once by \code{pdbase}. Each operation maps the same MATLAB matrix transformation over every local coefficient, every active rate row, and both terms of legacy rate-affine payloads while preserving the physical grid, degree, cell/label order, and metadata. A direct backend input returns a direct \code{pdbase}; the \code{pdmat} and \code{pdvar} reconstruction hooks retain their respective classes and class-specific semantics. Function-only \code{pdmat} data have no Bernstein coefficients to map and raise \code{pdmat:FunctionOnlyAlgebra}.
+
+\subsection{Unary Signs, Transpose, Vectorization, Diagonals, And Reshape}
+\label{sec:pdbase-unary-matrix-ops}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = +A
+B = -A
+T = transpose(A)
+H = ctranspose(A)
+T = A.'
+H = A'
+v = vec(A)
+d = diag(A)
+d = diag(A, k)
+D = diag(v)
+D = diag(v, k)
+t = trace(A)
+R = reshape(A, m, n)
+R = reshape(A, [m n])
+S = squeeze(A)
+\end{lstlisting}
+
+\descriptionhead
+Unary plus returns the same value; unary minus, transpose, conjugate transpose, vectorization, diagonal extraction/construction, trace, reshape, and squeeze map coefficient payloads without changing the parameter representation. \code{vec} uses MATLAB column-major order. \code{trace} returns a \(1\)-by-\(1\) object and sums the main diagonal even for a row or column vector. \code{diag} accepts a finite integer offset; for a matrix, the selected diagonal must be nonempty because the package cannot store an empty payload. \code{reshape} supports exactly two positive dimensions, permits at most one inferred \code{[]} dimension, and preserves the element count. \code{squeeze} is the identity because the storage contract remains two-dimensional.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdbase({[0 1]}, [2 2], 1, ...
+    {{[1 2; 3 4], [10 20; 30 40]}});
+T = A.';
+v = vec(A);
+d = diag(A);
+t = trace(A);
+R = reshape(A, 1, 4);
+transposeCoefficients = T.coeffs(1);
+vectorCoefficients = v.coeffs(1);
+diagonalCoefficients = d.coeffs(1);
+traceCoefficients = t.coeffs(1);
+transposeSize = size(T)
+transposeFirst = transposeCoefficients{1}
+vectorFirst = vectorCoefficients{1}
+diagonalFirst = diagonalCoefficients{1}
+traceFirst = traceCoefficients{1}
+reshapeSize = size(R)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+transposeSize =
+     2     2
+transposeFirst =
+     1     3
+     2     4
+vectorFirst =
+     1
+     3
+     2
+     4
+diagonalFirst =
+     1
+     4
+traceFirst =
+     5
+reshapeSize =
+     1     4
+\end{lstlisting}
+
+\remarkshead
+Malformed or empty diagonal selections raise \code{class(A) + ":InvalidDiag"}. Unsupported reshape forms, multiple inferred dimensions, nonpositive dimensions, or an element-count mismatch raise \code{class(A) + ":InvalidReshape"}. These identifiers therefore appear as \code{pdbase:*}, \code{pdmat:*}, or \code{pdvar:*} according to the public input class.
+
+\subsection{Triangular Parts And Reductions}
+\label{sec:pdbase-matrix-reductions}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+L = tril(A)
+L = tril(A, k)
+U = triu(A)
+U = triu(A, k)
+S = sum(A)
+S = sum(A, dim)
+S = sum(A, vecdim)
+S = sum(A, "all")
+M = mean(A)
+M = mean(A, dim)
+M = mean(A, vecdim)
+M = mean(A, "all")
+C = cumsum(A)
+C = cumsum(A, dim)
+C = cumsum(A, direction)
+C = cumsum(A, dim, direction)
+\end{lstlisting}
+
+\descriptionhead
+\code{tril} and \code{triu} retain entries on and below or above the finite integer offset \code{k}. \code{sum} and \code{mean} accept one nonempty vector of unique positive integer dimensions or the case-insensitive text \code{"all"}; dimensions above two are singleton no-ops. Without a dimension, each follows the first nonsingleton matrix dimension. \code{cumsum} accepts an optional positive integer scalar dimension and an optional case-insensitive \code{"forward"} or \code{"reverse"} direction. A direction without a dimension uses the first nonsingleton matrix dimension; a dimension above two leaves every matrix payload unchanged.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdbase({[0 1]}, [2 2], 1, ...
+    {{[1 2; 3 4], [10 20; 30 40]}});
+L = tril(A);
+S = sum(A, [1 2]);
+M = mean(A, "all");
+C = cumsum(A, 2, "reverse");
+lowerCoefficients = L.coeffs(1);
+sumCoefficients = S.coeffs(1);
+meanCoefficients = M.coeffs(1);
+cumsumCoefficients = C.coeffs(1);
+lowerFirst = lowerCoefficients{1}
+sumFirst = sumCoefficients{1}
+meanFirst = meanCoefficients{1}
+reverseCumsumFirst = cumsumCoefficients{1}
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+lowerFirst =
+     1     0
+     3     4
+sumFirst =
+    10
+meanFirst =
+    2.5000
+reverseCumsumFirst =
+     3     2
+     7     4
+\end{lstlisting}
+
+\remarkshead
+Invalid triangular offsets raise \code{class(A) + ":InvalidTriangularPart"}. Malformed reduction forms raise \code{class(A) + ":InvalidSum"}, \code{class(A) + ":InvalidMean"}, or \code{class(A) + ":InvalidCumsum"}. Missing-value, native-output, or other MATLAB reduction flags are not implemented.
+
+\subsection{Reordering, Rotation, And Repetition}
+\label{sec:pdbase-matrix-reordering}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+F = flip(A)
+F = flip(A, dim)
+F = flipud(A)
+F = fliplr(A)
+R = rot90(A)
+R = rot90(A, k)
+Q = repmat(A, m)
+Q = repmat(A, m, n)
+Q = repmat(A, [m n])
+\end{lstlisting}
+
+\descriptionhead
+\code{flip}, \code{flipud}, and \code{fliplr} reverse entries inside each coefficient matrix and never reverse a physical parameter grid. \code{flip(A)} follows MATLAB's first-nonsingleton behavior; \code{flip(A,dim)} requires a positive integer scalar dimension. \code{rot90} applies a finite integer number of counterclockwise quarter-turns, reducing the count modulo four. \code{repmat} supports a positive scalar interpreted as \code{[m m]}, two positive counts, or a two-element count vector; only the payload shape changes.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdbase({[0 1]}, [2 2], 1, ...
+    {{[1 2; 3 4], [10 20; 30 40]}});
+F = flipud(A);
+R = rot90(A);
+Q = repmat(A, [1 2]);
+flippedCoefficients = F.coeffs(1);
+rotatedCoefficients = R.coeffs(1);
+flippedFirst = flippedCoefficients{1}
+rotatedFirst = rotatedCoefficients{1}
+repeatedSize = size(Q)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+flippedFirst =
+     3     4
+     1     2
+rotatedFirst =
+     2     4
+     1     3
+repeatedSize =
+     2     4
+\end{lstlisting}
+
+\remarkshead
+Invalid flip dimensions, rotation counts, or repetition forms raise \code{class(A) + ":InvalidFlip"}, \code{class(A) + ":InvalidRot90"}, or \code{class(A) + ":InvalidRepmat"}. N-dimensional repetition is outside the two-dimensional payload contract.
+
+\subsection{Concatenation Dispatch}
+\label{sec:pdbase-concatenation-dispatch}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+C = horzcat(A, B, ...)
+C = [A, B, ...]
+C = vertcat(A, B, ...)
+C = [A; B; ...]
+C = cat(dim, A, B, ...)
+\end{lstlisting}
+
+\descriptionhead
+\code{pdbase} owns the inherited \code{horzcat}/\code{vertcat} entry points, which dispatch compatible derived objects to the class-specific \code{cat} implementation. \code{pdmat} and \code{pdvar} therefore retain coefficient-wise concatenation, grid/degree alignment, numeric promotion, validation, and result construction as documented in \cref{sec:pdmat-matrix-assembly,sec:pdvar-matrix-assembly}. Direct \code{pdbase} operands are scalar backend containers rather than MATLAB object arrays and cannot be concatenated.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+B = [A, A];
+resultClass = class(B)
+resultSize = size(B)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+resultClass =
+    'pdmat'
+resultSize =
+     1     2
+\end{lstlisting}
+
+\remarkshead
+Any direct \code{pdbase} operand in \code{cat}, \code{horzcat}, or \code{vertcat} raises \codeerr{pdbase}{Unsupported}\allowbreak\code{Concatenation}. Derived classes support only matrix dimensions one and two and report their own compatibility errors. \code{blkdiag} remains class-specific to \code{pdmat} and \code{pdvar}; it is not a \code{pdbase} implementation.
 
 \section{Transform Bernstein Storage}
 
 The following entries separate whole-object elevation from the protected helpers used to align degrees, convolve coefficients, and refine grids.  They change coefficient representations or temporary storage trees; they do not change the meanings of \code{ncell}, \code{ncoeff}, \code{npar}, or \code{size} described above.
+
+\subsection{\texorpdfstring{\code{elevate}}{elevate}}
+\index{elevate@\texttt{elevate}}
+\label{sec:pdbase-elevate}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+out = obj.elevate(degreeIncrement)
+\end{lstlisting}
+
+\descriptionhead
+\code{degreeIncrement} is a finite nonnegative integer scalar added uniformly in every parameter direction. \code{out} is the same dynamic class as \code{obj}; it contains elevated coefficient evidence at \code{obj.Degree + degreeIncrement} while preserving the represented polynomial, physical cells, metadata, YALMIP decision variables, rate-row order, and subclass properties. The source object is unchanged, and elevation introduces no new decision freedom.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
+B = A.elevate(1);
+sourceDegree = A.Degree
+elevatedDegree = B.Degree
+elevatedCoefficients = cell2mat(B.coeffs(1))
+sameValue = [A.evaluate(0.25), B.evaluate(0.25)]
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+sourceDegree =
+     1
+elevatedDegree =
+     2
+elevatedCoefficients =
+     1     2     3
+sameValue =
+    1.5000    1.5000
+\end{lstlisting}
+
+\remarkshead
+Invalid increments raise \codeerr{pdbase}{InvalidDegreeIncrement}. Function-only \code{pdmat} data have no coefficient evidence and raise \codeerr{pdbase}{MissingCoefficientEvidence}; constructing the function with a verified explicit \code{Degree} supplies the needed evidence. \code{elevate} returns an object, whereas \code{elevVals} returns only an elevated \code{LocalValues}-shaped tree.
 
 \subsection{\texorpdfstring{\code{elevVals}}{elevVals}}
 \index{elevVals@\texttt{elevVals}}
@@ -320,11 +627,10 @@ An invalid increment raises \code{pdbase:InvalidDegreeIncrement}.  A function-on
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
-vals = elevLocalValues(obj, vals, fromDeg, toDeg)
-vals = elevLocalValues(obj, vals, fromDeg, toDeg, grid)
+vals = pdbase.elevLocalValues(vals, fromDeg, toDeg, grid)
 \end{lstlisting}
 
-Each leaf must be a cell array with one column per degree-\code{fromDeg} Bernstein label.  The method elevates each rate-vertex row independently to \code{toDeg}; it never mixes rows.  The optional \code{grid} supplies the temporary physical-cell layout, and otherwise defaults to \code{obj.GridInfo.Vectors}.  Equal source and target degrees return the input tree unchanged.  A malformed leaf raises \code{pdbase:InvalidCoefficientCell}.  Public users encounter this behavior through grid merging, assignment, concatenation, and arithmetic rather than by calling the protected method directly.
+Each leaf must be a cell array with one column per degree-\code{fromDeg} Bernstein label.  The method elevates each rate-vertex row independently to \code{toDeg}; it never mixes rows.  The required \code{grid} supplies the temporary physical-cell layout.  Equal source and target degrees return the input tree unchanged.  A malformed leaf raises \code{pdbase:InvalidCoefficientCell}.  Public users encounter this behavior through grid merging, assignment, concatenation, and arithmetic rather than by calling the protected method directly.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -377,12 +683,12 @@ The example exercises the protected mechanism through public \code{pdmat} additi
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
-out = bernElev(obj, coeffs, fromDeg, toDeg)
+out = pdbase.bernElev(coeffs, fromDeg, toDeg, nPar)
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-    \item \code{coeffs} is a flat coefficient-cell family in the same label order as \code{lbls(obj)}. \item \code{fromDeg} and \code{toDeg} are nonnegative integer degrees, with \code{toDeg >= fromDeg}. \item \code{out} contains \((\code{toDeg}+1)^\ell\) elevated coefficients in the same label order.
+    \item \code{coeffs} is a flat coefficient-cell family in Bernstein label order. \item \code{fromDeg} and \code{toDeg} are nonnegative integer degrees, with \code{toDeg >= fromDeg}. \item \code{nPar} is the positive integer parameter count. \item \code{out} contains \((\code{toDeg}+1)^{\code{nPar}}\) elevated coefficients in the same label order.
 \end{itemize}
 
 \examplehead
@@ -439,6 +745,40 @@ coefficients =
 \end{lstlisting}
 
 The example invokes the protected helper through public matrix multiplication; users do not call \code{bernProd} directly.  Even for scalar data, the middle coefficient comes from two ordered contributions rather than from one sample.
+
+\subsection{\texorpdfstring{\code{bernTbl}, \code{mapVals}, and \code{matSubs}}{bernTbl, mapVals, and matSubs}}
+\label{sec:pdbase-backend-utilities}
+\index{bernTbl@\texttt{bernTbl}}\index{mapVals@\texttt{mapVals}}\index{matSubs@\texttt{matSubs}}
+
+\textit{Internal/protected mechanisms.} These object-aware utilities are owned by \code{pdbase}; they are not functions in the public \code{+helper} namespace and are not supported user call forms.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+T = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, ...)
+mapped = mapVals(vals, fcn, grid)
+[rows, cols] = matSubs(subs, sz, errId)
+\end{lstlisting}
+
+\descriptionhead
+\code{bernTbl} builds the detailed and one-line inspection tables used by \code{pdmat.bernsteinTable} and \code{pdvar.bernsteinTable}. It traverses \code{cells}, \code{lbls}, and \code{coeffs}, accepts at most one physical-cell selector and the case-insensitive \code{"oneLine"} option, and preserves the caller's error namespace. \code{mapVals} applies a coefficient mapping to every payload in every nested physical-cell leaf while preserving tree and label order; the owning class still validates matrix, symbolic, and rate semantics. \code{matSubs} normalizes exactly two row/column selectors, accepting \code{:}, finite positive integer vectors, or matching logical vectors, and rejects linear indexing, empty/out-of-range numeric indices, mismatched logical selectors, and array growth.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {[1 2; 3 4], [10 20; 30 40]}, Degree=1);
+T = A.bernsteinTable("oneLine");
+column = A(:, 2);
+tableHeight = height(T)
+columnSize = size(column)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+tableHeight =
+     1
+columnSize =
+     2     1
+\end{lstlisting}
+
+\remarkshead
+Users reach \code{bernTbl} through \code{bernsteinTable}, \code{mapVals} through inherited unary operations, and \code{matSubs} through \code{pdmat}/\code{pdvar} indexing and assignment. Invalid table selectors and rate-row mismatches raise the caller-owned \code{errId}; indexing uses the class-specific identifier supplied by \code{subsref} or \code{subsasgn}. The six genuine cross-class helpers remain documented in \cref{sec:helpers}.
 
 \subsection{\texorpdfstring{\code{mergeGrid}}{mergeGrid}}\index{mergeGrid@\texttt{mergeGrid}}
 \label{sec:pdbase-mergegrid}
@@ -515,4 +855,4 @@ The example invokes the protected helper through public addition; users do not c
 \end{center}
 
 \section{Boundaries and Related APIs}
-\code{pdmat}, \code{pdvar}, \code{cells}, \code{coeffs}, \code{lbls}, \code{ncell}, \code{ncoeff}, \code{npar}, \code{size}, \code{elevVals}, \code{elevLocalValues}, \code{bernElev}, \code{bernProd}, \code{mergeGrid}.
+\code{pdmat}, \code{pdvar}, \code{cells}, \code{coeffs}, \code{lbls}, \code{evaluate}, \code{ncell}, \code{ncoeff}, \code{npar}, \code{size}, \code{height}, \code{width}, \code{length}, \code{ndims}, \code{numel}, \code{end}, \code{numArgumentsFromSubscript}, unary \code{+}/\code{-}, \code{transpose}, \code{ctranspose}, \code{trace}, \code{vec}, \code{diag}, \code{reshape}, \code{squeeze}, \code{tril}, \code{triu}, \code{sum}, \code{mean}, \code{cumsum}, \code{flip}, \code{flipud}, \code{fliplr}, \code{rot90}, \code{repmat}, \code{cat}, \code{horzcat}, \code{vertcat}, \code{elevate}, \code{elevVals}, \code{elevLocalValues}, \code{bernElev}, \code{bernProd}, \code{bernTbl}, \code{mapVals}, \code{matSubs}, \code{mergeGrid}.

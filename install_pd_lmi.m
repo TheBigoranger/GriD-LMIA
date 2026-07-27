@@ -1,14 +1,14 @@
 function report = install_pd_lmi()
 %INSTALL_PD_LMI Validate and persist a usable PD-LMI MATLAB installation.
-%   INSTALL_PD_LMI() adds the package source folders to the current MATLAB
-%   path, verifies the existing YALMIP installation and a working SDP solver,
-%   then saves the path. REPORT = INSTALL_PD_LMI() additionally returns the
-%   selected solver and the paths added during this call.
+%   INSTALL_PD_LMI() adds the repository root to the end of the current
+%   MATLAB path, verifies the existing YALMIP installation and a working SDP
+%   solver, then saves the path. REPORT = INSTALL_PD_LMI() additionally
+%   returns the selected solver and the paths added during this call.
 
     originalPath = path;
     report = emptyReport();
     try
-        [yalmipRoot, yalmipFiles] = validateYalmip();
+        [yalmipRoot, ~] = validateYalmip();
         solver = findWorkingSolver();
 
         packageRoot = fileparts(mfilename("fullpath"));
@@ -34,7 +34,6 @@ function report = install_pd_lmi()
             "Solver", solver, ...
             "AddedPaths", {addedPaths}, ...
             "Persisted", true);
-        %#ok<NASGU> yalmipFiles records the validated public entry points.
     catch cause
         path(originalPath);
         rethrow(cause);
@@ -75,7 +74,7 @@ end
 
 function solver = findWorkingSolver()
 %FINDWORKINGSOLVER Probe supported SDP solvers in the documented fixed order.
-    priority = {"mosek", "copt", "sedumi", "sdpt3", "lmilab"};
+    priority = {'mosek', 'copt', 'sedumi', 'sdpt3', 'lmilab'};
     try
         available = getavailablesolvers(0);
     catch cause
@@ -122,27 +121,12 @@ function ok = probeSolver(solver)
 end
 
 function addedPaths = addPackagePaths(packageRoot)
-%ADDPACKAGEPATHS Add source folders only, leaving docs and generated files out.
-    candidates = strsplit(genpath(packageRoot), pathsep);
-    candidates = candidates(~cellfun(@isempty, candidates));
-    keep = cellfun(@(folder) ~isExcludedFolder(folder, packageRoot), candidates);
-    candidates = candidates(keep);
+%ADDPACKAGEPATHS Add the package root without scanning non-runtime trees.
     addedPaths = {};
-    for k = 1:numel(candidates)
-        if ~isOnPath(candidates{k})
-            addpath(candidates{k});
-            addedPaths{end + 1} = candidates{k}; %#ok<AGROW>
-        end
+    if ~isOnPath(packageRoot)
+        addpath(packageRoot, "-end");
+        addedPaths = {packageRoot};
     end
-end
-
-function tf = isExcludedFolder(folder, packageRoot)
-%ISEXCLUDEDFOLDER Keep non-runtime trees out of MATLAB's persistent path.
-    relative = erase(string(folder), string(packageRoot));
-    parts = split(replace(relative, "\\", "/"), "/");
-    excluded = ["doc", "webpage", "sos_validation", ".git", ".agents", ".codex", ...
-        "build", "dist", "node_modules", ".astro", "coverage", "tmp"];
-    tf = any(ismember(lower(parts), excluded));
 end
 
 function tf = isOnPath(folder)
@@ -153,20 +137,21 @@ end
 
 function verifyPackageClasses(packageRoot)
 %VERIFYPACKAGECLASSES Refuse persistence if another package shadows PD-LMI.
-    names = {"pdbase", "pdmat", "pdvar", "pdlmi"};
+    names = ["pdbase", "pdmat", "pdvar", "pdlmi"];
     for k = 1:numel(names)
-        expected = fullfile(packageRoot, ['@' names{k}], [names{k} '.m']);
-        hits = which(names{k}, "-all");
+        name = names(k);
+        expected = fullfile(packageRoot, "@" + name, name + ".m");
+        hits = which(name, "-all");
         if ischar(hits)
             hits = cellstr(hits);
         end
-        if isempty(hits) || ~strcmpi(char(hits{1}), expected)
+        if isempty(hits) || ~strcmpi(string(hits{1}), expected)
             found = "not found";
             if ~isempty(hits)
                 found = string(hits{1});
             end
             error("install_pd_lmi:PathConflict", ...
-                "PD-LMI class '%s' is shadowed by %s.", names{k}, found);
+                "PD-LMI class '%s' is shadowed by %s.", name, found);
         end
     end
 end

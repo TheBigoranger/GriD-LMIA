@@ -534,6 +534,8 @@
 .cell-summary__formula,
 .cell-summary__basis,
 .cell-bernstein-readout { display: grid; gap: 0.4rem; align-content: center; text-align: center; }
+.cell-summary__formula,
+.cell-summary__basis { max-width: 100%; overflow-x: auto; }
 .cell-summary strong,
 .cell-panel-title,
 .cell-basis-link { color: var(--sl-color-text-accent); font-size: 1.15rem; text-align: center; font-weight: 700; text-decoration: none; }
@@ -802,7 +804,7 @@
 
 .certificate-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   grid-auto-rows: 1fr;
   gap: 0.35rem;
   align-items: stretch;
@@ -847,7 +849,7 @@
 .certificate-flow__residual { display: grid; gap: 0.25rem; inline-size: min(100%, 34rem); padding: 0.75rem 1rem; border: 1px solid var(--diagram-result); border-radius: 10px; color: var(--diagram-result); text-align: center; background: color-mix(in srgb, var(--diagram-result) 8%, transparent); }
 .certificate-flow__residual .katex { color: inherit; font-size: 1em; }
 .certificate-flow__arrow { color: var(--sl-color-text-accent); font-size: 1.5rem; line-height: 1; }
-.certificate-flow-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; width: 100%; gap: 0.35rem; }
+.certificate-flow-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 1fr; width: 100%; gap: 0.35rem; }
 .certificate-flow-tabs button { display: grid; gap: 0.2rem; min-width: 0; min-block-size: 5rem; margin: 0; border: 1px solid var(--diagram-border); border-radius: 8px; padding: 0.5rem 0.35rem; color: var(--sl-color-text); background: var(--sl-color-bg); cursor: pointer; }
 .certificate-flow-tabs button strong { font-size: 0.9rem; }
 .certificate-flow-tabs button code { overflow-wrap: anywhere; color: var(--sl-color-gray-2); font-size: 0.72rem; }

@@ -96,26 +96,18 @@ polya = direct.applyPolya(1);
 putinarFromPolya = polya.applyPutinar();
 Fputinar = toYalmip(putinarDefault);
 
-fprintf("direct: putinar=%d, order=%d, constraints=%d\n", ...
-    direct.UsePutinar, direct.PutinarOrder, ...
-    numel(direct.Constraints));
-fprintf("default: putinar=%d, order=%d, constraints=%d\n", ...
-    putinarDefault.UsePutinar, putinarDefault.PutinarOrder, ...
-    numel(putinarDefault.Constraints));
-fprintf("higher: order=%d, constraints=%d\n", ...
-    putinarHigher.PutinarOrder, numel(putinarHigher.Constraints));
-fprintf("replacement: polya=%d, putinar=%d, order=%d\n", ...
-    putinarFromPolya.UsePolya, putinarFromPolya.UsePutinar, ...
-    putinarFromPolya.PutinarOrder);
-fprintf("exported constraints=%d\n", length(Fputinar));
-```
-
-```text
-direct: putinar=0, order=0, constraints=3
-default: putinar=1, order=1, constraints=5
-higher: order=2, constraints=7
-replacement: polya=0, putinar=1, order=1
-exported constraints=5
+direct.UsePutinar
+direct.PutinarOrder
+numel(direct.Constraints)
+putinarDefault.UsePutinar
+putinarDefault.PutinarOrder
+numel(putinarDefault.Constraints)
+putinarHigher.PutinarOrder
+numel(putinarHigher.Constraints)
+putinarFromPolya.UsePolya
+putinarFromPolya.UsePutinar
+putinarFromPolya.PutinarOrder
+length(Fputinar)
 ```
 
 For the degree-two scalar residual, order one stores two PSD blocks followed
@@ -151,6 +143,7 @@ share the one-parameter parity rule and default order.
 
 [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
 [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
 [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
 [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) ·
 [`SOS Certificates`](/PD-LMI-package/documents/math/sos-certificates/)

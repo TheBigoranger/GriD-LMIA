@@ -1,0 +1,180 @@
+---
+title: pdlmi applySparseFullBoxPreorder
+description: Rebuild a PD-LMI residual with a tensor-window sparse full-box certificate and canonical endpoints.
+---
+
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+
+<CertificateNavigation selected="sparsefullbox" showSections={false} />
+
+# `applySparseFullBoxPreorder`
+
+`applySparseFullBoxPreorder` rebuilds an inequality from its stored `Residual`
+with the sparse full-box family. It retains every parity term in one parameter
+and every generator-mask term on a multidimensional box, but replaces each
+dense Gram matrix by independent axis-aligned tensor windows.
+
+## Syntax
+
+```matlab
+Csparse = C.applySparseFullBoxPreorder()
+Csparse = C.applySparseFullBoxPreorder(b)
+Csparse = C.applySparseFullBoxPreorder(b, r)
+```
+
+The same family is available at construction:
+
+```matlab
+Csparse = pdlmi(expr, relation, "UseSparseFullBoxPreorder")
+Csparse = pdlmi(expr, relation, UseSparseFullBoxPreorder=true)
+Csparse = pdlmi(expr, relation, BandWidth=b)
+Csparse = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
+```
+
+## Arguments
+
+| Argument | Contract |
+| :--- | :--- |
+| `C` | Any `pdlmi` object. The method always rebuilds from `C.Residual`; it does not add constraints to the currently selected family. |
+| `b` | Finite positive integer scalar. Default `2`. It is a tensor-window width on every Bernstein axis, not a flattened matrix bandwidth. |
+| `r` | Finite nonnegative integer scalar and absolute Gram order. It is not an increment from the residual degree. |
+
+For residual degree `m`, the default and minimum admissible order are
+`floor(m/2)` in one parameter and `ceil(m/2)` in two or more parameters. Order
+validation occurs before endpoint normalization.
+
+## Returned Object And Read-Only State
+
+`Csparse` is a new value object; `C` is unchanged. At an intermediate width,
+the returned state is:
+
+```matlab
+Csparse.UseSparseFullBoxPreorder
+Csparse.SparseFullBoxOrder
+Csparse.BandWidth
+```
+
+with values `true`, `r`, and `b`. The other certificate selectors are false.
+These properties are read-only from user code.
+
+The exact endpoints are canonical:
+
+- `b == 1` returns an actual Direct object. Its sparse selector is false and
+  its sparse order and width are zero.
+- `b >= r + 1` returns an actual Full Box object. Its sparse selector is false,
+  and `UseFullBoxPreorder` and `FullBoxOrder` describe the selected family.
+- `1 < b < r + 1` returns a Sparse Full Box object.
+
+The endpoint states are intentionally normalized; callers should inspect the
+returned object instead of inferring its family from the requested width.
+
+## Certificate Construction
+
+For every full-box parity or generator-mask term, the sparse construction
+enumerates all admissible tensor-window start tuples. Each window obtains a
+free PSD Gram block, and exact coefficient matching is imposed at every
+coefficient of the target Bernstein tensor. The support is tensor-product:
+with width `b`, each axis uses at most `b` consecutive monomials.
+
+Certificates are independent for every physical cell, every active rate row,
+and every column-major matrix entry. A symmetric matrix inequality uses
+matrix-valued PSD blocks. An elementwise inequality uses independent scalar
+certificates for all entries. Cell-boundary residual handles may be shared,
+but Gram variables are not.
+
+## Deterministic Transcript
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, "symmetric", Degree=4);
+direct = P >= 0;
+
+sparse = direct.applySparseFullBoxPreorder();
+selected = direct.applySparseFullBoxPreorder(2, 2);
+directEndpoint = direct.applySparseFullBoxPreorder(1, 2);
+denseEndpoint = direct.applySparseFullBoxPreorder(3, 2);
+
+sparse.UseSparseFullBoxPreorder
+sparse.SparseFullBoxOrder
+sparse.BandWidth
+selected.UseSparseFullBoxPreorder
+directEndpoint.UseSparseFullBoxPreorder
+directEndpoint.UseFullBoxPreorder
+denseEndpoint.UseSparseFullBoxPreorder
+denseEndpoint.UseFullBoxPreorder
+numel(selected.Constraints)
+```
+
+```text
+ans =
+  logical
+   1
+
+ans =
+     2
+
+ans =
+     2
+
+ans =
+  logical
+   1
+
+ans =
+  logical
+   0
+
+ans =
+  logical
+   0
+
+ans =
+  logical
+   0
+
+ans =
+  logical
+   1
+
+ans =
+     8
+```
+
+For the scalar one-parameter degree-four fixture at order two and width two,
+one cell stores three PSD window blocks of dimension two and five coefficient
+identities. Width one stores five Direct coefficient tests; width three
+stores the two dense Full Box PSD blocks and five identities.
+
+## Validation And Errors
+
+- A malformed width raises `pdlmi:InvalidBandWidth`.
+- A malformed order raises `pdlmi:InvalidSparseFullBoxOrder`.
+- An integer below the dimension-dependent minimum raises
+  `pdlmi:SparseFullBoxOrderTooLow`, including when `b == 1`.
+- `UseSparseFullBoxPreorder=false` with `BandWidth` or
+  `SparseFullBoxOrder` raises `pdlmi:ConflictingSparseFullBoxOptions`.
+- Duplicate or malformed name-value syntax raises `pdlmi:DuplicateOption` or
+  `pdlmi:InvalidOptions`.
+- Enabling Sparse Full Box together with Pólya, Putinar, or Full Box raises
+  `pdlmi:ConflictingRelaxations`.
+- Every certificate option on relation `"=="` raises
+  `pdlmi:UnsupportedEqualityCertificate`. Equality rejection occurs before
+  method-argument validation.
+
+## Limitations
+
+Sparse Full Box is a fixed-order sufficient certificate, not an automatic
+order search, chordal decomposition, or residual diagnostic. Increasing the
+width nests the supported Gram patterns, but a strict feasibility improvement
+is not guaranteed. Putinar and Sparse Full Box have no total conservatism
+ordering. The method assembles constraints but does not select a solver or
+add a feasibility margin.
+
+## See Also
+
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
+[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
+[`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) ·
+[`SOS Certificates`](/PD-LMI-package/documents/math/sos-certificates/)

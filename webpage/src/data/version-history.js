@@ -1,8 +1,15 @@
 export const versionHistory = [
   {
+    version: "v1.1.0",
+    date: "2026-07-26",
+    status: "current",
+    summary:
+      "Documents the centralized pdbase implementation while retaining complete inherited pdmat and pdvar references, adds the Sparse Full Box certificate with tensor-window widths and canonical Direct/Full Box endpoints, corrects protected backend-helper ownership, and refreshes the printable and Web manuals.",
+  },
+  {
     version: "v1.0.0",
     date: "2026-07-19",
-    status: "current",
+    status: "previous · 6d19619",
     summary:
       "Marks the first stable public release of the documented package workflow. It consolidates installation and test-suite verification, the pdbase/pdmat/pdvar/pdlmi object model, continuous arbitrary-degree decision storage and rate-vertex differentiation, MATLAB-style matrix operations and indexing, and direct, Pólya, Putinar, and full-box finite certificate assembly. This milestone stabilizes the implemented and tested surface; it does not add new runtime behavior.",
   },

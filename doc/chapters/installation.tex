@@ -5,7 +5,7 @@
 \index{installation}\index{path conflict}\index{YALMIP dependency}
 \label{sec:installation}
 
-Start \matlab{} in the checked-out repository and run the root-level installer once.  The installer adds the package source tree recursively while excluding documentation, the Web site, independent SOS validation material, Git/agent metadata, and generated build directories.  It does not download dependencies or edit \code{startup.m}.
+Start \matlab{} in the checked-out repository and run the root-level installer once. The installer adds only the repository root to the end of the MATLAB path; MATLAB resolves the package's class, package, and private directories from that root. It does not recursively scan the checkout, download dependencies, or edit \code{startup.m}.
 
 \begin{lstlisting}[style=dpmatlab]
 report = install_pd_lmi();
@@ -31,7 +31,7 @@ install_pd_lmi:PathConflict
 install_pd_lmi:PathSaveFailed
 \end{lstlisting}
 
-Repeated successful calls are idempotent.
+Repeated successful calls are idempotent: when the repository root is already present, the installer adds no duplicate path entry and returns an empty \code{AddedPaths}.
 
 \section{Validate the Installation}
 \index{validation}\index{solver probe}
@@ -65,16 +65,18 @@ T = bernsteinTable(A, "oneLine")
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric");
+P = pdvar(2, {[0 1]}, "symmetric", Degree=4);
 C = P >= 0;
 F = toYalmip(C);
 Cputinar = C.applyPutinar();
 Fputinar = toYalmip(Cputinar);
+Csp = C.applySparseFullBoxPreorder(2);
+Fsp = toYalmip(Csp);
 Cbox = C.applyFullBoxPreorder();
 Fbox = toYalmip(Cbox);
 \end{lstlisting}
 
-\code{F} is the direct coefficient certificate; \code{Fputinar} and \code{Fbox} are the default Putinar and full-box certificates for the same stored residual.  Any one can be passed to ordinary YALMIP calls.  Use the selected solver from the report when an explicit solver setting is useful:
+\code{F} is the direct coefficient certificate; \code{Fputinar}, \code{Fsp}, and \code{Fbox} are the default Putinar, width-two SparseFullBox, and FullBox certificates for the same stored residual. Any one can be passed to ordinary YALMIP calls. Use the selected solver from the report when an explicit solver setting is useful:
 
 \begin{lstlisting}[style=dpsyntax]
 opts = sdpsettings('solver', report.Solver, 'verbose', 0);
@@ -97,7 +99,8 @@ Backend &
 \hyperref[sec:pdbase-counts]{\code{ncell}},
 \hyperref[sec:pdbase-counts]{\code{ncoeff}},
 \hyperref[sec:pdbase-counts]{\code{npar}},
-\hyperref[sec:pdbase-counts]{\code{size}} \\
+\hyperref[sec:pdbase-counts]{shape protocols},
+\hyperref[sec:pdbase-matrix-ops]{shared matrix operations} \\
 Known data &
 \hyperref[sec:pdmat]{\code{pdmat}},
 \hyperref[sec:pdmat-construction]{construction},
@@ -120,6 +123,7 @@ LMIs &
   \hyperref[sec:pdlmi-direct]{direct coefficient assembly},
   \hyperref[sec:pdlmi-polya]{\code{applyPolya}},
   \hyperref[sec:pdlmi-putinar]{\code{applyPutinar}},
+  \hyperref[sec:pdlmi-sparse-full-box]{\code{applySparseFullBoxPreorder}},
   \hyperref[sec:pdlmi-full-box]{\code{applyFullBoxPreorder}},
 \hyperref[sec:pdlmi-toyalmip]{\code{toYalmip}},
 \hyperref[sec:examples]{solver examples} \\

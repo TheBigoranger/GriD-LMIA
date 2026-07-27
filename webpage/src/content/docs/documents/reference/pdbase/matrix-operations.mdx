@@ -1,0 +1,252 @@
+---
+title: pdbase Matrix Operations
+description: Shared unary, structural, reduction, repetition, and concatenation protocols inherited by pdmat and pdvar.
+---
+
+import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
+
+<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdbase/">pdbase</a><span>/</span><span>matrix operations</span></nav>
+
+`pdbase` centralizes these operations by visiting every physical cell, local
+coefficient, and active rate row. A successful operation returns the same
+dynamic class with its grid, degree, metadata, and source object preserved.
+The pages for [`pdmat`](/PD-LMI-package/documents/reference/pdmat/structural-operations/)
+and [`pdvar`](/PD-LMI-package/documents/reference/pdvar/structural-operations/)
+remain complete because known numeric data and symbolic/rate-aware data have
+different user-facing behavior.
+
+## Unary sign and transpose
+
+### <span id="pdbase-uplus"></span>`uplus` and <span id="pdbase-uminus"></span>`uminus`
+
+```matlab
+positive = +obj
+negative = -obj
+```
+
+`uplus` returns the value-semantic object unchanged. `uminus` negates every
+payload and retains `MatrixSize`.
+
+### <span id="pdbase-transpose"></span>`transpose` and <span id="pdbase-ctranspose"></span>`ctranspose`
+
+```matlab
+plain = obj.'
+conjugate = obj'
+```
+
+Both swap the two payload dimensions. `transpose` does not conjugate;
+`ctranspose` does. For the package's real numeric and real YALMIP payloads they
+normally produce the same values.
+
+## Reshape and vectorize
+
+### <span id="pdbase-reshape"></span>`reshape`
+
+```matlab
+out = reshape(obj, rows, columns)
+out = reshape(obj, [rows columns])
+out = reshape(obj, [], columns)
+```
+
+Exactly two output dimensions are supported. At most one may be empty, and
+the final element count must equal `prod(obj.MatrixSize)`. Errors use
+`<dynamic-class>:InvalidReshape`.
+
+### <span id="pdbase-squeeze"></span>`squeeze`
+
+```matlab
+out = squeeze(obj)
+```
+
+The method applies MATLAB `squeeze` to every payload, then records the result
+as an always-two-dimensional matrix size. For example, a `1 × n` or `n × 1`
+payload stays a two-dimensional vector object; no N-D payload shape is
+introduced.
+
+### <span id="pdbase-vec"></span>`vec`
+
+```matlab
+out = vec(obj)
+```
+
+Returns a `numel(obj) × 1` payload in MATLAB column-major order.
+
+```matlab
+obj = pdbase({[0 1]}, [2 2], 0, {{[1 2; 3 4]}});
+v = vec(obj);
+v.MatrixSize
+v.coeffs(1){1}
+```
+
+```text
+ans =
+     4     1
+
+ans =
+     1
+     3
+     2
+     4
+```
+
+<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["a"], ["c"], ["b"], ["d"]]} beforeLabel="2 × 2 payload" afterLabel="vec(obj)" caption="The traversal changes matrix-entry placement only; cell and Bernstein-label order stay fixed." />
+
+## Diagonal, trace, and reductions
+
+### <span id="pdbase-diag"></span>`diag`
+
+```matlab
+out = diag(obj)
+out = diag(obj,k)
+```
+
+For a matrix payload, extracts diagonal `k`; for a vector payload, constructs
+a diagonal matrix. `k` is a finite integer scalar. Selecting an empty matrix
+diagonal raises `<dynamic-class>:InvalidDiag` because the backend cannot store
+an empty payload.
+
+### <span id="pdbase-trace"></span>`trace`
+
+```matlab
+out = trace(obj)
+```
+
+Sums the main diagonal and returns a `1 × 1` payload. Rectangular matrices and
+row or column vectors are supported: the method sums
+`min(rows,columns)` main-diagonal entries. It does not require a square input.
+
+### <span id="pdbase-sum"></span>`sum` and <span id="pdbase-mean"></span>`mean`
+
+```matlab
+out = sum(obj)
+out = sum(obj,dim)
+out = sum(obj,[dim1 dim2 ...])
+out = sum(obj,"all")
+
+out = mean(obj)
+out = mean(obj,dim)
+out = mean(obj,[dim1 dim2 ...])
+out = mean(obj,"all")
+```
+
+The dimension vector must be nonempty, unique, positive, finite, and integer.
+Dimensions above two are singleton no-ops. `"all"` returns a `1 × 1` payload.
+No MATLAB data flags such as `"native"` or `"omitmissing"` are accepted.
+Errors use `<dynamic-class>:InvalidSum` or `<dynamic-class>:InvalidMean`.
+
+### <span id="pdbase-cumsum"></span>`cumsum`
+
+```matlab
+out = cumsum(obj)
+out = cumsum(obj,dim)
+out = cumsum(obj,"forward")
+out = cumsum(obj,"reverse")
+out = cumsum(obj,dim,"forward")
+out = cumsum(obj,dim,"reverse")
+```
+
+The dimension is a positive integer scalar. A lone direction uses the first
+nonsingleton payload dimension. Dimensions above two return the unchanged
+payload because all higher matrix dimensions are singleton. Other directions
+or additional flags raise `<dynamic-class>:InvalidCumsum`.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2 3; 4 5 6], [2 4 6; 8 10 12]}, Degree=1);
+rectTrace = trace(A).evaluate(0)
+allSum = sum(A,[1 2 3]).evaluate(0)
+reverse = cumsum(A,2,"reverse").evaluate(0)
+```
+
+```text
+rectTrace =
+     6
+
+allSum =
+    21
+
+reverse =
+     6     5     3
+    15    11     6
+```
+
+## Triangular and positional transforms
+
+### <span id="pdbase-tril"></span>`tril` and <span id="pdbase-triu"></span>`triu`
+
+```matlab
+lower = tril(obj)
+lower = tril(obj,k)
+upper = triu(obj)
+upper = triu(obj,k)
+```
+
+The optional diagonal offset is a finite integer scalar. Invalid offsets use
+`<dynamic-class>:InvalidTriangularPart`.
+
+### <span id="pdbase-flip"></span>`flip`, <span id="pdbase-fliplr"></span>`fliplr`, and <span id="pdbase-flipud"></span>`flipud`
+
+```matlab
+out = flip(obj)
+out = flip(obj,dim)
+out = fliplr(obj)
+out = flipud(obj)
+```
+
+`flip` uses the first nonsingleton payload dimension by default; an explicit
+dimension must be a positive integer scalar. Higher dimensions are singleton
+no-ops. Invalid input uses `<dynamic-class>:InvalidFlip`.
+
+### <span id="pdbase-rot90"></span>`rot90`
+
+```matlab
+out = rot90(obj)
+out = rot90(obj,k)
+```
+
+`k` is a finite integer scalar; turns are normalized modulo four. Odd turns
+swap payload dimensions. Errors use `<dynamic-class>:InvalidRot90`.
+
+### <span id="pdbase-repmat"></span>`repmat`
+
+```matlab
+out = repmat(obj,n)
+out = repmat(obj,[rows columns])
+out = repmat(obj,rows,columns)
+```
+
+Only one scalar or exactly two positive integer repeat counts are supported.
+Errors use `<dynamic-class>:InvalidRepmat`.
+
+## Direct base concatenation boundary
+
+### <span id="pdbase-cat"></span>`cat`, <span id="pdbase-horzcat"></span>`horzcat`, and <span id="pdbase-vertcat"></span>`vertcat`
+
+```matlab
+cat(dim,obj1,obj2)
+[obj1 obj2]
+[obj1; obj2]
+```
+
+Direct `pdbase` operands reject every concatenation form with
+`pdbase:UnsupportedConcatenation`. A base-object array would conflict with
+the overloaded payload `size` and `numel` protocols. `pdmat` and `pdvar`
+override this boundary with coefficient-wise concatenation after grid,
+degree, shape, and rate-row alignment.
+
+## Shared limitations
+
+- Function-only `pdmat` objects have no coefficient tree for these maps and
+  raise `pdmat:FunctionOnlyAlgebra`.
+- Operations never reorder physical cells, local labels, or derivative rate
+  rows.
+- No operation evaluates YALMIP variables, calls a solver, or changes the
+  represented polynomial's parameter domain.
+- Validation generated by a shared operation uses the dynamic derived-class
+  prefix, except the explicit direct-base concatenation boundary.
+
+## See Also
+
+[`pdmat structural operations`](/PD-LMI-package/documents/reference/pdmat/structural-operations/) ·
+[`pdvar structural operations`](/PD-LMI-package/documents/reference/pdvar/structural-operations/) ·
+[`pdbase evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/) ·
+[`protected backend utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/)

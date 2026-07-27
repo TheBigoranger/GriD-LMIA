@@ -1,37 +1,7 @@
-\chapter{Public Helper Utilities}
+\chapter{Shared Helper Utilities}
 \label{sec:helpers}
 
-The \code{+helper} namespace contains exactly nine implementation utilities whose ownership genuinely crosses class boundaries.  They are developer-facing building blocks, not an alternative modeling API: ordinary users should enter through \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}.  Their signatures and current consumers are documented below so maintainers can distinguish shared contracts from class-local implementation details.
-
-\section{\texorpdfstring{\code{helper.bernTbl}}{helper.bernTbl}}
-
-\textit{Purpose.} Build the shared detailed or one-line Bernstein inspection table used by \code{pdmat} and \code{pdvar}.
-
-\syntaxhead
-\begin{lstlisting}[style=dpsyntax]
-T = helper.bernTbl(obj, errId, valFcn, exprFcn, rateVerts)
-T = helper.bernTbl(..., cellSubs)
-T = helper.bernTbl(..., "oneLine")
-\end{lstlisting}
-
-\descriptionhead
-\code{obj} supplies \code{cells}, \code{lbls}, and \code{coeffs}; \code{valFcn} maps each coefficient to a table value and \code{exprFcn} maps it to expression text.  \code{rateVerts} is empty for ordinary data or has one row per active rate vertex.  The optional \code{cellSubs} selects one physical cell; \code{"oneLine"} returns one expression per cell and rate row.
-
-\examplehead
-\begin{lstlisting}[style=dpmatlab]
-A = pdmat({[0 1]}, {1, 2}, Degree=1);
-T = helper.bernTbl(A, "demo:Invalid", @(x) x, ...
-    @(x) string(mat2str(x)), [], "oneLine")
-\end{lstlisting}
-\begin{lstlisting}[style=dpoutput]
-T =
-    CellSubscript          Expression
-    _____________    ______________________
-        {[1]}        "(1-alpha)*1 + alpha*2"
-\end{lstlisting}
-
-\remarkshead
-Only one cell selector and the case-insensitive \code{"oneLine"} option are accepted.  Invalid selectors, unknown text, repeated selectors, or rate-row count mismatches raise the caller-owned \code{errId}, preserving the public class error namespace.
+The \code{+helper} namespace contains exactly six implementation utilities whose ownership genuinely crosses class boundaries: \code{cellGet}, \code{chk}, \code{combRows}, \code{isZero}, \code{mkGrid}, and \code{mkNest}. They are developer-facing building blocks, not an alternative modeling API: ordinary users should enter through \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}. The object-aware \code{bernTbl}, \code{mapVals}, and \code{matSubs} mechanisms are protected \code{pdbase} backend utilities and are documented in \cref{sec:pdbase-backend-utilities}, not as \code{helper.*} functions.
 
 \section{\texorpdfstring{\code{helper.cellGet}}{helper.cellGet}}
 
@@ -144,59 +114,6 @@ objectZero =
 
 \remarkshead
 Function-only \code{pdmat} placeholders are not coefficient evidence and therefore do not prove object zero.  Invalid modes raise \codeerr{helper}{InvalidZeroMode}; the wrong mode-specific arity raises \codeerr{helper}{InvalidZeroCall}.
-
-\section{\texorpdfstring{\code{helper.mapVals}}{helper.mapVals}}
-
-\textit{Purpose.} Map one payload function across every leaf of a nested \code{LocalValues} tree.
-
-\syntaxhead
-\begin{lstlisting}[style=dpsyntax]
-mapped = helper.mapVals(vals, fcn, grid)
-\end{lstlisting}
-
-\descriptionhead
-\code{grid} determines the nested physical-cell shape and \code{fcn} is applied with \code{cellfun} to every payload in every selected leaf.  The result retains the original physical-cell tree and coefficient ordering.
-
-\examplehead
-\begin{lstlisting}[style=dpmatlab]
-vals = {{{1, 2}}, {{3, 4}}};
-mapped = helper.mapVals(vals, @(x) 10*x, {[0 1 2], [0 1]});
-secondLeaf = helper.cellGet(mapped, [2 1])
-\end{lstlisting}
-\begin{lstlisting}[style=dpoutput]
-secondLeaf =
-  1x2 cell array
-    {[30]}    {[40]}
-\end{lstlisting}
-
-\remarkshead
-The mapping preserves nesting but does not validate payload semantics; the owning class remains responsible for matrix sizes, symbolic affinity, and rate-row structure.
-
-\section{\texorpdfstring{\code{helper.matSubs}}{helper.matSubs}}
-
-\textit{Purpose.} Normalize supported two-dimensional payload subscripts into explicit row and column index vectors.
-
-\syntaxhead
-\begin{lstlisting}[style=dpsyntax]
-[rows, cols] = helper.matSubs(subs, sz, errId)
-\end{lstlisting}
-
-\descriptionhead
-\code{subs} is a two-element cell array.  Each element may be a finite positive integer vector, a matching logical vector, or \code{":"}; \code{sz=[m n]} supplies the available matrix size.  Errors use the caller-owned \code{errId}.
-
-\examplehead
-\begin{lstlisting}[style=dpmatlab]
-[rows, cols] = helper.matSubs({":", 2}, [3 4], "demo:BadSub")
-\end{lstlisting}
-\begin{lstlisting}[style=dpoutput]
-rows =
-     1     2     3
-cols =
-     2
-\end{lstlisting}
-
-\remarkshead
-The helper rejects linear indexing, empty or out-of-range numeric indices, and logical selectors whose lengths do not match the indexed dimension.  It never permits array growth.
 
 \section{\texorpdfstring{\code{helper.mkGrid}}{helper.mkGrid}}
 

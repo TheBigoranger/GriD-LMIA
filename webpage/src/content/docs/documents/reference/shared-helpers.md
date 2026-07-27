@@ -1,102 +1,86 @@
 ---
 title: Shared Helper Utilities
-description: Backend-only +helper utilities used by pdmat, pdvar, pdlmi, and pdbase.
+description: Six backend-only +helper utilities shared across the package.
 ---
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><span>shared helpers</span></nav>
 
-The `+helper` namespace contains implementation utilities, not the primary modeling API. They are documented so maintainers can inspect storage, validation, and ordering contracts. Protected Bernstein methods such as `bernElev`, `bernProd`, and `mergeGrid` remain on the separate [Bernstein backend utilities](/PD-LMI-package/documents/reference/bernstein-utilities/) page.
-
-## <span id="helper-berntbl"></span>`helper.bernTbl`
-
-**Syntax:** `T = helper.bernTbl(obj, errId, valFcn, exprFcn, rateVerts, [cellSubs], ["oneLine"])`
-
-**Output:** a detailed coefficient table, or one expression row per cell/rate vertex in `"oneLine"` mode.
-
-**Boundary and errors:** accepts at most one physical-cell selector and the `"oneLine"` text option; selector and rate-row failures use caller-owned `errId`.
-
-**Consumers:** `pdmat.bernsteinTable` and `pdvar.bernsteinTable`.
+The `+helper` namespace contains exactly six shared implementation utilities.
+They are documented for maintainers, not as primary modeling API. `bernTbl`,
+`mapVals`, and `matSubs` are protected `pdbase` methods and therefore belong
+on the [protected backend utilities](/PD-LMI-package/documents/reference/bernstein-utilities/)
+page.
 
 ## <span id="helper-cellget"></span>`helper.cellGet`
 
-**Syntax:** `leaf = helper.cellGet(vals, subs)`
+**Syntax:** `leaf = helper.cellGet(values,cellSubscripts)`.
 
-**Output:** the flat coefficient leaf or rate-row table at nested physical-cell subscript `subs`.
-
-**Boundary and errors:** assumes the tree and one index per level were validated by the caller; ordinary MATLAB cell-index errors surface for malformed access.
-
-**Consumers:** storage traversal, coefficient access, and `helper.mapVals`.
+Returns one nested physical-cell leaf. The caller supplies a validated tree and
+one subscript per parameter axis; ordinary MATLAB cell-access errors surface
+for malformed internal use.
 
 ## <span id="helper-chk"></span>`helper.chk`
 
-**Syntax:** `value = helper.chk(value, errId, message, tags..., Name, Value)`
+**Syntax:** `value = helper.chk(value,errorId,message,tags...,Name,Value)`.
 
-**Output:** the unchanged value after validation. Supported tags are `numeric`, `real`, `cell`, `struct`, `nonempty`, `scalar`, `vector`, `matrix`, `finite`, `integer`, `positive`, `nonnegative`, `increasing`, and `rowbounds`; options are `Size`, `Numel`, `MinNumel`, `Min`, and `Max`.
-
-**Boundary and errors:** a failed predicate raises the caller-owned `errId`; an unknown tag or malformed validator option raises `helper:InvalidValidatorCall`.
-
-**Consumers:** constructors and public-method argument validation across the package.
+Returns the unchanged value after common predicates pass. Supported tags cover
+numeric/real/cell/struct type, emptiness, scalar/vector/matrix shape, finite
+integer sign, strict increase, and row bounds; size/count/range options add
+exact constraints. A failed predicate raises the caller-owned identifier.
+Malformed validator syntax raises `helper:InvalidValidatorCall`.
 
 ## <span id="helper-combrows"></span>`helper.combRows`
 
-**Syntax:** `rows = helper.combRows(vecs)`
+**Syntax:** `rows = helper.combRows(vectors)`.
 
-**Output:** Cartesian-product rows with earlier tensor axes varying more slowly.
-
-**Boundary and errors:** `vecs` is expected to contain one vector per axis; callers validate element types and nonempty dimensions.
-
-**Consumers:** grid points, physical-cell traversal, local labels, and rate vertices.
+Returns Cartesian-product rows with earlier axes varying more slowly. This one
+order governs tensor grid points, physical-cell subscripts, Bernstein labels,
+and rate vertices. Callers validate the axis values.
 
 ## <span id="helper-iszero"></span>`helper.isZero`
 
-**Syntax:** `tf = helper.isZero(value,"num")`, `tf = helper.isZero(value,"add",matrixSize)`, `tf = helper.isZero(value,"vals")`, or `tf = helper.isZero(obj,"obj")`.
+**Syntax:** `tf = helper.isZero(value,mode,...)`.
 
-**Output:** true only when the selected evidence rule proves zero. Function-only `pdmat` placeholders are not zero evidence.
-
-**Boundary and errors:** unsupported modes raise `helper:InvalidZeroMode`; the wrong number of extra inputs raises `helper:InvalidZeroCall`.
-
-**Consumers:** additive identities, zero residual elimination, and equality assembly.
-
-## <span id="helper-mapvals"></span>`helper.mapVals`
-
-**Syntax:** `mapped = helper.mapVals(vals, fcn, grid)`
-
-**Output:** a new nested tree with the same physical-cell layout and `fcn` applied to every coefficient payload.
-
-**Boundary and errors:** relies on a validated grid and matching `LocalValues` tree; mapping-function errors propagate.
-
-**Consumers:** coefficient-wise algebra and structural transformations.
-
-## <span id="helper-matsubs"></span>`helper.matSubs`
-
-**Syntax:** `[rows, cols] = helper.matSubs(subs, size, errId)`
-
-**Output:** normalized positive row and column index vectors.
-
-**Boundary and errors:** requires exactly two subscripts; accepts `:`, a matching logical vector, or finite in-range positive integers. Violations raise caller-owned `errId`.
-
-**Consumers:** `pdmat` and `pdvar` `subsref`/`subsasgn`.
+Modes `"num"`, `"add"`, `"vals"`, and `"obj"` apply the package's numeric,
+additive, coefficient-tree, and object evidence rules. A function-only
+`pdmat` placeholder is not coefficient zero evidence. Bad modes and arity use
+`helper:InvalidZeroMode` or `helper:InvalidZeroCall`.
 
 ## <span id="helper-mkgrid"></span>`helper.mkGrid`
 
-**Syntax:** `info = helper.mkGrid(grid)` or `info = helper.mkGrid(grid, owner)`
+**Syntax:** `info = helper.mkGrid(grid)` or
+`info = helper.mkGrid(grid,owner)`.
 
-**Output:** `GridInfo` with `Vectors`, Cartesian `Points`, axis `Bounds`, and `NumNodes`.
-
-**Boundary and errors:** requires a nonempty cell array of finite, real, strictly increasing vectors with at least two nodes. Errors use `<owner>:InvalidGrid` or `<owner>:InvalidGridVector`; the default owner is `pdbase`.
-
-**Consumers:** `pdbase`-derived constructors.
+Validates a nonempty cell array of finite, real, strictly increasing vectors
+with at least two nodes. Returns `Vectors`, tensor-product `Points`, `Bounds`,
+and `NumNodes`. Errors use `<owner>:InvalidGrid` or
+`<owner>:InvalidGridVector`; the default owner is `pdbase`.
 
 ## <span id="helper-mknest"></span>`helper.mkNest`
 
-**Syntax:** `vals = helper.mkNest(nCell, mkLeaf)`
+**Syntax:** `values = helper.mkNest(cellCounts,makeLeaf)`.
 
-**Output:** `vals{i1}{i2}...{i_ell}`, with `mkLeaf` called once per physical-cell subscript row.
+Constructs `values{i1}{i2}...{i_npar}` and calls `makeLeaf` once for each
+physical-cell subscript row. Inputs are internal validated values; allocation
+or callback failures propagate.
 
-**Boundary and errors:** `nCell` and `mkLeaf` are internal validated inputs; callback or cell-allocation failures propagate. The optional recursion prefix is package-internal.
+## Ordering example
 
-**Consumers:** constructors, grid conversion, and `helper.mapVals`.
+```matlab
+helper.combRows({0:1, 10:10:20})
+```
+
+```text
+ans =
+     0    10
+     0    20
+     1    10
+     1    20
+```
 
 ## See Also
 
-[`pdbase storage inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/) · [`Bernstein backend utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/) · [`pdmat indexing and inspection`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) · [`pdvar indexing and inspection`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/)
+[`protected pdbase utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/) ·
+[`pdbase storage`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/) ·
+[`pdmat indexing`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) ·
+[`pdvar indexing`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/)

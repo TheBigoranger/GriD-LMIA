@@ -5,17 +5,26 @@ description: Reference-first entry point for PD-LMI classes, methods, and mathem
 
 import ReferenceCategoryHub from "../../../components/ReferenceCategoryHub.astro";
 
-Use this page as the lookup entry for current PD-LMI behavior. The reference pages document implemented code only, including direct, opt-in Pólya, fixed-order Putinar box, and fixed-order full-box preordering assembly. Supported inputs and validation errors appear beside the constructor or method they affect.
+Use this page as the lookup entry for current PD-LMI behavior. The reference pages document implemented code only, including Direct, opt-in Pólya, fixed-order Putinar, tensor-window Sparse Full Box, and fixed-order Full Box assembly. Supported inputs and validation errors appear beside the constructor or method they affect.
 
 PD-LMI means **parameter-dependent LMI**. The package represents continuous piecewise-polynomial matrix functions on physical grid cells in a cell-local tensor-product Bernstein basis. `pdvar` shares complete face values between adjacent cells; differentiation remains cell-local, so the representation is not a B-spline and does not assert global differentiability. Use **DPD-LMI** only for a differentiable PD-LMI with explicit derivative and rate terms.
 
-## Version 1.0 Supported Scope
+## Version 1.1 Supported Scope
 
-Version 1.0 is the stable documentation milestone for the implemented package workflow. Its supported surface comprises the `pdbase` storage backend; function-backed and coefficient-backed `pdmat` known data; degree-zero or continuous arbitrary-degree `pdvar` decisions; discontinuous rate-vertex data produced by `rhodiff`; direct `pdlmi` constraints; opt-in Pólya degree increments; fixed-order Putinar box and full-box Bernstein–Gram certificates; the documented MATLAB-style matrix and indexing overloads; and the indexed shared helpers below.
+Version 1.1 documents the implemented package workflow after shared matrix
+protocols, unary transformations, and reductions were centralized in
+`pdbase`. The inherited operations remain complete public `pdmat` and `pdvar`
+interfaces, with class-specific examples and validation. The supported
+surface also includes function-backed and coefficient-backed `pdmat` known
+data; degree-zero or continuous arbitrary-degree `pdvar` decisions;
+discontinuous rate-vertex data produced by `rhodiff`; Direct `pdlmi`
+constraints; opt-in Pólya degree increments; fixed-order Putinar, Sparse Full
+Box, and Full Box Bernstein–Gram certificates; and six shared `+helper`
+functions.
 
 The package remains intentionally bounded to tensor-product box grids and affine decision expressions. Products with decision dependence on both sides, including decision-by-decision and decision-by-rate products, are rejected. Equality assembly is direct-only. Certificate failure does not prove the original continuum inequality infeasible, no assembly mode inserts a positivity margin, and YALMIP continues to own objectives, solver choice, optimization, and diagnostics. General-domain or general-generator SOS hierarchies are mathematical context rather than implemented APIs.
 
-Start with [Install And Download](/PD-LMI-package/install/), verify the checkout with `tests.run_all()`, and use the generated lookup for the accepted forms, returned shapes, validation rules, and limitations of all 116 indexed entries.
+Start with [Install And Download](/PD-LMI-package/install/), verify the checkout with `tests.run_all()`, and use the generated lookup for the accepted forms, returned shapes, validation rules, and limitations of all 169 indexed entries.
 
 ## Reference Index
 
@@ -27,7 +36,7 @@ The generated [categorized lookup](/PD-LMI-package/documents/reference-index/) u
 
 - [Bernstein Polynomial](/PD-LMI-package/documents/math/bernstein-polynomial/): history, the standard forward local coordinate, convex-hull certificates, tensor-product storage, derivatives, elevation, subdivision, multiplication, traversal, and refinement boundaries.
 - [Gridding And Bernstein Degree](/PD-LMI-package/documents/math/gridding-and-degree/): diagram-led one- and two-parameter inputs, global coefficient-grid shapes, nested `LocalValues`, and the ℓ-dimensional count rules.
-- [SOS Certificates On A Hypercube](/PD-LMI-package/documents/math/sos-certificates/): direct Bernstein evidence, Pólya elevation, the implemented Putinar box module, full-box preorderings, and the exact software boundary.
+- [SOS Certificates On A Hypercube](/PD-LMI-package/documents/math/sos-certificates/): Direct Bernstein evidence, Pólya elevation, Putinar, Sparse Full Box tensor windows, Full Box preorderings, and the exact software boundary.
 
 ## Install And Examples
 

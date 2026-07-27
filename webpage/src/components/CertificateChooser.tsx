@@ -19,7 +19,7 @@ export interface CertificateOption {
 /** Switch between certificate summaries with accessible tab semantics. */
 export default function CertificateChooser({ options }: { options: CertificateOption[] }) {
   const [selected, setSelected] = useState(0);
-  const [draft, setDraft] = useState({ cells: "2", nPar: "1", degree: "2", rateMode: "ordinary" as "ordinary" | "rhodiff", order: "1", matrixSize: "2", mode: "semidefinite" as CertificateMode });
+  const [draft, setDraft] = useState({ cells: "2", nPar: "1", degree: "2", rateMode: "ordinary" as "ordinary" | "rhodiff", order: "1", bandWidth: "2", matrixSize: "2", mode: "semidefinite" as CertificateMode });
   const [shape, setShape] = useState(() => buildCertificateShape({ selector: "direct", cells: 2, nPar: 1, degree: 2, rateRows: 1, order: 1, matrixSize: 2, mode: "semidefinite" }));
   const [error, setError] = useState("");
   const panelId = useId();
@@ -29,7 +29,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
   const calculate = (selector = option.key, nextDraft = draft) => {
     try {
       const nPar = numberFrom(nextDraft.nPar);
-      setShape(buildCertificateShape({ selector, cells: numberFrom(nextDraft.cells), nPar, degree: numberFrom(nextDraft.degree), rateRows: nextDraft.rateMode === "rhodiff" ? 2 ** nPar : 1, order: numberFrom(nextDraft.order), matrixSize: numberFrom(nextDraft.matrixSize), mode: nextDraft.mode }));
+      setShape(buildCertificateShape({ selector, cells: numberFrom(nextDraft.cells), nPar, degree: numberFrom(nextDraft.degree), rateRows: nextDraft.rateMode === "rhodiff" ? 2 ** nPar : 1, order: numberFrom(nextDraft.order), bandWidth: numberFrom(nextDraft.bandWidth), matrixSize: numberFrom(nextDraft.matrixSize), mode: nextDraft.mode }));
       setError("");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Invalid certificate shape."); }
   };
@@ -38,7 +38,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
     setSelected(index);
     const selector = options[index].key;
     const minimum = numberFrom(draft.nPar) === 1 ? Math.floor(numberFrom(draft.degree) / 2) : Math.ceil(numberFrom(draft.degree) / 2);
-    const nextDraft = (selector === "putinar" || selector === "fullbox") && numberFrom(draft.order) < minimum ? { ...draft, order: String(minimum) } : draft;
+    const nextDraft = (selector === "putinar" || selector === "sparsefullbox" || selector === "fullbox") && numberFrom(draft.order) < minimum ? { ...draft, order: String(minimum) } : draft;
     setDraft(nextDraft);
     calculate(selector, nextDraft);
   };
@@ -107,6 +107,9 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             {option.key === "direct" ? <p><strong>Order:</strong> not used by the direct selector.</p> : <label>{option.key === "polya" ? "Elevation increment" : "Gram order"}
               <input inputMode="numeric" value={draft.order} onChange={(event) => setDraft({ ...draft, order: event.target.value })} />
             </label>}
+            {option.key === "sparsefullbox" ? <label>Band width
+              <input inputMode="numeric" value={draft.bandWidth} onChange={(event) => setDraft({ ...draft, bandWidth: event.target.value })} />
+            </label> : null}
             <label>Assembly mode
               <select value={draft.mode} onChange={(event) => setDraft({ ...draft, mode: event.target.value as CertificateMode })}>
                 <option value="semidefinite">symmetric semidefinite</option><option value="elementwise">entrywise n × n</option>
@@ -130,6 +133,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             <p><strong>Coefficient identities:</strong> {shape.coefficientIdentities}</p>
             <p><strong>PSD blocks:</strong> {shape.psdBlocks}</p>
             <p><strong>Total stored constraints:</strong> {shape.totalConstraints}</p>
+            {option.key === "sparsefullbox" ? <p><strong>Effective endpoint:</strong> {shape.effectiveSelector}</p> : null}
           </div>
           <details className="certificate-transcript">
             <summary>Show the matching MATLAB transcript</summary>

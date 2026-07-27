@@ -6,19 +6,20 @@ description: Install the PD-LMI package, open the synchronized manual, and verif
 import { versionInfo } from "../../data/version.js";
 
 The online and printable manuals describe documentation version **{versionInfo.current}**.
-Use the current `main` source snapshot for that interface. The older tagged
-`v0.2.0` release remains available when an immutable historical package
-snapshot is required.
+Use the matching tagged release when an immutable package snapshot is
+required, or the current `main` source snapshot for the latest accepted
+documentation.
 
 ## Downloads
 
 | Item | Link |
 | :--- | :--- |
 | {versionInfo.current} manual | [Open the synchronized printable manual](/PD-LMI-package/manual.pdf) |
+| {versionInfo.current} release | [Open the GitHub Release](https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v1.1.0) |
 | Current source snapshot | [Download `main` as ZIP](https://github.com/TheBigoranger/PD-LMI-package/archive/refs/heads/main.zip) |
 | GitHub repository | [TheBigoranger/PD-LMI-package](https://github.com/TheBigoranger/PD-LMI-package) |
 | Version history | [Open version history](/PD-LMI-package/version-history/) |
-| Historical v0.2.0 tag | [Open the immutable release](https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v0.2.0) |
+| Previous v1.0.0 release | [Open the completed 1.0 line](https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v1.0.0) |
 
 The project does not publish the PDF manual as a separately named release
 asset, so the manual link above is explicitly the current synchronized site
@@ -40,10 +41,12 @@ snapshot.
 report = install_pd_lmi();
 ```
 
-Run the command from the package root. It adds the package source paths while
-excluding documentation, the Web site, independent SOS validation, metadata,
-and generated build directories. It checks for class shadowing before saving
-the MATLAB path, so a failure restores the previous path instead of leaving a
+Run the command from the package root. It adds only that repository root at
+the end of the MATLAB path. It deliberately does not call `genpath` or add
+`doc`, `webpage`, test, metadata, or generated directories recursively.
+Exact-path idempotence means a second call leaves the root in place without
+duplicating it. The installer checks for class shadowing before saving the
+MATLAB path, so a failure restores the previous path instead of leaving a
 partial installation.
 
 `report` contains `PackageRoot`, `YALMIPRoot`, the working `Solver`, the
@@ -64,6 +67,9 @@ again; do not add package paths manually or edit `startup.m` for this setup.
 ```matlab
 results = tests.run_all();
 ```
+
+The v1.1.0 release gate completed 280 of 280 tests with zero failed and zero
+incomplete results. The focused installation suite completed 6 of 6 tests.
 
 ## First Lookup
 

@@ -1,7 +1,7 @@
 \chapter{\texorpdfstring{\code{pdvar}}{pdvar}: Decision Matrix Functions}
 \label{sec:pdvar}
 
-\code{pdvar} creates continuous cell-local Bernstein decision expressions backed by YALMIP \code{sdpvar} coefficients.  It participates in supported affine and known-data algebra.  It does not choose solvers or call \code{optimize}. Comparison overloads is created and handled by \code{pdlmi} objects, of which the member function \code{toYalmip} later converts them to YALMIP constraints.
+\code{pdvar} creates continuous cell-local Bernstein decision expressions backed by YALMIP \code{sdpvar} coefficients. It participates in supported affine and known-data algebra. It does not choose solvers or call \code{optimize}. Comparison overloads create \code{pdlmi} objects, whose \code{toYalmip} method later converts them to YALMIP constraints. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdvar} behavior; this chapter documents their decision-expression syntax, stable shape examples, validations, and rate-aware boundaries.
 
 \section{API Map}
 \label{sec:pdvar-lookup}
@@ -13,7 +13,8 @@ Task & Entry \\
 Construct decisions &
 \hyperref[sec:pdvar-construction]{\code{pdvar}} \\
 Inspect coefficients &
-\hyperref[sec:pdvar-table]{\code{bernsteinTable}} \\
+\hyperref[sec:pdvar-table]{\code{bernsteinTable}},
+\hyperref[sec:pdvar-backend-inheritance]{shared storage/evaluation/elevation} \\
 Convert assigned coefficients &
 \hyperref[sec:pdvar-value]{\code{value}} \\
 Differentiate rates &
@@ -247,6 +248,67 @@ firstCellCoefficients =
 \end{lstlisting}
 
 Use public algebra to create a modified value; direct assignments such as \code{P.Degree = 1} are not supported.
+
+\section{Inspect, Evaluate, And Elevate Inherited Storage}
+\label{sec:pdvar-backend-inheritance}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+cellSubs = cells(P)
+labels = lbls(P)
+coefficients = coeffs(P, cellSubs)
+n = ncell(P)
+n = ncoeff(P)
+n = npar(P)
+X = evaluate(P, point)
+X = P.evaluate(point)
+vals = P.elevVals(degreeIncrement)
+Q = P.elevate(degreeIncrement)
+\end{lstlisting}
+
+\descriptionhead
+The storage queries use the shared \code{pdbase} cell and label order and return the symbolic \code{sdpvar} coefficient payloads of the selected decision expression. \code{evaluate} reconstructs the affine symbolic matrix at one in-bounds parameter point; a derivative/rate-row object returns a \(1\)-by-\(2^\ell\) cell array in stored rate-vertex order. \code{elevVals} returns only an elevated nested coefficient tree. \code{elevate} returns a new \code{pdvar} of the same dynamic class with the same represented expression, physical cells, YALMIP decision variables, metadata, and rate-row order at the higher degree; it does not create new decision freedom or modify \code{P}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(2, {[0 1]}, "full", Degree=1);
+physicalCells = P.cells()
+labels = P.lbls()
+coefficientTableSize = size(P.coeffs(1))
+counts = [P.ncell(), P.ncoeff(), P.npar()]
+X = P.evaluate(0.25);
+Q = P.elevate(2);
+sampleClass = class(X)
+sampleSize = size(X)
+elevatedClass = class(Q)
+degrees = [P.Degree, Q.Degree]
+elevatedCoefficientTableSize = size(Q.coeffs(1))
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+physicalCells =
+     1
+labels =
+     0
+     1
+coefficientTableSize =
+     1     2
+counts =
+     1     2     1
+sampleClass =
+    'sdpvar'
+sampleSize =
+     2     2
+elevatedClass =
+    'pdvar'
+degrees =
+     1     3
+elevatedCoefficientTableSize =
+     1     4
+\end{lstlisting}
+
+\remarkshead
+Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}. Malformed points raise \codeerr{pdvar}{InvalidPoint}; out-of-bounds points raise \codeerr{pdvar}{PointOutOfBounds}. Invalid elevation increments raise \codeerr{pdbase}{InvalidDegreeIncrement}. Evaluation returns symbolic expressions until the user assigns or solves the underlying YALMIP variables; use \code{value} for the post-assignment numeric conversion documented in \cref{sec:pdvar-value}.
 
 \section{\texorpdfstring{\code{rhodiff}}{rhodiff}}
 \index{rhodiff@\texttt{rhodiff}}
@@ -612,7 +674,7 @@ Incompatible affine operands raise \codeerr{pdvar}{InvalidAddition} or \codeerr{
 \section{Reshape and Transform Decision Matrices}
 \label{sec:pdvar-matrix-ops}
 
-Every method below transforms each local affine YALMIP payload while preserving the physical grid, degree, and compatible rate rows.  The examples report stable classes, dimensions, and metadata rather than YALMIP's internal variable numbers.
+Every method below is inherited from the centralized \code{pdbase} implementation and transforms each local affine YALMIP payload while the \code{pdvar} reconstruction hook preserves the physical grid, degree, class, decision metadata, and compatible rate rows. The examples report stable classes, dimensions, and metadata rather than YALMIP's internal variable numbers.
 
 \subsection{Shape, Equality, And MATLAB Protocols}
 \label{sec:pdvar-matrix-shape}
@@ -798,12 +860,16 @@ U = triu(P)
 U = triu(P, k)
 S = sum(P)
 S = sum(P, dim)
+S = sum(P, vecdim)
 S = sum(P, "all")
 M = mean(P)
 M = mean(P, dim)
+M = mean(P, vecdim)
 M = mean(P, "all")
 C = cumsum(P)
 C = cumsum(P, dim)
+C = cumsum(P, direction)
+C = cumsum(P, dim, direction)
 \end{lstlisting}
 
 First form the two triangular views.
@@ -850,7 +916,7 @@ runningSize =
      2     3
 \end{lstlisting}
 
-Invalid triangular offsets raise \codeerr{pdvar}{InvalidTriangularPart}.  Invalid reduction calls raise \codeerr{pdvar}{InvalidSum}, \codeerr{pdvar}{InvalidMean}, or \codeerr{pdvar}{InvalidCumsum}.
+\code{vecdim} is a nonempty vector of unique positive integer dimensions; dimensions above two are singleton no-ops. \code{direction} is \code{"forward"} or \code{"reverse"}, case-insensitively. A direction supplied without a dimension uses the first nonsingleton matrix dimension, and \code{cumsum} along a dimension above two returns the same symbolic payloads. Invalid triangular offsets raise \codeerr{pdvar}{InvalidTriangularPart}. Invalid reduction calls raise \codeerr{pdvar}{InvalidSum}, \codeerr{pdvar}{InvalidMean}, or \codeerr{pdvar}{InvalidCumsum}; missing-value and native-output flags are not supported.
 
 \subsection{Reordering And Rotation}
 \label{sec:pdvar-matrix-reorder}
@@ -1144,7 +1210,7 @@ identityConstraints =
      []
 \end{lstlisting}
 
-Each group above corresponds to one local coefficient and contains six scalar entries in MATLAB column-major order.  Under P\'olya, Putinar, or Full Box, each entry of an entry-wise inequality receives an independent scalar certificate.  Equality is direct-only: constructor certificate options and \code{applyPolya}, \code{applyPutinar}, or \code{applyFullBoxPreorder} raise \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before validating an order.  Mixed ordinary/derivative row kinds raise \codeerr{pdvar}{InvalidEqualityRows}.  Use overloaded \code{==} to build a modeling equality; use \code{isequal} only for MATLAB structural comparison.
+Each group above corresponds to one local coefficient and contains six scalar entries in MATLAB column-major order. Under P\'olya, Putinar, SparseFullBox, or FullBox, each entry of an entry-wise inequality receives an independent scalar certificate. Equality is direct-only: constructor certificate options and \code{applyPolya}, \code{applyPutinar}, \code{applySparseFullBoxPreorder}, or \code{applyFullBoxPreorder} raise \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before validating an increment, width, or order. Mixed ordinary/derivative row kinds raise \codeerr{pdvar}{InvalidEqualityRows}. Use overloaded \code{==} to build a modeling equality; use \code{isequal} only for MATLAB structural comparison.
 
 \begin{center}
 \begin{tikzpicture}[node distance=7mm and 12mm]

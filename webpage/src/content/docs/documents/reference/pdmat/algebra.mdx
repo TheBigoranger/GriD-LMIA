@@ -24,9 +24,11 @@ A = pdmat({[0 1]}, {1, 2}, Degree=1);
 B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
 S = A + B; cS = S.coeffs(1);
 Z = A - A; N = -A; U = +A;
-fprintf('degree=%d\n', S.Degree); disp([cS{:}])
-fprintf('minus=%g, uminus=%g, uplus=%g\n', ...
-    Z.evaluate(0.5), N.evaluate(1), U.evaluate(0));
+S.Degree
+disp([cS{:}])
+Z.evaluate(0.5)
+N.evaluate(1)
+U.evaluate(0)
 ```
 
 ```text
@@ -79,7 +81,7 @@ convolution, not a pointwise product of sampled rows.
 
 <ExampleDisclosure
   visibleCode={"K = A * B;\ncK = K.coeffs([1 1]);"}
-  fullCode={"grid = {[0 1], [10 20]};\nA = pdmat(grid, {1 2; 3 4}, Degree=1);\nB = pdmat(grid, {5 6; 7 8}, Degree=1);\nK = A * B;\ncK = K.coeffs([1 1]);\nfprintf('degree=%d, coefficients=%d\\n', K.Degree, K.ncoeff());\ndisp([cK{:}])\n% degree=2, coefficients=9\n% 5  8  12  11  15  20  21  26  32"}
+  fullCode={"grid = {[0 1], [10 20]};\nA = pdmat(grid, {1 2; 3 4}, Degree=1);\nB = pdmat(grid, {5 6; 7 8}, Degree=1);\nK = A * B;\ncK = K.coeffs([1 1]);\nK.Degree\nK.ncoeff()\ndisp([cK{:}])\n% ans = 2\n% ans = 9\n% 5  8  12  11  15  20  21  26  32"}
   summary="Show the complete runnable two-parameter example"
 />
 

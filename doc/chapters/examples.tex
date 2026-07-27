@@ -1,10 +1,10 @@
 \chapter{Worked Solver Examples}
 \label{sec:examples}
 
-\section{Deterministic Putinar And Full-Box Selection}
+\section{Deterministic Putinar, SparseFullBox, And FullBox Selection}
 \label{sec:full-box-example}
 
-This example selects default Putinar and full-box certificates and an explicit full-box order without solving an optimization problem.  The reported values depend only on the public assembly contract, not on incidental YALMIP decision-variable identifiers.
+This example selects default Putinar and FullBox certificates, an explicit FullBox order, and the three canonical SparseFullBox outcomes without solving an optimization problem. The reported values depend only on the public assembly contract, not on incidental YALMIP decision-variable identifiers.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -50,6 +50,36 @@ exportedConstraintCount =
 \end{lstlisting}
 
 For the degree-two scalar residual, order one uses two PSD Gram blocks followed by three exact coefficient identities.  Order two matches a degree-four target and stores two PSD blocks followed by five identities.  The original \code{direct} object remains unchanged, and the selection made from \code{polya} replaces P\'olya rather than elevating its already assembled constraints.  Likewise, selecting Putinar from \code{boxHigher} rebuilds from the original residual and clears the full-box selection.
+
+The next degree-four residual makes width two an intermediate SparseFullBox certificate, while widths one and three expose its canonical endpoints.
+
+\begin{lstlisting}[style=dpmatlab]
+P4 = pdvar(1, {[0 1]}, Degree=4);
+direct4 = P4 >= 0;
+sparse4 = direct4.applySparseFullBoxPreorder(2, 2);
+direct4Endpoint = sparse4.applySparseFullBoxPreorder(1, 2);
+full4Endpoint = sparse4.applySparseFullBoxPreorder(3, 2);
+sparse4State = [sparse4.UseSparseFullBoxPreorder, ...
+    sparse4.SparseFullBoxOrder, sparse4.BandWidth, ...
+    numel(sparse4.Constraints)]
+direct4State = [direct4Endpoint.UseSparseFullBoxPreorder, ...
+    direct4Endpoint.UseFullBoxPreorder, ...
+    numel(direct4Endpoint.Constraints)]
+full4State = [full4Endpoint.UseSparseFullBoxPreorder, ...
+    full4Endpoint.UseFullBoxPreorder, full4Endpoint.FullBoxOrder, ...
+    numel(full4Endpoint.Constraints)]
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+sparse4State =
+     1     2     2     8
+direct4State =
+     0     0     5
+full4State =
+     0     1     2     7
+\end{lstlisting}
+
+The intermediate wrapper stores three width-two PSD blocks followed by five identities. Width one rebuilds actual Direct state with five coefficient constraints. Width three satisfies \(b=r+1\) and rebuilds actual FullBox state with two dense PSD blocks followed by the five identities. Every apply call is value-semantic and starts from the stored original residual, so the source wrapper and any earlier selection remain unchanged.
 
 \section{Solve for a Parameter-Dependent Lyapunov Matrix}
 \label{sec:parameter-dependent-lyapunov-smoke}

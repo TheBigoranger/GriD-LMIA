@@ -73,6 +73,12 @@ the residual; the package does not insert one.
       <td data-label="Package status">Box-specific full preordering implemented</td>
     </tr>
     <tr>
+      <th scope="row" data-label="Certificate">Sparse Full Box</th>
+      <td data-label="Proof domain">One local hypercube</td>
+      <td data-label="Central hypothesis">The full-box identity admits PSD tensor-window Gram blocks at the selected order and width</td>
+      <td data-label="Package status">Fixed-order tensor-window family implemented, with Direct and Full Box endpoints</td>
+    </tr>
+    <tr>
       <th scope="row" data-label="Certificate">Markov–Lukács</th>
       <td data-label="Proof domain">One closed interval</td>
       <td data-label="Central hypothesis">Degree-parity Gram form</td>
@@ -284,6 +290,28 @@ general-domain Schmüdgen interface.
 
 <CertificateSpectrum selected="fullbox" />
 
+## Sparse Full Box Tensor Windows
+
+Sparse Full Box keeps the parity terms in one parameter and every
+generator-subset term in multiple parameters. For each dense Gram basis
+tensor, it enumerates axis-aligned consecutive windows of width `b` and gives
+every window an independent PSD Gram block. Exact Bernstein coefficient
+matching is retained.
+
+The support is a tensor window, not a band in a flattened Gram matrix. At a
+fixed absolute order `r`, width one canonicalizes to Direct after validating
+the order. A width at least `r + 1` covers each basis axis and canonicalizes
+to Full Box. Intermediate widths define the implemented sparse hierarchy.
+Every cell, active rate row, and column-major matrix entry receives independent
+certificate variables.
+
+[`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/)
+documents syntax, state normalization, validation, fixtures, and limitations.
+Nested widths do not guarantee a strict improvement, and Sparse Full Box has
+no total ordering against Putinar.
+
+<CertificateSpectrum selected="sparsefullbox" />
+
 ### Worked full-box example: two parameters, degree three
 
 This example shows the finite SDP that the package assembles, rather than an
@@ -395,8 +423,8 @@ their Bernstein-basis matrix-Gram counterpart.
 4. **Higher Gram order** enlarges a positivity certificate.
 
 Only the second operation is performed by `applyPolya`; the fourth is selected
-at one explicit or default order by `applyPutinar` or
-`applyFullBoxPreorder`. Their method pages place unsupported adaptive and
+at one explicit or default order by `applyPutinar`,
+`applySparseFullBoxPreorder`, or `applyFullBoxPreorder`. Their method pages place unsupported adaptive and
 general-purpose boundaries beside the callable syntax.
 
 ## Exact Software Boundary
@@ -407,7 +435,9 @@ The callable package boundary is limited to:
 - fixed-increment Pólya elevation followed by direct assembly;
 - fixed-order Putinar assembly, using the parity-specific one-dimensional
   Markov–Lukács form or the separate box generators
-  $\alpha_s(1-\alpha_s)$ in two or more parameters; and
+  $\alpha_s(1-\alpha_s)$ in two or more parameters;
+- fixed-order Sparse Full Box assembly, using tensor-window Gram support with
+  exact Direct and Full Box endpoints; and
 - fixed-order full box preordering, sharing that one-dimensional form and
   using every generator-subset product in multiple parameters.
 
@@ -426,5 +456,6 @@ differ as described above.
 [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) ·
 [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
 [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
+[`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
 [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) ·
 [`Solver Examples`](/PD-LMI-package/examples/solver-smoke/)

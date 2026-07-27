@@ -1,101 +1,295 @@
 ---
 title: pdmat Structural Operations
-description: Detailed reshape, reduction, assembly, and reordering examples for pdmat payloads.
+description: Complete known-data transpose, reshape, reduction, assembly, repetition, and reordering reference.
 ---
 
 import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/matrix-operations/">matrix operations</a><span>/</span><span>structural operations</span></nav>
 
-Every method applies the matching MATLAB matrix operation to each stored coefficient payload and returns a `pdmat` with the same physical-cell tree.
+These methods are implemented by `pdbase` unless noted, but each is public
+`pdmat` behavior. Every successful operation maps known coefficient matrices
+and returns a `pdmat` with its cells, labels, degree, source metadata, and
+numeric payload type preserved.
 
-## <span id="pdmat-transpose"></span><span id="pdmat-ctranspose"></span><span id="pdmat-reshape"></span><span id="pdmat-squeeze"></span><span id="pdmat-vec"></span>Transpose and reshape
+## Transpose, reshape, squeeze, and vectorize
+
+### <span id="pdmat-transpose"></span>`transpose` and <span id="pdmat-ctranspose"></span>`ctranspose`
 
 ```matlab
-At = A.'; Ah = A'; R = reshape(A,[m n]); S = squeeze(A); V = vec(A);
+plain = A.'
+conjugate = A'
 ```
 
-`reshape` preserves payload element count, `squeeze` removes singleton dimensions, and `vec` uses MATLAB column-major order. For real coefficients, transpose and conjugate transpose have the same numeric effect.
+Both swap payload rows and columns; only `ctranspose` conjugates.
+
+### <span id="pdmat-reshape"></span>`reshape`
+
+```matlab
+out = reshape(A,rows,columns)
+out = reshape(A,[rows columns])
+out = reshape(A,[],columns)
+```
+
+Exactly two dimensions are supported. At most one may be inferred with `[]`,
+and the element count must be preserved. Invalid calls raise
+`pdmat:InvalidReshape`.
+
+### <span id="pdmat-squeeze"></span>`squeeze`
+
+```matlab
+out = squeeze(A)
+```
+
+Applies MATLAB `squeeze` coefficient-wise, then preserves the package's
+always-two-dimensional payload contract. It never creates an N-D `pdmat`.
+
+### <span id="pdmat-vec"></span>`vec`
+
+```matlab
+out = vec(A)
+```
+
+Returns a `numel(A) × 1` known-data payload in MATLAB column-major order.
 
 ```matlab
 A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
-At = A.'; r = reshape(A,[1 4]); s = squeeze(A); v = vec(A);
-fprintf('transpose=%d-by-%d, reshape=%d-by-%d, vec=%d-by-%d\n', ...
-    size(At,1),size(At,2),size(r,1),size(r,2),size(v,1),size(v,2));
-disp(v.evaluate(0))
+At = A.';
+r = reshape(A,[1 4]);
+s = squeeze(A);
+v = vec(A);
+shapes = [size(At); size(r); size(s); size(v)]
+vAtZero = v.evaluate(0)
 ```
 
 ```text
-transpose=2-by-2, reshape=1-by-4, vec=4-by-1
+shapes =
+     2     2
+     1     4
+     2     2
+     4     1
+
+vAtZero =
      1
      3
      2
      4
 ```
 
-<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["a"], ["c"], ["b"], ["d"]]} beforeLabel="2 × 2 payload" afterLabel="vec(A)" caption="Reshape changes payload dimensions; vec reads each local matrix in MATLAB column-major order." />
+<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["a"], ["c"], ["b"], ["d"]]} beforeLabel="2 × 2 payload" afterLabel="vec(A)" caption="The known coefficient matrices are vectorized in column-major order without changing cells or labels." />
 
-## <span id="pdmat-diag"></span><span id="pdmat-trace"></span><span id="pdmat-sum"></span><span id="pdmat-mean"></span><span id="pdmat-cumsum"></span><span id="pdmat-tril"></span><span id="pdmat-triu"></span>Extract, reduce, and triangularize
+## Diagonal and reduction methods
 
-`diag(A,k)`, `tril(A,k)`, and `triu(A,k)` accept MATLAB diagonal offsets. `trace` requires square payloads. `sum`, `mean`, and `cumsum` operate along a matrix dimension, never along cell or Bernstein-label axes.
+### <span id="pdmat-diag"></span>`diag`
 
 ```matlab
-A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
-D = diag(A); tr = trace(A); colsum = sum(A,1);
-avg = mean(A,2); running = cumsum(A,2); lo = tril(A); hi = triu(A);
-disp(D.evaluate(0)); fprintf('trace=%g\n', tr.evaluate(0));
-disp(colsum.evaluate(0)); disp(lo.evaluate(0)+hi.evaluate(0)-diag(diag(A.evaluate(0))))
+out = diag(A)
+out = diag(A,k)
+```
+
+Extracts diagonal `k` from matrix coefficients or builds a diagonal matrix
+from vector coefficients. Empty-diagonal offsets and malformed offsets raise
+`pdmat:InvalidDiag`.
+
+### <span id="pdmat-trace"></span>`trace`
+
+```matlab
+out = trace(A)
+```
+
+Sums the main diagonal and returns `1 × 1` known data. Rectangular matrices
+and row/column vectors are supported; square input is not required.
+
+### <span id="pdmat-sum"></span>`sum` and <span id="pdmat-mean"></span>`mean`
+
+```matlab
+out = sum(A)
+out = sum(A,dim)
+out = sum(A,[dim1 dim2 ...])
+out = sum(A,"all")
+
+out = mean(A)
+out = mean(A,dim)
+out = mean(A,[dim1 dim2 ...])
+out = mean(A,"all")
+```
+
+Dimensions must be a nonempty unique positive-integer vector. Dimensions above
+two are singleton no-ops. `"native"`, `"omitmissing"`, and other data flags
+are unsupported. Errors use `pdmat:InvalidSum` or `pdmat:InvalidMean`.
+
+### <span id="pdmat-cumsum"></span>`cumsum`
+
+```matlab
+out = cumsum(A)
+out = cumsum(A,dim)
+out = cumsum(A,"forward")
+out = cumsum(A,"reverse")
+out = cumsum(A,dim,"forward")
+out = cumsum(A,dim,"reverse")
+```
+
+A lone direction uses the first nonsingleton matrix dimension. Higher
+dimensions are singleton no-ops. Invalid dimensions, directions, or extra
+flags raise `pdmat:InvalidCumsum`.
+
+### <span id="pdmat-tril"></span>`tril` and <span id="pdmat-triu"></span>`triu`
+
+```matlab
+lower = tril(A)
+lower = tril(A,k)
+upper = triu(A)
+upper = triu(A,k)
+```
+
+The optional diagonal offset is a finite integer scalar. Errors use
+`pdmat:InvalidTriangularPart`.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2 3; 4 5 6], [2 4 6; 8 10 12]}, Degree=1);
+diagonalAtZero = diag(A).evaluate(0)
+rectangularTrace = trace(A).evaluate(0)
+allSum = sum(A,[1 2 3]).evaluate(0)
+columnMeans = mean(A,1).evaluate(0)
+reverseRows = cumsum(A,2,"reverse").evaluate(0)
 ```
 
 ```text
+diagonalAtZero =
      1
-     4
-trace=5
-     4     6
-     1     2
-     3     4
+     5
+
+rectangularTrace =
+     6
+
+allSum =
+    21
+
+columnMeans =
+    2.5000    3.5000    4.5000
+
+reverseRows =
+     6     5     3
+    15    11     6
 ```
 
-<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["a"], ["d"]]} beforeLabel="matrix coefficient" afterLabel="diag(A)" caption="diag extracts the diagonal at every local label; trace then reduces it to a scalar." />
+<MatrixGlyphDiagram before={[["a", "b", "c"], ["d", "e", "f"]]} after={[["a"], ["e"]]} beforeLabel="rectangular coefficient" afterLabel="diag(A)" caption="diag extracts the main diagonal; trace sums the same entries and remains valid for rectangular payloads." />
 
-## <span id="pdmat-horzcat"></span><span id="pdmat-vertcat"></span><span id="pdmat-cat"></span><span id="pdmat-blkdiag"></span><span id="pdmat-repmat"></span>Assemble larger matrices
+## Concatenation and block assembly
+
+### <span id="pdmat-horzcat"></span>`horzcat`, <span id="pdmat-vertcat"></span>`vertcat`, and <span id="pdmat-cat"></span>`cat`
+
+```matlab
+horizontal = [A B]
+vertical = [A; B]
+out = cat(1,A,B)
+out = cat(2,A,B)
+```
+
+Unlike direct `pdbase` values, `pdmat` implements coefficient-wise
+concatenation. Inputs may include compatible numeric matrices or `pdmat`
+values. The method aligns physical grids and degrees, preserves matrix-block
+order, and supports only dimensions one and two. Errors use
+`pdmat:InvalidConcatenation` or `pdmat:UnsupportedCatDimension`.
+
+### <span id="pdmat-blkdiag"></span>`blkdiag`
+
+```matlab
+out = blkdiag(A,B,...)
+```
+
+Builds a block diagonal after compatible known-data promotion and alignment.
+At least one input must be `pdmat`; malformed calls use
+`pdmat:InvalidBlkdiag`.
+
+### <span id="pdmat-repmat"></span>`repmat`
+
+```matlab
+out = repmat(A,n)
+out = repmat(A,[rows columns])
+out = repmat(A,rows,columns)
+```
+
+Uses positive integer two-dimensional repeat counts. Invalid forms use
+`pdmat:InvalidRepmat`.
 
 ```matlab
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
-H = [A A]; V = [A; A]; C = cat(2,A,A); B = blkdiag(A,A); R = repmat(A,2,3);
-fprintf('H=%d-by-%d, V=%d-by-%d, cat=%d-by-%d\n',size(H,1),size(H,2),size(V,1),size(V,2),size(C,1),size(C,2));
-fprintf('blkdiag=%d-by-%d, repmat=%d-by-%d\n',size(B,1),size(B,2),size(R,1),size(R,2));
+H = [A A];
+V = [A; A];
+C = cat(2,A,A);
+B = blkdiag(A,A);
+R = repmat(A,2,3);
+shapes = [size(H); size(V); size(C); size(B); size(R)]
 ```
 
 ```text
-H=1-by-2, V=2-by-1, cat=1-by-2
-blkdiag=2-by-2, repmat=2-by-3
+shapes =
+     1     2
+     2     1
+     1     2
+     2     2
+     2     3
 ```
 
-<MatrixGlyphDiagram before={[["A", "B"]]} after={[["A", "0"], ["0", "B"]]} beforeLabel="two payloads" afterLabel="blkdiag(A,B)" caption="Block assembly changes matrix layout while every block keeps the common grid and local labels." />
+<MatrixGlyphDiagram before={[["A", "B"]]} after={[["A", "0"], ["0", "B"]]} beforeLabel="two known blocks" afterLabel="blkdiag(A,B)" caption="Derived-class assembly overrides direct pdbase rejection and aligns known coefficient evidence before placing blocks." />
 
-## <span id="pdmat-flip"></span><span id="pdmat-fliplr"></span><span id="pdmat-flipud"></span><span id="pdmat-rot90"></span>Flip and rotate entries
+## Flip and rotation
+
+### <span id="pdmat-flip"></span>`flip`, <span id="pdmat-fliplr"></span>`fliplr`, and <span id="pdmat-flipud"></span>`flipud`
+
+```matlab
+out = flip(A)
+out = flip(A,dim)
+out = fliplr(A)
+out = flipud(A)
+```
+
+`flip` defaults to the first nonsingleton payload dimension. An explicit
+dimension is a positive integer; higher dimensions are no-ops. Invalid calls
+use `pdmat:InvalidFlip`.
+
+### <span id="pdmat-rot90"></span>`rot90`
+
+```matlab
+out = rot90(A)
+out = rot90(A,k)
+```
+
+Rotates each payload by `k` quarter turns; `k` is a finite integer and odd
+turns swap the payload dimensions. Errors use `pdmat:InvalidRot90`.
 
 ```matlab
 A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
-disp(fliplr(A).evaluate(0)); disp(flipud(A).evaluate(0)); disp(rot90(A).evaluate(0))
+leftRight = fliplr(A).evaluate(0)
+upDown = flipud(A).evaluate(0)
+quarterTurn = rot90(A).evaluate(0)
 ```
 
 ```text
+leftRight =
      2     1
      4     3
+
+upDown =
      3     4
      1     2
+
+quarterTurn =
      2     4
      1     3
 ```
 
-<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["d", "c"], ["b", "a"]]} beforeLabel="stored payload" afterLabel="rot90(A,2)" caption="Reordering changes matrix-entry positions; the physical cell and local Bernstein label stay fixed." />
+<MatrixGlyphDiagram before={[["a", "b"], ["c", "d"]]} after={[["d", "c"], ["b", "a"]]} beforeLabel="known payload" afterLabel="rot90(A,2)" caption="Only matrix-entry positions change; physical-cell and Bernstein-label order stay fixed." />
 
-## Validation and operation boundaries
+## Limitations and See Also
 
-Matrix dimensions, offsets, repeat counts, and concatenation sizes must satisfy the corresponding MATLAB operation. Function-only objects without coefficient evidence are rejected by coefficient structural operations. No method reorders physical cells or local labels.
+Function-only data without stored Bernstein evidence raises
+`pdmat:FunctionOnlyAlgebra`. Structural operations do not sample such a
+function, call YALMIP, modify the physical grid, or change local-label/rate
+ordering.
 
-## See Also
-
-[`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) · [`indexing and inspection`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) · [`pdvar structural operations`](/PD-LMI-package/documents/reference/pdvar/structural-operations/)
+[`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
+[`storage and elevation`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
+[`indexing and inspection`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) ·
+[`pdbase matrix operations`](/PD-LMI-package/documents/reference/pdbase/matrix-operations/)

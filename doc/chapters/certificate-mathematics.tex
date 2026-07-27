@@ -1,7 +1,7 @@
 \chapter{\texorpdfstring{Polynomial-Matrix Certificates on \mbox{Hypercubes}}{Polynomial-Matrix Certificates on Hypercubes}}
 \label{app:certificates}
 
-This appendix starts with positive semidefinite matrices, builds SOS and Gram representations, and then explains the four certificate choices implemented by \code{pdlmi}.  Background constructions are included so a new reader can recognize the mathematical landscape; only explicitly marked methods are package APIs.
+This appendix starts with positive semidefinite matrices, builds SOS and Gram representations, and then explains the five certificate paths implemented by \code{pdlmi}: Direct, P\'olya, Putinar, SparseFullBox, and FullBox. Background constructions are included so a new reader can recognize the mathematical landscape; only explicitly marked methods are package APIs.
 
 As in the preceding appendix, each major certificate is revealed as \emph{Basic idea} \(\rightarrow\) \emph{Formula} \(\rightarrow\) \emph{Worked example} \(\rightarrow\) \emph{Visual conclusion}.  Keep two questions separate while reading: what polynomial matrix is represented, and what finite cone is being used to certify its sign?
 
@@ -243,7 +243,7 @@ Partition \(Q\) into \(n\)-by-\(n\) blocks \(Q_{ij}\).  The Bernstein coefficien
   \sum_{\substack{0\le i,j\le d\\i+j=k-a}}
   \binom di\binom dj\,Q_{ij}.
 \]
-Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs.  For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms.  Its minimum absolute order is \(\lfloor m/2\rfloor\).
+Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs. For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms, while \code{applySparseFullBoxPreorder} uses the same parity terms with tensor-window Gram support at intermediate widths. Their minimum absolute order is \(\lfloor m/2\rfloor\).
 
 \section{Putinar Modules And Schm\"udgen Preorderings}
 \label{sec:certificate-putinar-schmudgen}
@@ -386,10 +386,56 @@ fullBoxState =
      1     5
 \end{lstlisting}
 
-Selections rebuild from the stored original \code{Residual} and \code{Relation}.  Reapplying P\'olya, Putinar, or full-box replaces the previous selection; the certificates never compound, and the three opt-in families are mutually exclusive.
+Selections rebuild from the stored original \code{Residual} and \code{Relation}. Reapplying P\'olya, Putinar, SparseFullBox, or FullBox replaces the previous selection; the certificates never compound, and the four opt-in families are mutually exclusive.
 
-\section{Five Different Modeling Choices}
-\label{sec:certificate-five-choices}
+\section{The Implemented SparseFullBox Tensor Windows}
+\label{sec:certificate-sparse-full-box}
+\index{SparseFullBox}\index{tensor window}\index{bandwidth}
+
+\ideastep{Basic idea} Retain every FullBox parity or generator-mask term and every exact target-coefficient identity, but replace one dense Gram matrix by a sum of free PSD matrices supported on overlapping axis-aligned windows of the tensor Bernstein basis.
+
+\ideastep{Formula} Let one dense FullBox term use tensor basis labels
+\[
+  \mathcal I_{\boldsymbol d}=\prod_{s=1}^{\ell}\{0,\ldots,d_s\}.
+\]
+For positive integer width \(b\), set \(w_s=\min(b,d_s+1)\). For every start label \(\boldsymbol t\) with \(0\le t_s\le d_s-w_s+1\), define
+\[
+  W_{\boldsymbol t}=\prod_{s=1}^{\ell}\{t_s,\ldots,t_s+w_s-1\}.
+\]
+If \(\mathcal Z_{W_{\boldsymbol t}}\) contains exactly the Bernstein basis functions whose tensor labels lie in \(W_{\boldsymbol t}\), SparseFullBox replaces the dense term by
+\[
+  \sum_{\boldsymbol t}
+  h_J(\boldsymbol\alpha)\,
+  \mathcal Z_{W_{\boldsymbol t}}(\boldsymbol\alpha)^{\mathsf T}
+  Q_{J,\boldsymbol t}
+  \mathcal Z_{W_{\boldsymbol t}}(\boldsymbol\alpha),
+  \qquad Q_{J,\boldsymbol t}\succeq0,
+\]
+where \(h_J\) is the same endpoint or box-generator weight used by the corresponding FullBox term. The implementation sums these weighted Bernstein maps and matches every coefficient of the sign-normalized, degree-elevated target exactly.
+
+\ideastep{Worked example} For one parameter, even residual degree four, and absolute order \(r=2\), the unweighted basis has labels \(\{0,1,2\}\) and the \(\alpha(1-\alpha)\)-weighted basis has labels \(\{0,1\}\). Width two therefore creates unweighted windows \(\{0,1\}\) and \(\{1,2\}\), plus one complete weighted window \(\{0,1\}\). The finite certificate has three PSD blocks followed by five exact coefficient identities. The unweighted support is block tridiagonal. Width three includes every basis label in the unweighted block and reaches the dense FullBox endpoint.
+
+\ideastep{Visual conclusion}
+\begin{center}
+\begin{tikzpicture}[node distance=6mm and 7mm,
+  box/.style={dp/result,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm},
+  endpoint/.style={dp/certificate,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm}]
+  \node[endpoint] (direct) {\(b=1\)\\actual Direct state};
+  \node[box,right=of direct] (tri) {\(b=2\)\\tridiagonal windows};
+  \node[box,right=of tri] (penta) {\(b=3<r+1\)\\pentadiagonal windows};
+  \node[endpoint,right=of penta] (dense) {\(b\ge r+1\)\\actual FullBox state};
+  \draw[dp/arrow] (direct) -- (tri);
+  \draw[dp/arrow] (tri) -- (penta);
+  \draw[dp/arrow] (penta) -- (dense);
+\end{tikzpicture}
+
+\textit{The intermediate cones are nested sufficient certificates; a wider cone need not yield a strict improvement on a particular residual.}
+\end{center}
+
+\code{applySparseFullBoxPreorder(b,r)} uses the same dimension-dependent absolute-order minimum as FullBox: \(\lfloor m/2\rfloor\) in one parameter and \(\lceil m/2\rceil\) otherwise. Width one canonicalizes to actual Direct state after order validation. Width at least \(r+1\) canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, active rate row, and entry-wise column-major matrix entry owns an independent certificate; the method adds no hidden margin and makes no solver call.
+
+\section{Six Different Modeling Choices}
+\label{sec:certificate-modeling-choices}
 
 These choices act on different parts of the problem.
 
@@ -403,7 +449,8 @@ These choices act on different parts of the problem.
   \node[box,below=of repr] (decision) {decision degree\\larger search space};
   \node[box,below=of decision] (grid) {physical subdivision\\more local cells};
   \node[box,below=of grid] (polya) {P\'olya increment\\same residual, elevated basis};
-  \node[box,below=of polya] (gram) {Gram order\\larger PSD certificate};
+  \node[box,below=of polya] (band) {SparseFullBox bandwidth\\larger tensor windows};
+  \node[box,below=of band] (gram) {Gram order\\larger PSD certificate};
   \coordinate (busmid) at ($(grid.east)+(6mm,0)$);
   \draw[dp/bus] ($(repr.east)+(6mm,0)$) -- ($(gram.east)+(6mm,0)$);
   \foreach \x in {repr,decision,grid,polya,gram}
@@ -425,10 +472,11 @@ decision degree & independent decision coefficients & certificate order \\
 subdivision & physical cells and local hulls & higher polynomial degree \\
 P\'olya degree & elevated residual coefficients & Gram variables \\
 Putinar/full-box order & Gram bases and PSD block sizes & decision degree \\
+SparseFullBox bandwidth & tensor-window Gram support and PSD block sizes & decision degree or physical grid \\
 \bottomrule
 \end{tabularx}
 
-When a certificate fails, do not infer continuous infeasibility.  Decide separately whether the model needs a richer decision degree, a finer physical grid, a larger P\'olya increment, or a higher Putinar or full-box order.
+When a certificate fails, do not infer continuous infeasibility. Decide separately whether the model needs a richer decision degree, a finer physical grid, a larger P\'olya increment, a wider SparseFullBox window, or a higher Putinar/SparseFullBox/FullBox order.
 
 \section{Implemented Boundary}
 \label{sec:certificate-boundary}
@@ -440,9 +488,10 @@ Implemented public behavior & Background only \\
 direct coefficient assembly & general full-space SOS parser \\
 uniform \code{applyPolya([d])} & direction-wise or automatic P\'olya search \\
 \code{applyPutinar([r])} & general-domain/general-generator Putinar interface \\
+\code{applySparseFullBoxPreorder([b[,r]])} & automatic or adaptive sparse-pattern selection \\
 \code{applyFullBoxPreorder([r])} & general-domain Schm\"udgen parser \\
 exact one-dimensional parity forms & automatic or adaptive Gram-order search \\
-all cells and active rate rows & sparse Gram selection or adaptive refinement \\
+all cells, active rate rows, and column-major entries & cross-cell/rate/entry Gram sharing \\
 explicit user margins & package-owned strictness or solver policy \\
 \bottomrule
 \end{tabularx}

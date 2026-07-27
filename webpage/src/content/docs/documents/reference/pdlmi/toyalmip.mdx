@@ -38,7 +38,7 @@ F = C.toYalmip()
 
 `pdlmi` stores constraints in package-owned cell-local form. Direct and Pólya
 objects store one sign condition per physical cell, Bernstein coefficient, and
-rate vertex. Putinar and full-box objects instead store PSD Gram-block
+rate vertex. Putinar, Sparse Full Box, and Full Box objects instead store PSD Gram-block
 conditions followed by exact coefficient identities for every cell and rate
 row. `toYalmip` is the
 boundary where the stored entries become a regular YALMIP constraint array:
@@ -49,7 +49,7 @@ $$
 
 For direct and Pólya inequalities, $N$ is the number of physical cells times the
 number of active rate rows times the number of assembled Bernstein
-coefficients. For Putinar and full-box objects, $N$ instead counts every stored
+coefficients. For Putinar, Sparse Full Box, and Full Box objects, $N$ instead counts every stored
 PSD Gram condition and exact coefficient identity across those cells and rows.
 
 It does not choose a solver, create an objective, apply relaxation margins, or
@@ -126,4 +126,4 @@ F =
 
 ## See Also
 
-[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)

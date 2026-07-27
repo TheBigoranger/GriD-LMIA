@@ -303,7 +303,7 @@ P = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
 Q = pdmat({[0 1]}, {2, 4}, Degree=1);
 R = P * Q;
 c = R.coeffs(1);
-fprintf("product degree=%d\n", R.Degree);
+R.Degree
 disp([c{:}])
 ```
 

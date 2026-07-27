@@ -15,22 +15,25 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
 `pdlmi` stores finite YALMIP constraints generated from `pdvar` residual
 expressions. Inequalities use semidefinite meaning only when every original
 coefficient is square Hermitian; otherwise the whole inequality is entry-wise.
-Equality is direct coefficient equality and may be rectangular. Direct coefficient assembly is the default; Pólya
-degree elevation, fixed-order Putinar box assembly, and fixed-order full box
-Bernstein-Gram preordering are explicit alternatives.
+Equality is direct coefficient equality and may be rectangular. Direct
+coefficient assembly is the default; Pólya degree elevation, fixed-order
+Putinar box assembly, tensor-window Sparse Full Box assembly, and fixed-order
+Full Box Bernstein-Gram preordering are explicit alternatives.
 
 <CertificateNavigation />
 
 <CertificateChooser />
 
-The four paths begin with the same stored residual. **Direct** tests every
+The five paths begin with the same stored residual. **Direct** tests every
 local coefficient and is the default. **Pólya** exactly elevates that residual
 before repeating the direct test. In one parameter, **Putinar** and **Full
 box** dispatch to the same parity-specific Markov–Lukács form with minimum
 order `floor(m/2)`. In two or more parameters, Putinar uses an unweighted Gram
 term plus one generator-weighted term per axis at minimum `ceil(m/2)`, while
-Full box includes every generator-subset product. Both Gram paths match exact
-box-polynomial identities. The
+Full Box includes every generator-subset product. **Sparse Full Box** retains
+the Full Box terms but uses axis-aligned tensor-window Gram blocks. Width one
+canonicalizes to Direct, and width at least `order + 1` canonicalizes to Full
+Box. Every Gram path matches exact box-polynomial identities. The
 [SOS certificate chapter](/PD-LMI-package/documents/math/sos-certificates/)
 derives these ideas; the API pages below stay focused on callable syntax.
 
@@ -40,10 +43,11 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 | Reference | Task |
 | :--- | :--- |
-| [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) | Select direct, Pólya-elevated, fixed-order Putinar, or fixed-order full-box assembly. |
+| [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) | Select Direct, Pólya, Putinar, Sparse Full Box, or Full Box assembly. |
 | [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) | Create semidefinite or entry-wise inequalities with `<=`/`>=`, and direct equalities with `==`. |
 | [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) | Rebuild the original residual with a selected Pólya degree increment. |
 | [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) | Rebuild the original residual with the minimum or a selected absolute Putinar order. |
+| [`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) | Rebuild the residual with tensor-window Gram blocks, an absolute order, and canonical Direct/Full Box endpoints. |
 | [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
 
 ### YALMIP export and solver use
@@ -54,14 +58,15 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 ## Implemented Behavior
 
-Version 1.0.0 assembles `<=`, `>=`, and `==` relations. Inequalities select
+Version 1.1.0 assembles `<=`, `>=`, and `==` relations. Inequalities select
 one global semidefinite or entry-wise interpretation from all original
 coefficients. Equality is always direct and supports rectangular or
 non-Hermitian residuals. Direct
 coefficient-wise assembly is the default. Pólya assembly performs exact degree
-elevation before applying the coefficient test. Putinar and full-box assembly
-create independent positive-semidefinite Gram blocks for every physical cell
-and active rate row, together with exact Bernstein coefficient identities.
+elevation before applying the coefficient test. Putinar, Sparse Full Box, and
+Full Box assembly create independent positive-semidefinite Gram blocks for
+every physical cell, active rate row, and column-major matrix entry, together
+with exact Bernstein coefficient identities.
 
 In one parameter, Putinar and full box share the parity-specific
 Markov–Lukács interval construction. For two or more parameters, Putinar uses
@@ -82,6 +87,7 @@ The constructor exposes private-set, read-only properties through dot access:
 | `Relation` | `C.Relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya`, `PolyaDegree` | `C.UsePolya`, `C.PolyaDegree` | Pólya selector and degree increment. |
 | `UsePutinar`, `PutinarOrder` | `C.UsePutinar`, `C.PutinarOrder` | Putinar selector and absolute order. |
+| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | Sparse Full Box selector, absolute order, and tensor-window width. Width one normalizes to Direct; width at least `order + 1` normalizes to Full Box. |
 | `UseFullBoxPreorder`, `FullBoxOrder` | `C.UseFullBoxPreorder`, `C.FullBoxOrder` | Full-box selector and absolute order. |
 
 Certificate selectors apply only to inequalities. Any selector on equality raises `pdlmi:UnsupportedEqualityCertificate`.
@@ -93,4 +99,4 @@ higher dimensions.
 
 ## See Also
 
-[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/PD-LMI-package/documents/math/sos-certificates/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/PD-LMI-package/documents/math/sos-certificates/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)

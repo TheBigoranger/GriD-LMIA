@@ -1,7 +1,7 @@
 \chapter{\texorpdfstring{\code{pdmat}}{pdmat}: Known Parameter-Dependent Matrices}
 \label{sec:pdmat}
 
-\code{pdmat} stores known finite real matrix data on a tensor grid.  Objects can be coefficient-backed, function-only, or function-backed with explicit Bernstein coefficient evidence.  Coefficient-backed objects participate in algebra.  Function-only objects evaluate exactly through the stored handle, but do not expose coefficient evidence for \code{bernsteinTable} or coefficient algebra.
+\code{pdmat} stores known finite real matrix data on a tensor grid. Objects can be coefficient-backed, function-only, or function-backed with explicit Bernstein coefficient evidence. Coefficient-backed objects participate in algebra. Function-only objects evaluate exactly through the stored handle, but do not expose coefficient evidence for \code{bernsteinTable} or coefficient algebra. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdmat} behavior; this chapter documents their known-data syntax, numeric examples, validations, and boundaries.
 
 \section{API Map}
 \label{sec:pdmat-lookup}
@@ -18,6 +18,8 @@ Inspect/display &
 \hyperref[sec:pdmat-table]{\code{bernsteinTable}},
 \hyperref[sec:pdmat-display]{\code{disp}},
 \hyperref[sec:pdmat-display]{\code{display}} \\
+Inspect/elevate backend storage &
+\hyperref[sec:pdmat-backend-inheritance]{\code{cells}/\code{lbls}/\code{coeffs}, counts, \code{elevVals}, and \code{elevate}} \\
 Plot &
 \hyperref[sec:pdmat-plot]{\code{plot}} \\
 Arithmetic &
@@ -204,6 +206,59 @@ firstCell = A.LocalValues{1}
 \end{lstlisting}
 
 Assigning \code{A.Degree}, \code{A.LocalValues}, or \code{A.FunctionHandle} is not a supported update operation; construct a new \code{pdmat} instead.
+
+\section{Inspect And Elevate Inherited Bernstein Storage}
+\label{sec:pdmat-backend-inheritance}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+cellSubs = cells(A)
+labels = lbls(A)
+coefficients = coeffs(A, cellSubs)
+n = ncell(A)
+n = ncoeff(A)
+n = npar(A)
+vals = A.elevVals(degreeIncrement)
+B = A.elevate(degreeIncrement)
+\end{lstlisting}
+
+\descriptionhead
+The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row; \code{lbls} returns zero-based tensor Bernstein labels; \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, coefficients per cell, and parameter directions. \code{elevVals} returns an elevated nested coefficient tree without modifying \code{A}; \code{elevate} returns a new \code{pdmat} with the same represented known function and dynamic-class metadata at the higher degree.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
+physicalCells = A.cells()
+labels = A.lbls()
+sourceCoefficients = cell2mat(A.coeffs(1))
+counts = [A.ncell(), A.ncoeff(), A.npar()]
+elevatedValues = A.elevVals(1);
+elevatedLeaf = elevatedValues{1};
+B = A.elevate(1);
+elevatedTreeCoefficients = cell2mat(elevatedLeaf)
+elevatedObjectCoefficients = cell2mat(B.coeffs(1))
+degrees = [A.Degree, B.Degree]
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+physicalCells =
+     1
+labels =
+     0
+     1
+sourceCoefficients =
+     1     3
+counts =
+     1     2     1
+elevatedTreeCoefficients =
+     1     2     3
+elevatedObjectCoefficients =
+     1     2     3
+degrees =
+     1     2
+\end{lstlisting}
+
+\remarkshead
+Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}. Invalid increments raise \codeerr{pdbase}{InvalidDegreeIncrement}. Function-only data support exact \code{evaluate}, but their placeholder storage is not Bernstein coefficient evidence and cannot be used by \code{elevVals}, \code{elevate}, algebra, or \code{bernsteinTable}; the elevation paths raise \codeerr{pdbase}{MissingCoefficientEvidence}. A function constructed with an explicit verified \code{Degree} retains both its exact handle and Bernstein evidence.
 
 \section{\texorpdfstring{\code{evaluate}}{evaluate}}
 \index{evaluate@\texttt{evaluate}}
@@ -663,7 +718,7 @@ Incompatible operands for \code{+}, \code{-}, and \code{*} raise \codeerr{pdmat}
 \section{Reshape and Transform Known Matrices}
 \label{sec:pdmat-matrix-ops}
 
-These methods transform every local matrix coefficient in the same way.  They do not transpose, reshape, or concatenate the physical grid.  Except for the documented evaluator/display/shape paths, structural methods require coefficient evidence.
+These methods transform every local matrix coefficient in the same way. They are inherited from the centralized \code{pdbase} implementation, while the \code{pdmat} reconstruction hook preserves the \code{pdmat} class, known-data payloads, and metadata. They do not transpose, reshape, or concatenate the physical grid. Except for the documented evaluator/display/shape paths, structural methods require coefficient evidence.
 
 \subsection{Shape, Equality, And Display Protocols}
 \index{numel@\texttt{numel}}
@@ -860,12 +915,16 @@ U = triu(A)
 U = triu(A, k)
 S = sum(A)
 S = sum(A, dim)
+S = sum(A, vecdim)
 S = sum(A, "all")
 M = mean(A)
 M = mean(A, dim)
+M = mean(A, vecdim)
 M = mean(A, "all")
 C = cumsum(A)
 C = cumsum(A, dim)
+C = cumsum(A, direction)
+C = cumsum(A, dim, direction)
 \end{lstlisting}
 
 First inspect the two triangular results.
@@ -910,7 +969,7 @@ runningAtZero =
      3     7
 \end{lstlisting}
 
-Invalid triangular offsets raise \codeerr{pdmat}{InvalidTriangularPart}.  Invalid reduction calls raise \codeerr{pdmat}{InvalidSum}, \codeerr{pdmat}{InvalidMean}, or \codeerr{pdmat}{InvalidCumsum}.
+\code{vecdim} is a nonempty vector of unique positive integer dimensions; dimensions above two are singleton no-ops. \code{direction} is \code{"forward"} or \code{"reverse"}, case-insensitively. A direction supplied without a dimension uses the first nonsingleton matrix dimension, and \code{cumsum} along a dimension above two returns the same coefficient payloads. Invalid triangular offsets raise \codeerr{pdmat}{InvalidTriangularPart}. Invalid reduction calls raise \codeerr{pdmat}{InvalidSum}, \codeerr{pdmat}{InvalidMean}, or \codeerr{pdmat}{InvalidCumsum}; missing-value and native-output flags are not supported.
 
 \subsection{Reordering And Rotation}
 \label{sec:pdmat-matrix-reorder}

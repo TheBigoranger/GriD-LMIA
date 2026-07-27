@@ -9,7 +9,7 @@ This generated lookup groups every reference-page family by its package role. A 
 <details class="reference-index__group" id="pdmat">
 <summary class="reference-index__group-summary">
 <span class="reference-index__group-copy"><strong>pdmat</strong><span>Function-backed known data and coefficient-backed Bernstein operations.</span></span>
-<span>44 indexed entries</span>
+<span>52 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
@@ -128,7 +128,7 @@ This generated lookup groups every reference-page family by its package role. A 
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-squeeze"><code>squeeze</code></a><span>pdmat method</span></div>
-<p>Remove singleton matrix dimensions.</p>
+<p>Apply squeeze while retaining the two-dimensional payload contract.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-vec"><code>vec</code></a><span>pdmat method</span></div>
@@ -140,19 +140,19 @@ This generated lookup groups every reference-page family by its package role. A 
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-trace"><code>trace</code></a><span>pdmat method</span></div>
-<p>Compute coefficient-wise matrix traces.</p>
+<p>Sum each payload main diagonal, including rectangular payloads.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-sum"><code>sum</code></a><span>pdmat method</span></div>
-<p>Sum along a matrix dimension.</p>
+<p>Sum along one or several matrix dimensions, or all dimensions.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-mean"><code>mean</code></a><span>pdmat method</span></div>
-<p>Average along a matrix dimension.</p>
+<p>Average along one or several matrix dimensions, or all dimensions.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-cumsum"><code>cumsum</code></a><span>pdmat method</span></div>
-<p>Cumulative sum along a matrix dimension.</p>
+<p>Cumulatively sum along a dimension in forward or reverse order.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/structural-operations/#pdmat-tril"><code>tril</code></a><span>pdmat method</span></div>
@@ -245,7 +245,7 @@ This generated lookup groups every reference-page family by its package role. A 
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-ndims"><code>ndims</code></a><span>pdmat method</span></div>
-<p>Report the matrix payload dimension count.</p>
+<p>Report the two-dimensional payload protocol.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-length"><code>length</code></a><span>pdmat method</span></div>
@@ -267,12 +267,57 @@ This generated lookup groups every reference-page family by its package role. A 
 </details>
 </div>
 </div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/">Storage And Elevation</a>
+<span>8 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/#pdmat-cells"><code>cells</code></a><span>inherited pdmat method</span></div>
+<p>Enumerate pdmat physical cells.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/#pdmat-coeffs"><code>coeffs</code></a><span>inherited pdmat method</span></div>
+<p>Read known coefficients from one pdmat cell.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/#pdmat-lbls"><code>lbls</code></a><span>inherited pdmat method</span></div>
+<p>Inspect pdmat local coefficient labels.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/#pdmat-ncell"><code>ncell</code></a><span>inherited pdmat method</span></div>
+<p>Count pdmat physical cells.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/#pdmat-ncoeff"><code>ncoeff</code></a><span>inherited pdmat method</span></div>
+<p>Count pdmat coefficient columns per cell.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/#pdmat-npar"><code>npar</code></a><span>inherited pdmat method</span></div>
+<p>Count pdmat parameter dimensions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/#pdmat-elevVals"><code>elevVals</code></a><span>inherited pdmat method</span></div>
+<p>Return elevated known-data LocalValues without changing the source.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/#pdmat-elevate"><code>elevate</code></a><span>inherited pdmat method</span></div>
+<p>Return an elevated pdmat with the same source evidence.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
 </div>
 </details>
 <details class="reference-index__group" id="pdvar">
 <summary class="reference-index__group-summary">
 <span class="reference-index__group-copy"><strong>pdvar</strong><span>Continuous arbitrary-degree affine decisions and rate-vertex differentiation.</span></span>
-<span>45 indexed entries</span>
+<span>54 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
@@ -391,7 +436,7 @@ This generated lookup groups every reference-page family by its package role. A 
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-squeeze"><code>squeeze</code></a><span>pdvar method</span></div>
-<p>Remove singleton symbolic matrix dimensions.</p>
+<p>Apply squeeze while retaining the two-dimensional payload contract.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-vec"><code>vec</code></a><span>pdvar method</span></div>
@@ -403,19 +448,19 @@ This generated lookup groups every reference-page family by its package role. A 
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-trace"><code>trace</code></a><span>pdvar method</span></div>
-<p>Compute symbolic matrix traces.</p>
+<p>Sum symbolic main diagonals, including rectangular payloads.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-sum"><code>sum</code></a><span>pdvar method</span></div>
-<p>Sum symbolic payloads along a dimension.</p>
+<p>Sum one or several symbolic payload dimensions, or all dimensions.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-mean"><code>mean</code></a><span>pdvar method</span></div>
-<p>Average symbolic payloads along a dimension.</p>
+<p>Average one or several symbolic payload dimensions, or all dimensions.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-cumsum"><code>cumsum</code></a><span>pdvar method</span></div>
-<p>Cumulative sum symbolic payloads.</p>
+<p>Cumulatively sum symbolic payloads forward or reverse.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-tril"><code>tril</code></a><span>pdvar method</span></div>
@@ -435,7 +480,7 @@ This generated lookup groups every reference-page family by its package role. A 
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-cat"><code>cat</code></a><span>pdvar method</span></div>
-<p>Concatenate symbolic payloads along a dimension.</p>
+<p>Concatenate symbolic payloads along a selected dimension.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/structural-operations/#pdvar-blkdiag"><code>blkdiag</code></a><span>pdvar method</span></div>
@@ -500,7 +545,7 @@ This generated lookup groups every reference-page family by its package role. A 
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-ndims"><code>ndims</code></a><span>pdvar method</span></div>
-<p>Report the matrix payload dimension count.</p>
+<p>Report the two-dimensional payload protocol.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-length"><code>length</code></a><span>pdvar method</span></div>
@@ -547,12 +592,61 @@ This generated lookup groups every reference-page family by its package role. A 
 </details>
 </div>
 </div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/">Storage And Evaluation</a>
+<span>9 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-cells"><code>cells</code></a><span>inherited pdvar method</span></div>
+<p>Enumerate pdvar physical cells.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-coeffs"><code>coeffs</code></a><span>inherited pdvar method</span></div>
+<p>Read symbolic coefficients or derivative rate rows from one cell.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-lbls"><code>lbls</code></a><span>inherited pdvar method</span></div>
+<p>Inspect pdvar local coefficient labels.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-ncell"><code>ncell</code></a><span>inherited pdvar method</span></div>
+<p>Count pdvar physical cells.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-ncoeff"><code>ncoeff</code></a><span>inherited pdvar method</span></div>
+<p>Count pdvar coefficient columns per cell.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-npar"><code>npar</code></a><span>inherited pdvar method</span></div>
+<p>Count pdvar parameter dimensions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-elevVals"><code>elevVals</code></a><span>inherited pdvar method</span></div>
+<p>Return elevated symbolic LocalValues without changing the source.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-elevate"><code>elevate</code></a><span>inherited pdvar method</span></div>
+<p>Return an elevated pdvar with the same variables and metadata.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/#pdvar-evaluate"><code>evaluate</code></a><span>inherited pdvar method</span></div>
+<p>Interpolate symbolic coefficients and independent derivative rows.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
 </div>
 </details>
 <details class="reference-index__group" id="pdlmi">
 <summary class="reference-index__group-summary">
-<span class="reference-index__group-copy"><strong>pdlmi</strong><span>Direct constraints and opt-in Pólya, Putinar, and full-box certificates.</span></span>
-<span>6 indexed entries</span>
+<span class="reference-index__group-copy"><strong>pdlmi</strong><span>Direct constraints and four opt-in finite certificate families.</span></span>
+<span>7 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
@@ -563,7 +657,7 @@ This generated lookup groups every reference-page family by its package role. A 
 <div class="reference-index__family-content">
 <div class="reference-index__direct-meta">
 <span>Constraint class</span>
-<p>Store direct equality or direct, Pólya-elevated, Putinar, or full-box inequality constraints.</p>
+<p>Store direct equality or direct, Pólya, Putinar, SparseFullBox, or FullBox inequality constraints.</p>
 </div>
 </div>
 </div>
@@ -575,7 +669,7 @@ This generated lookup groups every reference-page family by its package role. A 
 <div class="reference-index__family-content">
 <div class="reference-index__direct-meta">
 <span>pdlmi function</span>
-<p>Select direct, Pólya-elevated, fixed-order Putinar, or fixed-order full-box assembly.</p>
+<p>Select one of five finite assembly states.</p>
 </div>
 </div>
 </div>
@@ -617,6 +711,18 @@ This generated lookup groups every reference-page family by its package role. A 
 </div>
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/"><code>applySparseFullBoxPreorder</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdlmi method</span>
+<p>Rebuild a residual with a tensor-window full-box certificate and canonical endpoints.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
 <a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/"><code>applyFullBoxPreorder</code></a>
 <span>1 symbol</span>
 </div>
@@ -631,8 +737,8 @@ This generated lookup groups every reference-page family by its package role. A 
 </details>
 <details class="reference-index__group" id="pdbase-backend">
 <summary class="reference-index__group-summary">
-<span class="reference-index__group-copy"><strong>pdbase / backend</strong><span>Cell-local storage and Bernstein backend utilities.</span></span>
-<span>12 indexed entries</span>
+<span class="reference-index__group-copy"><strong>pdbase / backend</strong><span>Inherited matrix protocols, cell-local storage, and protected Bernstein utilities.</span></span>
+<span>50 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
@@ -643,14 +749,26 @@ This generated lookup groups every reference-page family by its package role. A 
 <div class="reference-index__family-content">
 <div class="reference-index__direct-meta">
 <span>Backend class</span>
-<p>Inspect cell-local Bernstein storage shared by pdmat and pdvar.</p>
+<p>Understand the common storage and matrix-operation implementation inherited by pdmat and pdvar.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdbase/constructor/"><code>pdbase constructor</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdbase function</span>
+<p>Construct a validated backend object for tests and derived classes.</p>
 </div>
 </div>
 </div>
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
 <a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/">Storage Inspection</a>
-<span>8 symbols</span>
+<span>12 symbols</span>
 </div>
 <div class="reference-index__family-content">
 <details class="reference-index__symbols">
@@ -662,15 +780,11 @@ This generated lookup groups every reference-page family by its package role. A 
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-coeffs"><code>coeffs</code></a><span>pdbase method</span></div>
-<p>Read local Bernstein coefficient families.</p>
+<p>Read one cell-local Bernstein coefficient family.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-lbls"><code>lbls</code></a><span>pdbase method</span></div>
 <p>Inspect flat local Bernstein labels.</p>
-</li>
-<li>
-<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-elevVals"><code>elevVals</code></a><span>pdbase method</span></div>
-<p>Degree-elevate every cell-local coefficient family.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ncell"><code>ncell</code></a><span>pdbase method</span></div>
@@ -688,13 +802,33 @@ This generated lookup groups every reference-page family by its package role. A 
 <div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-size"><code>size</code></a><span>pdbase method</span></div>
 <p>Inspect matrix payload dimensions.</p>
 </li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-numel"><code>numel</code></a><span>pdbase method</span></div>
+<p>Count matrix-payload elements.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-ndims"><code>ndims</code></a><span>pdbase method</span></div>
+<p>Report the always-two-dimensional payload protocol.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-length"><code>length</code></a><span>pdbase method</span></div>
+<p>Report the largest payload dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-height"><code>height</code></a><span>pdbase method</span></div>
+<p>Report the first payload dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/storage-inspection/#pdbase-width"><code>width</code></a><span>pdbase method</span></div>
+<p>Report the second payload dimension.</p>
+</li>
 </ul>
 </details>
 </div>
 </div>
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
-<a class="reference-index__page" href="/PD-LMI-package/documents/reference/bernstein-utilities/">Bernstein Utilities</a>
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/">Evaluation And Elevation</a>
 <span>3 symbols</span>
 </div>
 <div class="reference-index__family-content">
@@ -702,16 +836,187 @@ This generated lookup groups every reference-page family by its package role. A 
 <summary>Show direct symbol links</summary>
 <ul>
 <li>
-<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#bernElev"><code>bernElev</code></a><span>pdbase backend method</span></div>
-<p>Elevate Bernstein degree for compatible coefficient payloads.</p>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/#pdbase-evaluate"><code>evaluate</code></a><span>pdbase method</span></div>
+<p>Evaluate one cell-local coefficient family at a physical point.</p>
 </li>
 <li>
-<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#bernProd"><code>bernProd</code></a><span>pdbase backend method</span></div>
-<p>Multiply local Bernstein coefficient families by label convolution.</p>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/#pdbase-elevVals"><code>elevVals</code></a><span>pdbase method</span></div>
+<p>Return an elevated LocalValues tree without changing the object.</p>
 </li>
 <li>
-<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#mergeGrid"><code>mergeGrid</code></a><span>pdbase backend method</span></div>
-<p>Refine compatible physical grids before coefficient algebra.</p>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/#pdbase-elevate"><code>elevate</code></a><span>pdbase method</span></div>
+<p>Return an elevated object of the same dynamic class.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/">Matrix Operations</a>
+<span>22 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-uplus"><code>uplus</code></a><span>pdbase method</span></div>
+<p>Return a value-semantic copy with the same payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-uminus"><code>uminus</code></a><span>pdbase method</span></div>
+<p>Negate every stored payload.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-transpose"><code>transpose</code></a><span>pdbase method</span></div>
+<p>Transpose every matrix payload.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-ctranspose"><code>ctranspose</code></a><span>pdbase method</span></div>
+<p>Conjugate-transpose every matrix payload.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-reshape"><code>reshape</code></a><span>pdbase method</span></div>
+<p>Reshape every payload while preserving element count.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-squeeze"><code>squeeze</code></a><span>pdbase method</span></div>
+<p>Apply the payload squeeze while retaining a 2-D object shape.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-vec"><code>vec</code></a><span>pdbase method</span></div>
+<p>Vectorize every payload in MATLAB column-major order.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-diag"><code>diag</code></a><span>pdbase method</span></div>
+<p>Extract or construct payload diagonals.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-trace"><code>trace</code></a><span>pdbase method</span></div>
+<p>Sum the main diagonal of rectangular, square, or vector payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-sum"><code>sum</code></a><span>pdbase method</span></div>
+<p>Reduce payload dimensions, including a dimension vector or all.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-mean"><code>mean</code></a><span>pdbase method</span></div>
+<p>Average payload dimensions, including a dimension vector or all.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-cumsum"><code>cumsum</code></a><span>pdbase method</span></div>
+<p>Compute forward or reverse cumulative payload sums.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-tril"><code>tril</code></a><span>pdbase method</span></div>
+<p>Keep the lower triangular payload part.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-triu"><code>triu</code></a><span>pdbase method</span></div>
+<p>Keep the upper triangular payload part.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-repmat"><code>repmat</code></a><span>pdbase method</span></div>
+<p>Repeat every payload by two-dimensional repeat counts.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-flip"><code>flip</code></a><span>pdbase method</span></div>
+<p>Flip payloads along a selected dimension.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-fliplr"><code>fliplr</code></a><span>pdbase method</span></div>
+<p>Flip payloads left to right.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-flipud"><code>flipud</code></a><span>pdbase method</span></div>
+<p>Flip payloads up to down.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-rot90"><code>rot90</code></a><span>pdbase method</span></div>
+<p>Rotate payloads by quarter turns.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-cat"><code>cat</code></a><span>pdbase method</span></div>
+<p>Reject direct base-class concatenation pending a derived override.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-horzcat"><code>horzcat</code></a><span>pdbase method</span></div>
+<p>Reject direct base-class horizontal concatenation.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/matrix-operations/#pdbase-vertcat"><code>vertcat</code></a><span>pdbase method</span></div>
+<p>Reject direct base-class vertical concatenation.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/indexing-protocol/">Indexing Protocol</a>
+<span>2 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/indexing-protocol/#pdbase-end"><code>end</code></a><span>pdbase method</span></div>
+<p>Resolve MATLAB end against payload dimensions.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/indexing-protocol/#pdbase-numArgumentsFromSubscript"><code>numArgumentsFromSubscript</code></a><span>pdbase method</span></div>
+<p>Keep indexed object results scalar for dot dispatch.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/bernstein-utilities/">Bernstein Utilities</a>
+<span>9 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-bernelev"><code>bernElev</code></a><span>protected pdbase method</span></div>
+<p>Elevate one compatible Bernstein coefficient family.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-bernprod"><code>bernProd</code></a><span>protected pdbase method</span></div>
+<p>Multiply coefficient families by normalized label convolution.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-berntbl"><code>bernTbl</code></a><span>protected pdbase method</span></div>
+<p>Build detailed or one-line Bernstein diagnostic tables.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-elevlocalvalues"><code>elevLocalValues</code></a><span>protected pdbase method</span></div>
+<p>Elevate every cell and active rate row in a LocalValues tree.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-mapvals"><code>mapVals</code></a><span>protected pdbase method</span></div>
+<p>Map a function over every coefficient payload.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-matsubs"><code>matSubs</code></a><span>protected pdbase method</span></div>
+<p>Normalize two-dimensional matrix subscripts.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-mergegrid"><code>mergeGrid</code></a><span>protected pdbase method</span></div>
+<p>Build a common physical grid for compatible operands.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-mkunop"><code>mkUnOp</code></a><span>protected pdbase method</span></div>
+<p>Rebuild the same dynamic class from transformed payloads.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-unop"><code>unOp</code></a><span>protected pdbase method</span></div>
+<p>Apply one matrix operation across cells, labels, and rate rows.</p>
 </li>
 </ul>
 </details>
@@ -721,23 +1026,19 @@ This generated lookup groups every reference-page family by its package role. A 
 </details>
 <details class="reference-index__group" id="shared-helpers">
 <summary class="reference-index__group-summary">
-<span class="reference-index__group-copy"><strong>Shared helpers</strong><span>Implementation helpers shared across the package.</span></span>
-<span>9 indexed entries</span>
+<span class="reference-index__group-copy"><strong>Shared helpers</strong><span>Six implementation helpers shared across the package.</span></span>
+<span>6 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
 <a class="reference-index__page" href="/PD-LMI-package/documents/reference/shared-helpers/">Shared Helpers</a>
-<span>9 symbols</span>
+<span>6 symbols</span>
 </div>
 <div class="reference-index__family-content">
 <details class="reference-index__symbols">
 <summary>Show direct symbol links</summary>
 <ul>
-<li>
-<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-berntbl"><code>helper.bernTbl</code></a><span>shared backend helper</span></div>
-<p>Build detailed or one-line Bernstein coefficient tables.</p>
-</li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-cellget"><code>helper.cellGet</code></a><span>shared backend helper</span></div>
 <p>Read one nested LocalValues leaf by physical-cell subscripts.</p>
@@ -753,14 +1054,6 @@ This generated lookup groups every reference-page family by its package role. A 
 <li>
 <div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-iszero"><code>helper.isZero</code></a><span>shared backend helper</span></div>
 <p>Classify numeric, additive, coefficient-tree, or object zero evidence.</p>
-</li>
-<li>
-<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-mapvals"><code>helper.mapVals</code></a><span>shared backend helper</span></div>
-<p>Map a function over a nested LocalValues tree.</p>
-</li>
-<li>
-<div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-matsubs"><code>helper.matSubs</code></a><span>shared backend helper</span></div>
-<p>Normalize two-dimensional matrix subscripts.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/shared-helpers/#helper-mkgrid"><code>helper.mkGrid</code></a><span>shared backend helper</span></div>

@@ -8,14 +8,16 @@ These examples are intentionally small and deterministic. They complement the re
 ## Setup And Verification
 
 ```matlab
-projectRoot = "path/to/Differential Parameter-Dependent Linear Matrix Inequality";
-addpath(genpath(projectRoot));
-rmpath(genpath(fullfile(projectRoot, "doc")));
-
+projectRoot = "path/to/PD-LMI-package";
+cd(projectRoot)
+report = install_pd_lmi();
 results = tests.run_all();
 ```
 
-The test entry point runs helper, `pdbase`, `pdmat`, `pdvar`, and `pdlmi` tests. `pdvar` and `pdlmi` workflows require YALMIP on the MATLAB path.
+The installer adds only `projectRoot` at the end of the MATLAB path; it does
+not use `genpath`. The test entry point runs installation, helper, `pdbase`,
+`pdmat`, `pdvar`, and `pdlmi` tests. `pdvar` and `pdlmi` workflows require
+YALMIP on the MATLAB path.
 
 ## Scalar `pdmat`
 
@@ -114,6 +116,12 @@ contains a solver-independent transcript that compares direct assembly, the
 minimum Putinar order, an explicit higher order, replacement of a Pólya
 selection, and `toYalmip` export counts.
 
+## Deterministic Sparse Full Box Selection
+
+The [`applySparseFullBoxPreorder` reference](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/#deterministic-transcript)
+compares an intermediate tensor-window certificate with its exact Direct and
+Full Box endpoints, and records the corresponding read-only state.
+
 ## Solver Smoke Cases
 
 The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](https://github.com/TheBigoranger/PD-LMI-package/blob/main/%2Btests/%2Bpdlmi/test_solver_smoke.m) are documented on a dedicated page:
@@ -124,6 +132,6 @@ The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](http
 ## Current Solver Boundary
 
 The package currently assembles direct or Pólya-elevated coefficient-wise
-constraints and the opt-in fixed-order Putinar box and full box Gram
-certificates. It does not provide a package-owned solver wrapper or residual
-diagnostic layer.
+constraints and the opt-in fixed-order Putinar, Sparse Full Box, and Full Box
+Gram certificates. It does not provide a package-owned solver wrapper or
+residual diagnostic layer.

@@ -22,9 +22,11 @@ Compatible grids and degrees are aligned before coefficient rows are combined. N
 ```matlab
 yalmip('clear')
 P = pdvar(1, {[0 1]}); Q = P - P; R = P + 2; S = -P;
-fprintf('Q: decision=%d, degree=%d\n', Q.ContainsDecision, Q.Degree);
-fprintf('R=%d-by-%d, S=%d-by-%d, uplus=%d-by-%d\n', ...
-    size(R,1),size(R,2),size(S,1),size(S,2),size(+P,1),size(+P,2));
+Q.ContainsDecision
+Q.Degree
+size(R)
+size(S)
+size(+P)
 ```
 
 ```text
@@ -54,7 +56,7 @@ Written matrix order is preserved; $P[i]A[j]$ is not exchanged with $A[j]P[i]$.
 
 <ExampleDisclosure
   visibleCode={"L = A * P;\nR = P * A;"}
-  fullCode={"yalmip('clear')\nA = pdmat({[0 1]}, {2, 3}, Degree=1);\nP = pdvar(1, {[0 1]}, Degree=2);\nL = A * P;\nR = P * A;\nfprintf('left=%d-by-%d degree=%d\\n', size(L,1),size(L,2),L.Degree);\nfprintf('right=%d-by-%d degree=%d\\n', size(R,1),size(R,2),R.Degree);\n% left=1-by-1 degree=3\n% right=1-by-1 degree=3"}
+  fullCode={"yalmip('clear')\nA = pdmat({[0 1]}, {2, 3}, Degree=1);\nP = pdvar(1, {[0 1]}, Degree=2);\nL = A * P;\nR = P * A;\nsize(L)\nL.Degree\nsize(R)\nR.Degree\n% ans = 1 1\n% ans = 3\n% ans = 1 1\n% ans = 3"}
   summary="Show the complete runnable affine-decision example"
 />
 

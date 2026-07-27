@@ -17,6 +17,7 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 
 | Reference | Task |
 | :--- | :--- |
+| [`Storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) | Traverse symbolic/rate rows, elevate them independently, and evaluate without consulting assignments. |
 | [`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) | Build discontinuous rate-vertex derivative expressions. |
 | [`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/) | Inspect symbolic coefficient rows and rate vertices. |
 | [`value`](/PD-LMI-package/documents/reference/pdvar/value/) | Convert assigned coefficients to known `pdmat` data. |
@@ -39,7 +40,10 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 ## Scope Boundary
 
 `pdvar` represents expressions. It does not choose solvers or call `optimize`; solver handoff begins with [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/).
+Its common matrix operations are centralized in `pdbase`, but every inherited
+operation remains documented here with `pdvar` symbolic and rate-aware
+behavior.
 
 ## See Also
 
-[`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/) · [`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) · [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/)
+[`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/) · [`storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) · [`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) · [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/)

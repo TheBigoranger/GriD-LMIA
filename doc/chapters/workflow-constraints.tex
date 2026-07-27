@@ -184,24 +184,26 @@ The decay count is two physical cells times two rate vertices times four degree-
 
 \subsection{Choose a Finite Certificate}
 
-Direct Bernstein-coefficient constraints are the default.  Three opt-in selectors rebuild from the same original residual and relation; selections replace rather than compound one another.
+Direct Bernstein-coefficient constraints are the default.  Four opt-in selectors rebuild from the same original residual and relation; selections replace rather than compound one another.
 
 \begin{lstlisting}[style=dpmatlab]
 Cpolya = Cdecay.applyPolya(1);
 Cputinar = Cdecay.applyPutinar();
+Csp = Cdecay.applySparseFullBoxPreorder(2);
 Cbox = Cdecay.applyFullBoxPreorder();
 counts = [numel(Cdecay.Constraints), ...
     numel(Cpolya.Constraints), ...
     numel(Cputinar.Constraints), ...
+    numel(Csp.Constraints), ...
     numel(Cbox.Constraints)]
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
 counts =
-    16    20    24    24
+    16    20    24    24    24
 \end{lstlisting}
 
-Direct tests coefficient signs. P\'olya elevates the residual before testing. For this one-parameter residual, the default Putinar selector delegates to the full-box parity construction, so both return 24 stored constraints. In multiple parameters, Putinar uses the singleton-generator box module, whereas Full Box uses all box-generator products. All four are finite sufficient certificates for the continuous inequality. Failure of a selected certificate to yield feasibility does not prove that the continuous inequality itself is infeasible. \Cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen,sec:certificate-full-box} give the corresponding mathematical constructions, while \cref{sec:certificate-boundary} states the implemented boundary.
+Direct tests coefficient signs. P\'olya elevates the residual before testing. For this one-parameter residual, the degree-three default order is one, so width two reaches the dense endpoint and SparseFullBox canonicalizes to actual FullBox state; Putinar also delegates to the same parity construction, and all three wrappers store 24 constraints. At intermediate widths, SparseFullBox replaces each dense Gram block by all axis-aligned tensor-basis windows of the requested side length. In multiple parameters, Putinar uses the singleton-generator box module, whereas SparseFullBox and FullBox use all box-generator products with sparse-window or dense Gram support. All five paths are finite sufficient certificates for the continuous inequality. Failure of a selected certificate to yield feasibility does not prove that the continuous inequality itself is infeasible. \Cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen,sec:certificate-sparse-full-box,sec:certificate-full-box} give the corresponding mathematical constructions, while \cref{sec:certificate-boundary} states the implemented boundary.
 
 \subsection{Export to YALMIP and Recover the Solution}
 \index{strictness margin}\index{solver diagnostics}

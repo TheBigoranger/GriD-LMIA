@@ -2,7 +2,7 @@
 
 \input{manual-style}
 
-\title{\pkg\\User Manual} \author{Version v1.0.0} \date{July 19, 2026}
+\title{\pkg\\User Manual} \author{Version v1.1.0} \date{July 26, 2026}
 
 % \includeonly{chapters/workflow-introduction}
 % \includeonly{chapters/pdbase}
@@ -20,7 +20,7 @@ The \pkg{} is a MATLAB/YALMIP package for modelling and certifying parameter-dep
 
 The manual develops that bridge through a reproducible differentiable PD-LMI workflow: define the parameter grid and known data, construct continuous decision matrices, differentiate them cell by cell when scheduling-rate terms are present, form a residual inequality, choose a direct or certificate-based positivity condition, export the resulting constraints to YALMIP, and solve them with an available SDP solver.  It also makes explicit the distinction between shared-face continuity of the represented function and the generally discontinuous cellwise derivative data.
 
-Version 1.0 presents the implemented and tested public surface as one supported workflow: installation and verification; known-data, decision-variable, and finite-certificate objects; MATLAB-style matrix operations and indexing; helper utilities; and direct, P\'olya, Putinar, and full-box certificate assembly. The appendices provide the Bernstein-polynomial and positivity-certificate background needed to interpret those backends and their documented boundaries.
+Version 1.1 presents the implemented and tested public surface as one supported workflow: installation and verification; known-data, decision-variable, and finite-certificate objects; MATLAB-style matrix operations and indexing implemented centrally by \code{pdbase} and inherited by \code{pdmat}/\code{pdvar}; six shared helper utilities; and direct, P\'olya, Putinar, SparseFullBox, and FullBox certificate assembly. The appendices provide the Bernstein-polynomial and positivity-certificate background needed to interpret those backends and their documented boundaries.
 \end{abstract}
 
 \clearpage
@@ -88,6 +88,8 @@ V.~Powers and B.~Reznick, ``A new bound for P\'olya's theorem with applications 
 \end{thebibliography}
 
 \clearpage
+% Keep the final Index entry with the preceding TOC page after the expanded v1.1 reference surface.
+\addtocontents{toc}{\protect\enlargethispage{2\baselineskip}}
 \addcontentsline{toc}{chapter}{Index}
 \printindex
 

@@ -1,89 +1,274 @@
 ---
 title: pdvar Structural Operations
-description: Detailed reshape, reduction, assembly, and reordering examples for affine pdvar payloads.
+description: Complete symbolic and rate-aware transpose, reshape, reduction, assembly, repetition, and reordering reference.
 ---
 
 import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>structural operations</span></nav>
 
-Every operation acts on each symbolic coefficient matrix and returns an affine `pdvar`; cells, local labels, and rate metadata remain attached.
+The common mapping protocol lives in `pdbase`, but every method below is
+public `pdvar` behavior. Each operation visits every symbolic coefficient and
+every derivative rate row independently, returning an affine `pdvar` with
+YALMIP variables, cells, labels, and rate metadata preserved.
 
-## <span id="pdvar-transpose"></span><span id="pdvar-ctranspose"></span><span id="pdvar-reshape"></span><span id="pdvar-squeeze"></span><span id="pdvar-vec"></span>Transpose and reshape
+## Transpose, reshape, squeeze, and vectorize
+
+### <span id="pdvar-transpose"></span>`transpose` and <span id="pdvar-ctranspose"></span>`ctranspose`
+
+```matlab
+plain = P.'
+conjugate = P'
+```
+
+Both swap symbolic payload dimensions; only `ctranspose` conjugates.
+
+### <span id="pdvar-reshape"></span>`reshape`
+
+```matlab
+out = reshape(P,rows,columns)
+out = reshape(P,[rows columns])
+out = reshape(P,[],columns)
+```
+
+Exactly two dimensions are supported; element count must be preserved.
+Failures use `pdvar:InvalidReshape`.
+
+### <span id="pdvar-squeeze"></span>`squeeze`
+
+```matlab
+out = squeeze(P)
+```
+
+Applies squeeze coefficient-wise while preserving the always-two-dimensional
+`MatrixSize`. It never turns coefficient storage or rate rows into payload
+dimensions.
+
+### <span id="pdvar-vec"></span>`vec`
+
+```matlab
+out = vec(P)
+```
+
+Returns a column-major `numel(P) × 1` symbolic payload.
 
 ```matlab
 yalmip('clear')
 P = pdvar(2, {[0 1]}, "symmetric");
-Pt = P.'; Ph = P'; r = reshape(P,[1 4]); s = squeeze(P); v = vec(P);
-fprintf('transpose=%d-by-%d, ctranspose=%d-by-%d\n',size(Pt,1),size(Pt,2),size(Ph,1),size(Ph,2));
-fprintf('reshape=%d-by-%d, vec=%d-by-%d\n',size(r,1),size(r,2),size(v,1),size(v,2));
+Pt = P.';
+Ph = P';
+r = reshape(P,[1 4]);
+s = squeeze(P);
+v = vec(P);
+shapes = [size(Pt); size(Ph); size(r); size(s); size(v)]
 ```
 
 ```text
-transpose=2-by-2, ctranspose=2-by-2
-reshape=1-by-4, vec=4-by-1
+shapes =
+     2     2
+     2     2
+     1     4
+     2     2
+     4     1
 ```
 
-<MatrixGlyphDiagram before={[["x₁", "x₂"], ["x₃", "x₄"]]} after={[["x₁"], ["x₃"], ["x₂"], ["x₄"]]} beforeLabel="symbolic 2 × 2" afterLabel="vec(P)" caption="Every local symbolic matrix is reshaped in the same way; cells, labels, and decision handles remain aligned." />
+<MatrixGlyphDiagram before={[["x₁", "x₂"], ["x₃", "x₄"]]} after={[["x₁"], ["x₃"], ["x₂"], ["x₄"]]} beforeLabel="symbolic 2 × 2" afterLabel="vec(P)" caption="The same column-major transform is applied to every symbolic coefficient and rate row." />
 
-## <span id="pdvar-diag"></span><span id="pdvar-trace"></span><span id="pdvar-sum"></span><span id="pdvar-mean"></span><span id="pdvar-cumsum"></span><span id="pdvar-tril"></span><span id="pdvar-triu"></span>Extract and reduce structure
+## Diagonal and reduction methods
 
-`diag`, `tril`, and `triu` accept MATLAB diagonal offsets. `trace` requires square payloads. `sum`, `mean`, and `cumsum` operate on matrix dimensions, not storage axes.
+### <span id="pdvar-diag"></span>`diag`
 
 ```matlab
-yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric");
-D = diag(P); tr = trace(P); colsum = sum(P,1); avg = mean(P,2);
-running = cumsum(P,2); lo = tril(P); hi = triu(P);
-fprintf('diag=%d-by-%d, trace=%d-by-%d, sum=%d-by-%d\n',size(D,1),size(D,2),size(tr,1),size(tr,2),size(colsum,1),size(colsum,2));
-fprintf('mean=%d-by-%d, cumsum=%d-by-%d, triangles=%d-by-%d\n',size(avg,1),size(avg,2),size(running,1),size(running,2),size(lo,1),size(hi,2));
+out = diag(P)
+out = diag(P,k)
 ```
 
-```text
-diag=2-by-1, trace=1-by-1, sum=1-by-2
-mean=2-by-1, cumsum=2-by-2, triangles=2-by-2
-```
+Extracts or constructs symbolic diagonals. Empty or malformed offsets use
+`pdvar:InvalidDiag`.
 
-<MatrixGlyphDiagram before={[["x₁", "x₂"], ["x₃", "x₄"]]} after={[["x₁"], ["x₄"]]} beforeLabel="symbolic matrix" afterLabel="diag(P)" caption="A structural reduction is applied coefficient by coefficient, so the result remains parameter dependent and affine." />
-
-## <span id="pdvar-horzcat"></span><span id="pdvar-vertcat"></span><span id="pdvar-cat"></span><span id="pdvar-blkdiag"></span><span id="pdvar-repmat"></span>Assemble symbolic blocks
+### <span id="pdvar-trace"></span>`trace`
 
 ```matlab
-yalmip('clear')
-P = pdvar(1, {[0 1]});
-H = [P P]; V = [P; P]; C = cat(2,P,P); B = blkdiag(P,P); R = repmat(P,2,3);
-fprintf('H=%d-by-%d, V=%d-by-%d, cat=%d-by-%d\n',size(H,1),size(H,2),size(V,1),size(V,2),size(C,1),size(C,2));
-fprintf('blkdiag=%d-by-%d, repmat=%d-by-%d\n',size(B,1),size(B,2),size(R,1),size(R,2));
+out = trace(P)
 ```
 
-```text
-H=1-by-2, V=2-by-1, cat=1-by-2
-blkdiag=2-by-2, repmat=2-by-3
+Sums the main diagonal of square, rectangular, row-vector, or column-vector
+symbolic payloads. The result is `1 × 1`; square input is not required.
+
+### <span id="pdvar-sum"></span>`sum` and <span id="pdvar-mean"></span>`mean`
+
+```matlab
+out = sum(P)
+out = sum(P,dim)
+out = sum(P,[dim1 dim2 ...])
+out = sum(P,"all")
+
+out = mean(P)
+out = mean(P,dim)
+out = mean(P,[dim1 dim2 ...])
+out = mean(P,"all")
 ```
 
-<MatrixGlyphDiagram before={[["P", "A"]]} after={[["P", "0"], ["0", "A"]]} beforeLabel="symbolic + known" afterLabel="blkdiag(P,A)" caption="Block assembly changes matrix layout while each block retains the same cell-local symbolic geometry." />
+Dimension vectors are nonempty, unique, positive integers. Dimensions above
+two are singleton no-ops. Data flags are unsupported. Errors use
+`pdvar:InvalidSum` and `pdvar:InvalidMean`.
 
-## <span id="pdvar-flip"></span><span id="pdvar-fliplr"></span><span id="pdvar-flipud"></span><span id="pdvar-rot90"></span>Reorder matrix entries
+### <span id="pdvar-cumsum"></span>`cumsum`
+
+```matlab
+out = cumsum(P)
+out = cumsum(P,dim)
+out = cumsum(P,"forward")
+out = cumsum(P,"reverse")
+out = cumsum(P,dim,"forward")
+out = cumsum(P,dim,"reverse")
+```
+
+Higher dimensions are singleton no-ops; invalid directions and extra flags use
+`pdvar:InvalidCumsum`.
+
+### <span id="pdvar-tril"></span>`tril` and <span id="pdvar-triu"></span>`triu`
+
+```matlab
+lower = tril(P,k)
+upper = triu(P,k)
+```
+
+`k` defaults to zero and must be a finite integer. Errors use
+`pdvar:InvalidTriangularPart`.
 
 ```matlab
 yalmip('clear')
 P = pdvar([2 3], {[0 1]}, "full");
-F = flip(P,2); L = fliplr(P); U = flipud(P); R = rot90(P);
-fprintf('flip=%d-by-%d, fliplr=%d-by-%d, flipud=%d-by-%d\n',size(F,1),size(F,2),size(L,1),size(L,2),size(U,1),size(U,2));
-fprintf('rot90=%d-by-%d\n', size(R,1),size(R,2));
+D = diag(P);
+T = trace(P);
+S = sum(P,[1 2]);
+M = mean(P,1);
+C = cumsum(P,2,"reverse");
+shapes = [size(D); size(T); size(S); size(M); size(C)]
 ```
 
 ```text
-flip=2-by-3, fliplr=2-by-3, flipud=2-by-3
-rot90=3-by-2
+shapes =
+     2     1
+     1     1
+     1     1
+     1     3
+     2     3
 ```
 
-<MatrixGlyphDiagram before={[["x₁", "x₂"], ["x₃", "x₄"]]} after={[["x₄", "x₃"], ["x₂", "x₁"]]} beforeLabel="symbolic payload" afterLabel="reordered payload" caption="The permutation repeats at every symbolic Bernstein coefficient; only matrix-entry positions change." />
+<MatrixGlyphDiagram before={[["x₁", "x₂", "x₃"], ["x₄", "x₅", "x₆"]]} after={[["x₁"], ["x₅"]]} beforeLabel="rectangular symbolic matrix" afterLabel="diag(P)" caption="trace sums the same two main-diagonal terms; rectangular symbolic payloads are valid." />
 
-## Validation and operation boundaries
+## Concatenation and block assembly
 
-Dimensions, offsets, repeat counts, and concatenation sizes must satisfy the corresponding MATLAB call. Compatible operands are aligned before assembly. These methods remain affine and never reorder the physical grid, local labels, or rate vertices.
+### <span id="pdvar-horzcat"></span>`horzcat`, <span id="pdvar-vertcat"></span>`vertcat`, and <span id="pdvar-cat"></span>`cat`
 
-## See Also
+```matlab
+horizontal = [P Q]
+vertical = [P; Q]
+out = cat(1,P,Q)
+out = cat(2,P,Q)
+```
 
-[`pdvar algebra`](/PD-LMI-package/documents/reference/pdvar/algebra/) · [`indexing and inspection`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/) · [`pdmat structural operations`](/PD-LMI-package/documents/reference/pdmat/structural-operations/)
+`pdvar` overrides direct-base concatenation. Compatible numeric, `sdpvar`,
+`pdmat`, and `pdvar` operands are promoted and aligned. Only dimensions one
+and two are supported. Ordinary/rate row structure and rate bounds must agree.
+Errors use `pdvar:InvalidConcatenation` or
+`pdvar:UnsupportedCatDimension`.
+
+### <span id="pdvar-blkdiag"></span>`blkdiag`
+
+```matlab
+out = blkdiag(P,Q,...)
+```
+
+Builds a symbolic block diagonal through the same compatible promotion and
+alignment rules.
+
+### <span id="pdvar-repmat"></span>`repmat`
+
+```matlab
+out = repmat(P,n)
+out = repmat(P,[rows columns])
+out = repmat(P,rows,columns)
+```
+
+Uses positive integer two-dimensional repeats; malformed forms raise
+`pdvar:InvalidRepmat`.
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]});
+H = [P P];
+V = [P; P];
+C = cat(2,P,P);
+B = blkdiag(P,P);
+R = repmat(P,2,3);
+shapes = [size(H); size(V); size(C); size(B); size(R)]
+```
+
+```text
+shapes =
+     1     2
+     2     1
+     1     2
+     2     2
+     2     3
+```
+
+<MatrixGlyphDiagram before={[["P", "A"]]} after={[["P", "0"], ["0", "A"]]} beforeLabel="symbolic + known" afterLabel="blkdiag(P,A)" caption="Derived-class assembly retains the symbolic handles and common cell-local geometry of every block." />
+
+## Flip and rotation
+
+### <span id="pdvar-flip"></span>`flip`, <span id="pdvar-fliplr"></span>`fliplr`, and <span id="pdvar-flipud"></span>`flipud`
+
+```matlab
+out = flip(P)
+out = flip(P,dim)
+out = fliplr(P)
+out = flipud(P)
+```
+
+`flip` defaults to the first nonsingleton payload dimension. Higher dimensions
+are singleton no-ops; invalid dimensions use `pdvar:InvalidFlip`.
+
+### <span id="pdvar-rot90"></span>`rot90`
+
+```matlab
+out = rot90(P)
+out = rot90(P,k)
+```
+
+Rotates each symbolic payload by a finite integer number of quarter turns.
+Odd turns swap payload dimensions; errors use `pdvar:InvalidRot90`.
+
+```matlab
+yalmip('clear')
+P = pdvar([2 3], {[0 1]}, "full");
+F = flip(P,2);
+L = fliplr(P);
+U = flipud(P);
+R = rot90(P);
+shapes = [size(F); size(L); size(U); size(R)]
+```
+
+```text
+shapes =
+     2     3
+     2     3
+     2     3
+     3     2
+```
+
+<MatrixGlyphDiagram before={[["x₁", "x₂"], ["x₃", "x₄"]]} after={[["x₄", "x₃"], ["x₂", "x₁"]]} beforeLabel="symbolic payload" afterLabel="rot90(P,2)" caption="Only matrix-entry positions change; coefficient labels and derivative rate rows retain their order." />
+
+## Limitations and See Also
+
+These methods preserve affine decision dependence and do not call `value`,
+`optimize`, or a solver. They never reorder physical cells, local labels, or
+rate vertices.
+
+[`pdvar algebra`](/PD-LMI-package/documents/reference/pdvar/algebra/) ·
+[`storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) ·
+[`indexing and inspection`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/) ·
+[`pdbase matrix operations`](/PD-LMI-package/documents/reference/pdbase/matrix-operations/)

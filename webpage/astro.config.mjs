@@ -50,6 +50,7 @@ export default defineConfig({
               items: [
                 { label: "Overview", slug: "documents/reference/pdmat" },
                 { label: "Constructor", slug: "documents/reference/pdmat/constructor" },
+                { label: "Storage And Elevation", slug: "documents/reference/pdmat/storage-and-elevation" },
                 { label: "evaluate", slug: "documents/reference/pdmat/evaluate" },
                 { label: "plot", slug: "documents/reference/pdmat/plot" },
                 { label: "bernsteinTable", slug: "documents/reference/pdmat/bernsteintable" },
@@ -69,6 +70,7 @@ export default defineConfig({
               items: [
                 { label: "Overview", slug: "documents/reference/pdvar" },
                 { label: "Constructor", slug: "documents/reference/pdvar/constructor" },
+                { label: "Storage And Evaluation", slug: "documents/reference/pdvar/storage-and-evaluation" },
                 { label: "value", slug: "documents/reference/pdvar/value" },
                 { label: "rhodiff", slug: "documents/reference/pdvar/rhodiff" },
                 { label: "bernsteinTable", slug: "documents/reference/pdvar/bernsteintable" },
@@ -95,6 +97,7 @@ export default defineConfig({
                   items: [
                     { label: "Pólya", slug: "documents/reference/pdlmi/applypolya" },
                     { label: "Putinar", slug: "documents/reference/pdlmi/applyputinar" },
+                    { label: "Sparse Full Box", slug: "documents/reference/pdlmi/applysparsefullboxpreorder" },
                     { label: "Full Box", slug: "documents/reference/pdlmi/applyfullboxpreorder" },
                   ],
                 },
@@ -104,7 +107,11 @@ export default defineConfig({
               label: "pdbase",
               items: [
                 { label: "Overview", slug: "documents/reference/pdbase" },
+                { label: "Constructor", slug: "documents/reference/pdbase/constructor" },
                 { label: "Storage Inspection", slug: "documents/reference/pdbase/storage-inspection" },
+                { label: "Evaluation And Elevation", slug: "documents/reference/pdbase/evaluation-and-elevation" },
+                { label: "Matrix Operations", slug: "documents/reference/pdbase/matrix-operations" },
+                { label: "Indexing Protocol", slug: "documents/reference/pdbase/indexing-protocol" },
                 { label: "Bernstein Backend Utilities", slug: "documents/reference/bernstein-utilities" },
               ],
             },

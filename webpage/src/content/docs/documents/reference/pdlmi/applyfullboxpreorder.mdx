@@ -124,26 +124,18 @@ polya = direct.applyPolya(1);
 boxFromPolya = polya.applyFullBoxPreorder();
 Fbox = toYalmip(boxDefault);
 
-fprintf("direct: fullBox=%d, order=%d, constraints=%d\n", ...
-    direct.UseFullBoxPreorder, direct.FullBoxOrder, ...
-    numel(direct.Constraints));
-fprintf("default: fullBox=%d, order=%d, constraints=%d\n", ...
-    boxDefault.UseFullBoxPreorder, boxDefault.FullBoxOrder, ...
-    numel(boxDefault.Constraints));
-fprintf("higher: order=%d, constraints=%d\n", ...
-    boxHigher.FullBoxOrder, numel(boxHigher.Constraints));
-fprintf("replacement: polya=%d, fullBox=%d, order=%d\n", ...
-    boxFromPolya.UsePolya, boxFromPolya.UseFullBoxPreorder, ...
-    boxFromPolya.FullBoxOrder);
-fprintf("exported constraints=%d\n", length(Fbox));
-```
-
-```text
-direct: fullBox=0, order=0, constraints=3
-default: fullBox=1, order=1, constraints=5
-higher: order=2, constraints=7
-replacement: polya=0, fullBox=1, order=1
-exported constraints=5
+direct.UseFullBoxPreorder
+direct.FullBoxOrder
+numel(direct.Constraints)
+boxDefault.UseFullBoxPreorder
+boxDefault.FullBoxOrder
+numel(boxDefault.Constraints)
+boxHigher.FullBoxOrder
+numel(boxHigher.Constraints)
+boxFromPolya.UsePolya
+boxFromPolya.UseFullBoxPreorder
+boxFromPolya.FullBoxOrder
+length(Fbox)
 ```
 
 For the degree-two scalar residual, order one stores two PSD blocks followed by
@@ -175,6 +167,7 @@ full-space SOS representation, or an automatic hierarchy selector.
 [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
 [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
 [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
+[`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
 [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) ·
 [`Bernstein Polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
 [`SOS Certificates`](/PD-LMI-package/documents/math/sos-certificates/)

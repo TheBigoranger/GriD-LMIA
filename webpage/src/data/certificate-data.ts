@@ -1,8 +1,8 @@
-export type CertificateKey = "direct" | "polya" | "putinar" | "fullbox";
+export type CertificateKey = "direct" | "polya" | "putinar" | "sparsefullbox" | "fullbox";
 
 export interface CertificateSource {
   key: CertificateKey;
-  anchor: "direct" | "polya" | "putinar" | "full-box";
+  anchor: "direct" | "polya" | "putinar" | "sparse-full-box" | "full-box";
   label: string;
   description: string;
   command: string;
@@ -34,6 +34,23 @@ export const certificateSources: CertificateSource[] = [
     ],
     cardFormula: "\\begin{gathered}-F^{(\\mathbf c,v)}=S_0+\\sum_{s=1}^{\\ell}g_sS_s\\\\g_s=\\alpha_s(1-\\alpha_s),\\quad S_s\\succeq0\\end{gathered}",
     detailRoute: "documents/reference/pdlmi/applyputinar/",
+  },
+  {
+    key: "sparsefullbox",
+    anchor: "sparse-full-box",
+    label: "Sparse Full Box",
+    description: "Sparse Full Box keeps every full-box parity or generator-mask family but replaces each dense Gram block by axis-aligned tensor windows. Band width one canonicalizes to Direct; a width at least order + 1 canonicalizes to Full Box.",
+    command: "L.applySparseFullBoxPreorder()",
+    exportCommand: "C = L.applySparseFullBoxPreorder().toYalmip();",
+    constraintCount: "For the one-parameter degree-two fixture, the default width two is the Full Box endpoint: 10 constraints across two cells.",
+    boundaryNote: "Every physical cell, active rate row, and column-major matrix entry receives an independent certificate; only residual boundary handles remain shared.",
+    formula: [
+      "b=1:\\;\\text{Direct}",
+      "1<b<r+1:\\;\\text{tensor-window Gram blocks}",
+      "b\\ge r+1:\\;\\text{Full Box}",
+    ],
+    cardFormula: "\\begin{gathered}-F^{(\\mathbf c,v)}=\\sum_{J}\\sum_{\\mathbf s}g_JS_{J,\\mathbf s}\\\\\\operatorname{supp}S_{J,\\mathbf s}\\subseteq\\prod_a\\{s_a,\\ldots,s_a+b-1\\}\\end{gathered}",
+    detailRoute: "documents/reference/pdlmi/applysparsefullboxpreorder/",
   },
   { key: "fullbox", anchor: "full-box", label: "Full Box", description: "In one parameter the default full-box selector is the same order-one Markov–Lukács construction as Putinar.", command: "L.applyFullBoxPreorder()", exportCommand: "C = L.applyFullBoxPreorder().toYalmip();", constraintCount: "10 constraints: 2 cells × (2 PSD blocks + 3 identities).", boundaryNote: "Putinar and Full Box coincide in one parameter; Gram blocks remain cell-local even though residual boundary handles are shared.", formula: ["\\ell=1:\\;F=S_0+\\alpha(1-\\alpha)S_1"], cardFormula: "\\begin{gathered}-F^{(\\mathbf c,v)}=\\sum_{J\\subseteq[\\ell]}g_{J}S_{J}\\\\g_{J}=\\prod_{s\\in J}\\alpha_s(1-\\alpha_s),\\quad S_{J}\\succeq0\\end{gathered}", detailRoute: "documents/reference/pdlmi/applyfullboxpreorder/" },
 ];

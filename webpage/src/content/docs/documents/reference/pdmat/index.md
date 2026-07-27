@@ -17,6 +17,7 @@ description: Known finite real matrix data on a parameter grid.
 
 | Reference | Task |
 | :--- | :--- |
+| [`Storage and elevation`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) | Traverse known coefficient evidence and exactly elevate its Bernstein representation. |
 | [`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) | Evaluate known data at one parameter point. |
 | [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/) | Sample one- or two-dimensional diagnostic plots. |
 | [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/) | Inspect local Bernstein coefficients in tabular form. |
@@ -32,7 +33,11 @@ description: Known finite real matrix data on a parameter grid.
 
 ## Inherited Storage
 
-`pdmat` extends [`pdbase`](/PD-LMI-package/documents/reference/pdbase/) and exposes `GridInfo`, `MatrixSize`, `Degree`, `LocalValues`, local labels, and cell-local coefficient inspection.
+`pdmat` extends [`pdbase`](/PD-LMI-package/documents/reference/pdbase/).
+The matrix-operation implementation is centralized there, while
+[`pdmat` storage and elevation](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/)
+and the algebra, structural, and indexing pages retain complete class-specific
+syntax and behavior.
 
 ## Current Boundaries
 
@@ -42,4 +47,4 @@ description: Known finite real matrix data on a parameter grid.
 
 ## See Also
 
-[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) · [`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) · [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/) · [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/)
+[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) · [`storage and elevation`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) · [`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) · [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/) · [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/)

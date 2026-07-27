@@ -71,6 +71,63 @@ test("matches multivariate Putinar and full-box source fixtures", () => {
   assert.deepEqual([orderZero.blocks.length, orderZero.totalConstraints], [1, 2]);
 });
 
+test("matches sparse full-box windows and canonical endpoints", () => {
+  const scalar1d = { selector: "sparsefullbox" as const, cells: 1, nPar: 1,
+    degree: 4, rateRows: 1, order: 2, matrixSize: 1, mode: "semidefinite" as const };
+  const sparse = buildCertificateShape({ ...scalar1d, bandWidth: 2 });
+  assert.deepEqual(
+    [sparse.effectiveSelector, sparse.psdBlocks, sparse.coefficientIdentities, sparse.totalConstraints],
+    ["sparsefullbox", 3, 5, 8],
+  );
+  assert.deepEqual(sparse.blocks.map((block) => block.dimension), [2, 2, 2]);
+
+  const direct = buildCertificateShape({ ...scalar1d, bandWidth: 1 });
+  assert.deepEqual(
+    [direct.effectiveSelector, direct.coefficientTests, direct.psdBlocks, direct.totalConstraints],
+    ["direct", 5, 0, 5],
+  );
+  const dense = buildCertificateShape({ ...scalar1d, bandWidth: 3 });
+  assert.deepEqual(
+    [dense.effectiveSelector, dense.psdBlocks, dense.coefficientIdentities],
+    ["fullbox", 2, 5],
+  );
+  assert.deepEqual(dense.blocks.map((block) => block.dimension), [3, 2]);
+});
+
+test("matches tensor and higher-order sparse full-box fixtures", () => {
+  const tensor = buildCertificateShape({ selector: "sparsefullbox", cells: 1,
+    nPar: 2, degree: 4, rateRows: 1, order: 2, bandWidth: 2, matrixSize: 1,
+    mode: "semidefinite" });
+  assert.deepEqual([tensor.psdBlocks, tensor.coefficientIdentities, tensor.totalConstraints], [9, 25, 34]);
+  assert.ok(tensor.blocks.every((block) => block.dimension === 4));
+
+  const degree6 = { selector: "sparsefullbox" as const, cells: 1, nPar: 1,
+    degree: 6, rateRows: 1, order: 3, matrixSize: 1, mode: "semidefinite" as const };
+  const width2 = buildCertificateShape({ ...degree6, bandWidth: 2 });
+  const width3 = buildCertificateShape({ ...degree6, bandWidth: 3 });
+  assert.deepEqual([width2.psdBlocks, width2.coefficientIdentities], [5, 7]);
+  assert.deepEqual(width2.blocks.map((block) => block.dimension), [2, 2, 2, 2, 2]);
+  assert.deepEqual([width3.psdBlocks, width3.coefficientIdentities], [3, 7]);
+  assert.deepEqual(width3.blocks.map((block) => block.dimension), [3, 3, 3]);
+});
+
+test("counts independent sparse certificates and rejects malformed widths or orders", () => {
+  const shape = buildCertificateShape({ selector: "sparsefullbox", cells: 2,
+    nPar: 1, degree: 4, rateRows: 2, order: 2, bandWidth: 2, matrixSize: 2,
+    mode: "elementwise" });
+  assert.equal(shape.copies, 16);
+  assert.equal(shape.psdBlocks, 48);
+  assert.equal(shape.coefficientIdentities, 80);
+  assert.ok(shape.blocks.every((block) => block.dimension === 2));
+
+  assert.throws(() => buildCertificateShape({ selector: "sparsefullbox", cells: 1,
+    nPar: 1, degree: 4, rateRows: 1, order: 2, bandWidth: 0, matrixSize: 1,
+    mode: "semidefinite" }), /band width.*1 to 9/i);
+  assert.throws(() => buildCertificateShape({ selector: "sparsefullbox", cells: 1,
+    nPar: 2, degree: 4, rateRows: 1, order: 1, bandWidth: 2, matrixSize: 1,
+    mode: "semidefinite" }), /at least 2/i);
+});
+
 test("counts independent elementwise certificates per matrix entry", () => {
   const shape = buildCertificateShape({ selector: "fullbox", cells: 2, nPar: 2, degree: 2,
     rateRows: 4, order: 1, matrixSize: 3, mode: "elementwise" });
