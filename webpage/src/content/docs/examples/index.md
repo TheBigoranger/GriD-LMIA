@@ -116,11 +116,11 @@ contains a solver-independent transcript that compares direct assembly, the
 minimum Putinar order, an explicit higher order, replacement of a Pólya
 selection, and `toYalmip` export counts.
 
-## Deterministic Sparse Full Box Selection
+## Deterministic SparseFullBox Selection
 
 The [`applySparseFullBoxPreorder` reference](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/#deterministic-transcript)
 compares an intermediate tensor-window certificate with its exact Direct and
-Full Box endpoints, and records the corresponding read-only state.
+FullBox endpoints, and records the corresponding read-only state.
 
 ## Solver Smoke Cases
 
@@ -132,6 +132,12 @@ The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](http
 ## Current Solver Boundary
 
 The package currently assembles direct or Pólya-elevated coefficient-wise
-constraints and the opt-in fixed-order Putinar, Sparse Full Box, and Full Box
+constraints and the opt-in fixed-order Putinar, SparseFullBox, and FullBox
 Gram certificates. It does not provide a package-owned solver wrapper or
 residual diagnostic layer.
+
+## See Also
+
+[LPV induced-L2-gain modeling guide](/PD-LMI-package/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/) ·
+[Certificate map](/PD-LMI-package/documents/math/sos-certificates/) ·
+[`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)

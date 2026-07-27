@@ -3,6 +3,8 @@
 
 \code{pdvar} creates continuous cell-local Bernstein decision expressions backed by YALMIP \code{sdpvar} coefficients. It participates in supported affine and known-data algebra. It does not choose solvers or call \code{optimize}. Comparison overloads create \code{pdlmi} objects, whose \code{toYalmip} method later converts them to YALMIP constraints. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdvar} behavior; this chapter documents their decision-expression syntax, stable shape examples, validations, and rate-aware boundaries.
 
+A degree-\(m\) \code{pdvar} represents a decision such as \(P(\boldsymbol\rho)\) or \(y_k(\boldsymbol\rho)\). For \(m\ge1\), neighboring cells reuse every decision handle on their complete shared face, which enforces value continuity without auxiliary equality constraints; for \(m=0\), the entire grid reuses one decision matrix. \code{rhodiff} applies cellwise forward differences scaled by \(1/h_s^{(\mathbf c)}\) and stores one row per vertex of \(\mathcal R\), while \code{value} recovers numeric coefficient payloads only after the caller has validated YALMIP's solver status. Products remain affine only when the other factor is known numeric or \code{pdmat} data.
+
 \section{API Map}
 \label{sec:pdvar-lookup}
 
@@ -41,18 +43,18 @@ Build LMIs &
 \begin{lstlisting}[style=dpsyntax]
 P = pdvar(n, gridVectors)
 P = pdvar(n, n, gridVectors)
-P = pdvar(n, m, gridVectors)
+P = pdvar(n, p, gridVectors)
 P = pdvar(..., "full")
 P = pdvar(..., "symmetric")
 P = pdvar(..., Degree=0)
 P = pdvar(..., Degree=1)
-P = pdvar(..., Degree=d)
+P = pdvar(..., Degree=m)
 P = pdvar(..., RateBounds=rb)
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{pdvar(n, gridVectors)} creates an \(n\times n\) square variable using scalar-size shorthand; for example, \code{pdvar(2, {[0 1]})}. Square variables default to symmetric YALMIP coefficients. \item \code{pdvar(n, n, gridVectors)} is the explicit square-size form; for example, \code{pdvar(2, 2, {[0 1]})}.  It has the same default symmetric structure as the shorthand. \item \code{pdvar(n, m, gridVectors)} creates an \(n\times m\) variable. Rectangular variables default to full YALMIP coefficients; for example, \code{pdvar(2, 3, {[0 1]})}. \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP coefficient structure.  \code{"symmetric"} requires a square size. \item \code{Degree=1} is the default continuous Bernstein decision variable. Every finite nonnegative integer \code{Degree=d} is supported. \code{Degree=0} creates one parameter-independent decision matrix shared across the grid; \code{d >= 1} creates continuous piecewise Bernstein data whose neighboring cells share complete control faces. \item \code{RateBounds=rb} stores parameter-rate metadata for later \code{rhodiff(P)} calls.  Use \code{RateBounds=[-1 1]} for one parameter; use a two-row matrix for two parameters, as shown in the rate-metadata example below.
+  \item \code{pdvar(n, gridVectors)} creates an \(n\times n\) square variable using scalar-size shorthand; for example, \code{pdvar(2, {[0 1]})}. Square variables default to symmetric YALMIP coefficients. \item \code{pdvar(n, n, gridVectors)} is the explicit square-size form; for example, \code{pdvar(2, 2, {[0 1]})}. It has the same default symmetric structure as the shorthand. \item \code{pdvar(n, p, gridVectors)} creates an \(n\times p\) variable. Rectangular variables default to full YALMIP coefficients; for example, \code{pdvar(2, 3, {[0 1]})}. \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP coefficient structure. \code{"symmetric"} requires a square size. \item \code{Degree=1} is the default continuous Bernstein decision variable. Every finite nonnegative integer \code{Degree=m} is supported. \code{Degree=0} creates one parameter-independent decision matrix shared across the grid; \code{m >= 1} creates continuous piecewise Bernstein data whose neighboring cells share complete control faces. \item \code{RateBounds=rb} stores parameter-rate metadata for later \code{rhodiff(P)} calls. Use \code{RateBounds=[-1 1]} for one parameter; use a two-row matrix for two parameters, as shown in the rate-metadata example below.
 \end{itemize}
 
 \begin{center}
@@ -325,11 +327,10 @@ D = rhodiff(P, rb)
   \item \code{P} is a \code{pdvar} without existing rate-vertex rows. \item \code{rb} is a finite \(\ell\)-by-\(2\) numeric matrix of lower and upper parameter-rate bounds, with each lower bound no greater than its upper bound.  It must equal \code{P.RateBounds} when the object already carries nonempty bounds. \item Without \code{rb}, \code{rhodiff(P)} requires nonempty \code{P.RateBounds}. \item \code{D} is a discontinuous \code{pdvar} with one coefficient row per rate vertex.  In one parameter a degree-\(m\) derivative has degree \(m-1\), while a degree-zero derivative remains zero; multivariate partials are elevated into the implementation's common tensor degree.
 \end{itemize}
 
-For a one-parameter degree-one coefficient pair \(P^{(c)}[0],P^{(c)}[1]\) on the physical cell
-\(c=[\rho_c,\rho_{c+1}]\), define the positive cell length explicitly by \(h_c := \rho_{c+1}-\rho_c\). The rate-dependent derivative row is then
+For a one-parameter degree-one coefficient pair \(P^{(c)}[0],P^{(c)}[1]\) on \(\mathcal H_c=[\rho_1^{(c)},\rho_1^{(c+1)}]\), define \(h_1^{(c)}=\rho_1^{(c+1)}-\rho_1^{(c)}>0\). The rate-dependent derivative row is then
 \[
-  \dot P(\rho,\dot\rho)
-=\dot\rho\,\frac{P^{(c)}[1]-P^{(c)}[0]}{h_c}.
+  \dot P(\rho,\nu)
+=\nu\,\frac{P^{(c)}[1]-P^{(c)}[0]}{h_1^{(c)}}.
 \]
 This is the one-dimensional special case: the two rows correspond to the lower and upper allowed scheduling rates.
 
@@ -341,9 +342,9 @@ This is the one-dimensional special case: the two rows correspond to the lower a
     font=\scriptsize,align=center,minimum width=34mm,minimum height=10mm}]
   \node[box] (p) {\(P^{(c)}[0],P^{(c)}[1]\)\\one-parameter cell \(c\)};
   \node[result,right=of p] (d)
-    {\((P^{(c)}[1]-P^{(c)}[0])/h_c\)\\local derivative};
-  \node[result,right=of d,yshift=8mm] (lo) {\(\dot\rho_{\min}\) row};
-  \node[result,right=of d,yshift=-8mm] (hi) {\(\dot\rho_{\max}\) row};
+    {\((P^{(c)}[1]-P^{(c)}[0])/h_1^{(c)}\)\\local derivative};
+  \node[result,right=of d,yshift=8mm] (lo) {\(\underline\nu\) row};
+  \node[result,right=of d,yshift=-8mm] (hi) {\(\overline\nu\) row};
   \draw[->,thick,dpblue] (p) -- (d);
   \draw[->,thick,dpblue] (d) -- (lo);
   \draw[->,thick,dpblue] (d) -- (hi);
@@ -352,11 +353,11 @@ This is the one-dimensional special case: the two rows correspond to the lower a
 \textit{Differentiation changes local coefficients; rate substitution creates rows.  Neither operation adds physical cells.}
 \end{center}
 
-For \(\ell\) parameters, work cell by cell with \(h_s^{(c)}:=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0\) in direction \(s\) of the physical hypercube \(c=(c_1,\ldots,c_\ell)\).  Thus nonuniform grids use a distinct step length in every direction and cell:
+For \(\ell\) parameters, work cell by cell with \(h_s^{(\mathbf c)}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0\) in direction \(s\) of \(\mathcal H_{\mathbf c}\). Thus nonuniform grids use a distinct step length in every direction and cell:
 \[
-    \dot P^{(c)}(\rho,\dot\rho)=\sum_{s=1}^{\ell}\dot\rho_s\,\frac{\partial P^{(c)}}{\partial\rho_s}(\rho).
+    \dot P^{(\mathbf c)}(\boldsymbol\rho,\boldsymbol\nu)=\sum_{s=1}^{\ell}\nu_s\,\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}(\boldsymbol\rho).
 \]
-\code{RateBounds} fixes a lower/upper box for \(\dot{\boldsymbol\rho}\), so \code{rhodiff} evaluates this affine expression at its \(2^\ell\) vertices and stores one row per vertex.  Supply those bounds explicitly as \code{rhodiff(P, rb)}, or initialize \code{P} with \code{RateBounds=rb}; if both are present they must match.  Without bounds there is no finite vertex set to store, so \code{rhodiff(P)} raises \codeerr{pdvar}{MissingRateBounds}.  \Cref{sec:bernstein-rate-vertex-storage} gives the exact hypercube-local row and coefficient layout.
+\code{RateBounds} fixes \(\mathcal R\), so \code{rhodiff} evaluates this affine expression at its \(2^\ell\) vertices and stores one row per vertex. Supply those bounds explicitly as \code{rhodiff(P, rb)}, or initialize \code{P} with \code{RateBounds=rb}; if both are present they must match. Without bounds there is no finite vertex set to store, so \code{rhodiff(P)} raises \codeerr{pdvar}{MissingRateBounds}. \Cref{sec:bernstein-rate-vertex-storage} gives the exact hypercube-local row and coefficient layout.
 
 \remarkshead
 Unsupported call arity or differentiating an expression that already contains rate-vertex rows raises \codeerr{pdvar}{InvalidDiff}.  Explicit malformed rate bounds raise \codeerr{pdvar}{Invalid}\allowbreak\code{RateBounds}.  Calling \code{rhodiff(P)} without stored bounds raises \codeerr{pdvar}{Missing}\allowbreak\code{RateBounds}; explicit bounds that disagree with \code{P.RateBounds} raise \codeerr{pdvar}{RateBounds}\allowbreak\code{Mismatch}.
@@ -573,12 +574,12 @@ negativeClass =
 \end{tikzpicture}
 \end{center}
 
-A nonlinear symbolic operand such as \code{x*x} is rejected.  Rate-vertex rows from \code{rhodiff} may be added to compatible ordinary expressions; the ordinary rows are broadcast over the active rate vertices.
+A nonlinear symbolic operand such as \code{eta*eta} is rejected. Rate-vertex rows from \code{rhodiff} may be added to compatible ordinary expressions; the ordinary rows are broadcast over the active rate vertices.
 
 \subsection{Multiplication By Known Or Numeric Data}
 \label{sec:pdvar-operator-entries}
 
-The \code{mtimes} overload supports multiplication only when decision dependence occurs on at most one side. A coefficient-backed \code{pdmat} or finite real numeric matrix may multiply a \code{pdvar} from either side. A scalar \code{pdvar} may scale a known matrix. Two decision-bearing factors, including \code{P*Q} and \code{P*x} for a decision \code{sdpvar x}, are nonlinear and rejected.
+The \code{mtimes} overload supports multiplication only when decision dependence occurs on at most one side. A coefficient-backed \code{pdmat} or finite real numeric matrix may multiply a \code{pdvar} from either side. A scalar \code{pdvar} may scale a known matrix. Two decision-bearing factors, including \code{P*Q} and \code{P*eta} for a decision \code{sdpvar eta}, are nonlinear and rejected.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]

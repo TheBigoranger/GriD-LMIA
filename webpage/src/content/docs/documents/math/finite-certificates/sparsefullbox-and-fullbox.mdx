@@ -1,0 +1,132 @@
+---
+title: SparseFullBox And FullBox
+description: Full-box preorderings, tensor-window Gram support, bandwidth endpoints, and exact coefficient matching.
+---
+
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <span>Finite Certificates</span>
+  <span>/</span>
+  <span>SparseFullBox And FullBox</span>
+</nav>
+
+<CertificateSpectrum selected="sparsefullbox" />
+
+The mathematical names are **sparse full-box tensor-window certificate** and
+**full-box preordering**. Their software states are `SparseFullBox` and
+`FullBox`.
+
+## Full-Box Preordering
+
+For each subset $J\subseteq\{1,\ldots,\ell\}$, define
+
+$$
+g_J(\boldsymbol\alpha)
+=\prod_{s\in J}\alpha_s(1-\alpha_s),
+\qquad g_{\varnothing}=1.
+$$
+
+FullBox represents
+
+$$
+S^{(\mathbf c)}(\boldsymbol\alpha)
+=\sum_{J\subseteq[\ell]}
+g_J(\boldsymbol\alpha)S_J(\boldsymbol\alpha),
+$$
+
+where every $S_J$ has a free positive-semidefinite Gram matrix. The weighted
+Gram maps are assembled in the Bernstein basis and matched exactly to every
+$C^{(\mathbf c)}[\mathbf i]$.
+
+```matlab
+selected = L.applyFullBoxPreorder();
+selected = L.applyFullBoxPreorder(r);
+```
+
+## Sparse Full-Box Tensor Windows
+
+SparseFullBox retains every FullBox generator-mask family but writes each dense
+Gram term as a sum of positive-semidefinite blocks supported on overlapping
+axis-aligned windows of the tensor Bernstein basis:
+
+$$
+S^{(\mathbf c)}
+=\sum_J\sum_{\mathbf t}
+g_JS_{J,\mathbf t},
+\qquad
+\operatorname{supp}S_{J,\mathbf t}
+\subseteq
+\prod_{s=1}^{\ell}\{t_s,\ldots,t_s+b-1\}.
+$$
+
+The bandwidth $b$ controls window support; the absolute Gram order is $r$.
+
+```matlab
+selected = L.applySparseFullBoxPreorder();
+selected = L.applySparseFullBoxPreorder(b);
+selected = L.applySparseFullBoxPreorder(b, r);
+```
+
+## Canonical Endpoints
+
+- $b=1$ canonicalizes to actual Direct state after validating $r$.
+- $1<b<r+1$ stores actual SparseFullBox state.
+- $b\ge r+1$ canonicalizes to actual FullBox state.
+
+These are state transitions, not merely descriptive similarities. Inspect the
+read-only `pdlmi` properties when code must report the selected state.
+
+## One-Parameter Boundary
+
+In one parameter, the parity-specific Markov–Lukács terms are used. For even
+$M=4$ and $r=2$, the unweighted basis labels are $\{0,1,2\}$. Bandwidth
+$b=2$ produces the overlapping windows $\{0,1\}$ and $\{1,2\}$;
+$b=3=r+1$ reaches FullBox.
+
+## Multivariate Boundary
+
+For $\ell\ge2$, the minimum absolute order is
+$r=\lceil M/2\rceil$. FullBox can grow rapidly because every generator
+subset and dense tensor basis block contributes. SparseFullBox trades dense
+support for overlapping local windows while retaining exact coefficient
+matching.
+
+## Selection Guidance
+
+Use Direct as the baseline. Use SparseFullBox when a Gram certificate is
+desired but dense FullBox blocks are too large, and vary $b$ independently
+of $r$. Use FullBox when the dense preordering is computationally acceptable.
+Always record $\mathcal G_s$, $m$, $M$, $r$, $b$, solver, and solver
+status.
+
+## Failure Interpretation
+
+A fixed $r$ or $b$ failure is inconclusive. A solver abort, memory limit,
+or nonzero `diagnostics.problem` is not objective data and does not establish
+continuous infeasibility.
+
+## Limitations
+
+SparseFullBox uses axis-aligned tensor windows; it does not search arbitrary
+chordal patterns or adapt bandwidth automatically. FullBox is limited to box
+generators and can become large with dimension and order. Neither selector
+calls a solver or inserts a positivity margin.
+
+## Further Reading
+
+- Schmüdgen, [The K-moment problem for compact semi-algebraic sets](https://doi.org/10.1007/BF01234651), for preorderings.
+- Harris and Parrilo, [Improved nonnegativity testing in the Bernstein basis via geometric means](https://arxiv.org/abs/2309.10675), for a related univariate sparse Bernstein-Gram precedent.
+- Zheng and Fantuzzi, [Sum-of-squares chordal decomposition of polynomial matrix inequalities](https://arxiv.org/abs/2007.11410), for broader sparse polynomial-matrix Gram context.
+
+These sparse-Gram sources motivate structure; they do not define the package's
+tensor-window map.
+
+## See Also
+
+[Previous: Markov–Lukács And Putinar](/PD-LMI-package/documents/math/finite-certificates/markov-lukacs-and-putinar/) ·
+[Next: `pdlmi` Overview](/PD-LMI-package/documents/reference/pdlmi/) ·
+[`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)

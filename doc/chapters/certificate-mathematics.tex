@@ -5,7 +5,7 @@ This appendix starts with positive semidefinite matrices, builds SOS and Gram re
 
 As in the preceding appendix, each major certificate is revealed as \emph{Basic idea} \(\rightarrow\) \emph{Formula} \(\rightarrow\) \emph{Worked example} \(\rightarrow\) \emph{Visual conclusion}.  Keep two questions separate while reading: what polynomial matrix is represented, and what finite cone is being used to certify its sign?
 
-For a residual \(F\preceq0\), define \(S=-F\).  For \(F\succeq0\), define \(S=F\).  The common problem is
+For an original residual \(\mathcal F\preceq0\), define the sign-normalized positive target \(S=-\mathcal F\). For \(\mathcal F\succeq0\), define \(S=\mathcal F\). The common problem is
 \[
 S(\boldsymbol\alpha)\succeq0
   \quad\text{for every }\boldsymbol\alpha\in[0,1]^\ell.
@@ -18,11 +18,11 @@ All Gram constraints below prove non-strict inequalities.  A strict model must s
 
 \ideastep{Basic idea} A real symmetric matrix \(Q\) is positive semidefinite when
 \[
-z^{\mathsf T}Qz\ge0\qquad\text{for every vector }z.
+  u^{\mathsf T}Qu\ge0\qquad\text{for every vector }u.
 \]
-\ideastep{Formula} An LMI is an affine matrix expression constrained to the PSD cone:
+\ideastep{Formula} Let \(\boldsymbol y=(y_1,\ldots,y_N)\) collect the scalar decision coordinates. An LMI is an affine matrix expression constrained to the PSD cone:
 \[
-Q(x)=Q_0+x_1Q_1+\cdots+x_rQ_r\succeq0.
+Q(\boldsymbol y)=Q_0+\sum_{k=1}^{N}y_kQ_k\succeq0.
 \]
 The unknowns enter affinely, so this is a semidefinite program.  A polynomial matrix sign condition appears infinite because it asks for one PSD matrix at every point.  A certificate replaces those pointwise conditions by finitely many PSD matrices and affine coefficient identities.
 
@@ -31,11 +31,11 @@ The unknowns enter affinely, so this is a semidefinite program.  A polynomial ma
 \begin{tikzpicture}[>=Latex,node distance=8mm,
   box/.style={dp/result,
     font=\scriptsize,align=center,minimum width=38mm,minimum height=11mm}]
-  \node[box] (x) {decision vector \(x\)};
-  \node[box,right=of x] (q) {affine matrix \(Q(x)\)};
-  \node[box,right=of q] (psd) {\(Q(x)\succeq0\)};
-  \draw[->,thick,dpblue] (x)--(q);
-  \draw[->,thick,dpblue] (q)--node[above,font=\scriptsize]{one LMI}(psd);
+  \node[box] (y) {decision vector \(\boldsymbol y\)};
+  \node[box,right=of y] (q) {affine matrix \(Q(\boldsymbol y)\)};
+  \node[box,right=of q] (psd) {\(Q(\boldsymbol y)\succeq0\)};
+  \draw[->,thick,dpblue] (y)--(q);
+  \draw[->,thick,dpblue] (q)--(psd);
 \end{tikzpicture}
 \end{center}
 
@@ -45,19 +45,19 @@ The unknowns enter affinely, so this is a semidefinite program.  A polynomial ma
 
 \ideastep{Basic idea} A scalar polynomial is a sum of squares (SOS) if
 \[
-p(z)=q_1(z)^2+\cdots+q_s(z)^2.
+p(\xi)=q_1(\xi)^2+\cdots+q_s(\xi)^2.
 \]
-Every SOS polynomial is nonnegative.  Choose a polynomial basis vector \(v_d(z)\).  The Gram form
+Every SOS polynomial is nonnegative. Choose a polynomial basis vector \(v_d(\xi)\). The Gram form
 \[
-  p(z)=v_d(z)^{\mathsf T}Qv_d(z),\qquad Q\succeq0,
+  p(\xi)=v_d(\xi)^{\mathsf T}Qv_d(\xi),\qquad Q\succeq0,
 \]
 is SOS because a factorization \(Q=L^{\mathsf T}L\) yields \(p=\lVert Lv_d\rVert_2^2\).  Expanding the Gram form and matching every coefficient of \(p\) gives equations linear in the entries of \(Q\).  Thus an SOS search is a finite PSD constraint plus affine equalities.
 
 \ideastep{Formula} For a symmetric \(n\)-by-\(n\) polynomial matrix, set
 \[
-Z_d(z)=v_d(z)\otimes I_n,\qquad S(z)=Z_d(z)^{\mathsf T}QZ_d(z),\quad Q\succeq0.
+Z_d(\xi)=v_d(\xi)\otimes I_n,\qquad S(\xi)=Z_d(\xi)^{\mathsf T}QZ_d(\xi),\quad Q\succeq0.
 \]
-Then \(y^{\mathsf T}S(z)y=(Z_dy)^{\mathsf T}Q(Z_dy)\ge0\) for every \(y\), so \(S(z)\succeq0\).  Matrix-SOS relaxations are developed in \cite{schererhol2006}.
+Then \(u^{\mathsf T}S(\xi)u=(Z_d(\xi)u)^{\mathsf T}Q(Z_d(\xi)u)\ge0\) for every \(u\), so \(S(\xi)\succeq0\). Matrix-SOS relaxations are developed in \cite{schererhol2006}.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -74,9 +74,10 @@ Then \(y^{\mathsf T}S(z)y=(Z_dy)^{\mathsf T}Q(Z_dy)\ge0\) for every \(y\), so \(
 \end{tikzpicture}
 \end{center}
 
+\needspace{14\baselineskip}
 \section{Full-Space SOS}
 
-An unweighted Gram form proves \(S(z)\succeq0\) on all of \(\mathbb R^\ell\).  That can be much stronger than positivity only on a box. For example, \(\alpha(1-\alpha)\) is nonnegative on \([0,1]\) but negative outside it.  The package does not expose a general full-space SOS parser; this construction is background for understanding weighted certificates.
+An unweighted Gram form proves \(S(\xi)\succeq0\) on all of \(\mathbb R^\ell\). That can be much stronger than positivity only on a box. For example, \(\alpha(1-\alpha)\) is nonnegative on \([0,1]\) but negative outside it. The package does not expose a general full-space SOS parser; this construction is background for understanding weighted certificates.
 
 \section{Direct Bernstein Coefficients}
 \label{sec:certificate-direct}
@@ -84,10 +85,10 @@ An unweighted Gram form proves \(S(z)\succeq0\) on all of \(\mathbb R^\ell\).  T
 
 \ideastep{Basic idea} If every local coefficient matrix has the requested sign, every convex combination of those coefficients has the same sign.  This yields a small, transparent sufficient certificate.
 
-\ideastep{Formula} On physical cell \(\mathbf c\) and one rate row, write
+\ideastep{Formula} After any rate rows have been stacked, write the target on physical cell \(\mathbf c\) as
 \[
 S(\boldsymbol\alpha)=
-  \sum_{\mathbf i}B_{\mathbf i}^m(\boldsymbol\alpha)
+  \sum_{\mathbf i}B_{\mathbf i}^M(\boldsymbol\alpha)
 C^{(\mathbf c)}[\mathbf i].
 \]
 Because the basis weights are nonnegative and sum to one,
@@ -243,7 +244,7 @@ Partition \(Q\) into \(n\)-by-\(n\) blocks \(Q_{ij}\).  The Bernstein coefficien
   \sum_{\substack{0\le i,j\le d\\i+j=k-a}}
   \binom di\binom dj\,Q_{ij}.
 \]
-Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs. For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms, while \code{applySparseFullBoxPreorder} uses the same parity terms with tensor-window Gram support at intermediate widths. Their minimum absolute order is \(\lfloor m/2\rfloor\).
+Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs. For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms, while \code{applySparseFullBoxPreorder} uses the same parity terms with tensor-window Gram support at intermediate widths. Their minimum absolute order is \(\lfloor M/2\rfloor\), where \(M\) is the assembled residual degree.
 
 \section{Putinar Modules And Schm\"udgen Preorderings}
 \label{sec:certificate-putinar-schmudgen}
@@ -251,7 +252,7 @@ Equating this affine map to each target coefficient gives exact linear identitie
 
 For
 \[
-  K=\{z:g_1(z)\ge0,\ldots,g_q(z)\ge0\},
+  K=\{\xi:g_1(\xi)\ge0,\ldots,g_q(\xi)\ge0\},
 \]
 a Putinar quadratic module has the form
 \[
@@ -259,7 +260,7 @@ a Putinar quadratic module has the form
 \]
 Under the Archimedean hypothesis, every polynomial strictly positive on \(K\) has such a representation at some degree \cite{putinar1993}.  Compactness alone is not that theorem statement.  The package implements one box-specific, fixed-order selector, not a general-domain or general-generator parser.
 
-For one parameter, \code{applyPutinar(r)} dispatches to the same exact even/odd Markov--Luk\'acs forms as \code{applyFullBoxPreorder(r)}.  Its absolute default and minimum are \(r=\lfloor m/2\rfloor\).  Even targets use the unweighted and \(\alpha(1-\alpha)\)-weighted Gram blocks and match at degree \(2r\); odd targets use the two endpoint-weighted Gram blocks and match at degree \(2r+1\).
+For one parameter, \code{applyPutinar(r)} dispatches to the same exact even/odd Markov--Luk\'acs forms as \code{applyFullBoxPreorder(r)}. Its absolute default and minimum are \(r=\lfloor M/2\rfloor\). Even targets use the unweighted and \(\alpha(1-\alpha)\)-weighted Gram blocks and match at degree \(2r\); odd targets use the two endpoint-weighted Gram blocks and match at degree \(2r+1\).
 
 For \(\ell\ge2\), use the local box generators
 \[
@@ -267,27 +268,27 @@ For \(\ell\ge2\), use the local box generators
 \]
 and \code{applyPutinar(r)} uses
 \[
-  F=S_0+\sum_{s=1}^{\ell}g_sS_s,
+  S=S_0+\sum_{s=1}^{\ell}g_sS_s,
   \qquad
   S_0=\mathcal Z_{r\boldsymbol1}^{\mathsf T}Q_0
        \mathcal Z_{r\boldsymbol1},\quad
   S_s=\mathcal Z_{r\boldsymbol1-\boldsymbol e_s}^{\mathsf T}Q_s
        \mathcal Z_{r\boldsymbol1-\boldsymbol e_s},
 \]
-where every present \(Q_s\succeq0\).  In this multivariate branch the order is absolute and satisfies \(r\ge\lceil m/2\rceil\).  Exact identities match the sign-normalized target, elevated without changing it, at tensor degree \(2r\).  Negative-degree multiplier blocks are omitted at \(r=0\).  Each physical cell and active rate row owns independent Gram and equality blocks; no generator products, implicit margin, or solver call are introduced.
+where every present \(Q_s\succeq0\). In this multivariate branch the order is absolute and satisfies \(r\ge\lceil M/2\rceil\). Exact identities match the sign-normalized target, elevated without changing it, at tensor degree \(2r\). Negative-degree multiplier blocks are omitted at \(r=0\). Each physical cell and stored rate row owns independent Gram and equality blocks; no generator products, implicit margin, or solver call are introduced.
 
 A Schm\"udgen full preordering includes every square-free generator product:
 \[
-  p=\sum_{\boldsymbol\nu\in\{0,1\}^{q}}
-  \sigma_{\boldsymbol\nu}\prod_{j=1}^{q}g_j^{\nu_j},
-  \qquad \sigma_{\boldsymbol\nu}\text{ SOS}.
+  p=\sum_{\boldsymbol\beta\in\{0,1\}^{q}}
+  \sigma_{\boldsymbol\beta}\prod_{j=1}^{q}g_j^{\beta_j},
+  \qquad \sigma_{\boldsymbol\beta}\text{ SOS}.
 \]
 Strict positivity on a compact basic closed semialgebraic set has such a representation \cite{schmudgen1991}.  A finite truncation is still a sufficient certificate, and up to \(2^q\) multiplier blocks may be required.
 
-\section{The Implemented Multivariate Full Box Preordering}
+\section{The Implemented Multivariate FullBox State}
 \label{sec:certificate-full-box}
 
-\ideastep{Basic idea} For several parameters, use every square-free product of the box generators. Each subset selects one weighted Gram block, and exact coefficient identities make the sum equal the stored residual on one physical cell and rate row.
+\ideastep{Basic idea} The mathematical construction is a full-box preordering: for several parameters, use every square-free product of the box generators. Each subset selects one weighted Gram block, and exact coefficient identities make the sum equal the sign-normalized target \(S\) on one physical cell and stored rate row. The software state is \code{FullBox}.
 
 \ideastep{Formula} For the hypercube, use
 \[
@@ -329,33 +330,37 @@ Terms with negative tensor degree are omitted.  A present block has dimension
 \[
   n\prod_{s=1}^{\ell}\left(r+1-\mathbf1_{s\in J}\right).
 \]
-Every physical cell and active rate row gets independent dense Gram blocks and exact coefficient identities.  The minimum order is \(\lceil m/2\rceil\) for \(\ell\ge2\).  This is a specific dense Bernstein realization of the complete box preordering, not a full-space SOS, Putinar-only, sparse, or general-domain parser.  A fixed multivariate order is sufficient rather than exact.
+Every physical cell and stored rate row gets independent dense Gram blocks and exact coefficient identities. The minimum order is \(\lceil M/2\rceil\) for \(\ell\ge2\). This is a specific dense Bernstein realization of the full-box preordering, not a full-space SOS, Putinar-only, sparse, or general-domain parser. A fixed multivariate order is sufficient rather than exact.
 
-\ideastep{Finite SDP example: \(\ell=2\), \(m=3\)} Let \((a,b)\in[0,1]^2\) be the local coordinates of one cell, and suppose the sign-normalized residual is
+\ideastep{Finite SDP example: \(\ell=2\), \(M=3\)} Let \((\alpha_1,\alpha_2)\in[0,1]^2\) be the local coordinates of one cell, and suppose the sign-normalized target is
 \[
-  F(a,b)=\sum_{i=0}^3\sum_{k=0}^3
-    B_i^3(a)B_k^3(b)F_{i,k}\succeq0.
+  S^{(\mathbf c)}(\boldsymbol\alpha)=
+  \sum_{i_1=0}^3\sum_{i_2=0}^3
+    B_{i_1}^3(\alpha_1)B_{i_2}^3(\alpha_2)
+    C^{(\mathbf c)}[i_1,i_2]\succeq0.
 \]
 The default order is \(r=\lceil3/2\rceil=2\).  After exact elevation to degree \((4,4)\), the implementation introduces four independent PSD Gram matrices and enforces the identity
 \begin{align*}
-  F(a,b)={}&
+  S^{(\mathbf c)}(\boldsymbol\alpha)={}&
     \mathcal Z_{(2,2)}^{\mathsf T}Q_{\varnothing}\mathcal Z_{(2,2)}
-    +a(1-a)\mathcal Z_{(1,2)}^{\mathsf T}Q_1\mathcal Z_{(1,2)}\\
-    &+b(1-b)\mathcal Z_{(2,1)}^{\mathsf T}Q_2\mathcal Z_{(2,1)}\\
-    &+a(1-a)b(1-b)
+    +\alpha_1(1-\alpha_1)\mathcal Z_{(1,2)}^{\mathsf T}Q_1\mathcal Z_{(1,2)}\\
+    &+\alpha_2(1-\alpha_2)\mathcal Z_{(2,1)}^{\mathsf T}Q_2\mathcal Z_{(2,1)}\\
+    &+\alpha_1(1-\alpha_1)\alpha_2(1-\alpha_2)
       \mathcal Z_{(1,1)}^{\mathsf T}Q_{12}\mathcal Z_{(1,1)},\\[-1mm]
   Q_{\varnothing}&\succeq0,\qquad Q_1\succeq0,\qquad
     Q_2\succeq0,\qquad Q_{12}\succeq0.
 \end{align*}
 For an \(n\)-by-\(n\) residual, these blocks have dimensions \(9n\), \(6n\), \(6n\), and \(4n\).  If
 \[
-  F(a,b)=\sum_{p=0}^4\sum_{q=0}^4
-    B_p^4(a)B_q^4(b)\widetilde F_{p,q},
+  S^{(\mathbf c)}(\boldsymbol\alpha)=
+  \sum_{i_1=0}^4\sum_{i_2=0}^4
+    B_{i_1}^4(\alpha_1)B_{i_2}^4(\alpha_2)
+    \widetilde C^{(\mathbf c)}[i_1,i_2],
 \]
-then \(\widetilde F_{0,0}=F_{0,0}\) and \(\widetilde F_{1,0}=F_{0,0}/4+3F_{1,0}/4\).  The finite SDP has the four PSD-LMI constraints above and one exact matrix equality for each of the \(5\times5=25\) elevated Bernstein labels.  With \([Q]_{u,v}\) denoting the \(n\)-by-\(n\) Gram block indexed by labels \(u,v\), two illustrative equalities are
+then \(\widetilde C^{(\mathbf c)}[0,0]=C^{(\mathbf c)}[0,0]\) and \(\widetilde C^{(\mathbf c)}[1,0]=C^{(\mathbf c)}[0,0]/4+3C^{(\mathbf c)}[1,0]/4\). The finite SDP has the four PSD-LMI constraints above and one exact matrix equality for each of the \(5\times5=25\) elevated Bernstein labels. With \([Q]_{\mathbf i,\mathbf j}\) denoting the \(n\)-by-\(n\) Gram block indexed by labels \(\mathbf i,\mathbf j\), two illustrative equalities are
 \begin{align*}
-  F_{0,0}={}&[Q_{\varnothing}]_{(0,0),(0,0)},\\
-  \frac14F_{0,0}+\frac34F_{1,0}={}&
+  C^{(\mathbf c)}[0,0]={}&[Q_{\varnothing}]_{(0,0),(0,0)},\\
+  \frac14C^{(\mathbf c)}[0,0]+\frac34C^{(\mathbf c)}[1,0]={}&
     \frac12[Q_{\varnothing}]_{(0,0),(1,0)}
     +\frac12[Q_{\varnothing}]_{(1,0),(0,0)}
     +\frac14[Q_1]_{(0,0),(0,0)}.
@@ -388,11 +393,11 @@ fullBoxState =
 
 Selections rebuild from the stored original \code{Residual} and \code{Relation}. Reapplying P\'olya, Putinar, SparseFullBox, or FullBox replaces the previous selection; the certificates never compound, and the four opt-in families are mutually exclusive.
 
-\section{The Implemented SparseFullBox Tensor Windows}
+\section{The Implemented SparseFullBox State}
 \label{sec:certificate-sparse-full-box}
 \index{SparseFullBox}\index{tensor window}\index{bandwidth}
 
-\ideastep{Basic idea} Retain every FullBox parity or generator-mask term and every exact target-coefficient identity, but replace one dense Gram matrix by a sum of free PSD matrices supported on overlapping axis-aligned windows of the tensor Bernstein basis.
+\ideastep{Basic idea} The sparse full-box tensor-window certificate retains every FullBox parity or generator-mask term and every exact target-coefficient identity, but replaces one dense Gram matrix by a sum of free PSD matrices supported on overlapping axis-aligned windows of the tensor Bernstein basis. Harris and Parrilo provide a close univariate Bernstein precedent, while factor-width and chordal matrix-SOS work provide broader sparse-Gram context \cite{harrisparrilo2023,gouveiakovacecsaee2022,zhengfantuzzi2023}; none of those sources defines this package's tensor-window map.
 
 \ideastep{Formula} Let one dense FullBox term use tensor basis labels
 \[
@@ -413,7 +418,7 @@ If \(\mathcal Z_{W_{\boldsymbol t}}\) contains exactly the Bernstein basis funct
 \]
 where \(h_J\) is the same endpoint or box-generator weight used by the corresponding FullBox term. The implementation sums these weighted Bernstein maps and matches every coefficient of the sign-normalized, degree-elevated target exactly.
 
-\ideastep{Worked example} For one parameter, even residual degree four, and absolute order \(r=2\), the unweighted basis has labels \(\{0,1,2\}\) and the \(\alpha(1-\alpha)\)-weighted basis has labels \(\{0,1\}\). Width two therefore creates unweighted windows \(\{0,1\}\) and \(\{1,2\}\), plus one complete weighted window \(\{0,1\}\). The finite certificate has three PSD blocks followed by five exact coefficient identities. The unweighted support is block tridiagonal. Width three includes every basis label in the unweighted block and reaches the dense FullBox endpoint.
+\ideastep{Worked example} For one parameter, even assembled residual degree \(M=4\), and absolute order \(r=2\), the unweighted basis has labels \(\{0,1,2\}\) and the \(\alpha(1-\alpha)\)-weighted basis has labels \(\{0,1\}\). Width \(b=2\) therefore creates unweighted windows \(\{0,1\}\) and \(\{1,2\}\), plus one complete weighted window \(\{0,1\}\). The finite certificate has three PSD blocks followed by five exact coefficient identities. The unweighted support is block tridiagonal. Width \(b=3\) includes every basis label in the unweighted block and reaches the dense FullBox endpoint.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -421,18 +426,16 @@ where \(h_J\) is the same endpoint or box-generator weight used by the correspon
   box/.style={dp/result,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm},
   endpoint/.style={dp/certificate,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm}]
   \node[endpoint] (direct) {\(b=1\)\\actual Direct state};
-  \node[box,right=of direct] (tri) {\(b=2\)\\tridiagonal windows};
-  \node[box,right=of tri] (penta) {\(b=3<r+1\)\\pentadiagonal windows};
-  \node[endpoint,right=of penta] (dense) {\(b\ge r+1\)\\actual FullBox state};
+  \node[box,right=of direct] (tri) {\(b=2\)\\intermediate tensor windows};
+  \node[endpoint,right=of tri] (dense) {\(b=3=r+1\)\\actual FullBox state};
   \draw[dp/arrow] (direct) -- (tri);
-  \draw[dp/arrow] (tri) -- (penta);
-  \draw[dp/arrow] (penta) -- (dense);
+  \draw[dp/arrow] (tri) -- (dense);
 \end{tikzpicture}
 
 \textit{The intermediate cones are nested sufficient certificates; a wider cone need not yield a strict improvement on a particular residual.}
 \end{center}
 
-\code{applySparseFullBoxPreorder(b,r)} uses the same dimension-dependent absolute-order minimum as FullBox: \(\lfloor m/2\rfloor\) in one parameter and \(\lceil m/2\rceil\) otherwise. Width one canonicalizes to actual Direct state after order validation. Width at least \(r+1\) canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, active rate row, and entry-wise column-major matrix entry owns an independent certificate; the method adds no hidden margin and makes no solver call.
+\code{applySparseFullBoxPreorder(b,r)} uses the same dimension-dependent absolute-order minimum as FullBox: \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) otherwise. Width one canonicalizes to actual Direct state after order validation. Width at least \(r+1\) canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, stored rate row, and entry-wise column-major matrix entry owns an independent certificate; the method adds no hidden margin and makes no solver call.
 
 \section{Six Different Modeling Choices}
 \label{sec:certificate-modeling-choices}
@@ -449,7 +452,7 @@ These choices act on different parts of the problem.
   \node[box,below=of repr] (decision) {decision degree\\larger search space};
   \node[box,below=of decision] (grid) {physical subdivision\\more local cells};
   \node[box,below=of grid] (polya) {P\'olya increment\\same residual, elevated basis};
-  \node[box,below=of polya] (band) {SparseFullBox bandwidth\\larger tensor windows};
+  \node[box,below=of polya] (band) {SparseFullBox bandwidth \(b\)\\larger tensor windows};
   \node[box,below=of band] (gram) {Gram order\\larger PSD certificate};
   \coordinate (busmid) at ($(grid.east)+(6mm,0)$);
   \draw[dp/bus] ($(repr.east)+(6mm,0)$) -- ($(gram.east)+(6mm,0)$);
@@ -470,13 +473,13 @@ Choice & Changes & Does not mean \\
 basis conversion & coefficient coordinates & more decision freedom \\
 decision degree & independent decision coefficients & certificate order \\
 subdivision & physical cells and local hulls & higher polynomial degree \\
-P\'olya degree & elevated residual coefficients & Gram variables \\
+P\'olya increment \(d\) & elevated residual coefficients & Gram variables \\
 Putinar/full-box order & Gram bases and PSD block sizes & decision degree \\
-SparseFullBox bandwidth & tensor-window Gram support and PSD block sizes & decision degree or physical grid \\
+SparseFullBox bandwidth \(b\) & tensor-window Gram support and PSD block sizes & decision degree or physical grid \\
 \bottomrule
 \end{tabularx}
 
-When a certificate fails, do not infer continuous infeasibility. Decide separately whether the model needs a richer decision degree, a finer physical grid, a larger P\'olya increment, a wider SparseFullBox window, or a higher Putinar/SparseFullBox/FullBox order.
+When a certificate fails, do not infer continuous infeasibility. Decide separately whether the model needs a richer decision degree \(m\), a finer physical grid, a larger P\'olya increment \(d\), a wider SparseFullBox window \(b\), or a higher absolute Gram order \(r\).
 
 \section{Implemented Boundary}
 \label{sec:certificate-boundary}

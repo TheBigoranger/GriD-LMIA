@@ -169,14 +169,14 @@ Optimal H-infinity gamma: <solver result>
 The numeric value is solver- and tolerance-dependent, so the manual does not present a fixed value as a regression target.
 
 The release-gate smoke suite also exports one representative inequality from
-each implemented family—Direct, Pólya, Putinar, Sparse Full Box, and Full
-Box—through the same solver policy, which prefers MOSEK when available.
+each implemented family—Direct, Pólya, Putinar, SparseFullBox, and
+FullBox—through the same solver policy, which prefers MOSEK when available.
 
 ## Boundary
 
 These examples do not call a package-owned solver wrapper. They document the
 current boundary: PD-LMI builds direct, Pólya-elevated,
 [`Putinar box`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/), or
-[`Sparse Full Box`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/), or
+[`SparseFullBox`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/), or
 [`full-box`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
 YALMIP constraints, and users call `optimize` directly.

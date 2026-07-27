@@ -29,7 +29,10 @@ Each inequality is classified **once for the complete original residual**:
 
 Direct semidefinite assembly stores one matrix-sign condition per cell, rate row, and local coefficient. Direct entry-wise assembly vectorizes each coefficient in MATLAB column-major order and stores one vector inequality for the complete entry family at that coefficient.
 
-Pólya preserves the global mode after exact degree elevation. Putinar and Full Box give every column-major scalar entry its own independent scalar Gram certificate. Gram variables remain independent across entries, cells, and rate rows.
+Pólya preserves the global mode after exact degree elevation. Putinar and
+FullBox give every column-major scalar entry its own independent scalar Gram
+certificate. Gram variables remain independent across entries, cells, and
+rate rows.
 
 ```matlab
 yalmip('clear')

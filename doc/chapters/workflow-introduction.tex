@@ -2,47 +2,77 @@
 \label{sec:canonical-pdlmi}
 \label{sec:bernstein-motivation}
 
-This chapter introduces the purpose, object model, and complete solution path of the package. It begins with a continuous LPV control inequality, separates the physical grid from local polynomial labels, and ends with finite YALMIP constraints and recovery of the solved parameter-dependent matrix.
+This chapter develops one complete modeling spine: an LPV plant with an induced-\(L_2\)-gain objective, a bounded-real DPD-LMI, exact reduction of the scheduling-rate box, cell-local Bernstein representation on a tensor grid, a finite positivity certificate, and explicit YALMIP solution recovery. Each section answers one decision that a first-time user must make; \cref{app:bernstein-math,app:certificates} retain the detailed coefficient and Gram derivations.
 
-\section{Motivation: LPV Systems and Parameter-Dependent LMIs}
+\section{Model an LPV Induced-\texorpdfstring{\(L_2\)}{L2}-Gain Problem}
 
-Many systems are usefully linear only after their operating condition is made explicit. An aircraft changes with altitude and speed, a chemical process changes with temperature and concentration, and an autonomous vehicle changes lane with forward speed and tire cornering conditions. Treating those conditions as unrelated LTI models discards their shared structure. Requiring one constant Lyapunov matrix or one constant stability criterion for all cases can be equally unsatisfactory, as the resulting test is often unnecessarily conservative.
-
-A \emph{linear parameter-varying (LPV) system}\index{LPV system} keeps the linear state-space structure while allowing its known matrices to depend on a measurable scheduling vector \(\boldsymbol\rho(t)=(\rho_1(t),\ldots,\rho_\ell(t))\in\mathcal P\subset \mathbb{R}^\ell\). For example, an autonomous model is written as
-\[
-    \dot x(t)=A\bigl(\boldsymbol\rho(t)\bigr)x(t),
-\]
-where \(x\) is the state vector and \(\boldsymbol\rho\) selects the current parameter of the known matrix family \(A(\boldsymbol\rho)\). The central question is therefore not whether each frozen model works in isolation, but whether one structured stability condition proves the required property throughout the full parameter set \(\mathcal P\).
-
-A \emph{differentiable parameter-dependent linear matrix inequality} (DPD-LMI)\index{DPD-LMI} supplies that condition by allowing the decision matrix itself to vary with \(\boldsymbol\rho\). A standard LPV Lyapunov construction seeks a symmetric \(P(\boldsymbol\rho)\) such that the following inequalities hold throughout \((\rho,\dot{\rho}) \in \mathcal{P}\times \mathcal{V}\):
+Many systems are usefully linear only after their operating condition is made explicit. An LPV model retains the linear state-space structure while allowing its known matrices to depend on a measurable scheduling vector \(\boldsymbol\rho(t)=(\rho_1(t),\ldots,\rho_\ell(t))\) in a parameter box \(\mathcal P\). The canonical analysis model in this manual is
 \begin{align}
-P(\boldsymbol\rho) & \succeq I,
-\label{eq:canonical-positive}               \\
-    \dot P(\boldsymbol\rho,\dot{\boldsymbol\rho})
-    +P(\boldsymbol\rho)A(\boldsymbol\rho)
-    +A(\boldsymbol\rho)^{\mathsf T}P(\boldsymbol\rho)
-    & \preceq-\varepsilon I.
+\dot x(t)&=A(\boldsymbol\rho(t))x(t)+B_w(\boldsymbol\rho(t))w(t),\nonumber\\
+z(t)&=C_z(\boldsymbol\rho(t))x(t)+D_{zw}(\boldsymbol\rho(t))w(t),
+\label{eq:lpv-l2-model}
+\end{align}
+where \(x(t)\) is the plant state, \(w(t)\) is the disturbance, and \(z(t)\) is the performance output. The objective is to certify zero-state induced-\(L_2\) gain below \(\gamma\): \(\lVert z\rVert_2<\gamma\lVert w\rVert_2\) for every nonzero admissible disturbance and every admissible scheduling trajectory.
+
+A differentiable parameter-dependent Lyapunov matrix \(P(\boldsymbol\rho)=P(\boldsymbol\rho)^{\mathsf T}\) yields the bounded-real DPD-LMI \cite{scherer1996}. Write \(\boldsymbol\nu=\dot{\boldsymbol\rho}\), let \(\mathcal R\) be the admissible rate box, and require
+\begin{align}
+P(\boldsymbol\rho) & \succ 0,
+\label{eq:canonical-positive}\\
+\mathcal F_{\mathrm{BR}}(\boldsymbol\rho,\boldsymbol\nu,\gamma)
+&=
+\begin{bmatrix}
+\dot P(\boldsymbol\rho,\boldsymbol\nu)+\operatorname{He}\!\left(P(\boldsymbol\rho)A(\boldsymbol\rho)\right) &
+P(\boldsymbol\rho)B_w(\boldsymbol\rho) &
+C_z(\boldsymbol\rho)^{\mathsf T}\\
+B_w(\boldsymbol\rho)^{\mathsf T}P(\boldsymbol\rho) &
+-\gamma I &
+D_{zw}(\boldsymbol\rho)^{\mathsf T}\\
+C_z(\boldsymbol\rho) &
+D_{zw}(\boldsymbol\rho) &
+-\gamma I
+\end{bmatrix}
+\prec0
 \label{eq:lpv-spine}
 \end{align}
-The first inequality keeps the Lyapunov function \(V(t)=x^{\top}(t) P(\boldsymbol\rho(t))x(t)\) positive definite, while the second requires $\dot V$ to decrease along every admissible scheduling trajectory. When \(\boldsymbol\rho\) changes with time, the time derivative term \(\dot P\) matters. On the other hand, if \(\boldsymbol\rho\) represents uncertainty of the system, which does not vary with respect to the time, removing \(\dot P\), i.e., fixing \(\dot{\boldsymbol\rho}=0\), recovers an ordinary  \emph{parameter-dependent linear matrix inequality} (PD-LMI)\index{PD-LMI}. After known data are fixed, every term must remain affine in the decision coefficients, and the displayed \(\varepsilon I\) remains an explicit user choice rather than a hidden package margin.
+for every \((\boldsymbol\rho,\boldsymbol\nu)\in\mathcal P\times\mathcal R\). Here \(\operatorname{He}(X)=X+X^{\mathsf T}\) and \(\dot P=\sum_s\nu_s\,\partial P/\partial\rho_s\). The first inequality makes \(V(t)=x(t)^{\mathsf T}P(\boldsymbol\rho(t))x(t)\) positive definite; the second supplies the dissipation inequality for the induced-\(L_2\) bound. The strict signs shown here are analysis notation: the package inserts no hidden margin, so a numerical model must choose and encode conditions such as \(P(\boldsymbol\rho)\succeq\varepsilon I\) explicitly. Setting \(\boldsymbol\nu=0\) removes the scheduling derivative and recovers an ordinary PD-LMI.
 
-\section{Package roles and the end-to-end path}
+\section{Follow the Package Path}
 
 The package starts after the user has chosen an LPV model, a parameter box, any scheduling-rate bounds, and the matrix inequality to certify. Its role is to represent the known and decision matrices, convert the parameter continuum into finite certificate constraints, and hand those constraints to YALMIP. It does not generate the plant or controller structure, choose an objective or SDP solver, or interpret solver diagnostics on the user's behalf.
 
-The main objects follow the same four-stage path used in the rest of the manual:
+The main objects follow the same path used in the rest of the manual:
 \begin{enumerate}
-    \item \code{pdmat} stores known parameter-dependent matrices, while \code{pdvar} creates continuous parameter-dependent decision matrices on a physical grid. Both inherit grid, degree, label, cell-local storage, matrix-shape protocols, and shared structural operations from the backend class \code{pdbase}; ordinary users normally begin with \code{pdmat} and \code{pdvar}, not \code{pdbase}. \item Matrix operations form an affine cell-local residual. When scheduling-rate terms are present, \code{rhodiff} differentiates a \code{pdvar} on each cell and stores one derivative row for every rate-box vertex. \item A comparison such as \code{residual <= 0} creates a \code{pdlmi}. Direct Bernstein-coefficient constraints are the default; \code{applyPolya}, \code{applyPutinar}, \code{applySparseFullBoxPreorder}, and \code{applyFullBoxPreorder} replace that selection with an implemented opt-in certificate. \item \code{toYalmip} exports the stored finite constraints. The user calls YALMIP \code{optimize} with an explicit objective and solver configuration, checks the returned diagnostics, and calls \code{value} to recover solved coefficient data.
+    \item \code{pdmat} stores known parameter-dependent matrices, while \code{pdvar} creates continuous parameter-dependent decisions such as \(P(\boldsymbol\rho)\) and \(\gamma\)-dependent affine expressions. Both inherit grid, degree, label, cell-local storage, matrix-shape protocols, and shared structural operations from the backend class \code{pdbase}; ordinary users begin with \code{pdmat} and \code{pdvar}, not \code{pdbase}.
+    \item Matrix operations assemble the original residual \(\mathcal F\). When scheduling-rate terms are present, \code{rhodiff} differentiates a \code{pdvar} on each cell and stores one derivative row for every vertex of \(\mathcal R\).
+    \item A comparison such as \code{residual <= 0} creates a \code{pdlmi}, orients the comparison as a positive target \(S\), and selects Direct by default. \code{applyPolya}, \code{applyPutinar}, \code{applySparseFullBoxPreorder}, and \code{applyFullBoxPreorder} rebuild alternative finite certificates from the same original residual.
+    \item \code{toYalmip} exports the stored constraints. The user calls YALMIP \code{optimize}, accepts an optimized \(\gamma\) only when \code{sol.problem == 0}, and calls \code{value} to recover numeric Bernstein data.
 \end{enumerate}
 
-Two finite reductions in this path have different logical status. Traversing all rate-box vertices is exact when the residual is affine in \(\dot{\boldsymbol\rho}\). By contrast, the selected Bernstein or Bernstein--Gram certificate supplies a finite sufficient condition over the remaining \(\boldsymbol\rho\)-continuum; failure of that certificate does not prove that the original continuous inequality is infeasible. The mathematical comparison in \cref{sec:certificate-modeling-choices,sec:certificate-boundary} separates the implemented certificate choices from changes to the model itself. The next four sections explain the representation behind these reductions, and \cref{sec:cellwise-solver-path} executes the complete path in MATLAB.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=5mm and 5mm,font=\scriptsize]
+  \node[dp/known,minimum width=23mm,minimum height=10mm,align=center] (model) {LPV model\\\(\mathcal P,\mathcal R,\gamma\)};
+  \node[dp/decision,minimum width=23mm,minimum height=10mm,align=center,right=of model] (decision) {decision\\\(P(\boldsymbol\rho)\)};
+  \node[dp/contribution,minimum width=23mm,minimum height=10mm,align=center,right=of decision] (cells) {rate vertices\\and cell pullbacks};
+  \node[dp/certificate,minimum width=23mm,minimum height=10mm,align=center,right=of cells] (certificate) {finite\\certificate};
+  \node[dp/result,minimum width=23mm,minimum height=10mm,align=center,right=of certificate] (solve) {YALMIP\\solve and recover};
+  \draw[dp/arrow] (model)--(decision);
+  \draw[dp/arrow] (decision)--(cells);
+  \draw[dp/arrow] (cells)--(certificate);
+  \draw[dp/arrow] (certificate)--(solve);
+\end{tikzpicture}
+\caption{The end-to-end documentation spine. Rate-vertex traversal is an exact reduction for affine rate dependence; the parameter-domain certificate is sufficient and is followed by an explicit solver-status check.}
+\label{fig:end-to-end-pipeline}
+\end{figure}
 
-\section{Version 1.1 Supported Scope}
+Two finite steps in this path have different logical status. Traversing all vertices of \(\mathcal R\) is exact when \(\mathcal F\) is affine in \(\boldsymbol\nu\). By contrast, a Bernstein or Bernstein--Gram construction is a sufficient certificate over the remaining \(\boldsymbol\rho\)-continuum; failure at a fixed grid, degree, or certificate order does not prove that the original continuous inequality is infeasible. \Cref{sec:certificate-modeling-choices,sec:certificate-boundary} separates certificate selection from changes to the underlying model, and \cref{sec:cellwise-solver-path} executes the path in MATLAB.
+
+\section{Version 1.1.1 Documentation Scope}
 \label{sec:version-one-scope}
 
-Version 1.1 is the feature-level documentation milestone for the workflow documented in this manual. The supported surface comprises the \code{pdbase} storage backend and its shared matrix-operation implementation; \code{pdmat} known data; continuous arbitrary-degree \code{pdvar} decisions and their cellwise \code{rhodiff} derivatives; \code{pdlmi} direct, P\'olya, Putinar, SparseFullBox, and FullBox assembly; the documented MATLAB matrix-operation and indexing overloads; and the six public \code{helper} utilities. The source-indexed reference chapters state the accepted forms, returned shapes, validation rules, and error boundaries for that surface.
+Version 1.1.1 is a documentation snapshot of the implemented workflow. The supported surface comprises the \code{pdbase} storage backend and its shared matrix-operation implementation; \code{pdmat} known data; continuous arbitrary-degree \code{pdvar} decisions and their cellwise \code{rhodiff} derivatives; \code{pdlmi} Direct, P\'olya, Putinar, SparseFullBox, and FullBox assembly; the documented MATLAB matrix-operation and indexing overloads; and the six public \code{helper} utilities. The source-indexed reference chapters state the accepted forms, returned shapes, validation rules, and error boundaries for that surface.
 
-Centralizing shared matrix operations in \code{pdbase} does not remove those operations from \code{pdmat} or \code{pdvar}: both modeling classes retain complete public, class-specific reference entries and behavior. Version 1.1 also documents the implemented SparseFullBox tensor-window certificate, including its Direct and FullBox endpoint normalization. The package remains restricted to tensor-product box grids, affine decision expressions, and the certificate constructions described here. Products that are nonlinear in decision or rate-dependent data are rejected, certificate failure remains inconclusive for the original continuum inequality, and YALMIP retains ownership of optimization objectives, solver selection, and diagnostics.
+Centralizing shared matrix operations in \code{pdbase} does not remove those operations from \code{pdmat} or \code{pdvar}: both modeling classes retain complete public, class-specific reference entries and behavior. The package remains restricted to tensor-product box grids, affine decision expressions, and the finite certificate constructions described here. Products nonlinear in decision or rate-dependent data are rejected, certificate failure remains inconclusive for the original continuum inequality, and YALMIP retains ownership of objectives, solver selection, and diagnostics. Version 1.1.0 remains the latest tagged GitHub Release; v1.1.1 changes documentation only.
 
 For release verification, run the root installer and \code{tests.run_all()} as described in \cref{sec:setup}. Examples involving \code{pdvar}, \code{rhodiff}, \code{pdlmi}, or solver state begin from a cleared YALMIP model so that their decision variables and constraints are reproducible in a fresh MATLAB session.
 
@@ -54,18 +84,18 @@ The dot on \(P\) is a time derivative along the scheduling trajectory, not a new
     \dot P\bigl(\boldsymbol\rho(t)\bigr)
 =\frac{dP}{dt} =\sum_{s=1}^{\ell}
     \frac{\partial P}{\partial\rho_s}
-    \bigl(\boldsymbol\rho(t)\bigr)\dot\rho_s(t).
+    \bigl(\boldsymbol\rho(t)\bigr)\nu_s(t).
 \]
-Write \(\boldsymbol\nu=\dot{\boldsymbol\rho}\) and give every scheduling direction independent finite rate bounds,
+Give every scheduling direction independent finite rate bounds,
 \[
-    \mathcal V
+    \mathcal R
 =\prod_{s=1}^{\ell}[\underline\nu_s,\overline\nu_s].
 \]
-For a residual that is affine in \(\boldsymbol\nu\), the rate box is handled exactly by traversing its \(2^\ell\) lower/upper vertices \(\boldsymbol v^{(r)}\). The coefficient-level differentiation and rate-row construction are derived in \cref{sec:bernstein-differentiation}. Thus, rather than retaining a rate continuum, the rate-dependent inequality can be written in the block-diagonal form
+For a residual affine in \(\boldsymbol\nu\), the rate box is handled exactly by traversing its \(2^\ell\) lower/upper vertices \(\boldsymbol\nu^{(q)}\). The temporary index \(q\) is needed only while constructing the vertex blocks or explaining stored rate rows. After stacking those blocks, the rate index is suppressed in all parameter-domain certificate formulas. The coefficient-level differentiation and rate-row construction are derived in \cref{sec:bernstein-differentiation}. The rate-dependent inequality becomes
 \begin{gather}
 \label{eq:rate-vertex-block-diagonal}
-\operatorname{diag}_{r=1}^{2^\ell}
-    \mathcal F\bigl(\boldsymbol\rho,\boldsymbol v^{(r)}\bigr)
+\operatorname{diag}_{q=1}^{2^\ell}
+    \mathcal F\bigl(\boldsymbol\rho,\boldsymbol\nu^{(q)}\bigr)
     \prec 0,
     \qquad \boldsymbol\rho\in\mathcal P.
 \end{gather}
@@ -75,19 +105,19 @@ Each diagonal block is the residual at one rate vertex.  The remaining continuum
 We therefore focus on the following general DPD-LMI.
 \keyequation{General form of the differentiable parameter-dependent LMI}{%
 \begin{equation}
-  \mathcal F(\boldsymbol\rho,\dot{\boldsymbol\rho})
-  = \sum_{i=1}^{N} R_i(\boldsymbol\rho)
+  \mathcal F(\boldsymbol\rho,\boldsymbol\nu)
+  = \sum_{k=1}^{N} R_k(\boldsymbol\rho)
   \sum_{j=1}^{\ell}
-  \frac{\partial x_i}{\partial\rho_j}(\boldsymbol\rho)
-  \dot\rho_j
+  \frac{\partial y_k}{\partial\rho_j}(\boldsymbol\rho)
+  \nu_j
   + F_0(\boldsymbol\rho)
-  + \sum_{i=1}^{N} F_i(\boldsymbol\rho)x_i(\boldsymbol\rho)
-  \prec 0, \qquad \forall (\boldsymbol\rho,\dot{\boldsymbol\rho}) \in\mathcal P\times\mathcal V.
+  + \sum_{k=1}^{N} F_k(\boldsymbol\rho)y_k(\boldsymbol\rho)
+  \prec 0, \qquad \forall (\boldsymbol\rho,\boldsymbol\nu) \in\mathcal P\times\mathcal R.
 \label{eq:general-dpdlmi}
 \end{equation}
-} Here \(R_i\), \(F_0\), and \(F_i\) are known matrix functions, while the \(x_i\) are parameter-dependent decision functions. The affine dependence on \(\dot{\boldsymbol\rho}\) reduces exactly to the finite rate vertices in \cref{eq:rate-vertex-block-diagonal}, but \(\boldsymbol\rho\in\mathcal P\) remains a continuum. The construction is dimension-generic in \(\ell\), subject to the cost of the resulting tensor data. The package handles the remaining continuum by representing each \(x_i\) as a continuous piecewise-polynomial function on a physical grid, with cell-local tensor-product Bernstein coefficients.
+} Here \(R_k\), \(F_0\), and \(F_k\) are known matrix functions, while \(y_k(\boldsymbol\rho)\) are general parameter-dependent decision functions; \(P(\boldsymbol\rho)\) in \cref{eq:lpv-spine} is the canonical matrix-valued instance. Affine dependence on \(\boldsymbol\nu\) reduces exactly to \cref{eq:rate-vertex-block-diagonal}, but \(\boldsymbol\rho\in\mathcal P\) remains a continuum. The package represents each \(y_k\) as a continuous piecewise polynomial with cell-local tensor-product Bernstein coefficients.
 
-Setting \(R_i\equiv0\) for every \(i\) (collectively, \(R=0\)) removes the derivative term and recovers an ordinary PD-LMI.
+Setting \(R_k\equiv0\) for every \(k\) removes the derivative term and recovers an ordinary PD-LMI.
 
 \section{Grid the Scheduling-Parameter Space}
 \index{physical grid}\index{physical node}\index{physical hypercube}\index{tensor grid}
@@ -115,8 +145,8 @@ The package represents coefficient-backed known data and decision matrices by lo
 
 A monomial parameterization makes the additional continuity condition explicit.  For two adjacent one-dimensional cells, write
 \[
-    A^{(c)}(\alpha_c)=\sum_{i=0}^{m}\alpha_c^i A_i^{(c)},
-    \qquad \alpha_c\in[0,1].
+    A^{(c)}(\alpha)=\sum_{i=0}^{m}\alpha^i A_i^{(c)},
+    \qquad \alpha\in[0,1].
 \]
 At their shared physical node, \(\alpha_1=1\) in the left cell and \(\alpha_2=0\) in the right cell.  Enforcing \(C^0\) continuity therefore requires the extra matrix equality
 \[
@@ -125,7 +155,7 @@ At their shared physical node, \(\alpha_1=1\) in the left cell and \(\alpha_2=0\
 \]
 When \(\ell>1\), equality along a shared face is a polynomial identity in the tangential coordinates and produces a corresponding family of linear coefficient equalities. The number of such conditions grows with the polynomial degree and the number of shared faces.
 
-The right side of \cref{fig:shared-face-lipschitz} shows the intended behaviour: the two polynomial pieces share their boundary value, while their one-sided slopes remain different. A globally \(C^0\), piecewise-polynomial matrix function on the compact parameter box is Lipschitz. At a shared face, its Clarke generalized derivative is the convex hull of the limiting derivatives from the adjacent cells. The package consequently imposes \cref{eq:general-dpdlmi} using the relevant cellwise derivative and rate-vertex data without claiming that the derivative itself is globally continuous.
+The right side of \cref{fig:shared-face-lipschitz} shows the intended behavior: the two polynomial pieces share their boundary value, while their one-sided slopes may differ. A globally \(C^0\), piecewise-polynomial matrix function on compact \(\mathcal P\) is locally Lipschitz. At a shared face, its Clarke generalized derivative is the convex hull of the limiting derivatives from the adjacent cells \cite{clarke1990}. Because \cref{eq:general-dpdlmi} is affine in those derivatives, imposing the cell-side conditions covers that convex hull; this interface argument does not claim that \(\nabla P\) is continuous. Discontinuous coefficient-backed \code{pdmat} data remain a supported implementation choice, but they fall outside this continuity argument and must be analyzed cellwise.
 
 \begin{figure}[H]
     \centering
@@ -168,11 +198,13 @@ The right side of \cref{fig:shared-face-lipschitz} shows the intended behaviour:
 \label{sec:continuous-bernstein-representation}
 \index{cell-local storage}\index{local Bernstein label}
 
-For its cell-local polynomial representation, the package uses the Bernstein basis rather than the monomial basis in the preceding comparison. Bernstein endpoint identities expose each face polynomial directly through its face coefficients; shared decision storage can therefore impose \(C^0\) continuity without adding separate cross-cell equalities. Inside a physical hypercube \cref{eq:physical-hypercube}, the forward local coordinate in direction \(s\) is
+For its cell-local polynomial representation, the package uses the Bernstein basis rather than the monomial basis in the preceding comparison. Bernstein endpoint identities expose each face polynomial directly through its face coefficients; shared decision storage can therefore impose \(C^0\) continuity without adding separate cross-cell equalities. Inside \(\mathcal H_{\mathbf c}\), define its width and forward pullback by
 \[
-    \alpha_s=
-    \frac{\rho_s-\rho_s^{(c_s)}}
-    {\rho_s^{(c_s+1)}-\rho_s^{(c_s)}}\in[0,1].
+    h_s^{(\mathbf c)}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)},
+    \qquad
+    \phi_{\mathbf c}(\boldsymbol\rho)=\boldsymbol\alpha,
+    \qquad
+    \alpha_s=\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{(\mathbf c)}}\in[0,1].
 \]
 On one local coordinate \(\alpha\in[0,1]\), the normalized degree-\(m\) Bernstein basis is
 \[
@@ -201,7 +233,7 @@ The basis functions are nonnegative and sum to one.  The first four nonnegative 
 \]
 In \(\ell\) parameter directions, the package uses the tensor-product expansion
 \[
-    C^{(\mathbf c)}(\boldsymbol\rho)=
+    C^{(\mathbf c)}\!\left(\phi_{\mathbf c}(\boldsymbol\rho)\right)=
     \sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
     \left(\prod_{s=1}^{\ell}B_{i_s}^{m}(\alpha_s)\right)
     C^{(\mathbf c)}[\mathbf i].

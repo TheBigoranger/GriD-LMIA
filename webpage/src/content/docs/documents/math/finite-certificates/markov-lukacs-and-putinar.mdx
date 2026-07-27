@@ -1,0 +1,103 @@
+---
+title: Markov–Lukács And Putinar
+description: Parity-specific interval Gram forms and the implemented singleton-generator Putinar box module.
+---
+
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <span>Finite Certificates</span>
+  <span>/</span>
+  <span>Markov–Lukács And Putinar</span>
+</nav>
+
+<CertificateSpectrum selected="putinar" />
+
+The software state is `Putinar`. In one parameter its implementation uses the
+parity-specific Markov–Lukács interval form; Markov–Lukács is not a separate
+selector.
+
+## One-Parameter Even Degree
+
+For assembled degree $M=2q$, represent the target as
+
+$$
+S^{(\mathbf c)}(\alpha)
+=Z_q(\alpha)^{\mathsf T}Q_0Z_q(\alpha)
++\alpha(1-\alpha)
+Z_{q-1}(\alpha)^{\mathsf T}Q_1Z_{q-1}(\alpha),
+$$
+
+with $Q_0,Q_1\succeq0$. The basis-to-coefficient Gram map is affine, and
+every resulting Bernstein coefficient is matched exactly to
+$C^{(\mathbf c)}[i]$.
+
+## One-Parameter Odd Degree
+
+For $M=2q+1$, use endpoint weights:
+
+$$
+S^{(\mathbf c)}(\alpha)
+=(1-\alpha)Z_q^{\mathsf T}Q_0Z_q
++\alpha Z_q^{\mathsf T}Q_1Z_q,
+\qquad Q_0,Q_1\succeq0.
+$$
+
+The minimum absolute order is $r=\lfloor M/2\rfloor$ in one parameter.
+
+## Multivariate Putinar Module
+
+For $\ell\ge2$, define
+$g_s(\boldsymbol\alpha)=\alpha_s(1-\alpha_s)$. The implemented module is
+
+$$
+S^{(\mathbf c)}
+=S_0+\sum_{s=1}^{\ell}g_sS_s,
+$$
+
+where each $S_s$ has a free positive-semidefinite Gram representation and the
+sum matches every target coefficient exactly. The minimum absolute order is
+$r=\lceil M/2\rceil$.
+
+```matlab
+selected = L.applyPutinar();
+selected = L.applyPutinar(r);
+constraints = selected.toYalmip();
+```
+
+Each cell, stored rate row, and column-major matrix entry receives independent
+Gram blocks.
+
+## Relation To FullBox
+
+In one parameter, Putinar and FullBox use the same Markov–Lukács interval
+form. In several parameters, Putinar includes only the unweighted and singleton
+generator terms. FullBox includes every generator-subset product.
+
+## Failure Interpretation
+
+A fixed-order Gram model is a sufficient certificate. Failure may reflect
+certificate order, numerical conditioning, memory pressure, grid choice, or
+decision degree. It does not prove that $S$ becomes indefinite somewhere.
+
+## Limitations
+
+The implementation is specialized to box generators and fixed absolute order.
+It is not a general semialgebraic-domain parser and does not choose an order or
+solver automatically. Large Gram programs can be memory- or numerically
+limited.
+
+## Further Reading
+
+- de Klerk, Hess, and Laurent, [Improved convergence rates for Lasserre-type hierarchies of upper bounds for box-constrained polynomial optimization](https://doi.org/10.1137/16M1065264), for interval representations and box context.
+- Aylward, Itani, and Parrilo, [Explicit SOS decompositions of univariate polynomial matrices and the KYP lemma](https://www.mit.edu/~parrilo/pubs/files/AylwardItaniParrilo-ExplicitSOSDecompositionsOfUnivariatePolynomialMatricesAndTheKYPLemma.pdf).
+- Putinar, [Positive polynomials on compact semi-algebraic sets](https://www.jstor.org/stable/24897130).
+
+## See Also
+
+[Previous: Direct And Pólya](/PD-LMI-package/documents/math/finite-certificates/direct-and-polya/) ·
+[Next: SparseFullBox And FullBox](/PD-LMI-package/documents/math/finite-certificates/sparsefullbox-and-fullbox/) ·
+[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
+[`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)

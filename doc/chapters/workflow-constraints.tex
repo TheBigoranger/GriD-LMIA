@@ -1,7 +1,7 @@
 \section{From Cellwise Algebra to Solver Constraints}
 \label{sec:cellwise-solver-path}
 
-This section executes a two-cell instance of the Lyapunov model in \cref{eq:canonical-positive,eq:lpv-spine}. It follows the object roles established above: known matrices are stored as \code{pdmat}, decision matrices as \code{pdvar}, cellwise rate derivatives are produced by \code{rhodiff}, and finite certificate selections are stored as \code{pdlmi}.
+This section first isolates the Lyapunov block \(\dot P+\operatorname{He}(PA)\) from \cref{eq:lpv-spine} so that the cell, coefficient, and rate-row mechanics remain visible. It then reconnects that block to the complete induced-\(L_2\)-gain model and solver objective. Known matrices are stored as \code{pdmat}, decisions as \code{pdvar}, cellwise rate derivatives are produced by \code{rhodiff}, and finite certificate selections are stored as \code{pdlmi}.
 
 \subsection{Store Known Matrices and Decision Matrices}
 \index{pdmat@\texttt{pdmat}}\index{pdvar@\texttt{pdvar}}
@@ -59,11 +59,11 @@ Each cell stores three local symmetric decision matrices.  The upper face of cel
 
 \subsection{Multiply in Bernstein Coefficient Space}
 
-On one physical cell, write \(P=\sum_iB_i^mP^{(c)}[i]\) and \(A=\sum_jB_j^nA^{(c)}[j]\).  The ordered product is
+On one physical cell \(\mathcal H_{\mathbf c}\), write \(P=\sum_iB_i^mP^{(\mathbf c)}[i]\) and \(A=\sum_jB_j^nA^{(\mathbf c)}[j]\). The ordered product is
 \[
-PA=\sum_{k=0}^{m+n}B_k^{m+n}R^{(c)}[k],\qquad R^{(c)}[k]=\sum_{i+j=k}
+PA=\sum_{k=0}^{m+n}B_k^{m+n}R^{(\mathbf c)}[k],\qquad R^{(\mathbf c)}[k]=\sum_{i+j=k}
     \frac{\binom mi\binom nj}{\binom{m+n}{k}}
-P^{(c)}[i]A^{(c)}[j].
+P^{(\mathbf c)}[i]A^{(\mathbf c)}[j].
 \]
 For quadratic \(P\) and affine \(A\), the four result coefficients are
 \[
@@ -94,26 +94,26 @@ coefficientCountPA =
 
 \subsection{Differentiate and Enumerate Rate Vertices}
 
-For a degree-\(m\) cell of width \(h_c\), differentiation is the forward difference
+For a degree-\(m\) cell of width \(h_1^{(\mathbf c)}\), differentiation is the forward difference
 \[
   \frac{\partial P}{\partial\rho}
-=\frac{m}{h_c}\sum_{i=0}^{m-1}
-   \bigl(P^{(c)}[i+1]-P^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
+=\frac{m}{h_1^{(\mathbf c)}}\sum_{i=0}^{m-1}
+   \bigl(P^{(\mathbf c)}[i+1]-P^{(\mathbf c)}[i]\bigr)B_i^{m-1}(\alpha).
 \]
-Because the chain-rule term is affine in the bounded rate, checking the two vertices \(-1\) and \(+1\) covers \(\dot\rho\in[-1,1]\). \Cref{sec:bernstein-differentiation} gives the coefficient derivation and its physical-cell scaling.
+Because the chain-rule term is affine in the bounded rate, checking the two vertices \(-1\) and \(+1\) covers \(\nu\in[-1,1]\). \Cref{sec:bernstein-differentiation} gives the coefficient derivation and its physical-cell scaling.
 
-For \(\ell\) parameters, let \(h_{\mathbf c,s}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}\) be the width of physical hypercube \(\mathbf c\) in direction \(s\), and let \(\mathbf e_s\) be the corresponding unit multi-index. Differentiating the tensor-product representation in \cref{sec:continuous-bernstein-representation} gives
+For \(\ell\) parameters, let \(h_s^{(\mathbf c)}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}\) be the width of \(\mathcal H_{\mathbf c}\) in direction \(s\), and let \(\mathbf e_s\) be the corresponding unit multi-index. Differentiating the tensor-product representation in \cref{sec:continuous-bernstein-representation} gives
 \[
 \frac{\partial P^{(\mathbf c)}}{\partial\rho_s}
-=\frac{m}{h_{\mathbf c,s}}
+=\frac{m}{h_s^{(\mathbf c)}}
 \sum_{\substack{\mathbf i\in\{0,\ldots,m\}^{\ell}\\ i_s<m}}
 \bigl(P^{(\mathbf c)}[\mathbf i+\mathbf e_s]-P^{(\mathbf c)}[\mathbf i]\bigr)
 B_{i_s}^{m-1}(\alpha_s)
 \prod_{r\ne s}B_{i_r}^{m}(\alpha_r),
 \qquad
-\dot P^{(\mathbf c)}=\sum_{s=1}^{\ell}\dot\rho_s\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}.
+\dot P^{(\mathbf c)}=\sum_{s=1}^{\ell}\nu_s\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}.
 \]
-Each partial derivative has degree \(m-1\) in its differentiated direction and degree \(m\) in every other direction. For \(\ell>1\), \code{rhodiff} therefore elevates the shortened direction back to degree \(m\) before summing the rate-weighted partials. If \(\dot\rho_s\in[\underline v_s,\overline v_s]\), the rate box has \(2^\ell\) Cartesian vertices \(\mathbf v\); because \(\dot P\) is affine in \(\dot{\boldsymbol\rho}\), traversing those vertices is exact. For \(m>0\), each multidimensional cell consequently stores \(2^\ell\) rate rows with \((m+1)^\ell\) tensor-Bernstein coefficients per row.
+Each partial derivative has degree \(m-1\) in its differentiated direction and degree \(m\) in every other direction. For \(\ell>1\), \code{rhodiff} therefore elevates the shortened direction back to degree \(m\) before summing the rate-weighted partials. If \(\nu_s\in[\underline\nu_s,\overline\nu_s]\), the rate box \(\mathcal R\) has \(2^\ell\) Cartesian vertices \(\boldsymbol\nu^{(q)}\); because \(\dot P\) is affine in \(\boldsymbol\nu\), traversing those vertices is exact. For \(m>0\), each multidimensional cell consequently stores \(2^\ell\) rate rows with \((m+1)^\ell\) tensor-Bernstein coefficients per row.
 
 \begin{lstlisting}[style=dpmatlab]
 D = rhodiff(P, [-1 1]);
@@ -155,24 +155,24 @@ coefficientsPerRow2D =
     4
 \end{lstlisting}
 
-Thus a coefficient table is indexed independently by physical hypercube, rate-vertex row, and tensor-Bernstein label. Rate rows are neither physical cells nor additional Bernstein labels; a later comparison constrains every combination of these three indices.
+Thus a coefficient table is indexed independently by physical hypercube, stored rate row, and tensor-Bernstein label. Rate rows are neither physical cells nor additional Bernstein labels. Once the rows are stacked into the finite residual, subsequent certificate formulas suppress the temporary vertex index \(q\).
 
 \subsection{Form a Residual on Every Hypercube}
 \index{residual}
 
-The MATLAB residual is a direct transcription of \cref{eq:canonical-positive,eq:lpv-spine}.  Addition performs exact degree elevation before the cell-local terms are combined.
+The MATLAB residual isolates the Lyapunov block \(\dot P+\operatorname{He}(PA)\) of the full bounded-real LMI in \cref{eq:lpv-spine}; the separate positivity comparison implements the numerical normalization chosen for \cref{eq:canonical-positive}. Addition performs exact degree elevation before the cell-local terms are combined.
 
 \begin{lstlisting}[style=dpmatlab]
 residual = D + P * A + A' * P;
 Cdecay = residual <= -1e-6 * eye(2);
 Cpositive = P >= eye(2);
-residualDegree = residual.Degree
+residualDegreeM = residual.Degree
 decayConstraintCount = numel(Cdecay.Constraints)
 positivityConstraintCount = numel(Cpositive.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-residualDegree =
+residualDegreeM =
     3
 decayConstraintCount =
     16
@@ -180,7 +180,7 @@ positivityConstraintCount =
     6
 \end{lstlisting}
 
-The decay count is two physical cells times two rate vertices times four degree-three labels.  Positivity has no rate rows and has three degree-two labels per cell.  Shared faces are visited from each adjoining cell because certification remains cell-local.
+The assembled decay residual has degree \(M=3\): two physical cells times two stored rate rows times four local labels give sixteen coefficient constraints. Positivity has no rate rows and has three degree-two labels per cell. Shared faces are visited from each adjoining cell because certification remains cell-local. For a comparison \(\mathcal F\preceq0\), \code{pdlmi} stores the original residual and sign-normalizes the positive target as \(S=-\mathcal F\); for \(\mathcal F\succeq0\), it uses \(S=\mathcal F\).
 
 \subsection{Choose a Finite Certificate}
 
@@ -203,7 +203,7 @@ counts =
     16    20    24    24    24
 \end{lstlisting}
 
-Direct tests coefficient signs. P\'olya elevates the residual before testing. For this one-parameter residual, the degree-three default order is one, so width two reaches the dense endpoint and SparseFullBox canonicalizes to actual FullBox state; Putinar also delegates to the same parity construction, and all three wrappers store 24 constraints. At intermediate widths, SparseFullBox replaces each dense Gram block by all axis-aligned tensor-basis windows of the requested side length. In multiple parameters, Putinar uses the singleton-generator box module, whereas SparseFullBox and FullBox use all box-generator products with sparse-window or dense Gram support. All five paths are finite sufficient certificates for the continuous inequality. Failure of a selected certificate to yield feasibility does not prove that the continuous inequality itself is infeasible. \Cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen,sec:certificate-sparse-full-box,sec:certificate-full-box} give the corresponding mathematical constructions, while \cref{sec:certificate-boundary} states the implemented boundary.
+Direct tests the coefficients of \(S\). P\'olya elevates \(S\) by increment \(d\) before applying the same test. In one parameter, the Gram paths use the parity-specific Markov--Luk\'acs interval representation; for this degree-\(M=3\) residual, absolute order \(r=1\) is the default. Width \(b=2\) therefore reaches the dense endpoint and SparseFullBox canonicalizes to actual FullBox state, while Putinar delegates to the same interval form; all three wrappers store 24 constraints. In multiple parameters, Putinar uses the singleton-generator box module, the sparse full-box tensor-window certificate uses bandwidth \(b\), and the full-box preordering uses every box-generator product. All five software states are finite sufficient certificates for the continuous inequality. Failure of a selected state at fixed \(M,d,r,b\) is inconclusive. \Cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen,sec:certificate-sparse-full-box,sec:certificate-full-box} give the constructions, while \cref{sec:certificate-boundary} states their implemented boundaries.
 
 \subsection{Export to YALMIP and Recover the Solution}
 \index{strictness margin}\index{solver diagnostics}
@@ -215,9 +215,8 @@ Fdecay = toYalmip(Cdecay);
 Fpositive = Cpositive.toYalmip();
 opts = sdpsettings('solver', 'sedumi', 'verbose', 0);
 sol = optimize([Fdecay, Fpositive], [], opts);
-if sol.problem == 0
-    solvedP = value(P);
-end
+assert(sol.problem == 0, sol.info)
+solvedP = value(P);
 \end{lstlisting}
 
-The solver choice and \code{sol.problem} semantics belong to YALMIP and the installed solver.  After a successful solve, \code{value(P)} replaces the symbolic coefficient payloads with numeric values while preserving the grid, degree, matrix shape, and cell ordering.  Complete solver examples appear in \cref{sec:examples}; certificate syntax and order boundaries appear in \cref{sec:pdlmi}.
+The solver choice and \code{sol.problem} semantics belong to YALMIP and the installed solver. After \code{problem == 0}, \code{value(P)} replaces symbolic coefficient payloads with numeric values while preserving the grid, degree, matrix shape, and cell ordering. In the complete bounded-real model, \(\gamma\) is a degree-zero \code{pdvar}; the tested construction and objective extraction appear in \cref{sec:solver-example}. Retain \code{value(gamma.LocalValues\{1\}\{1\})} only after the same successful-status check. Certificate syntax and order boundaries appear in \cref{sec:pdlmi}.

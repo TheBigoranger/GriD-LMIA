@@ -256,7 +256,7 @@ export const referenceEntries = [
   entry("applyPolya", "pdlmi method", "Rebuild a residual with a selected Pólya degree increment.", "documents/reference/pdlmi/applypolya", "", "pdlmi"),
   entry("applyPutinar", "pdlmi method", "Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate.", "documents/reference/pdlmi/applyputinar", "", "pdlmi"),
   entry("applySparseFullBoxPreorder", "pdlmi method", "Rebuild a residual with a tensor-window full-box certificate and canonical endpoints.", "documents/reference/pdlmi/applysparsefullboxpreorder", "", "pdlmi"),
-  entry("applyFullBoxPreorder", "pdlmi method", "Rebuild a residual with a fixed-order full box Bernstein-Gram certificate.", "documents/reference/pdlmi/applyfullboxpreorder", "", "pdlmi"),
+  entry("applyFullBoxPreorder", "pdlmi method", "Rebuild a residual with a fixed-order full-box Bernstein-Gram preordering.", "documents/reference/pdlmi/applyfullboxpreorder", "", "pdlmi"),
   entry("helper.cellGet", "shared backend helper", "Read one nested LocalValues leaf by physical-cell subscripts.", "documents/reference/shared-helpers", "helper-cellget"),
   entry("helper.chk", "shared backend helper", "Apply common validation predicates with caller-owned errors.", "documents/reference/shared-helpers", "helper-chk"),
   entry("helper.combRows", "shared backend helper", "Build Cartesian rows in the package tensor order.", "documents/reference/shared-helpers", "helper-combrows"),

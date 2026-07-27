@@ -1,10 +1,17 @@
 export const versionHistory = [
   {
+    version: "v1.1.1",
+    date: "2026-07-26",
+    status: "current documentation snapshot",
+    summary:
+      "Restructures the printable and Web mathematical guides around the LPV induced-L2-gain workflow, standardizes notation across the manuals, and expands certificate selection guidance without changing runtime MATLAB APIs. This snapshot has no Git tag or GitHub Release.",
+  },
+  {
     version: "v1.1.0",
     date: "2026-07-26",
-    status: "current",
+    status: "latest GitHub Release",
     summary:
-      "Documents the centralized pdbase implementation while retaining complete inherited pdmat and pdvar references, adds the Sparse Full Box certificate with tensor-window widths and canonical Direct/Full Box endpoints, corrects protected backend-helper ownership, and refreshes the printable and Web manuals.",
+      "Documents the centralized pdbase implementation while retaining complete inherited pdmat and pdvar references, adds the SparseFullBox certificate with tensor-window widths and canonical Direct/FullBox endpoints, corrects protected backend-helper ownership, and refreshes the printable and Web manuals.",
   },
   {
     version: "v1.0.0",
@@ -47,5 +54,5 @@ export const historyPolicy = {
   updateRule:
     "Change the TeX manual version first, then run npm --prefix webpage run sync:version or any webpage build.",
   appendRule:
-    "Keep the current release and only the final patch release for each completed minor line, unless the user explicitly requests another history policy.",
+    "Keep the current documentation snapshot, the latest GitHub Release, and the final patch release for each earlier completed minor line, unless the user explicitly requests another history policy.",
 };

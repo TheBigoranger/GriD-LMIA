@@ -4,6 +4,8 @@
 
 \code{pdbase} is the developer-facing backend parent for \code{pdmat} and \code{pdvar}. Ordinary users should model known data with \code{pdmat} and decision expressions with \code{pdvar}. This section documents \code{pdbase} because it owns the shared storage, traversal, inspection, matrix-shape, unary-transformation, reduction, and reordering implementations inherited by both public modeling classes. Central implementation does not remove these methods from \code{pdmat} or \code{pdvar}; their class-specific syntax, examples, validation, and limitations remain documented in \cref{sec:pdmat-matrix-ops,sec:pdvar-matrix-ops}.
 
+Its traversal contract is the concrete form of the notation in \cref{sec:bernstein-tensor-grids}: \code{cells()} enumerates one-based physical indices \(\mathbf c\), \code{lbls()} enumerates zero-based local labels \(\mathbf i\), and \code{coeffs(c)} returns \(C^{(\mathbf c)}[\mathbf i]\) in that label order. If a leaf contains derivative data, rows additionally enumerate the already constructed vertices of \(\mathcal R\); rows never change \(\mathcal H_{\mathbf c}\) or \(\mathbf i\). Public \code{elevate}/\code{elevVals} and the protected \code{bernElev}/\code{bernProd}/\code{bernTbl}/\code{mapVals}/\code{matSubs}/\code{mergeGrid} mechanisms preserve this separation while owning degree alignment, ordered convolution, tables, payload mapping, matrix subscripting, and common-grid refinement.
+
 \section{API Map}
 \label{sec:pdbase-lookup}
 

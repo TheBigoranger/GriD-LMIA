@@ -2,7 +2,7 @@
 
 \input{manual-style}
 
-\title{\pkg\\User Manual} \author{Version v1.1.0} \date{July 26, 2026}
+\title{\pkg\\User Manual} \author{Version v1.1.1} \date{July 26, 2026}
 
 % \includeonly{chapters/workflow-introduction}
 % \includeonly{chapters/pdbase}
@@ -20,7 +20,7 @@ The \pkg{} is a MATLAB/YALMIP package for modelling and certifying parameter-dep
 
 The manual develops that bridge through a reproducible differentiable PD-LMI workflow: define the parameter grid and known data, construct continuous decision matrices, differentiate them cell by cell when scheduling-rate terms are present, form a residual inequality, choose a direct or certificate-based positivity condition, export the resulting constraints to YALMIP, and solve them with an available SDP solver.  It also makes explicit the distinction between shared-face continuity of the represented function and the generally discontinuous cellwise derivative data.
 
-Version 1.1 presents the implemented and tested public surface as one supported workflow: installation and verification; known-data, decision-variable, and finite-certificate objects; MATLAB-style matrix operations and indexing implemented centrally by \code{pdbase} and inherited by \code{pdmat}/\code{pdvar}; six shared helper utilities; and direct, P\'olya, Putinar, SparseFullBox, and FullBox certificate assembly. The appendices provide the Bernstein-polynomial and positivity-certificate background needed to interpret those backends and their documented boundaries.
+Documentation snapshot v1.1.1 presents the implemented and tested public surface as one supported workflow: installation and verification; known-data, decision-variable, and finite-certificate objects; MATLAB-style matrix operations and indexing implemented centrally by \code{pdbase} and inherited by \code{pdmat}/\code{pdvar}; six shared helper utilities; and Direct, P\'olya, Putinar, SparseFullBox, and FullBox certificate assembly. The appendices provide the Bernstein-polynomial and positivity-certificate background needed to interpret those backends and their documented boundaries. The latest tagged GitHub Release remains v1.1.0.
 \end{abstract}
 
 \clearpage
@@ -48,6 +48,12 @@ Version 1.1 presents the implemented and tested public surface as one supported 
 \clearpage
 \addcontentsline{toc}{chapter}{References}
 \begin{thebibliography}{99}
+
+\bibitem{scherer1996}
+C.~W. Scherer, ``Mixed \(H_2/H_\infty\) control for time-varying and linear parametrically-varying systems,'' \emph{International Journal of Robust and Nonlinear Control}, vol.~6, nos.~9--10, pp.~929--952, 1996. \href{https://doi.org/10.1002/\%28SICI\%291099-1239\%28199611\%296\%3A9\%2F10\%3C929\%3A\%3AAID-RNC260\%3E3.0.CO\%3B2-9}{publisher DOI record}.
+
+\bibitem{clarke1990}
+F.~H. Clarke, \emph{Optimization and Nonsmooth Analysis}. Philadelphia, PA, USA: SIAM, 1990. \href{https://doi.org/10.1137/1.9781611971309}{doi:10.1137/1.9781611971309}.
 
 \bibitem{farouki2012}
 R.~T. Farouki, ``The Bernstein polynomial basis: A centennial retrospective,'' \emph{Computer Aided Geometric Design}, vol.~29, no.~6, pp.~379--419, 2012. \href{https://doi.org/10.1016/j.cagd.2012.03.001} {doi:10.1016/j.cagd.2012.03.001}.
@@ -84,6 +90,15 @@ K.~Schm\"udgen, ``The \(K\)-moment problem for compact semi-algebraic sets,'' \e
 
 \bibitem{powersreznick2001}
 V.~Powers and B.~Reznick, ``A new bound for P\'olya's theorem with applications to polynomials positive on polyhedra,'' \emph{Journal of Pure and Applied Algebra}, vol.~164, nos.~1--2, pp.~221--229, 2001. \href{https://doi.org/10.1016/S0022-4049(00)00155-9} {doi:10.1016/S0022-4049(00)00155-9}.
+
+\bibitem{harrisparrilo2023}
+M.~T. Harris and P.~A. Parrilo, ``Improved nonnegativity testing in the Bernstein basis via geometric means,'' arXiv:2309.10675, 2023. \href{https://doi.org/10.48550/arXiv.2309.10675}{doi:10.48550/arXiv.2309.10675}.
+
+\bibitem{gouveiakovacecsaee2022}
+J.~Gouveia, A.~Kova\v{c}ec, and M.~Saee, ``On sums of squares of \(k\)-nomials,'' \emph{Journal of Pure and Applied Algebra}, vol.~226, no.~1, art.~106820, 2022. \href{https://doi.org/10.1016/j.jpaa.2021.106820}{doi:10.1016/j.jpaa.2021.106820}.
+
+\bibitem{zhengfantuzzi2023}
+Y.~Zheng and G.~Fantuzzi, ``Sum-of-squares chordal decomposition of polynomial matrix inequalities,'' \emph{Mathematical Programming}, vol.~197, pp.~71--108, 2023. \href{https://doi.org/10.1007/s10107-021-01728-w}{doi:10.1007/s10107-021-01728-w}.
 
 \end{thebibliography}
 

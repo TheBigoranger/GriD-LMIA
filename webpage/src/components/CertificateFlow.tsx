@@ -26,7 +26,7 @@ export default function CertificateFlow({ options }: { options: CertificateFlowO
   return (
     <figure className="diagram-frame certificate-flow-figure" aria-label="Finite certificate selection flow">
       <div className="diagram-frame__body certificate-flow">
-        <div className="certificate-flow__residual"><strong>Stored residual</strong><span dangerouslySetInnerHTML={{ __html: renderInlineMath("F^{(\\mathbf c,v)}(\\boldsymbol\\alpha)\\preceq0") }} /></div>
+        <div className="certificate-flow__residual"><strong>Positive target</strong><span dangerouslySetInnerHTML={{ __html: renderInlineMath("S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succeq0") }} /></div>
         <span className="certificate-flow__arrow" aria-hidden="true">↓</span>
         <div aria-label="Finite certificate method" className="certificate-flow-tabs" role="tablist">
           {options.map((item, index) => (

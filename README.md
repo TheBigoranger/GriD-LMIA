@@ -5,7 +5,7 @@ It represents continuous piecewise-polynomial decision matrices in cell-local
 tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
 models are called differentiable parameter-dependent LMIs (DPD-LMIs).
 
-Current release: **v1.1.0**.
+Documentation: **v1.1.1**. Latest GitHub Release: **v1.1.0**.
 
 The current implementation provides:
 
@@ -197,15 +197,15 @@ F = putinar.toYalmip();
 The constructor forms `pdlmi(P, ">=", "UsePutinar")`,
 `pdlmi(P, ">=", UsePutinar=true, PutinarOrder=2)`, and
 `pdlmi(P, ">=", PutinarOrder=2)` select the same certificate family. A new
-Pólya, Putinar, SparseFullBox, or full-box selection always rebuilds from the
+Pólya, Putinar, SparseFullBox, or FullBox selection always rebuilds from the
 original residual and replaces the previous family.
 
 ## Opt-in SparseFullBox Hierarchy
 
 `applySparseFullBoxPreorder([bandWidth[, order]])` interpolates between the
-direct coefficient certificate and the dense Full Box certificate with free
+direct coefficient certificate and the dense full-box preordering with free
 PSD tensor-window cliques. The no-argument form uses `BandWidth=2` and the
-same dimension-dependent absolute order as Full Box. Every window contribution
+same dimension-dependent absolute order as FullBox. Every window contribution
 is embedded and matched exactly in the cell-local Bernstein basis; matrix
 entries, physical cells, and active rate rows receive independent
 certificates.
@@ -223,12 +223,12 @@ The constructor forms
 `pdlmi(P, ">=", BandWidth=2)`, and
 `pdlmi(P, ">=", BandWidth=2, SparseFullBoxOrder=2)` select the same family.
 Width one normalizes to actual Direct state. A width at least `order+1`
-normalizes to actual dense Full Box state. Only intermediate widths retain
+normalizes to actual FullBox state. Only intermediate widths retain
 `UseSparseFullBoxPreorder=true`, `SparseFullBoxOrder`, and `BandWidth`.
 SparseFullBox is a box-specific sufficient certificate, not a generic sparse
 SOS parser or an automatic solver-selection layer.
 
-## Opt-in Full Box Preordering
+## Opt-in FullBox Preordering
 
 `applyFullBoxPreorder([order])` replaces direct, Pólya, Putinar, or
 SparseFullBox assembly with a cell-local dense Bernstein–Gram certificate for
@@ -249,9 +249,10 @@ F = preorder.toYalmip();
 ## Documentation
 
 - Online manual: https://thebigoranger.github.io/PD-LMI-package/
-- Bernstein and PD-LMI background: https://thebigoranger.github.io/PD-LMI-package/documents/math/bernstein-polynomial/
+- Mathematical guide: https://thebigoranger.github.io/PD-LMI-package/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/
+- Bernstein overview: https://thebigoranger.github.io/PD-LMI-package/documents/math/bernstein-polynomial/
 - Install and downloads: https://thebigoranger.github.io/PD-LMI-package/install/
-- Release v1.1.0: https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v1.1.0
+- Latest GitHub Release (v1.1.0): https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v1.1.0
 - Version history: https://thebigoranger.github.io/PD-LMI-package/version-history/
 - Solver smoke examples: https://thebigoranger.github.io/PD-LMI-package/examples/solver-smoke/
 - `applyPutinar` reference: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/applyputinar/

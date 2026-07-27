@@ -1,6 +1,6 @@
 ---
 title: pdlmi applyFullBoxPreorder
-description: Rebuild a PD-LMI residual with a fixed-order full box Bernstein-Gram certificate.
+description: Rebuild a PD-LMI residual with a fixed-order full-box Bernstein-Gram preordering.
 ---
 
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
@@ -18,7 +18,7 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
 ## Purpose
 
 Create a new `pdlmi` that represents the stored residual with the implemented
-cell-local full box Bernstein-Gram preordering.
+cell-local full-box Bernstein-Gram preordering.
 
 ## Syntax
 
@@ -154,11 +154,11 @@ it does not use the already elevated constraints.
   page, including `pdlmi:InvalidUseFullBoxPreorder` and
   `pdlmi:ConflictingRelaxations`.
 
-This method implements the fixed-order full box preordering on each local
+This method implements the fixed-order full-box preordering on each local
 parameter box. In one parameter it shares the parity-specific Markov–Lukács
 assembly with
 [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/).
-For two or more parameters it is distinct because full box includes every
+For two or more parameters it is distinct because the full-box preordering includes every
 generator-subset product. It is not a general-domain SOS interface, a
 full-space SOS representation, or an automatic hierarchy selector.
 

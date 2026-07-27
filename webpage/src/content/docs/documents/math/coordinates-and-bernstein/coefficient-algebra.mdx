@@ -1,0 +1,152 @@
+---
+title: Coefficient Algebra
+description: Exact Bernstein elevation, differentiation, ordered convolution, subdivision, residual assembly, and traversal.
+---
+
+import MultiplicationDiagram from "../../../../../components/MultiplicationDiagram.astro";
+import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
+import DegreeElevationExplorer from "../../../../../components/DegreeElevationExplorer.tsx";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <span>Coordinates And Bernstein</span>
+  <span>/</span>
+  <span>Coefficient Algebra</span>
+</nav>
+
+The package performs cell-local polynomial algebra directly in the tensor
+Bernstein basis. The operations below are exact; conservatism enters only when
+a finite positivity certificate is selected.
+
+## Degree Convention
+
+Use $m$ for decision degree and $M$ for assembled residual degree. Products,
+known-data degrees, derivatives, and common-degree alignment determine $M$.
+Pólya increment $d$, absolute Gram order $r$, and SparseFullBox bandwidth
+$b$ are certificate parameters, not polynomial degrees.
+
+## Exact Degree Elevation
+
+For a one-dimensional coefficient sequence $C[i]$ of degree $M$, one
+elevation step gives
+
+$$
+\widetilde C[i]
+=\frac{i}{M+1}C[i-1]
++\left(1-\frac{i}{M+1}\right)C[i],
+$$
+
+with missing endpoint terms omitted. Tensor elevation applies this map axis by
+axis. `pdbase.elevate()` and the protected `bernElev` backend preserve the
+represented polynomial.
+
+<DegreeElevationExplorer client:visible />
+
+## Ordered Multiplication And Convolution
+
+If
+
+$$
+P(\boldsymbol\alpha)
+=\sum_{\mathbf i}P[\mathbf i]B_{\mathbf i}^{\mathbf m},
+\qquad
+Q(\boldsymbol\alpha)
+=\sum_{\mathbf j}Q[\mathbf j]B_{\mathbf j}^{\mathbf n},
+$$
+
+then the product has degree $\mathbf m+\mathbf n$ and coefficient
+
+$$
+R[\mathbf k]
+=\sum_{\mathbf i+\mathbf j=\mathbf k}
+\left[
+\prod_{s=1}^{\ell}
+\frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
+{\binom{m_s+n_s}{k_s}}
+\right]
+P[\mathbf i]Q[\mathbf j].
+$$
+
+Matrix-factor order is preserved: `P*Q` does not commute coefficient matrices.
+
+<MultiplicationDiagram />
+
+Products are allowed when decision dependence remains affine, such as known
+`pdmat` by `pdvar`. Decision-by-decision and decision-by-rate products are
+rejected.
+
+## Differentiation And Rate-Row Storage
+
+Along local axis $s$,
+
+$$
+\frac{\partial P}{\partial\rho_s}
+=\frac{m_s}{h_s^{(\mathbf c)}}
+\sum_{\mathbf i}
+\bigl(P[\mathbf i+\mathbf e_s]-P[\mathbf i]\bigr)
+B_{\mathbf i}^{\mathbf m-\mathbf e_s}.
+$$
+
+The implementation elevates axis-wise partials to a common tensor degree before
+rate weighting.
+
+<RhodiffDiagram />
+
+The resulting rate-vertex index belongs to stored rows. Once those rows are
+stacked, write the sign-normalized target as
+
+$$
+S^{(\mathbf c)}(\boldsymbol\alpha)
+=\sum_{\mathbf i}
+C^{(\mathbf c)}[\mathbf i]
+B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)
+$$
+
+without carrying the row index through every certificate formula.
+
+## Residual Assembly
+
+Known terms, decisions, and derivative rows are aligned to common grids and
+degrees before the original residual $\mathcal F$ is assembled. A comparison
+orients $\mathcal F$ into $S$. Direct and all opt-in selectors enforce
+their finite constraints against exactly the coefficients of this target.
+
+## de Casteljau Evaluation And Subdivision
+
+Repeated affine interpolation evaluates a Bernstein polynomial. Retaining the
+left and right interpolation edges yields exact subdivision coefficients.
+Subdivision and evaluation do not introduce approximation error into the
+represented polynomial.
+
+## Traversal And Storage
+
+- `cells()` traverses one-based physical cell indices $\mathbf c$.
+- `labels()` traverses zero-based local labels $\mathbf i$.
+- `rateVertices()` exposes the stored lower/upper tensor rows when present.
+- `bernsteinTable()` reports the coefficient provenance appropriate to the
+  object class.
+
+The nested order is part of the public storage contract. See
+[pdbase storage and inspection](/PD-LMI-package/documents/reference/pdbase/storage-inspection/)
+and the class-specific `bernsteinTable` pages.
+
+## Limitations
+
+Algebra is cell-local on tensor-product box grids. Ordered matrix multiplication
+must remain dimensionally valid and affine in decision data. Function-backed
+`pdmat` objects evaluate from their function and do not expose a coefficient
+table. Increasing degree or subdividing a representation does not by itself
+strengthen every selected certificate.
+
+## Further Reading
+
+- Farouki, [The Bernstein polynomial basis: A centennial retrospective](https://doi.org/10.1016/j.cagd.2012.03.001), for elevation, multiplication, evaluation, and subdivision.
+- Zettler and Garloff, [Robustness analysis using Bernstein expansion](https://doi.org/10.1109/9.746333), for coefficient enclosures in robust analysis.
+
+## See Also
+
+[Previous: Bernstein Basis, Continuity, And Storage](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
+[Next: Certificate Map And Selection Guide](/PD-LMI-package/documents/math/sos-certificates/) ·
+[`pdmat` algebra](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
+[`pdvar` algebra](/PD-LMI-package/documents/reference/pdvar/algebra/)

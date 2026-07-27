@@ -1,0 +1,118 @@
+---
+title: Rate-Box Reduction And Interface Analysis
+description: Exact rate-vertex reduction, cellwise derivatives, value continuity, and Clarke coverage at shared faces.
+---
+
+import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <span>Modeling And Analysis</span>
+  <span>/</span>
+  <span>Rate-Box Reduction And Interface Analysis</span>
+</nav>
+
+Two distinct reductions occur in the workflow. Affinity in
+$\boldsymbol\nu$ makes rate-box vertex reduction exact. Bernstein, Pólya, or
+Gram conditions over $\boldsymbol\rho$ are finite sufficient certificates.
+
+## Exact Rate-Box Vertex Reduction
+
+For fixed $\boldsymbol\rho$, write the residual as
+
+$$
+\mathcal F(\boldsymbol\rho,\boldsymbol\nu)
+=\mathcal F_0(\boldsymbol\rho)
++\sum_{s=1}^{\ell}\nu_s\mathcal F_s(\boldsymbol\rho).
+$$
+
+Because $\mathcal R$ is a box and the residual is affine in
+$\boldsymbol\nu$, requiring the matrix inequality at every vertex of
+$\mathcal R$ is equivalent to requiring it throughout $\mathcal R$. This
+step introduces $2^\ell$ rate rows, ordered by lower/upper tensor choices.
+
+<RhodiffDiagram />
+
+The rate-vertex index is useful while explaining or inspecting these stored
+rows. After rows are stacked into the finite residual array, certificate
+formulas suppress it.
+
+## Cellwise Derivatives
+
+Within physical cell $\mathcal H_{\mathbf c}$, the forward pullback
+$\boldsymbol\alpha=\phi_{\mathbf c}(\boldsymbol\rho)$ gives
+
+$$
+\frac{\partial P}{\partial\rho_s}
+=\frac{1}{h_s^{(\mathbf c)}}
+\frac{\partial(P\circ\phi_{\mathbf c}^{-1})}{\partial\alpha_s}.
+$$
+
+`rhodiff(P, rateBounds)` differentiates cell-local Bernstein data, aligns the
+partial derivatives to a common tensor degree, multiplies them by each rate
+vertex, and stores the resulting rows. See
+[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) for its input
+and output contract.
+
+## Shared Values, Different One-Sided Slopes
+
+A continuous piecewise-polynomial `pdvar` shares full face-control handles
+between neighboring cells. Therefore its values agree on each face. The
+normal derivative need not agree:
+
+$$
+P_{\mathbf c^-}|_{\text{face}}
+=P_{\mathbf c^+}|_{\text{face}},
+\qquad
+\nabla P_{\mathbf c^-}|_{\text{face}}
+\ne
+\nabla P_{\mathbf c^+}|_{\text{face}}
+\quad\text{is allowed}.
+$$
+
+This is $C^0$ piecewise-polynomial storage, not a claim of global $C^1$
+smoothness.
+
+## Clarke Interface Coverage
+
+A continuous piecewise-polynomial matrix function on compact
+$\mathcal P$ is locally Lipschitz. At a shared face, its Clarke generalized
+derivative lies in the convex hull of the limiting cell-side derivatives.
+Because the DPD-LMI is affine in those derivatives, imposing the inequality
+for every adjacent cell-side limit covers that convex hull.
+
+This argument closes the interface gap without requiring derivative
+continuity. It applies to the continuous decision $P$, not automatically to
+discontinuous coefficient-backed `pdmat` data.
+
+## Exact Versus Sufficient
+
+| Step | Logical status | What remains |
+| :--- | :--- | :--- |
+| Rate-box vertices | Exact for affine $\boldsymbol\nu$-dependence | Continuous $\boldsymbol\rho$-domain |
+| Cell-side interface checks | Covers Clarke convex hull under continuity and affinity | Positivity on each cell |
+| Direct, Pólya, or Gram certificate | Finite sufficient condition | Possible conservatism at fixed settings |
+
+A failed certificate does not undo exact rate reduction, and it does not prove
+that the original continuous inequality fails.
+
+## Limitations
+
+The exact vertex statement requires affine dependence on
+$\boldsymbol\nu$ over a hyperrectangle. The interface argument requires
+value continuity and local Lipschitz regularity of the decision function.
+Discontinuous known data must be analyzed cellwise, and nonlinear rate
+dependence would need a different treatment.
+
+## Further Reading
+
+- Clarke, [Optimization and Nonsmooth Analysis](https://epubs.siam.org/doi/book/10.1137/1.9781611971309), for generalized gradients of locally Lipschitz functions.
+- Masubuchi, Kume, and Shimemura, [Spline-type solution to parameter-dependent LMIs](https://doi.org/10.1109/CDC.1998.761918), for finite spline-type PD-LMI conditions.
+
+## See Also
+
+[Previous: DPD-LMI And LPV L2-Gain Model](/PD-LMI-package/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/) ·
+[Next: Gridding And Local Coordinates](/PD-LMI-package/documents/math/gridding-and-degree/) ·
+[`pdvar` storage and evaluation](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) ·
+[`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/)

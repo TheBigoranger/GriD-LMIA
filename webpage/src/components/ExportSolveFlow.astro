@@ -11,7 +11,7 @@ import DiagramFrame from "./DiagramFrame.astro";
     <div class="export-solve-flow__node"><strong>pdlmi</strong><code>L</code></div>
     <span class="export-solve-flow__arrow" aria-hidden="true">→</span>
     <div class="export-solve-flow__certificates" aria-label="Certificate choices">
-      <span>Direct</span><span>Pólya</span><span>Putinar</span><span>Full Box</span>
+      <span>Direct</span><span>Pólya</span><span>Putinar</span><span>SparseFullBox</span><span>FullBox</span>
     </div>
     <span class="export-solve-flow__arrow" aria-hidden="true">→</span>
     <div class="export-solve-flow__node"><strong>YALMIP constraints</strong><code>selected.toYalmip()</code></div>
@@ -29,6 +29,7 @@ import DiagramFrame from "./DiagramFrame.astro";
   .export-solve-flow__node--result { border-color: var(--diagram-result); color: var(--diagram-result); background: color-mix(in srgb, var(--diagram-result) 8%, transparent); }
   .export-solve-flow__node--result code { color: inherit; }
   .export-solve-flow__certificates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.25rem; }
+  .export-solve-flow__certificates span:last-child { grid-column: 1 / -1; }
   .export-solve-flow__certificates span { border: 1px solid var(--diagram-border); border-radius: 6px; padding: 0.35rem; color: var(--sl-color-text); font-size: 0.78rem; font-weight: 700; text-align: center; background: var(--sl-color-bg); }
   .export-solve-flow__arrow { color: var(--sl-color-text-accent); font-size: 1.2rem; font-weight: 800; }
   @media (max-width: 760px) {

@@ -1,0 +1,100 @@
+---
+title: Direct And Pólya
+description: Coefficient-wise positivity and exact Bernstein elevation by a selected Pólya increment.
+---
+
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <span>Finite Certificates</span>
+  <span>/</span>
+  <span>Direct And Pólya</span>
+</nav>
+
+<CertificateSpectrum selected="direct" />
+
+Both methods use the sign-normalized positive target
+
+$$
+S^{(\mathbf c)}(\boldsymbol\alpha)
+=\sum_{\mathbf i}
+C^{(\mathbf c)}[\mathbf i]
+B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha).
+$$
+
+The stored rate rows have already been stacked, so the certificate notation
+does not carry a rate-vertex index.
+
+## Direct
+
+Direct enforces
+
+$$
+C^{(\mathbf c)}[\mathbf i]\succeq0
+\qquad\text{for every cell and label}.
+$$
+
+Nonnegative Bernstein basis functions sum to one, so this condition implies
+$S^{(\mathbf c)}(\boldsymbol\alpha)\succeq0$ on the unit cell. It is the
+default `pdlmi` state.
+
+```matlab
+L = residual <= 0;
+constraints = L.toYalmip();
+```
+
+No Gram matrices, margin, or solver call are added.
+
+## Pólya Elevation
+
+For increment $d\in\mathbb N_0$, multiply the representation by the identity
+
+$$
+\prod_{s=1}^{\ell}
+[\alpha_s+(1-\alpha_s)]^d=1.
+$$
+
+This produces exact degree elevation from $M$ to $M+d$. Pólya then applies
+the same coefficient test to the elevated matrices
+$\widetilde C^{(\mathbf c)}[\mathbf i]$.
+
+```matlab
+selected = L.applyPolya(d);
+constraints = selected.toYalmip();
+```
+
+The residual polynomial is unchanged. Reapplying a selector rebuilds from the
+stored original residual $\mathcal F$; certificate choices do not compound.
+
+## When To Use Each
+
+Start with Direct. If a coarse representation has an unfavorable coefficient
+even though the target appears positive, try a modest $d$, refine a sensitive
+grid axis, or enlarge decision degree $m$. These are separate operations and
+should be recorded separately.
+
+## Failure Interpretation
+
+Failure at one coefficient degree or Pólya increment is inconclusive for the
+continuous inequality. Likewise, `diagnostics.problem ~= 0` supplies no valid
+objective and does not prove infeasibility.
+
+## Limitations
+
+Both methods remain sufficient coefficient tests. Pólya can increase the number
+of coefficient constraints quickly with dimension, and the package does not
+search increments adaptively. Equality assembly is direct-only.
+
+## Further Reading
+
+- Farouki, [The Bernstein polynomial basis: A centennial retrospective](https://doi.org/10.1016/j.cagd.2012.03.001), for exact degree elevation.
+- Powers and Reznick, [A new bound for Pólya's theorem](https://doi.org/10.1007/s002080000183), for the underlying positivity theorem.
+
+## See Also
+
+[Previous: Certificate Map And Selection Guide](/PD-LMI-package/documents/math/sos-certificates/) ·
+[Next: Markov–Lukács And Putinar](/PD-LMI-package/documents/math/finite-certificates/markov-lukacs-and-putinar/) ·
+[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
+[`pdlmi` constructor](/PD-LMI-package/documents/reference/pdlmi/constructor/)

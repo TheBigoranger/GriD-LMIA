@@ -10,7 +10,7 @@ import DiagramFrame from "./DiagramFrame.astro";
   <div class="multiplication-formulas">
     <div>
       <span>Parameter space</span>
-      <strong>R(ρ) = P(ρ)Q(ρ)</strong>
+      <strong>R(α) = P(α)Q(α)</strong>
     </div>
     <div>
       <span>Coefficient space</span>
@@ -20,15 +20,15 @@ import DiagramFrame from "./DiagramFrame.astro";
   <div class="curve-layout">
     <div class="curve-legend" aria-label="Function and Bernstein coefficient legend">
       <section class="curve-copy curve-copy--first">
-        <h4>P(ρ) = 4 − 2ρ</h4>
+        <h4>P(α) = 4 − 2α</h4>
         <p>Bernstein [4, 2]</p>
       </section>
       <section class="curve-copy curve-copy--second">
-        <h4>Q(ρ) = 0.5 + 2.5ρ</h4>
+        <h4>Q(α) = 0.5 + 2.5α</h4>
         <p>Bernstein [0.5, 3]</p>
       </section>
       <section class="curve-copy curve-copy--result">
-        <h4>R(ρ) = 2 + 9ρ − 5ρ²</h4>
+        <h4>R(α) = 2 + 9α − 5α²</h4>
         <p>Bernstein [2, 6.5, 6]</p>
       </section>
     </div>
@@ -38,7 +38,7 @@ import DiagramFrame from "./DiagramFrame.astro";
       <g class="axes">
         <path d="M60 250 H840"/><path d="M60 250 V35"/>
         <text x="60" y="276" text-anchor="middle">0</text><text x="840" y="276" text-anchor="middle">1</text>
-        <text x="450" y="294" text-anchor="middle">ρ</text>
+        <text x="450" y="294" text-anchor="middle">α</text>
       </g>
       <g class="grid">
         <path d="M60 215 H840 M60 180 H840 M60 145 H840 M60 110 H840 M60 75 H840 M60 40 H840" />

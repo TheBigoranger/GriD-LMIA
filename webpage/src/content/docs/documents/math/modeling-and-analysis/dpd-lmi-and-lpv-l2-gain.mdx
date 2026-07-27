@@ -1,0 +1,169 @@
+---
+title: DPD-LMI And LPV L2-Gain Model
+description: Build the canonical LPV induced-L2-gain analysis problem from the plant model to a bounded-real DPD-LMI.
+---
+
+import JourneyCurve from "../../../../../components/JourneyCurve.astro";
+import ExportSolveFlow from "../../../../../components/ExportSolveFlow.astro";
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <span>Modeling And Analysis</span>
+  <span>/</span>
+  <span>DPD-LMI And LPV L2-Gain Model</span>
+</nav>
+
+This page fixes the model and symbols used throughout the manual. Subsequent
+pages carry the same problem through rate reduction, cell coordinates,
+Bernstein residual assembly, a finite certificate, and YALMIP.
+
+<JourneyCurve />
+
+## LPV Plant And Objective
+
+Consider
+
+$$
+\begin{aligned}
+\dot x(t)
+&=A(\boldsymbol\rho(t))x(t)+B(\boldsymbol\rho(t))w(t),\\
+z(t)
+&=C(\boldsymbol\rho(t))x(t)+D(\boldsymbol\rho(t))w(t),
+\end{aligned}
+$$
+
+where $x(t)$ is the plant state, $w(t)$ is the disturbance, and $z(t)$
+is the performance output. The scheduling vector and rate satisfy
+
+$$
+\boldsymbol\rho(t)\in\mathcal P,\qquad
+\boldsymbol\nu(t)=\dot{\boldsymbol\rho}(t)\in\mathcal R,
+$$
+
+with parameter and rate boxes
+
+$$
+\mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s],
+\qquad
+\mathcal R=\prod_{s=1}^{\ell}[\underline\nu_s,\overline\nu_s].
+$$
+
+The goal is a zero-state induced-$L_2$ bound
+$\lVert z\rVert_2<\gamma\lVert w\rVert_2$.
+
+## Bounded-Real DPD-LMI
+
+Choose a differentiable symmetric matrix $P(\boldsymbol\rho)$. A standard
+sufficient analysis condition is
+
+$$
+P(\boldsymbol\rho)\succ0
+$$
+
+and
+
+$$
+\begin{bmatrix}
+\dot P+\operatorname{He}(PA) & PB & C^{\mathsf T}\\
+B^{\mathsf T}P & -\gamma I & D^{\mathsf T}\\
+C & D & -\gamma I
+\end{bmatrix}\prec0
+$$
+
+for every
+$(\boldsymbol\rho,\boldsymbol\nu)\in\mathcal P\times\mathcal R$, where
+
+$$
+\dot P(\boldsymbol\rho,\boldsymbol\nu)
+=\sum_{s=1}^{\ell}
+\nu_s\frac{\partial P}{\partial\rho_s}(\boldsymbol\rho),
+\qquad
+\operatorname{He}(X)=X+X^{\mathsf T}.
+$$
+
+The strict signs describe the mathematical analysis condition. The package
+inserts no hidden margin; a numerical model must encode a chosen
+$\varepsilon I$ explicitly.
+
+## General DPD-LMI Template
+
+The same workflow applies to residuals affine in general decision functions
+$y_k(\boldsymbol\rho)$ and their partial derivatives:
+
+$$
+\mathcal F(\boldsymbol\rho,\boldsymbol\nu)
+=F_0(\boldsymbol\rho)
++\sum_{k=1}^{N}F_k(\boldsymbol\rho)y_k(\boldsymbol\rho)
++\sum_{k=1}^{N}\sum_{s=1}^{\ell}
+R_{ks}(\boldsymbol\rho)
+\frac{\partial y_k}{\partial\rho_s}(\boldsymbol\rho)\nu_s.
+$$
+
+The package supports affine decision expressions. Products nonlinear in
+decision data, including decision-by-decision and decision-by-rate products,
+are rejected.
+
+## From Analysis Residual To Positive Target
+
+A comparison such as `residual <= 0` stores the original residual
+$\mathcal F$ and normalizes its sign to a positive target
+
+$$
+S=-\mathcal F.
+$$
+
+Certificate pages use $S\succeq0$. They do not silently replace the original
+relation or add strictness.
+
+## Modeling Path In MATLAB
+
+```matlab
+yalmip('clear')
+
+P = pdvar(n, grid, "symmetric", Degree=m);
+Pdot = rhodiff(P, rateBounds);
+
+residual = [ ...
+    Pdot + P*A + A'*P, P*B, C'; ...
+    B'*P,              -gamma*eye(nw), D'; ...
+    C,                 D,              -gamma*eye(nz)];
+
+L = residual <= -epsilon*eye(n + nw + nz);
+selected = L;  % Direct by default
+
+diagnostics = optimize(selected.toYalmip(), gamma.LocalValues{1}{1}, options);
+assert(diagnostics.problem == 0, diagnostics.info)
+Psol = value(P);
+```
+
+`pdlmi` assembles constraints but does not own solver selection or the
+`optimize` call. Retain an optimized $\gamma$ only after
+`diagnostics.problem == 0`.
+
+<ExportSolveFlow />
+
+## What Comes Next
+
+The rate dependence above is affine, so the entire rate box reduces exactly to
+its vertices. Parameter dependence remains continuous and requires a separate
+finite sufficient certificate after gridding and Bernstein assembly.
+
+## Limitations
+
+This is an analysis condition for box-bounded scheduling parameters and rates.
+It does not establish necessity, synthesize controllers, infer a grid, or
+choose $\varepsilon$, a solver, or a certificate order. A nonzero solver
+status is not proof that the continuous LPV problem is infeasible.
+
+## Further Reading
+
+- Scherer, [Mixed $H_2/H_\infty$ control for time-varying and linear parametrically-varying systems](https://doi.org/10.1002/%28SICI%291099-1239%28199611%296%3A9%2F10%3C929%3A%3AAID-RNC260%3E3.0.CO%3B2-9), for parameter-dependent bounded-real analysis.
+- Scherer and Weiland, [Linear Matrix Inequalities in Control](https://www.imng.uni-stuttgart.de/mst/files/LectureNotes.pdf), for LMI and dissipation background.
+
+## See Also
+
+[Next: Rate-Box Reduction And Interface Analysis](/PD-LMI-package/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/) ·
+[`pdvar` constructor](/PD-LMI-package/documents/reference/pdvar/constructor/) ·
+[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
+[`pdlmi` constructor](/PD-LMI-package/documents/reference/pdlmi/constructor/)
