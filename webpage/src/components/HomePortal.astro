@@ -19,14 +19,14 @@ const primaryLinks = [
 const lmiSteps = [
   {
     number: "01",
-    title: "Model an LPV induced-L2-gain problem",
-    text: "x(t) is the plant state, w(t) is the disturbance, and z(t) is the performance output. Seek a parameter-dependent Lyapunov matrix P and an induced-L2 bound gamma.",
+    title: "Model the general DPD-LMI problem",
+    textHtml: `Choose continuous piecewise-polynomial decision matrices ${renderInlineMath("Y_1,\\ldots,Y_N")} so that one or more symmetric residuals ${renderInlineMath("\\mathcal F_a")} are negative semidefinite throughout the parameter box and, when rate dependence is present, the optional bounded rate box. Equivalently, certify ${renderInlineMath("S_a=-\\mathcal F_a\\succeq0")} as a positive target.`,
     math: [
-      "\\dot x=A(\\boldsymbol\\rho)x+B(\\boldsymbol\\rho)w,\\qquad z=C(\\boldsymbol\\rho)x+D(\\boldsymbol\\rho)w.",
-      "\\boldsymbol\\rho\\in\\mathcal P,\\quad\\boldsymbol\\nu=\\dot{\\boldsymbol\\rho}\\in\\mathcal R,\\quad\\lVert z\\rVert_2<\\gamma\\lVert w\\rVert_2.",
-      "P(\\boldsymbol\\rho)\\succ0,\\qquad \\begin{bmatrix}\\dot P+\\operatorname{He}(PA)&PB&C^{\\mathsf T}\\\\B^{\\mathsf T}P&-\\gamma I&D^{\\mathsf T}\\\\C&D&-\\gamma I\\end{bmatrix}\\prec0.",
+      "Y_1(\\boldsymbol\\rho),\\ldots,Y_N(\\boldsymbol\\rho)\\quad\\text{continuous piecewise-polynomial decisions}.",
+      "\\mathcal F_a\\!\\left(\\boldsymbol\\rho,\\boldsymbol\\nu;Y_1,\\ldots,Y_N\\right)\\preceq0,\\qquad \\forall(\\boldsymbol\\rho,\\boldsymbol\\nu)\\in\\mathcal P\\times\\mathcal R,\\quad a=1,\\ldots,q.",
+      "\\mathcal R\\text{ is included only for rate-dependent models},\\qquad S_a=-\\mathcal F_a\\succeq0.",
     ],
-    manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/",
+    manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#general-dpd-lmi-template",
   },
   {
     number: "02",
@@ -83,12 +83,12 @@ const lmiSteps = [
     <div class="home-copy">
       <p class="home-kicker">MATLAB / YALMIP</p>
       <p class="home-wordmark">PD-LMI</p>
-      <p class="home-subtitle">From an LPV gain model to finite cellwise certificates.</p>
+      <p class="home-subtitle">From a continuum DPD-LMI to finite cellwise certificates.</p>
       <p class="home-summary">
-        Analyze an LPV induced-L2-gain problem with continuous
-        piecewise-polynomial decisions, exact scheduling-rate vertices,
-        cell-local Bernstein algebra, and five selectable finite certificate
-        states.
+        Model general symmetric residual inequalities with continuous
+        piecewise-polynomial decisions, optional exact scheduling-rate vertex
+        reduction, cell-local Bernstein algebra, and five selectable finite
+        certificate states.
       </p>
       <nav class="home-actions" aria-label="Primary documentation links">
         {primaryLinks.map((link) => <a href={link.href}>{link.label}</a>)}
@@ -100,7 +100,7 @@ const lmiSteps = [
   <section class="product-walkthrough" aria-labelledby="walkthrough-title">
     <header class="section-heading">
       <p class="home-label">Worked spine · {versionInfo.current}</p>
-      <h2 id="walkthrough-title">From the LPV model to YALMIP and a recovered Lyapunov matrix</h2>
+      <h2 id="walkthrough-title">From a continuum DPD-LMI to YALMIP and recovered decisions</h2>
       <p>Follow one notation-stable spine. Each stage links to a focused mathematical guide and the relevant API reference.</p>
     </header>
 
