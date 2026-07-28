@@ -1,6 +1,6 @@
 ---
 title: pdlmi applySparseFullBoxPreorder
-description: Rebuild a PD-LMI residual with a tensor-window sparse full-box certificate and canonical endpoints.
+description: Rebuild a PD-LMI residual with band-limited FullBox Gram support and canonical endpoints.
 ---
 
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
@@ -10,9 +10,11 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
 # `applySparseFullBoxPreorder`
 
 `applySparseFullBoxPreorder` rebuilds an inequality from its stored `Residual`
-with the sparse full-box family. It retains every parity term in one parameter
-and every generator-mask term on a multidimensional box, but replaces each
-dense Gram matrix by independent axis-aligned tensor windows.
+with the sparse full-box family. It retains every FullBox parity or
+generator-mask term and every exact target-coefficient identity, while
+restricting Gram support to a band-limited form. The implementation realizes
+that support with independent overlapping axis-aligned tensor-window PSD
+clique blocks.
 
 ## Syntax
 
@@ -20,6 +22,7 @@ dense Gram matrix by independent axis-aligned tensor windows.
 Csparse = C.applySparseFullBoxPreorder()
 Csparse = C.applySparseFullBoxPreorder(b)
 Csparse = C.applySparseFullBoxPreorder(b, r)
+Csparse = C.applySparseFullBoxPreorder(..., ValidationMode=mode)
 ```
 
 The same family is available at construction:
@@ -36,7 +39,7 @@ Csparse = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
 | Argument | Contract |
 | :--- | :--- |
 | `C` | Any `pdlmi` object. The method always rebuilds from `C.Residual`; it does not add constraints to the currently selected family. |
-| `b` | Finite positive integer scalar. Default `2`. It is a tensor-window width on every Bernstein axis, not a flattened matrix bandwidth. |
+| `b` | Finite positive integer band width. Default `2`. Intermediate support is realized with windows of at most `b` consecutive labels on every Bernstein axis. |
 | `r` | Finite nonnegative integer scalar and absolute Gram order. It is not an increment from the residual degree. |
 
 For assembled residual degree `M`, the default and minimum admissible order are
@@ -71,9 +74,9 @@ returned object instead of inferring its family from the requested width.
 ## Certificate Construction
 
 For every full-box parity or generator-mask term, the sparse construction
-enumerates all admissible tensor-window start tuples. Each window obtains a
+enumerates all admissible tensor-window start tuples. Each clique obtains a
 free PSD Gram block, and exact coefficient matching is imposed at every
-coefficient of the target Bernstein tensor. The support is tensor-product:
+coefficient of the target Bernstein tensor. The implementation support is tensor-product:
 with width `b`, each axis uses at most `b` consecutive monomials.
 
 Certificates are independent for every physical cell, every active rate row,
@@ -144,6 +147,9 @@ For the scalar one-parameter degree-four fixture at order two and width two,
 one cell stores three PSD window blocks of dimension two and five coefficient
 identities. Width one stores five Direct coefficient tests; width three
 stores the two dense FullBox PSD blocks and five identities.
+
+`ValidationMode` is transient, accepts case-insensitive `"fast"` or
+`"strict"`, applies only to this rebuild, and is neither stored nor inherited.
 
 ## Validation And Errors
 

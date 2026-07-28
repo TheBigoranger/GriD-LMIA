@@ -3,5 +3,5 @@ function out = mkUnOp(obj, vals, sz)
 
     out = pdvar(mkInit(obj.GridInfo.Vectors, sz, obj.Degree, vals, ...
         obj.ContainsDecision, obj.HasRateDependence, obj.RateBounds, ...
-        "expression", obj.IsContinuous));
+        "expression", []));
 end

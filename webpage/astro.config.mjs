@@ -37,6 +37,7 @@ export default defineConfig({
         { label: "Welcome", link: "/" },
         { label: "Install", slug: "install" },
         { label: "Version History", slug: "version-history" },
+        { label: "v1.1.2 Performance", slug: "performance-v1-1-2" },
         {
           label: "Documents",
           items: [
@@ -73,8 +74,10 @@ export default defineConfig({
                 { label: "Constructor", slug: "documents/reference/pdmat/constructor" },
                 { label: "Storage And Elevation", slug: "documents/reference/pdmat/storage-and-elevation" },
                 { label: "evaluate", slug: "documents/reference/pdmat/evaluate" },
+                { label: "rhodiff", slug: "documents/reference/pdmat/rhodiff" },
                 { label: "plot", slug: "documents/reference/pdmat/plot" },
                 { label: "bernsteinTable", slug: "documents/reference/pdmat/bernsteintable" },
+                { label: "Comparisons", slug: "documents/reference/pdmat/comparisons" },
                 {
                   label: "Matrix Operations",
                   items: [

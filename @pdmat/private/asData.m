@@ -1,4 +1,4 @@
-function data = asData(grid, val, reqSize, errId)
+function data = asData(grid, val, reqSize, rb, errId)
     %ASDATA Convert an operand into coefficient data on the target grid.
     %
     %   Syntax:
@@ -33,8 +33,13 @@ function data = asData(grid, val, reqSize, errId)
         if ~isempty(reqSize) && ~isequal(val.MatrixSize, reqSize)
             error(errId, "pdmat matrix sizes are incompatible for this operation.");
         end
+        if ~isempty(val.RateBounds) && ...
+                (isempty(rb) || ~isequal(rb, val.RateBounds))
+            error(errId, "pdmat operands must have matching RateBounds.");
+        end
         data.MatrixSize = val.MatrixSize;
         data.Degree = val.Degree;
+        data.HasRateRows = val.hasRateRows();
 
         same = numel(info.Vectors) == numel(val.GridInfo.Vectors);
         if same
@@ -44,11 +49,15 @@ function data = asData(grid, val, reqSize, errId)
         end
         if same
             data.LocalValues = val.LocalValues;
+        elseif data.HasRateRows
+            error(errId, ...
+                "Rate-vertex pdmat operands require matching physical grids.");
         else
             % Re-sampling through evaluate keeps subdivision local to pdmat algebra.
             data.LocalValues = fitVals(info, val.Degree, val.MatrixSize, @(pt) evaluate(val, pt));
         end
         data.IsContinuous = val.IsContinuous;
+        data.HasRateDependence = val.HasRateDependence;
         return
     end
 
@@ -71,4 +80,6 @@ function data = asData(grid, val, reqSize, errId)
     nCell = info.NumNodes - 1;
     data.LocalValues = helper.mkNest(nCell, @(~) {mat});
     data.IsContinuous = true;
+    data.HasRateDependence = false;
+    data.HasRateRows = false;
 end

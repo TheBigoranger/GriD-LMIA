@@ -1,4 +1,4 @@
-function out = applyPutinar(obj, order)
+function out = applyPutinar(obj, varargin)
     %APPLYPUTINAR Apply a cell-local Putinar box certificate.
     %
     %   Syntax:
@@ -37,12 +37,18 @@ function out = applyPutinar(obj, order)
         error("pdlmi:UnsupportedEqualityCertificate", ...
             "Coefficient equality supports direct assembly only.");
     end
-    if nargin < 2
+    [args, validationMode] = parseApplyValidation(varargin);
+    if numel(args) > 1
+        error("pdlmi:InvalidApplyOptions", ...
+            "Too many positional inputs were supplied.");
+    end
+    if isempty(args)
         order = chkPutinarOrder(obj.Residual);
     else
-        order = chkPutinarOrder(obj.Residual, order);
+        order = chkPutinarOrder(obj.Residual, args{1});
     end
 
     out = pdlmi(obj.Residual, obj.Relation, ...
-        UsePutinar=true, PutinarOrder=order);
+        UsePutinar=true, PutinarOrder=order, ...
+        ValidationMode=validationMode);
 end

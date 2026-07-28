@@ -29,6 +29,11 @@ function out = plus(lhs, rhs)
 
     % The identity fast path must still enforce ordinary addition compatibility.
     if ~isempty(zeroVal)
+        if zeroVal.HasRateDependence || out.HasRateDependence
+            zeroVal = [];
+        end
+    end
+    if ~isempty(zeroVal)
         if ~isequal(zeroVal.MatrixSize, out.MatrixSize)
             error("pdvar:InvalidAddition", ...
                 "pdvar operand matrix sizes are incompatible for this operation.");

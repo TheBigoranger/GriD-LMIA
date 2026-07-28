@@ -18,7 +18,7 @@ classdef pdlmi
     %     C = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
     %
     %   Arguments:
-    %     expr     - pdvar residual to constrain relative to zero.
+    %     expr     - pdvar residual, or pdmat residual for an inequality.
     %     relation - "<=", ">=", or "==" applied to assembled coefficients.
     %     options  - One optional inequality certificate selection. Sparse
     %                full-box options are UseSparseFullBoxPreorder,
@@ -43,6 +43,13 @@ classdef pdlmi
     %   also independent for every MATLAB column-major matrix entry. Apply
     %   methods rebuild from Residual, so a new selection replaces the previous
     %   one.
+    %
+    %   For a known pdmat inequality, Direct and Pólya export one logical
+    %   sufficient certificate using absolute tolerance 1e-10. A false export
+    %   warns with pdlmi:InconclusiveCertificate because coefficient failure
+    %   does not prove continuous-domain violation or indefiniteness. Gram
+    %   certificates still export YALMIP constraints with auxiliary variables.
+    %   Function-only pdmat residuals and pdmat equality are unsupported.
     %
     %   Sparse full-box defaults to BandWidth=2. Its default order is
     %   floor(expr.Degree/2) for one parameter and ceil(expr.Degree/2)
@@ -89,9 +96,9 @@ classdef pdlmi
 
     methods
         function obj = pdlmi(expr, relation, varargin)
-            if ~isa(expr, "pdvar")
+            if ~(isa(expr, "pdvar") || isa(expr, "pdmat"))
                 error("pdlmi:InvalidExpression", ...
-                    "The pdlmi residual must be a pdvar expression.");
+                    "The pdlmi residual must be a pdvar or pdmat expression.");
             end
             if ~((ischar(relation) && isrow(relation) && ~isempty(relation)) || ...
                     (isstring(relation) && isscalar(relation) && ~ismissing(relation)))
@@ -103,9 +110,17 @@ classdef pdlmi
                 error("pdlmi:InvalidRelation", ...
                     "relation must be the scalar string '<=', '>=', or '=='.");
             end
+            if isa(expr, "pdmat") && relation == "=="
+                error("pdlmi:UnsupportedPdmatEquality", ...
+                    "Coefficient equality remains supported only for pdvar residuals.");
+            end
+            if isa(expr, "pdmat") && expr.SourceSummary == "function"
+                error("pdlmi:MissingCoefficientEvidence", ...
+                    "Function-only pdmat residuals need Bernstein coefficient evidence.");
+            end
 
             opts = parseOpts(relation == "==", varargin{:});
-            mode = classifyComparison(expr, relation);
+            comparisonMode = classifyComparison(expr, relation);
             obj.Residual = expr;
             obj.Relation = relation;
             obj.UsePolya = opts.UsePolya;
@@ -126,7 +141,8 @@ classdef pdlmi
                 end
                 obj.FullBoxOrder = opts.FullBoxOrder;
                 obj.Constraints = mkFullBoxCons(expr, ...
-                    relation, opts.FullBoxOrder, mode);
+                    relation, opts.FullBoxOrder, comparisonMode, ...
+                    opts.ValidationMode);
             elseif opts.UsePutinar
                 if opts.PutinarOrderSpecified
                     opts.PutinarOrder = chkPutinarOrder(expr, ...
@@ -136,7 +152,8 @@ classdef pdlmi
                 end
                 obj.PutinarOrder = opts.PutinarOrder;
                 obj.Constraints = mkPutinarCons(expr, relation, ...
-                    opts.PutinarOrder, mode);
+                    opts.PutinarOrder, comparisonMode, ...
+                    opts.ValidationMode);
             elseif opts.UseSparseFullBoxPreorder
                 if opts.SparseFullBoxOrderSpecified
                     order = chkSparseFullBoxOrder(expr, ...
@@ -150,30 +167,32 @@ classdef pdlmi
                 % and avoid auxiliary Gram variables when they add no freedom.
                 if bandWidth == 1
                     obj.Constraints = mkCoeffCons(expr, relation, ...
-                        false, 0, mode);
+                        false, 0, comparisonMode, opts.ValidationMode);
                 elseif bandWidth >= order + 1
                     obj.UseFullBoxPreorder = true;
                     obj.FullBoxOrder = order;
                     obj.Constraints = mkFullBoxCons(expr, relation, ...
-                        order, mode);
+                        order, comparisonMode, opts.ValidationMode);
                 else
                     obj.UseSparseFullBoxPreorder = true;
                     obj.SparseFullBoxOrder = order;
                     obj.BandWidth = bandWidth;
                     obj.Constraints = mkSparseFullBoxCons(expr, relation, ...
-                        order, bandWidth, mode);
+                        order, bandWidth, comparisonMode, ...
+                        opts.ValidationMode);
                 end
             else
                 obj.Constraints = mkCoeffCons(expr, relation, ...
-                    opts.UsePolya, opts.PolyaDegree, mode);
+                    opts.UsePolya, opts.PolyaDegree, comparisonMode, ...
+                    opts.ValidationMode);
             end
-            if mode == "elementwise"
+            if comparisonMode == "elementwise"
                 warning("pdlmi:ElementwiseInequality", ...
                     "The residual is non-square or has a non-Hermitian coefficient; the inequality is assembled entry-wise.");
             end
         end
 
-        out = applyPolya(obj, degreeIncrement)
+        out = applyPolya(obj, varargin)
         out = applyFullBoxPreorder(obj, varargin)
         out = applyPutinar(obj, varargin)
         out = applySparseFullBoxPreorder(obj, varargin)
@@ -190,21 +209,27 @@ function mode = classifyComparison(expr, relation)
         return
     end
 
+    if expr.MatrixSize(1) ~= expr.MatrixSize(2)
+        mode = "elementwise";
+        return
+    end
+
     mode = "semidefinite";
     cells = expr.cells();
+    vals = expr.LocalValues;
     for c = 1:size(cells, 1)
-        coeffs = expr.coeffs(cells(c, :));
+        coeffs = helper.cellGet(vals, cells(c, :));
         for row = 1:size(coeffs, 1)
             for k = 1:size(coeffs, 2)
                 mat = coeffs{row, k};
-                if size(mat, 1) ~= size(mat, 2)
+                if isa(mat, "sdpvar")
+                    isHermitian = ishermitian(mat);
+                else
+                    isHermitian = norm(mat - mat', inf) <= 1e-10;
+                end
+                if ~isHermitian
                     mode = "elementwise";
-                elseif isa(mat, "sdpvar")
-                    if ~ishermitian(mat)
-                        mode = "elementwise";
-                    end
-                elseif norm(mat - mat', inf) > 1e-10
-                    mode = "elementwise";
+                    return
                 end
             end
         end
@@ -221,12 +246,14 @@ function opts = parseOpts(isEquality, varargin)
         "FullBoxOrderSpecified", false, "UsePutinar", false, ...
         "PutinarOrder", 0, "PutinarOrderSpecified", false, ...
         "UseSparseFullBoxPreorder", false, "SparseFullBoxOrder", 0, ...
-        "SparseFullBoxOrderSpecified", false, "BandWidth", 0);
+        "SparseFullBoxOrderSpecified", false, "BandWidth", 0, ...
+        "ValidationMode", "fast");
     seen = struct("UsePolya", false, "PolyaDegree", false, ...
         "UseFullBoxPreorder", false, "FullBoxOrder", false, ...
         "UsePutinar", false, "PutinarOrder", false, ...
         "UseSparseFullBoxPreorder", false, ...
-        "SparseFullBoxOrder", false, "BandWidth", false);
+        "SparseFullBoxOrder", false, "BandWidth", false, ...
+        "ValidationMode", false);
     k = 1;
     while k <= numel(varargin)
         rawName = varargin{k};
@@ -240,10 +267,10 @@ function opts = parseOpts(isEquality, varargin)
                 "UseFullBoxPreorder", "FullBoxOrder", ...
                 "UsePutinar", "PutinarOrder", ...
                 "UseSparseFullBoxPreorder", "SparseFullBoxOrder", ...
-                "BandWidth"])
+                "BandWidth", "ValidationMode"])
             error("pdlmi:UnknownOption", "Unsupported pdlmi option: %s.", name);
         end
-        if isEquality
+        if isEquality && name ~= "ValidationMode"
             error("pdlmi:UnsupportedEqualityCertificate", ...
                 "Coefficient equality supports direct assembly only.");
         end
@@ -266,19 +293,24 @@ function opts = parseOpts(isEquality, varargin)
             continue
         end
         if k == numel(varargin)
+            if name == "ValidationMode"
+                error("pdlmi:InvalidValidationMode", ...
+                    "ValidationMode requires the scalar text 'fast' or 'strict'.");
+            end
             error("pdlmi:InvalidOptions", ...
                 "pdlmi option %s requires a value.", name);
         end
-        if (ischar(varargin{k + 1}) && isrow(varargin{k + 1}) && ...
+        if name ~= "ValidationMode" && ...
+                ((ischar(varargin{k + 1}) && isrow(varargin{k + 1}) && ...
                 ~isempty(varargin{k + 1})) || ...
                 (isstring(varargin{k + 1}) && isscalar(varargin{k + 1}) && ...
-                ~ismissing(varargin{k + 1}))
+                ~ismissing(varargin{k + 1})))
             nextName = string(varargin{k + 1});
             if any(nextName == ["UsePolya", "PolyaDegree", ...
                     "UseFullBoxPreorder", "FullBoxOrder", ...
                     "UsePutinar", "PutinarOrder", ...
                     "UseSparseFullBoxPreorder", "SparseFullBoxOrder", ...
-                    "BandWidth"])
+                    "BandWidth", "ValidationMode"])
                 error("pdlmi:InvalidOptions", ...
                     "pdlmi option %s requires a value.", name);
             end
@@ -343,6 +375,8 @@ function opts = parseOpts(isEquality, varargin)
                 opts.SparseFullBoxOrderSpecified = true;
             case "BandWidth"
                 opts.BandWidth = chkBandWidth(val);
+            case "ValidationMode"
+                opts.ValidationMode = normalizeValidationMode(val);
         end
         k = k + 2;
     end
@@ -385,5 +419,19 @@ function opts = parseOpts(isEquality, varargin)
             opts.UseSparseFullBoxPreorder]) > 1
         error("pdlmi:ConflictingRelaxations", ...
             "Pólya, Putinar, sparse full box, and full box preordering cannot be enabled together.");
+    end
+end
+
+function mode = normalizeValidationMode(value)
+    %NORMALIZEVALIDATIONMODE Validate transient assembly-plan checking.
+    if ~((ischar(value) && isrow(value) && ~isempty(value)) || ...
+            (isstring(value) && isscalar(value) && ~ismissing(value)))
+        error("pdlmi:InvalidValidationMode", ...
+            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+    end
+    mode = lower(string(value));
+    if ~any(mode == ["fast", "strict"])
+        error("pdlmi:InvalidValidationMode", ...
+            "ValidationMode must be the scalar text 'fast' or 'strict'.");
     end
 end

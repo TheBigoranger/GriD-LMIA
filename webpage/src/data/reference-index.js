@@ -30,6 +30,7 @@ const pdbasePublic = [
   ["height", "Report the first payload dimension.", "storage-inspection"],
   ["width", "Report the second payload dimension.", "storage-inspection"],
   ["evaluate", "Evaluate one cell-local coefficient family at a physical point.", "evaluation-and-elevation"],
+  ["rhodiff", "Differentiate coefficient-backed storage into deterministic rate-vertex rows.", "evaluation-and-elevation"],
   ["elevVals", "Return an elevated LocalValues tree without changing the object.", "evaluation-and-elevation"],
   ["elevate", "Return an elevated object of the same dynamic class.", "evaluation-and-elevation"],
   ["uplus", "Return a value-semantic copy with the same payloads.", "matrix-operations"],
@@ -61,6 +62,10 @@ const pdbasePublic = [
 const pdbaseProtected = [
   ["bernElev", "Elevate one compatible Bernstein coefficient family."],
   ["bernProd", "Multiply coefficient families by normalized label convolution."],
+  ["elevationPlan", "Build an operation-local numeric elevation plan."],
+  ["productPlan", "Build an operation-local normalized product plan."],
+  ["alignLocalDegrees", "Align normalized cell-local data to a common degree."],
+  ["prodLocalValues", "Apply a product plan across compatible cells and rate rows."],
   ["bernTbl", "Build detailed or one-line Bernstein diagnostic tables."],
   ["elevLocalValues", "Elevate every cell and active rate row in a LocalValues tree."],
   ["mapVals", "Map a function over every coefficient payload."],
@@ -73,6 +78,7 @@ const pdbaseProtected = [
 const pdmatMethods = [
   ["bernsteinTable", "Inspect coefficient rows and optional one-line expressions.", "bernsteinTable"],
   ["evaluate", "Evaluate known data at a parameter point.", "evaluate"],
+  ["rhodiff", "Differentiate coefficient-backed known data into numeric rate-vertex rows.", "rhodiff"],
   ["plot", "Plot one- or two-parameter known data.", "plot"],
   ["plus", "Add coefficient-backed data or a compatible numeric constant."],
   ["minus", "Subtract coefficient-backed data or a compatible numeric constant."],
@@ -105,6 +111,9 @@ const pdmatMethods = [
   ["disp", "Display a concise object summary."],
   ["display", "Display using MATLAB display dispatch."],
   ["isequal", "Compare normalized object metadata and evidence."],
+  ["eq", "Return a scalar logical coefficient-evidence comparison."],
+  ["le", "Create a nonpositive known-data pdlmi residual."],
+  ["ge", "Create a nonnegative known-data pdlmi residual."],
   ["end", "Resolve end-index syntax."],
   ["numArgumentsFromSubscript", "Preserve scalar MATLAB subscript results."],
   ["numel", "Count payload elements."],
@@ -187,6 +196,9 @@ const inheritedPdvar = [
 const algebraMethods = new Set(["plus", "minus", "uplus", "uminus", "mtimes"]);
 const indexingMethods = new Set(["subsref", "subsasgn", "end", "size", "numel", "ndims", "length", "height", "width", "isequal", "disp", "display", "numArgumentsFromSubscript"]);
 const operationRoute = (owner, name) => {
+  if (owner === "pdmat" && (name === "eq" || name === "le" || name === "ge")) {
+    return "documents/reference/pdmat/comparisons";
+  }
   if (algebraMethods.has(name)) return `documents/reference/${owner}/algebra`;
   if (indexingMethods.has(name)) return `documents/reference/${owner}/indexing-and-inspection`;
   return `documents/reference/${owner}/structural-operations`;
@@ -255,7 +267,7 @@ export const referenceEntries = [
   entry("toYalmip", "pdlmi method", "Concatenate stored constraints for YALMIP optimize calls.", "documents/reference/pdlmi/toyalmip", "", "pdlmi"),
   entry("applyPolya", "pdlmi method", "Rebuild a residual with a selected Pólya degree increment.", "documents/reference/pdlmi/applypolya", "", "pdlmi"),
   entry("applyPutinar", "pdlmi method", "Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate.", "documents/reference/pdlmi/applyputinar", "", "pdlmi"),
-  entry("applySparseFullBoxPreorder", "pdlmi method", "Rebuild a residual with a tensor-window full-box certificate and canonical endpoints.", "documents/reference/pdlmi/applysparsefullboxpreorder", "", "pdlmi"),
+  entry("applySparseFullBoxPreorder", "pdlmi method", "Rebuild a residual with band-limited FullBox Gram support and canonical endpoints.", "documents/reference/pdlmi/applysparsefullboxpreorder", "", "pdlmi"),
   entry("applyFullBoxPreorder", "pdlmi method", "Rebuild a residual with a fixed-order full-box Bernstein-Gram preordering.", "documents/reference/pdlmi/applyfullboxpreorder", "", "pdlmi"),
   entry("helper.cellGet", "shared backend helper", "Read one nested LocalValues leaf by physical-cell subscripts.", "documents/reference/shared-helpers", "helper-cellget"),
   entry("helper.chk", "shared backend helper", "Apply common validation predicates with caller-owned errors.", "documents/reference/shared-helpers", "helper-chk"),

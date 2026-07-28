@@ -30,7 +30,7 @@ function out = binOp(lhs, rhs, fcn, errId)
         error(errId, "At least one operand must be a pdvar.");
     end
 
-    rb = pickRb(errId, lhs, rhs);
+    rb = anchor.pickRateBounds(errId, lhs, rhs);
     % Merge physical cells before fitting coefficients so both operands use
     % one local Bernstein basis for the binary operation.
     grid = anchor.mergeGrid("pdvar:MixedGrid", lhs, rhs);
@@ -41,9 +41,14 @@ function out = binOp(lhs, rhs, fcn, errId)
     deg = max(ld.Degree, rd.Degree);
     % Degree elevation changes representation only; it does not change the
     % represented polynomial before coefficient-wise algebra is applied.
-    lhsVals = pdbase.elevLocalValues(ld.LocalValues, ld.Degree, deg, grid);
-    rhsVals = pdbase.elevLocalValues(rd.LocalValues, rd.Degree, deg, grid);
-    vals = zipRows(lhsVals, rhsVals, fcn, grid);
+    [lhsPlan, rhsPlan] = elevationPlans( ...
+        ld.Degree, rd.Degree, deg, numel(grid));
+    lhsVals = pdbase.elevLocalValues( ...
+        ld.LocalValues, ld.Degree, deg, grid, lhsPlan, "fast");
+    rhsVals = pdbase.elevLocalValues( ...
+        rd.LocalValues, rd.Degree, deg, grid, rhsPlan, "fast");
+    vals = anchor.zipRateRows(lhsVals, rhsVals, fcn, grid, ...
+        "pdvar:InvalidCoefficientRows");
 
     if helper.isZero(vals, "vals")
         out = zeroObj(grid, reqSize);
@@ -57,5 +62,21 @@ function out = binOp(lhs, rhs, fcn, errId)
 
     out = pdvar(mkInit(grid, reqSize, deg, vals, ...
         ld.ContainsDecision || rd.ContainsDecision, ...
-        hasRate, rb, "expression", ld.IsContinuous && rd.IsContinuous));
+        hasRate, rb, "expression", []));
+end
+
+function [lhsPlan, rhsPlan] = elevationPlans(lhsDegree, rhsDegree, targetDegree, nPar)
+    %ELEVATIONPLANS Reuse one map when both operands share a source degree.
+    lhsPlan = [];
+    rhsPlan = [];
+    if lhsDegree < targetDegree
+        lhsPlan = pdbase.elevationPlan(lhsDegree, targetDegree, nPar);
+    end
+    if rhsDegree < targetDegree
+        if rhsDegree == lhsDegree
+            rhsPlan = lhsPlan;
+        else
+            rhsPlan = pdbase.elevationPlan(rhsDegree, targetDegree, nPar);
+        end
+    end
 end

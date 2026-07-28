@@ -75,7 +75,12 @@ function out = zeroProd(lhs, rhs)
             ~isempty(rhs) && all(isfinite(rhs(:)))))
         grid = lhs.GridInfo.Vectors;
         if isa(rhs, "pdbase")
+            rb = lhs.pickRateBounds("pdvar:InvalidMultiplication", rhs);
             grid = lhs.mergeGrid("pdvar:MixedGrid", lhs, rhs);
+            if lhs.hasRateRows() || rhs.hasRateRows()
+                asData(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
+                asData(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
+            end
         end
         if isa(rhs, "pdvar") || isa(rhs, "pdmat")
             rhsSize = rhs.MatrixSize;
@@ -91,7 +96,12 @@ function out = zeroProd(lhs, rhs)
             isa(rhs, "pdvar") && helper.isZero(rhs, "obj")
         grid = rhs.GridInfo.Vectors;
         if isa(lhs, "pdbase")
+            rb = rhs.pickRateBounds("pdvar:InvalidMultiplication", lhs);
             grid = rhs.mergeGrid("pdvar:MixedGrid", lhs, rhs);
+            if lhs.hasRateRows() || rhs.hasRateRows()
+                asData(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
+                asData(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
+            end
         end
         if isa(lhs, "pdvar") || isa(lhs, "pdmat")
             lhsSize = lhs.MatrixSize;
@@ -120,7 +130,7 @@ function out = scalarProd(lhs, rhs)
         leftScale = true;
     end
 
-    if obj.HasRateDependence && ~hasRateRows(obj)
+    if obj.HasRateDependence && ~obj.hasRateRows()
         error("pdvar:InvalidMultiplication", ...
             "Products involving metadata-only rate-dependent pdvar expressions are unsupported in this slice.");
     end
@@ -144,7 +154,7 @@ function out = generalProd(lhs, rhs)
     end
 
     % Align rate bounds, grids, and coefficient payloads before multiplication.
-    rb = pickRb("pdvar:InvalidMultiplication", lhs, rhs);
+    rb = anchor.pickRateBounds("pdvar:InvalidMultiplication", lhs, rhs);
     grid = anchor.mergeGrid("pdvar:MixedGrid", lhs, rhs);
     ld = asData(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
     rd = asData(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
@@ -163,10 +173,10 @@ function out = generalProd(lhs, rhs)
 
     sz = prodSz(ld.MatrixSize, rd.MatrixSize);
     % Multiply local rows while broadcasting ordinary rows as needed.
-    nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) prodRows(anchor, ...
-        helper.cellGet(ld.LocalValues, subs), ld.Degree, ...
-        helper.cellGet(rd.LocalValues, subs), rd.Degree));
+    plan = anchor.productPlan(ld.Degree, rd.Degree);
+    vals = anchor.prodLocalValues(ld.LocalValues, ld.Degree, ...
+        rd.LocalValues, rd.Degree, grid, ...
+        "pdvar:InvalidMultiplication", plan, "fast");
 
     hasRate = ld.HasRateDependence || rd.HasRateDependence;
     if ~hasRate
@@ -175,7 +185,7 @@ function out = generalProd(lhs, rhs)
     end
     out = pdvar(mkInit(grid, sz, ld.Degree + rd.Degree, vals, ...
         ld.ContainsDecision || rd.ContainsDecision, hasRate, rb, ...
-        "expression", ld.IsContinuous && rd.IsContinuous));
+        "expression", []));
 end
 
 function sz = prodSz(lhs, rhs)

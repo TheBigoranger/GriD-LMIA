@@ -26,7 +26,14 @@ function out = mtimes(lhs, rhs)
     % Validate grid and size before collapsing a zero-object product.
     if isa(lhs, "pdmat") && isa(rhs, "pdmat") && ...
             (helper.isZero(lhs, "obj") || helper.isZero(rhs, "obj"))
+        rb = lhs.pickRateBounds("pdmat:InvalidMultiplication", lhs, rhs);
         grid = lhs.mergeGrid("pdmat:MixedGrid", lhs, rhs);
+        if lhs.hasRateRows() || rhs.hasRateRows()
+            % Even a proven-zero product must not bypass the exact-grid
+            % contract attached to explicit rate-vertex coefficient tables.
+            asData(grid, lhs, [], rb, "pdmat:InvalidMultiplication");
+            asData(grid, rhs, [], rb, "pdmat:InvalidMultiplication");
+        end
         out = zeroObj(grid, zeroProdSz(lhs.MatrixSize, rhs.MatrixSize, ...
         "pdmat:InvalidMultiplication"));
         return
@@ -71,9 +78,10 @@ function out = mtimes(lhs, rhs)
     end
 
     % Align both operands on the common refinement grid before multiplication.
+    rb = anchor.pickRateBounds("pdmat:InvalidMultiplication", lhs, rhs);
     grid = anchor.mergeGrid("pdmat:MixedGrid", lhs, rhs);
-    ld = asData(grid, lhs, [], "pdmat:InvalidMultiplication");
-    rd = asData(grid, rhs, [], "pdmat:InvalidMultiplication");
+    ld = asData(grid, lhs, [], rb, "pdmat:InvalidMultiplication");
+    rd = asData(grid, rhs, [], rb, "pdmat:InvalidMultiplication");
 
     % Validate inner dimensions after numeric operands have been promoted.
     if ld.MatrixSize(2) ~= rd.MatrixSize(1)
@@ -82,10 +90,10 @@ function out = mtimes(lhs, rhs)
     end
 
     % Multiply local Bernstein coefficients cell by cell.
-    nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) anchor.bernProd( ...
-        helper.cellGet(ld.LocalValues, subs), ld.Degree, ...
-        helper.cellGet(rd.LocalValues, subs), rd.Degree));
+    plan = anchor.productPlan(ld.Degree, rd.Degree);
+    vals = anchor.prodLocalValues(ld.LocalValues, ld.Degree, ...
+        rd.LocalValues, rd.Degree, grid, ...
+        "pdmat:InvalidMultiplication", plan, "fast");
 
     % Compact products that cancel to an all-zero coefficient payload.
     if helper.isZero(vals, "vals")
@@ -94,7 +102,11 @@ function out = mtimes(lhs, rhs)
         return
     end
 
-    out = mkObj(grid, vals, ld.Degree + rd.Degree);
+    hasRate = ld.HasRateDependence || rd.HasRateDependence;
+    if ~hasRate
+        rb = [];
+    end
+    out = mkObj(grid, vals, ld.Degree + rd.Degree, rb);
 end
 
 function sz = zeroProdSz(lhs, rhs, errId)

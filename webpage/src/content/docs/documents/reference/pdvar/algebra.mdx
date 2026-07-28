@@ -56,7 +56,7 @@ Written matrix order is preserved; $P[i]A[j]$ is not exchanged with $A[j]P[i]$.
 
 <ExampleDisclosure
   visibleCode={"L = A * P;\nR = P * A;"}
-  fullCode={"yalmip('clear')\nA = pdmat({[0 1]}, {2, 3}, Degree=1);\nP = pdvar(1, {[0 1]}, Degree=2);\nL = A * P;\nR = P * A;\nsize(L)\nL.Degree\nsize(R)\nR.Degree\n% ans = 1 1\n% ans = 3\n% ans = 1 1\n% ans = 3"}
+  fullCode={"yalmip('clear')\nA = pdmat({[0 1]}, {2, 3}, Degree=1);\nP = pdvar(1, {[0 1]}, Degree=2);\nL = A * P;\nR = P * A;\nassert(isequal(size(L), [1 1]))\nassert(L.Degree == 3)\nassert(isequal(size(R), [1 1]))\nassert(R.Degree == 3)"}
   summary="Show the complete runnable affine-decision example"
 />
 

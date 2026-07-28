@@ -22,14 +22,12 @@ isContinuous = P.IsContinuous
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-matrixSize =
+matrixSize = 1×2 double
      2     2
-physicalCellCount =
-     2
-knownDegree =
-     1
-decisionDegree =
-     2
+
+physicalCellCount = 2
+knownDegree = 1
+decisionDegree = 2
 isContinuous =
   logical
    1
@@ -84,12 +82,9 @@ coefficientCountPA = numel(PA.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-degreePA =
-     3
-degreeATP =
-     3
-coefficientCountPA =
-     4
+degreePA = 3
+degreeATP = 3
+coefficientCountPA = 4
 \end{lstlisting}
 
 \subsection{Differentiate and Enumerate Rate Vertices}
@@ -124,15 +119,12 @@ coefficientsPerRow = size(D.coeffs(1),2)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-derivativeDegree =
-    1
+derivativeDegree = 1
 isContinuous =
   logical
    0
-rateRowCount =
-    2
-coefficientsPerRow =
-    2
+rateRowCount = 2
+coefficientsPerRow = 2
 \end{lstlisting}
 
 For example, a degree-one decision on one two-parameter cell has four rate vertices and four tensor-Bernstein labels:
@@ -147,12 +139,9 @@ coefficientsPerRow2D = size(D2.coeffs([1 1]), 2)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-tensorDerivativeDegree =
-    1
-rateRowCount2D =
-    4
-coefficientsPerRow2D =
-    4
+tensorDerivativeDegree = 1
+rateRowCount2D = 4
+coefficientsPerRow2D = 4
 \end{lstlisting}
 
 Thus a coefficient table is indexed independently by physical hypercube, stored rate row, and tensor-Bernstein label. Rate rows are neither physical cells nor additional Bernstein labels. Once the rows are stacked into the finite residual, subsequent certificate formulas suppress the temporary vertex index \(q\).
@@ -172,12 +161,9 @@ positivityConstraintCount = numel(Cpositive.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-residualDegreeM =
-    3
-decayConstraintCount =
-    16
-positivityConstraintCount =
-    6
+residualDegreeM = 3
+decayConstraintCount = 16
+positivityConstraintCount = 6
 \end{lstlisting}
 
 The assembled decay residual has degree \(M=3\): two physical cells times two stored rate rows times four local labels give sixteen coefficient constraints. Positivity has no rate rows and has three degree-two labels per cell. Shared faces are visited from each adjoining cell because certification remains cell-local. For a comparison \(\mathcal F\preceq0\), \code{pdlmi} stores the original residual and sign-normalizes the positive target as \(S=-\mathcal F\); for \(\mathcal F\succeq0\), it uses \(S=\mathcal F\).
@@ -199,11 +185,11 @@ counts = [numel(Cdecay.Constraints), ...
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-counts =
+counts = 1×5 double
     16    20    24    24    24
 \end{lstlisting}
 
-Direct tests the coefficients of \(S\). P\'olya elevates \(S\) by increment \(d\) before applying the same test. In one parameter, the Gram paths use the parity-specific Markov--Luk\'acs interval representation; for this degree-\(M=3\) residual, absolute order \(r=1\) is the default. Width \(b=2\) therefore reaches the dense endpoint and SparseFullBox canonicalizes to actual FullBox state, while Putinar delegates to the same interval form; all three wrappers store 24 constraints. In multiple parameters, Putinar uses the singleton-generator box module, the sparse full-box tensor-window certificate uses bandwidth \(b\), and the full-box preordering uses every box-generator product. All five software states are finite sufficient certificates for the continuous inequality. Failure of a selected state at fixed \(M,d,r,b\) is inconclusive. \Cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen,sec:certificate-sparse-full-box,sec:certificate-full-box} give the constructions, while \cref{sec:certificate-boundary} states their implemented boundaries.
+Direct tests the coefficients of \(S\). P\'olya elevates \(S\) by increment \(d\) before applying the same test. In one parameter, the Gram paths use the parity-specific Markov--Luk\'acs interval representation; for this degree-\(M=3\) residual, absolute order \(r=1\) is the default. Width \(b=2\) therefore reaches the dense endpoint and SparseFullBox canonicalizes to actual FullBox state, while Putinar delegates to the same interval form; all three wrappers store 24 constraints. In multiple parameters, Putinar uses the singleton-generator box module, SparseFullBox retains every FullBox generator-mask term and exact identity while restricting Gram support to bandwidth \(b\), and the full-box preordering uses dense support for every box-generator product. The sparse support is implemented by overlapping tensor-window PSD cliques. All five software states are finite sufficient certificates for the continuous inequality. Failure of a selected state at fixed \(M,d,r,b\) is inconclusive. \Cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen,sec:certificate-sparse-full-box,sec:certificate-full-box} give the constructions, while \cref{sec:certificate-boundary} states their implemented boundaries.
 
 \subsection{Export to YALMIP and Recover the Solution}
 \index{strictness margin}\index{solver diagnostics}

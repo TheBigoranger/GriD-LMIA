@@ -9,7 +9,7 @@ This generated lookup groups every reference-page family by its package role. A 
 <details class="reference-index__group" id="pdmat">
 <summary class="reference-index__group-summary">
 <span class="reference-index__group-copy"><strong>pdmat</strong><span>Function-backed known data and coefficient-backed Bernstein operations.</span></span>
-<span>52 indexed entries</span>
+<span>56 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
@@ -57,6 +57,18 @@ This generated lookup groups every reference-page family by its package role. A 
 <div class="reference-index__direct-meta">
 <span>pdmat method</span>
 <p>Evaluate known data at a parameter point.</p>
+</div>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/PD-LMI-package/documents/reference/pdmat/rhodiff/"><code>rhodiff</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>pdmat method</span>
+<p>Differentiate coefficient-backed known data into numeric rate-vertex rows.</p>
 </div>
 </div>
 </div>
@@ -262,6 +274,31 @@ This generated lookup groups every reference-page family by its package role. A 
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/#pdmat-size"><code>size</code></a><span>pdmat method</span></div>
 <p>Inspect matrix payload dimensions.</p>
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdmat/comparisons/">Comparisons</a>
+<span>3 symbols</span>
+</div>
+<div class="reference-index__family-content">
+<details class="reference-index__symbols">
+<summary>Show direct symbol links</summary>
+<ul>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/comparisons/#pdmat-eq"><code>eq</code></a><span>pdmat method</span></div>
+<p>Return a scalar logical coefficient-evidence comparison.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/comparisons/#pdmat-le"><code>le</code></a><span>pdmat method</span></div>
+<p>Create a nonpositive known-data pdlmi residual.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdmat/comparisons/#pdmat-ge"><code>ge</code></a><span>pdmat method</span></div>
+<p>Create a nonnegative known-data pdlmi residual.</p>
 </li>
 </ul>
 </details>
@@ -717,7 +754,7 @@ This generated lookup groups every reference-page family by its package role. A 
 <div class="reference-index__family-content">
 <div class="reference-index__direct-meta">
 <span>pdlmi method</span>
-<p>Rebuild a residual with a tensor-window full-box certificate and canonical endpoints.</p>
+<p>Rebuild a residual with band-limited FullBox Gram support and canonical endpoints.</p>
 </div>
 </div>
 </div>
@@ -738,7 +775,7 @@ This generated lookup groups every reference-page family by its package role. A 
 <details class="reference-index__group" id="pdbase-backend">
 <summary class="reference-index__group-summary">
 <span class="reference-index__group-copy"><strong>pdbase / backend</strong><span>Inherited matrix protocols, cell-local storage, and protected Bernstein utilities.</span></span>
-<span>50 indexed entries</span>
+<span>55 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
@@ -829,7 +866,7 @@ This generated lookup groups every reference-page family by its package role. A 
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
 <a class="reference-index__page" href="/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/">Evaluation And Elevation</a>
-<span>3 symbols</span>
+<span>4 symbols</span>
 </div>
 <div class="reference-index__family-content">
 <details class="reference-index__symbols">
@@ -838,6 +875,10 @@ This generated lookup groups every reference-page family by its package role. A 
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/#pdbase-evaluate"><code>evaluate</code></a><span>pdbase method</span></div>
 <p>Evaluate one cell-local coefficient family at a physical point.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/#pdbase-rhodiff"><code>rhodiff</code></a><span>pdbase method</span></div>
+<p>Differentiate coefficient-backed storage into deterministic rate-vertex rows.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/#pdbase-elevVals"><code>elevVals</code></a><span>pdbase method</span></div>
@@ -976,7 +1017,7 @@ This generated lookup groups every reference-page family by its package role. A 
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
 <a class="reference-index__page" href="/PD-LMI-package/documents/reference/bernstein-utilities/">Bernstein Utilities</a>
-<span>9 symbols</span>
+<span>13 symbols</span>
 </div>
 <div class="reference-index__family-content">
 <details class="reference-index__symbols">
@@ -989,6 +1030,22 @@ This generated lookup groups every reference-page family by its package role. A 
 <li>
 <div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-bernprod"><code>bernProd</code></a><span>protected pdbase method</span></div>
 <p>Multiply coefficient families by normalized label convolution.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-elevationplan"><code>elevationPlan</code></a><span>protected pdbase method</span></div>
+<p>Build an operation-local numeric elevation plan.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-productplan"><code>productPlan</code></a><span>protected pdbase method</span></div>
+<p>Build an operation-local normalized product plan.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-alignlocaldegrees"><code>alignLocalDegrees</code></a><span>protected pdbase method</span></div>
+<p>Align normalized cell-local data to a common degree.</p>
+</li>
+<li>
+<div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-prodlocalvalues"><code>prodLocalValues</code></a><span>protected pdbase method</span></div>
+<p>Apply a product plan across compatible cells and rate rows.</p>
 </li>
 <li>
 <div><a href="/PD-LMI-package/documents/reference/bernstein-utilities/#pdbase-berntbl"><code>bernTbl</code></a><span>protected pdbase method</span></div>

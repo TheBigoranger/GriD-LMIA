@@ -49,8 +49,15 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
                 else
                     isCont = true;
                 end
+                if isfield(init, "ValidationMode")
+                    validationMode = normalizeValidationMode( ...
+                        init.ValidationMode);
+                else
+                    validationMode = "fast";
+                end
             else
-                [grid, sz, deg, vals, hasRate, rb] = ctorArgs(varargin{:});
+                [grid, sz, deg, vals, hasRate, rb, validationMode] = ...
+                    ctorArgs(varargin{:});
                 hasDec = true;
                 summary = "decision";
                 isCont = true;
@@ -61,19 +68,22 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
                 ContainsDecision=hasDec, ...
                 HasRateDependence=hasRate, ...
                 RateBounds=rb, ...
-                SourceSummary=summary);
+                SourceSummary=summary, ...
+                ValidationMode=validationMode);
         end
     end
 
     methods (Access = protected)
         out = mkUnOp(obj, vals, sz)
+        out = mkRhodiff(obj, deg, vals, rb, hasDec)
     end
 
 end
 
-function [grid, sz, deg, vals, hasRate, rb] = ctorArgs(varargin)
+function [grid, sz, deg, vals, hasRate, rb, validationMode] = ctorArgs(varargin)
     %CTORARGS Parse public inputs and allocate shared continuous coefficients.
-    [sz, grid, info, typ, deg, rb] = parseArgs(varargin{:});
+    [sz, grid, info, typ, deg, rb, validationMode] = ...
+        parseArgs(varargin{:});
     nCell = info.NumNodes - 1;
     if deg == 0
         % A degree-zero pdvar is parameter-independent; every physical cell
@@ -95,16 +105,17 @@ function [grid, sz, deg, vals, hasRate, rb] = ctorArgs(varargin)
     hasRate = ~isempty(rb);
 end
 
-function [sz, grid, info, typ, deg, rb] = parseArgs(varargin)
+function [sz, grid, info, typ, deg, rb, validationMode] = parseArgs(varargin)
     %PARSEARGS Normalize matrix size, grid, structure, degree, and rate box.
     if nargin < 2
         error("pdvar:InvalidInput", ...
             "pdvar requires a matrix size and gridVectors.");
     end
 
-    typ = "";
     deg = 1;
     rb = [];
+    validationMode = "fast";
+    seenValidation = false;
     first = varargin{1};
     second = varargin{2};
     secondIsGrid = iscell(second) || ...
@@ -165,6 +176,12 @@ function [sz, grid, info, typ, deg, rb] = parseArgs(varargin)
         end
 
         if k == numel(rest)
+            if (ischar(item) && strcmp(item, "ValidationMode")) || ...
+                    (isstring(item) && isscalar(item) && ...
+                    ~ismissing(item) && item == "ValidationMode")
+                error("pdvar:InvalidValidationMode", ...
+                    "ValidationMode requires the scalar text 'fast' or 'strict'.");
+            end
             error("pdvar:InvalidOptions", ...
                 "pdvar option %s requires a value.", name);
         end
@@ -176,6 +193,13 @@ function [sz, grid, info, typ, deg, rb] = parseArgs(varargin)
                 deg = double(helper.chk(val, "pdvar:InvalidDegree", ...
                     "Degree must be a nonnegative integer scalar.", ...
                     "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+            case "ValidationMode"
+                if seenValidation
+                    error("pdvar:InvalidValidationMode", ...
+                        "ValidationMode may be supplied only once.");
+                end
+                validationMode = normalizeValidationMode(val);
+                seenValidation = true;
             case {"IsContinuous", "ContainsDecision", "HasRateDependence"}
                 error("pdvar:UnsupportedOption", ...
                     "%s is fixed internally for pdvar and is not a constructor option.", name);
@@ -191,6 +215,20 @@ function [sz, grid, info, typ, deg, rb] = parseArgs(varargin)
             "symmetric pdvar variables must be square.");
     end
     info = helper.mkGrid(grid, "pdvar");
+end
+
+function mode = normalizeValidationMode(value)
+    %NORMALIZEVALIDATIONMODE Validate transient post-normalization checks.
+    if ~((ischar(value) && isrow(value) && ~isempty(value)) || ...
+            (isstring(value) && isscalar(value) && ~ismissing(value)))
+        error("pdvar:InvalidValidationMode", ...
+            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+    end
+    mode = lower(string(value));
+    if ~any(mode == ["fast", "strict"])
+        error("pdvar:InvalidValidationMode", ...
+            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+    end
 end
 
 function coeffs = cellVals(nodes, subs, lbls, deg)

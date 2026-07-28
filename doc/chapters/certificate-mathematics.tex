@@ -244,7 +244,7 @@ Partition \(Q\) into \(n\)-by-\(n\) blocks \(Q_{ij}\).  The Bernstein coefficien
   \sum_{\substack{0\le i,j\le d\\i+j=k-a}}
   \binom di\binom dj\,Q_{ij}.
 \]
-Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs. For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms, while \code{applySparseFullBoxPreorder} uses the same parity terms with tensor-window Gram support at intermediate widths. Their minimum absolute order is \(\lfloor M/2\rfloor\), where \(M\) is the assembled residual degree.
+Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs. For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms, while \code{applySparseFullBoxPreorder} uses the same parity terms and identities with band-limited Gram support at intermediate widths. Their minimum absolute order is \(\lfloor M/2\rfloor\), where \(M\) is the assembled residual degree.
 
 \section{Putinar Modules And Schm\"udgen Preorderings}
 \label{sec:certificate-putinar-schmudgen}
@@ -381,23 +381,22 @@ fullBoxState = [box.FullBoxOrder, numel(box.Constraints)]
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-directConstraintCount =
-     3
-polyaState =
+directConstraintCount = 3
+polyaState = 1×2 double
      1     4
-putinarState =
+putinarState = 1×2 double
      1     5
-fullBoxState =
+fullBoxState = 1×2 double
      1     5
 \end{lstlisting}
 
 Selections rebuild from the stored original \code{Residual} and \code{Relation}. Reapplying P\'olya, Putinar, SparseFullBox, or FullBox replaces the previous selection; the certificates never compound, and the four opt-in families are mutually exclusive.
 
-\section{The Implemented SparseFullBox State}
+\section{The Implemented SparseFullBox Band-Limited State}
 \label{sec:certificate-sparse-full-box}
 \index{SparseFullBox}\index{tensor window}\index{bandwidth}
 
-\ideastep{Basic idea} The sparse full-box tensor-window certificate retains every FullBox parity or generator-mask term and every exact target-coefficient identity, but replaces one dense Gram matrix by a sum of free PSD matrices supported on overlapping axis-aligned windows of the tensor Bernstein basis. Harris and Parrilo provide a close univariate Bernstein precedent, while factor-width and chordal matrix-SOS work provide broader sparse-Gram context \cite{harrisparrilo2023,gouveiakovacecsaee2022,zhengfantuzzi2023}; none of those sources defines this package's tensor-window map.
+\ideastep{Basic idea} SparseFullBox is the FullBox certificate with band-limited Gram support: it retains every FullBox parity or generator-mask term and every exact target-coefficient identity. The implementation realizes the support by replacing one dense Gram matrix with a sum of free PSD clique matrices on overlapping axis-aligned windows of the tensor Bernstein basis. Harris and Parrilo provide a close univariate Bernstein precedent, while factor-width and chordal matrix-SOS work provide broader sparse-Gram context \cite{harrisparrilo2023,gouveiakovacecsaee2022,zhengfantuzzi2023}; none of those sources defines this package's band map or window realization.
 
 \ideastep{Formula} Let one dense FullBox term use tensor basis labels
 \[
@@ -426,7 +425,7 @@ where \(h_J\) is the same endpoint or box-generator weight used by the correspon
   box/.style={dp/result,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm},
   endpoint/.style={dp/certificate,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm}]
   \node[endpoint] (direct) {\(b=1\)\\actual Direct state};
-  \node[box,right=of direct] (tri) {\(b=2\)\\intermediate tensor windows};
+  \node[box,right=of direct] (tri) {\(b=2\)\\intermediate band support};
   \node[endpoint,right=of tri] (dense) {\(b=3=r+1\)\\actual FullBox state};
   \draw[dp/arrow] (direct) -- (tri);
   \draw[dp/arrow] (tri) -- (dense);
@@ -452,7 +451,7 @@ These choices act on different parts of the problem.
   \node[box,below=of repr] (decision) {decision degree\\larger search space};
   \node[box,below=of decision] (grid) {physical subdivision\\more local cells};
   \node[box,below=of grid] (polya) {P\'olya increment\\same residual, elevated basis};
-  \node[box,below=of polya] (band) {SparseFullBox bandwidth \(b\)\\larger tensor windows};
+  \node[box,below=of polya] (band) {SparseFullBox bandwidth \(b\)\\larger Gram support};
   \node[box,below=of band] (gram) {Gram order\\larger PSD certificate};
   \coordinate (busmid) at ($(grid.east)+(6mm,0)$);
   \draw[dp/bus] ($(repr.east)+(6mm,0)$) -- ($(gram.east)+(6mm,0)$);
@@ -475,7 +474,7 @@ decision degree & independent decision coefficients & certificate order \\
 subdivision & physical cells and local hulls & higher polynomial degree \\
 P\'olya increment \(d\) & elevated residual coefficients & Gram variables \\
 Putinar/full-box order & Gram bases and PSD block sizes & decision degree \\
-SparseFullBox bandwidth \(b\) & tensor-window Gram support and PSD block sizes & decision degree or physical grid \\
+SparseFullBox bandwidth \(b\) & band-limited Gram support and PSD clique sizes & decision degree or physical grid \\
 \bottomrule
 \end{tabularx}
 

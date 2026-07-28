@@ -15,7 +15,8 @@ import ConstraintAssemblyDiagram from "../../../../../components/ConstraintAssem
 
 ## Purpose
 
-Convert stored coefficient-wise `pdlmi` entries into a YALMIP constraint array.
+Export stored `pdlmi` entries as a YALMIP constraint array or, for Direct and
+Pólya known-data wrappers, one scalar logical certificate.
 
 ## Syntax
 
@@ -32,7 +33,10 @@ F = C.toYalmip()
 
 ## Output
 
-`F` is a YALMIP constraint array suitable for ordinary solver calls such as `optimize(F, objective, sdpsettings(...))`, or `[]` when a direct equality is proven identically zero.
+For a `pdvar` residual, `F` is a YALMIP constraint array suitable for ordinary
+solver calls, or `[]` when a direct equality is proven identically zero. For a
+coefficient-backed known `pdmat` residual, Direct and Pólya return a scalar
+logical.
 
 ## Description
 
@@ -52,8 +56,17 @@ number of active rate rows times the number of assembled Bernstein
 coefficients. For Putinar, SparseFullBox, and FullBox objects, $N$ instead counts every stored
 PSD Gram condition and exact coefficient identity across those cells and rows.
 
-It does not choose a solver, create an objective, apply relaxation margins, or
-run `optimize`.
+The known-data logical test uses the wrapper’s single global inequality
+classification and inclusive absolute tolerance `1e-10`. Semidefinite mode
+symmetrizes each coefficient matrix and tests its eigenvalues; only
+entry-wise mode tests individual scalar entries. A false result warns with
+`pdlmi:InconclusiveCertificate` because failure of this sufficient coefficient
+test does not prove a continuous violation or matrix indefiniteness.
+
+Known-data Putinar, SparseFullBox, and FullBox wrappers still export YALMIP
+constraints and may contain auxiliary Gram variables. `toYalmip` does not
+choose a solver, create an objective, apply relaxation margins, or run
+`optimize`.
 
 For equality, direct coefficient groups are concatenated in MATLAB
 column-major entry order. Proven zero groups are omitted; consequently
@@ -124,6 +137,26 @@ F =
 
 `toYalmip` does not select solvers, add objectives, apply relaxation margins, or run `optimize`.
 
+### Known-data logical export
+
+```matlab
+yalmip('clear')
+A = pdmat([0 1], {{1, 2; 3, 4}}, ...
+    Degree=1, RateBounds=[-1 2]);
+direct = A >= 0;
+directCertificate = toYalmip(direct)
+polya = direct.applyPolya(1);
+polyaCertificate = toYalmip(polya)
+```
+
+```text
+directCertificate = logical
+   1
+
+polyaCertificate = logical
+   1
+```
+
 ## See Also
 
-[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`pdmat comparisons`](/PD-LMI-package/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)

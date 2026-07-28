@@ -119,7 +119,7 @@ selection, and `toYalmip` export counts.
 ## Deterministic SparseFullBox Selection
 
 The [`applySparseFullBoxPreorder` reference](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/#deterministic-transcript)
-compares an intermediate tensor-window certificate with its exact Direct and
+compares an intermediate band-limited certificate with its exact Direct and
 FullBox endpoints, and records the corresponding read-only state.
 
 ## Solver Smoke Cases

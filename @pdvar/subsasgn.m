@@ -25,16 +25,22 @@ function obj = subsasgn(obj, S, rhs)
     [rows, cols] = pdbase.matSubs(S(1).subs, obj.MatrixSize, ...
         "pdvar:InvalidAssignment");
     grid = obj.mergeGrid("pdvar:MixedGrid", rhs);
-    rb = pickRb("pdvar:InvalidAssignment", obj, rhs);
+    rb = obj.pickRateBounds("pdvar:InvalidAssignment", rhs);
     lhsData = asData(grid, obj, [], rb, ...
         "pdvar:InvalidAssignment");
     rhsData = asData(grid, rhs, [numel(rows), numel(cols)], ...
         rb, "pdvar:InvalidAssignment");
 
     deg = max(lhsData.Degree, rhsData.Degree);
-    lhsVals = pdbase.elevLocalValues(lhsData.LocalValues, lhsData.Degree, deg, grid);
-    rhsVals = pdbase.elevLocalValues(rhsData.LocalValues, rhsData.Degree, deg, grid);
-    vals = zipRows(lhsVals, rhsVals, @(lhs, rhs) assignBlock(lhs, rhs, rows, cols), grid);
+    [lhsPlan, rhsPlan] = elevationPlans( ...
+        lhsData.Degree, rhsData.Degree, deg, numel(grid));
+    lhsVals = pdbase.elevLocalValues(lhsData.LocalValues, ...
+        lhsData.Degree, deg, grid, lhsPlan, "fast");
+    rhsVals = pdbase.elevLocalValues(rhsData.LocalValues, ...
+        rhsData.Degree, deg, grid, rhsPlan, "fast");
+    vals = obj.zipRateRows(lhsVals, rhsVals, ...
+        @(lhs, rhs) assignBlock(lhs, rhs, rows, cols), grid, ...
+        "pdvar:InvalidCoefficientRows");
 
     hasDec = lhsData.ContainsDecision || rhsData.ContainsDecision;
     hasRate = lhsData.HasRateDependence || rhsData.HasRateDependence;
@@ -42,7 +48,23 @@ function obj = subsasgn(obj, S, rhs)
         rb = [];
     end
     obj = pdvar(mkInit(grid, obj.MatrixSize, deg, vals, hasDec, hasRate, rb, ...
-        "expression", lhsData.IsContinuous && rhsData.IsContinuous));
+        "expression", []));
+end
+
+function [lhsPlan, rhsPlan] = elevationPlans(lhsDegree, rhsDegree, targetDegree, nPar)
+    %ELEVATIONPLANS Reuse one map when both operands share a source degree.
+    lhsPlan = [];
+    rhsPlan = [];
+    if lhsDegree < targetDegree
+        lhsPlan = pdbase.elevationPlan(lhsDegree, targetDegree, nPar);
+    end
+    if rhsDegree < targetDegree
+        if rhsDegree == lhsDegree
+            rhsPlan = lhsPlan;
+        else
+            rhsPlan = pdbase.elevationPlan(rhsDegree, targetDegree, nPar);
+        end
+    end
 end
 
 function out = assignBlock(lhs, rhs, rows, cols)

@@ -34,10 +34,12 @@ function tf = chkCont(vals, nCell, deg)
             end
             lhs = helper.cellGet(vals, subs);
             rhs = helper.cellGet(vals, subs + step);
-            for q = 1:numel(hi)
-                if ~sameMat(lhs{hi(q)}, rhs{lo(q)})
-                    tf = false;
-                    return
+            for row = 1:size(lhs, 1)
+                for q = 1:numel(hi)
+                    if ~sameMat(lhs{row, hi(q)}, rhs{row, lo(q)})
+                        tf = false;
+                        return
+                    end
                 end
             end
         end

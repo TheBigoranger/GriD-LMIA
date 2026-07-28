@@ -22,10 +22,16 @@ function out = plus(lhs, rhs)
 
         % The identity fast path must still enforce ordinary addition compatibility.
         if ~isempty(zeroVal)
+            if zeroVal.hasRateRows() || out.hasRateRows()
+                zeroVal = [];
+            end
+        end
+        if ~isempty(zeroVal)
             if ~isequal(zeroVal.MatrixSize, out.MatrixSize)
                 error("pdmat:InvalidAddition", ...
                     "pdmat matrix sizes are incompatible for this operation.");
             end
+            zeroVal.pickRateBounds("pdmat:InvalidAddition", zeroVal, out);
             zeroVal.mergeGrid("pdmat:MixedGrid", zeroVal, out);
             return
         end

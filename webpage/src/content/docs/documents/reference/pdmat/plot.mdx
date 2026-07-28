@@ -28,8 +28,10 @@ Sample a `pdmat` object through `evaluate` and plot each matrix entry over one o
 
 ```matlab
 h = plot(A)
-h = plot(A, dims, Name, Value)
 h = plot(A, SamplesPerCell=n)
+h = plot(A, dims, SamplesPerCell=n)
+h = plot(A, ..., RateVertex=k)
+h = plot(A, ..., Name, Value)
 ```
 
 ## Arguments And Options
@@ -39,11 +41,20 @@ h = plot(A, SamplesPerCell=n)
 | `A` | A `pdmat` object. |
 | `dims` | One or two positive parameter indices. Defaults to `1` for scalar objects and `[1 2]` for multi-parameter objects. |
 | `SamplesPerCell` | Positive integer scalar. Default is `15`. |
+| `RateVertex` | One-based stored rate row. Rate-row objects default to row one; ordinary data reject this option. |
 | `Name, Value` | Additional plotting arguments passed to MATLAB `plot` or `surf`. |
 
 ## Output
 
 `h` is a graphics object array, one entry per matrix payload element.
+
+For explicit rate rows, select the stored vertex inside the plotting call:
+
+```matlab
+A = pdmat([0 1], {0, 2}, Degree=1, RateBounds=[-1 2]);
+D = rhodiff(A);
+plot(D, RateVertex=2, SamplesPerCell=20, LineWidth=2);
+```
 
 ## Examples
 
@@ -138,10 +149,14 @@ cannot cover either surface.
 
 - Invalid `dims` raises `pdmat:InvalidPlotDimensions`.
 - Invalid or missing `SamplesPerCell` raises `pdmat:InvalidPlotOptions`.
+- Supplying `RateVertex` for ordinary data or selecting beyond the stored
+  rows raises `pdmat:InvalidRateVertex`.
 
 - Plotting is diagnostic and samples through `evaluate`.
 - For higher-dimensional objects, unselected dimensions are fixed at their lower grid bounds.
 
 ## See Also
 
-[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) · [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/)
+[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
+[`rhodiff`](/PD-LMI-package/documents/reference/pdmat/rhodiff/) ·
+[`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/)

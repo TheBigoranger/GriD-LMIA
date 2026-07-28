@@ -16,7 +16,7 @@ function varargout = subsref(obj, S)
             obj.GridInfo.Vectors);
         out = pdvar(mkInit(obj.GridInfo.Vectors, [numel(rows), numel(cols)], ...
             obj.Degree, vals, obj.ContainsDecision, obj.HasRateDependence, ...
-            obj.RateBounds, "expression", obj.IsContinuous));
+            obj.RateBounds, "expression", []));
 
         if numel(S) == 1
             varargout{1} = out;

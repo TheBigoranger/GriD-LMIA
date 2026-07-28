@@ -20,9 +20,8 @@ function tbl = bernsteinTable(obj, varargin)
     %     P = pdvar(1, {[0 1]});
     %     T = bernsteinTable(P, "oneLine");
 
-    nCoeff = (obj.Degree + 1) ^ obj.npar();
     rateVerts = [];
-    if isRateRows(obj.LocalValues, obj.GridInfo.Vectors, nCoeff)
+    if obj.hasRateRows()
         % Expand RateBounds into the vertex rows consumed by pdbase.bernTbl.
         vecs = cell(1, size(obj.RateBounds, 1));
         for k = 1:size(obj.RateBounds, 1)

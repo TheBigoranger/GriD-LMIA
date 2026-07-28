@@ -1,4 +1,5 @@
-function [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
+function [sz, deg, vals, isCont, summary, fh, rb] = ...
+        mkData(grid, src, optDeg, rb)
     %MKDATA Route pdmat constructor sources into pdbase constructor inputs.
     %
     %   Syntax:
@@ -28,6 +29,14 @@ function [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
 
     info = helper.mkGrid(grid, "pdmat");
     vecs = info.Vectors;
+    if nargin < 4 || isempty(rb)
+        rb = [];
+    else
+        rb = double(helper.chk(rb, "pdmat:InvalidRateBounds", ...
+            "RateBounds must be empty or a finite ell-by-2 matrix with lower <= upper.", ...
+            "numeric", "real", "finite", "rowbounds", ...
+            "Size", [numel(vecs), 2]));
+    end
     if ~isempty(optDeg)
         optDeg = double(helper.chk(optDeg, "pdmat:InvalidDegree", ...
             "Degree must be a nonnegative integer scalar.", ...
@@ -50,7 +59,7 @@ function [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
         [sz, deg, vals] = gridToLocal(src, vecs, optDeg, "pdmat");
         isCont = true;
     else
-        [sz, deg, vals, isCont] = localData(src, vecs, optDeg);
+        [sz, deg, vals, isCont] = localData(src, vecs, optDeg, rb);
     end
 end
 
@@ -108,7 +117,7 @@ function [sz, deg, vals, summary, fh] = fcnData(fh, info, optDeg)
     summary = "function-bernstein";
 end
 
-function [sz, deg, vals, isCont] = localData(src, vecs, optDeg)
+function [sz, deg, vals, isCont] = localData(src, vecs, optDeg, rb)
     %LOCALDATA Validate nested LocalValues while inferring its degree.
     %
     %   Syntax:
@@ -119,7 +128,11 @@ function [sz, deg, vals, isCont] = localData(src, vecs, optDeg)
 
     nPar = numel(vecs);
     nCell = cellfun(@numel, vecs) - 1;
-    [sz, nCoeff] = scanNest(src, nCell);
+    [sz, nCoeff, rowKind] = scanNest(src, nCell, nPar);
+    if rowKind == "rate" && isempty(rb)
+        error("pdmat:InvalidRateBounds", ...
+            "Explicit rate-vertex LocalValues require nonempty RateBounds.");
+    end
 
     if isempty(optDeg)
         deg = round(nCoeff ^ (1 / nPar) - 1);
@@ -141,7 +154,7 @@ function [sz, deg, vals, isCont] = localData(src, vecs, optDeg)
     isCont = chkCont(vals, nCell, deg);
 end
 
-function [sz, nCoeff] = scanNest(vals, nCell)
+function [sz, nCoeff, rowKind] = scanNest(vals, nCell, nPar)
     %SCANNEST Inspect a nested LocalValues tree without changing its layout.
     %
     %   Syntax:
@@ -155,25 +168,36 @@ function [sz, nCoeff] = scanNest(vals, nCell)
 
     sz = [];
     nCoeff = [];
+    rowKind = "";
     for k = 1:nCell(1)
         if isscalar(nCell)
             coeffs = vals{k};
             helper.chk(coeffs, "pdmat:InvalidCoefficientCell", ...
-                "Each physical cell must store a nonempty flat coefficient cell.", ...
+                "Each physical cell must store a nonempty coefficient table.", ...
                 "cell", "nonempty");
-            oneN = numel(coeffs);
+            if size(coeffs, 1) == 1
+                oneKind = "ordinary";
+            elseif size(coeffs, 1) == 2 ^ nPar
+                oneKind = "rate";
+            else
+                error("pdmat:InvalidCoefficientCell", ...
+                    "A coefficient table must have one row or one row per RateBounds vertex.");
+            end
+            oneN = size(coeffs, 2);
             oneSz = scanMats(coeffs(:), "pdmat:InvalidCoefficientPayload", ...
                 "Each pdmat payload must be a nonempty finite real numeric matrix.");
         else
-            [oneSz, oneN] = scanNest(vals{k}, nCell(2:end));
+            [oneSz, oneN, oneKind] = scanNest(vals{k}, ...
+                nCell(2:end), nPar);
         end
 
         if isempty(sz)
             sz = oneSz;
             nCoeff = oneN;
-        elseif ~isequal(sz, oneSz) || nCoeff ~= oneN
+            rowKind = oneKind;
+        elseif ~isequal(sz, oneSz) || nCoeff ~= oneN || rowKind ~= oneKind
             error("pdmat:InvalidLocalValues", ...
-                "All local coefficient cells must use the same matrix size and coefficient count.");
+                "All local coefficient cells must use one matrix size, coefficient count, and row kind.");
         end
     end
 end

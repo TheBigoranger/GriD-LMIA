@@ -17,7 +17,8 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
 
 ## Purpose
 
-Build a `pdlmi` object from a `pdvar` residual expression and one supported relation.
+Build a `pdlmi` object from a `pdvar` residual or a coefficient-backed known
+`pdmat` inequality.
 
 ## Syntax
 
@@ -41,6 +42,7 @@ C = pdlmi(expr, relation, "UseSparseFullBoxPreorder")
 C = pdlmi(expr, relation, UseSparseFullBoxPreorder=true, BandWidth=b)
 C = pdlmi(expr, relation, BandWidth=b)
 C = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
+C = pdlmi(expr, relation, ValidationMode=mode)
 C = lhs <= rhs
 C = lhs >= rhs
 C = lhs == rhs
@@ -59,16 +61,17 @@ degree elevation before coefficient constraints. In one parameter,
 Markov–Lukács interval form. In two or more parameters, `UsePutinar` selects
 one unweighted Gram term plus one $\alpha_s(1-\alpha_s)$-weighted term per
 axis, while `UseFullBoxPreorder` selects a term for every generator-subset
-product. `UseSparseFullBoxPreorder` retains those FullBox terms but partitions
-their Gram support into tensor windows. All four opt-in selections are
+product. `UseSparseFullBoxPreorder` retains those FullBox terms and exact
+identities while restricting Gram support to a band-limited form, implemented
+with overlapping axis-aligned tensor-window PSD clique blocks. All four opt-in selections are
 mutually exclusive.
 
 Use the direct default first. Choose Pólya when you want one exact degree
 elevation followed by the same coefficient test. In one parameter the two
 Gram selectors are equivalent. In two or more parameters, choose FullBox for
 every generator-subset product or Putinar for the unweighted term plus the
-separate axis generators. Choose SparseFullBox when an intermediate
-tensor-window support is useful; its exact endpoints return Direct at width
+separate axis generators. Choose SparseFullBox when intermediate band-limited
+support is useful; its exact endpoints return Direct at width
 one and FullBox at width at least `order + 1`.
 For derivations and the difference between representation degree and
 certificate order, see
@@ -78,7 +81,7 @@ certificate order, see
 
 | Input | Description |
 | :--- | :--- |
-| `expr` | `pdvar` residual expression, such as `P`, `V-Q`, or `diffP + P*A + A'*P`. |
+| `expr` | `pdvar` residual expression, or coefficient-backed `pdmat` residual for `"<="`/`">="`. A known `pdmat` equality is instead scalar logical `A == B`. |
 | `relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya` | Logical option. Default `false`. The bare flag `"UsePolya"` enables Pólya assembly with increment one. |
 | `PolyaDegree` | Finite nonnegative integer scalar. Default `0`. Supplying it without `UsePolya` enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
@@ -88,7 +91,8 @@ certificate order, see
 | `PutinarOrder` | Finite nonnegative integer scalar. This is an absolute order, not a degree increment. Supplying it alone enables Putinar assembly without a warning. |
 | `UseSparseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparseFullBox assembly. |
 | `SparseFullBoxOrder` | Finite nonnegative integer scalar and absolute order. Supplying it alone enables SparseFullBox assembly. |
-| `BandWidth` | Finite positive integer scalar. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
+| `BandWidth` | Finite positive integer band width. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
+| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient, not stored, and not inherited by later selection calls. |
 
 When full-box assembly is active, the minimum order is
 `floor(expr.Degree/2)` for one parameter and `ceil(expr.Degree/2)` for two or
@@ -269,7 +273,11 @@ not a sparse selector with a special width.
 
 - Nonsquare or non-Hermitian inequality coefficients select supported entry-wise mode and warn once with `pdlmi:ElementwiseInequality`.
 - Rectangular and non-Hermitian equality coefficients are supported.
-- A non-`pdvar` residual raises `pdlmi:InvalidExpression`; an unsupported relation raises `pdlmi:InvalidRelation`.
+- A residual outside supported `pdvar`/coefficient-backed `pdmat` forms raises
+  `pdlmi:InvalidExpression`; function-only `pdmat` raises
+  `pdlmi:MissingCoefficientEvidence`; `pdlmi(A,"==")` for `pdmat` raises
+  `pdlmi:UnsupportedPdmatEquality`; an unsupported relation raises
+  `pdlmi:InvalidRelation`.
 - Nonlogical selectors raise `pdlmi:InvalidUsePolya`, `pdlmi:InvalidUseFullBoxPreorder`, `pdlmi:InvalidUsePutinar`, or `pdlmi:InvalidUseSparseFullBoxPreorder`.
 - Invalid Pólya increments, FullBox orders, Putinar orders, SparseFullBox orders, or widths raise `pdlmi:InvalidPolyaDegree`, `pdlmi:InvalidFullBoxOrder`, `pdlmi:InvalidPutinarOrder`, `pdlmi:InvalidSparseFullBoxOrder`, or `pdlmi:InvalidBandWidth`.
 - When a Gram mode is enabled, a valid integer below its applicable minimum raises `pdlmi:FullBoxOrderTooLow`, `pdlmi:PutinarOrderTooLow`, or `pdlmi:SparseFullBoxOrderTooLow`.
@@ -278,6 +286,7 @@ not a sparse selector with a special width.
 - `UseSparseFullBoxPreorder=false` with `SparseFullBoxOrder` or `BandWidth` raises `pdlmi:ConflictingSparseFullBoxOptions`.
 - Enabling more than one of Pólya, Putinar, SparseFullBox, and FullBox assembly raises `pdlmi:ConflictingRelaxations`.
 - Malformed, duplicate, or unknown options raise `pdlmi:InvalidOptions`, `pdlmi:DuplicateOption`, or `pdlmi:UnknownOption`.
+- Invalid or misplaced validation values raise `pdlmi:InvalidValidationMode`.
 - Any Pólya, Putinar, SparseFullBox, or FullBox option on relation `"=="` raises `pdlmi:UnsupportedEqualityCertificate`.
 
 In one parameter, Putinar and full-box assembly share the exact
@@ -289,4 +298,4 @@ mode adds an implicit positivity margin or calls a solver.
 
 ## See Also
 
-[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)
+[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) · [`pdmat comparisons`](/PD-LMI-package/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)

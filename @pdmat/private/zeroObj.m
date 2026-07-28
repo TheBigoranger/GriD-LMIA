@@ -3,5 +3,5 @@ function out = zeroObj(grid, sz)
 
     info = helper.mkGrid(grid, "pdmat");
     vals = helper.mkNest(info.NumNodes - 1, @(~) {zeros(sz)});
-    out = mkObj(grid, vals, 0);
+    out = mkObj(grid, vals, 0, [], "coefficient-backed", true, sz);
 end

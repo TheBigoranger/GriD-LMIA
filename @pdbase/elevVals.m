@@ -1,4 +1,4 @@
-function vals = elevVals(obj, degreeIncrement)
+function vals = elevVals(obj, degreeIncrement, validationMode)
     %ELEVVALS Return this object's coefficients in an elevated Bernstein basis.
     %
     %   Syntax:
@@ -21,6 +21,12 @@ function vals = elevVals(obj, degreeIncrement)
     %     obj = pdbase({[0 1]}, [1 1], 1, {{0, 1}});
     %     vals = obj.elevVals(1);  % vals{1} is {0, 0.5, 1}
 
+    if nargin < 3
+        validationMode = "fast";
+    else
+        validationMode = normalizeValidationMode(validationMode);
+    end
+
     inc = double(helper.chk(degreeIncrement, ...
         "pdbase:InvalidDegreeIncrement", ...
         "degreeIncrement must be a finite nonnegative integer scalar.", ...
@@ -31,5 +37,20 @@ function vals = elevVals(obj, degreeIncrement)
     end
 
     vals = pdbase.elevLocalValues(obj.LocalValues, obj.Degree, ...
-        obj.Degree + inc, obj.GridInfo.Vectors);
+        obj.Degree + inc, obj.GridInfo.Vectors, [], validationMode);
+end
+
+function mode = normalizeValidationMode(value)
+    % The optional mode is an internal call-local bridge for certificate
+    % assembly; it is deliberately not stored on or inherited from obj.
+    if ~((ischar(value) && isrow(value) && ~isempty(value)) || ...
+            (isstring(value) && isscalar(value) && ~ismissing(value)))
+        error("pdbase:InvalidValidationMode", ...
+            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+    end
+    mode = lower(string(value));
+    if ~any(mode == ["fast", "strict"])
+        error("pdbase:InvalidValidationMode", ...
+            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+    end
 end

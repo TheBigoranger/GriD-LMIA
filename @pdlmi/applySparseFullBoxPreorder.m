@@ -45,23 +45,24 @@ function out = applySparseFullBoxPreorder(obj, varargin)
         error("pdlmi:UnsupportedEqualityCertificate", ...
             "Coefficient equality supports direct assembly only.");
     end
-    if numel(varargin) > 2
+    [args, validationMode] = parseApplyValidation(varargin);
+    if numel(args) > 2
         error("pdlmi:InvalidApplyOptions", ...
             "Too many positional inputs were supplied.");
     end
-    if isempty(varargin)
+    if isempty(args)
         bandWidth = 2;
     else
-        bandWidth = varargin{1};
+        bandWidth = args{1};
     end
     bandWidth = chkBandWidth(bandWidth);
-    if numel(varargin) < 2
+    if numel(args) < 2
         order = chkSparseFullBoxOrder(obj.Residual);
     else
-        order = chkSparseFullBoxOrder(obj.Residual, varargin{2});
+        order = chkSparseFullBoxOrder(obj.Residual, args{2});
     end
 
     out = pdlmi(obj.Residual, obj.Relation, ...
         UseSparseFullBoxPreorder=true, BandWidth=bandWidth, ...
-        SparseFullBoxOrder=order);
+        SparseFullBoxOrder=order, ValidationMode=validationMode);
 end

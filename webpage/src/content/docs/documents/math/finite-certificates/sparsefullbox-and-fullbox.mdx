@@ -1,6 +1,6 @@
 ---
 title: SparseFullBox And FullBox
-description: Full-box preorderings, tensor-window Gram support, bandwidth endpoints, and exact coefficient matching.
+description: Full-box preorderings, band-limited Gram support, bandwidth endpoints, and exact coefficient matching.
 ---
 
 import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
@@ -15,9 +15,9 @@ import CertificateSpectrum from "../../../../../components/CertificateSpectrum.a
 
 <CertificateSpectrum selected="sparsefullbox" />
 
-The mathematical names are **sparse full-box tensor-window certificate** and
-**full-box preordering**. Their software states are `SparseFullBox` and
-`FullBox`.
+The mathematical construction is FullBox with **band-limited Gram support**;
+the software state is `SparseFullBox`. The dense construction is the
+**full-box preordering**, with software state `FullBox`.
 
 ## Full-Box Preordering
 
@@ -46,11 +46,13 @@ selected = L.applyFullBoxPreorder();
 selected = L.applyFullBoxPreorder(r);
 ```
 
-## Sparse Full-Box Tensor Windows
+## SparseFullBox Band-Limited Support
 
-SparseFullBox retains every FullBox generator-mask family but writes each dense
-Gram term as a sum of positive-semidefinite blocks supported on overlapping
-axis-aligned windows of the tensor Bernstein basis:
+SparseFullBox retains every FullBox parity or generator-mask term and every
+exact target-coefficient identity, but restricts each Gram term to
+band-limited support. The implementation realizes that support as a sum of
+positive-semidefinite clique blocks on overlapping axis-aligned windows of
+the tensor Bernstein basis:
 
 $$
 S^{(\mathbf c)}
@@ -62,7 +64,7 @@ g_JS_{J,\mathbf t},
 \prod_{s=1}^{\ell}\{t_s,\ldots,t_s+b-1\}.
 $$
 
-The bandwidth $b$ controls window support; the absolute Gram order is $r$.
+The bandwidth $b$ controls Gram support; the absolute Gram order is $r$.
 
 ```matlab
 selected = L.applySparseFullBoxPreorder();
@@ -110,8 +112,9 @@ continuous infeasibility.
 
 ## Limitations
 
-SparseFullBox uses axis-aligned tensor windows; it does not search arbitrary
-chordal patterns or adapt bandwidth automatically. FullBox is limited to box
+SparseFullBox uses band-limited support realized by axis-aligned tensor
+windows; it does not search arbitrary chordal patterns or adapt bandwidth
+automatically. FullBox is limited to box
 generators and can become large with dimension and order. Neither selector
 calls a solver or inserts a positivity margin.
 
@@ -122,7 +125,7 @@ calls a solver or inserts a positivity margin.
 - Zheng and Fantuzzi, [Sum-of-squares chordal decomposition of polynomial matrix inequalities](https://arxiv.org/abs/2007.11410), for broader sparse polynomial-matrix Gram context.
 
 These sparse-Gram sources motivate structure; they do not define the package's
-tensor-window map.
+band map or its tensor-window realization.
 
 ## See Also
 

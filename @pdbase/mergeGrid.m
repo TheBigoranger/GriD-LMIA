@@ -36,6 +36,9 @@ function grid = mergeGrid(obj, errId, varargin)
             if grid{p}(1) ~= vec(1) || grid{p}(end) ~= vec(end)
                 error(errId, "gridded operands must have matching grid bounds.");
             end
+            if isequal(grid{p}, vec)
+                continue
+            end
             grid{p} = unique([grid{p}, vec], "sorted");
         end
     end

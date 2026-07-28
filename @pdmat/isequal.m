@@ -47,17 +47,19 @@ function tf = sameOne(a, b)
         % Compare coefficient-backed operands after grid and degree alignment.
         try
             grid = a.mergeGrid("pdmat:InvalidEquality", a, b);
-            ad = asData(grid, a, a.MatrixSize, "pdmat:InvalidEquality");
-            bd = asData(grid, b, a.MatrixSize, "pdmat:InvalidEquality");
+            rb = a.pickRateBounds("pdmat:InvalidEquality", a, b);
+            ad = asData(grid, a, a.MatrixSize, rb, ...
+                "pdmat:InvalidEquality");
+            bd = asData(grid, b, a.MatrixSize, rb, ...
+                "pdmat:InvalidEquality");
         catch
             tf = false;
             return
         end
 
         deg = max(ad.Degree, bd.Degree);
-        av = pdbase.elevLocalValues(ad.LocalValues, ad.Degree, deg, grid);
-        bv = pdbase.elevLocalValues(bd.LocalValues, bd.Degree, deg, grid);
-        tf = valsEqual(av, bv);
+        aligned = pdbase.alignLocalDegrees([ad, bd], deg, grid);
+        tf = valsEqual(aligned(1).LocalValues, aligned(2).LocalValues);
         return
     end
 

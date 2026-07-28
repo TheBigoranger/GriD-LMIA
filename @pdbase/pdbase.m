@@ -33,18 +33,15 @@ classdef pdbase
     end
 
     methods
-        function obj = pdbase(gridVectors, matrixSize, degree, localValues, options)
-            arguments
-                gridVectors
-                matrixSize
-                degree
-                localValues = []
-                options.IsContinuous (1, 1) logical = false
-                options.ContainsDecision (1, 1) logical = false
-                options.HasRateDependence (1, 1) logical = false
-                options.RateBounds = []
-                options.SourceSummary = "coefficient-backed"
+        function obj = pdbase(gridVectors, matrixSize, degree, varargin)
+            if ~isempty(varargin) && isValidationModeName(varargin{end})
+                error("pdbase:InvalidValidationMode", ...
+                    "ValidationMode requires the scalar text 'fast' or 'strict'.");
             end
+            [localValues, options] = parseConstructorOptions(varargin{:});
+
+            validationMode = normalizeValidationMode( ...
+                options.ValidationMode, "pdbase");
 
             % Normalize once at the parent layer so pdmat/pdvar/pdlmi can
             % share the same tensor-grid contract and label ordering.
@@ -80,7 +77,8 @@ classdef pdbase
                 hasRate = false;
             else
                 vals = localValues;
-                hasRate = chkVals(vals, nCell, nCoeff, sz, nPar);
+                hasRate = chkVals(vals, nCell, nCoeff, sz, nPar, ...
+                    validationMode);
             end
             if hasRate && isempty(rb)
                 error("pdbase:InvalidRateBounds", ...
@@ -101,24 +99,71 @@ classdef pdbase
             obj.RateBounds = rb;
             obj.SourceSummary = options.SourceSummary;
         end
+    end
 
-        vals = elevVals(obj, degreeIncrement)
+    methods
+        vals = elevVals(obj, degreeIncrement, validationMode)
         out = elevate(obj, degreeIncrement)
+        out = rhodiff(obj, rb)
     end
 
     methods (Access = protected)
-        out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg)
+        out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg, varargin)
         tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
+        tf = hasRateRows(obj)
+        rb = pickRateBounds(obj, errId, varargin)
+        coeffs = joinRateRows(obj, leaves, fcn, errId)
+        vals = zipRateRows(obj, lhsVals, rhsVals, fcn, grid, errId)
+        coeffs = prodRateRows(obj, lhs, lhsDeg, rhs, rhsDeg, errId, varargin)
+        vals = prodLocalValues(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
+            grid, errId, plan, varargin)
+        plan = productPlan(obj, lhsDeg, rhsDeg)
         grid = mergeGrid(obj, errId, varargin)
         out = unOp(obj, fcn, sz)
         out = mkUnOp(obj, vals, sz)
+        out = mkRhodiff(obj, deg, vals, rb, hasDec)
     end
 
     methods (Static, Access = protected)
-        out = bernElev(coeffs, fromDeg, toDeg, nPar)
-        vals = elevLocalValues(vals, fromDeg, toDeg, grid)
+        out = bernElev(coeffs, fromDeg, toDeg, nPar, varargin)
+        plan = elevationPlan(fromDeg, toDeg, nPar)
+        data = alignLocalDegrees(data, targetDegree, grid, validationMode)
+        vals = elevLocalValues(vals, fromDeg, toDeg, grid, varargin)
         vals = mapVals(vals, fcn, grid)
         [rows, cols] = matSubs(subs, sz, errId)
     end
 
+end
+
+function [localValues, options] = parseConstructorOptions(localValues, options)
+            arguments
+                localValues = []
+                options.IsContinuous (1, 1) logical = false
+                options.ContainsDecision (1, 1) logical = false
+                options.HasRateDependence (1, 1) logical = false
+                options.RateBounds = []
+                options.SourceSummary = "coefficient-backed"
+                options.ValidationMode = "fast"
+            end
+end
+
+function tf = isValidationModeName(value)
+    %ISVALIDATIONMODENAME Detect a dangling public ValidationMode name.
+    tf = (ischar(value) && isrow(value) && strcmp(value, "ValidationMode")) || ...
+        (isstring(value) && isscalar(value) && ~ismissing(value) && ...
+        value == "ValidationMode");
+end
+
+function mode = normalizeValidationMode(value, owner)
+    %NORMALIZEVALIDATIONMODE Validate the transient structural-check policy.
+    if ~((ischar(value) && isrow(value) && ~isempty(value)) || ...
+            (isstring(value) && isscalar(value) && ~ismissing(value)))
+        error(owner + ":InvalidValidationMode", ...
+            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+    end
+    mode = lower(string(value));
+    if ~any(mode == ["fast", "strict"])
+        error(owner + ":InvalidValidationMode", ...
+            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+    end
 end

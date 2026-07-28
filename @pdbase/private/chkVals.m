@@ -1,5 +1,5 @@
-function hasRate = chkVals(vals, nCell, nCoeff, sz, nPar)
-    %CHKVALS Validate cell-local Bernstein values.
+function [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, nPar, mode)
+    %CHKVALS Validate normalized cell-local Bernstein storage.
     %
     %   Syntax:
     %     hasRate = chkVals(vals, nCell, nCoeff, sz, nPar)
@@ -25,19 +25,39 @@ function hasRate = chkVals(vals, nCell, nCoeff, sz, nPar)
         "LocalValues must match the physical nested-cell grid shape.", ...
         "cell", "Numel", nCell(1));
 
+    if nargin < 6
+        mode = "strict";
+    end
     hasRate = false;
-    for k = 1:nCell(1)
+    rowKind = "";
+    if mode == "fast"
+        % Constructor-generated trees are structurally uniform. Sampling index
+        % one at each nesting level reaches the first physical cell, whose
+        % complete coefficient table (including every rate row) is still checked.
+        indices = 1;
+    else
+        indices = 1:nCell(1);
+    end
+    for k = indices
         if isscalar(nCell)
             coeffs = vals{k};
-            hasRate = chkCoeffRow(coeffs, nCoeff, sz, nPar) || hasRate;
+            [oneRate, oneKind] = chkCoeffRow(coeffs, nCoeff, sz, nPar);
         else
             % Recurse through one physical-grid dimension at a time.
-            hasRate = chkVals(vals{k}, nCell(2:end), nCoeff, sz, nPar) || hasRate;
+            [oneRate, oneKind] = chkVals(vals{k}, ...
+                nCell(2:end), nCoeff, sz, nPar, mode);
+        end
+        hasRate = oneRate || hasRate;
+        if rowKind == ""
+            rowKind = oneKind;
+        elseif rowKind ~= oneKind
+            error("pdbase:InvalidCoefficientRows", ...
+                "LocalValues cannot mix ordinary and rate-vertex rows across physical cells.");
         end
     end
 end
 
-function hasRate = chkCoeffRow(coeffs, nCoeff, sz, nPar)
+function [hasRate, rowKind] = chkCoeffRow(coeffs, nCoeff, sz, nPar)
     %CHKCOEFFROW Validate one physical-cell leaf and classify rate storage.
     % A leaf is flat or has one row per corner of the parameter-rate box.
 
@@ -45,14 +65,20 @@ function hasRate = chkCoeffRow(coeffs, nCoeff, sz, nPar)
         "Each physical coefficient row must be a flat coefficient cell or a rate-vertex coefficient table.", ...
         "cell");
 
-    isRateTable = size(coeffs, 1) == 2 ^ nPar && size(coeffs, 2) == nCoeff;
+    isRateTable = size(coeffs, 1) == 2 ^ nPar && ...
+        size(coeffs, 2) == nCoeff;
     if ~isRateTable
         helper.chk(coeffs, "pdbase:InvalidCoefficientCell", ...
             "Each ordinary physical coefficient row must have the expected coefficient count.", ...
-            "Numel", nCoeff);
+            "Size", [1, nCoeff]);
     end
 
     hasRate = isRateTable;
+    if isRateTable
+        rowKind = "rate";
+    else
+        rowKind = "ordinary";
+    end
     for c = 1:nCoeff
         for row = 1:size(coeffs, 1)
             val = coeffs{row, c};

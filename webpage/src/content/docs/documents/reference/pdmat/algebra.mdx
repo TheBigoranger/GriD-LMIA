@@ -32,9 +32,11 @@ U.evaluate(0)
 ```
 
 ```text
-degree=2
-   11.0000   21.5000   32.0000
-minus=0, uminus=-2, uplus=1
+ans = 2
+    11.0000   21.5000   32.0000
+ans = 0
+ans = -2
+ans = 1
 ```
 
 <MatrixGlyphDiagram before={[["a₀", "a₁"]]} after={[["a₀+b₀", "a₁+b₁", "a₂+b₂"]]} beforeLabel="unaligned rows" afterLabel="common degree" caption="Degree elevation changes the representation, not the polynomial; addition combines aligned local labels." />
@@ -81,7 +83,7 @@ convolution, not a pointwise product of sampled rows.
 
 <ExampleDisclosure
   visibleCode={"K = A * B;\ncK = K.coeffs([1 1]);"}
-  fullCode={"grid = {[0 1], [10 20]};\nA = pdmat(grid, {1 2; 3 4}, Degree=1);\nB = pdmat(grid, {5 6; 7 8}, Degree=1);\nK = A * B;\ncK = K.coeffs([1 1]);\nK.Degree\nK.ncoeff()\ndisp([cK{:}])\n% ans = 2\n% ans = 9\n% 5  8  12  11  15  20  21  26  32"}
+  fullCode={"grid = {[0 1], [10 20]};\nA = pdmat(grid, {1 2; 3 4}, Degree=1);\nB = pdmat(grid, {5 6; 7 8}, Degree=1);\nK = A * B;\ncK = K.coeffs([1 1]);\nassert(K.Degree == 2)\nassert(K.ncoeff() == 9)\ndisp([cK{:}])"}
   summary="Show the complete runnable two-parameter example"
 />
 
@@ -92,6 +94,12 @@ convolution, not a pointwise product of sampled rows.
 - Function-only objects without Bernstein evidence are rejected by coefficient algebra.
 - Physical bounds and matrix dimensions must be compatible before refinement or multiplication.
 - `mtimes` is matrix multiplication; element-wise parameter-dependent products are not a public substitute.
+- Ordinary one-row operands broadcast across explicit rate rows. Two
+  rate-row operands must have exactly matching grids and nonempty matching
+  rate boxes; they are not automatically refined.
+- Multiplication preserves rate rows when only one side has them. Rate-row by
+  rate-row products, rate-row by ordinary decision products, and
+  metadata-only rate dependence in a product are rejected.
 - These methods return known `pdmat` data and do not introduce YALMIP decisions.
 
 ## See Also

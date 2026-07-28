@@ -18,12 +18,11 @@ leaf = helper.cellGet(vals, subs)
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 vals = {{{10, 20}}, {{30, 40}}};
-leaf = helper.cellGet(vals, [2 1])
+leaf = cell2mat(helper.cellGet(vals, [2 1]))
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
-leaf =
-  1x2 cell array
-    {[30]}    {[40]}
+leaf = 1×2 double
+    30    40
 \end{lstlisting}
 
 \remarkshead
@@ -48,7 +47,7 @@ validated = helper.chk([1 2], "demo:BadValue", "bad value", ...
     "numeric", "real", "finite", "Size", [1 2])
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
-validated =
+validated = 1×2 double
      1     2
 \end{lstlisting}
 
@@ -72,7 +71,7 @@ rows = helper.combRows(vecs)
 rows = helper.combRows({0:1, 10:11})
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
-rows =
+rows = 4×2 double
      0    10
      0    11
      1    10
@@ -135,10 +134,11 @@ bounds = info.Bounds
 points = info.Points
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
-bounds =
+bounds = 2×2 double
      0     1
     10    20
-points =
+
+points = 4×2 double
      0    10
      0    20
      1    10
@@ -164,12 +164,10 @@ vals = helper.mkNest(nCell, mkLeaf, prefix)
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 vals = helper.mkNest([2 1], @(subs) {sum(subs)});
-secondLeaf = helper.cellGet(vals, [2 1])
+secondLeaf = cell2mat(helper.cellGet(vals, [2 1]))
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
-secondLeaf =
-  1x1 cell array
-    {[3]}
+secondLeaf = 3
 \end{lstlisting}
 
 \remarkshead

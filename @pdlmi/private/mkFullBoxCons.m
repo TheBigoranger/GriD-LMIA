@@ -1,4 +1,4 @@
-function cons = mkFullBoxCons(expr, relation, order, mode)
+function cons = mkFullBoxCons(expr, relation, order, comparisonMode, validationMode)
     %MKFULLBOXCONS Define and assemble full-box-preordering constraints.
     %
     %   Syntax:
@@ -18,5 +18,6 @@ function cons = mkFullBoxCons(expr, relation, order, mode)
     %   all blocks passed to the shared cell/rate-row Gram assembler.
 
     [targetDeg, specs] = mkFullBoxSpec(expr, order);
-    cons = mkGramCons(expr, relation, targetDeg, specs, mode);
+    cons = mkGramCons(expr, relation, targetDeg, specs, ...
+        comparisonMode, validationMode);
 end

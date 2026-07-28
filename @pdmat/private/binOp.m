@@ -28,19 +28,22 @@ function out = binOp(lhs, rhs, fcn, errId)
         anchor = rhs;
     end
     % Use one pdmat operand as the metadata anchor for grid and size alignment.
+    rb = anchor.pickRateBounds(errId, lhs, rhs);
     grid = anchor.mergeGrid("pdmat:MixedGrid", lhs, rhs);
     reqSize = anchor.MatrixSize;
-    ld = asData(grid, lhs, reqSize, errId);
-    rd = asData(grid, rhs, reqSize, errId);
+    ld = asData(grid, lhs, reqSize, rb, errId);
+    rd = asData(grid, rhs, reqSize, rb, errId);
 
     % Elevate both operands before applying the cell-local coefficient operation.
     deg = max(ld.Degree, rd.Degree);
-    lhsVals = pdbase.elevLocalValues(ld.LocalValues, ld.Degree, deg, grid);
-    rhsVals = pdbase.elevLocalValues(rd.LocalValues, rd.Degree, deg, grid);
-    nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) cellfun(fcn, ...
-        helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs), ...
-        UniformOutput=false));
+    [lhsPlan, rhsPlan] = elevationPlans( ...
+        ld.Degree, rd.Degree, deg, numel(grid));
+    lhsVals = pdbase.elevLocalValues( ...
+        ld.LocalValues, ld.Degree, deg, grid, lhsPlan, "fast");
+    rhsVals = pdbase.elevLocalValues( ...
+        rd.LocalValues, rd.Degree, deg, grid, rhsPlan, "fast");
+    vals = anchor.zipRateRows(lhsVals, rhsVals, fcn, grid, ...
+        "pdmat:InvalidCoefficientRows");
 
     if helper.isZero(vals, "vals")
         % Store an all-zero result in its compact representation.
@@ -48,5 +51,25 @@ function out = binOp(lhs, rhs, fcn, errId)
         return
     end
 
-    out = mkObj(grid, vals, deg);
+    hasRate = ld.HasRateDependence || rd.HasRateDependence;
+    if ~hasRate
+        rb = [];
+    end
+    out = mkObj(grid, vals, deg, rb);
+end
+
+function [lhsPlan, rhsPlan] = elevationPlans(lhsDegree, rhsDegree, targetDegree, nPar)
+    %ELEVATIONPLANS Reuse one map when both operands share a source degree.
+    lhsPlan = [];
+    rhsPlan = [];
+    if lhsDegree < targetDegree
+        lhsPlan = pdbase.elevationPlan(lhsDegree, targetDegree, nPar);
+    end
+    if rhsDegree < targetDegree
+        if rhsDegree == lhsDegree
+            rhsPlan = lhsPlan;
+        else
+            rhsPlan = pdbase.elevationPlan(rhsDegree, targetDegree, nPar);
+        end
+    end
 end

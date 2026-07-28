@@ -13,7 +13,7 @@ report = install_pd_lmi();
 
 The returned structure records the package root, the YALMIP root discovered on the current MATLAB path, the working SDP solver, the paths added by this run, and whether the path was persisted:
 
-\begin{lstlisting}[style=dpoutput]
+\begin{lstlisting}[style=dpsyntax]
 report.PackageRoot
 report.YALMIPRoot
 report.Solver
@@ -23,7 +23,7 @@ report.Persisted
 
 YALMIP must already be on the active MATLAB path.  The installer validates \code{yalmip}, \code{sdpvar}, \code{sdpsettings}, \code{optimize}, and \code{getavailablesolvers}; it then probes available SDP solvers in the fixed commercial-first order MOSEK, COPT, SeDuMi, SDPT3, and LMILAB using a tiny bounded SDP.  A failed probe falls through to the next candidate.  If any precondition, shadow check, solver probe, or path persistence operation fails, the installer restores the original MATLAB path and stops with one of these stable errors:
 
-\begin{lstlisting}[style=dpoutput]
+\begin{lstlisting}[style=dpsyntax]
 install_pd_lmi:MissingYALMIP
 install_pd_lmi:IncompleteYALMIP
 install_pd_lmi:NoWorkingSDPSolver
@@ -53,12 +53,13 @@ The installer already rejects shadowed package classes before it persists the pa
 \begin{lstlisting}[style=dpmatlab]
 report.Solver
 A = pdmat({[0 1]}, {1, 3}, Degree=1);
-T = bernsteinTable(A, "oneLine")
+T = bernsteinTable(A, "oneLine");
+disp(T)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-    CellSubscript      Expression
-    _____________    _______________
+    CellSubscript          Expression
+    _____________    _______________________
 
         {[1]}        "(1-alpha)*1 + alpha*3"
 \end{lstlisting}

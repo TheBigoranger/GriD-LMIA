@@ -1,4 +1,4 @@
-function out = applyPolya(obj, degreeIncrement)
+function out = applyPolya(obj, varargin)
     %APPLYPOLYA Rebuild this residual with a selected Pólya degree increment.
     %
     %   Syntax:
@@ -29,13 +29,20 @@ function out = applyPolya(obj, degreeIncrement)
         error("pdlmi:UnsupportedEqualityCertificate", ...
             "Coefficient equality supports direct assembly only.");
     end
-    if nargin < 2
+    [args, validationMode] = parseApplyValidation(varargin);
+    if numel(args) > 1
+        error("pdlmi:InvalidApplyOptions", ...
+            "Too many positional inputs were supplied.");
+    end
+    if isempty(args)
         degreeIncrement = 1;
+    else
+        degreeIncrement = args{1};
     end
     degreeIncrement = double(helper.chk(degreeIncrement, ...
         "pdlmi:InvalidPolyaDegree", ...
         "PolyaDegree must be a finite nonnegative integer scalar.", ...
         "numeric", "real", "finite", "integer", "nonnegative", "scalar"));
     out = pdlmi(obj.Residual, obj.Relation, UsePolya=true, ...
-        PolyaDegree=degreeIncrement);
+        PolyaDegree=degreeIncrement, ValidationMode=validationMode);
 end

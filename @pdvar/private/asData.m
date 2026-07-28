@@ -36,8 +36,7 @@ function data = asData(grid, val, reqSize, rb, errId)
         if ~isempty(reqSize) && ~isequal(val.MatrixSize, reqSize)
             error(errId, "pdvar operand matrix sizes are incompatible for this operation.");
         end
-        nCoeff = (val.Degree + 1) ^ val.npar();
-        hasRows = isRateRows(val.LocalValues, val.GridInfo.Vectors, nCoeff);
+        hasRows = val.hasRateRows();
         same = sameGrid(info, val, errId);
         if same
             vals = val.LocalValues;
@@ -62,15 +61,23 @@ function data = asData(grid, val, reqSize, rb, errId)
         if ~isempty(reqSize) && ~isequal(val.MatrixSize, reqSize)
             error(errId, "pdvar operand matrix sizes are incompatible for this operation.");
         end
+        if ~isempty(val.RateBounds) && ...
+                (isempty(rb) || ~isequal(rb, val.RateBounds))
+            error(errId, "Gridded operands must have matching RateBounds.");
+        end
+        hasRows = val.hasRateRows();
         if sameGrid(info, val, errId)
             vals = val.LocalValues;
+        elseif hasRows
+            error(errId, ...
+                "Rate-vertex pdmat expressions require matching grids in pdvar algebra.");
         else
             % Coefficient-backed known data is re-expressed on the same
             % common refinement before entering symbolic pdvar algebra.
             vals = fitVals(info, val.Degree, val.MatrixSize, @(pt) evaluate(val, pt));
         end
         data = pack(val.MatrixSize, val.Degree, vals, false, ...
-            val.HasRateDependence, val.IsContinuous, false);
+            val.HasRateDependence, val.IsContinuous, hasRows);
         return
     end
 

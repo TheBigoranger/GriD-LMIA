@@ -1,4 +1,4 @@
-function cons = mkSparseFullBoxCons(expr, relation, order, bandWidth, mode)
+function cons = mkSparseFullBoxCons(expr, relation, order, bandWidth, comparisonMode, validationMode)
     %MKSPARSEFULLBOXCONS Assemble tensor-window full-box constraints.
     %
     %   The dense and sparse families share the exact parity/mask convention.
@@ -6,5 +6,6 @@ function cons = mkSparseFullBoxCons(expr, relation, order, bandWidth, mode)
     %   by every axis-aligned window with side min(bandWidth, degree+1).
 
     [targetDeg, specs] = mkFullBoxSpec(expr, order);
-    cons = mkGramCons(expr, relation, targetDeg, specs, mode, bandWidth);
+    cons = mkGramCons(expr, relation, targetDeg, specs, ...
+        comparisonMode, validationMode, bandWidth);
 end

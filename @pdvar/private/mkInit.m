@@ -1,4 +1,4 @@
-function init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary, isCont)
+function init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary, isCont, validationMode)
     %MKINIT Package prepared coefficient data for the pdvar constructor.
     %
     %   Syntax:
@@ -18,8 +18,20 @@ function init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary, isCont
     %     Q = -P;  % Unary algebra packages data through mkInit.
 
 
-    if nargin < 9
-        isCont = true;
+    firstLeaf = helper.cellGet(vals, ones(1, numel(grid)));
+    hasRateRows = hasRate && iscell(firstLeaf) && size(firstLeaf, 1) > 1;
+    if hasRateRows
+        % Active derivative vertices remain deliberately cell-local even when
+        % a particular coefficient realization happens to match at a face.
+        isCont = false;
+    elseif nargin < 9 || isempty(isCont)
+        % Recompute globally unless the caller supplies an exact preservation
+        % proof; an operand-level continuity flag cannot detect cancellation.
+        nCell = cellfun(@numel, grid) - 1;
+        isCont = chkCont(vals, nCell, deg);
+    end
+    if nargin < 10
+        validationMode = "fast";
     end
 
     init = struct( ...
@@ -32,5 +44,6 @@ function init = mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, summary, isCont
         "ContainsDecision", hasDec, ...
         "HasRateDependence", hasRate, ...
         "RateBounds", rb, ...
-        "SourceSummary", summary);
+        "SourceSummary", summary, ...
+        "ValidationMode", validationMode);
 end

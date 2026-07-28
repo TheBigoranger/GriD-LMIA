@@ -35,7 +35,9 @@ val = A.evaluate(pt)
 
 ## Output
 
-`val` is a numeric matrix with size `A.MatrixSize`.
+For ordinary data, `val` is a numeric matrix with size `A.MatrixSize`. For
+explicit rate-row data, it is a `1`-by-`2^ell` cell row containing one numeric
+matrix per stored rate vertex.
 
 ## Description
 
@@ -51,6 +53,20 @@ For matrix-valued data, the same formula is applied entrywise to each stored
 coefficient matrix. Function-backed objects keep the exact MATLAB function
 handle and call it directly.
 
+Explicit rate rows are interpolated independently; `evaluate` does not merge
+the alternatives:
+
+```matlab
+A = pdmat([0 1], {{1, 3; 10, 14}}, ...
+    Degree=1, RateBounds=[-1 2]);
+rateRows = cell2mat(A.evaluate(0.5))
+```
+
+```text
+rateRows = 1×2 double
+     2    12
+```
+
 ## Examples
 
 ### Function-call form
@@ -61,8 +77,7 @@ val = evaluate(A, 0.25)
 ```
 
 ```text
-val =
-    2.5000
+val = 2.5000
 ```
 
 At `rho = 0.25`, the public forward coordinate is `alpha = 0.25`, so the value is
@@ -76,8 +91,7 @@ val = A.evaluate(0.75)
 ```
 
 ```text
-val =
-    3.5000
+val = 3.5000
 ```
 
 The dot-call form is equivalent to `evaluate(A, pt)` and is often convenient in
@@ -91,8 +105,7 @@ val = F.evaluate(pi/2)
 ```
 
 ```text
-val =
-     1
+val = 1
 ```
 
 Function-backed objects route evaluation through the retained function handle.
@@ -105,4 +118,6 @@ Function-backed objects route evaluation through the retained function handle.
 
 ## See Also
 
-[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) · [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/)
+[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) ·
+[`rhodiff`](/PD-LMI-package/documents/reference/pdmat/rhodiff/) ·
+[`plot`](/PD-LMI-package/documents/reference/pdmat/plot/)

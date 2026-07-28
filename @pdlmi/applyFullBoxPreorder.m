@@ -1,4 +1,4 @@
-function out = applyFullBoxPreorder(obj, order)
+function out = applyFullBoxPreorder(obj, varargin)
     %APPLYFULLBOXPREORDER Apply a cell-local full box preordering certificate.
     %
     %   Syntax:
@@ -39,12 +39,18 @@ function out = applyFullBoxPreorder(obj, order)
         error("pdlmi:UnsupportedEqualityCertificate", ...
             "Coefficient equality supports direct assembly only.");
     end
-    if nargin < 2
+    [args, validationMode] = parseApplyValidation(varargin);
+    if numel(args) > 1
+        error("pdlmi:InvalidApplyOptions", ...
+            "Too many positional inputs were supplied.");
+    end
+    if isempty(args)
         order = chkFullBoxOrder(obj.Residual);
     else
-        order = chkFullBoxOrder(obj.Residual, order);
+        order = chkFullBoxOrder(obj.Residual, args{1});
     end
 
     out = pdlmi(obj.Residual, obj.Relation, ...
-        UseFullBoxPreorder=true, FullBoxOrder=order);
+        UseFullBoxPreorder=true, FullBoxOrder=order, ...
+        ValidationMode=validationMode);
 end

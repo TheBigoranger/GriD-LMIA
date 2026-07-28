@@ -25,6 +25,8 @@ function display(obj)
     fprintf("  Physical cells: %d\n", obj.ncell());
     fprintf("  Coefficients per cell: %d\n", obj.ncoeff());
     fprintf("  Continuous: %s\n", string(obj.IsContinuous));
+    fprintf("  Rate metadata: %s\n", string(obj.HasRateDependence));
+    fprintf("  Explicit rate rows: %s\n", string(obj.hasRateRows()));
     fprintf("  Source: %s\n", obj.SourceSummary);
     fprintf("  Function handle: %s\n", string(~isempty(obj.FunctionHandle)));
 end

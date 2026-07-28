@@ -20,17 +20,14 @@ function out = cat(dim, varargin)
 
     anchor = pickAnchor("pdvar:InvalidConcatenation", varargin);
     grid = anchor.mergeGrid("pdvar:MixedGrid", varargin{:});
-    rb = pickRb("pdvar:InvalidConcatenation", varargin{:});
+    rb = anchor.pickRateBounds("pdvar:InvalidConcatenation", varargin{:});
     [data, sz] = catData(dim, varargin, grid, rb);
     deg = max(arrayfun(@(d) d.Degree, data));
 
-    for k = 1:numel(data)
-        data(k).LocalValues = pdbase.elevLocalValues(data(k).LocalValues, ...
-            data(k).Degree, deg, grid);
-    end
+    data = pdbase.alignLocalDegrees(data, deg, grid);
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) catCell(dim, data, subs));
+    vals = helper.mkNest(nCell, @(subs) catCell(anchor, dim, data, subs));
     hasDec = any(arrayfun(@(d) d.ContainsDecision, data));
     hasRate = any(arrayfun(@(d) d.HasRateDependence, data));
     if ~hasRate
@@ -106,7 +103,7 @@ function common = commonDim(vals, label)
     end
 end
 
-function coeffs = catCell(dim, data, subs)
+function coeffs = catCell(anchor, dim, data, subs)
     %CATCELL Concatenate one cell after ordinary/rate row alignment.
     leaves = cell(1, numel(data));
     for k = 1:numel(data)
@@ -114,6 +111,6 @@ function coeffs = catCell(dim, data, subs)
     end
     % rhodiff leaves have one row per rate vertex; ordinary leaves have one
     % row and broadcast across those vertices before block assembly.
-    coeffs = joinRows(leaves, @(parts) cat(dim, parts{:}), ...
+    coeffs = anchor.joinRateRows(leaves, @(parts) cat(dim, parts{:}), ...
         "pdvar:InvalidCoefficientRows");
 end

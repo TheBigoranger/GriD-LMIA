@@ -19,6 +19,7 @@ or [`pdvar`](/PD-LMI-package/documents/reference/pdvar/constructor/).
 obj = pdbase(gridVectors, matrixSize, degree)
 obj = pdbase(gridVectors, matrixSize, degree, localValues)
 obj = pdbase(gridVectors, matrixSize, degree, localValues, Name=Value)
+obj = pdbase(..., ValidationMode=mode)
 ```
 
 ## Arguments and options
@@ -34,6 +35,7 @@ obj = pdbase(gridVectors, matrixSize, degree, localValues, Name=Value)
 | `HasRateDependence` | Logical scalar metadata; default `false`. |
 | `RateBounds` | Empty or finite `npar × 2` lower/upper bounds with lower not exceeding upper. |
 | `SourceSummary` | Source label; default `"coefficient-backed"`. |
+| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`; default `"fast"`, transient, and not stored. |
 
 When `localValues` is omitted or empty, each physical cell receives a
 coefficient-backed zero payload with the requested matrix size. Rate-dependent
@@ -49,32 +51,27 @@ operations return new values without mutating the source.
 ## Example
 
 ```matlab
-obj = pdbase({[0 1 2]}, [2 2], 1)
-obj.GridInfo.NumNodes
-obj.MatrixSize
-obj.ncell()
-obj.ncoeff()
+obj = pdbase({[0 1 2]}, [2 2], 1);
+objectClass = class(obj)
+matrixSize = obj.MatrixSize
+degree = obj.Degree
+cellCount = obj.ncell()
+coefficientCount = obj.ncoeff()
+parameterCount = obj.npar()
+objectSize = size(obj)
 ```
 
 ```text
-obj =
-  pdbase with properties:
-    GridInfo: [1x1 struct]
-    MatrixSize: [2 2]
-    Degree: 1
-    ...
-
-ans =
-     3
-
-ans =
+objectClass = 'pdbase'
+matrixSize = 1×2 double
      2     2
 
-ans =
-     2
-
-ans =
-     2
+degree = 1
+cellCount = 2
+coefficientCount = 2
+parameterCount = 1
+objectSize = 1×2 double
+     2     2
 ```
 
 ## Validation and limitations
@@ -84,6 +81,12 @@ Payload shape, degree, local-tree, coefficient-count, coefficient-payload, and
 rate failures use the corresponding `pdbase:Invalid...` identifier. Direct
 `pdbase` values are backend containers; they do not implement `pdmat` algebra,
 `pdvar` decision construction, plotting, comparisons, or LMI assembly.
+
+Fast mode checks repeated supplied coefficient structure only in the first
+physical cell; malformed later coefficient counts, payloads, or rate-row
+layouts can remain undetected. Strict mode audits every supplied cell. Grid,
+metadata, and options are global in both modes. This raw backend exception
+must not be inferred as the public `pdmat` or `pdvar` constructor contract.
 
 ## See Also
 

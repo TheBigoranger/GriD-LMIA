@@ -4,12 +4,13 @@ function varargout = plot(obj, varargin)
     %   Syntax:
     %     h = plot(A)
     %     h = plot(A, dims, Name, Value)
-    %     h = plot(A, SamplesPerCell=n)
+    %     h = plot(A, SamplesPerCell=n, RateVertex=k)
     %
     %   Arguments:
     %     A              - pdmat object to sample and plot.
     %     dims           - Optional one or two parameter dimensions.
     %     SamplesPerCell - Positive sample count per physical cell.
+    %     RateVertex     - One-based rate row in combRows(RateBounds) order.
     %     Name, Value    - Additional MATLAB line or surface options.
     %
     %   Output:
@@ -18,13 +19,19 @@ function varargout = plot(obj, varargin)
     %   Example:
     %     A = pdmat({[0 1]}, @(rho) [rho, rho^2]);
     %     h = plot(A, SamplesPerCell=20);
+    %     D = rhodiff(pdmat([0 1], {0, 1}, Degree=1, ...
+    %         RateBounds=[-1 1]));
+    %     plot(D, RateVertex=2);
+    %
+    %   A rate-row object defaults to RateVertex=1. Supplying RateVertex for
+    %   ordinary data, or selecting beyond the stored vertex count, is an error.
 
     name = inputname(1);
     if isempty(name) || ~isvarname(name)
         name = "A";
     end
 
-    [dims, args, spc] = parseArgs(obj, varargin);
+    [dims, args, spc, rateVertex] = parseArgs(obj, varargin);
     % Build legend labels once so the line and surface paths stay aligned.
     nEntry = prod(obj.MatrixSize);
     lbls = cell(1, nEntry);
@@ -34,9 +41,9 @@ function varargout = plot(obj, varargin)
     end
 
     if numel(dims) == 1
-        h = plot1(obj, dims, args, spc, lbls);
+        h = plot1(obj, dims, args, spc, rateVertex, lbls);
     else
-        h = plot2(obj, dims, args, spc, lbls);
+        h = plot2(obj, dims, args, spc, rateVertex, lbls);
     end
 
     if nargout > 0
@@ -44,8 +51,8 @@ function varargout = plot(obj, varargin)
     end
 end
 
-function [dims, args, spc] = parseArgs(obj, args)
-    %PARSEARGS Select plot dimensions and remove SamplesPerCell from options.
+function [dims, args, spc, rateVertex] = parseArgs(obj, args)
+    %PARSEARGS Select dimensions and remove package-owned plot options.
     if obj.npar() == 1
         dims = 1;
     else
@@ -66,6 +73,9 @@ function [dims, args, spc] = parseArgs(obj, args)
     end
 
     spc = 15;
+    hasRows = obj.hasRateRows();
+    rateVertex = 1;
+    seenRate = false;
     k = 1;
     while k <= numel(args)
         if (ischar(args{k}) || (isstring(args{k}) && isscalar(args{k}))) && ...
@@ -79,9 +89,31 @@ function [dims, args, spc] = parseArgs(obj, args)
                 "numeric", "real", "scalar", "finite", "integer", "positive");
             spc = double(spc);
             args(k:(k + 1)) = [];
+        elseif (ischar(args{k}) || ...
+                (isstring(args{k}) && isscalar(args{k}))) && ...
+                strcmpi(string(args{k}), "RateVertex")
+            if seenRate || k == numel(args)
+                error("pdmat:InvalidRateVertex", ...
+                    "RateVertex must be supplied once with a valid one-based index.");
+            end
+            rateVertex = helper.chk(args{k + 1}, ...
+                "pdmat:InvalidRateVertex", ...
+                "RateVertex must be a valid one-based rate-row index.", ...
+                "numeric", "real", "scalar", "finite", "integer", "positive");
+            rateVertex = double(rateVertex);
+            seenRate = true;
+            args(k:(k + 1)) = [];
         else
             k = k + 1;
         end
+    end
+    if seenRate && ~hasRows
+        error("pdmat:InvalidRateVertex", ...
+            "RateVertex is supported only for pdmat objects with explicit rate rows.");
+    end
+    if hasRows && rateVertex > 2 ^ obj.npar()
+        error("pdmat:InvalidRateVertex", ...
+            "RateVertex exceeds the number of stored RateBounds vertices.");
     end
 end
 
@@ -100,7 +132,7 @@ function x = denseVec(v, spc)
     end
 end
 
-function h = plot1(obj, dim, args, spc, lbls)
+function h = plot1(obj, dim, args, spc, rateVertex, lbls)
     %PLOT1 Draw every matrix entry along one selected parameter dimension.
     x = denseVec(obj.GridInfo.Vectors{dim}, spc);
     base = obj.GridInfo.Bounds(:, 1).';
@@ -109,7 +141,7 @@ function h = plot1(obj, dim, args, spc, lbls)
     for k = 1:numel(x)
         pt = base;
         pt(dim) = x(k);
-        vals(k, :) = reshape(obj.evaluate(pt), 1, []);
+        vals(k, :) = reshape(plotValue(obj, pt, rateVertex), 1, []);
     end
 
     ax = gca;
@@ -133,7 +165,7 @@ function h = plot1(obj, dim, args, spc, lbls)
     ylabel(ax, "value");
 end
 
-function h = plot2(obj, dims, args, spc, lbls)
+function h = plot2(obj, dims, args, spc, rateVertex, lbls)
     %PLOT2 Draw one surface per matrix entry over two selected dimensions.
     x = denseVec(obj.GridInfo.Vectors{dims(1)}, spc);
     y = denseVec(obj.GridInfo.Vectors{dims(2)}, spc);
@@ -146,7 +178,8 @@ function h = plot2(obj, dims, args, spc, lbls)
             pt = base;
             pt(dims(1)) = x(c);
             pt(dims(2)) = y(r);
-            vals(r, c, :) = reshape(obj.evaluate(pt), 1, 1, []);
+            vals(r, c, :) = reshape( ...
+                plotValue(obj, pt, rateVertex), 1, 1, []);
         end
     end
 
@@ -184,4 +217,12 @@ function h = plot2(obj, dims, args, spc, lbls)
     xlabel(ax, sprintf("$\\rho_{%d}$", dims(1)), Interpreter="latex");
     ylabel(ax, sprintf("$\\rho_{%d}$", dims(2)), Interpreter="latex");
     zlabel(ax, "value");
+end
+
+function val = plotValue(obj, pt, rateVertex)
+    %PLOTVALUE Select one stored rate row after exact Bernstein evaluation.
+    val = obj.evaluate(pt);
+    if iscell(val)
+        val = val{rateVertex};
+    end
 end

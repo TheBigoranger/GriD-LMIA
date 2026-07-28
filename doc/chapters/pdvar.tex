@@ -50,11 +50,12 @@ P = pdvar(..., Degree=0)
 P = pdvar(..., Degree=1)
 P = pdvar(..., Degree=m)
 P = pdvar(..., RateBounds=rb)
+P = pdvar(..., ValidationMode=mode)
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{pdvar(n, gridVectors)} creates an \(n\times n\) square variable using scalar-size shorthand; for example, \code{pdvar(2, {[0 1]})}. Square variables default to symmetric YALMIP coefficients. \item \code{pdvar(n, n, gridVectors)} is the explicit square-size form; for example, \code{pdvar(2, 2, {[0 1]})}. It has the same default symmetric structure as the shorthand. \item \code{pdvar(n, p, gridVectors)} creates an \(n\times p\) variable. Rectangular variables default to full YALMIP coefficients; for example, \code{pdvar(2, 3, {[0 1]})}. \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP coefficient structure. \code{"symmetric"} requires a square size. \item \code{Degree=1} is the default continuous Bernstein decision variable. Every finite nonnegative integer \code{Degree=m} is supported. \code{Degree=0} creates one parameter-independent decision matrix shared across the grid; \code{m >= 1} creates continuous piecewise Bernstein data whose neighboring cells share complete control faces. \item \code{RateBounds=rb} stores parameter-rate metadata for later \code{rhodiff(P)} calls. Use \code{RateBounds=[-1 1]} for one parameter; use a two-row matrix for two parameters, as shown in the rate-metadata example below.
+  \item \code{pdvar(n, gridVectors)} creates an \(n\times n\) square variable using scalar-size shorthand; for example, \code{pdvar(2, {[0 1]})}. Square variables default to symmetric YALMIP coefficients. \item \code{pdvar(n, n, gridVectors)} is the explicit square-size form; for example, \code{pdvar(2, 2, {[0 1]})}. It has the same default symmetric structure as the shorthand. \item \code{pdvar(n, p, gridVectors)} creates an \(n\times p\) variable. Rectangular variables default to full YALMIP coefficients; for example, \code{pdvar(2, 3, {[0 1]})}. \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP coefficient structure. \code{"symmetric"} requires a square size. \item \code{Degree=1} is the default continuous Bernstein decision variable. Every finite nonnegative integer \code{Degree=m} is supported. \code{Degree=0} creates one parameter-independent decision matrix shared across the grid; \code{m >= 1} creates continuous piecewise Bernstein data whose neighboring cells share complete control faces. \item \code{RateBounds=rb} stores parameter-rate metadata for later \code{rhodiff(P)} calls. Use \code{RateBounds=[-1 1]} for one parameter; use a two-row matrix for two parameters, as shown in the rate-metadata example below. \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It affects repeated validation of package-generated storage only; public options, grid, structure, affine safety, continuity, and source semantics remain global in both modes. The mode is not stored.
 \end{itemize}
 
 \begin{center}
@@ -86,7 +87,6 @@ The square shorthand creates a \(2\times2\) continuous decision object.  The def
 yalmip('clear')
 Ps = pdvar(2, {[0 1]});
 P= Ps.coeffs([1]);
-P{1}
 symmetricCoefficient = ishermitian(P{1})
 variableClass = class(Ps)
 matrixSize = size(Ps)
@@ -95,21 +95,12 @@ rateDependent = Ps.HasRateDependence
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-Linear matrix variable 2x2 (symmetric, real, 3 variables)
-Coefficient range: 1 to 1
-
-symmetricCoefficient =
- logical
-  1
-
-variableClass =
-    'pdvar'
-
-matrixSize =
+symmetricCoefficient = 1
+variableClass = 'pdvar'
+matrixSize = 1×2 double
      2     2
 
-degree =
-     1
+degree = 1
 
 rateDependent =
   logical
@@ -127,14 +118,11 @@ degree = Pf.Degree
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-variableClass =
-    'pdvar'
-
-matrixSize =
+variableClass = 'pdvar'
+matrixSize = 1×2 double
      2     3
 
-degree =
-     1
+degree = 1
 \end{lstlisting}
 
 The structure flag makes the coefficient structure explicit.  This is useful when a square variable should use full, not symmetric, coefficients.
@@ -143,7 +131,6 @@ The structure flag makes the coefficient structure explicit.  This is useful whe
 yalmip('clear')
 Pfull = pdvar(2, 2, {[0 1]}, "full");
 P = Pfull.coeffs([1]);
-P{1}
 fullCoefficient = ishermitian(P{1})
 variableClass = class(Pfull)
 matrixSize = Pfull.MatrixSize
@@ -151,21 +138,14 @@ degree = Pfull.Degree
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-Linear matrix variable 2x2 (full, real, 4 variables)
-Coefficient range: 1 to 1
+fullCoefficient = logical
+   0
 
-fullCoefficient =
- logical
-  0
-
-variableClass =
-    'pdvar'
-
-matrixSize =
+variableClass = 'pdvar'
+matrixSize = 1×2 double
      2     2
 
-degree =
-     1
+degree = 1
 \end{lstlisting}
 
 \shortpairspace
@@ -181,14 +161,9 @@ cellCount = P0.ncell()
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-variableClass =
-    'pdvar'
-
-degree =
-     0
-
-cellCount =
-     2
+variableClass = 'pdvar'
+degree = 0
+cellCount = 2
 \end{lstlisting}
 
 \shortpairspace
@@ -203,21 +178,19 @@ rateBounds = Pr.RateBounds
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-variableClass =
-    'pdvar'
-
+variableClass = 'pdvar'
 rateDependent =
- logical
-  1
+  logical
+   1
 
-rateBounds =
+rateBounds = 2×2 double
      -1     2
      -3     4
 \end{lstlisting}
 
 \remarkshead
 \begin{itemize}[leftmargin=*]
-  \item Missing or misplaced dimensions and grids raise \codeerr{pdvar}{InvalidInput}; invalid sizes and degrees raise \codeerr{pdvar}{Invalid}\allowbreak\code{MatrixSize} or \codeerr{pdvar}{InvalidDegree}. \item Option failures use \codeerr{pdvar}{Invalid}\allowbreak\code{Options}, \codeerr{pdvar}{Unknown}\allowbreak\code{Option}, or \codeerr{pdvar}{Unsupported}\allowbreak\code{Option}. \item A symmetric nonsquare request raises \codeerr{pdvar}{InvalidStructure}; grid failures use \codeerr{pdvar}{InvalidGrid} or \codeerr{pdvar}{Invalid}\allowbreak\code{GridVector}. \item \code{RateBounds} must be a finite \(\ell\)-by-2 matrix with each lower bound no greater than its upper bound; violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
+  \item Missing or misplaced dimensions and grids raise \codeerr{pdvar}{InvalidInput}; invalid sizes and degrees raise \codeerr{pdvar}{Invalid}\allowbreak\code{MatrixSize} or \codeerr{pdvar}{InvalidDegree}. \item Option failures use \codeerr{pdvar}{Invalid}\allowbreak\code{Options}, \codeerr{pdvar}{Unknown}\allowbreak\code{Option}, or \codeerr{pdvar}{Unsupported}\allowbreak\code{Option}; invalid modes raise \codeerr{pdvar}{Invalid}\allowbreak\code{ValidationMode}. \item A symmetric nonsquare request raises \codeerr{pdvar}{InvalidStructure}; grid failures use \codeerr{pdvar}{InvalidGrid} or \codeerr{pdvar}{Invalid}\allowbreak\code{GridVector}. \item \code{RateBounds} must be a finite \(\ell\)-by-2 matrix with each lower bound no greater than its upper bound; violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
 \end{itemize}
 
 \section{Inspect Object Properties}
@@ -230,23 +203,20 @@ P = pdvar(2, {[0 1]}, "symmetric", Degree=2, RateBounds=[-1 1]);
 degree = P.Degree
 isContinuous = P.IsContinuous
 rateBounds = P.RateBounds
-firstCellCoefficients = P.coeffs(1)
+firstCellCoefficientCount = numel(P.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-degree =
-     2
+degree = 2
 
 isContinuous =
- logical
-  1
+  logical
+   1
 
-rateBounds =
+rateBounds = 1×2 double
      -1     1
 
-firstCellCoefficients =
-1x3 cell array
-    {[2x2 sdpvar]}    {[2x2 sdpvar]}    {[2x2 sdpvar]}
+firstCellCoefficientCount = 3
 \end{lstlisting}
 
 Use public algebra to create a modified value; direct assignments such as \code{P.Degree = 1} are not supported.
@@ -288,24 +258,21 @@ degrees = [P.Degree, Q.Degree]
 elevatedCoefficientTableSize = size(Q.coeffs(1))
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
-physicalCells =
-     1
-labels =
+physicalCells = 1
+labels = 2×1 double
      0
      1
-coefficientTableSize =
+coefficientTableSize = 1×2 double
      1     2
-counts =
+counts = 1×3 double
      1     2     1
-sampleClass =
-    'sdpvar'
-sampleSize =
+sampleClass = 'sdpvar'
+sampleSize = 1×2 double
      2     2
-elevatedClass =
-    'pdvar'
-degrees =
+elevatedClass = 'pdvar'
+degrees = 1×2 double
      1     3
-elevatedCoefficientTableSize =
+elevatedCoefficientTableSize = 1×2 double
      1     4
 \end{lstlisting}
 
@@ -377,16 +344,14 @@ rateBounds = D.RateBounds
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-derivativeClass =
-    'pdvar'
-derivativeDegree =
-     0
+derivativeClass = 'pdvar'
+derivativeDegree = 0
 isContinuous =
   logical
    0
-coefficientTableSize =
+coefficientTableSize = 1×2 double
      2     1
-rateBounds =
+rateBounds = 1×2 double
      -1     1
 \end{lstlisting}
 
@@ -406,17 +371,13 @@ rateBounds = E.RateBounds
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-derivativeClass =
-    'pdvar'
-derivativeDegree =
-     1
-coefficientTableSize =
+derivativeClass = 'pdvar'
+derivativeDegree = 1
+coefficientTableSize = 1×2 double
      4     4
-rateVertexCount =
-     4
-coefficientsPerRateVertex =
-     4
-rateBounds =
+rateVertexCount = 4
+coefficientsPerRateVertex = 4
+rateBounds = 2×2 double
      -1     1
      -2     2
 \end{lstlisting}
@@ -456,14 +417,17 @@ T = bernsteinTable(P, cellSubs, "oneLine")
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(1, {[0 1]});
-bernsteinTable(P, "oneLine")
+T = bernsteinTable(P, "oneLine");
+tableHeight = height(T)
+tableWidth = width(T)
+hasExpression = ismember("Expression", string(T.Properties.VariableNames))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-    CellSubscript                     Expression
-    _____________    _____________________________________________
-
-        {[1]}        "(1-alpha)*internal(10) + alpha*internal(11)"
+tableHeight = 1
+tableWidth = 2
+hasExpression = logical
+   1
 \end{lstlisting}
 
 \shortpairspace
@@ -480,20 +444,19 @@ expressionCount = height(T)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-vertexIndices =
+vertexIndices = 4×1 double
      1
      2
      3
      4
 
-rateVertices =
+rateVertices = 4×2 double
      -1    -2
      -1     2
      1    -2
      1     2
 
-expressionCount =
-     4
+expressionCount = 4
 \end{lstlisting}
 
 \remarkshead
@@ -545,19 +508,15 @@ negativeClass = class(N)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-sumClass =
-    'pdvar'
-sumSize =
+sumClass = 'pdvar'
+sumSize = 1×2 double
      2     2
-sumDegree =
-     1
+sumDegree = 1
 sumContainsDecision =
   logical
    1
-differenceClass =
-    'pdvar'
-negativeClass =
-    'pdvar'
+differenceClass = 'pdvar'
+negativeClass = 'pdvar'
 \end{lstlisting}
 
 \begin{center}
@@ -605,13 +564,13 @@ degrees = [L.Degree R.Degree S.Degree]
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-leftSize =
+leftSize = 1×2 double
      1     1
-rightSize =
+rightSize = 1×2 double
      2     2
-scaledSize =
+scaledSize = 1×2 double
      2     1
-degrees =
+degrees = 1×3 double
      1     1     1
 \end{lstlisting}
 
@@ -637,16 +596,11 @@ coefficientsPerCell = numel(L.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-knownLeftClass =
-    'pdvar'
-knownLeftDegree =
-     3
-knownRightClass =
-    'pdvar'
-knownRightDegree =
-     3
-coefficientsPerCell =
-     4
+knownLeftClass = 'pdvar'
+knownLeftDegree = 3
+knownRightClass = 'pdvar'
+knownRightDegree = 3
+coefficientsPerCell = 4
 \end{lstlisting}
 
 \begin{center}
@@ -711,18 +665,14 @@ equalsUnaryPlus = isequal(P,+P)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-matrixSize =
+matrixSize = 1×2 double
      2     3
-rowCount =
-     2
-columnCount =
-     3
-longestDimension =
-     3
-elementCount =
-     6
-dimensionCount =
-     2
+
+rowCount = 2
+columnCount = 3
+longestDimension = 3
+elementCount = 6
+dimensionCount = 2
 equalsUnaryPlus =
   logical
    1
@@ -756,14 +706,12 @@ conjugateTransposeClass = class(H)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-transposeSize =
+transposeSize = 1×2 double
      3     2
-conjugateTransposeSize =
+conjugateTransposeSize = 1×2 double
      3     2
-transposeClass =
-    'pdvar'
-conjugateTransposeClass =
-    'pdvar'
+transposeClass = 'pdvar'
+conjugateTransposeClass = 'pdvar'
 \end{lstlisting}
 
 \begin{center}
@@ -802,11 +750,11 @@ squeezeSize = size(S)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-vectorSize =
+vectorSize = 1×2 double
      6     1
-reshapeSize =
+reshapeSize = 1×2 double
      3     2
-squeezeSize =
+squeezeSize = 1×2 double
      2     3
 \end{lstlisting}
 
@@ -838,11 +786,11 @@ traceSize = size(t)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-diagonalSize =
+diagonalSize = 1×2 double
      3     1
-rebuiltSize =
+rebuiltSize = 1×2 double
      3     3
-traceSize =
+traceSize = 1×2 double
      1     1
 \end{lstlisting}
 
@@ -887,11 +835,11 @@ degrees = [L.Degree U.Degree]
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-lowerSize =
+lowerSize = 1×2 double
      3     3
-upperSize =
+upperSize = 1×2 double
      3     3
-degrees =
+degrees = 1×2 double
      1     1
 \end{lstlisting}
 
@@ -909,11 +857,11 @@ runningSize = size(running)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-rowSumSize =
+rowSumSize = 1×2 double
      2     1
-allMeanSize =
+allMeanSize = 1×2 double
      1     1
-runningSize =
+runningSize = 1×2 double
      2     3
 \end{lstlisting}
 
@@ -947,14 +895,12 @@ rotatedClass = class(R)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-flippedSize =
+flippedSize = 1×2 double
      2     3
-rotatedSize =
+rotatedSize = 1×2 double
      3     2
-flippedClass =
-    'pdvar'
-rotatedClass =
-    'pdvar'
+flippedClass = 'pdvar'
+rotatedClass = 'pdvar'
 \end{lstlisting}
 
 \begin{center}
@@ -999,11 +945,11 @@ blockDiagonalSize = size(D)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-horizontalSize =
+horizontalSize = 1×2 double
      2     4
-verticalSize =
+verticalSize = 1×2 double
      4     2
-blockDiagonalSize =
+blockDiagonalSize = 1×2 double
      4     4
 \end{lstlisting}
 
@@ -1045,10 +991,9 @@ containsDecision = Q.ContainsDecision
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-repeatedSize =
+repeatedSize = 1×2 double
      2     4
-repeatedDegree =
-     1
+repeatedDegree = 1
 containsDecision =
   logical
    1
@@ -1086,14 +1031,12 @@ containsDecision = P.ContainsDecision
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-selectedSize =
+selectedSize = 1×2 double
      2     1
-assignedSize =
+assignedSize = 1×2 double
      2     3
-assignedClass =
-    'pdvar'
-assignedDegree =
-     1
+assignedClass = 'pdvar'
+assignedDegree = 1
 containsDecision =
   logical
    1
@@ -1124,7 +1067,7 @@ A = value(P)
 rows = value(rhodiff(P))
 \end{lstlisting}
 
-\code{value} converts assigned \code{pdvar} coefficients into known, coefficient-backed \code{pdmat} data.  An ordinary expression returns one \code{pdmat}, preserving its grid, matrix size, degree, local coefficient order, and continuity metadata.  A rate-vertex expression created by \code{rhodiff} returns a \(1\)-by-\(2^\ell\) cell array of \code{pdmat} objects in \code{helper.combRows(RateBounds)} lower/upper vertex order.  The returned \code{pdmat} objects do not carry rate metadata.  Every symbolic coefficient must have an assigned finite real YALMIP value; otherwise the method raises \codeerr{pdvar}{UnassignedValue}.
+\code{value} converts assigned \code{pdvar} coefficients into known, coefficient-backed \code{pdmat} data. An ordinary expression returns one \code{pdmat}, preserving its grid, matrix size, degree, local coefficient order, and continuity metadata. A rate-vertex expression created by \code{rhodiff} returns a \(1\)-by-\(2^\ell\) cell array of \code{pdmat} objects in the deterministic lower/upper vertex order induced by applying \code{helper.combRows} to \code{num2cell(RateBounds,2).'}. The returned \code{pdmat} objects do not carry rate metadata. Every symbolic coefficient must have an assigned finite real YALMIP value; otherwise the method raises \codeerr{pdvar}{UnassignedValue}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -1133,12 +1076,12 @@ P = pdvar(1, [0 1], Degree=2);
 c = P.coeffs(1);
 assign([c{:}], [1 2 4]);
 A = value(P);
-assignedCoefficients = A.coeffs(1)
+assignedCoefficients = cell2mat(A.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-assignedCoefficients =
-    {[1]}    {[2]}    {[4]}
+assignedCoefficients = 1×3 double
+     1     2     4
 \end{lstlisting}
 
 \section{Comparisons To \texorpdfstring{\code{pdlmi}}{pdlmi}}
@@ -1175,14 +1118,10 @@ positiveConstraintCount = numel(Cpos.Constraints)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-negativeWrapperClass =
-    'pdlmi'
-negativeConstraintCount =
-     4
-positiveWrapperClass =
-    'pdlmi'
-positiveConstraintCount =
-     4
+negativeWrapperClass = 'pdlmi'
+negativeConstraintCount = 4
+positiveWrapperClass = 'pdlmi'
+positiveConstraintCount = 4
 \end{lstlisting}
 
 A rectangular residual selects entry-wise inequality globally.  Equality is entry-wise by definition and is warning-free.
@@ -1203,11 +1142,11 @@ clear restoreWarning
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-entrywiseConstraintGroups =
-     2
-equalityConstraintGroups =
-     2
+entrywiseConstraintGroups = 2
+equalityConstraintGroups = 2
+
 identityConstraints =
+
      []
 \end{lstlisting}
 

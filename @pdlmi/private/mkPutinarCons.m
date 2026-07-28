@@ -1,4 +1,4 @@
-function cons = mkPutinarCons(expr, relation, order, mode)
+function cons = mkPutinarCons(expr, relation, order, comparisonMode, validationMode)
     %MKPUTINARCONS Define and assemble Putinar quadratic-module constraints.
     %
     %   Syntax:
@@ -21,7 +21,8 @@ function cons = mkPutinarCons(expr, relation, order, mode)
 
     nPar = numel(expr.GridInfo.Vectors);
     if nPar == 1
-        cons = mkFullBoxCons(expr, relation, order, mode);
+        cons = mkFullBoxCons(expr, relation, order, ...
+            comparisonMode, validationMode);
         return
     end
 
@@ -32,5 +33,6 @@ function cons = mkPutinarCons(expr, relation, order, mode)
         specs{k, 2} = [masks(k, :); masks(k, :)];
     end
 
-    cons = mkGramCons(expr, relation, 2 * order, specs, mode);
+    cons = mkGramCons(expr, relation, 2 * order, specs, ...
+        comparisonMode, validationMode);
 end

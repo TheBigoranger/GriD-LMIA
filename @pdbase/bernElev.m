@@ -1,4 +1,4 @@
-function out = bernElev(coeffs, fromDeg, toDeg, nPar)
+function out = bernElev(coeffs, fromDeg, toDeg, nPar, plan, validateInstance)
     %BERNELEV Degree-elevate one cell's flat Bernstein coefficients.
     %
     %   Syntax:
@@ -17,48 +17,37 @@ function out = bernElev(coeffs, fromDeg, toDeg, nPar)
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     vals = A.elevVals(1);
 
-    % Validate the explicit tensor dimension before forming label tables.
-    sanChk(fromDeg, toDeg, coeffs, nPar);
+    if nargin < 5 || isempty(plan)
+        plan = pdbase.elevationPlan(fromDeg, toDeg, nPar);
+    end
+    if nargin < 6
+        validateInstance = true;
+    end
+    if validateInstance
+        sanChk(fromDeg, toDeg, coeffs, nPar, plan);
+    end
 
     if toDeg == fromDeg
         out = coeffs;
         return
     end
 
-    oldLbls = helper.combRows(repmat({0:fromDeg}, 1, nPar));
-    newLbls = helper.combRows(repmat({0:toDeg}, 1, nPar));
-    out = cell(1, size(newLbls, 1));
-    % gap is the extra Bernstein degree supplied by partition-of-unity factors.
-    gap = toDeg - fromDeg;
-
-    for outIdx = 1:size(newLbls, 1)
-        outLbl = newLbls(outIdx, :);
-        acc = [];
-        for inIdx = 1:size(oldLbls, 1)
-            inLbl = oldLbls(inIdx, :);
-            if all(outLbl >= inLbl) && all((outLbl - inLbl) <= gap)
-                % Tensor Bernstein degree elevation scales independently along
-                % each parameter axis before accumulating into flat order.
-                scale = 1;
-                for k = 1:nPar
-                    scale = scale ...
-                        * nchoosek(fromDeg, inLbl(k)) ...
-                        * nchoosek(gap, outLbl(k) - inLbl(k)) ...
-                        / nchoosek(toDeg, outLbl(k));
-                end
-                term = coeffs{inIdx} .* scale;
-                if isempty(acc)
-                    acc = term;
-                else
-                    acc = acc + term;
-                end
-            end
-        end
-        out{outIdx} = acc;
+    matrixColumns = size(coeffs{1}, 2);
+    % Coefficients are packed as adjacent matrix-column blocks. kron(E',I)
+    % elevates those blocks without mixing physical matrix columns or rows.
+    packed = horzcat(coeffs{:});
+    packed = packed * kron(plan.Operator', speye(matrixColumns));
+    if isnumeric(packed)
+        packed = full(packed);
+    end
+    out = cell(1, plan.TargetCount);
+    for targetIdx = 1:plan.TargetCount
+        columns = (targetIdx - 1) * matrixColumns + (1:matrixColumns);
+        out{targetIdx} = packed(:, columns);
     end
 end
 
-function sanChk(fromDeg, toDeg, coeffs, nPar)
+function sanChk(fromDeg, toDeg, coeffs, nPar, plan)
     %SANCHK Validate degree bounds and the flat tensor coefficient count.
     fromDeg = double(helper.chk(fromDeg, "pdbase:InvalidDegree", ...
         "fromDeg must be a nonnegative integer scalar.", ...
@@ -70,8 +59,40 @@ function sanChk(fromDeg, toDeg, coeffs, nPar)
         error("pdbase:InvalidDegreeElevation", ...
             "Cannot degree-elevate from degree %d to lower degree %d.", fromDeg, toDeg);
     end
+    if fromDeg ~= plan.FromDegree || toDeg ~= plan.ToDegree || ...
+            nPar ~= plan.NumParameters
+        error("pdbase:InvalidDegreeElevation", ...
+            "The elevation plan does not match the requested tensor degrees.");
+    end
     expected = (fromDeg + 1) ^ nPar;
     helper.chk(coeffs, "pdbase:InvalidCoefficientCell", ...
         "Coefficient cell count must match the source degree and parameter dimension.", ...
-        "cell", "Numel", expected);
+        "cell", "Size", [1, expected]);
+    matrixSize = [];
+    for k = 1:numel(coeffs)
+        value = coeffs{k};
+        if isa(value, "sdpvar")
+            valid = ismatrix(value) && isreal(value) && islinear(value);
+        else
+            valid = isnumeric(value) && ismatrix(value) && ...
+                ~isempty(value) && isreal(value) && ...
+                all(isfinite(value), "all");
+        end
+        if ~valid
+            error("pdbase:InvalidCoefficientPayload", ...
+                "Elevation coefficients must be finite real numeric or affine real sdpvar matrices.");
+        end
+        if isempty(matrixSize)
+            matrixSize = size(value);
+        elseif ~isequal(size(value), matrixSize)
+            error("pdbase:InvalidCoefficientPayload", ...
+                "Every coefficient in one elevation row must have the same matrix size.");
+        end
+    end
+    if ~isnumeric(plan.Operator) || ...
+            ~isequal(size(plan.Operator), ...
+            [plan.TargetCount, plan.SourceCount])
+        error("pdbase:InvalidDegreeElevation", ...
+            "The elevation operator does not match its declared tensor shape.");
+    end
 end

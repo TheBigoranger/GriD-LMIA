@@ -33,6 +33,7 @@ P = pdvar(..., "full")
 P = pdvar(..., "symmetric")
 P = pdvar(..., Degree=0)
 P = pdvar(..., Degree=d, RateBounds=rb)
+P = pdvar(..., ValidationMode=mode)
 ```
 
 ## Arguments And Options
@@ -45,6 +46,7 @@ P = pdvar(..., Degree=d, RateBounds=rb)
 | `"symmetric"` | Use symmetric YALMIP matrix coefficients, as in `pdvar(2,{[0 1]},"symmetric")`. Requires square dimensions. |
 | `Degree` | Finite nonnegative integer scalar. Default is `1`; use `Degree=0` for a parameter-independent decision, or higher degrees for continuous piecewise Bernstein decision data. |
 | `RateBounds` | Finite `ell x 2` lower/upper rate-bound table stored as metadata, such as `RateBounds=[-1 1]` or `RateBounds=[-1 2; -3 4]`. |
+| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`; default `"fast"`, transient, and not stored. |
 
 Unsupported public options: `IsContinuous`, `ContainsDecision`, and `HasRateDependence`.
 
@@ -194,6 +196,7 @@ ans =
 - Nonsquare `"symmetric"` variables raise `pdvar:InvalidStructure`.
 - Negative, noninteger, nonscalar, or nonfinite constructor degrees raise `pdvar:InvalidDegree`.
 - Invalid constructor rate metadata raises inherited `pdbase:InvalidRateBounds`.
+- Invalid or missing validation values raise `pdvar:InvalidValidationMode`.
 - Unknown options raise `pdvar:UnknownOption`; internal metadata options raise `pdvar:UnsupportedOption`.
 
 ## See Also

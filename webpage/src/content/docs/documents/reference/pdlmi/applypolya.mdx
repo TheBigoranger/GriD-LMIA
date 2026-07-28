@@ -25,6 +25,7 @@ degree increment.
 ```matlab
 Cpolya = C.applyPolya()
 Cpolya = C.applyPolya(degreeIncrement)
+Cpolya = C.applyPolya(..., ValidationMode=mode)
 ```
 
 ## Description
@@ -58,6 +59,9 @@ two = one.applyPolya(2);
 ans =
      0     1     2
 ```
+
+`ValidationMode` is transient, accepts case-insensitive `"fast"` or
+`"strict"`, applies only to this rebuild, and is neither stored nor inherited.
 
 ## Validation And Errors
 

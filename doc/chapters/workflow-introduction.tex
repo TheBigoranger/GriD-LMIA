@@ -67,14 +67,70 @@ The main objects follow the same path used in the rest of the manual:
 
 Two finite steps in this path have different logical status. Traversing all vertices of \(\mathcal R\) is exact when \(\mathcal F\) is affine in \(\boldsymbol\nu\). By contrast, a Bernstein or Bernstein--Gram construction is a sufficient certificate over the remaining \(\boldsymbol\rho\)-continuum; failure at a fixed grid, degree, or certificate order does not prove that the original continuous inequality is infeasible. \Cref{sec:certificate-modeling-choices,sec:certificate-boundary} separates certificate selection from changes to the underlying model, and \cref{sec:cellwise-solver-path} executes the path in MATLAB.
 
-\section{Version 1.1.1 Documentation Scope}
+\section{Version 1.1.2 Documentation Scope}
 \label{sec:version-one-scope}
 
-Version 1.1.1 is a documentation snapshot of the implemented workflow. The supported surface comprises the \code{pdbase} storage backend and its shared matrix-operation implementation; \code{pdmat} known data; continuous arbitrary-degree \code{pdvar} decisions and their cellwise \code{rhodiff} derivatives; \code{pdlmi} Direct, P\'olya, Putinar, SparseFullBox, and FullBox assembly; the documented MATLAB matrix-operation and indexing overloads; and the six public \code{helper} utilities. The source-indexed reference chapters state the accepted forms, returned shapes, validation rules, and error boundaries for that surface.
+Version 1.1.2 is a documentation snapshot of the implemented workflow. The supported surface comprises the \code{pdbase} storage backend and its shared matrix-operation implementation; rate-aware \code{pdmat} known data and \code{rhodiff} derivatives; continuous arbitrary-degree \code{pdvar} decisions and their cellwise \code{rhodiff} derivatives; \code{pdlmi} Direct, P\'olya, Putinar, SparseFullBox, and FullBox assembly for decision expressions and coefficient-backed known inequalities; the documented MATLAB matrix-operation and indexing overloads; and the six public \code{helper} utilities. The source-indexed reference chapters state the accepted forms, returned shapes, validation rules, and error boundaries for that surface.
 
-Centralizing shared matrix operations in \code{pdbase} does not remove those operations from \code{pdmat} or \code{pdvar}: both modeling classes retain complete public, class-specific reference entries and behavior. The package remains restricted to tensor-product box grids, affine decision expressions, and the finite certificate constructions described here. Products nonlinear in decision or rate-dependent data are rejected, certificate failure remains inconclusive for the original continuum inequality, and YALMIP retains ownership of objectives, solver selection, and diagnostics. Version 1.1.0 remains the latest tagged GitHub Release; v1.1.1 changes documentation only.
+Centralizing shared matrix operations in \code{pdbase} does not remove those operations from \code{pdmat} or \code{pdvar}: both modeling classes retain complete public, class-specific reference entries and behavior. The package remains restricted to tensor-product box grids, affine decision expressions, and the finite certificate constructions described here. Products nonlinear in decision or rate-dependent data are rejected, certificate failure remains inconclusive for the original continuum inequality, and YALMIP retains ownership of objectives, solver selection, and diagnostics. Version 1.1.0 remains the latest tagged GitHub Release; v1.1.2 is a documentation milestone and creates no tag or release.
 
 For release verification, run the root installer and \code{tests.run_all()} as described in \cref{sec:setup}. Examples involving \code{pdvar}, \code{rhodiff}, \code{pdlmi}, or solver state begin from a cleared YALMIP model so that their decision variables and constraints are reproducible in a fresh MATLAB session.
+
+\section{Assembly Optimizations and Validation Diagnostics}
+\label{sec:assembly-performance}
+
+The v1.1.2 implementation substantially rewrites internal assembly while leaving the ordinary modeling path largely compatible. Bernstein elevation and multiplication build numeric operation-local plans once and reuse them across compatible cells and rate rows; Direct and P\'olya assembly preallocate in the established cell, rate-row, coefficient, and column-major entry order; Gram families reuse numeric coefficient maps while allocating fresh independent Gram variables for every required block; and \code{toYalmip} concatenates retained constraints once. These changes preserve the represented function, decision-variable identities, certificate family, constraint and cone order, and exact coefficient identities, up to scale-appropriate floating-point summation differences.
+
+The public constructors \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi} accept the transient name-value option \code{ValidationMode="fast"} or \code{ValidationMode="strict"}, case-insensitively; the default is \code{"fast"}. Each \code{applyPolya}, \code{applyPutinar}, \code{applySparseFullBoxPreorder}, and \code{applyFullBoxPreorder} call accepts the same trailing option. The selection is local to that call, is not stored as an object property, and is not inherited by later algebra or certificate-selection calls. The developer-facing raw \code{pdbase} constructor is a deliberate exception to broad fast-mode claims: it checks repeated coefficient structure only in the first supplied physical cell, so a later supplied cell can escape coefficient-count, payload, or rate-row validation; strict mode audits every supplied cell. The \code{pdmat} and \code{pdvar} constructors first normalize their public sources and retain their documented class-specific guarantees. In the normalized algebra and certificate paths, fast mode samples repeated post-normalization structural checks, while strict mode checks every generated cell, rate row, coefficient payload, elevation/product application, and Gram-plan application. Both modes retain option, compatibility, continuity, affine-safety, inequality-classification, and actual constraint-generation checks; strict is a diagnostic mode, not a different mathematical model.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+A = pdmat([0 1], {1, 2}, Degree=1, ValidationMode="STRICT");
+P = pdvar(1, [0 1], ValidationMode="fast");
+C = pdlmi(P, ">=", ValidationMode="strict");
+C = C.applyPolya(0, ValidationMode="FAST");
+hasStoredMode = isprop(A, "ValidationMode")
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+hasStoredMode = logical
+   0
+\end{lstlisting}
+
+The three reproducible non-solver benchmarks warm every timed function, construct setup objects outside the timed bodies, verify mathematical equivalence first, and report the median of three independent \code{timeit} estimates. \code{tests.benchmark_stage1b_performance} uses two parameters on \code{{0:0.25:1,-1:0.5:1}}, 16 physical cells, degree three, and \(3\times3\) payloads for numeric multiplication, known-by-affine multiplication, and elevation by two. \code{tests.benchmark_stage1c_performance} uses a symmetric \(3\times3\), two-parameter, 16-cell, degree-three residual with 256 Direct constraints and 400 P\'olya-\(+1\) constraints. \code{tests.benchmark_stage2_performance} uses one two-parameter cell, degree two, a symmetric \(2\times2\) FullBox/Putinar residual, a scalar SparseFullBox residual, and a one-parameter symmetric \(2\times2\) Putinar residual. Timing results are machine- and load-specific and are not performance guarantees.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Contention-free MATLAB MCP measurements from one run on the current machine. Medians are machine- and load-specific observations, not performance guarantees. The final column reports a captured-baseline speedup only where that benchmark supplied one; \(0.91\times\) means the measured Direct export was slower than its captured baseline.}
+\label{tab:assembly-performance-medians}
+\begin{tabularx}{\textwidth}{@{}llrY@{}}
+\toprule
+Stage & Workload & Median (s) & Captured-baseline speedup \\
+\midrule
+1B & Numeric multiplication       & 0.045856 & \(2.01\times\) \\
+1B & Known \(\times\) affine      & 0.744692 & \(1.90\times\) \\
+1B & Numeric elevate \(+2\)       & 0.004389 & \(3.19\times\) \\
+1B & Symbolic elevate \(+2\)      & 0.117991 & --- \\
+\addlinespace
+1C & Direct, fast                 & 0.090959 & \(2.51\times\) \\
+1C & Direct, strict               & 0.153322 & --- \\
+1C & P\'olya \(+1\), fast         & 0.242357 & --- \\
+1C & P\'olya \(+1\), strict       & 0.376200 & --- \\
+1C & Direct \code{toYalmip}       & 0.155284 & \(0.91\times\) (slower) \\
+1C & P\'olya \code{toYalmip}      & 0.271730 & --- \\
+\addlinespace
+2 & FullBox 2D, fast              & 0.053643 & \(5.61\times\) \\
+2 & FullBox 2D, strict            & 0.051391 & --- \\
+2 & Putinar 2D                    & 0.046707 & --- \\
+2 & Putinar 1D                    & 0.015255 & --- \\
+2 & Sparse intermediate           & 0.104958 & --- \\
+2 & Sparse saturated              & 0.098002 & --- \\
+2 & FullBox \code{toYalmip}       & 0.006123 & --- \\
+2 & Sparse \code{toYalmip}        & 0.019741 & --- \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{The Chain Rule in a DPD-LMI}
 \index{chain rule}\index{parameter rate}\index{rate vertex}\index{rate row}

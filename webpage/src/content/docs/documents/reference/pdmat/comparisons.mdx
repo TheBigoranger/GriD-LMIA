@@ -1,0 +1,101 @@
+---
+title: pdmat Comparisons
+description: Logical coefficient equality and finite known-data inequality certificates.
+---
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <span>/</span>
+  <span>Comparisons</span>
+</nav>
+
+## Purpose
+
+Compare known coefficient evidence exactly, or wrap a coefficient-backed
+known inequality in `pdlmi`.
+
+## Syntax
+
+```matlab
+tf = A == B
+C = A <= B
+C = A >= B
+C = A <= M
+C = A >= M
+```
+
+<span id="pdmat-eq"></span>
+
+## Logical `eq` (`==`)
+
+For two `pdmat` operands, `A == B` returns one scalar logical. Subtraction
+performs the normal grid compatibility, common-grid refinement, and exact
+degree elevation; the result is true exactly when the aligned coefficient
+difference is provably zero. This operator never creates a `pdlmi`.
+
+<span id="pdmat-le"></span>
+<span id="pdmat-ge"></span>
+
+## Known-Data `le` And `ge`
+
+`<=` and `>=` create a `pdlmi` from compatible coefficient-backed known data.
+Finite real numeric operands follow the ordinary size and scalar-broadcast
+rules. Direct and Pólya assembly scan the complete coefficient family and
+store one logical certificate cell; `toYalmip` exports that state as one scalar
+logical.
+
+```matlab
+A = pdmat([0 1], {1, 2}, Degree=1);
+B = pdmat([0 1], {1, 2}, Degree=1);
+C = pdmat([0 1], {1, 3}, Degree=1);
+same = (A == B)
+different = (A == C)
+direct = A >= 0;
+directCertificate = toYalmip(direct)
+polya = direct.applyPolya(1);
+polyaCertificate = toYalmip(polya)
+```
+
+```text
+same = logical
+   1
+
+different = logical
+   0
+
+directCertificate = logical
+   1
+
+polyaCertificate = logical
+   1
+```
+
+The exported known-data test uses the wrapper’s single global inequality
+classification and inclusive absolute tolerance `1e-10`. Semidefinite mode
+symmetrizes each coefficient as `(C + C.')/2` and tests eigenvalues. Only
+entry-wise mode tests individual scalar entries.
+
+## Validation And Limitations
+
+- `pdmat:InvalidEquality` applies only when either `==` operand is not a
+  `pdmat`. Incompatible `pdmat` operands delegate through subtraction and
+  alignment, then propagate the applicable subtraction, grid, or rate-bound
+  compatibility error.
+- Function-only data have no finite coefficient evidence and cannot enter
+  equality or inequality certification.
+- A known `pdmat` equality is deliberately not a `pdlmi` residual;
+  `pdlmi(A,"==")` raises `pdlmi:UnsupportedPdmatEquality`.
+- A false Direct or Pólya export warns with
+  `pdlmi:InconclusiveCertificate`; failure of this sufficient coefficient
+  test does not prove a continuous violation or matrix indefiniteness.
+- Known-data Putinar, SparseFullBox, and FullBox paths still return YALMIP
+  constraints and may introduce auxiliary Gram variables.
+
+## See Also
+
+[`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
+[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
+[`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) ·
+[`pdvar comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/)

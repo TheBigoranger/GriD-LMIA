@@ -1,11 +1,11 @@
 ---
 title: Protected pdbase Backend Utilities
-description: Nine protected Bernstein, storage, indexing, and reconstruction methods owned by pdbase.
+description: Protected Bernstein plans, storage, indexing, and reconstruction methods owned by pdbase.
 ---
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdbase/">pdbase</a><span>/</span><span>protected backend utilities</span></nav>
 
-These nine methods are `protected` `pdbase` implementation utilities. They are
+These inventoried methods are `protected` `pdbase` implementation utilities. They are
 documented for maintainers and API ownership clarity, but they are not callable
 public modeling API. Use the linked `pdmat`, `pdvar`, and `pdlmi` paths instead.
 
@@ -23,6 +23,31 @@ the tensor label count. Errors use `pdbase:InvalidDegree`,
 Forms the normalized tensor Bernstein convolution while preserving written
 matrix-product order. Public `pdmat` and `pdvar` `mtimes` own operand and
 affinity validation.
+
+## <span id="pdbase-elevationplan"></span>`elevationPlan`
+
+**Backend syntax:** `plan = pdbase.elevationPlan(fromDeg,toDeg,nPar)`.
+Builds an operation-local numeric source-to-target incidence and weight plan.
+Compatible cells and rate rows reuse the plan; public coefficients remain
+dense numeric or affine payloads.
+
+## <span id="pdbase-productplan"></span>`productPlan`
+
+**Backend syntax:** `plan = productPlan(obj,lhsDegree,rhsDegree)`.
+Precomputes ordered Bernstein label pairs and normalized binomial weights for
+one compatible product shape. Applying it preserves written matrix order.
+
+## <span id="pdbase-alignlocaldegrees"></span>`alignLocalDegrees`
+
+**Backend syntax:** `data = pdbase.alignLocalDegrees(data,targetDegree,grid,mode)`.
+Aligns normalized cell-local data to one target degree, reusing elevation
+plans and the selected transient validation policy.
+
+## <span id="pdbase-prodlocalvalues"></span>`prodLocalValues`
+
+**Backend syntax:** `vals = prodLocalValues(obj,...,plan,mode)`.
+Applies one product plan across compatible physical cells and active rate rows
+without changing the established traversal order.
 
 ## <span id="pdbase-berntbl"></span>`bernTbl`
 

@@ -21,35 +21,39 @@ function out = blkdiag(varargin)
             "At least one blkdiag input must be a pdmat.");
     end
 
+    rb = anchor.pickRateBounds("pdmat:InvalidBlkdiag", varargin{:});
     grid = anchor.mergeGrid("pdmat:MixedGrid", varargin{:});
     data = repmat(struct("MatrixSize", [], "Degree", [], ...
-        "LocalValues", [], "IsContinuous", []), 1, numel(varargin));
+        "LocalValues", [], "IsContinuous", [], ...
+        "HasRateDependence", [], "HasRateRows", []), 1, numel(varargin));
     for k = 1:numel(varargin)
-        data(k) = asData(grid, varargin{k}, [], "pdmat:InvalidBlkdiag");
+        data(k) = asData(grid, varargin{k}, [], rb, ...
+            "pdmat:InvalidBlkdiag");
     end
 
     deg = max(arrayfun(@(d) d.Degree, data));
-    for k = 1:numel(data)
-        data(k).LocalValues = pdbase.elevLocalValues(data(k).LocalValues, ...
-            data(k).Degree, deg, grid);
-    end
+    data = pdbase.alignLocalDegrees(data, deg, grid);
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) blkCell(data, subs));
-    out = mkObj(grid, vals, deg);
+    vals = helper.mkNest(nCell, @(subs) blkCell(anchor, data, subs));
+    if ~any(arrayfun(@(d) d.HasRateDependence, data))
+        rb = [];
+    end
+    out = mkObj(grid, vals, deg, rb);
 end
 
-function coeffs = blkCell(data, subs)
+function coeffs = blkCell(anchor, data, subs)
     %BLKCELL Assemble one physical cell's block-diagonal coefficients.
-    nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
-    coeffs = cell(1, nCoeff);
-    for c = 1:nCoeff
-        parts = cell(1, numel(data));
-        for k = 1:numel(data)
-            one = helper.cellGet(data(k).LocalValues, subs);
-            parts{k} = one{c};
-        end
+    leaves = cell(1, numel(data));
+    for k = 1:numel(data)
+        leaves{k} = helper.cellGet(data(k).LocalValues, subs);
+    end
+    coeffs = anchor.joinRateRows(leaves, @oneBlkdiag, ...
+        "pdmat:InvalidCoefficientRows");
+end
 
+function val = oneBlkdiag(parts)
+    %ONEBLKDIAG Assemble one aligned coefficient block diagonal.
         rows = cellfun(@(a) size(a, 1), parts);
         cols = cellfun(@(a) size(a, 2), parts);
         val = zeros(sum(rows), sum(cols));
@@ -62,6 +66,4 @@ function coeffs = blkCell(data, subs)
             row = row + rows(k);
             col = col + cols(k);
         end
-        coeffs{c} = val;
-    end
 end

@@ -1,0 +1,81 @@
+---
+title: pdmat rhodiff
+description: Differentiate coefficient-backed known data into deterministic rate-vertex rows.
+---
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <span>/</span>
+  <span>rhodiff</span>
+</nav>
+
+## Purpose
+
+Differentiate coefficient-backed `pdmat` data cell by cell and store the
+rate-weighted derivative at every vertex of a scheduling-rate box.
+
+## Syntax
+
+```matlab
+D = rhodiff(A)
+D = rhodiff(A, rateBounds)
+```
+
+## Arguments And Returned Object
+
+`A` must have Bernstein coefficient evidence. The no-argument form uses
+`A.RateBounds`; explicit `rateBounds` supplies missing metadata, but must match
+stored bounds when both are present.
+
+For one parameter, degree `m > 0` returns degree `m - 1`; degree zero remains
+zero. For several parameters, each shortened partial derivative is elevated
+back to the common tensor degree `m` before the rate-weighted sum is formed.
+`D` is a `pdmat` with `IsContinuous=false`, `HasRateDependence=true`, and one
+numeric coefficient row per rate-box vertex in `helper.combRows` order.
+
+## MATLAB Transcript
+
+```matlab
+A = pdmat([0 1], {0, 2}, Degree=1, RateBounds=[-1 2]);
+D = rhodiff(A);
+disp("derivativeClass =")
+disp(class(D))
+disp("derivativeDegree =")
+disp(D.Degree)
+disp("derivativeRowValues =")
+disp(cell2mat(D.coeffs(1)))
+```
+
+```text
+derivativeClass =
+pdmat
+derivativeDegree =
+     0
+
+derivativeRowValues =
+    -2
+     4
+```
+
+The two rows evaluate the constant physical derivative `2` at rates `-1` and
+`2`.
+
+## Validation And Limitations
+
+- Function-only data raise `pdmat:FunctionOnlyDiff`.
+- Missing, malformed, or inconsistent bounds raise
+  `pdmat:MissingRateBounds`, `pdmat:InvalidRateBounds`, or
+  `pdmat:RateBoundsMismatch`.
+- Existing explicit rate rows, including a previous derivative, raise
+  `pdmat:InvalidDiff`; repeated differentiation is unsupported.
+- The output is cell-local and generally discontinuous at shared faces.
+
+## See Also
+
+[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) ·
+[`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/) ·
+[`plot`](/PD-LMI-package/documents/reference/pdmat/plot/) ·
+[`pdvar rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
+[`pdbase evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/)

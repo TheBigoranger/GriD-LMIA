@@ -19,7 +19,9 @@ function varargout = subsref(obj, S)
         nCell = obj.GridInfo.NumNodes - 1;
         vals = helper.mkNest(nCell, @(subs) cellfun(@(a) a(rows, cols), ...
             helper.cellGet(obj.LocalValues, subs), UniformOutput=false));
-        out = mkObj(obj.GridInfo.Vectors, vals, obj.Degree);
+        out = mkObj(obj.GridInfo.Vectors, vals, obj.Degree, ...
+            obj.RateBounds, "coefficient-backed", [], ...
+            [numel(rows), numel(cols)]);
 
         if numel(S) == 1
             varargout{1} = out;

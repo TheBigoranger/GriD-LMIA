@@ -29,8 +29,7 @@ function out = value(obj)
 
     grid = obj.GridInfo.Vectors;
     vals = pdbase.mapVals(obj.LocalValues, @evalCoeff, grid);
-    nCoeff = (obj.Degree + 1) ^ obj.npar();
-    if ~isRateRows(vals, grid, nCoeff)
+    if ~obj.hasRateRows()
         out = mkPdmat(obj, vals);
         return
     end
@@ -83,8 +82,50 @@ function out = mkPdmat(obj, vals)
     init.MatrixSize = obj.MatrixSize;
     init.Degree = obj.Degree;
     init.LocalValues = vals;
-    init.IsContinuous = obj.IsContinuous;
+    if obj.hasRateRows()
+        % Each exported derivative vertex retains the source's deliberate
+        % cell-local semantics after rate metadata is removed.
+        init.IsContinuous = false;
+    else
+        init.IsContinuous = assignedContinuity(vals, ...
+            obj.GridInfo.NumNodes - 1, obj.Degree);
+    end
     init.SourceSummary = "coefficient-backed";
     init.FunctionHandle = [];
     out = pdmat(init);
+end
+
+function tf = assignedContinuity(vals, nCell, degree)
+    %ASSIGNEDCONTINUITY Reclassify faces after symbolic values are assigned.
+    nPar = numel(nCell);
+    cells = helper.combRows(arrayfun(@(n) 1:n, nCell, ...
+        "UniformOutput", false));
+    labels = helper.combRows(repmat({0:degree}, 1, nPar));
+    tf = true;
+    for dim = 1:nPar
+        upper = find(labels(:, dim) == degree);
+        lower = find(labels(:, dim) == 0);
+        step = zeros(1, nPar);
+        step(dim) = 1;
+        for k = 1:size(cells, 1)
+            subs = cells(k, :);
+            if subs(dim) == nCell(dim)
+                continue
+            end
+            lhs = helper.cellGet(vals, subs);
+            rhs = helper.cellGet(vals, subs + step);
+            for row = 1:size(lhs, 1)
+                for q = 1:numel(upper)
+                    left = lhs{row, upper(q)};
+                    right = rhs{row, lower(q)};
+                    tolerance = 1e-9 * max([1, norm(left, "fro"), ...
+                        norm(right, "fro")]);
+                    if norm(left - right, "fro") > tolerance
+                        tf = false;
+                        return
+                    end
+                end
+            end
+        end
+    end
 end

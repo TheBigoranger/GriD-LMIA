@@ -11,7 +11,8 @@ function out = minus(lhs, rhs)
     %     C = eye(2) - P;
 
     if isa(lhs, "pdvar") && (isa(rhs, "pdvar") || isa(rhs, "pdmat")) && ...
-            helper.isZero(rhs, "obj")
+            helper.isZero(rhs, "obj") && ...
+            ~lhs.HasRateDependence && ~rhs.HasRateDependence
         % The identity fast path must still enforce ordinary subtraction compatibility.
         if ~isequal(rhs.MatrixSize, lhs.MatrixSize)
             error("pdvar:InvalidSubtraction", ...

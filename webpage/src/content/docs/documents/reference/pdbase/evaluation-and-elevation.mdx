@@ -123,9 +123,46 @@ Validation matches `elevVals`, including the function-only missing-evidence
 boundary. Degree elevation changes the Bernstein representation, not the
 represented polynomial, physical grid, or ownership of interior boundaries.
 
+## <span id="pdbase-rhodiff"></span>`rhodiff`
+
+```matlab
+D = rhodiff(A)
+D = rhodiff(A, rateBounds)
+```
+
+`rhodiff` differentiates coefficient-backed storage cell by cell and returns
+the same dynamic class. Explicit bounds supply missing metadata but must match
+stored bounds when both are present. One-parameter degree `m > 0` becomes
+`m-1`; multidimensional partials are elevated back to common degree `m`.
+Every physical cell stores one row per rate-box vertex in `helper.combRows`
+order.
+
+```matlab
+A = pdbase({[0 2]}, [1 1], 1, {{1, 5}}, ...
+    RateBounds=[-2 3]);
+D = rhodiff(A);
+derivativeClass = class(D)
+derivativeDegree = D.Degree
+derivativeRows = cell2mat(D.coeffs(1))
+```
+
+```text
+derivativeClass = 'pdbase'
+derivativeDegree = 0
+derivativeRows = 2×1 double
+    -4
+     6
+```
+
+Function-only storage raises `pdbase:FunctionOnlyDiff`; existing rate rows
+raise `pdbase:InvalidDiff`. Missing, malformed, or inconsistent bounds raise
+`pdbase:MissingRateBounds`, `pdbase:InvalidRateBounds`, or
+`pdbase:RateBoundsMismatch`.
+
 ## See Also
 
 [`pdmat storage and elevation`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
+[`pdmat rhodiff`](/PD-LMI-package/documents/reference/pdmat/rhodiff/) ·
 [`pdvar storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) ·
 [`Pólya certificate`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
 [`Bernstein polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/)

@@ -24,8 +24,10 @@ Create a known-data `pdmat` object over one or more parameter-grid dimensions.
 ```matlab
 A = pdmat(gridVector, source)
 A = pdmat(gridVector, source, Degree=m)
+A = pdmat(gridVector, source, RateBounds=rb)
 A = pdmat(gridVectors, source)
-A = pdmat(gridVectors, source, Degree=m)
+A = pdmat(gridVectors, source, Degree=m, RateBounds=rb)
+A = pdmat(..., ValidationMode=mode)
 ```
 
 ## Arguments
@@ -35,8 +37,11 @@ A = pdmat(gridVectors, source, Degree=m)
 | `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of strictly increasing vectors, such as `{[0 1], [10 20]}`. |
 | `source` | Function handle, global cell grid of numeric Bernstein coefficients such as `{1, 2, 3}`, or explicit nested `LocalValues` such as `{{[1 0], [0 1]}, {[2 0], [0 2]}}`. |
 | `Degree` | Nonnegative integer Bernstein degree, such as `Degree=1` or `Degree=2`. Required when a function handle should be validated as Bernstein coefficient evidence. |
+| `RateBounds` | Finite `ell`-by-2 lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`; explicit nested leaves may instead contain all `2^ell` rate-vertex rows. |
+| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient and not stored. Public source validation remains complete in both modes. |
 
-Unsupported options: `IsContinuous`, `ContainsDecision`, `HasRateDependence`, and `RateBounds`.
+Unsupported metadata options: `IsContinuous`, `ContainsDecision`, and
+`HasRateDependence`.
 
 For diagrams of one- and two-parameter grid inputs, the global
 coefficient-grid shape, and the separate role of Bernstein `Degree`, see
@@ -55,8 +60,8 @@ readable through dot syntax and have private set access:
 | `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | Cell-local numeric Bernstein coefficients. |
 | `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces; otherwise the constructor warns and returns `false`. |
 | `ContainsDecision` | `A.ContainsDecision` | Always `false`; no YALMIP decisions are stored. |
-| `HasRateDependence` | `A.HasRateDependence` | Always `false`; rate dependence belongs to `pdvar`/`rhodiff`. |
-| `RateBounds` | `A.RateBounds` | Always empty for `pdmat`. |
+| `HasRateDependence` | `A.HasRateDependence` | `true` when rate metadata or explicit rate rows are present. |
+| `RateBounds` | `A.RateBounds` | Empty or the stored scheduling-rate box used by `rhodiff`, rate-row inspection, and `pdlmi`. |
 | `SourceSummary` | `A.SourceSummary` | Source label such as `coefficient-backed`, `function`, or `function-bernstein`. |
 | `FunctionHandle` | `A.FunctionHandle` | Exact evaluator for function-backed objects; empty for coefficient-backed data. |
 
@@ -197,6 +202,30 @@ ans =
 Adding `Degree=2` tells the constructor to validate and store Bernstein
 coefficient evidence while retaining the exact function handle for evaluation.
 
+### Explicit rate-vertex rows
+
+```matlab
+A = pdmat([0 1], {{1, 3; 10, 14}}, ...
+    Degree=1, RateBounds=[-1 2]);
+disp("rateBounds =")
+disp(A.RateBounds)
+disp("rateRowValues =")
+disp(cell2mat(A.coeffs(1)))
+```
+
+```text
+rateBounds =
+    -1     2
+
+rateRowValues =
+     1     3
+    10    14
+```
+
+Each physical cell must use either one ordinary row or every rate-box vertex
+row, uniformly. Vertex order is
+`helper.combRows(num2cell(A.RateBounds,2).')`.
+
 ## Validation And Errors
 
 - Malformed option sequences raise `pdmat:InvalidOptions`.
@@ -207,6 +236,8 @@ coefficient evidence while retaining the exact function handle for evaluation.
   coefficient grids raise `pdmat:InvalidData`.
 - Invalid degrees and malformed nested storage raise `pdmat:InvalidDegree` and
   `pdmat:InvalidLocalValues`.
+- Malformed rate boxes raise `pdmat:InvalidRateBounds`; malformed, duplicate,
+  or missing validation values raise `pdmat:InvalidValidationMode`.
 - Malformed explicit coefficient-leaf counts or shapes raise
   `pdmat:InvalidCoefficientCell`; invalid, nonfinite, nonreal, or wrong-size
   payloads raise `pdmat:InvalidCoefficientPayload`.
@@ -221,4 +252,8 @@ coefficient evidence while retaining the exact function handle for evaluation.
 
 ## See Also
 
-[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) · [`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/) · [`pdbase`](/PD-LMI-package/documents/reference/pdbase/)
+[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
+[`rhodiff`](/PD-LMI-package/documents/reference/pdmat/rhodiff/) ·
+[`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/) ·
+[`comparisons`](/PD-LMI-package/documents/reference/pdmat/comparisons/) ·
+[`pdbase`](/PD-LMI-package/documents/reference/pdbase/)

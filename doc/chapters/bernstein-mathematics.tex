@@ -166,15 +166,14 @@ p(1/2)=\tfrac14(1)+\tfrac12(2)+\tfrac14(6)=2.75.
 \begin{lstlisting}[style=dpmatlab]
 p = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
 valueAtHalf = p.evaluate(0.5)
-T = bernsteinTable(p, "oneLine")
+T = bernsteinTable(p, "oneLine");
+disp(T)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-valueAtHalf =
-    2.7500
-T =
-    CellSubscript                    Expression
-    _____________    __________________________________________
+valueAtHalf = 2.7500
+    CellSubscript                      Expression
+    _____________    _______________________________________________
 
         {[1]}        "(1-alpha)^2*1 + 2(1-alpha)alpha*2 + alpha^2*6"
 \end{lstlisting}
@@ -279,11 +278,9 @@ localLabels = obj.lbls()
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-physicalCellCount =
-     6
-coefficientsPerCell =
-     4
-localLabels =
+physicalCellCount = 6
+coefficientsPerCell = 4
+localLabels = 4×2 double
      0     0
      0     1
      1     0
@@ -353,9 +350,8 @@ productCoefficients = cell2mat(R.coeffs(1))
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-productDegree =
-     3
-productCoefficients =
+productDegree = 3
+productCoefficients = 1×4 double
     2.0000    4.0000    9.3333   24.0000
 \end{lstlisting}
 

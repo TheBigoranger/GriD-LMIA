@@ -2,7 +2,7 @@
 
 \input{manual-style}
 
-\title{\pkg\\User Manual} \author{Version v1.1.1} \date{July 26, 2026}
+\title{\pkg\\User Manual} \author{Version v1.1.2} \date{July 27, 2026}
 
 % \includeonly{chapters/workflow-introduction}
 % \includeonly{chapters/pdbase}
@@ -20,7 +20,7 @@ The \pkg{} is a MATLAB/YALMIP package for modelling and certifying parameter-dep
 
 The manual develops that bridge through a reproducible differentiable PD-LMI workflow: define the parameter grid and known data, construct continuous decision matrices, differentiate them cell by cell when scheduling-rate terms are present, form a residual inequality, choose a direct or certificate-based positivity condition, export the resulting constraints to YALMIP, and solve them with an available SDP solver.  It also makes explicit the distinction between shared-face continuity of the represented function and the generally discontinuous cellwise derivative data.
 
-Documentation snapshot v1.1.1 presents the implemented and tested public surface as one supported workflow: installation and verification; known-data, decision-variable, and finite-certificate objects; MATLAB-style matrix operations and indexing implemented centrally by \code{pdbase} and inherited by \code{pdmat}/\code{pdvar}; six shared helper utilities; and Direct, P\'olya, Putinar, SparseFullBox, and FullBox certificate assembly. The appendices provide the Bernstein-polynomial and positivity-certificate background needed to interpret those backends and their documented boundaries. The latest tagged GitHub Release remains v1.1.0.
+Documentation snapshot v1.1.2 presents the implemented and tested public surface as one supported workflow: installation and verification; known-data, decision-variable, and finite-certificate objects; rate-aware \code{pdmat} construction, differentiation, algebra, inspection, plotting, comparison, and known-data inequalities; transient fast or strict validation diagnostics; MATLAB-style matrix operations and indexing implemented centrally by \code{pdbase} and inherited by \code{pdmat}/\code{pdvar}; six shared helper utilities; and Direct, P\'olya, Putinar, SparseFullBox, and FullBox certificate assembly. The appendices provide the Bernstein-polynomial and positivity-certificate background needed to interpret those backends and their documented boundaries. The latest tagged GitHub Release remains v1.1.0.
 \end{abstract}
 
 \clearpage

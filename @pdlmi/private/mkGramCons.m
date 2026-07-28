@@ -1,139 +1,105 @@
-function cons = mkGramCons(expr, relation, targetDeg, specs, mode, bandWidth)
+function cons = mkGramCons(expr, relation, targetDeg, specs, comparisonMode, validationMode, bandWidth)
     %MKGRAMCONS Assemble a specified Bernstein-Gram certificate per cell/row.
     %
-    %   Syntax:
-    %     cons = mkGramCons(expr, relation, targetDeg, specs, mode)
-    %     cons = mkGramCons(expr, relation, targetDeg, specs, mode, bandWidth)
-    %
-    %   Arguments:
-    %     expr      - pdvar residual with local Bernstein coefficients.
-    %     relation  - Normalized "<=" or ">=" comparison relation.
-    %     targetDeg - Common tensor degree used for exact coefficient matching.
-    %     specs     - PSD-block specifications: Gram degree and [alpha; 1-alpha]
-    %                 weight exponents in each row.
-    %     mode      - "semidefinite" or "elementwise" inequality assembly.
-    %     bandWidth - Optional tensor-window side length. Omit for dense blocks.
-    %
-    %   Output:
-    %     cons - Cell column of PSD and exact coefficient-matching constraints.
-    %
-    %   The result contains one independent matrix certificate per physical
-    %   cell/rate row in semidefinite mode. Entry-wise mode instead creates an
-    %   independent scalar certificate for each column-major matrix entry.
-    if nargin < 6
+    %   Each physical cell and active rate row receives an independent
+    %   certificate. Entry-wise mode additionally creates an independent
+    %   scalar certificate for each MATLAB column-major matrix entry.
+    if nargin < 7
         bandWidth = [];
     end
 
-    vals = expr.elevVals(targetDeg - expr.Degree);
+    vals = expr.elevVals(targetDeg - expr.Degree, validationMode);
+    validateAssemblyValues(expr, vals, targetDeg, validationMode);
     cells = expr.cells();
     nPar = numel(expr.GridInfo.Vectors);
-    cons = {};
+    certificatePlan = mkGramCertificatePlan( ...
+        specs, nPar, bandWidth, targetDeg * ones(1, nPar));
+
+    if comparisonMode == "elementwise"
+        certificatesPerRow = prod(expr.MatrixSize);
+        gramMatrixSize = 1;
+    else
+        certificatesPerRow = 1;
+        gramMatrixSize = expr.MatrixSize(1);
+    end
+    localCertificateCount = countLocalCertificates( ...
+        vals, cells, certificatesPerRow);
+    constraintsPerCertificate = certificatePlan.BlockCount + ...
+        certificatePlan.TargetCount;
+    cons = cell(localCertificateCount * constraintsPerCertificate, 1);
+    nextConstraint = 0;
+    planValidated = false(certificatePlan.BlockCount, 1);
 
     for c = 1:size(cells, 1)
         coeffs = helper.cellGet(vals, cells(c, :));
         for row = 1:size(coeffs, 1)
-            % Certificates are independent across cells and active rate rows.
+            % Relation negation changes only the exact matching target.
             target = coeffs(row, :);
-            for k = 1:numel(target)
-                mat = target{k};
-                if relation == "<="
-                    target{k} = -mat;
+            if relation == "<="
+                for targetIndex = 1:numel(target)
+                    target{targetIndex} = -target{targetIndex};
                 end
             end
 
-            if mode == "elementwise"
+            if comparisonMode == "elementwise"
                 for entry = 1:prod(expr.MatrixSize)
-                    % Scalar certificates remain independent across entries;
-                    % MATLAB linear indexing preserves column-major entry order.
-                    scalarTarget = cellfun(@(mat) mat(entry), target, ...
-                        "UniformOutput", false);
-                    [coneCons, represented] = mkCert( ...
-                        1, nPar, specs, bandWidth);
-                    cons = [cons; coneCons]; %#ok<AGROW>
-                    for k = 1:numel(scalarTarget)
-                        cons{end + 1, 1} = represented{k} == scalarTarget{k}; %#ok<AGROW>
-                    end
+                    scalarTarget = cellfun(@(matrix) matrix(entry), ...
+                        target, "UniformOutput", false);
+                    appendCertificate(1, scalarTarget);
                 end
             else
-                [coneCons, represented] = mkCert( ...
-                    expr.MatrixSize(1), nPar, specs, bandWidth);
-                cons = [cons; coneCons]; %#ok<AGROW>
-                % Matching is exact; strictness remains encoded in the residual.
-                for k = 1:numel(target)
-                    cons{end + 1, 1} = represented{k} == target{k}; %#ok<AGROW>
-                end
+                appendCertificate(gramMatrixSize, target);
             end
         end
     end
-end
 
-function [cons, coeffs] = mkCert(n, nPar, specs, bandWidth)
-    %MKCERT Create Gram blocks and sum their weighted Bernstein maps.
-    %
-    %   Syntax:
-    %     [cons, coeffs] = mkCert(n, nPar, specs, bandWidth)
-    %
-    %   Arguments:
-    %     n    - Matrix dimension of each local residual coefficient.
-    %     nPar - Number of scheduling-parameter directions.
-    %     specs     - Gram-block specifications from mkGramCons.
-    %     bandWidth - Empty for dense blocks, or a tensor-window side length.
-    %
-    %   Output:
-    %     cons   - Cell column of PSD constraints for the active Gram blocks.
-    %     coeffs - Flat Bernstein coefficient cell for their weighted sum.
-    %
-    %   Negative nominal Gram degrees denote omitted order-zero multiplier blocks.
-    cons = {};
-    coeffs = {};
-    for k = 1:size(specs, 1)
-        gramDeg = reshape(specs{k, 1}, 1, []);
-        if any(gramDeg < 0)
-            % At order zero, multiplier blocks have an empty nominal basis.
-            continue
+    function appendCertificate(matrixSize, target)
+        % Preserve the public order: local cones, then exact coefficient matches.
+        [coneConstraints, represented, planValidated] = ...
+            mkCert(matrixSize, certificatePlan, ...
+            validationMode, planValidated);
+        coneCount = numel(coneConstraints);
+        if coneCount > 0
+            indices = nextConstraint + (1:coneCount);
+            cons(indices) = coneConstraints;
+            nextConstraint = nextConstraint + coneCount;
         end
-        weight = specs{k, 2};
-        alphaPower = reshape(weight(1, :), 1, nPar);
-        oneMinusAlphaPower = reshape(weight(2, :), 1, nPar);
-        if isempty(bandWidth)
-            dim = n * prod(gramDeg + 1);
-            gram = sdpvar(dim, dim, 'symmetric');
-            cons{end + 1, 1} = gram >= 0; %#ok<AGROW>
-            term = bernGramCoeffs(gram, gramDeg, ...
-                alphaPower, oneMinusAlphaPower);
-            coeffs = addTerm(coeffs, term);
-        else
-            % Tensor-coordinate windows avoid any dependence on the flattened
-            % helper.combRows position of neighboring basis labels.
-            winSize = min(bandWidth, gramDeg + 1);
-            localLabels = labelRows(winSize - 1);
-            starts = labelRows(gramDeg - winSize + 1);
-            for w = 1:size(starts, 1)
-                basisLabels = localLabels + starts(w, :);
-                dim = n * size(basisLabels, 1);
-                gram = sdpvar(dim, dim, 'symmetric');
-                cons{end + 1, 1} = gram >= 0; %#ok<AGROW>
-                term = bernGramCoeffs(gram, gramDeg, ...
-                    alphaPower, oneMinusAlphaPower, basisLabels);
-                coeffs = addTerm(coeffs, term);
-            end
+        for coefficientIndex = 1:certificatePlan.TargetCount
+            nextConstraint = nextConstraint + 1;
+            cons{nextConstraint} = ...
+                represented{coefficientIndex} == target{coefficientIndex};
         end
     end
 end
 
-function rows = labelRows(maxLabel)
-    %LABELROWS Enumerate one tensor box of nonnegative labels.
-    ranges = arrayfun(@(d) 0:d, maxLabel, "UniformOutput", false);
-    rows = helper.combRows(ranges);
+function count = countLocalCertificates(vals, cells, certificatesPerRow)
+    %COUNTLOCALCERTIFICATES Count exact independent local Gram certificates.
+    count = 0;
+    for cellIndex = 1:size(cells, 1)
+        coeffs = helper.cellGet(vals, cells(cellIndex, :));
+        count = count + size(coeffs, 1) * certificatesPerRow;
+    end
 end
 
-function coeffs = addTerm(coeffs, term)
-    %ADDTERM Accumulate one dense or windowed Gram contribution.
-    if isempty(coeffs)
-        coeffs = term;
-        return
-    end
-    for j = 1:numel(coeffs)
-        coeffs{j} = coeffs{j} + term{j};
+function [cons, coeffs, planValidated] = mkCert( ...
+        matrixSize, certificatePlan, validationMode, planValidated)
+    %MKCERT Allocate fresh Gram variables and realize precomputed maps.
+    cons = cell(certificatePlan.BlockCount, 1);
+    coeffs = repmat({zeros(matrixSize)}, ...
+        1, certificatePlan.TargetCount);
+    for block = 1:certificatePlan.BlockCount
+        plan = certificatePlan.Blocks{block};
+        dimension = matrixSize * plan.BasisCount;
+        gram = sdpvar(dimension, dimension, 'symmetric');
+        cons{block} = gram >= 0;
+
+        validateInstance = validationMode == "strict" || ...
+            ~planValidated(block);
+        term = applyGramPlan(gram, plan, validateInstance);
+        planValidated(block) = true;
+        for coefficient = 1:certificatePlan.TargetCount
+            coeffs{coefficient} = coeffs{coefficient} + ...
+                term{coefficient};
+        end
     end
 end

@@ -12,18 +12,19 @@ function out = cat(dim, varargin)
     % sanity check inputs and select anchor pdmat for metadata
     anchor = sanChk(dim, varargin);
 
+    rb = anchor.pickRateBounds("pdmat:InvalidConcatenation", varargin{:});
     grid = anchor.mergeGrid("pdmat:MixedGrid", varargin{:});
-    [data, sz] = catData(anchor, dim, varargin, grid);
+    [data, sz] = catData(dim, varargin, grid, rb);
     deg = max(arrayfun(@(d) d.Degree, data));
 
-    for k = 1:numel(data)
-        data(k).LocalValues = pdbase.elevLocalValues( ...
-            data(k).LocalValues, data(k).Degree, deg, grid);
-    end
+    data = pdbase.alignLocalDegrees(data, deg, grid);
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) catCell(dim, data, subs));
-    out = mkObj(grid, vals, deg);
+    vals = helper.mkNest(nCell, @(subs) catCell(anchor, dim, data, subs));
+    if ~any(arrayfun(@(d) d.HasRateDependence, data))
+        rb = [];
+    end
+    out = mkObj(grid, vals, deg, rb);
 
     if ~isequal(size(out), sz)
         error("pdmat:InvalidConcatenation", "Internal pdmat concatenation size mismatch.");
@@ -43,19 +44,24 @@ function anchor = sanChk(dim, args)
     for k = 1:numel(args)
         if isa(args{k}, "pdmat")
             anchor = args{k};
-            return
+            break
         end
     end
-    error("pdmat:InvalidConcatenation", "At least one concatenated value must be a pdmat.");
+    if isempty(anchor)
+        error("pdmat:InvalidConcatenation", ...
+            "At least one concatenated value must be a pdmat.");
+    end
 end
 
-function [data, outSize] = catData(anchor, dim, args, grid)
+function [data, outSize] = catData(dim, args, grid, rb)
     %CATDATA Promote blocks, broadcast numeric scalars, and infer output size.
     data = repmat(struct( ...
         "MatrixSize", [], ...
         "Degree", [], ...
         "LocalValues", [], ...
-        "IsContinuous", []), 1, numel(args));
+        "IsContinuous", [], ...
+        "HasRateDependence", [], ...
+        "HasRateRows", []), 1, numel(args));
     raw = cell(1, numel(args));
     sz = zeros(numel(args), 2);
     isScalar = false(1, numel(args));
@@ -63,7 +69,8 @@ function [data, outSize] = catData(anchor, dim, args, grid)
     for k = 1:numel(args)
         val = args{k};
         if isa(val, "pdmat")
-            data(k) = asData(grid, val, [], "pdmat:InvalidConcatenation");
+            data(k) = asData(grid, val, [], rb, ...
+                "pdmat:InvalidConcatenation");
             sz(k, :) = data(k).MatrixSize;
         else
             helper.chk(val, "pdmat:InvalidConcatenation", ...
@@ -122,20 +129,19 @@ function [data, outSize] = catData(anchor, dim, args, grid)
             nCell = cellfun(@numel, grid) - 1;
             data(k).LocalValues = helper.mkNest(nCell, @(~) {mat});
             data(k).IsContinuous = true;
+            data(k).HasRateDependence = false;
+            data(k).HasRateRows = false;
         end
     end
 end
 
-function coeffs = catCell(dim, data, subs)
+function coeffs = catCell(anchor, dim, data, subs)
     %CATCELL Concatenate aligned coefficient blocks in one physical cell.
-    nCoeff = numel(helper.cellGet(data(1).LocalValues, subs));
-    coeffs = cell(1, nCoeff);
-    for c = 1:nCoeff
-        pieces = cell(1, numel(data));
-        for k = 1:numel(data)
-            one = helper.cellGet(data(k).LocalValues, subs);
-            pieces{k} = one{c};
-        end
-        coeffs{c} = builtin("cat", dim, pieces{:});
+    leaves = cell(1, numel(data));
+    for k = 1:numel(data)
+        leaves{k} = helper.cellGet(data(k).LocalValues, subs);
     end
+    coeffs = anchor.joinRateRows(leaves, ...
+        @(parts) builtin("cat", dim, parts{:}), ...
+        "pdmat:InvalidCoefficientRows");
 end

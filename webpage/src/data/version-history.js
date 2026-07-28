@@ -1,10 +1,10 @@
 export const versionHistory = [
   {
-    version: "v1.1.1",
-    date: "2026-07-26",
+    version: "v1.1.2",
+    date: "2026-07-27",
     status: "current documentation snapshot",
     summary:
-      "Restructures the printable and Web mathematical guides around the LPV induced-L2-gain workflow, standardizes notation across the manuals, and expands certificate selection guidance without changing runtime MATLAB APIs. This snapshot has no Git tag or GitHub Release.",
+      "Documents the operation-local Bernstein and Gram assembly rewrite, transient fast/strict validation, rate-aware pdmat construction and differentiation, known-data certificates, and corrected SparseFullBox band-support semantics. The ordinary modeling interface remains largely compatible. This snapshot has no Git tag or GitHub Release.",
   },
   {
     version: "v1.1.0",

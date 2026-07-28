@@ -25,6 +25,7 @@ cell-local full-box Bernstein-Gram preordering.
 ```matlab
 Cbox = C.applyFullBoxPreorder()
 Cbox = C.applyFullBoxPreorder(order)
+Cbox = C.applyFullBoxPreorder(..., ValidationMode=mode)
 ```
 
 ## Description
@@ -142,6 +143,9 @@ For the degree-two scalar residual, order one stores two PSD blocks followed by
 three exact coefficient identities. Order two stores two PSD blocks followed
 by five identities. The selection made from `polya` replaces Pólya assembly;
 it does not use the already elevated constraints.
+
+`ValidationMode` is transient, accepts case-insensitive `"fast"` or
+`"strict"`, applies only to this rebuild, and is neither stored nor inherited.
 
 ## Validation And Errors
 

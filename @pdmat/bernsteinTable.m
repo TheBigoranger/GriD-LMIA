@@ -25,6 +25,11 @@ function tbl = bernsteinTable(obj, varargin)
             "Function-only pdmat objects do not have Bernstein coefficient evidence to tabulate.");
     end
 
+    rateVerts = [];
+    if obj.hasRateRows()
+        vecs = num2cell(obj.RateBounds, 2).';
+        rateVerts = helper.combRows(vecs);
+    end
     tbl = bernTbl(obj, "pdmat:InvalidBernsteinTableInput", ...
-        @(val) val, @(val) string(mat2str(val)), [], varargin{:});
+        @(val) val, @(val) string(mat2str(val)), rateVerts, varargin{:});
 end

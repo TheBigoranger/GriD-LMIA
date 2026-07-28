@@ -5,20 +5,18 @@ It represents continuous piecewise-polynomial decision matrices in cell-local
 tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
 models are called differentiable parameter-dependent LMIs (DPD-LMIs).
 
-Documentation: **v1.1.1**. Latest GitHub Release: **v1.1.0**.
+Documentation: **v1.1.2**. Latest GitHub Release: **v1.1.0**.
 
 The current implementation provides:
 
 - `pdbase` as the backend parent for tensor-grid metadata, nested `LocalValues`, local Bernstein labels, coefficient inspection, and the shared matrix protocols and operations inherited by `pdmat` and `pdvar`.
-- `pdmat` for known finite real matrix data from coefficient grids, explicit local values, or exact function handles.
+- `pdmat` for known finite real matrix data from coefficient grids, explicit local values, or exact function handles, with optional rate-box metadata and explicit rate-vertex coefficient rows.
 - `pdvar` for arbitrary-degree continuous YALMIP-backed Bernstein decision
   expressions whose neighboring cells share boundary values.
-- `rhodiff` for discontinuous rate-vertex derivative expressions.
-- `pdlmi` for direct equality constraints and direct, Pólya-elevated, Putinar
-  box, SparseFullBox tensor-window, or dense full-box-preordering inequality
-  assembly with `toYalmip` handoff.
+- `rhodiff` for discontinuous numeric `pdmat` or decision-bearing `pdvar` rate-vertex derivative expressions.
+- `pdlmi` for direct equality constraints on `pdvar`, known-data inequalities from coefficient-backed `pdmat`, and direct, Pólya-elevated, Putinar box, band-limited SparseFullBox, or dense full-box-preordering inequality assembly with `toYalmip` handoff.
 - `bernsteinTable` methods on both `pdmat` and `pdvar` for command-window
-  inspection of local Bernstein coefficient rows.
+  inspection of local Bernstein coefficient and rate-vertex rows.
 
 ## Why Bernstein Form?
 
@@ -70,6 +68,19 @@ The test entry point covers installer behavior, helper utilities, `pdbase`,
 `pdmat`, `pdvar`, and `pdlmi`. Its solver smoke tests use the same
 commercial-first working-solver policy as `install_pd_lmi`.
 
+The v1.1.2 implementation keeps the established modeling interfaces while
+using operation-local plans for Bernstein products, elevation, Direct/Pólya
+assembly, and Bernstein-Gram coefficient maps. Constructors and certificate
+selectors accept transient `ValidationMode="fast"` or `"strict"` where
+documented. Fast mode is the default; strict mode repeats internal structural
+checks across every generated cell and is diagnostic rather than a different
+mathematical model. The option is not stored on returned objects. Reproducible
+non-solver workloads are provided by
+`tests.benchmark_stage1b_performance`,
+`tests.benchmark_stage1c_performance`, and
+`tests.benchmark_stage2_performance`; their machine-specific measurements are
+reported in the manuals rather than treated as universal guarantees.
+
 ## Quick Start
 
 Known scalar data:
@@ -83,11 +94,26 @@ disp(T)
 MATLAB output:
 
 ```text
-    CellSubscript      Expression
-    _____________    _______________
+    CellSubscript          Expression
+    _____________    _______________________
 
         {[1]}        "(1-alpha)*1 + alpha*3"
 ```
+
+Known rate metadata and explicit rate rows:
+
+```matlab
+rb = [-1 2];
+R = pdmat([0 1], {{1, 3; 10, 14}}, Degree=1, RateBounds=rb);
+D = rhodiff(pdmat([0 1], {0, 1}, Degree=1, RateBounds=rb));
+rows = bernsteinTable(D, "oneLine");
+```
+
+`RateBounds` alone is metadata. Explicit nested coefficient leaves may instead
+store one row for every vertex in the deterministic `helper.combRows` order
+induced by the rows of `RateBounds`.
+Rate-row-aware evaluation, algebra, structural operations, assignment,
+elevation, tables, display, and `plot(...,RateVertex=k)` preserve that order.
 
 Inspect a YALMIP-backed decision expression:
 
@@ -123,6 +149,15 @@ the complete relation is entry-wise and emits
 Putinar, SparseFullBox, and full-box certificates, with independent scalar
 certificates in MATLAB column-major entry order. Numeric comparisons include
 the boundary at the package tolerance of `1e-10`.
+
+For known `pdmat` objects, `A == B` returns one scalar logical after compatible
+coefficient representations are aligned. `A >= B` and `A <= B` create a
+`pdlmi` wrapper. Direct and Pólya `toYalmip` export one logical certificate;
+a false result emits `pdlmi:InconclusiveCertificate` because coefficient
+failure does not prove a continuous-domain violation. Putinar, SparseFullBox,
+and FullBox still create ordinary YALMIP constraints with auxiliary Gram
+variables. Function-only `pdmat` data need coefficient evidence before these
+paths, and `pdlmi` equality remains `pdvar`-only.
 
 `P == Q` creates direct coefficient equalities. Rectangular and non-Hermitian
 matrices are supported, and compatible derivative expressions compare every
@@ -202,13 +237,13 @@ original residual and replaces the previous family.
 
 ## Opt-in SparseFullBox Hierarchy
 
-`applySparseFullBoxPreorder([bandWidth[, order]])` interpolates between the
-direct coefficient certificate and the dense full-box preordering with free
-PSD tensor-window cliques. The no-argument form uses `BandWidth=2` and the
-same dimension-dependent absolute order as FullBox. Every window contribution
-is embedded and matched exactly in the cell-local Bernstein basis; matrix
-entries, physical cells, and active rate rows receive independent
-certificates.
+`applySparseFullBoxPreorder([bandWidth[, order]])` keeps the same
+parity/generator-mask terms and exact coefficient identities as the dense
+FullBox preordering while restricting its Gram support to a band-limited form.
+The implementation realizes that support as overlapping axis-aligned
+tensor-window PSD clique blocks. The no-argument form uses `BandWidth=2` and
+the same dimension-dependent absolute order as FullBox. Matrix entries,
+physical cells, and active rate rows receive independent certificates.
 
 ```matlab
 yalmip('clear')

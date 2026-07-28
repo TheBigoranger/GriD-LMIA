@@ -11,7 +11,7 @@ function out = blkdiag(varargin)
 
     anchor = pickAnchor("pdvar:InvalidBlkdiag", varargin);
     grid = anchor.mergeGrid("pdvar:MixedGrid", varargin{:});
-    rb = pickRb("pdvar:InvalidBlkdiag", varargin{:});
+    rb = anchor.pickRateBounds("pdvar:InvalidBlkdiag", varargin{:});
     data = repmat(struct("MatrixSize", [], "Degree", [], ...
         "LocalValues", [], "ContainsDecision", [], "HasRateDependence", [], ...
         "IsContinuous", [], "HasRateRows", []), ...
@@ -22,13 +22,10 @@ function out = blkdiag(varargin)
     end
 
     deg = max(arrayfun(@(d) d.Degree, data));
-    for k = 1:numel(data)
-        data(k).LocalValues = pdbase.elevLocalValues(data(k).LocalValues, ...
-            data(k).Degree, deg, grid);
-    end
+    data = pdbase.alignLocalDegrees(data, deg, grid);
 
     nCell = cellfun(@numel, grid) - 1;
-    vals = helper.mkNest(nCell, @(subs) blkCell(data, subs));
+    vals = helper.mkNest(nCell, @(subs) blkCell(anchor, data, subs));
     sz = [sum(arrayfun(@(d) d.MatrixSize(1), data)), ...
         sum(arrayfun(@(d) d.MatrixSize(2), data))];
     hasDec = any(arrayfun(@(d) d.ContainsDecision, data));
@@ -41,7 +38,7 @@ function out = blkdiag(varargin)
         "expression", all(arrayfun(@(d) d.IsContinuous, data))));
 end
 
-function coeffs = blkCell(data, subs)
+function coeffs = blkCell(anchor, data, subs)
     %BLKCELL Assemble aligned block diagonals with rate-row broadcasting.
     leaves = cell(1, numel(data));
     for k = 1:numel(data)
@@ -49,6 +46,6 @@ function coeffs = blkCell(data, subs)
     end
     % Block diagonal assembly follows the same rate-row broadcast contract
     % as cat: derivative rows stay row-wise, ordinary rows expand to them.
-    coeffs = joinRows(leaves, @(parts) blkdiag(parts{:}), ...
+    coeffs = anchor.joinRateRows(leaves, @(parts) blkdiag(parts{:}), ...
         "pdvar:InvalidCoefficientRows");
 end
