@@ -8,6 +8,10 @@ const outFile = resolve(here, "../src/content/docs/documents/reference-index.mdx
 const legacyOutFile = resolve(here, "../src/content/docs/documents/reference-index.md");
 
 const escapeHtml = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const wrapCompounds = (value) => escapeHtml(value).replace(
+  /\b[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+\b/g,
+  '<span class="reference-index__compound">$&</span>',
+);
 
 const routeOf = (href) => href.split("#", 1)[0];
 const anchorOf = (href) => href.includes("#") ? href.slice(href.indexOf("#") + 1) : "";
@@ -24,7 +28,7 @@ function familyLabel(route, entries) {
 function symbolList(entries) {
   return entries.map((entry) => `<li>
 <div><a href="${entry.href}"><code>${escapeHtml(entry.name)}</code></a><span>${escapeHtml(entry.type)}</span></div>
-<p>${escapeHtml(entry.task)}</p>
+<p>${wrapCompounds(entry.task)}</p>
 </li>`).join("\n");
 }
 
@@ -37,7 +41,7 @@ function family(route, familyEntries) {
   const content = singleEntry
     ? `<div class="reference-index__direct-meta">
 <span>${escapeHtml(singleEntry.type)}</span>
-<p>${escapeHtml(singleEntry.task)}</p>
+<p>${wrapCompounds(singleEntry.task)}</p>
 </div>`
     : `<details class="reference-index__symbols">
 <summary>Show direct symbol links</summary>
@@ -71,7 +75,7 @@ function groupSection(group) {
   const entries = referenceEntries.filter((entry) => entry.group === group.id);
   return `<details class="reference-index__group" id="${group.id}">
 <summary class="reference-index__group-summary">
-<span class="reference-index__group-copy"><strong>${escapeHtml(group.label)}</strong><span>${escapeHtml(group.description)}</span></span>
+<span class="reference-index__group-copy"><strong>${escapeHtml(group.label)}</strong><span>${wrapCompounds(group.description)}</span></span>
 <span>${entries.length} indexed entries</span>
 </summary>
 <div class="reference-index__families">
@@ -85,7 +89,7 @@ title: Reference Lookup
 description: Generated lookup for implemented PD-LMI reference pages and symbols.
 ---
 
-This generated lookup groups every reference-page family by its package role. A one-symbol family links directly to that symbol; multi-symbol families keep their direct symbol and anchor links in one compact disclosure. The source data lives in \`src/data/reference-index.js\`; regenerate this page with \`npm --prefix webpage run generate:index\`.
+<p>${wrapCompounds("This generated lookup groups every reference-page family by its package role. A one-symbol family links directly to that symbol; multi-symbol families keep their direct symbol and anchor links in one compact disclosure. The source data lives in ")}<code>src/data/reference-index.js</code>${wrapCompounds("; regenerate this page with ")}<code>{"npm --prefix webpage run generate:index"}</code>.</p>
 
 <div class="reference-index">
 ${referenceGroups.map(groupSection).join("\n")}

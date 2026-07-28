@@ -320,6 +320,10 @@
   line-height: 1.45;
 }
 
+.reference-index__compound {
+  white-space: nowrap;
+}
+
 .reference-index__symbols {
   min-width: 0;
   margin: 0;
