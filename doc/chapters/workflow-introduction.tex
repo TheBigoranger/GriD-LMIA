@@ -1,391 +1,224 @@
-\chapter[From LPV Models to Finite Solver Constraints]{\texorpdfstring{From LPV Models to\\Finite Solver Constraints}{From LPV Models to Finite Solver Constraints}}
+\chapter[From a Parameter Box to Finite Constraints]{\texorpdfstring{From a Parameter Box to\\Finite Constraints}{From a Parameter Box to Finite Constraints}}
 \label{sec:canonical-pdlmi}
 \label{sec:bernstein-motivation}
 
-This chapter develops one complete modeling spine: an LPV plant with an induced-\(L_2\)-gain objective, a bounded-real DPD-LMI, exact reduction of the scheduling-rate box, cell-local Bernstein representation on a tensor grid, a finite positivity certificate, and explicit YALMIP solution recovery. Each section answers one decision that a first-time user must make; \cref{app:bernstein-math,app:certificates} retain the detailed coefficient and Gram derivations.
+This chapter begins with the LPV induced-\(L_2\)-gain problem, states the general DPD-LMI handled by the package, and then separates two examples on purpose. A two-dimensional nonuniform grid explains physical cells and tensor indexing without changing the mathematical domain. The Bernstein-basis section then opens with a one-dimensional, two-cell residual and carries that example through shared-face continuity and finite certificates. Detailed algebra remains in Appendices~\ref{app:bernstein-math} and~\ref{app:certificates}, while complete API contracts remain in Chapters~\ref{sec:pdmat}--\ref{sec:pdlmi}.
 
-\section{Model an LPV Induced-\texorpdfstring{\(L_2\)}{L2}-Gain Problem}
+\section{Motivation}
 
-Many systems are usefully linear only after their operating condition is made explicit. An LPV model retains the linear state-space structure while allowing its known matrices to depend on a measurable scheduling vector \(\boldsymbol\rho(t)=(\rho_1(t),\ldots,\rho_\ell(t))\) in a parameter box \(\mathcal P\). The canonical analysis model in this manual is
+Consider the LPV plant
 \begin{align}
-\dot x(t)&=A(\boldsymbol\rho(t))x(t)+B_w(\boldsymbol\rho(t))w(t),\nonumber\\
-z(t)&=C_z(\boldsymbol\rho(t))x(t)+D_{zw}(\boldsymbol\rho(t))w(t),
+    \dot x(t)&=A(\boldsymbol\rho(t))x(t)+B_w(\boldsymbol\rho(t))w(t),\nonumber\\
+    z(t)&=C_z(\boldsymbol\rho(t))x(t)+D_{zw}(\boldsymbol\rho(t))w(t),
 \label{eq:lpv-l2-model}
 \end{align}
-where \(x(t)\) is the plant state, \(w(t)\) is the disturbance, and \(z(t)\) is the performance output. The objective is to certify zero-state induced-\(L_2\) gain below \(\gamma\): \(\lVert z\rVert_2<\gamma\lVert w\rVert_2\) for every nonzero admissible disturbance and every admissible scheduling trajectory.
+where \(x\in\mathbb R^{n_x}\), \(w\in\mathbb R^{n_w}\), \(z\in\mathbb R^{n_z}\), and the measurable scheduling trajectory satisfies \((\boldsymbol\rho(t),\dot{\boldsymbol\rho}(t))\in\mathcal P\times\mathcal V\). For \(\gamma>0\), the zero-state induced-\(L_2\) objective is to certify
+\[
+    \lVert z\rVert_2<\gamma\lVert w\rVert_2
+\]
+for every nonzero admissible disturbance and every admissible scheduling trajectory.
 
-A differentiable parameter-dependent Lyapunov matrix \(P(\boldsymbol\rho)=P(\boldsymbol\rho)^{\mathsf T}\) yields the bounded-real DPD-LMI \cite{scherer1996}. Write \(\boldsymbol\nu=\dot{\boldsymbol\rho}\), let \(\mathcal R\) be the admissible rate box, and require
+A differentiable matrix \(P(\boldsymbol\rho)=P(\boldsymbol\rho)^{\mathsf T}\) supplies the scaled bounded-real DPD-LMI \cite{scherer1996}
 \begin{align}
-P(\boldsymbol\rho) & \succ 0,
+    P(\boldsymbol\rho)&\succ0,
 \label{eq:canonical-positive}\\
-\mathcal F_{\mathrm{BR}}(\boldsymbol\rho,\boldsymbol\nu,\gamma)
-&=
-\begin{bmatrix}
-\dot P(\boldsymbol\rho,\boldsymbol\nu)+\operatorname{He}\!\left(P(\boldsymbol\rho)A(\boldsymbol\rho)\right) &
-P(\boldsymbol\rho)B_w(\boldsymbol\rho) &
-C_z(\boldsymbol\rho)^{\mathsf T}\\
-B_w(\boldsymbol\rho)^{\mathsf T}P(\boldsymbol\rho) &
--\gamma I &
-D_{zw}(\boldsymbol\rho)^{\mathsf T}\\
-C_z(\boldsymbol\rho) &
-D_{zw}(\boldsymbol\rho) &
--\gamma I
-\end{bmatrix}
-\prec0
+    \begin{bmatrix}
+        \dot P(\boldsymbol\rho,\dot{\boldsymbol\rho})+\operatorname{He}\!\left(P(\boldsymbol\rho)A(\boldsymbol\rho)\right) &
+        P(\boldsymbol\rho)B_w(\boldsymbol\rho) &
+        C_z(\boldsymbol\rho)^{\mathsf T}\\
+        B_w(\boldsymbol\rho)^{\mathsf T}P(\boldsymbol\rho) &
+        -\gamma I_{n_w} &
+        D_{zw}(\boldsymbol\rho)^{\mathsf T}\\
+        C_z(\boldsymbol\rho) &
+        D_{zw}(\boldsymbol\rho) &
+        -\gamma I_{n_z}
+    \end{bmatrix}&\prec0
 \label{eq:lpv-spine}
 \end{align}
-for every \((\boldsymbol\rho,\boldsymbol\nu)\in\mathcal P\times\mathcal R\). Here \(\operatorname{He}(X)=X+X^{\mathsf T}\) and \(\dot P=\sum_s\nu_s\,\partial P/\partial\rho_s\). The first inequality makes \(V(t)=x(t)^{\mathsf T}P(\boldsymbol\rho(t))x(t)\) positive definite; the second supplies the dissipation inequality for the induced-\(L_2\) bound. The strict signs shown here are analysis notation: the package inserts no hidden margin, so a numerical model must choose and encode conditions such as \(P(\boldsymbol\rho)\succeq\varepsilon I\) explicitly. Setting \(\boldsymbol\nu=0\) removes the scheduling derivative and recovers an ordinary PD-LMI.
+for every \((\boldsymbol\rho,\dot{\boldsymbol\rho})\in\mathcal P\times\mathcal V\), where \(\operatorname{He}(X)=X+X^{\mathsf T}\) and
+\[
+    \dot P(\boldsymbol\rho,\dot{\boldsymbol\rho})
+    =\sum_{s=1}^{\ell}\dot\rho_s
+    \frac{\partial P}{\partial\rho_s}(\boldsymbol\rho).
+\]
+The first inequality makes \(x^{\mathsf T}P(\boldsymbol\rho)x\) positive definite, and the block inequality supplies the dissipation condition for the gain bound. This application is one instance of the general derivative-dependent residual below. The strict signs are analysis notation: the package uses non-strict semidefinite comparisons and inserts no hidden numerical margin.
 
-\section{Follow the Package Path}
+\section{General Problem and Assumptions}
+\label{sec:general-problem-assumptions}
 
-The package starts after the user has chosen an LPV model, a parameter box, any scheduling-rate bounds, and the matrix inequality to certify. Its role is to represent the known and decision matrices, convert the parameter continuum into finite certificate constraints, and hand those constraints to YALMIP. It does not generate the plant or controller structure, choose an objective or SDP solver, or interpret solver diagnostics on the user's behalf.
+Let \(y=(y_1,\ldots,y_N)\) collect scalar parameter-dependent decision functions. The general task is to satisfy the single residual
+\begin{equation}
+\begin{aligned}
+    \mathcal F(\boldsymbol\rho,\dot{\boldsymbol\rho};y)
+    ={}&F_0(\boldsymbol\rho)
+    +\sum_{k=1}^{N}F_k(\boldsymbol\rho)y_k(\boldsymbol\rho)\\
+    &+\sum_{k=1}^{N}\sum_{s=1}^{\ell}
+    T_{k,s}(\boldsymbol\rho)\dot\rho_s
+    \frac{\partial y_k}{\partial\rho_s}(\boldsymbol\rho)
+    \preceq0,
+    \qquad
+    \forall(\boldsymbol\rho,\dot{\boldsymbol\rho})\in\mathcal P\times\mathcal V,
+\end{aligned}
+\label{eq:general-pdlmi}
+\end{equation}
+The package fixes the abstract sets and decision class in \cref{eq:general-pdlmi} through the following assumptions.
+\begin{itemize}
+    \item The scheduling set and rate set are axis-aligned boxes; general polytopic or curved scheduling domains are outside the implemented model:
+    \[
+        \mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s],
+        \qquad
+        \mathcal V=\prod_{s=1}^{\ell}[\underline v_s,\overline v_s].
+    \]
+    \item The functions \(F_0\), \(F_k\), and \(T_{k,s}\) are known matrix functions of compatible dimensions, and the \(y_k\) are scalar decision functions. A matrix-valued decision is represented by vectorizing its independent scalar entries and assigning one component \(y_k\) to each entry, so symmetry can be encoded without treating a whole matrix as one scalar decision. Setting every \(T_{k,s}=0\) removes the derivative term and recovers an ordinary derivative-free PD-LMI.
+    \item The theoretical statement uses differentiable \(y_k\). The package searches instead over continuous piecewise-Bernstein functions that are differentiable within each physical cell. Their values agree on shared faces, but their one-sided derivatives may differ; derivative data and the resulting residual conditions remain cell-local at those interfaces.
+    \item Known data used by a certificate have cell-local polynomial coefficient evidence, and the assembled residual remains affine in the underlying YALMIP decisions. Supported numeric or known parameter-dependent factors may multiply a decision expression, but products of two decision-bearing expressions are outside the affine model.
+    \item Dependence on \(\dot{\boldsymbol\rho}\) is affine. Consequently, checking the \(2^\ell\) vertices of \(\mathcal V\) is exactly equivalent to checking the complete rate box. This exact reduction is separate from both finite restrictions over the scheduling variables described next.
+    \item MATLAB and YALMIP use non-strict semidefinite comparisons. A theoretical strict condition must therefore be modeled with an explicit user-selected margin such as \(S(\boldsymbol\rho)\succeq\varepsilon I\), and failure of a finite certificate is not proof that \cref{eq:general-pdlmi} is infeasible.
+\end{itemize}
 
-The main objects follow the same path used in the rest of the manual:
-\begin{enumerate}
-    \item \code{pdmat} stores known parameter-dependent matrices, while \code{pdvar} creates continuous parameter-dependent decisions such as \(P(\boldsymbol\rho)\) and \(\gamma\)-dependent affine expressions. Both inherit grid, degree, label, cell-local storage, matrix-shape protocols, and shared structural operations from the backend class \code{pdbase}; ordinary users begin with \code{pdmat} and \code{pdvar}, not \code{pdbase}.
-    \item Matrix operations assemble the original residual \(\mathcal F\). When scheduling-rate terms are present, \code{rhodiff} differentiates a \code{pdvar} on each cell and stores one derivative row for every vertex of \(\mathcal R\).
-    \item A comparison such as \code{residual <= 0} creates a \code{pdlmi}, orients the comparison as a positive target \(S\), and selects Direct by default. \code{applyPolya}, \code{applyPutinar}, \code{applySparseFullBoxPreorder}, and \code{applyFullBoxPreorder} rebuild alternative finite certificates from the same original residual.
-    \item \code{toYalmip} exports the stored constraints. The user calls YALMIP \code{optimize}, accepts an optimized \(\gamma\) only when \code{sol.problem == 0}, and calls \code{value} to recover numeric Bernstein data.
-\end{enumerate}
+\section[Where the Finite Restrictions Enter]{\texorpdfstring{\hspace{0.3em}Where the Finite Restrictions Enter}{Where the Finite Restrictions Enter}}
+
+There are two distinct restrictions over the scheduling continuum. First, gridding restricts the infinite-dimensional search over decision functions to a finite-dimensional space of continuous, cellwise-differentiable piecewise-Bernstein functions. Second, after a residual has been assembled in that space, Direct, P\'olya, Putinar, SparseFullBox, or FullBox imposes a finite sufficient certificate for its semidefinite sign throughout every cell. Either choice may be conservative, and changing the decision grid or degree is conceptually different from changing the certificate family or order.
+
+The tensor grid itself is exact geometry: it partitions all of the assumed box \(\mathcal P\) into physical cells with disjoint interiors whose union is \(\mathcal P\); adjacent closed cells share their boundary faces. It is neither point sampling nor an approximation of the domain; gridding is an approximation method because it restricts the admissible decision functions on that exact domain. Likewise, the affine rate dependence in \cref{eq:general-pdlmi} is checked exactly at the vertices of \(\mathcal V\); rate-vertex traversal is not a third approximation layer.
+
+\section[Gridding the Parameter Domain: a Separate Two-Dimensional Example]{\texorpdfstring{\hspace{0.3em}Gridding the Parameter Domain: a Separate Two-Dimensional Example}{Gridding the Parameter Domain: a Separate Two-Dimensional Example}}
+\label{sec:intro-gridding}
+\index{physical grid}\index{physical node}\index{physical cell}\index{tensor grid}
+
+To make the tensor geometry visible, first isolate the grid and indexing geometry; the following Bernstein-basis section introduces the separate one-dimensional residual. Choose the nonuniform grids
+\[
+    G_1=\{0,0.4,1\},
+    \qquad
+    G_2=\{0,0.25,1\}.
+\]
+Their tensor product \(G=G_1\times G_2\) has nine physical nodes and exactly partitions \([0,1]^2\) into four physical cells. The one-based cell indices are \((1,1)\), \((1,2)\), \((2,1)\), and \((2,2)\).
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=5mm and 5mm,font=\scriptsize]
-  \node[dp/known,minimum width=23mm,minimum height=10mm,align=center] (model) {LPV model\\\(\mathcal P,\mathcal R,\gamma\)};
-  \node[dp/decision,minimum width=23mm,minimum height=10mm,align=center,right=of model] (decision) {decision\\\(P(\boldsymbol\rho)\)};
-  \node[dp/contribution,minimum width=23mm,minimum height=10mm,align=center,right=of decision] (cells) {rate vertices\\and cell pullbacks};
-  \node[dp/certificate,minimum width=23mm,minimum height=10mm,align=center,right=of cells] (certificate) {finite\\certificate};
-  \node[dp/result,minimum width=23mm,minimum height=10mm,align=center,right=of certificate] (solve) {YALMIP\\solve and recover};
-  \draw[dp/arrow] (model)--(decision);
-  \draw[dp/arrow] (decision)--(cells);
-  \draw[dp/arrow] (cells)--(certificate);
-  \draw[dp/arrow] (certificate)--(solve);
+\begin{tikzpicture}[x=8.2cm,y=5.0cm,font=\scriptsize]
+  \draw[dp/grid-line,very thick] (0,0) rectangle (1,1);
+  \draw[dp/grid-line,very thick] (0.4,0)--(0.4,1);
+  \draw[dp/grid-line,very thick] (0,0.25)--(1,0.25);
+  \foreach \x/\lab in {0/{0},0.4/{0.4},1/{1}} {
+    \node[dp/grid-point] at (\x,0) {};
+    \node[dp/grid-point] at (\x,0.25) {};
+    \node[dp/grid-point] at (\x,1) {};
+    \node[below=5pt] at (\x,0) {$\lab$};
+  }
+  \foreach \y/\lab in {0/{0},0.25/{0.25},1/{1}} {
+    \node[left=5pt] at (0,\y) {$\lab$};
+  }
+  \node at (0.2,0.125) {\(\mathbf c=(1,1)\)};
+  \node at (0.2,0.625) {\(\mathbf c=(1,2)\)};
+  \node at (0.7,0.125) {\(\mathbf c=(2,1)\)};
+  \node at (0.7,0.625) {\(\mathbf c=(2,2)\)};
+  \node[below=14pt] at (0.5,0) {\(\rho_1\)};
+  \node[rotate=90,above=14pt] at (0,0.5) {\(\rho_2\)};
 \end{tikzpicture}
-\caption{The end-to-end documentation spine. Rate-vertex traversal is an exact reduction for affine rate dependence; the parameter-domain certificate is sufficient and is followed by an explicit solver-status check.}
-\label{fig:end-to-end-pipeline}
+\caption{A nonuniform two-dimensional tensor grid with nine physical nodes and four physical cells. Every point of the box belongs to at least one cell; the lines partition the domain rather than sample it.}
+\label{fig:intro-two-dimensional-grid}
 \end{figure}
 
-Two finite steps in this path have different logical status. Traversing all vertices of \(\mathcal R\) is exact when \(\mathcal F\) is affine in \(\boldsymbol\nu\). By contrast, a Bernstein or Bernstein--Gram construction is a sufficient certificate over the remaining \(\boldsymbol\rho\)-continuum; failure at a fixed grid, degree, or certificate order does not prove that the original continuous inequality is infeasible. \Cref{sec:certificate-modeling-choices,sec:certificate-boundary} separates certificate selection from changes to the underlying model, and \cref{sec:cellwise-solver-path} executes the path in MATLAB.
+For a tensor-product polynomial of degree two in each direction, every selected cell contains the nine zero-based local labels \(\mathbf i=(i_1,i_2)\in\{0,1,2\}^2\). Those labels identify Bernstein coefficients inside the cell; they are not nine additional physical sample points. In general, if direction \(s\) has \(k_s\) physical nodes, then \(G=G_1\times\cdots\times G_\ell\) has \(\prod_s k_s\) physical nodes and \(\prod_s(k_s-1)\) physical cells, while a degree-\(m\) tensor basis has \((m+1)^\ell\) local labels per cell. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
 
-\section{Version 1.1.2 Documentation Scope}
-\label{sec:version-one-scope}
+\section[Bernstein Basis on Each Cell]{\texorpdfstring{\hspace{0.3em}Bernstein Basis on Each Cell}{Bernstein Basis on Each Cell}}
+\label{sec:continuous-bernstein-representation}
+\index{Bernstein basis}\index{cell-local storage}\index{local Bernstein label}
 
-Version 1.1.2 is a documentation snapshot of the implemented workflow. The supported surface comprises the \code{pdbase} storage backend and its shared matrix-operation implementation; rate-aware \code{pdmat} known data and \code{rhodiff} derivatives; continuous arbitrary-degree \code{pdvar} decisions and their cellwise \code{rhodiff} derivatives; \code{pdlmi} Direct, P\'olya, Putinar, SparseFullBox, and FullBox assembly for decision expressions and coefficient-backed known inequalities; the documented MATLAB matrix-operation and indexing overloads; and the six public \code{helper} utilities. The source-indexed reference chapters state the accepted forms, returned shapes, validation rules, and error boundaries for that surface.
-
-Centralizing shared matrix operations in \code{pdbase} does not remove those operations from \code{pdmat} or \code{pdvar}: both modeling classes retain complete public, class-specific reference entries and behavior. The package remains restricted to tensor-product box grids, affine decision expressions, and the finite certificate constructions described here. Products nonlinear in decision or rate-dependent data are rejected, certificate failure remains inconclusive for the original continuum inequality, and YALMIP retains ownership of objectives, solver selection, and diagnostics. Version 1.1.0 remains the latest tagged GitHub Release; v1.1.2 is a documentation milestone and creates no tag or release.
-
-For release verification, run the root installer and \code{tests.run_all()} as described in \cref{sec:setup}. Examples involving \code{pdvar}, \code{rhodiff}, \code{pdlmi}, or solver state begin from a cleared YALMIP model so that their decision variables and constraints are reproducible in a fresh MATLAB session.
-
-\section{Assembly Optimizations and Validation Diagnostics}
-\label{sec:assembly-performance}
-
-The v1.1.2 implementation substantially rewrites internal assembly while leaving the ordinary modeling path largely compatible. Bernstein elevation and multiplication build numeric operation-local plans once and reuse them across compatible cells and rate rows; Direct and P\'olya assembly preallocate in the established cell, rate-row, coefficient, and column-major entry order; Gram families reuse numeric coefficient maps while allocating fresh independent Gram variables for every required block; and \code{toYalmip} concatenates retained constraints once. These changes preserve the represented function, decision-variable identities, certificate family, constraint and cone order, and exact coefficient identities, up to scale-appropriate floating-point summation differences.
-
-The public constructors \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi} accept the transient name-value option \code{ValidationMode="fast"} or \code{ValidationMode="strict"}, case-insensitively; the default is \code{"fast"}. Each \code{applyPolya}, \code{applyPutinar}, \code{applySparseFullBoxPreorder}, and \code{applyFullBoxPreorder} call accepts the same trailing option. The selection is local to that call, is not stored as an object property, and is not inherited by later algebra or certificate-selection calls. The developer-facing raw \code{pdbase} constructor is a deliberate exception to broad fast-mode claims: it checks repeated coefficient structure only in the first supplied physical cell, so a later supplied cell can escape coefficient-count, payload, or rate-row validation; strict mode audits every supplied cell. The \code{pdmat} and \code{pdvar} constructors first normalize their public sources and retain their documented class-specific guarantees. In the normalized algebra and certificate paths, fast mode samples repeated post-normalization structural checks, while strict mode checks every generated cell, rate row, coefficient payload, elevation/product application, and Gram-plan application. Both modes retain option, compatibility, continuity, affine-safety, inequality-classification, and actual constraint-generation checks; strict is a diagnostic mode, not a different mathematical model.
+The two-dimensional interlude established only the grid and indexing geometry. To introduce the cellwise Bernstein representation and the later certificate bookkeeping, now turn to a separate one-dimensional example with two cells and three degree-two coefficients per cell. Let
+\begin{equation}
+    S(\rho)=P(\rho)-H(\rho)\succeq\varepsilon I,
+    \qquad 0\le\rho\le1,
+\label{eq:running-residual}
+\end{equation}
+where \(P(\rho)\) is a continuous symmetric degree-two decision and
+\[
+    H(\rho)=
+    \begin{bmatrix}
+        1+\rho & 0.1\rho(1-\rho)\\
+        0.1\rho(1-\rho) & 2+\rho^2
+    \end{bmatrix}.
+\]
+Choose the physical grid \(G_1=\{0,0.5,1\}\), whose three nodes define the cells \(\mathcal H_1=[0,0.5]\) and \(\mathcal H_2=[0.5,1]\). The shared value \(0.5\) is one physical node and the boundary of both cells.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
-A = pdmat([0 1], {1, 2}, Degree=1, ValidationMode="STRICT");
-P = pdvar(1, [0 1], ValidationMode="fast");
-C = pdlmi(P, ">=", ValidationMode="strict");
-C = C.applyPolya(0, ValidationMode="FAST");
-hasStoredMode = isprop(A, "ValidationMode")
+grid = {[0 0.5 1]};
+H = pdmat(grid, @(rho) ...
+    [1 + rho, 0.1 * rho * (1 - rho); ...
+     0.1 * rho * (1 - rho), 2 + rho^2], Degree=2);
+P = pdvar(2, grid, "symmetric", Degree=2);
+
+physicalCells = P.cells()
+physicalCellCount = P.ncell()
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-hasStoredMode = logical
-   0
+physicalCells = 2×1 double
+     1
+     2
+
+physicalCellCount = 2
 \end{lstlisting}
 
-The three reproducible non-solver benchmarks warm every timed function, construct setup objects outside the timed bodies, verify mathematical equivalence first, and report the median of three independent \code{timeit} estimates. \code{tests.benchmark_stage1b_performance} uses two parameters on \code{{0:0.25:1,-1:0.5:1}}, 16 physical cells, degree three, and \(3\times3\) payloads for numeric multiplication, known-by-affine multiplication, and elevation by two. \code{tests.benchmark_stage1c_performance} uses a symmetric \(3\times3\), two-parameter, 16-cell, degree-three residual with 256 Direct constraints and 400 P\'olya-\(+1\) constraints. \code{tests.benchmark_stage2_performance} uses one two-parameter cell, degree two, a symmetric \(2\times2\) FullBox/Putinar residual, a scalar SparseFullBox residual, and a one-parameter symmetric \(2\times2\) Putinar residual. Timing results are machine- and load-specific and are not performance guarantees.
-
-\begin{table}[H]
-\centering
-\small
-\caption{Contention-free MATLAB MCP measurements from one run on the current machine. Medians are machine- and load-specific observations, not performance guarantees. The final column reports a captured-baseline speedup only where that benchmark supplied one; \(0.91\times\) means the measured Direct export was slower than its captured baseline.}
-\label{tab:assembly-performance-medians}
-\begin{tabularx}{\textwidth}{@{}llrY@{}}
-\toprule
-Stage & Workload & Median (s) & Captured-baseline speedup \\
-\midrule
-1B & Numeric multiplication       & 0.045856 & \(2.01\times\) \\
-1B & Known \(\times\) affine      & 0.744692 & \(1.90\times\) \\
-1B & Numeric elevate \(+2\)       & 0.004389 & \(3.19\times\) \\
-1B & Symbolic elevate \(+2\)      & 0.117991 & --- \\
-\addlinespace
-1C & Direct, fast                 & 0.090959 & \(2.51\times\) \\
-1C & Direct, strict               & 0.153322 & --- \\
-1C & P\'olya \(+1\), fast         & 0.242357 & --- \\
-1C & P\'olya \(+1\), strict       & 0.376200 & --- \\
-1C & Direct \code{toYalmip}       & 0.155284 & \(0.91\times\) (slower) \\
-1C & P\'olya \code{toYalmip}      & 0.271730 & --- \\
-\addlinespace
-2 & FullBox 2D, fast              & 0.053643 & \(5.61\times\) \\
-2 & FullBox 2D, strict            & 0.051391 & --- \\
-2 & Putinar 2D                    & 0.046707 & --- \\
-2 & Putinar 1D                    & 0.015255 & --- \\
-2 & Sparse intermediate           & 0.104958 & --- \\
-2 & Sparse saturated              & 0.098002 & --- \\
-2 & FullBox \code{toYalmip}       & 0.006123 & --- \\
-2 & Sparse \code{toYalmip}        & 0.019741 & --- \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\section{The Chain Rule in a DPD-LMI}
-\index{chain rule}\index{parameter rate}\index{rate vertex}\index{rate row}
-
-The dot on \(P\) is a time derivative along the scheduling trajectory, not a new independent matrix. Applying the multivariable chain rule gives
+For cell \(c\), let \(a_c=\rho^{(c)}\), \(b_c=\rho^{(c+1)}\), and pull the physical coordinate back to
 \[
-    \dot P\bigl(\boldsymbol\rho(t)\bigr)
-=\frac{dP}{dt} =\sum_{s=1}^{\ell}
-    \frac{\partial P}{\partial\rho_s}
-    \bigl(\boldsymbol\rho(t)\bigr)\nu_s(t).
+    \alpha_c=\frac{\rho-a_c}{b_c-a_c}\in[0,1].
 \]
-Give every scheduling direction independent finite rate bounds,
+The normalized degree-two Bernstein basis is
 \[
-    \mathcal R
-=\prod_{s=1}^{\ell}[\underline\nu_s,\overline\nu_s].
+    B_0^2(\alpha)=(1-\alpha)^2,\qquad
+    B_1^2(\alpha)=2(1-\alpha)\alpha,\qquad
+    B_2^2(\alpha)=\alpha^2.
 \]
-For a residual affine in \(\boldsymbol\nu\), the rate box is handled exactly by traversing its \(2^\ell\) lower/upper vertices \(\boldsymbol\nu^{(q)}\). The temporary index \(q\) is needed only while constructing the vertex blocks or explaining stored rate rows. After stacking those blocks, the rate index is suppressed in all parameter-domain certificate formulas. The coefficient-level differentiation and rate-row construction are derived in \cref{sec:bernstein-differentiation}. The rate-dependent inequality becomes
-\begin{gather}
-\label{eq:rate-vertex-block-diagonal}
-\operatorname{diag}_{q=1}^{2^\ell}
-    \mathcal F\bigl(\boldsymbol\rho,\boldsymbol\nu^{(q)}\bigr)
-    \prec 0,
-    \qquad \boldsymbol\rho\in\mathcal P.
-\end{gather}
-
-Each diagonal block is the residual at one rate vertex.  The remaining continuum is only the scheduling parameter \(\boldsymbol\rho\), which the package treats cellwise with its Bernstein certificates.
-
-We therefore focus on the following general DPD-LMI.
-\keyequation{General form of the differentiable parameter-dependent LMI}{%
+On each running-example cell,
 \begin{equation}
-  \mathcal F(\boldsymbol\rho,\boldsymbol\nu)
-  = \sum_{k=1}^{N} R_k(\boldsymbol\rho)
-  \sum_{j=1}^{\ell}
-  \frac{\partial y_k}{\partial\rho_j}(\boldsymbol\rho)
-  \nu_j
-  + F_0(\boldsymbol\rho)
-  + \sum_{k=1}^{N} F_k(\boldsymbol\rho)y_k(\boldsymbol\rho)
-  \prec 0, \qquad \forall (\boldsymbol\rho,\boldsymbol\nu) \in\mathcal P\times\mathcal R.
-\label{eq:general-dpdlmi}
+    P^{(c)}(\rho)=\sum_{i=0}^{2}B_i^2(\alpha_c)P^{(c)}[i],
+    \qquad c=1,2.
+\label{eq:running-bernstein}
 \end{equation}
-} Here \(R_k\), \(F_0\), and \(F_k\) are known matrix functions, while \(y_k(\boldsymbol\rho)\) are general parameter-dependent decision functions; \(P(\boldsymbol\rho)\) in \cref{eq:lpv-spine} is the canonical matrix-valued instance. Affine dependence on \(\boldsymbol\nu\) reduces exactly to \cref{eq:rate-vertex-block-diagonal}, but \(\boldsymbol\rho\in\mathcal P\) remains a continuum. The package represents each \(y_k\) as a continuous piecewise polynomial with cell-local tensor-product Bernstein coefficients.
+The coefficient label \(i\) is zero-based and local to the already selected physical cell. The three matrices \(P^{(c)}[0]\), \(P^{(c)}[1]\), and \(P^{(c)}[2]\) are control coefficients, not samples at three additional physical grid points.
 
-Setting \(R_k\equiv0\) for every \(k\) removes the derivative term and recovers an ordinary PD-LMI.
-
-\section{Grid the Scheduling-Parameter Space}
-\index{physical grid}\index{physical node}\index{physical hypercube}\index{tensor grid}
-
-The package currently considers only an axis-aligned box parameter domain,
+Because the basis functions are nonnegative and sum to one, \(P^{(c)}(\rho)\) is a convex combination of its three local coefficient matrices. The endpoint identities \(B_0^2(0)=1\) and \(B_2^2(1)=1\) expose the cell faces directly. A degree-two \code{pdvar} on two cells therefore has six local positions but only five global matrix controls:
 \[
-    \mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s].
+    P^{(1)}[2]=P^{(2)}[0].
 \]
-This restriction is deliberate, as a compact box is easy to partition into hypercubes for cellwise modelling. General polytopic or curved parameter domains are outside the implemented model. Gridding starts independently in each parameter direction. For each direction, choose the following physical grid
-\[
-    \mathcal G_s=
-    \{\underline{\rho}_s=\rho_s^{(1)},\ldots,\rho_s^{(k_s)}=\overline{\rho}_s\},\qquad s=1,\ldots,\ell.
-\]
-The full tensor grid is \(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\).  It contains \(\prod_{s=1}^{\ell} k_s\) physical nodes and partitions \(\mathcal P\) into \(\prod_{s=1}^{\ell}(k_s-1)\) physical hypercubes.  A hypercube is identified by the  $\ell$-dimensional multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\); \cref{sec:bernstein-tensor-grids} gives the exact physical-grid and local-label conventions:
-\begin{gather}
-    \label{eq:physical-hypercube}
-    \mathcal H_{\mathbf c}=\prod_{s=1}^{\ell} [\rho_s^{(c_s)},\rho_s^{(c_s+1)}].
-\end{gather}
-
-\section{Desired Behavior Across Cell Boundaries}
-\label{sec:desired-cross-cell-behaviour}
-\index{shared face}\index{continuity}\index{Lipschitz regularity}
-
-The package represents coefficient-backed known data and decision matrices by local polynomials, so products, degree elevation, and differentiation can be performed one physical cell at a time. A Lyapunov matrix or comparable decision function must not jump when the scheduling trajectory crosses a shared face, so \code{pdvar} guarantees global \(C^0\) continuity. It does not require \(C^1\) continuity, that is, one-sided derivatives may differ, and \code{rhodiff} retains the corresponding cell-local derivative data\index{derivative data}. Known \code{pdmat} data are different: the object records whether adjacent numeric faces match, but it preserves explicitly supplied discontinuous local data rather than adding decision constraints to repair them.
-
-A monomial parameterization makes the additional continuity condition explicit.  For two adjacent one-dimensional cells, write
-\[
-    A^{(c)}(\alpha)=\sum_{i=0}^{m}\alpha^i A_i^{(c)},
-    \qquad \alpha\in[0,1].
-\]
-At their shared physical node, \(\alpha_1=1\) in the left cell and \(\alpha_2=0\) in the right cell.  Enforcing \(C^0\) continuity therefore requires the extra matrix equality
-\[
-    \underbrace{\sum_{i=0}^{m}A_i^{(1)}}_{A^{(1)}(1)}
-    =\underbrace{A_0^{(2)}}_{A^{(2)}(0)}.
-\]
-When \(\ell>1\), equality along a shared face is a polynomial identity in the tangential coordinates and produces a corresponding family of linear coefficient equalities. The number of such conditions grows with the polynomial degree and the number of shared faces.
-
-The right side of \cref{fig:shared-face-lipschitz} shows the intended behavior: the two polynomial pieces share their boundary value, while their one-sided slopes may differ. A globally \(C^0\), piecewise-polynomial matrix function on compact \(\mathcal P\) is locally Lipschitz. At a shared face, its Clarke generalized derivative is the convex hull of the limiting derivatives from the adjacent cells \cite{clarke1990}. Because \cref{eq:general-dpdlmi} is affine in those derivatives, imposing the cell-side conditions covers that convex hull; this interface argument does not claim that \(\nabla P\) is continuous. Discontinuous coefficient-backed \code{pdmat} data remain a supported implementation choice, but they fall outside this continuity argument and must be analyzed cellwise.
-
-\begin{figure}[H]
-    \centering
-    \begin{tikzpicture}[x=1cm,y=0.62cm,font=\scriptsize]
-        % Before: separate endpoint controls allow a jump at the shared face.
-        \begin{scope}
-            \draw[dp/axis] (0,0) -- (5.2,0) node[below] {\(\rho\)};
-            \draw[dp/axis] (0,-1.2) -- (0,3.25) node[left] {\(C\)};
-            \draw[dp/grid-line,densely dashed] (2.5,-1.1) -- (2.5,3.1);
-            \draw[dp/curve-primary] plot[smooth] coordinates
-                {(0,0.8) (1.25,2.2) (2.5,1.4)};
-            \draw[dp/curve-secondary] plot[smooth] coordinates
-                {(2.5,0.8) (3.75,-0.2) (5,1.8)};
-            \fill[black] (2.5,1.4) circle (1.3pt);
-            \fill[white,draw=black!70] (2.5,0.8) circle (1.3pt);
-            \node[align=center] at (2.5,3.1) {Before: unshared controls\\can jump at the face};
-            \node[below=3pt] at (2.5,0) {\(0.5\)};
-        \end{scope}
-        % After: the control face is shared, but tangent labels deliberately differ.
-        \begin{scope}[xshift=7cm]
-            \draw[dp/axis] (0,0) -- (5.2,0) node[below] {\(\rho\)};
-            \draw[dp/axis] (0,-1.2) -- (0,3.25) node[left] {\(C\)};
-            \draw[dp/grid-line,densely dashed] (2.5,-1.1) -- (2.5,3.1);
-            \draw[dp/curve-primary] plot[smooth] coordinates
-                {(0,0.8) (1.25,2.2) (2.5,1.4)};
-            \draw[dp/curve-primary] plot[smooth] coordinates
-                {(2.5,1.4) (3.75,-0.2) (5,1.8)};
-            \fill[white,draw=black!90,thick] (2.5,1.4) circle (1.7pt);
-            \node[align=center] at (2.5,3.1) {After: one shared value\\(continuous and Lipschitz)};
-            \node[above left=1pt] at (2.5,1) {\(1.4\)};
-            \node[below=3pt] at (2.5,0) {\(0.5\)};
-            \node[below,align=center] at (2.5,-1.0) {\(\lvert C'(\rho)\rvert\le8\), but the derivative is not continuous};
-        \end{scope}
-    \end{tikzpicture}
-    \caption{The required cell-interface behaviour.  Enforcing one shared boundary value removes the jump while allowing unequal one-sided derivatives.}
-    \label{fig:shared-face-lipschitz}
-\end{figure}
-
-\section{Bernstein Basis and Cell-Local Storage}
-\label{sec:continuous-bernstein-representation}
-\index{cell-local storage}\index{local Bernstein label}
-
-For its cell-local polynomial representation, the package uses the Bernstein basis rather than the monomial basis in the preceding comparison. Bernstein endpoint identities expose each face polynomial directly through its face coefficients; shared decision storage can therefore impose \(C^0\) continuity without adding separate cross-cell equalities. Inside \(\mathcal H_{\mathbf c}\), define its width and forward pullback by
-\[
-    h_s^{(\mathbf c)}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)},
-    \qquad
-    \phi_{\mathbf c}(\boldsymbol\rho)=\boldsymbol\alpha,
-    \qquad
-    \alpha_s=\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{(\mathbf c)}}\in[0,1].
-\]
-On one local coordinate \(\alpha\in[0,1]\), the normalized degree-\(m\) Bernstein basis is
-\[
-    B_i^m(\alpha)=\binom mi(1-\alpha)^{m-i}\alpha^i,
-    \qquad i=0,\ldots,m.
-\]
-The basis functions are nonnegative and sum to one.  The first four nonnegative degrees are
-\[
-\begin{aligned}
-    m=0:\quad
-    &B_0^0=1                 &
-    &\\
-    m=1:\quad
-      &B_0^1=1-\alpha,                 &
-      &B_1^1=\alpha,\\
-    m=2:\quad
-      &B_0^2=(1-\alpha)^2,             &
-      &B_1^2=2(1-\alpha)\alpha,        &
-      &B_2^2=\alpha^2,\\
-    m=3:\quad
-      &B_0^3=(1-\alpha)^3,             &
-      &B_1^3=3(1-\alpha)^2\alpha,      &
-      &B_2^3=3(1-\alpha)\alpha^2,      &
-      &B_3^3=\alpha^3.
-\end{aligned}
-\]
-In \(\ell\) parameter directions, the package uses the tensor-product expansion
-\[
-    C^{(\mathbf c)}\!\left(\phi_{\mathbf c}(\boldsymbol\rho)\right)=
-    \sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
-    \left(\prod_{s=1}^{\ell}B_{i_s}^{m}(\alpha_s)\right)
-    C^{(\mathbf c)}[\mathbf i].
-\]
-The matrix value is a convex combination of the local coefficient matrices. Exact degree elevation, multiplication, and differentiation operate on those coefficients without changing the identity of the physical cell. The detailed formulas appear in \cref{sec:bernstein-higher-degree,sec:bernstein-degree-elevation,sec:bernstein-product-math,sec:bernstein-differentiation}.
-
-\subsection{Physical nodes, local labels, and continuity by storage}
-
-The two index systems have different meanings:
-\begin{itemize}
-    \item the physical node \(\rho_s^{(j)}\) and the cell component \(c_s\) are one-based and identify geometry; \item the local Bernstein label \(i_s\in\{0,\ldots,m\}\) is zero-based and selects one coefficient inside an already chosen cell.
-\end{itemize}
-A degree-\(m\) tensor polynomial stores \((m+1)^\ell\) local coefficient positions per physical cell.  These positions are not another grid of point samples.  The traversal order used by \code{cells}, \code{lbls}, \code{coeffs}, and rate-vertex rows varies later dimensions fastest; in two dimensions, \code{lbls()} lists \([0,0],[0,1],\ldots,[0,m],[1,0],\ldots,[m,m]\). The general tensor ordering is defined in \cref{sec:bernstein-tensor-grids}.
-
-The endpoint identities \(B_0^m(0)=1\) and \(B_m^m(1)=1\) make continuity easy to encode in coefficient data. For a \code{pdvar}, adjacent cells reuse the same YALMIP decision handles on their common face; in one dimension, \(C^{(1)}[m]\) and \(C^{(2)}[0]\) are the same decision matrix. Tensor cells similarly share every handle on a common face, so continuity requires no later equality constraint. For a coefficient-backed \code{pdmat}, \code{IsContinuous} instead reports whether the two numeric face-coefficient sets agree; explicitly mismatched local data remain cell-local and produce a warning.
+The package creates this equality by reusing the same YALMIP decision handle on both sides of the shared face; it does not append a later continuity constraint. The two interior controls \(P^{(1)}[1]\) and \(P^{(2)}[1]\) remain independent, so the represented function is continuous but need not have a continuous derivative at \(\rho=0.5\).
 
 \begin{center}
-    \begin{tikzpicture}[y=1cm,
-            face/.style={dp/decision,minimum width=22mm,minimum height=8mm,
-                    font=\scriptsize,align=center},
-            interior/.style={dp/contribution,minimum width=22mm,minimum height=8mm,
-                    font=\scriptsize,align=center}]
-        \node[face] (c10) {$C^{(1)}[0]$};
-        \node[interior,right=7mm of c10] (c11) {$C^{(1)}[1]$};
-        \node[face,minimum width=40mm,right=10mm of c11] (shared) {$C^{(1)}[2]=C^{(2)}[0]$};
-        \node[interior,right=10mm of shared] (c21) {$C^{(2)}[1]$};
-        \node[face,right=7mm of c21] (c22) {$C^{(2)}[2]$};
-        \draw[dp/arrow] (c10)--(c11); \draw[dp/arrow] (c11)--(shared);
-        \draw[dp/arrow] (shared)--(c21); \draw[dp/arrow] (c21)--(c22);
-        \node[below=7pt of shared,font=\scriptsize] {shared value, independent interiors};
-    \end{tikzpicture}
+\begin{tikzpicture}[node distance=7mm,font=\scriptsize]
+  \node[dp/decision,minimum width=19mm,minimum height=9mm] (p10) {$P^{(1)}[0]$};
+  \node[dp/contribution,minimum width=19mm,minimum height=9mm,right=of p10] (p11) {$P^{(1)}[1]$};
+  \node[dp/decision,minimum width=34mm,minimum height=9mm,right=of p11] (shared) {$P^{(1)}[2]=P^{(2)}[0]$};
+  \node[dp/contribution,minimum width=19mm,minimum height=9mm,right=of shared] (p21) {$P^{(2)}[1]$};
+  \node[dp/decision,minimum width=19mm,minimum height=9mm,right=of p21] (p22) {$P^{(2)}[2]$};
+  \draw[dp/arrow] (p10)--(p11);
+  \draw[dp/arrow] (p11)--(shared);
+  \draw[dp/arrow] (shared)--(p21);
+  \draw[dp/arrow] (p21)--(p22);
+  \node[below=6pt of shared] {one shared boundary control};
+\end{tikzpicture}
 \end{center}
 
-\subsection{A two-dimensional storage example}
-\label{sec:one-hypercube-storage}
-
-The first two-dimensional example uses \(\mathcal G_1=\{0,0.5,1\}\), \(\mathcal G_2=\{0,1\}\), and degree two:
+The same indexing appears through the inspection methods:
 
 \begin{lstlisting}[style=dpmatlab]
-grid2 = {[0 .5 1], [0 1]};
-A2 = pdmat(grid2, @(rho1,rho2) ...
-    [1+rho1+rho2, rho1*rho2; ...
-        rho1*rho2,   2+rho1^2], Degree=2);
-physicalCells = A2.cells()
-localLabels = A2.lbls()
-secondCellCoefficients = A2.coeffs([2 1])
-sameLeaf = A2.LocalValues{2}{1}
+localLabels = P.lbls()
+cell1Coefficients = P.coeffs(1);
+cell2Coefficients = P.coeffs(2);
+localCount = numel(cell1Coefficients)
 \end{lstlisting}
 
-The grid has two physical hypercubes. The highlighted one below is \(\mathbf c=(2,1)\), whose domain is \([0.5,1]\times[0,1]\). Selecting it through \code{A2.coeffs([2 1])} reaches the same nested storage leaf as \code{A2.LocalValues{2}{1}}. The figure lists the nine matrices in \code{A2.lbls()} order, with \(i_1\) varying more slowly than \(i_2\).
+\begin{lstlisting}[style=dpoutput]
+localLabels = 3×1 double
+     0
+     1
+     2
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[x=3.2cm,y=3.2cm,>=Latex]
-\fill[dpbluewash] (0.5,0) rectangle (1,1);
-\draw[black!55,very thick] (0,0) rectangle (1,1);
-\draw[black!55,very thick] (0.5,0)--(0.5,1);
-\foreach \x/\lab in {0/{0},0.5/{0.5},1/{1}}{
-        \draw (\x,0.02)--(\x,-0.02);
-        \node[below=4pt,font=\scriptsize] at (\x,0) {$\lab$};}
-\foreach \y/\lab in {0/{0},1/{1}}{
-        \draw (0.01,\y)--(-0.01,\y);
-        \node[left=4pt,font=\scriptsize] at (0,\y) {$\lab$};}
-\node[font=\scriptsize] at (0.25,0.5) {$\mathbf c=(1,1)$};
-\node[font=\scriptsize\bfseries] (selected) at (0.75,0.5)
-{$\mathbf c=(2,1)$};
-\node[below=10pt,font=\scriptsize] at (0.5,0) {$\rho_1$};
-\node[rotate=90,above=11pt,font=\scriptsize] at (0,0.5) {$\rho_2$};
+localCount = 3
+\end{lstlisting}
 
-        \node[dp/panel,anchor=west,inner xsep=2.5mm,inner ysep=2.5mm,align=left,font=\scriptsize] (leaf) at (1.65,0.5) {%
-            \textbf{Selected physical leaf}\\[-1pt]
-            $\mathcal H_{(2,1)}=[0.5,1]\times[0,1]$\\
-            \code{LocalValues{2}{1}}\\[2pt]
-            \textbf{Nine matrices \(C^{(2,1)}[i_1,i_2]\)}\\[-2pt]
-            $\begin{array}{c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c}
-                                                                                 & i_2=0 & i_2=1 & i_2=2 \\
-                    i_1=0                                                        &
-                    \begin{bmatrix}\frac32&0\\0&\frac94\end{bmatrix}             &
-                    \begin{bmatrix}2&\frac14\\\frac14&\frac94\end{bmatrix}       &
-                    \begin{bmatrix}\frac52&\frac12\\\frac12&\frac94\end{bmatrix}                         \\
-                    i_1=1                                                        &
-                    \begin{bmatrix}\frac74&0\\0&\frac52\end{bmatrix}             &
-                    \begin{bmatrix}\frac94&\frac38\\\frac38&\frac52\end{bmatrix} &
-                    \begin{bmatrix}\frac{11}4&\frac34\\\frac34&\frac52\end{bmatrix}                      \\
-                    i_1=2                                                        &
-                    \begin{bmatrix}2&0\\0&3\end{bmatrix}                         &
-                    \begin{bmatrix}\frac52&\frac12\\\frac12&3\end{bmatrix}       &
-                    \begin{bmatrix}3&1\\1&3\end{bmatrix}
-                \end{array}$};
-        \draw[dp/arrow] (selected.east) -- node[above,font=\tiny]
-        {\code{A2.coeffs([2 1])}} (leaf.west);
-        \end{tikzpicture}
-    \caption{A physical hypercube selects one storage leaf. Within that leaf, \code{A2.lbls()} supplies the nine zero-based local labels in the displayed order. The matrices are Bernstein coefficients, not a \(3\)-by-\(3\) grid of point samples.}
-    \label{fig:selected-hypercube-storage}
-    \end{figure}
-
-The selected leaf is a flat nine-entry coefficient cell: row \(q\) of \code{A2.lbls()} labels entry \(q\). \Cref{sec:bernstein-tensor-grids,sec:bernstein-power-conversion} derive the ordering and conversion rules.
+Known \(H\) and decision \(P\) use the same cell pullbacks and coefficient labels. Subtraction therefore forms the running residual \(S=P-H\) coefficient by coefficient, with exact degree elevation performed automatically if compatible operands have different degrees. \Cref{sec:bernstein-higher-degree,sec:bernstein-degree-elevation,sec:bernstein-product-math} develop the corresponding higher-degree, elevation, and multiplication rules.
 
 \input{chapters/workflow-constraints}
