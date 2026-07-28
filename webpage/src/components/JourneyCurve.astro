@@ -63,7 +63,8 @@ const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}
   @media (max-width: 900px) {
     .journey-desktop { display: none; }
     .journey-mobile { display: grid; gap: 1.2rem; }
-    .journey-mobile li { position: relative; grid-template-columns: 2.25rem minmax(0, 1fr); align-items: center; min-height: 4rem; padding: 0.75rem; }
+    .journey-mobile li { position: relative; display: block; min-height: 4rem; padding: 0.75rem; }
+    .journey-mobile a { grid-template-columns: 2.25rem minmax(0, 1fr); align-items: center; min-height: 2.5rem; }
     .journey-mobile li:not(:last-child)::after { position: absolute; content: ""; inset-block-start: 100%; inset-inline-start: 1.83rem; height: 1.2rem; border-inline-start: 3px solid var(--sl-color-accent); }
     .journey-mobile span { display: grid; place-items: center; width: 2rem; height: 2rem; border: 2px solid var(--sl-color-accent); border-radius: 50%; background: var(--sl-color-bg); letter-spacing: normal; }
     .journey-mobile strong { font-size: clamp(1rem, 4.5vw, 1.15rem); }

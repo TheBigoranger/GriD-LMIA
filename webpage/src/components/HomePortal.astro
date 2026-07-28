@@ -24,6 +24,7 @@ const lmiSteps = [
     math: [
       "\\dot x=A(\\boldsymbol\\rho)x+B(\\boldsymbol\\rho)w,\\qquad z=C(\\boldsymbol\\rho)x+D(\\boldsymbol\\rho)w.",
       "\\boldsymbol\\rho\\in\\mathcal P,\\quad\\boldsymbol\\nu=\\dot{\\boldsymbol\\rho}\\in\\mathcal R,\\quad\\lVert z\\rVert_2<\\gamma\\lVert w\\rVert_2.",
+      "P(\\boldsymbol\\rho)\\succ0,\\qquad \\begin{bmatrix}\\dot P+\\operatorname{He}(PA)&PB&C^{\\mathsf T}\\\\B^{\\mathsf T}P&-\\gamma I&D^{\\mathsf T}\\\\C&D&-\\gamma I\\end{bmatrix}\\prec0.",
     ],
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/",
   },
@@ -211,6 +212,8 @@ const lmiSteps = [
   }
   .step-copy p { color: var(--sl-color-gray-2); line-height: 1.65; }
   .math-strip { inline-size: min(100%, 54rem); min-width: 0; margin-inline: auto; border-inline-start: 3px solid var(--sl-color-accent); padding-inline-start: 0.8rem; }
+  /* Long matrix conditions stay intact and scroll only within their own row. */
+  .math-strip__row { min-width: 0; overflow-x: auto; overflow-y: hidden; }
   .math-strip :global(.katex-display) { margin: 0; }
   .step-content :global(.diagram-frame) { margin-block: 0.4rem 0; }
   .step-content :global(.certificate-flow) { inline-size: min(100%, 54rem); margin-inline: auto; }
