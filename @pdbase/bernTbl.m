@@ -53,9 +53,11 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
 end
 
 function tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn)
-    %ORDINARYTBL Emit one table row per cell and Bernstein coefficient.
-    nRow = size(cells, 1) * size(lbls, 1);
-    termIdx = (1:nRow).';
+    %ORDINARYTBL Emit every matrix row without hiding complete coefficients.
+    nMatRow = obj.MatrixSize(1);
+    nTerm = size(cells, 1) * size(lbls, 1);
+    nRow = nTerm * nMatRow;
+    termIdx = zeros(nRow, 1);
     cellSubs = cell(nRow, 1);
     coeffSubs = cell(nRow, 1);
     locIdx = cell(nRow, 1);
@@ -64,19 +66,33 @@ function tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn)
     valsCol = cell(nRow, 1);
 
     row = 0;
+    term = 0;
     for c = 1:size(cells, 1)
         cellSub = cells(c, :);
         vals = obj.coeffs(cellSub);
         for k = 1:size(lbls, 1)
-            row = row + 1;
+            term = term + 1;
             [coeffSub, nodeFlag] = coeffInfo(obj, cellSub, lbls(k, :));
-            cellSubs{row} = cellSub;
-            coeffSubs{row} = coeffSub;
-            locIdx{row} = lbls(k, :);
-            basisCol(row) = basis(k);
-            isNode(row) = nodeFlag;
-            valsCol{row} = valFcn(vals{k});
+            for matRow = 1:nMatRow
+                row = row + 1;
+                termIdx(row) = term;
+                cellSubs{row} = cellSub;
+                coeffSubs{row} = coeffSub;
+                locIdx{row} = lbls(k, :);
+                basisCol(row) = basis(k);
+                isNode(row) = nodeFlag;
+                valsCol{row} = valFcn(vals{k}(matRow, :));
+            end
         end
+    end
+
+    if nMatRow > 1
+        termIdx = centeredMetadata(num2cell(termIdx), nMatRow, "number");
+        cellSubs = centeredMetadata(cellSubs, nMatRow, "subscript");
+        coeffSubs = centeredMetadata(coeffSubs, nMatRow, "subscript");
+        locIdx = centeredMetadata(locIdx, nMatRow, "subscript");
+        basisCol = centeredMetadata(num2cell(basisCol), nMatRow, "quoted");
+        isNode = centeredMetadata(num2cell(isNode), nMatRow, "logical");
     end
 
     % Use MATLAB's ordinary table constructor; no pdmat/pdvar operands are passed.
@@ -87,10 +103,12 @@ function tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn)
 end
 
 function tbl = rateTbl(obj, cells, lbls, basis, valFcn, rateVerts, errId)
-    %RATETBL Emit one table row per cell, rate vertex, and coefficient.
+    %RATETBL Emit matrix rows inside each cell/rate/coefficient group.
     nVert = size(rateVerts, 1);
-    nRow = size(cells, 1) * nVert * size(lbls, 1);
-    termIdx = (1:nRow).';
+    nMatRow = obj.MatrixSize(1);
+    nTerm = size(cells, 1) * nVert * size(lbls, 1);
+    nRow = nTerm * nMatRow;
+    termIdx = zeros(nRow, 1);
     cellSubs = cell(nRow, 1);
     rateIdx = zeros(nRow, 1);
     rateCol = cell(nRow, 1);
@@ -101,6 +119,7 @@ function tbl = rateTbl(obj, cells, lbls, basis, valFcn, rateVerts, errId)
     valsCol = cell(nRow, 1);
 
     row = 0;
+    term = 0;
     for c = 1:size(cells, 1)
         cellSub = cells(c, :);
         vals = obj.coeffs(cellSub);
@@ -110,18 +129,33 @@ function tbl = rateTbl(obj, cells, lbls, basis, valFcn, rateVerts, errId)
         end
         for r = 1:nVert
             for k = 1:size(lbls, 1)
-                row = row + 1;
+                term = term + 1;
                 [coeffSub, nodeFlag] = coeffInfo(obj, cellSub, lbls(k, :));
-                cellSubs{row} = cellSub;
-                rateIdx(row) = r;
-                rateCol{row} = rateVerts(r, :);
-                coeffSubs{row} = coeffSub;
-                locIdx{row} = lbls(k, :);
-                basisCol(row) = basis(k);
-                isNode(row) = nodeFlag;
-                valsCol{row} = valFcn(vals{r, k});
+                for matRow = 1:nMatRow
+                    row = row + 1;
+                    termIdx(row) = term;
+                    cellSubs{row} = cellSub;
+                    rateIdx(row) = r;
+                    rateCol{row} = rateVerts(r, :);
+                    coeffSubs{row} = coeffSub;
+                    locIdx{row} = lbls(k, :);
+                    basisCol(row) = basis(k);
+                    isNode(row) = nodeFlag;
+                    valsCol{row} = valFcn(vals{r, k}(matRow, :));
+                end
             end
         end
+    end
+
+    if nMatRow > 1
+        termIdx = centeredMetadata(num2cell(termIdx), nMatRow, "number");
+        cellSubs = centeredMetadata(cellSubs, nMatRow, "subscript");
+        rateIdx = centeredMetadata(num2cell(rateIdx), nMatRow, "number");
+        rateCol = centeredMetadata(rateCol, nMatRow, "subscript");
+        coeffSubs = centeredMetadata(coeffSubs, nMatRow, "subscript");
+        locIdx = centeredMetadata(locIdx, nMatRow, "subscript");
+        basisCol = centeredMetadata(num2cell(basisCol), nMatRow, "quoted");
+        isNode = centeredMetadata(num2cell(isNode), nMatRow, "logical");
     end
 
     tbl = table(termIdx, cellSubs, rateIdx, rateCol, coeffSubs, ...
@@ -133,9 +167,10 @@ end
 
 function tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errId)
     %PRINTONELINE Build one expression row per cell and active rate vertex.
+    nMatRow = obj.MatrixSize(1);
     if hasRate
         nVert = size(rateVerts, 1);
-        nRow = size(cells, 1) * nVert;
+        nRow = size(cells, 1) * nVert * nMatRow;
         cellSubs = cell(nRow, 1);
         rateIdx = zeros(nRow, 1);
         rateCol = cell(nRow, 1);
@@ -150,12 +185,21 @@ function tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errI
                     "Rate-vertex coefficient rows must match the RateBounds vertices.");
             end
             for r = 1:nVert
-                row = row + 1;
-                cellSubs{row} = cellSub;
-                rateIdx(row) = r;
-                rateCol{row} = rateVerts(r, :);
-                exprs(row) = rowExpr(basis, vals(r, :), exprFcn);
+                for matRow = 1:nMatRow
+                    row = row + 1;
+                    cellSubs{row} = cellSub;
+                    rateIdx(row) = r;
+                    rateCol{row} = rateVerts(r, :);
+                    exprs(row) = rowExpr( ...
+                        basis, vals(r, :), exprFcn, matRow);
+                end
             end
+        end
+
+        if nMatRow > 1
+            cellSubs = centeredMetadata(cellSubs, nMatRow, "subscript");
+            rateIdx = centeredMetadata(num2cell(rateIdx), nMatRow, "number");
+            rateCol = centeredMetadata(rateCol, nMatRow, "subscript");
         end
 
         tbl = table(cellSubs, rateIdx, rateCol, exprs, ...
@@ -164,24 +208,33 @@ function tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errI
         return
     end
 
-    cellSubs = cell(size(cells, 1), 1);
-    exprs = strings(size(cells, 1), 1);
+    nRow = size(cells, 1) * nMatRow;
+    cellSubs = cell(nRow, 1);
+    exprs = strings(nRow, 1);
+    row = 0;
     for c = 1:size(cells, 1)
         cellSub = cells(c, :);
         vals = obj.coeffs(cellSub);
-        cellSubs{c} = cellSub;
-        exprs(c) = rowExpr(basis, vals, exprFcn);
+        for matRow = 1:nMatRow
+            row = row + 1;
+            cellSubs{row} = cellSub;
+            exprs(row) = rowExpr(basis, vals, exprFcn, matRow);
+        end
+    end
+
+    if nMatRow > 1
+        cellSubs = centeredMetadata(cellSubs, nMatRow, "subscript");
     end
 
     tbl = table(cellSubs, exprs, ...
         'VariableNames', {'CellSubscript', 'Expression'});
 end
 
-function expr = rowExpr(basis, vals, exprFcn)
+function expr = rowExpr(basis, vals, exprFcn, matRow)
     %ROWEXPR Join one ordered coefficient row into Bernstein expression text.
     terms = strings(1, numel(vals));
     for k = 1:numel(vals)
-        val = exprFcn(vals{k});
+        val = exprFcn(vals{k}(matRow, :));
         if basis(k) == "1"
             terms(k) = val;
         else
@@ -201,6 +254,34 @@ function [coeffSub, nodeFlag] = coeffInfo(obj, cellSub, loc)
         coeffSub = (cellSub - 1) .* obj.Degree + loc + 1;
         nodeFlag = all(mod(coeffSub - 1, obj.Degree) == 0);
     end
+end
+
+function col = centeredMetadata(values, nMatRow, kind)
+    %CENTEREDMETADATA Show group metadata once beside expanded matrix rows.
+    nRow = numel(values);
+    text = strings(nRow, 1);
+    center = floor(nMatRow / 2) + 1;
+    for row = center:nMatRow:nRow
+        value = values{row};
+        switch kind
+            case "number"
+                text(row) = string(value);
+            case "subscript"
+                if isscalar(value)
+                    text(row) = "{[" + string(value) + "]}";
+                else
+                    text(row) = "{" + string(mat2str(value)) + "}";
+                end
+            case "quoted"
+                text(row) = """" + string(value) + """";
+            case "logical"
+                text(row) = string(mat2str(value));
+        end
+    end
+
+    % Character table variables render empty rows as whitespace, unlike
+    % missing numeric, string, or cell values, which show visible markers.
+    col = char(text);
 end
 
 function [cells, oneLine] = parseArgs(obj, errId, varargin)

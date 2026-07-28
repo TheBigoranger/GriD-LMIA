@@ -3,8 +3,6 @@ title: pdvar Algebra
 description: Detailed affine-algebra syntax, formulas, examples, outputs, and errors for pdvar.
 ---
 
-import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
-import MultiplicationDiagram from "../../../../../components/MultiplicationDiagram.astro";
 import ExampleDisclosure from "../../../../../components/ExampleDisclosure.astro";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
@@ -34,7 +32,10 @@ Q: decision=0, degree=0
 R=1-by-1, S=1-by-1, uplus=1-by-1
 ```
 
-<MatrixGlyphDiagram before={[["x₀", "x₁"]]} after={[["x₀+a₀", "x₁+a₁", "x₂+a₂"]]} beforeLabel="symbolic row" afterLabel="aligned affine row" caption="Affine addition aligns the physical grid and Bernstein degree before combining symbolic coefficient rows." />
+The same exact degree alignment applies to symbolic rows and numeric rows. Use
+the [`pdmat` numerical addition explorer](/PD-LMI-package/documents/reference/pdmat/algebra/#numerical-addition-explorer)
+to inspect the coefficient transformation; `pdvar` replaces those numeric
+entries with affine YALMIP expressions.
 
 ## <span id="pdvar-mtimes"></span>Multiply by known data
 
@@ -60,7 +61,10 @@ Written matrix order is preserved; $P[i]A[j]$ is not exchanged with $A[j]P[i]$.
   summary="Show the complete runnable affine-decision example"
 />
 
-<MultiplicationDiagram />
+The [`pdmat` numerical multiplication explorer](/PD-LMI-package/documents/reference/pdmat/algebra/#numerical-multiplication-explorer)
+shows the same ordered Bernstein convolution with numeric coefficients.
+For `pdvar`, the additional boundary is decision linearity: at most one
+converted operand may carry decision dependence.
 
 ## Validation and operation boundaries
 
@@ -72,4 +76,4 @@ Written matrix order is preserved; $P[i]A[j]$ is not exchanged with $A[j]P[i]$.
 
 ## See Also
 
-[`structural operations`](/PD-LMI-package/documents/reference/pdvar/structural-operations/) · [`comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) · [`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/)
+[`Mathematical notation`](/PD-LMI-package/documents/math/notation/) · [`structural operations`](/PD-LMI-package/documents/reference/pdvar/structural-operations/) · [`comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) · [`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/)

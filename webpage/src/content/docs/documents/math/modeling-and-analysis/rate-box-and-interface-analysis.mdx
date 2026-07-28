@@ -40,13 +40,16 @@ formulas suppress it.
 
 ## Cellwise Derivatives
 
-Within physical cell $\mathcal H_{\mathbf c}$, the forward pullback
-$\boldsymbol\alpha=\phi_{\mathbf c}(\boldsymbol\rho)$ gives
+Within physical cell $\mathcal H_{\mathbf c}$, let
+$\boldsymbol\rho=\phi_{\mathbf c}(\boldsymbol\alpha)$ and
+$P^{(\mathbf c)}=P\circ\phi_{\mathbf c}$. Then
 
 $$
 \frac{\partial P}{\partial\rho_s}
-=\frac{1}{h_s^{(\mathbf c)}}
-\frac{\partial(P\circ\phi_{\mathbf c}^{-1})}{\partial\alpha_s}.
+(\phi_{\mathbf c}(\boldsymbol\alpha))
+=\frac{1}{h_s^{\mathbf c}}
+\frac{\partial P^{(\mathbf c)}}{\partial\alpha_s}
+(\boldsymbol\alpha).
 $$
 
 `rhodiff(P, rateBounds)` differentiates cell-local Bernstein data, aligns the
@@ -114,5 +117,6 @@ dependence would need a different treatment.
 
 [Previous: DPD-LMI And LPV L2-Gain Model](/PD-LMI-package/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/) ·
 [Next: Gridding And Local Coordinates](/PD-LMI-package/documents/math/gridding-and-degree/) ·
+[Notation](/PD-LMI-package/documents/math/notation/#domains-and-rate-vertices) ·
 [`pdvar` storage and evaluation](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) ·
 [`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/)

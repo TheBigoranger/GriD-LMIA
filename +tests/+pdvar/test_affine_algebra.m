@@ -137,6 +137,36 @@ function testMixedScalarGridUsesCommonRefinement(testCase)
         cp{2} + cq2{2}});
 end
 
+function testExplicitPdmatRateRowsDispatchAndPreservation(testCase)
+    % A known rate-row table should broadcast an ordinary decision on either side.
+    rb = [-1 2];
+    P = pdvar(1, [0 1], RateBounds=rb);
+    cp = P.coeffs(1);
+    R = pdmat([0 1], {{1, 3; 10, 14}}, ...
+        Degree=1, RateBounds=rb);
+
+    S = P + R;
+    D = R - P;
+
+    testCase.verifyClass(S, "pdvar");
+    testCase.verifyClass(D, "pdvar");
+    testCase.verifyTrue(S.HasRateDependence);
+    testCase.verifyEqual(S.RateBounds, rb);
+    testCase.verifyEqual(size(S.coeffs(1)), [2 2]);
+    verifyCoeffExpr(testCase, S.coeffs(1), {
+        cp{1} + 1, cp{2} + 3
+        cp{1} + 10, cp{2} + 14
+        });
+    verifyCoeffExpr(testCase, D.coeffs(1), {
+        1 - cp{1}, 3 - cp{2}
+        10 - cp{1}, 14 - cp{2}
+        });
+
+    mismatch = pdmat([0 1], {{1, 2; 3, 4}}, ...
+        Degree=1, RateBounds=[0 2]);
+    testCase.verifyError(@() P + mismatch, "pdvar:InvalidAddition");
+end
+
 function testNonuniformQuadraticRefinementUsesForwardAlpha(testCase)
     % Restrict a coarse quadratic at alpha=5/12 onto two unequal cells.
     P = pdvar(1, {[-2 4]}, Degree=2);

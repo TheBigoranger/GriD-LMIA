@@ -5,7 +5,7 @@ It represents continuous piecewise-polynomial decision matrices in cell-local
 tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
 models are called differentiable parameter-dependent LMIs (DPD-LMIs).
 
-Documentation: **v1.1.4**. Latest GitHub Release: **v1.1.0**.
+Documentation: **v1.1.5**. Latest GitHub Release: **v1.1.0**.
 
 The current implementation provides:
 
@@ -87,18 +87,14 @@ The test entry point covers installer behavior, helper utilities, `pdbase`,
 `pdmat`, `pdvar`, and `pdlmi`. Its solver smoke tests use the same
 commercial-first working-solver policy as `install_pd_lmi`.
 
-The v1.1.4 documentation keeps the established modeling interfaces while
-using operation-local plans for Bernstein products, elevation, Direct/Pólya
-assembly, and Bernstein-Gram coefficient maps. Constructors and certificate
-selectors accept transient `ValidationMode="fast"` or `"strict"` where
-documented. Fast mode is the default; strict mode repeats internal structural
-checks across every generated cell and is diagnostic rather than a different
-mathematical model. The option is not stored on returned objects. Reproducible
-non-solver workloads are provided by
-`tests.benchmark_stage1b_performance`,
-`tests.benchmark_stage1c_performance`, and
-`tests.benchmark_stage2_performance`; their machine-specific measurements are
-reported in the manuals rather than treated as universal guarantees.
+The v1.1.5 documentation keeps the established MATLAB API while unifying the
+notation used by the printable and Web manuals. Its Math Concepts navigation
+collects the global symbol dictionary, modeling background, cell coordinates,
+Bernstein algebra, and finite certificates. The numerical `pdmat` reference
+now includes interactive addition, multiplication, and degree-elevation
+explorers; the `pdvar` reference keeps the same algebra symbolic and links to
+those numerical demonstrations. Constructors and certificate selectors still
+accept transient `ValidationMode="fast"` or `"strict"` where documented.
 
 ## Quick Start
 
@@ -303,8 +299,12 @@ F = preorder.toYalmip();
 ## Documentation
 
 - Online manual: https://thebigoranger.github.io/PD-LMI-package/
+- Printable TeX manual: https://thebigoranger.github.io/PD-LMI-package/manual.pdf
+- Math Concepts notation: https://thebigoranger.github.io/PD-LMI-package/documents/math/notation/
 - Mathematical guide: https://thebigoranger.github.io/PD-LMI-package/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/
 - Bernstein overview: https://thebigoranger.github.io/PD-LMI-package/documents/math/bernstein-polynomial/
+- `pdmat` algebra explorers: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdmat/algebra/
+- `pdmat` storage and elevation explorer: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/
 - Install and downloads: https://thebigoranger.github.io/PD-LMI-package/install/
 - Latest GitHub Release (v1.1.0): https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v1.1.0
 - Version history: https://thebigoranger.github.io/PD-LMI-package/version-history/

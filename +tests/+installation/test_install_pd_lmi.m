@@ -18,6 +18,7 @@ function testFallbackReportAndRepeatRun(testCase)
     setMock("fallback", 0);
     first = install_pd_lmi();
     second = install_pd_lmi();
+    state = getMock();
 
     testCase.verifyEqual(first.Solver, 'sedumi');
     testCase.verifyTrue(first.Persisted);
@@ -26,6 +27,9 @@ function testFallbackReportAndRepeatRun(testCase)
     testCase.verifyTrue(isfolder(first.YALMIPRoot));
     testCase.verifyTrue(all(strcmpi(first.AddedPaths, first.PackageRoot)));
     testCase.verifyEmpty(second.AddedPaths);
+    testCase.verifyEqual(numel(state.SaveCalls), 2);
+    testCase.verifyEmpty(state.SaveCalls{1});
+    testCase.verifyEmpty(state.SaveCalls{2});
 end
 
 function testFailedProbeRollsBackPath(testCase)
@@ -36,8 +40,32 @@ function testFailedProbeRollsBackPath(testCase)
     testCase.verifyEqual(path, before);
 end
 
+function testNonzeroPrimarySaveUsesUserPathFallback(testCase)
+    setMock("fallback", [1 0]);
+    report = install_pd_lmi();
+    state = getMock();
+
+    testCase.verifyTrue(report.Persisted);
+    testCase.verifyEqual(numel(state.SaveCalls), 2);
+    testCase.verifyEmpty(state.SaveCalls{1});
+    testCase.verifyEqual(state.SaveCalls{2}, ...
+        {fullfile(state.UserPath, "pathdef.m")});
+end
+
+function testPrimarySaveExceptionUsesUserPathFallback(testCase)
+    setMock("fallback", [0 0], 1);
+    report = install_pd_lmi();
+    state = getMock();
+
+    testCase.verifyTrue(report.Persisted);
+    testCase.verifyEqual(numel(state.SaveCalls), 2);
+    testCase.verifyEmpty(state.SaveCalls{1});
+    testCase.verifyEqual(state.SaveCalls{2}, ...
+        {fullfile(state.UserPath, "pathdef.m")});
+end
+
 function testPersistenceFailureRollsBackPath(testCase)
-    setMock("fallback", 1);
+    setMock("fallback", [1 1]);
     before = path;
 
     testCase.verifyError(@() install_pd_lmi(), "install_pd_lmi:PathSaveFailed");
@@ -80,10 +108,24 @@ function testIncompleteYalmip(testCase)
     testCase.verifyError(@() install_pd_lmi(), "install_pd_lmi:IncompleteYALMIP");
 end
 
-function setMock(mode, saveStatus)
+function setMock(mode, saveStatus, throwCalls)
 %SETMOCK Control the shared solver and savepath doubles deterministically.
+    if nargin < 3
+        throwCalls = [];
+    end
     global pd_lmi_install_mock
-    pd_lmi_install_mock = struct("Mode", mode, "SaveStatus", saveStatus);
+    pd_lmi_install_mock = struct( ...
+        "Mode", mode, ...
+        "SaveStatus", saveStatus, ...
+        "ThrowCalls", throwCalls, ...
+        "SaveCalls", {{}}, ...
+        "UserPath", fullfile(tempdir, "pd_lmi_install_user"));
+end
+
+function state = getMock()
+%GETMOCK Return the current savepath call log for assertions.
+    global pd_lmi_install_mock
+    state = pd_lmi_install_mock;
 end
 
 function temporarilyHideYalmip(mockDir)
@@ -130,9 +172,22 @@ function mockDir = makeMockYalmip()
     writelines(["function solvers = getavailablesolvers(varargin)", ...
         "solvers = struct('tag', {'mosek', 'copt', 'sedumi'});", "end"], ...
         fullfile(mockDir, "getavailablesolvers.m"));
-    writelines(["function status = savepath", "global pd_lmi_install_mock", ...
-        "status = pd_lmi_install_mock.SaveStatus;", "end"], ...
+    writelines(["function status = savepath(varargin)", ...
+        "global pd_lmi_install_mock", ...
+        "pd_lmi_install_mock.SaveCalls{end + 1} = varargin;", ...
+        "callIndex = numel(pd_lmi_install_mock.SaveCalls);", ...
+        "if any(callIndex == pd_lmi_install_mock.ThrowCalls)", ...
+        "    error('mock:SavePathFailure', 'Injected savepath failure.');", ...
+        "end", ...
+        "statusIndex = min(callIndex, numel(pd_lmi_install_mock.SaveStatus));", ...
+        "status = pd_lmi_install_mock.SaveStatus(statusIndex);", ...
+        "end"], ...
         fullfile(mockDir, "savepath.m"));
+    writelines(["function folder = userpath", ...
+        "global pd_lmi_install_mock", ...
+        "folder = pd_lmi_install_mock.UserPath;", ...
+        "end"], ...
+        fullfile(mockDir, "userpath.m"));
     writelines(["function diagnostics = optimize(varargin)", ...
         "global pd_lmi_install_mock", ...
         "if strcmp(pd_lmi_install_mock.Mode, 'fallback') && strcmpi(varargin{3}.solver, 'sedumi')", ...

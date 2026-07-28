@@ -3,6 +3,8 @@ title: pdmat Storage And Elevation
 description: Class-specific cell traversal, coefficient evidence, labels, counts, and exact degree elevation for known data.
 ---
 
+import DegreeElevationExplorer from "../../../../../components/DegreeElevationExplorer.tsx";
+
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><span>storage and elevation</span></nav>
 
 The implementation is inherited from `pdbase`, but these methods are complete
@@ -127,9 +129,17 @@ object constructed without explicit `Degree` raises
 representation-only: it does not refine the physical grid or sample a
 function-only source.
 
+### <span id="numerical-degree-elevation-explorer"></span>Numerical degree-elevation explorer
+
+Edit one normalized Bernstein row and an increment. The original and elevated
+rows represent the same one-cell polynomial.
+
+<DegreeElevationExplorer client:visible />
+
 ## See Also
 
 [`pdmat evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
 [`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
+[`Mathematical notation`](/PD-LMI-package/documents/math/notation/) ·
 [`pdbase evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/) ·
 [`pdvar storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/)

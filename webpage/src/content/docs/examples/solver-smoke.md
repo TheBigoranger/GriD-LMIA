@@ -10,6 +10,9 @@ description: Two solver-facing examples mirrored from +tests/+pdlmi/test_solver_
 </nav>
 
 These examples mirror the tested solver-facing workflows in `+tests/+pdlmi/test_solver_smoke.m`. They use the package to assemble YALMIP constraints; solver selection and execution still happen through ordinary YALMIP calls.
+They are non-strict regression constraints; strict analysis requires an
+explicit $\varepsilon I$ margin as described in the
+[global notation](/PD-LMI-package/documents/math/notation/#strict-theory-and-software-constraints).
 
 ## Parameter-Dependent Lyapunov Variable
 

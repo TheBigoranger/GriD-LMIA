@@ -1,0 +1,138 @@
+---
+title: Mathematical Notation
+description: Canonical symbols for parameter boxes, tensor grids, local Bernstein coordinates, residuals, finite certificates, and Gram representations.
+---
+
+<nav class="manual-trail">
+  <a href="/PD-LMI-package/documents/">Documents</a>
+  <span>/</span>
+  <span>Math Concepts</span>
+  <span>/</span>
+  <span>Notation</span>
+</nav>
+
+This page is the shared symbol dictionary for the mathematical guides and API
+examples. A deep page still defines the symbols needed for its own argument.
+
+<span id="domains-and-rate-vertices"></span>
+
+## <span id="domains"></span>Parameter And Rate Domains
+
+$$
+\mathcal P=\prod_{s=1}^{\ell}
+[\underline\rho_s,\overline\rho_s],
+\qquad
+\mathcal R=\prod_{s=1}^{\ell}
+[\underline\nu_s,\overline\nu_s].
+$$
+
+- $\boldsymbol\rho\in\mathcal P$ is the scheduling parameter and
+  $\boldsymbol\nu=\dot{\boldsymbol\rho}\in\mathcal R$ is its admissible rate.
+- $\ell$ is the number of parameter axes.
+- $\mathcal V_{\mathcal R}$ is the set of the $2^\ell$ lower/upper rate
+  vertices. Reduction to these vertices is exact when the residual is affine
+  in $\boldsymbol\nu$.
+
+<span id="grids-cells-and-local-coordinates"></span>
+
+## <span id="grid"></span>Tensor Grid And Physical Cells
+
+$$
+\mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},
+\qquad
+\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell.
+$$
+
+Here $k_s$ is the number of nodes on axis $s$. The one-based physical-cell
+index $\mathbf c=(c_1,\ldots,c_\ell)$ selects
+
+$$
+\mathcal H_{\mathbf c}
+=\prod_{s=1}^{\ell}
+[\rho_s^{(c_s)},\rho_s^{(c_s+1)}],
+\qquad
+h_s^{\mathbf c}
+=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
+$$
+
+The tensor grid partitions $\mathcal P$ exactly. Gridding becomes a modeling
+approximation only when it restricts the admissible decision-function space.
+
+## <span id="local-coordinates"></span>Local Coordinates And Labels
+
+The physical map $\phi_{\mathbf c}:[0,1]^\ell\to\mathcal H_{\mathbf c}$ and
+its inverse are
+
+$$
+\rho_s=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,
+\qquad
+\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho).
+$$
+
+Physical nodes and $\mathbf c$ are one-based. A local Bernstein label
+$\mathbf i=(i_1,\ldots,i_\ell)$ is zero-based.
+
+<span id="bernstein-labels-and-degrees"></span>
+
+## <span id="degrees"></span>Polynomial And Certificate Degrees
+
+| Symbol | Meaning |
+| :--- | :--- |
+| $m$ | Modeled Bernstein degree of a decision function. |
+| $M$ | Assembled Bernstein degree of the residual or sign-normalized target. |
+| $d$ | Pólya degree-elevation increment. |
+| $r$ | Absolute Gram order; it is not an increment from $M$. |
+| $w$ | SparseFullBox bandwidth. |
+
+These quantities are independent of the number of physical grid cells.
+
+<span id="residual-and-positive-target"></span>
+
+## <span id="residual-target"></span>Residual And Positive Target
+
+On one physical cell,
+
+$$
+\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
+=\sum_{\mathbf i\in\{0,\ldots,M\}^{\ell}}
+B_{\mathbf i}^{M}(\boldsymbol\alpha)
+\mathcal C^{(\mathbf c)}[\mathbf i],
+$$
+
+and a negative-semidefinite residual is sign-normalized as
+
+$$
+S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)},
+\qquad
+C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}.
+$$
+
+The theoretical target is
+$S^{(\mathbf c)}(\boldsymbol\alpha)\succ0$. YALMIP models non-strict
+semidefinite constraints; encode a chosen margin explicitly as
+$S^{(\mathbf c)}(\boldsymbol\alpha)-\varepsilon I\succeq0$.
+
+<span id="strict-theory-and-software-constraints"></span>
+<span id="gram-basis-and-certificate-parameters"></span>
+
+## <span id="gram"></span>Gram Representation
+
+For tensor Bernstein basis vector $\mathbf b_{\mathbf a}$, define
+
+$$
+Z_{\mathbf a}=\mathbf b_{\mathbf a}\otimes I_n,
+\qquad
+Z_{\mathbf a}^{\mathsf T}QZ_{\mathbf a},
+\qquad Q\succeq0.
+$$
+
+The multi-index $\mathbf a$ specifies the basis degree, $I_n$ matches the
+matrix-polynomial size, and $Q$ is a positive-semidefinite Gram matrix.
+Weighted interval or box-generator terms change the coefficient-matching
+degree without changing these symbol roles.
+
+## See Also
+
+[Gridding And Local Coordinates](/PD-LMI-package/documents/math/gridding-and-degree/) ·
+[Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/) ·
+[Certificate Map And Selection Guide](/PD-LMI-package/documents/math/sos-certificates/)

@@ -2,7 +2,8 @@ function report = install_pd_lmi()
 %INSTALL_PD_LMI Validate and persist a usable PD-LMI MATLAB installation.
 %   INSTALL_PD_LMI() adds the repository root to the end of the current
 %   MATLAB path, verifies the existing YALMIP installation and a working SDP
-%   solver, then saves the path. REPORT = INSTALL_PD_LMI() additionally
+%   solver, then persists the path with a user-level fallback. REPORT =
+%   INSTALL_PD_LMI() additionally
 %   returns the selected solver and the paths added during this call.
 
     originalPath = path;
@@ -15,18 +16,8 @@ function report = install_pd_lmi()
         addedPaths = addPackagePaths(packageRoot);
         verifyPackageClasses(packageRoot);
 
-        % Persist only after every dependency, solver, and shadowing check has
-        % succeeded. A failed savepath is rolled back with the in-memory path.
-        try
-            status = savepath;
-        catch cause
-            throwAsCaller(MException("install_pd_lmi:PathSaveFailed", ...
-                "Unable to save the MATLAB path: %s", cause.message));
-        end
-        if ~isequal(status, 0)
-            error("install_pd_lmi:PathSaveFailed", ...
-                "MATLAB could not persist the PD-LMI path (savepath returned %d).", status);
-        end
+        % Persist only after every dependency, solver, and shadowing check.
+        persistPath();
 
         report = struct( ...
             "PackageRoot", packageRoot, ...
@@ -127,6 +118,45 @@ function addedPaths = addPackagePaths(packageRoot)
         addpath(packageRoot, "-end");
         addedPaths = {packageRoot};
     end
+end
+
+function persistPath()
+%PERSISTPATH Save the path globally when possible, then under userpath.
+    try
+        status = savepath;
+        if isequal(status, 0)
+            return
+        end
+        primaryFailure = "savepath returned " + string(status);
+    catch cause
+        primaryFailure = string(cause.message);
+    end
+
+    try
+        fallbackFile = fullfile(firstUserFolder(), "pathdef.m");
+        status = savepath(fallbackFile);
+    catch cause
+        throwAsCaller(MException("install_pd_lmi:PathSaveFailed", ...
+            "Unable to persist the MATLAB path. Primary attempt: %s. " + ...
+            "User-path fallback: %s.", primaryFailure, cause.message));
+    end
+    if ~isequal(status, 0)
+        error("install_pd_lmi:PathSaveFailed", ...
+            "Unable to persist the MATLAB path. Primary attempt: %s. " + ...
+            "User-path fallback savepath returned %s.", ...
+            primaryFailure, string(status));
+    end
+end
+
+function folder = firstUserFolder()
+%FIRSTUSERFOLDER Return the first configured nonempty MATLAB user folder.
+    entries = string(strsplit(char(userpath), pathsep));
+    entries = entries(strlength(entries) > 0);
+    if isempty(entries)
+        error("install_pd_lmi:PathSaveFailed", ...
+            "MATLAB userpath is empty; no user-level pathdef.m can be written.");
+    end
+    folder = entries(1);
 end
 
 function tf = isOnPath(folder)

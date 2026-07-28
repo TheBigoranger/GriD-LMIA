@@ -61,8 +61,8 @@ function testMalformedFunctionDuringBernsteinProbe(testCase)
         "pdmat:InvalidFunctionValue");
 end
 
-function testDecisionAndRateOptionsUnavailable(testCase)
-    % pdmat should reject decision, discontinuity, and rate options for now.
+function testFixedOptionsAndMalformedRateBounds(testCase)
+    % Fixed representation flags stay unavailable while RateBounds is public.
     data = {1, 2};
 
     testCase.verifyError(@() pdmat({[0 1]}, data, IsContinuous=false), ...
@@ -71,8 +71,28 @@ function testDecisionAndRateOptionsUnavailable(testCase)
         "pdmat:UnsupportedOption");
     testCase.verifyError(@() pdmat({[0 1]}, data, HasRateDependence=true), ...
         "pdmat:UnsupportedOption");
-    testCase.verifyError(@() pdmat({[0 1]}, data, RateBounds=[-1 1]), ...
-        "pdmat:UnsupportedOption");
+    testCase.verifyError(@() pdmat({[0 1]}, data, RateBounds=[1 -1]), ...
+        "pdmat:InvalidRateBounds");
+    testCase.verifyError(@() pdmat({[0 1]}, data, RateBounds=[-1 1; -1 1]), ...
+        "pdmat:InvalidRateBounds");
+end
+
+function testMalformedAndMixedExplicitRateRows(testCase)
+    % Explicit leaves use uniformly one row or exactly 2^ell rows.
+    testCase.verifyError(@() pdmat([0 1], {{1, 2; 3, Inf}}, ...
+        Degree=1, RateBounds=[-1 1]), ...
+        "pdmat:InvalidCoefficientPayload");
+    testCase.verifyError(@() pdmat([0 1], {{1, 2; 3, 4; 5, 6}}, ...
+        Degree=1, RateBounds=[-1 1]), ...
+        "pdmat:InvalidCoefficientCell");
+
+    mixed = {
+        {1, 2}, ...
+        {2, 3; 4, 5}
+        };
+    testCase.verifyError(@() pdmat([0 1 2], mixed, ...
+        Degree=1, RateBounds=[-1 1]), ...
+        "pdmat:InvalidLocalValues");
 end
 
 function out = numericOnlyNonpoly(rho)

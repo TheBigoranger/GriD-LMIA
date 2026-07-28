@@ -30,8 +30,8 @@ The same family is available at construction:
 ```matlab
 Csparse = pdlmi(expr, relation, "UseSparseFullBoxPreorder")
 Csparse = pdlmi(expr, relation, UseSparseFullBoxPreorder=true)
-Csparse = pdlmi(expr, relation, BandWidth=b)
-Csparse = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
+Csparse = pdlmi(expr, relation, BandWidth=w)
+Csparse = pdlmi(expr, relation, BandWidth=w, SparseFullBoxOrder=r)
 ```
 
 ## Arguments
@@ -39,7 +39,7 @@ Csparse = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
 | Argument | Contract |
 | :--- | :--- |
 | `C` | Any `pdlmi` object. The method always rebuilds from `C.Residual`; it does not add constraints to the currently selected family. |
-| `b` | Finite positive integer band width. Default `2`. Intermediate support is realized with windows of at most `b` consecutive labels on every Bernstein axis. |
+| `w` | Finite positive integer band width. Default `2`. Intermediate support is realized with windows of at most `w` consecutive labels on every Bernstein axis. |
 | `r` | Finite nonnegative integer scalar and absolute Gram order. It is not an increment from the residual degree. |
 
 For assembled residual degree `M`, the default and minimum admissible order are

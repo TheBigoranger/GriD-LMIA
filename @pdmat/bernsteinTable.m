@@ -14,6 +14,8 @@ function tbl = bernsteinTable(obj, varargin)
     %
     %   Output:
     %     T - Table of cell, label, basis, and coefficient information.
+    %         Matrix coefficients use one table row per matrix row and show
+    %         their shared metadata once on the centered display row.
     %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
@@ -31,5 +33,15 @@ function tbl = bernsteinTable(obj, varargin)
         rateVerts = helper.combRows(vecs);
     end
     tbl = bernTbl(obj, "pdmat:InvalidBernsteinTableInput", ...
-        @(val) val, @(val) string(mat2str(val)), rateVerts, varargin{:});
+        @(val) val, @exprText, rateVerts, varargin{:});
+end
+
+function txt = exprText(val)
+    %EXPRTEXT Match the active MATLAB numeric format without padded columns.
+    txt = strip(string(formattedDisplayText( ...
+        val, "SuppressMarkup", true)));
+    txt = regexprep(txt, "\s+", " ");
+    if ~isscalar(val)
+        txt = "[" + txt + "]";
+    end
 end

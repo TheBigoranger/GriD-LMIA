@@ -33,8 +33,11 @@ FullBox represents
 
 $$
 S^{(\mathbf c)}(\boldsymbol\alpha)
+=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
 =\sum_{J\subseteq[\ell]}
 g_J(\boldsymbol\alpha)S_J(\boldsymbol\alpha),
+\qquad
+C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)},
 $$
 
 where every $S_J$ has a free positive-semidefinite Gram matrix. The weighted
@@ -61,22 +64,22 @@ g_JS_{J,\mathbf t},
 \qquad
 \operatorname{supp}S_{J,\mathbf t}
 \subseteq
-\prod_{s=1}^{\ell}\{t_s,\ldots,t_s+b-1\}.
+\prod_{s=1}^{\ell}\{t_s,\ldots,t_s+w-1\}.
 $$
 
-The bandwidth $b$ controls Gram support; the absolute Gram order is $r$.
+The bandwidth $w$ controls Gram support; the absolute Gram order is $r$.
 
 ```matlab
 selected = L.applySparseFullBoxPreorder();
-selected = L.applySparseFullBoxPreorder(b);
-selected = L.applySparseFullBoxPreorder(b, r);
+selected = L.applySparseFullBoxPreorder(w);
+selected = L.applySparseFullBoxPreorder(w, r);
 ```
 
 ## Canonical Endpoints
 
-- $b=1$ canonicalizes to actual Direct state after validating $r$.
-- $1<b<r+1$ stores actual SparseFullBox state.
-- $b\ge r+1$ canonicalizes to actual FullBox state.
+- $w=1$ canonicalizes to actual Direct state after validating $r$.
+- $1<w<r+1$ stores actual SparseFullBox state.
+- $w\ge r+1$ canonicalizes to actual FullBox state.
 
 These are state transitions, not merely descriptive similarities. Inspect the
 read-only `pdlmi` properties when code must report the selected state.
@@ -85,8 +88,8 @@ read-only `pdlmi` properties when code must report the selected state.
 
 In one parameter, the parity-specific Markov–Lukács terms are used. For even
 $M=4$ and $r=2$, the unweighted basis labels are $\{0,1,2\}$. Bandwidth
-$b=2$ produces the overlapping windows $\{0,1\}$ and $\{1,2\}$;
-$b=3=r+1$ reaches FullBox.
+$w=2$ produces the overlapping windows $\{0,1\}$ and $\{1,2\}$;
+$w=3=r+1$ reaches FullBox.
 
 ## Multivariate Boundary
 
@@ -99,14 +102,14 @@ matching.
 ## Selection Guidance
 
 Use Direct as the baseline. Use SparseFullBox when a Gram certificate is
-desired but dense FullBox blocks are too large, and vary $b$ independently
+desired but dense FullBox blocks are too large, and vary $w$ independently
 of $r$. Use FullBox when the dense preordering is computationally acceptable.
-Always record $\mathcal G_s$, $m$, $M$, $r$, $b$, solver, and solver
+Always record $\mathcal G_s$, $m$, $M$, $r$, $w$, solver, and solver
 status.
 
 ## Failure Interpretation
 
-A fixed $r$ or $b$ failure is inconclusive. A solver abort, memory limit,
+A fixed $r$ or $w$ failure is inconclusive. A solver abort, memory limit,
 or nonzero `diagnostics.problem` is not objective data and does not establish
 continuous infeasibility.
 
@@ -131,5 +134,6 @@ band map or its tensor-window realization.
 
 [Previous: Markov–Lukács And Putinar](/PD-LMI-package/documents/math/finite-certificates/markov-lukacs-and-putinar/) ·
 [Next: `pdlmi` Overview](/PD-LMI-package/documents/reference/pdlmi/) ·
+[Notation](/PD-LMI-package/documents/math/notation/#gram-basis-and-certificate-parameters) ·
 [`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
 [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)

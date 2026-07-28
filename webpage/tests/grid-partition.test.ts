@@ -4,7 +4,9 @@ import test from "node:test";
 import {
   clampPitch,
   enumerateCells,
+  fitProjection,
   getCellBounds,
+  mapProjection,
   normalizeKnots,
   projectPoint,
   resetRotation,
@@ -46,4 +48,41 @@ test("resets the three-dimensional view to the documented finite rotation", () =
   const reset = resetRotation();
   const projected = projectPoint([0.5, 0.5, 0.5], reset.yaw, reset.pitch);
   assert.ok([projected.x, projected.y, projected.depth].every(Number.isFinite));
+});
+
+test("fits every rotated cube endpoint and selected marker inside the padded viewBox", () => {
+  const corners = [
+    [0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
+    [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1],
+  ] as const;
+  const viewBox = { width: 420, height: 300 };
+  const padding = 12;
+  const radius = 7;
+
+  for (const yaw of [-180, -90, -35, 0, 35, 90, 180]) {
+    for (let pitch = -70; pitch <= 70; pitch += 10) {
+      const projected = corners.map((point) => projectPoint(point, yaw, pitch));
+      const fit = fitProjection(projected, viewBox, padding, radius);
+      for (const point of projected.map((item) => mapProjection(item, fit))) {
+        assert.ok(point.x >= padding + radius - 1e-9);
+        assert.ok(point.x <= viewBox.width - padding - radius + 1e-9);
+        assert.ok(point.y >= padding + radius - 1e-9);
+        assert.ok(point.y <= viewBox.height - padding - radius + 1e-9);
+      }
+
+      const marker = mapProjection(projectPoint([0.15, 0.3, 0.75], yaw, pitch), fit);
+      assert.ok(marker.x - radius >= padding - 1e-9);
+      assert.ok(marker.x + radius <= viewBox.width - padding + 1e-9);
+      assert.ok(marker.y - radius >= padding - 1e-9);
+      assert.ok(marker.y + radius <= viewBox.height - padding + 1e-9);
+    }
+  }
+});
+
+test("rejects invalid projection-fitting inputs", () => {
+  assert.throws(() => fitProjection([], { width: 420, height: 300 }, 12), /finite geometry/i);
+  assert.throws(
+    () => fitProjection([{ x: 0, y: 0, depth: 1 }], { width: 10, height: 10 }, 6),
+    /no visible drawing area/i,
+  );
 });

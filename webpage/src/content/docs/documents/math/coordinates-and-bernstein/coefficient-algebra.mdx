@@ -24,17 +24,17 @@ a finite positivity certificate is selected.
 Use $m$ for decision degree and $M$ for assembled residual degree. Products,
 known-data degrees, derivatives, and common-degree alignment determine $M$.
 Pólya increment $d$, absolute Gram order $r$, and SparseFullBox bandwidth
-$b$ are certificate parameters, not polynomial degrees.
+$w$ are certificate parameters, not polynomial degrees.
 
 ## Exact Degree Elevation
 
-For a one-dimensional coefficient sequence $C[i]$ of degree $M$, one
+For a one-dimensional coefficient sequence $C[i]$ of degree $m$, one
 elevation step gives
 
 $$
 \widetilde C[i]
-=\frac{i}{M+1}C[i-1]
-+\left(1-\frac{i}{M+1}\right)C[i],
+=\frac{i}{m+1}C[i-1]
++\left(1-\frac{i}{m+1}\right)C[i],
 $$
 
 with missing endpoint terms omitted. Tensor elevation applies this map axis by
@@ -81,8 +81,8 @@ rejected.
 Along local axis $s$,
 
 $$
-\frac{\partial P}{\partial\rho_s}
-=\frac{m_s}{h_s^{(\mathbf c)}}
+\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}
+=\frac{m_s}{h_s^{\mathbf c}}
 \sum_{\mathbf i}
 \bigl(P[\mathbf i+\mathbf e_s]-P[\mathbf i]\bigr)
 B_{\mathbf i}^{\mathbf m-\mathbf e_s}.
@@ -98,9 +98,12 @@ stacked, write the sign-normalized target as
 
 $$
 S^{(\mathbf c)}(\boldsymbol\alpha)
+=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
 =\sum_{\mathbf i}
 C^{(\mathbf c)}[\mathbf i]
-B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)
+B_{\mathbf i}^{M}(\boldsymbol\alpha),
+\qquad
+C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}
 $$
 
 without carrying the row index through every certificate formula.
@@ -148,5 +151,6 @@ strengthen every selected certificate.
 
 [Previous: Bernstein Basis, Continuity, And Storage](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
 [Next: Certificate Map And Selection Guide](/PD-LMI-package/documents/math/sos-certificates/) ·
+[Notation](/PD-LMI-package/documents/math/notation/#bernstein-labels-and-degrees) ·
 [`pdmat` algebra](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
 [`pdvar` algebra](/PD-LMI-package/documents/reference/pdvar/algebra/)

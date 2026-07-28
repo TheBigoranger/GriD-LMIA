@@ -2,24 +2,37 @@
 \label{sec:cellwise-solver-path}
 \index{residual}\index{Direct certificate}\index{finite certificate}
 
-Fix any physical cell \(\mathcal H_{\mathbf c}\) and one already assembled, sign-normalized matrix target \(T^{(\mathbf c)}(\boldsymbol\rho)\). Suppress any rate-row index and write its tensor-product Bernstein form as
+Fix any physical cell \(\mathcal H_{\mathbf c}\) and suppress the already enumerated rate-row index. After all local operations have been aligned to the assembled residual degree \(M\), the pullback of the residual has the general form
 \[
-    T^{(\mathbf c)}(\boldsymbol\rho)
-    =\sum_{\mathbf i}B_{\mathbf i}^{m}(\boldsymbol\alpha_{\mathbf c})T^{(\mathbf c)}[\mathbf i].
+    \mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
+    =\sum_{\mathbf i\in\{0,\ldots,M\}^{\ell}}
+    B_{\mathbf i}^{M}(\boldsymbol\alpha)
+    \mathcal C^{(\mathbf c)}[\mathbf i]
+    \prec0.
 \]
-The Direct certificate imposes the finite family
+Here \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\), \(B_{\mathbf i}^{M}\) is the degree-\(M\) tensor Bernstein basis, \(\mathbf i\) is a zero-based local label, and \(\mathcal C^{(\mathbf c)}[\mathbf i]\) is the corresponding residual coefficient. Define the sign-normalized positive target and its coefficients by
 \[
-    T^{(\mathbf c)}[\mathbf i]\succeq0
+    S^{(\mathbf c)}(\boldsymbol\alpha)
+    =-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
+    =\sum_{\mathbf i\in\{0,\ldots,M\}^{\ell}}
+    B_{\mathbf i}^{M}(\boldsymbol\alpha)
+    C^{(\mathbf c)}[\mathbf i],
+    \qquad
+    C^{(\mathbf c)}[\mathbf i]=-\mathcal C^{(\mathbf c)}[\mathbf i].
+\]
+The theoretical target is \(S^{(\mathbf c)}(\boldsymbol\alpha)\succ0\) on the unit box. The Direct certificate imposes the finite non-strict family
+\[
+    C^{(\mathbf c)}[\mathbf i]\succeq0
     \qquad\text{for every local Bernstein label }\mathbf i.
 \]
-Because every \(B_{\mathbf i}^{m}\) is nonnegative on the unit box and the basis functions sum to one,
+Because every \(B_{\mathbf i}^{M}\) is nonnegative on the unit box and the basis functions sum to one,
 \[
-    \bigl[T^{(\mathbf c)}[\mathbf i]\succeq0\ \text{for all }\mathbf i\bigr]
+    \bigl[C^{(\mathbf c)}[\mathbf i]\succeq0\ \text{for all }\mathbf i\bigr]
     \quad\Longrightarrow\quad
-    T^{(\mathbf c)}(\boldsymbol\rho)\succeq0
-    \quad\text{for all }\boldsymbol\rho\in\mathcal H_{\mathbf c}.
+    S^{(\mathbf c)}(\boldsymbol\alpha)\succeq0
+    \quad\text{for all }\boldsymbol\alpha\in[0,1]^\ell.
 \]
-Repeating this implication for every physical cell and every stored rate row produces finitely many YALMIP constraints that suffice for the continuous sign condition. The implication is not a converse: a positive matrix polynomial may have an indefinite Bernstein coefficient, so failure of Direct does not prove that the continuous condition is infeasible.
+Repeating this implication for every physical cell and every stored rate row produces finitely many YALMIP constraints that suffice for the continuous sign condition. The implication is not a converse: a positive matrix polynomial may have an indefinite Bernstein coefficient, so failure of Direct does not prove that the continuous condition is infeasible. MATLAB and YALMIP comparisons are non-strict; to model the strict theoretical target, the user must impose an explicit margin such as \(S^{(\mathbf c)}-\varepsilon I\succeq0\).
 
 \subsection{Opt-in alternatives}
 

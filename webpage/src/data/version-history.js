@@ -1,10 +1,10 @@
 export const versionHistory = [
   {
-    version: "v1.1.4",
-    date: "2026-07-27",
+    version: "v1.1.5",
+    date: "2026-07-28",
     status: "current documentation snapshot",
     summary:
-      "Reframes the Welcome and printable-manual openings around the five-stage continuum-to-solver overview, adds an accessible nonuniform 1D/2D/3D grid explorer, and keeps the v1.1 package API and certificate semantics unchanged. This documentation snapshot has no Git tag or GitHub Release.",
+      "Unifies tensor-grid, Bernstein-degree, residual, target, and Gram notation across both manuals; expands the Bernstein convolution and Gram/SOS foundations; adds Math Concepts navigation plus pdmat addition, multiplication, and elevation explorers; and keeps the three-dimensional Welcome grid visible at every supported rotation. The MATLAB API is unchanged, and this documentation snapshot has no Git tag or GitHub Release.",
   },
   {
     version: "v1.1.0",

@@ -11,6 +11,9 @@ description: Return a command-line Bernstein coefficient table for pdmat.
   <span>bernsteinTable</span>
 </nav>
 
+Cell indices, local labels, and degree symbols follow the
+[global notation](/PD-LMI-package/documents/math/notation/#bernstein-labels-and-degrees).
+
 ## Purpose
 
 Inspect coefficient-backed `pdmat` local Bernstein data as a MATLAB table.

@@ -6,6 +6,8 @@ description: Detailed coefficient-algebra syntax, formulas, examples, outputs, a
 import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
 import MultiplicationDiagram from "../../../../../components/MultiplicationDiagram.astro";
 import ExampleDisclosure from "../../../../../components/ExampleDisclosure.astro";
+import AdditionExplorer from "../../../../../components/AdditionExplorer.tsx";
+import MultiplicationExplorer from "../../../../../components/MultiplicationExplorer.tsx";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
 
@@ -39,9 +41,24 @@ ans = -2
 ans = 1
 ```
 
-<MatrixGlyphDiagram before={[["a₀", "a₁"]]} after={[["a₀+b₀", "a₁+b₁", "a₂+b₂"]]} beforeLabel="unaligned rows" afterLabel="common degree" caption="Degree elevation changes the representation, not the polynomial; addition combines aligned local labels." />
+For example, elevating a degree-one row to degree two gives
+
+$$
+[a_0,a_1]
+\longmapsto
+\left[a_0,\frac{a_0+a_1}{2},a_1\right].
+$$
+
+<MatrixGlyphDiagram before={[["a₀", "½(a₀+a₁)", "a₁"], ["b₀", "b₁", "b₂"]]} after={[["a₀+b₀", "½(a₀+a₁)+b₁", "a₁+b₂"]]} beforeLabel="degree-elevated rows" afterLabel="coefficient sum" caption="Degree elevation changes the representation, not the polynomial; addition then combines aligned local labels." />
 
 If compatible operands have different interior nodes, their sorted union is the common refinement. Grid refinement and degree elevation are independent alignment steps.
+
+### <span id="numerical-addition-explorer"></span>Numerical addition explorer
+
+Edit either one-cell coefficient row. The explorer elevates both rows exactly
+to their common degree, then displays and plots the aligned operands and sum.
+
+<AdditionExplorer client:visible />
 
 ## <span id="pdmat-mtimes"></span>Multiply in Bernstein coefficient space
 
@@ -89,6 +106,13 @@ convolution, not a pointwise product of sampled rows.
 
 <MultiplicationDiagram />
 
+### <span id="numerical-multiplication-explorer"></span>Numerical multiplication explorer
+
+The weighted convolution below uses the same normalized Bernstein rule as
+`pdmat.mtimes` and preserves the written factor order.
+
+<MultiplicationExplorer client:visible />
+
 ## Validation and operation boundaries
 
 - Function-only objects without Bernstein evidence are rejected by coefficient algebra.
@@ -104,4 +128,4 @@ convolution, not a pointwise product of sampled rows.
 
 ## See Also
 
-[`structural operations`](/PD-LMI-package/documents/reference/pdmat/structural-operations/) · [`indexing and inspection`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) · [`Bernstein utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/)
+[`Mathematical notation`](/PD-LMI-package/documents/math/notation/) · [`structural operations`](/PD-LMI-package/documents/reference/pdmat/structural-operations/) · [`indexing and inspection`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) · [`Bernstein utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/)

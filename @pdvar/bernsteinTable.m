@@ -14,6 +14,8 @@ function tbl = bernsteinTable(obj, varargin)
     %
     %   Output:
     %     T - Table of cells, rate vertices, basis labels, and coefficients.
+    %         Matrix coefficients use one table row per matrix row and show
+    %         their shared metadata once on the centered display row.
     %
     %   Example:
     %     yalmip("clear");

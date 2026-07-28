@@ -20,22 +20,26 @@ differentiation, convolution, subdivision, and traversal formulas now live in
 
 ## Begin With One Polynomial
 
-On one local coordinate $\alpha\in[0,1]$, the degree-$M$ Bernstein basis is
+On one local coordinate $\alpha\in[0,1]$, the modeled degree-$m$ Bernstein
+basis is
 
 $$
-B_i^M(\alpha)=\binom{M}{i}\alpha^i(1-\alpha)^{M-i},
-\qquad i=0,\ldots,M.
+B_i^m(\alpha)=\binom{m}{i}\alpha^i(1-\alpha)^{m-i},
+\qquad i=0,\ldots,m.
 $$
 
-A cell-local matrix polynomial is
+After residual assembly, use $M$ for the target degree. For
+$\mathcal F^{(\mathbf c)}
+=\sum_i\mathcal C^{(\mathbf c)}[i]B_i^M$, define
 
 $$
 S^{(\mathbf c)}(\alpha)
+=-\mathcal F^{(\mathbf c)}(\alpha)
 =\sum_{i=0}^{M}C^{(\mathbf c)}[i]B_i^M(\alpha).
 $$
 
-The coefficients are matrices, while the basis functions are nonnegative
-scalars that sum to one.
+Here $C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}$. The coefficients are
+matrices, while the basis functions are nonnegative scalars that sum to one.
 
 <BernsteinConceptDiagram />
 
@@ -44,27 +48,31 @@ scalars that sum to one.
 Bernstein coefficients expose endpoint values and give a convex-hull
 enclosure. For a sign-normalized positive target $S$, coefficient conditions
 $C^{(\mathbf c)}[\mathbf i]\succeq0$ are therefore finite sufficient
-conditions on a cell. They are not necessary in general.
+conditions on a cell. They are not necessary in general. The theoretical
+target is $S^{(\mathbf c)}\succ0$; software constraints are non-strict, so
+model a chosen margin explicitly as
+$S^{(\mathbf c)}-\varepsilon I\succeq0$.
 
 ## Local Coordinate, Basis Order, And Endpoint Labels
 
-For physical cell $\mathcal H_{\mathbf c}$, use the forward pullback
-$\boldsymbol\alpha=\phi_{\mathbf c}(\boldsymbol\rho)$. Local labels
+For physical cell $\mathcal H_{\mathbf c}$, use the physical map
+$\boldsymbol\rho=\phi_{\mathbf c}(\boldsymbol\alpha)$ and local inverse
+$\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)$. Local labels
 $\mathbf i=(i_1,\ldots,i_\ell)$ are zero-based, even though physical grid
 nodes $\rho_s^{(j)}$ and cell indices $\mathbf c$ are one-based.
 
 The multivariate basis is
 
 $$
-B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)
-=\prod_{s=1}^{\ell}B_{i_s}^{M_s}(\alpha_s).
+B_{\mathbf i}^{M}(\boldsymbol\alpha)
+=\prod_{s=1}^{\ell}B_{i_s}^{M}(\alpha_s).
 $$
 
 For scalar assembled degree $M$, each $i_s\in\{0,\ldots,M\}$.
 
 ## Nonnegativity, Unit Sum, And Convex Hulls
 
-Because $B_{\mathbf i}^{\mathbf M}\ge0$ and the basis sums to one,
+Because $B_{\mathbf i}^{M}\ge0$ and the basis sums to one,
 $S^{(\mathbf c)}(\boldsymbol\alpha)$ is a convex combination of its
 coefficient matrices. This is the mathematical reason the Direct certificate
 is cheap and sufficient.
@@ -72,7 +80,7 @@ is cheap and sufficient.
 ## Tensor Products On Hyperrectangles
 
 The basis always lives on $[0,1]^\ell$; physical geometry is isolated in
-$\phi_{\mathbf c}$ and cell widths $h_s^{(\mathbf c)}$. This separation
+$\phi_{\mathbf c}$ and cell widths $h_s^{\mathbf c}$. This separation
 allows different physical cell sizes to share the same local coefficient
 algebra.
 
@@ -92,7 +100,7 @@ argument is explained in [Rate-Box Reduction And Interface Analysis](/PD-LMI-pac
 ## Differentiation
 
 Differentiation reduces the degree on the differentiated local axis, multiplies
-by the degree, and scales by $1/h_s^{(\mathbf c)}$. `rhodiff` combines these
+by the degree, and scales by $1/h_s^{\mathbf c}$. `rhodiff` combines these
 partials with rate-box vertices and stores one coefficient row per vertex.
 Detailed formulas are in [Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-row-storage).
 
@@ -147,7 +155,7 @@ See the [certificate map](/PD-LMI-package/documents/math/sos-certificates/).
 ## Four Different Refinements
 
 Decision degree $m$, residual degree $M$, Pólya increment $d$, absolute
-Gram order $r$, and SparseFullBox bandwidth $b$ are distinct quantities.
+Gram order $r$, and SparseFullBox bandwidth $w$ are distinct quantities.
 Grid refinement is another independent choice.
 
 ## Control Literature And Scope
@@ -174,5 +182,6 @@ require cellwise interpretation.
 
 [Previous: Gridding And Local Coordinates](/PD-LMI-package/documents/math/gridding-and-degree/) ·
 [Next: Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/) ·
+[Notation](/PD-LMI-package/documents/math/notation/#bernstein-labels-and-degrees) ·
 [`pdmat` storage and elevation](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
 [`pdvar` storage and evaluation](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/)

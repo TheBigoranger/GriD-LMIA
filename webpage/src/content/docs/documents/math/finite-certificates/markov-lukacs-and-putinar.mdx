@@ -17,17 +17,21 @@ import CertificateSpectrum from "../../../../../components/CertificateSpectrum.a
 
 The software state is `Putinar`. In one parameter its implementation uses the
 parity-specific Markov–Lukács interval form; Markov–Lukács is not a separate
-selector.
+selector. The Gram notation below uses
+$Z_a=\mathbf b_a\otimes I_n$ for matrix size $n$, where $\mathbf b_a$ is the
+degree-$a$ Bernstein basis vector and every Gram matrix $Q$ satisfies
+$Q\succeq0$.
 
 ## One-Parameter Even Degree
 
-For assembled degree $M=2q$, represent the target as
+For assembled degree $M=2r$, represent the target as
 
 $$
 S^{(\mathbf c)}(\alpha)
-=Z_q(\alpha)^{\mathsf T}Q_0Z_q(\alpha)
+=-\mathcal F^{(\mathbf c)}(\alpha)
+=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha)
 +\alpha(1-\alpha)
-Z_{q-1}(\alpha)^{\mathsf T}Q_1Z_{q-1}(\alpha),
+Z_{r-1}(\alpha)^{\mathsf T}Q_1Z_{r-1}(\alpha),
 $$
 
 with $Q_0,Q_1\succeq0$. The basis-to-coefficient Gram map is affine, and
@@ -36,12 +40,12 @@ $C^{(\mathbf c)}[i]$.
 
 ## One-Parameter Odd Degree
 
-For $M=2q+1$, use endpoint weights:
+For $M=2r+1$, use endpoint weights:
 
 $$
 S^{(\mathbf c)}(\alpha)
-=(1-\alpha)Z_q^{\mathsf T}Q_0Z_q
-+\alpha Z_q^{\mathsf T}Q_1Z_q,
+=(1-\alpha)Z_r^{\mathsf T}Q_0Z_r
++\alpha Z_r^{\mathsf T}Q_1Z_r,
 \qquad Q_0,Q_1\succeq0.
 $$
 
@@ -69,6 +73,9 @@ constraints = selected.toYalmip();
 
 Each cell, stored rate row, and column-major matrix entry receives independent
 Gram blocks.
+These are non-strict software constraints. The theoretical
+$S^{(\mathbf c)}\succ0$ condition requires an explicit
+$S^{(\mathbf c)}-\varepsilon I\succeq0$ margin in the modeled residual.
 
 ## Relation To FullBox
 
@@ -99,5 +106,6 @@ limited.
 
 [Previous: Direct And Pólya](/PD-LMI-package/documents/math/finite-certificates/direct-and-polya/) ·
 [Next: SparseFullBox And FullBox](/PD-LMI-package/documents/math/finite-certificates/sparsefullbox-and-fullbox/) ·
+[Notation](/PD-LMI-package/documents/math/notation/#gram-basis-and-certificate-parameters) ·
 [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
 [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)

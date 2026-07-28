@@ -15,6 +15,17 @@ export interface Rotation {
   pitch: number;
 }
 
+export interface ViewBox {
+  width: number;
+  height: number;
+}
+
+export interface ProjectionFit {
+  offsetX: number;
+  offsetY: number;
+  scale: number;
+}
+
 /** Return a fresh copy of the documented default 3D view. */
 export function resetRotation(): Rotation {
   return { yaw: 35, pitch: 25 };
@@ -83,4 +94,63 @@ export function projectPoint(
   const pitchZ = py * Math.sin(pitchRad) + yawZ * Math.cos(pitchRad);
 
   return { x: yawX, y: pitchY, depth: pitchZ + 2 };
+}
+
+/** Fit projected geometry inside a viewBox while preserving its aspect ratio. */
+export function fitProjection(
+  points: readonly ProjectedPoint[],
+  viewBox: ViewBox,
+  padding: number,
+  markerRadius = 0,
+): ProjectionFit {
+  if (points.length === 0
+      || points.some((point) => ![point.x, point.y].every(Number.isFinite))
+      || ![viewBox.width, viewBox.height, padding, markerRadius].every(Number.isFinite)
+      || viewBox.width <= 0
+      || viewBox.height <= 0
+      || padding < 0
+      || markerRadius < 0) {
+    throw new TypeError("Projection fitting requires finite geometry and positive viewBox dimensions.");
+  }
+
+  const minX = Math.min(...points.map((point) => point.x));
+  const maxX = Math.max(...points.map((point) => point.x));
+  const minY = Math.min(...points.map((point) => point.y));
+  const maxY = Math.max(...points.map((point) => point.y));
+  const inset = padding + markerRadius;
+  const innerWidth = viewBox.width - 2 * inset;
+  const innerHeight = viewBox.height - 2 * inset;
+  if (innerWidth <= 0 || innerHeight <= 0) {
+    throw new RangeError("Projection padding leaves no visible drawing area.");
+  }
+
+  const spanX = maxX - minX;
+  const spanY = maxY - minY;
+  const scale = Math.min(
+    spanX === 0 ? Number.POSITIVE_INFINITY : innerWidth / spanX,
+    spanY === 0 ? Number.POSITIVE_INFINITY : innerHeight / spanY,
+  );
+  const finiteScale = Number.isFinite(scale) ? scale : 1;
+  return {
+    scale: finiteScale,
+    offsetX: (viewBox.width - spanX * finiteScale) / 2 - minX * finiteScale,
+    // SVG y increases downward, so fit the negated projected y coordinate.
+    offsetY: (viewBox.height - spanY * finiteScale) / 2 + maxY * finiteScale,
+  };
+}
+
+/** Map one orthographic point through a previously computed viewBox fit. */
+export function mapProjection(
+  point: ProjectedPoint,
+  fit: ProjectionFit,
+): ProjectedPoint {
+  if (![point.x, point.y, point.depth, fit.offsetX, fit.offsetY, fit.scale].every(Number.isFinite)
+      || fit.scale <= 0) {
+    throw new TypeError("Projection mapping requires finite point and fit data.");
+  }
+  return {
+    x: fit.offsetX + point.x * fit.scale,
+    y: fit.offsetY - point.y * fit.scale,
+    depth: point.depth,
+  };
 }

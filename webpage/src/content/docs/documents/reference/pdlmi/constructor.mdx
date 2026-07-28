@@ -13,6 +13,10 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>constructor</span>
 </nav>
 
+Certificate pages use
+$S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$ and the
+[global residual and strictness notation](/PD-LMI-package/documents/math/notation/#residual-and-positive-target).
+
 <CertificateNavigation selected="direct" showSections={false} />
 
 ## Purpose
@@ -39,9 +43,9 @@ C = pdlmi(expr, relation, UsePutinar=true, PutinarOrder=r)
 C = pdlmi(expr, relation, "PutinarOrder", r)
 C = pdlmi(expr, relation, "UsePutinar", true, "PutinarOrder", r)
 C = pdlmi(expr, relation, "UseSparseFullBoxPreorder")
-C = pdlmi(expr, relation, UseSparseFullBoxPreorder=true, BandWidth=b)
-C = pdlmi(expr, relation, BandWidth=b)
-C = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
+C = pdlmi(expr, relation, UseSparseFullBoxPreorder=true, BandWidth=w)
+C = pdlmi(expr, relation, BandWidth=w)
+C = pdlmi(expr, relation, BandWidth=w, SparseFullBoxOrder=r)
 C = pdlmi(expr, relation, ValidationMode=mode)
 C = lhs <= rhs
 C = lhs >= rhs

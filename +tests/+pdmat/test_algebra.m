@@ -26,6 +26,51 @@ function testSubtractionAndUnaryMinus(testCase)
     verifyCoeff(testCase, -A, 1, {-1, -3});
 end
 
+function testEqualityUsesZeroDifference(testCase)
+    % Equality returns one logical from the coefficient-backed difference.
+    A = pdmat({[0 1]}, {1, 3}, Degree=1);
+    same = pdmat({[0 0.5 1]}, {1, 2, 3}, Degree=1);
+    different = pdmat({[0 1]}, {1, 4}, Degree=1);
+
+    testCase.verifyTrue(A == same);
+    testCase.verifyFalse(A == different);
+    testCase.verifyClass(A == same, "logical");
+    testCase.verifySize(A == same, [1 1]);
+end
+
+function testEqualitySupportsSubtractionCompatibleNumericOperands(testCase)
+    % Numeric equality should reuse scalar expansion and matrix subtraction.
+    Z = pdmat({[0 1]}, {zeros(2), zeros(2)}, Degree=1);
+    I = pdmat({[0 1]}, {eye(2), eye(2)}, Degree=1);
+    O = pdmat({[0 1]}, {ones(2), ones(2)}, Degree=1);
+
+    testCase.verifyTrue((I - I) == 0);
+    testCase.verifyTrue(0 == (I - I));
+    testCase.verifyTrue(O == 1);
+    testCase.verifyTrue(1 == O);
+    testCase.verifyTrue(I == eye(2));
+    testCase.verifyTrue(eye(2) == I);
+    testCase.verifyFalse(I == 0);
+    testCase.verifyFalse(0 == I);
+    testCase.verifyFalse(I == [1 0; 0 2]);
+    testCase.verifyFalse([1 0; 0 2] == I);
+    testCase.verifyClass(Z == 0, "logical");
+    testCase.verifySize(Z == 0, [1 1]);
+end
+
+function testEqualityRejectsInvalidNumericAndUnsupportedOperands(testCase)
+    % Equality keeps subtraction-owned numeric validation and API errors.
+    A = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
+    notFinite = str2double("NaN");
+
+    testCase.verifyError(@() A == ones(1, 3), ...
+        "pdmat:InvalidSubtraction");
+    testCase.verifyError(@() A == notFinite, "pdmat:InvalidSubtraction");
+    testCase.verifyError(@() A == 1i, "pdmat:InvalidSubtraction");
+    testCase.verifyError(@() A == [], "pdmat:InvalidSubtraction");
+    testCase.verifyError(@() A == "zero", "pdmat:InvalidEquality");
+end
+
 function testMatrixMultiplicationDegreeGrowth(testCase)
     % Matrix multiplication should convolve Bernstein coefficients and grow degree.
     A = pdmat({[0 1]}, {[1 2], [3 4]}, Degree=1);

@@ -12,6 +12,11 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>pdlmi</span>
 </nav>
 
+Throughout this reference,
+$S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$ and $M$ is the assembled
+residual degree; see the
+[global notation](/PD-LMI-package/documents/math/notation/#residual-and-positive-target).
+
 `pdlmi` stores finite certificates generated from `pdvar` residuals or
 coefficient-backed `pdmat` inequalities. Inequalities use semidefinite meaning
 only when every original
@@ -63,7 +68,7 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 ## Implemented Behavior
 
-Documentation v1.1.4 describes `<=`, `>=`, and `==` for affine `pdvar`
+Documentation v1.1.5 describes `<=`, `>=`, and `==` for affine `pdvar`
 residuals and `<=`/`>=` for coefficient-backed known `pdmat` residuals.
 Inequalities select
 one global semidefinite or entry-wise interpretation from all original

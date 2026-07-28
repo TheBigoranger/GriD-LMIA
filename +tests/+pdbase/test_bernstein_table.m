@@ -59,6 +59,72 @@ function testPdmatOneLineModeIncludesBernsteinScales(testCase)
         "(1-alpha)^2*1 + 2(1-alpha)alpha*2 + alpha^2*3");
 end
 
+function testPdmatMatrixRowsRemainVisibleInDetailedTable(testCase)
+    % Matrix values expand by row while metadata appears once per coefficient.
+    A = pdmat({[0 1]}, ...
+        {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+
+    T = bernsteinTable(A);
+
+    testCase.verifyEqual(height(T), 4);
+    testCase.verifyEqual(strip(string(T.TermIndex)), [""; "1"; ""; "2"]);
+    testCase.verifyEqual(strip(string(T.CellSubscript)), ...
+        [""; "{[1]}"; ""; "{[1]}"]);
+    testCase.verifyEqual(strip(string(T.CoeffSubscript)), ...
+        [""; "{[1]}"; ""; "{[2]}"]);
+    testCase.verifyEqual(strip(string(T.LocalIndex)), ...
+        [""; "{[0]}"; ""; "{[1]}"]);
+    testCase.verifyEqual(strip(string(T.Basis)), ...
+        [""; """(1-alpha)"""; ""; """alpha"""]);
+    testCase.verifyEqual(strip(string(T.IsPhysicalNode)), ...
+        [""; "true"; ""; "true"]);
+    testCase.verifyEqual(T.Value, {[1 2]; [3 4]; [5 6]; [7 8]});
+end
+
+function testOddHeightMatrixCentersMetadata(testCase)
+    % Odd-height matrix blocks should place metadata on the true middle row.
+    A = pdmat({[0 1]}, ...
+        {[1 2; 3 4; 5 6], [7 8; 9 10; 11 12]}, Degree=1);
+
+    detailed = bernsteinTable(A);
+    oneLine = bernsteinTable(A, "oneLine");
+
+    testCase.verifyEqual(strip(string(detailed.TermIndex)), ...
+        [""; "1"; ""; ""; "2"; ""]);
+    testCase.verifyEqual(strip(string(detailed.CellSubscript)), ...
+        [""; "{[1]}"; ""; ""; "{[1]}"; ""]);
+    testCase.verifyEqual(detailed.Value, ...
+        {[1 2]; [3 4]; [5 6]; [7 8]; [9 10]; [11 12]});
+    testCase.verifyEqual(strip(string(oneLine.CellSubscript)), ...
+        [""; "{[1]}"; ""]);
+end
+
+function testPdmatMatrixOneLineUsesActiveNumericFormat(testCase)
+    % oneLine should expand matrix rows and honor the active MATLAB format.
+    A = pdmat({[0 1]}, ...
+        {[0.204908275128747 0.0320487219369788; ...
+          0.0320487219369788 0.781999831414089], ...
+         [0.170281985942478 -0.0736470291023216; ...
+          -0.0736470291023216 0.571024555454962]}, Degree=1);
+    originalFormat = format;
+    testCase.addTeardown(@() restoreFormat(originalFormat));
+
+    format short
+    shortTable = bernsteinTable(A, "oneLine");
+    testCase.verifyEqual(height(shortTable), 2);
+    testCase.verifyEqual(strip(string(shortTable.CellSubscript)), ...
+        [""; "{[1]}"]);
+    testCase.verifyEqual(string(shortTable.Expression), [ ...
+        "(1-alpha)*[0.2049 0.0320] + alpha*[0.1703 -0.0736]"; ...
+        "(1-alpha)*[0.0320 0.7820] + alpha*[-0.0736 0.5710]"]);
+
+    format longG
+    longTable = bernsteinTable(A, "oneLine");
+    testCase.verifyEqual(string(longTable.Expression(1)), ...
+        "(1-alpha)*[0.204908275128747 0.0320487219369788] + " + ...
+        "alpha*[0.170281985942478 -0.0736470291023216]");
+end
+
 function testPdmatTensorGridOrderingAndInvalidInputs(testCase)
     % Tensor rows should follow the shared local-label combination order.
     A = pdmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1);
@@ -106,16 +172,39 @@ function testPdvarOrdinaryTableUsesSdisplayStrings(testCase)
 end
 
 function testPdvarMatrixCoefficientDisplayIsCompact(testCase)
-    % Matrix-valued sdpvar coefficients should still occupy one table cell.
-    P = pdvar(2, 1, {[0 1]}, "full");
+    % Matrix-valued sdpvar rows share one centered metadata row.
+    P = pdvar(2, 2, {[0 1]}, "full");
     cp = P.coeffs(1);
 
     T = bernsteinTable(P, 1);
 
-    testCase.verifyEqual(height(T), 2);
+    testCase.verifyEqual(height(T), 4);
+    testCase.verifyEqual(strip(string(T.TermIndex)), [""; "1"; ""; "2"]);
+    testCase.verifyEqual(strip(string(T.CellSubscript)), ...
+        [""; "{[1]}"; ""; "{[1]}"]);
     testCase.verifyTrue(isstring(T.Value{1}));
     testCase.verifyTrue(isscalar(T.Value{1}));
-    testCase.verifyEqual(T.Value{1}, sdpText(cp{1}));
+    testCase.verifyEqual(T.Value{1}, sdpText(cp{1}(1, :)));
+    testCase.verifyEqual(T.Value{2}, sdpText(cp{1}(2, :)));
+    testCase.verifyEqual(T.Value{3}, sdpText(cp{2}(1, :)));
+    testCase.verifyEqual(T.Value{4}, sdpText(cp{2}(2, :)));
+end
+
+function testPdvarMatrixOneLineExpandsRows(testCase)
+    % oneLine should emit one complete Bernstein expression per matrix row.
+    P = pdvar(2, 2, {[0 1]}, "full");
+    cp = P.coeffs(1);
+
+    T = bernsteinTable(P, "oneLine");
+
+    testCase.verifyEqual(height(T), 2);
+    testCase.verifyEqual(strip(string(T.CellSubscript)), ...
+        [""; "{[1]}"]);
+    testCase.verifyEqual(string(T.Expression), [ ...
+        "(1-alpha)*" + sdpText(cp{1}(1, :)) + ...
+            " + alpha*" + sdpText(cp{2}(1, :)); ...
+        "(1-alpha)*" + sdpText(cp{1}(2, :)) + ...
+            " + alpha*" + sdpText(cp{2}(2, :))]);
 end
 
 function testPdvarOneLineModeIncludesSymbolicBernsteinTerms(testCase)
@@ -184,6 +273,36 @@ function testPdvarDerivativeOneLineAddsRateVertexColumns(testCase)
     testCase.verifyEqual(string(T.Expression(1)), expected);
 end
 
+function testPdvarDerivativeMatrixRowsPreserveRateOrder(testCase)
+    % Matrix expansion must remain inside each cell/rate/coefficient group.
+    P = pdvar(2, 2, {[0 1]}, "full", Degree=2);
+    D = rhodiff(P, [-1 2]);
+    cd = D.coeffs(1);
+
+    detailed = bernsteinTable(D);
+
+    testCase.verifyEqual(height(detailed), 8);
+    testCase.verifyEqual(strip(string(detailed.TermIndex)), ...
+        [""; "1"; ""; "2"; ""; "3"; ""; "4"]);
+    testCase.verifyEqual(strip(string(detailed.RateVertexIndex)), ...
+        [""; "1"; ""; "1"; ""; "2"; ""; "2"]);
+    testCase.verifyEqual(detailed.Value{1}, sdpText(cd{1, 1}(1, :)));
+    testCase.verifyEqual(detailed.Value{2}, sdpText(cd{1, 1}(2, :)));
+    testCase.verifyEqual(detailed.Value{5}, sdpText(cd{2, 1}(1, :)));
+
+    oneLine = bernsteinTable(D, "oneLine");
+
+    testCase.verifyEqual(height(oneLine), 4);
+    testCase.verifyEqual(strip(string(oneLine.RateVertexIndex)), ...
+        [""; "1"; ""; "2"]);
+    firstRow = "(1-alpha)*" + sdpText(cd{1, 1}(1, :)) + ...
+        " + alpha*" + sdpText(cd{1, 2}(1, :));
+    secondRow = "(1-alpha)*" + sdpText(cd{1, 1}(2, :)) + ...
+        " + alpha*" + sdpText(cd{1, 2}(2, :));
+    testCase.verifyEqual(string(oneLine.Expression(1)), firstRow);
+    testCase.verifyEqual(string(oneLine.Expression(2)), secondRow);
+end
+
 function testPdvarInvalidInputsFailClearly(testCase)
     % Option validation should match the pdmat bernsteinTable surface.
     P = pdvar(1, {[0 1]});
@@ -219,4 +338,10 @@ function txt = scalarText(expr)
     if numel(vars) == 1 && txt == "expr"
         txt = "internal(" + string(vars) + ")";
     end
+end
+
+function restoreFormat(options)
+    %RESTOREFORMAT Restore both numeric style and line spacing after a test.
+    format(char(options.NumericFormat));
+    format(char(options.LineSpacing));
 end

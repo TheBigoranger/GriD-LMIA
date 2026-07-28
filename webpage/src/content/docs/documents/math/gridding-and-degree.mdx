@@ -24,11 +24,16 @@ choices.
 For scheduling axis $s$, define the ordered grid
 
 $$
-\mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\}.
+\mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},
+\qquad
+\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell.
 $$
 
 The one-based symbol $\rho_s^{(j)}$ denotes physical node $j$ on axis
-$s$, while $k_s$ is that axis's node count.
+$s$, while $k_s$ is that axis's node count. The tensor grid exactly
+partitions the parameter box
+$\mathcal P=\prod_s[\underline\rho_s,\overline\rho_s]$ into
+$\prod_s(k_s-1)$ physical cells.
 
 The one-based physical cell index
 $\mathbf c=(c_1,\ldots,c_\ell)$ selects
@@ -38,7 +43,7 @@ $$
 =\prod_{s=1}^{\ell}
 [\rho_s^{(c_s)},\rho_s^{(c_s+1)}],
 \qquad
-h_s^{(\mathbf c)}
+h_s^{\mathbf c}
 =\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
 $$
 
@@ -49,25 +54,24 @@ cells.
 
 ## One-Dimensional Input
 
-For $\mathcal G_1=\{0,0.5,1\}$, there are two cells. The forward pullback
-from a physical point $\boldsymbol\rho\in\mathcal H_{\mathbf c}$ to the unit
-cell is
+For $\mathcal G_1=\{0,0.5,1\}$, there are two cells. The physical map
+$\phi_{\mathbf c}:[0,1]^\ell\to\mathcal H_{\mathbf c}$ and its inverse are
 
 $$
-\boldsymbol\alpha=\phi_{\mathbf c}(\boldsymbol\rho),
+\rho_s=\phi_{\mathbf c,s}(\boldsymbol\alpha)
+=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,
+\qquad
+\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho),
 \qquad
 \alpha_s=
-\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{(\mathbf c)}}\in[0,1].
+\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{\mathbf c}}\in[0,1].
 $$
 
-“Forward” matters: $\phi_{\mathbf c}$ maps physical coordinates to local
-coordinates. The inverse map is
-$\rho_s=\rho_s^{(c_s)}+h_s^{(\mathbf c)}\alpha_s$.
 Consequently,
 
 $$
 \frac{\partial}{\partial\rho_s}
-=\frac{1}{h_s^{(\mathbf c)}}
+=\frac{1}{h_s^{\mathbf c}}
 \frac{\partial}{\partial\alpha_s}.
 $$
 
@@ -116,7 +120,7 @@ for the exact traversal contract.
 - Increasing residual degree $M$ can result from products and common-degree
   alignment even when $m$ is unchanged.
 - Increasing Pólya increment $d$, Gram order $r$, or SparseFullBox
-  bandwidth $b$ changes the selected finite certificate.
+  bandwidth $w$ changes the selected finite certificate.
 
 ## Limitations
 
@@ -135,5 +139,6 @@ extend to such known data automatically.
 
 [Previous: Rate-Box Reduction And Interface Analysis](/PD-LMI-package/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/) ·
 [Next: Bernstein Basis, Continuity, And Storage](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
+[Notation](/PD-LMI-package/documents/math/notation/#grid) ·
 [`pdmat` constructor](/PD-LMI-package/documents/reference/pdmat/constructor/) ·
 [`pdvar` constructor](/PD-LMI-package/documents/reference/pdvar/constructor/)

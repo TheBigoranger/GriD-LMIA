@@ -5,10 +5,10 @@ import { certificateSources } from "../data/certificate-data";
 const { compact = false } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const cardNotation = {
-  direct: "",
+  direct: "\\begin{gathered}C^{(\\mathbf c)}[\\mathbf i]:\\text{ target coefficient matrix}\\\\\\mathbf i\\in\\mathcal I_M=\\{0,\\ldots,M\\}^{\\ell}:\\text{ local label}\\end{gathered}",
   polya: "\\begin{gathered}\\widetilde C^{(\\mathbf c)}[\\mathbf i]\\succeq0,\\quad\\mathbf i\\in\\mathcal I_{M+d}\\\\\\mathcal I_{M+d}=\\{0,\\ldots,M+d\\}^{\\ell}\\end{gathered}",
   putinar: "\\begin{gathered}S_0,S_s\\succeq0:\\text{ PSD Gram/SOS polynomial matrices}\\\\g_s=\\alpha_s(1-\\alpha_s):\\text{ box generator};\\quad r:\\text{ absolute Gram order}\\end{gathered}",
-  sparsefullbox: "\\begin{gathered}S_{J,\\mathbf t}\\succeq0:\\text{ band-support PSD clique}\\\\b=1:\\text{ Direct};\\quad b\\ge r+1:\\text{ FullBox}\\end{gathered}",
+  sparsefullbox: "\\begin{gathered}S_{J,\\mathbf t}\\succeq0:\\text{ band-support PSD clique}\\\\w=1:\\text{ Direct};\\quad w\\ge r+1:\\text{ FullBox}\\end{gathered}",
   fullbox: "S_{J}\\succeq0:\\text{ PSD Gram/SOS multiplier};\\quad J\\subseteq[\\ell]:\\text{ generator subset};\\quad r:\\text{ absolute Gram order}",
 } as const;
 const options = certificateSources.map((item) => ({

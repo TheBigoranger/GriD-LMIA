@@ -708,6 +708,23 @@
   font-weight: 750;
 }
 
+.addition-readout {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.addition-readout p {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.3fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  margin: 0;
+}
+
+.addition-readout code {
+  overflow-wrap: anywhere;
+}
+
 .plot-block {
   min-width: 0;
   border: 1px solid var(--diagram-border);
@@ -1385,6 +1402,11 @@
 }
 
 @media (max-width: 520px) {
+  .addition-readout p {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+  }
+
   .grid-rotation-controls {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

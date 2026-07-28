@@ -13,6 +13,9 @@ import DiagramFrame from "../../../../../components/DiagramFrame.astro";
   <span>constructor</span>
 </nav>
 
+Cell indices, local coordinates, and modeled degree $m$ follow the
+[global notation](/PD-LMI-package/documents/math/notation/#bernstein-labels-and-degrees).
+
 <DiagramFrame caption="Each local Bernstein position stores a full YALMIP decision matrix. Neighboring continuous cells reference the same decision handle on their shared face." label="Shared pdvar decision handles across two cells">
   <div class="decision-handles" role="img" aria-label="Two quadratic coefficient strips share one symbolic interface handle">
     <span>X₀</span><span>X₁</span><strong>X₂<br/><small>shared</small></strong><span>X₃</span><span>X₄</span>

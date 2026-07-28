@@ -29,7 +29,7 @@ const lmiSteps = [
   {
     number: "02",
     title: "Partition the supported parameter box",
-    text: "Assume axis-aligned parameter and rate boxes. Independent nonuniform axis grids exactly partition the parameter box into physical cells. Gridding becomes an approximation only when it restricts the admissible decision-function space; affine rate-vertex reduction is a separate exact step.",
+    textHtml: `Here ${renderInlineMath("\\mathcal P")} is the parameter box, ${renderInlineMath("\\mathcal R")} is the rate box, and ${renderInlineMath("\\ell")} is the number of axes. On axis ${renderInlineMath("s")}, ${renderInlineMath("\\mathcal G_s")} contains ${renderInlineMath("k_s")} physical nodes. The one-based vector ${renderInlineMath("\\mathbf c")} selects the physical cell ${renderInlineMath("\\mathcal H_{\\mathbf c}")}. The tensor grid partitions ${renderInlineMath("\\mathcal P")} exactly; approximation enters only through the restricted decision-function space, while affine rate-vertex reduction is a separate exact step.`,
     math: [
       "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
       "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},\\qquad\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
@@ -43,7 +43,7 @@ const lmiSteps = [
     title: "Fix one cell and use the Bernstein basis",
     textHtml: `Pull one physical cell back to ${renderInlineMath("\\boldsymbol\\alpha\\in[0,1]^\\ell")}. The normalized basis is nonnegative and sums to one, exposes endpoint and face coefficients, and supports cell-local coefficient algebra.`,
     math: [
-      "\\boldsymbol\\alpha=\\phi_{\\mathbf c}(\\boldsymbol\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{(\\mathbf c)}}.",
+      "\\boldsymbol\\alpha=\\phi_{\\mathbf c}^{-1}(\\boldsymbol\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{\\mathbf c}}.",
       "B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad \\sum_{\\mathbf i}B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=1.",
       "A^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha).",
     ],
@@ -54,14 +54,13 @@ const lmiSteps = [
   },
   {
     number: "04",
-    title: "Replace one continuous cell condition by Direct tests",
-    textHtml: `Because every normalized Bernstein basis function is nonnegative, positive-semidefinite coefficient matrices are a finite sufficient condition for the continuous target. Direct is the default; <a href="${local("documents/math/finite-certificates/direct-and-polya/")}">Pólya</a>, <a href="${local("documents/math/finite-certificates/markov-lukacs-and-putinar/")}">Putinar</a>, <a href="${local("documents/math/finite-certificates/sparsefullbox-and-fullbox/")}">SparseFullBox and FullBox</a> are opt-in alternatives described in the detailed certificate material.`,
+    title: "Select a finite certificate for the positive target",
+    textHtml: `The theoretical cell target is ${renderInlineMath("S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0")}. YALMIP uses non-strict semidefinite constraints, so a required numerical margin must be written explicitly as ${renderInlineMath("S^{(\\mathbf c)}-\\varepsilon I\\succeq0")}. Expand any method below to see one representative identity, its notation, the MATLAB selector, and the detailed reference.`,
     math: [
-      "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\mathcal I_M}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{M}(\\boldsymbol\\alpha).",
-      "\\bigl[C^{(\\mathbf c)}[\\mathbf i]\\succeq0\\;\\;\\forall\\mathbf i\\bigr]\\;\\Longrightarrow\\;\\bigl[S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succeq0\\;\\;\\forall\\boldsymbol\\alpha\\in[0,1]^\\ell\\bigr].",
+      "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=-\\mathcal F^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0.",
     ],
     visual: "certificate",
-    fullCode: "selected = L;  % Direct coefficient tests",
+    fullCode: "selected = L;  % or select Pólya, Putinar, SparseFullBox, or FullBox",
     manual: "documents/math/finite-certificates/direct-and-polya/",
   },
   {

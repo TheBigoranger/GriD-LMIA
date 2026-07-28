@@ -42,9 +42,12 @@ The implication is one-way.  A polynomial may be positive everywhere while one B
 
 \section{Degree-One Interpolation On One Physical Cell}
 
-\ideastep{Basic idea} Let \(\mathcal H_c=[\rho_1^{(c)},\rho_1^{(c+1)}]\), with width \(h_1^{(c)}=\rho_1^{(c+1)}-\rho_1^{(c)}>0\). Its forward local coordinate is
+\ideastep{Basic idea} Let \(\mathcal H_c=[\rho_1^{(c)},\rho_1^{(c+1)}]\), with width \(h_1^{c}=\rho_1^{(c+1)}-\rho_1^{(c)}>0\). Its forward map and inverse coordinate are
 \[
-  \alpha=\frac{\rho_1-\rho_1^{(c)}}{h_1^{(c)}}\in[0,1].
+  \phi_c(\alpha)=\rho_1^{(c)}+h_1^c\alpha,
+  \qquad
+  \alpha=\phi_c^{-1}(\rho_1)
+  =\frac{\rho_1-\rho_1^{(c)}}{h_1^c}\in[0,1].
 \]
 \ideastep{Formula} The degree-one Bernstein basis is
 \[
@@ -97,7 +100,7 @@ Each basis function is nonnegative on \([0,1]\).  The binomial theorem gives
 \]
 Thus
 \[
-M_c(\alpha)=\sum_{i=0}^{m}B_i^m(\alpha)C^{(c)}[i]
+  C^{(c)}(\alpha)=\sum_{i=0}^{m}B_i^m(\alpha)C^{(c)}[i]
 \]
 is a convex combination of its local coefficient matrices.
 
@@ -238,29 +241,68 @@ Direct elevation from \(m\) to \(M\ge m\) is
   \sum_{i=\max(0,k-M+m)}^{\min(m,k)}
 C^{(c)}[i]\frac{\binom mi\binom{M-m}{k-i}}{\binom Mk}.
 \]
-The new coefficients are fixed convex combinations of the old ones.  Elevation therefore changes representation but adds no decision freedom.  Constructing a new higher-degree \code{pdvar} does enlarge the decision parameterization.
+This formula is a binomially normalized discrete convolution. Define
+\[
+  U_m^{(c)}[i]=\binom mi C^{(c)}[i],
+  \qquad
+  E_{M-m}[j]=\binom{M-m}{j},
+  \qquad
+  \widehat U_M^{(c)}[k]=\binom Mk\widehat C^{(c)}[k].
+\]
+Then
+\[
+  \widehat U_M^{(c)}=U_m^{(c)}*E_{M-m},
+  \qquad
+  \widehat C^{(c)}[k]
+  =\frac{(U_m^{(c)}*E_{M-m})[k]}{\binom Mk},
+\]
+where \(*\) is ordinary one-dimensional discrete convolution and out-of-range entries are zero. Thus elevation first binomially scales the coefficient row, convolves it with the fixed binomial kernel of degree \(M-m\), and divides by the degree-\(M\) binomial weight. The new coefficients are fixed convex combinations of the old ones. Elevation therefore changes representation but adds no decision freedom. Constructing a new higher-degree \code{pdvar} does enlarge the decision parameterization.
+
+For a tensor coefficient array, apply the same rule in every direction. With
+\[
+  U_m^{(\mathbf c)}[\mathbf i]
+  =\left(\prod_{s=1}^{\ell}\binom m{i_s}\right)
+  C^{(\mathbf c)}[\mathbf i],
+  \qquad
+  E_{M-m}[\mathbf j]
+  =\prod_{s=1}^{\ell}\binom{M-m}{j_s},
+\]
+the elevated array satisfies
+\[
+  \left(\prod_{s=1}^{\ell}\binom M{k_s}\right)
+  \widehat C^{(\mathbf c)}[\mathbf k]
+  =
+  \bigl(U_m^{(\mathbf c)}*_{\ell}E_{M-m}\bigr)[\mathbf k],
+\]
+where \(*_{\ell}\) denotes \(\ell\)-dimensional discrete convolution. This tensor convolution is deterministic and preserves the represented polynomial exactly.
 
 \section[Physical Tensor Grids And Local Tensor Labels]{%
   \texorpdfstring{Physical Tensor Grids And\\Local Tensor Labels}%
   {Physical Tensor Grids And Local Tensor Labels}}
 \label{sec:bernstein-tensor-grids}
 
-Suppose direction \(s\) has physical nodes
+Suppose direction \(s\) has the axis grid
 \[
+  \mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},
+  \qquad
   \rho_s^{(1)}<\rho_s^{(2)}<\cdots<\rho_s^{(k_s)}.
 \]
-The counts \(k_s\) may differ. Thus \(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\) has \(\prod_s k_s\) physical nodes. A physical hypercube is identified separately by the one-based multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\), with \(\mathcal H_{\mathbf c}=\prod_s[\rho_s^{(c_s)},\rho_s^{(c_s+1)}]\). Define its directional width and forward pullback by
+The counts \(k_s\) may differ. Thus \(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\) has \(\prod_s k_s\) physical nodes. A physical hypercube is identified separately by the one-based multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\), with \(\mathcal H_{\mathbf c}=\prod_s[\rho_s^{(c_s)},\rho_s^{(c_s+1)}]\). Define its directional width and forward affine map by
 \[
-  h_s^{(\mathbf c)}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)},
-  \qquad
-  \phi_{\mathbf c}(\boldsymbol\rho)=\boldsymbol\alpha,
-  \qquad
-  \alpha_s=\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{(\mathbf c)}},
-  \qquad s=1,\ldots,\ell.
+\begin{aligned}
+  h_s^{\mathbf c}
+    &=\rho_s^{(c_s+1)}-\rho_s^{(c_s)},\\
+  \phi_{\mathbf c}&:[0,1]^\ell\longrightarrow\mathcal H_{\mathbf c},\\
+  \phi_{\mathbf c,s}(\alpha_s)
+    &=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,\\
+  \boldsymbol\alpha
+    &=\phi_{\mathbf c}^{-1}(\boldsymbol\rho),
+    \qquad s=1,\ldots,\ell.
+\end{aligned}
 \]
-For the package's scalar degree \(m\),
+For any cellwise quantity \(C\), write \(C^{(\mathbf c)}=C\circ\phi_{\mathbf c}\) for its pullback to the unit box. For the package's scalar degree \(m\),
 \[
-C^{(\mathbf c)}\!\left(\phi_{\mathbf c}(\boldsymbol\rho)\right)=
+C^{(\mathbf c)}(\boldsymbol\alpha)=
   \sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
 B_{\mathbf i}^{m}(\boldsymbol\alpha)
   C^{(\mathbf c)}[\mathbf i],
@@ -328,6 +370,21 @@ gives
   \frac{\binom mi\binom nj}{\binom{m+n}{k}}.
 \]
 This is an ordered matrix convolution.  In general \(P^{(c)}[i]Q^{(c)}[j]\ne Q^{(c)}[j]P^{(c)}[i]\).
+
+Equivalently, define the binomially scaled rows
+\[
+  \widetilde P^{(c)}[i]=\binom miP^{(c)}[i],
+  \qquad
+  \widetilde Q^{(c)}[j]=\binom njQ^{(c)}[j],
+  \qquad
+  \widetilde R^{(c)}[k]=\binom{m+n}{k}(PQ)^{(c)}[k].
+\]
+Then
+\[
+  \widetilde R^{(c)}
+  =\widetilde P^{(c)}*\widetilde Q^{(c)}.
+\]
+The convolution remains ordered for matrix payloads: each summand is \(\widetilde P^{(c)}[i]\widetilde Q^{(c)}[j]\), never the reversed product.
 
 \newpage
 \ideastep{Worked example} Take quadratic coefficients \(P=[1,2,6]\) and affine coefficients \(Q=[2,4]\).  The anti-diagonals give
@@ -453,7 +510,20 @@ P^{(\mathbf c)}[\mathbf i] Q^{(\mathbf c)}[\mathbf j]
   \frac{\binom m{i_s}\binom n{j_s}}
        {\binom{m+n}{k_s}}.
 \]
-Labels add componentwise; physical-cell identity does not change.
+In binomially scaled form, the tensor rule is the \(\ell\)-dimensional discrete convolution
+\[
+  \left(\prod_{s=1}^{\ell}\binom{m+n}{k_s}\right)
+  (PQ)^{(\mathbf c)}[\mathbf k]
+  =
+  \left(
+  \left\{\left(\prod_{s=1}^{\ell}\binom m{i_s}\right)
+  P^{(\mathbf c)}[\mathbf i]\right\}_{\mathbf i}
+  *_{\ell}
+  \left\{\left(\prod_{s=1}^{\ell}\binom n{j_s}\right)
+  Q^{(\mathbf c)}[\mathbf j]\right\}_{\mathbf j}
+  \right)[\mathbf k].
+\]
+Labels add componentwise; physical-cell identity does not change, and every matrix product retains the written left-to-right factor order.
 
 \needspace{14\baselineskip}
 \section{Differentiation And Rate Vertices}
@@ -461,11 +531,11 @@ Labels add componentwise; physical-cell identity does not change.
 
 \ideastep{Basic idea} Differentiate inside each physical cell.  Adjacent control differences produce the derivative coefficients; multiplying by a bounded rate then creates one stored row per rate-box vertex.  Value continuity of \(P\) does not force the cell-local derivatives to match across a face.
 
-\ideastep{Formula} For one parameter, on physical cell \(\mathbf c\) of width \(h_1^{(\mathbf c)}\),
+\ideastep{Formula} For one parameter, on physical cell \(c\) of width \(h_1^c\),
 \[
   \frac{\partial P}{\partial\rho}
-=\frac{m}{h_1^{(\mathbf c)}}\sum_{i=0}^{m-1}
-    \bigl(C^{(\mathbf c)}[i+1]-C^{(\mathbf c)}[i]\bigr)B_i^{m-1}(\alpha).
+=\frac{m}{h_1^c}\sum_{i=0}^{m-1}
+    \bigl(C^{(c)}[i+1]-C^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
 \]
 \ideastep{Worked example} For the worked polynomial \([1,2,6]\) on \([0,2]\), \(m=2\) and \(h=2\), so the derivative coefficients are
 \[
@@ -475,7 +545,7 @@ This represents \(dp/d\rho=1+3\alpha\).
 
 In \(\ell\) dimensions, differentiation with respect to \(\rho_s\) replaces each coefficient by
 \[
-  \frac{m}{h_s^{(\mathbf c)}}
+  \frac{m}{h_s^{\mathbf c}}
   \left(C^{(\mathbf c)}[\mathbf i+\mathbf e_s]
        -C^{(\mathbf c)}[\mathbf i]\right),
 \]
@@ -487,7 +557,7 @@ Finally,
   \nu_s\frac{\partial P}{\partial\rho_s},
   \qquad \boldsymbol\nu=\dot{\boldsymbol\rho}.
 \]
-This matrix expression is affine in \(\boldsymbol\nu\). Every value inside the rate box \(\mathcal R\) is therefore a convex combination of the \(2^\ell\) vertex matrices. Because the positive- and negative-semidefinite cones are convex, the requested semidefinite sign holds on all of \(\mathcal R\) whenever it holds at every vertex. \code{rhodiff} stores one row for each vertex.
+This matrix expression is affine in \(\boldsymbol\nu\). Every value inside the rate box \(\mathcal R\) is therefore a convex combination of the \(2^\ell\) vertex matrices in \(\mathcal V_{\mathcal R}\). Because the positive- and negative-semidefinite cones are convex, the requested semidefinite sign holds on all of \(\mathcal R\) whenever it holds at every vertex. \code{rhodiff} stores one row for each vertex.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -512,10 +582,11 @@ This matrix expression is affine in \(\boldsymbol\nu\). Every value inside the r
 
 Let \(\code{RateBounds}(s,:)=[\underline\nu_s\ \overline\nu_s]\). The rate box \(\mathcal R=\prod_s[\underline\nu_s,\overline\nu_s]\) has the finite vertex set
 \[
-  \operatorname{vert}(\mathcal R)=\prod_{s=1}^{\ell}\{\underline\nu_s,\overline\nu_s\},
-  \qquad |\operatorname{vert}(\mathcal R)|=2^\ell.
+  \mathcal V_{\mathcal R}
+  =\prod_{s=1}^{\ell}\{\underline\nu_s,\overline\nu_s\},
+  \qquad |\mathcal V_{\mathcal R}|=2^\ell.
 \]
-For a derivative object \(D=\code{rhodiff}(P,\code{RateBounds})\) and one physical hypercube \(\mathbf c=(c_1,\ldots,c_\ell)\), the leaf \(\code{D.LocalValues}\{c_1\}\cdots\{c_\ell\}\) is a \(2^\ell\)-by-\((\code{D.Degree}+1)^\ell\) cell array. Its rows enumerate vertices \(\boldsymbol\nu^{(q)}\in\operatorname{vert}(\mathcal R)\); its columns enumerate local Bernstein labels in \code{combRows} order. Each entry already contains \(\sum_s\nu_s^{(q)}\,\partial P^{(\mathbf c)}/\partial\rho_s\). The rows add rate alternatives inside one existing hypercube; they do not add physical cells.
+For a derivative object \(D=\code{rhodiff}(P,\code{RateBounds})\) and one physical hypercube \(\mathbf c=(c_1,\ldots,c_\ell)\), the leaf \(\code{D.LocalValues}\{c_1\}\cdots\{c_\ell\}\) is a \(2^\ell\)-by-\((\code{D.Degree}+1)^\ell\) cell array. Its rows enumerate vertices \(\boldsymbol\nu^{(q)}\in\mathcal V_{\mathcal R}\); its columns enumerate local Bernstein labels in \code{combRows} order. Each entry already contains \(\sum_s\nu_s^{(q)}\,\partial P^{(\mathbf c)}/\partial\rho_s\). The rows add rate alternatives inside one existing hypercube; they do not add physical cells.
 
 For \(\ell=2\), the lower/upper tensor order is
 \[

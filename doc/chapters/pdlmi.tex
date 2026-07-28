@@ -98,10 +98,10 @@ C = pdlmi(expr, relation, UsePutinar=true, PutinarOrder=r)
 C = pdlmi(expr, relation, PutinarOrder=r)
 C = pdlmi(expr, relation, "UseSparseFullBoxPreorder")
 C = pdlmi(expr, relation, UseSparseFullBoxPreorder=true)
-C = pdlmi(expr, relation, BandWidth=b)
+C = pdlmi(expr, relation, BandWidth=w)
 C = pdlmi(expr, relation, SparseFullBoxOrder=r)
 C = pdlmi(expr, relation, UseSparseFullBoxPreorder=true, ...
-    BandWidth=b, SparseFullBoxOrder=r)
+    BandWidth=w, SparseFullBoxOrder=r)
 C = pdlmi(expr, relation, "UseFullBoxPreorder")
 C = pdlmi(expr, relation, UseFullBoxPreorder=true)
 C = pdlmi(expr, relation, FullBoxOrder=r)
@@ -120,7 +120,7 @@ C = lhs == rhs
   \item \code{UsePutinar} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select the dimension-appropriate Putinar certificate at the smallest admissible order.
   \item \code{PutinarOrder=r} is a finite nonnegative integer scalar and is an absolute Bernstein Gram order, not a degree increment. For assembled residual degree \(M\), its default and minimum are \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) in two or more parameters. Supplying the order without \code{UsePutinar} enables Putinar assembly. Pairing \code{UsePutinar=false} with any explicit order, including zero, raises \codeerr{pdlmi}{ConflictingPutinarOptions}.
   \item \code{UseSparseFullBox}\allowbreak\code{Preorder} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select SparseFullBox with default \code{BandWidth=2}; \code{BandWidth} or \code{SparseFullBoxOrder} alone also enables this family. Explicit \code{UseSparseFullBox}\allowbreak\code{Preorder=false} conflicts with either sparse parameter.
-  \item \code{BandWidth=b} is a finite positive integer band width. Intermediate widths restrict the FullBox Gram support and are realized by overlapping axis-aligned tensor-window PSD clique blocks. \code{SparseFullBoxOrder=r} is a finite nonnegative absolute Gram order whose default and minimum are \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) otherwise, where \(M=\code{C.Residual.Degree}\). Width one canonicalizes to actual Direct state after order validation; width at least \(r+1\) canonicalizes to actual FullBox state; intermediate widths select SparseFullBox state.
+  \item \code{BandWidth=w} is a finite positive integer bandwidth. Intermediate widths restrict the FullBox Gram support and are realized by overlapping axis-aligned tensor-window PSD clique blocks. \code{SparseFullBoxOrder=r} is a finite nonnegative absolute Gram order whose default and minimum are \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) otherwise, where \(M=\code{C.Residual.Degree}\). Width one canonicalizes to actual Direct state after order validation; width at least \(r+1\) canonicalizes to actual FullBox state; intermediate widths select SparseFullBox state.
   \item \code{UseFullBoxPreorder} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select full-box assembly at the smallest admissible order.
   \item \code{FullBoxOrder=r} is a finite nonnegative integer scalar and is an absolute order, not a degree increment. Supplying it without \code{UseFullBoxPreorder} enables full-box assembly. When FullBox is enabled, the minimum is \(\lfloor M/2\rfloor\) for a one-parameter residual of degree \(M\), and \(\lceil M/2\rceil\) for two or more parameters. Explicitly pairing \code{UseFullBoxPreorder=false} with \code{FullBoxOrder=r} suppresses that automatic selection: \code{C} remains direct and records \code{r} only as inspectable metadata; the order is not applied to assembly.
   \item P\'olya, Putinar, SparseFullBox, and FullBox selection are mutually exclusive and apply only to inequalities. Any recognized certificate option on an equality raises \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before width or order validation. Enabling more than one inequality family raises \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}.
@@ -197,7 +197,7 @@ bandWidth = 0
 
 For a \code{pdvar} residual, including equality behavior, each physical cell, local Bernstein coefficient, and rate-vertex row if present creates one stored YALMIP constraint entry. For an ordinary expression with \(N_c\) physical cells and \(N_b\) Bernstein coefficients per cell, the number of entries is \(N_cN_b\); with \(N_v\) rate vertices it is \(N_cN_bN_v\). A semidefinite-mode entry is one matrix constraint. An entry-wise-mode entry is the column-major vector of scalar matrix entries compared independently. An equality entry is the corresponding direct coefficient equation and may be rectangular. For a coefficient-backed known \code{pdmat} inequality, Direct and P\'olya assembly instead scan the complete numeric coefficient family and store exactly one logical cell containing the global certificate; \code{toYalmip} exports that state as one scalar logical.
 
-The idea is the Bernstein convex-hull property. After orienting the original residual \(\mathcal F\) as the sign-normalized positive target \(S\), suppress the already-stacked rate-row index and write
+The idea is the Bernstein convex-hull property. After orienting the cell residual \(\mathcal F^{(\mathbf c)}\) as the sign-normalized positive target \(S^{(\mathbf c)}\), suppress the already-stacked rate-row index and write
 \[
 S^{(\mathbf c)}(\boldsymbol\alpha)=
   \sum_{\mathbf i}B_{\mathbf i}^M(\boldsymbol\alpha)
@@ -331,22 +331,22 @@ The mathematical background and the limits of fixed-increment coefficient positi
 
 For an entry-wise inequality, the constructions below are applied independently to each scalar matrix entry in MATLAB column-major order.  Gram variables are not shared between entries.  Equality wrappers reject Putinar selection.
 
-The Putinar selector is dimension-aware.  With one parameter it deliberately uses the same exact even/odd Markov--Luk\'acs
+The Putinar selector is dimension-aware. With one parameter it deliberately uses the same exact even/odd Markov--Luk\'acs
 \index{Markov--Lukacs@Markov--Luk\'acs} assembly as
-\code{applyFullBoxPreorder}.  For selected absolute order \(r\), the even form matches at degree \(2r\),
+\code{applyFullBoxPreorder}. Let \(Z_r(\alpha)=\mathbf b_r(\alpha)\otimes I_n\), where \(\mathbf b_r=[B_0^r,\ldots,B_r^r]^{\mathsf T}\). For selected absolute order \(r\), the even form matches at degree \(2r\),
 \[
-S=\mathcal Z_r^{\mathsf T}Q_0\mathcal Z_r +\alpha(1-\alpha)
-      \mathcal Z_{r-1}^{\mathsf T}Q_1\mathcal Z_{r-1},
+ S^{(c)}=Z_r^{\mathsf T}Q_0Z_r +\alpha(1-\alpha)
+      Z_{r-1}^{\mathsf T}Q_1Z_{r-1},
 \]
 where the second block is omitted at \(r=0\).  The odd form matches at degree \(2r+1\),
 \[
-S=(1-\alpha)\mathcal Z_r^{\mathsf T}Q_L\mathcal Z_r +\alpha\mathcal Z_r^{\mathsf T}Q_U\mathcal Z_r.
+ S^{(c)}=(1-\alpha)Z_r^{\mathsf T}Q_LZ_r +\alpha Z_r^{\mathsf T}Q_UZ_r.
 \]
 All present Gram matrices are positive semidefinite. The one-parameter default and minimum are \(r=\lfloor M/2\rfloor\) for assembled residual degree \(M\).
 
-For two or more parameters, the selector instead uses the fixed-order, box-specific singleton-generator Bernstein--Gram quadratic module. After normalizing the relation so that \(S(\boldsymbol\alpha)\) is positive semidefinite, it represents
+For two or more parameters, the selector instead uses the fixed-order, box-specific singleton-generator Bernstein--Gram quadratic module. After normalizing the relation so that \(S^{(\mathbf c)}(\boldsymbol\alpha)\) is positive semidefinite, it represents
 \[
-S(\boldsymbol\alpha)=S_0(\boldsymbol\alpha) +\sum_{s=1}^{\ell}\alpha_s(1-\alpha_s) S_s(\boldsymbol\alpha).
+S^{(\mathbf c)}(\boldsymbol\alpha)=S_0(\boldsymbol\alpha) +\sum_{s=1}^{\ell}\alpha_s(1-\alpha_s) S_s(\boldsymbol\alpha).
 \]
 Only singleton box generators appear in this multivariate branch: products such as \(\alpha_1(1-\alpha_1)\alpha_2(1-\alpha_2)\) belong to the full-box preordering, not this module.
 
@@ -391,7 +391,7 @@ For this one-parameter scalar degree-two cell, order one uses the exact even Mar
 \remarkshead
 For the multivariate backend, the smallest useful worked case is \(\ell=2\).  Let \(g_s=\alpha_s(1-\alpha_s)\).  At absolute order \(r\), Putinar uses exactly the singleton-generator module
 \[
-  S=S_0+g_1S_1+g_2S_2,
+  S^{(\mathbf c)}=S_0+g_1S_1+g_2S_2,
 \]
 where \(S_0\) has Bernstein basis degree \((r,r)\), \(S_1\) has degree \((r-1,r)\), and \(S_2\) has degree \((r,r-1)\).  Each \(S_j\) is a PSD Gram form.  MATLAB elevates the sign-normalized target and all present terms to tensor degree \((2r,2r)\), then creates one exact coefficient match per local Bernstein label.  These PSD blocks and equalities are assembled independently for every physical cell, active rate row, and scalar matrix entry; they are never shared across those axes.
 
@@ -405,7 +405,7 @@ The diagram below specializes to the even one-parameter example above.
     minimum height=11mm},
   r/.style={dp/result,font=\scriptsize,align=center,minimum width=29mm,
     minimum height=11mm}]
-  \node[n] (target) {positive target \(S\)\\elevate to degree \(2r\)};
+  \node[n] (target) {positive target \(S^{(\mathbf c)}\)\\elevate to degree \(2r\)};
   \node[c,right=of target] (grams) {PSD Gram blocks\\\(S_0\) and singleton \(S_s\)};
   \node[r,right=of grams] (match) {exact Bernstein\\coefficient identities};
   \draw[dp/arrow] (target) -- (grams);
@@ -427,26 +427,26 @@ Select SparseFullBox with\\[-0.15em] \texorpdfstring{\code{applySparseFullBoxPre
 \index{SparseFullBox}\index{band-limited Gram support}\index{applySparseFullBoxPreorder@\texttt{applySparseFullBoxPreorder}}\index{BandWidth@\texttt{BandWidth}}
 \label{sec:pdlmi-sparse-full-box}
 
-SparseFullBox is FullBox with band-limited Gram support. It uses the same one-parameter parity terms, multivariate box-generator masks, relation orientation, and exact target-coefficient identities as FullBox. The implementation realizes the restricted support by replacing each dense Gram block with free positive-semidefinite clique blocks on overlapping axis-aligned windows of the tensor Bernstein basis. This implementation mechanism changes only allowed Gram entries: the original residual \(\mathcal F\), physical grid, decision degree \(m\), assembled residual degree \(M\), generator weights, and coefficient identities remain unchanged.
+SparseFullBox is FullBox with band-limited Gram support. It uses the same one-parameter parity terms, multivariate box-generator masks, relation orientation, and exact target-coefficient identities as FullBox. The implementation realizes the restricted support by replacing each dense Gram block with free positive-semidefinite clique blocks on overlapping axis-aligned windows of the tensor Bernstein basis. This implementation mechanism changes only allowed Gram entries: the cell residual \(\mathcal F^{(\mathbf c)}\), physical grid, decision degree \(m\), assembled residual degree \(M\), generator weights, and coefficient identities remain unchanged.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 Csp = C.applySparseFullBoxPreorder()
-Csp = C.applySparseFullBoxPreorder(b)
-Csp = C.applySparseFullBoxPreorder(b, r)
+Csp = C.applySparseFullBoxPreorder(w)
+Csp = C.applySparseFullBoxPreorder(w, r)
 Csp = C.applySparseFullBoxPreorder(..., ValidationMode=mode)
 \end{lstlisting}
 
 \arghead
-\code{b} is a finite positive integer band width and defaults to two; for intermediate state it is also the side length of each overlapping implementation window. \code{r} is an optional absolute SparseFullBox Gram order and defaults to \(\lfloor M/2\rfloor\) for a one-parameter residual of degree \(M\), or \(\lceil M/2\rceil\) for two or more parameters. Every explicit order is validated against that same minimum before endpoint normalization.
+\code{w} is a finite positive integer bandwidth and defaults to two; for intermediate state it is also the side length of each overlapping implementation window. \code{r} is an optional absolute SparseFullBox Gram order and defaults to \(\lfloor M/2\rfloor\) for a one-parameter residual of degree \(M\), or \(\lceil M/2\rceil\) for two or more parameters. Every explicit order is validated against that same minimum before endpoint normalization.
 
 \descriptionhead
-For a FullBox Gram term with tensor basis degree \(\boldsymbol d\), define the complete label box \(\mathcal I_{\boldsymbol d}=\prod_s\{0,\ldots,d_s\}\). SparseFullBox sets \(w_s=\min(b,d_s+1)\) and introduces one independent PSD block for every window
+For a FullBox Gram term with tensor basis degree \(\boldsymbol d\), define the complete label box \(\mathcal I_{\boldsymbol d}=\prod_s\{0,\ldots,d_s\}\). SparseFullBox sets \(w_s=\min(w,d_s+1)\) and introduces one independent PSD block for every window
 \[
   W_{\boldsymbol t}=\prod_{s=1}^{\ell}\{t_s,\ldots,t_s+w_s-1\},
   \qquad 0\le t_s\le d_s-w_s+1.
 \]
-Each block contributes only through the basis labels in its own \(W_{\boldsymbol t}\); the weighted Bernstein maps of all windows and all parity/mask terms are summed and matched exactly to every coefficient of the sign-normalized target. In one parameter, \(b=2\) permits adjacent basis-label interactions and gives block-tridiagonal Gram support, while \(b=3\) gives block-pentadiagonal support. Increasing the width gives a nested sufficient hierarchy because a smaller-window PSD block can be embedded in a larger window, but feasibility need not improve strictly on any particular model.
+Each block contributes only through the basis labels in its own \(W_{\boldsymbol t}\); the weighted Bernstein maps of all windows and all parity/mask terms are summed and matched exactly to every coefficient of the sign-normalized target. In one parameter, \(w=2\) permits adjacent basis-label interactions and gives block-tridiagonal Gram support, while \(w=3\) gives block-pentadiagonal support. Increasing the width gives a nested sufficient hierarchy because a smaller-window PSD block can be embedded in a larger window, but feasibility need not improve strictly on any particular model.
 
 \begin{center}
 \begin{tikzpicture}[node distance=7mm and 8mm,
@@ -496,13 +496,13 @@ denseEndpointState = 1×4 double
      0     1     2     7
 \end{lstlisting}
 
-The intermediate result uses three PSD blocks---two width-two windows for the unweighted degree-two basis and one complete width-two window for the generator-weighted degree-one basis---followed by five exact coefficient identities. Width one returns actual Direct state with no sparse metadata or Gram variables. Since \(b=3=r+1\), the dense endpoint returns actual FullBox state with two dense PSD blocks followed by the same five identities. These are canonical public states, not merely equivalent constraint lists.
+The intermediate result uses three PSD blocks---two width-two windows for the unweighted degree-two basis and one complete width-two window for the generator-weighted degree-one basis---followed by five exact coefficient identities. Width one returns actual Direct state with no sparse metadata or Gram variables. Since \(w=3=r+1\), the dense endpoint returns actual FullBox state with two dense PSD blocks followed by the same five identities. These are canonical public states, not merely equivalent constraint lists.
 
 \remarkshead
 \begin{enumerate}[leftmargin=*]
   \item \code{applySparseFullBoxPreorder} is a value-class method: it returns a new wrapper, leaves the source unchanged, and rebuilds from \code{Residual} and \code{Relation}, replacing any earlier P\'olya, Putinar, SparseFullBox, or FullBox selection. It adds no positivity margin and makes no solver call.
   \item Every physical cell and active rate row owns independent window Gram blocks and coefficient identities. Semidefinite mode builds matrix Gram blocks; entry-wise mode builds an independent scalar certificate for every matrix entry in MATLAB column-major order.
-  \item Width one canonicalizes to actual Direct state. A width satisfying \code{b >= r + 1} canonicalizes to actual FullBox state. For \(1<b<r+1\), the result records \code{UseSparseFullBoxPreorder=true}, \code{SparseFullBoxOrder=r}, and \code{BandWidth=b}.
+  \item Width one canonicalizes to actual Direct state. A width satisfying \code{w >= r + 1} canonicalizes to actual FullBox state. For \(1<w<r+1\), the result records \code{UseSparseFullBoxPreorder=true}, \code{SparseFullBoxOrder=r}, and \code{BandWidth=w}.
   \item Invalid widths raise \codeerr{pdlmi}{InvalidBandWidth}. Malformed orders raise \codeerr{pdlmi}{InvalidSparse}\allowbreak\code{FullBoxOrder}; orders below the dimension-dependent minimum raise \codeerr{pdlmi}{SparseFullBox}\allowbreak\code{OrderTooLow}. More than two positional inputs raise \codeerr{pdlmi}{InvalidApplyOptions}.
   \item Constructor selector conflicts use \codeerr{pdlmi}{ConflictingSparse}\allowbreak\code{FullBoxOptions} or \codeerr{pdlmi}{ConflictingRelaxations}. Equality raises \codeerr{pdlmi}{UnsupportedEquality}\allowbreak\code{Certificate} before width or order validation.
 \end{enumerate}
@@ -512,7 +512,7 @@ Select FullBox with\\[-0.15em] \texorpdfstring{\code{applyFullBoxPreorder}}{appl
 \index{FullBox}\index{full-box preordering}\index{applyFullBoxPreorder@\texttt{applyFullBoxPreorder}}
 \label{sec:pdlmi-full-box}
 
-The mathematical construction is a full-box preordering in the forward local coordinates \(\boldsymbol\alpha\in[0,1]^\ell\); the software state is \code{FullBox}. It is a box-specific Bernstein--Gram representation, not a general Putinar certificate, general-domain SOS interface, or full-space SOS representation. It adds no implicit positivity margin. For an entry-wise inequality, every column-major scalar entry receives an independent copy of the selected Gram construction. Equality wrappers reject FullBox selection.
+The mathematical construction is a full-box preordering in the unit-box local coordinates \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\in[0,1]^\ell\); the software state is \code{FullBox}. It is a box-specific Bernstein--Gram representation, not a general Putinar certificate, general-domain SOS interface, or full-space SOS representation. It adds no implicit positivity margin. For an entry-wise inequality, every column-major scalar entry receives an independent copy of the selected Gram construction. Equality wrappers reject FullBox selection.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -523,15 +523,16 @@ Cbox = C.applyFullBoxPreorder(..., ValidationMode=mode)
 
 The no-argument form selects the smallest admissible absolute order. The explicit form selects \code{r}; it does not add \code{r} to the residual degree. Both forms are value-class selectors: they return a new \code{pdlmi}, leave \code{C} unchanged, and rebuild from \code{C.Residual}. Reapplication therefore replaces an earlier FullBox order or a P\'olya, Putinar, or SparseFullBox selection rather than compounding it.
 
-The idea is to represent the oriented positive target as a sum of PSD Gram forms multiplied by functions that are nonnegative on the local box:
+The idea is to represent the oriented positive target as a sum of PSD Gram forms multiplied by functions that are nonnegative on the local box. For selected absolute order \(r\), let \(\boldsymbol\chi_J\) be the indicator of \(J\), set \(\mathbf a_J=r\boldsymbol1-\boldsymbol\chi_J\), and define \(Z_{\mathbf a_J}=\mathbf b_{\mathbf a_J}\otimes I_n\):
 \[
-S(\boldsymbol\alpha)=
+S^{(\mathbf c)}(\boldsymbol\alpha)=
   \sum_{J\subseteq\{1,\ldots,\ell\}}
   \left(\prod_{s\in J}\alpha_s(1-\alpha_s)\right)
-  \mathcal Z_J(\boldsymbol\alpha)^{\mathsf T}
-Q_J\mathcal Z_J(\boldsymbol\alpha),
+  Z_{\mathbf a_J}(\boldsymbol\alpha)^{\mathsf T}
+Q_JZ_{\mathbf a_J}(\boldsymbol\alpha),
   \qquad Q_J\succeq0.
 \]
+Terms for which \(\mathbf a_J\) has a negative component are omitted.
 In one parameter the implementation uses the even/odd Markov--Luk\'acs forms, with minimum absolute order \(\lfloor M/2\rfloor\) for assembled residual degree \(M\). For two or more parameters it uses every subset product of the \(\ell\) box generators and minimum order \(\lceil M/2\rceil\). The selected order fixes the dense Bernstein Gram bases; it is not added to \(M\).
 
 \examplehead
@@ -560,7 +561,7 @@ At this order the scalar degree-two cell has two PSD Gram constraints followed b
 \remarkshead
 For \(\ell=2\), the FullBox state differs from Putinar by retaining the product generator. With \(g_s=\alpha_s(1-\alpha_s)\), the full-box preordering has the exact backend form
 \[
-S=S_0+g_1S_1+g_2S_2+g_1g_2S_{12}.
+S^{(\mathbf c)}=S_0+g_1S_1+g_2S_2+g_1g_2S_{12}.
 \]
 The Bernstein basis degrees are respectively \((r,r)\), \((r-1,r)\), \((r,r-1)\), and \((r-1,r-1)\); each present term is a PSD Gram block. All four terms are elevated and coefficient-matched at tensor degree \((2r,2r)\).  Thus the additional \(S_{12}\) block is precisely the two-generator distinction from the singleton Putinar module, not a change to the residual, grid, or decision degree.  The implementation builds the PSD blocks and exact equalities independently for each cell, rate row, and scalar matrix entry.
 

@@ -95,6 +95,29 @@ function testRectangularResidualAcrossAllCertificates(testCase)
     end
 end
 
+function testKnownPdmatGramCertificatesSolve(testCase)
+    % Every auxiliary-Gram family for a known residual must be solver feasible.
+    yalmip("clear");
+    A = pdmat([0 1], @(rho) 1 + 0 * rho, Degree=4);
+    direct = A >= 0;
+    wrappers = {
+        direct.applyPutinar(2), ...
+        direct.applySparseFullBoxPreorder(2, 2), ...
+        direct.applyFullBoxPreorder(2)
+        };
+
+    solver = testCase.TestData.Solver;
+    opts = sdpsettings('solver', solver, 'verbose', 0);
+    fprintf("Known pdmat Gram certificate solver: %s\n", solver);
+    for k = 1:numel(wrappers)
+        F = wrappers{k}.toYalmip;
+        testCase.verifyTrue(isa(F, "lmi") || isa(F, "constraint"));
+        testCase.verifyNotEmpty(getvariables(F));
+        sol = optimize(F, [], opts);
+        testCase.verifyEqual(sol.problem, 0, sol.info);
+    end
+end
+
 function out = constructEntrywiseSilently(fun)
     % Solver smoke output should not repeat dispatch warnings covered elsewhere.
     warnId = "pdlmi:ElementwiseInequality";

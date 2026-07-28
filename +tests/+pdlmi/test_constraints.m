@@ -356,6 +356,80 @@ function testToYalmip(testCase)
     testCase.verifyTrue(isa(F, "lmi") || isa(F, "constraint"));
 end
 
+function testToYalmipOneShotMatchesSequential(testCase)
+    % Solver-facing one-shot concatenation must match the previous loop.
+    P = pdvar(2, {[0 1]}, "symmetric");
+    direct = P >= 0;
+    polya = direct.applyPolya(1);
+    equality = pdvar(2, {[0 1]}, "full") == 0;
+    rectangular = pdvar(2, 1, {[0 1]}, "full");
+    entrywise = constructWithSingleWarning(testCase, @() rectangular >= 0);
+
+    X = sdpvar(2);
+    mixedExpr = internalPdvar({[0 1]}, [2 2], 1, ...
+        {{zeros(2), X}}, false, [], "test-mixed-export");
+    mixed = mixedExpr >= 0;
+
+    wrappers = {direct, polya, equality, entrywise, mixed};
+    for k = 1:numel(wrappers)
+        actual = toYalmip(wrappers{k});
+        reference = sequentialConstraints(wrappers{k}.Constraints);
+        verifyConstraintCollection(testCase, actual, reference);
+    end
+end
+
+function out = sequentialConstraints(entries)
+    % Reproduce the pre-optimization export loop as an independent oracle.
+    state = warning;
+    cleanup = onCleanup(@() warning(state)); %#ok<NASGU>
+    warning("off", "all");
+    out = [];
+    for k = 1:numel(entries)
+        out = [out, entries{k}]; %#ok<AGROW>
+    end
+end
+
+function verifyConstraintCollection(testCase, actual, reference)
+    % Compare ordering, cone/equality type, variables, bases, and PSD blocks.
+    testCase.verifyEqual(length(actual), length(reference));
+    for k = 1:length(actual)
+        testCase.verifyEqual(is(actual(k), "equality"), ...
+            is(reference(k), "equality"));
+        testCase.verifyEqual(is(actual(k), "sdp"), is(reference(k), "sdp"));
+        testCase.verifyEqual(getvariables(actual(k)), ...
+            getvariables(reference(k)));
+        actualExpr = sdpvar(actual(k));
+        referenceExpr = sdpvar(reference(k));
+        testCase.verifySize(actualExpr, size(referenceExpr));
+        testCase.verifyEqual(full(getbase(actualExpr)), ...
+            full(getbase(referenceExpr)), AbsTol=0);
+    end
+
+    [actualModel, referenceModel] = exportSedumi(actual, reference);
+    testCase.verifyEqual(actualModel.K.f, referenceModel.K.f);
+    testCase.verifyEqual(actualModel.K.l, referenceModel.K.l);
+    testCase.verifyEqual(actualModel.K.s, referenceModel.K.s);
+end
+
+function [actualModel, referenceModel] = exportSedumi(actual, reference)
+    % MATLAB also ships an export function, so temporarily prioritize YALMIP.
+    originalPath = path;
+    cleanup = onCleanup(@() restorePath(originalPath)); %#ok<NASGU>
+    addpath(fileparts(which("yalmip")), "-begin");
+    clear export
+    settings = sdpsettings;
+    settings.solver = 'sedumi';
+    settings.verbose = 0;
+    actualModel = export(actual, [], settings);
+    referenceModel = export(reference, [], settings);
+    clear export
+end
+
+function restorePath(originalPath)
+    path(originalPath);
+    clear export
+end
+
 function verifyDefaults(testCase, C)
     testCase.verifyFalse(C.UsePolya);
     testCase.verifyEqual(C.PolyaDegree, 0);

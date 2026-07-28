@@ -13,6 +13,9 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>applyFullBoxPreorder</span>
 </nav>
 
+Gram bases, absolute order $r$, and target coefficients follow the
+[global certificate notation](/PD-LMI-package/documents/math/notation/#gram-basis-and-certificate-parameters).
+
 <CertificateNavigation selected="fullbox" showSections={false} />
 
 ## Purpose
@@ -36,13 +39,13 @@ Both forms rebuild from `C.Residual` and `C.Relation`, return a new object, and
 leave `C` unchanged. Reapplication therefore replaces an earlier full-box
 order, a Pólya selection, or a Putinar selection instead of compounding it.
 
-For a one-parameter residual of degree $m$, the minimum is
-$\lfloor m/2\rfloor$. Even-degree residuals use an unweighted Gram block plus
+For a one-parameter residual of assembled degree $M$, the minimum is
+$\lfloor M/2\rfloor$. Even-degree residuals use an unweighted Gram block plus
 an $\alpha(1-\alpha)$-weighted block when that block has a nonempty basis.
 Odd-degree residuals use separate $\alpha$- and
 $(1-\alpha)$-weighted blocks.
 
-For two or more parameters, the minimum is $\lceil m/2\rceil$. The
+For two or more parameters, the minimum is $\lceil M/2\rceil$. The
 certificate contains one Gram term for every subset product of the box
 generators $\alpha_s(1-\alpha_s)$. A term whose tensor Gram degree would have
 a negative component is omitted.
@@ -53,7 +56,9 @@ active rate-vertex row. Each present Gram matrix is constrained positive
 semidefinite, then exact identities match every Bernstein coefficient. For a
 `<=` relation, the target coefficients are negated before positive-
 semidefinite matching; for `>=`, the residual is matched directly. No implicit
-positivity margin is added.
+positivity margin is added. The theoretical target is
+$S^{(\mathbf c)}\succ0$; encode strictness in the residual with an explicit
+$\varepsilon I$ margin before selecting this non-strict certificate.
 
 For two parameters the four illustrated blocks correspond to the empty
 subset, each single generator, and their product. In $\ell$ parameters the
@@ -64,7 +69,7 @@ develops the Gram and Markov–Lukács background step by step.
 ### Finite-SDP shape: two parameters, degree three
 
 For one cell and one active rate row, let the sign-normalized residual have
-Bernstein coefficients $F_{i,k}$ at tensor degree $(3,3)$. The default order
+Bernstein coefficients $C^{(\mathbf c)}[(i,k)]$ at tensor degree $(3,3)$. The default order
 is $r=2$, so the residual is exactly elevated to degree $(4,4)$. The returned
 constraint list has four PSD Gram constraints, followed by 25 exact affine
 matrix equalities:
@@ -73,7 +78,7 @@ $$
 \begin{gathered}
 Q_{\varnothing}\succeq0,\quad Q_{\{1\}}\succeq0,\quad
 Q_{\{2\}}\succeq0,\quad Q_{\{1,2\}}\succeq0,\\
-\widetilde F_{p,q}=
+\widetilde C^{(\mathbf c)}[(p,q)]=
 \mathcal A_{p,q}(Q_{\varnothing},Q_{\{1\}},Q_{\{2\}},Q_{\{1,2\}}),
 \qquad p,q=0,\ldots,4.
 \end{gathered}
@@ -83,13 +88,13 @@ Each $\mathcal A_{p,q}$ is a fixed affine Bernstein-coefficient map of the
 Gram blocks. For instance,
 
 $$
-F_{0,0}=[Q_{\varnothing}]_{(0,0),(0,0)},
+C^{(\mathbf c)}[(0,0)]=[Q_{\varnothing}]_{(0,0),(0,0)},
 $$
 
 while
 
 $$
-\tfrac14F_{0,0}+\tfrac34F_{1,0}
+\tfrac14C^{(\mathbf c)}[(0,0)]+\tfrac34C^{(\mathbf c)}[(1,0)]
 =\tfrac12[Q_{\varnothing}]_{(0,0),(1,0)}
 +\tfrac12[Q_{\varnothing}]_{(1,0),(0,0)}
 +\tfrac14[Q_{\{1\}}]_{(0,0),(0,0)}.

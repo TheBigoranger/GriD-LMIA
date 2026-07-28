@@ -103,6 +103,29 @@ function testDerivativeProductsPreserveRateRows(testCase)
     verifyCoeffExpr(testCase, T.coeffs(1), {cd{1, 1} * 4; cd{2, 1} * 4});
 end
 
+function testExplicitPdmatRateRowsMultiplyOrdinaryDecision(testCase)
+    % One known rate-row factor is affine-safe on either side of pdvar.
+    rb = [-1 2];
+    P = pdvar(1, [0 1]);
+    cp = P.coeffs(1);
+    R = pdmat([0 1], {{1, 3; 10, 14}}, ...
+        Degree=1, RateBounds=rb);
+
+    L = R * P;
+    U = P * R;
+    expected = {
+        cp{1}, (3 * cp{1} + cp{2}) / 2, 3 * cp{2}
+        10 * cp{1}, (14 * cp{1} + 10 * cp{2}) / 2, 14 * cp{2}
+        };
+
+    testCase.verifyClass(L, "pdvar");
+    testCase.verifyClass(U, "pdvar");
+    testCase.verifyEqual(L.RateBounds, rb);
+    testCase.verifyEqual(U.RateBounds, rb);
+    verifyCoeffExpr(testCase, L.coeffs(1), expected);
+    verifyCoeffExpr(testCase, U.coeffs(1), expected);
+end
+
 function testDerivativeNumericMatrixProducts(testCase)
     % Numeric matrices may multiply a rate-row vector on either side.
     V = pdvar(2, 1, {[0 1]}, "full");

@@ -12,7 +12,7 @@ Consider the LPV plant
     z(t)&=C_z(\boldsymbol\rho(t))x(t)+D_{zw}(\boldsymbol\rho(t))w(t),
 \label{eq:lpv-l2-model}
 \end{align}
-where \(x\in\mathbb R^{n_x}\), \(w\in\mathbb R^{n_w}\), \(z\in\mathbb R^{n_z}\), and the measurable scheduling trajectory satisfies \((\boldsymbol\rho(t),\dot{\boldsymbol\rho}(t))\in\mathcal P\times\mathcal V\). For \(\gamma>0\), the zero-state induced-\(L_2\) objective is to certify
+where \(x\in\mathbb R^{n_x}\), \(w\in\mathbb R^{n_w}\), \(z\in\mathbb R^{n_z}\), and the measurable scheduling trajectory satisfies \((\boldsymbol\rho(t),\dot{\boldsymbol\rho}(t))\in\mathcal P\times\mathcal R\). For \(\gamma>0\), the zero-state induced-\(L_2\) objective is to certify
 \[
     \lVert z\rVert_2<\gamma\lVert w\rVert_2
 \]
@@ -35,7 +35,7 @@ A differentiable matrix \(P(\boldsymbol\rho)=P(\boldsymbol\rho)^{\mathsf T}\) su
     \end{bmatrix}&\prec0
 \label{eq:lpv-spine}
 \end{align}
-for every \((\boldsymbol\rho,\dot{\boldsymbol\rho})\in\mathcal P\times\mathcal V\), where \(\operatorname{He}(X)=X+X^{\mathsf T}\) and
+for every \((\boldsymbol\rho,\dot{\boldsymbol\rho})\in\mathcal P\times\mathcal R\), where \(\operatorname{He}(X)=X+X^{\mathsf T}\) and
 \[
     \dot P(\boldsymbol\rho,\dot{\boldsymbol\rho})
     =\sum_{s=1}^{\ell}\dot\rho_s
@@ -57,7 +57,7 @@ Let \(y=(y_1,\ldots,y_N)\) collect scalar parameter-dependent decision functions
     \frac{\partial y_k}{\partial\rho_s}(\boldsymbol\rho)
     \preceq0,
     \qquad
-    \forall(\boldsymbol\rho,\dot{\boldsymbol\rho})\in\mathcal P\times\mathcal V,
+    \forall(\boldsymbol\rho,\dot{\boldsymbol\rho})\in\mathcal P\times\mathcal R,
 \end{aligned}
 \label{eq:general-pdlmi}
 \end{equation}
@@ -67,32 +67,50 @@ The package fixes the abstract sets and decision class in \cref{eq:general-pdlmi
     \[
         \mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s],
         \qquad
-        \mathcal V=\prod_{s=1}^{\ell}[\underline v_s,\overline v_s].
+        \mathcal R=\prod_{s=1}^{\ell}[\underline v_s,\overline v_s],
+        \qquad
+        \mathcal V_{\mathcal R}
+        =\prod_{s=1}^{\ell}\{\underline v_s,\overline v_s\}.
     \]
     \item The functions \(F_0\), \(F_k\), and \(T_{k,s}\) are known matrix functions of compatible dimensions, and the \(y_k\) are scalar decision functions. A matrix-valued decision is represented by vectorizing its independent scalar entries and assigning one component \(y_k\) to each entry, so symmetry can be encoded without treating a whole matrix as one scalar decision. Setting every \(T_{k,s}=0\) removes the derivative term and recovers an ordinary derivative-free PD-LMI.
     \item The theoretical statement uses differentiable \(y_k\). The package searches instead over continuous piecewise-Bernstein functions that are differentiable within each physical cell. Their values agree on shared faces, but their one-sided derivatives may differ; derivative data and the resulting residual conditions remain cell-local at those interfaces.
     \item Known data used by a certificate have cell-local polynomial coefficient evidence, and the assembled residual remains affine in the underlying YALMIP decisions. Supported numeric or known parameter-dependent factors may multiply a decision expression, but products of two decision-bearing expressions are outside the affine model.
-    \item Dependence on \(\dot{\boldsymbol\rho}\) is affine. Consequently, checking the \(2^\ell\) vertices of \(\mathcal V\) is exactly equivalent to checking the complete rate box. This exact reduction is separate from both finite restrictions over the scheduling variables described next.
-    \item MATLAB and YALMIP use non-strict semidefinite comparisons. A theoretical strict condition must therefore be modeled with an explicit user-selected margin such as \(S(\boldsymbol\rho)\succeq\varepsilon I\), and failure of a finite certificate is not proof that \cref{eq:general-pdlmi} is infeasible.
+    \item Dependence on \(\dot{\boldsymbol\rho}\) is affine. Consequently, checking the \(2^\ell\) vertices in \(\mathcal V_{\mathcal R}\) is exactly equivalent to checking the complete rate box \(\mathcal R\). This exact reduction is separate from the two finite restrictions over the scheduling variables.
+    \item MATLAB and YALMIP use non-strict semidefinite comparisons. A theoretical strict condition must therefore be modeled with an explicit user-selected margin, for example \(-\mathcal F(\boldsymbol\rho,\dot{\boldsymbol\rho};y)-\varepsilon I\succeq0\), and failure of a finite certificate is not proof that \cref{eq:general-pdlmi} is infeasible.
 \end{itemize}
-
-\section[Where the Finite Restrictions Enter]{\texorpdfstring{\hspace{0.3em}Where the Finite Restrictions Enter}{Where the Finite Restrictions Enter}}
-
-There are two distinct restrictions over the scheduling continuum. First, gridding restricts the infinite-dimensional search over decision functions to a finite-dimensional space of continuous, cellwise-differentiable piecewise-Bernstein functions. Second, after a residual has been assembled in that space, Direct, P\'olya, Putinar, SparseFullBox, or FullBox imposes a finite sufficient certificate for its semidefinite sign throughout every cell. Either choice may be conservative, and changing the decision grid or degree is conceptually different from changing the certificate family or order.
-
-The tensor grid itself is exact geometry: it partitions all of the assumed box \(\mathcal P\) into physical cells with disjoint interiors whose union is \(\mathcal P\); adjacent closed cells share their boundary faces. It is neither point sampling nor an approximation of the domain; gridding is an approximation method because it restricts the admissible decision functions on that exact domain. Likewise, the affine rate dependence in \cref{eq:general-pdlmi} is checked exactly at the vertices of \(\mathcal V\); rate-vertex traversal is not a third approximation layer.
 
 \section[Gridding the Parameter Domain: a Separate Two-Dimensional Example]{\texorpdfstring{\hspace{0.3em}Gridding the Parameter Domain: a Separate Two-Dimensional Example}{Gridding the Parameter Domain: a Separate Two-Dimensional Example}}
 \label{sec:intro-gridding}
 \index{physical grid}\index{physical node}\index{physical cell}\index{tensor grid}
 
-To make the tensor geometry visible, first isolate the grid and indexing geometry; the following Bernstein-basis section introduces a separate one-dimensional known polynomial. Choose the nonuniform grids
+For each parameter direction \(s=1,\ldots,\ell\), choose an independent, possibly nonuniform axis grid
 \[
-    G_1=\{0,0.4,1\},
+    \mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},
     \qquad
-    G_2=\{0,0.25,1\}.
+    \underline\rho_s=\rho_s^{(1)}<\cdots<\rho_s^{(k_s)}=\overline\rho_s.
 \]
-Their tensor product \(G=G_1\times G_2\) has nine physical nodes and exactly partitions \([0,1]^2\) into four physical cells. The one-based cell indices are \((1,1)\), \((1,2)\), \((2,1)\), and \((2,2)\).
+Their Cartesian product
+\[
+    \mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell
+\]
+contains \(\prod_{s=1}^{\ell}k_s\) physical nodes. The one-based multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\), with \(c_s\in\{1,\ldots,k_s-1\}\), selects the physical cell
+\[
+    \mathcal H_{\mathbf c}
+    =\prod_{s=1}^{\ell}
+    [\rho_s^{(c_s)},\rho_s^{(c_s+1)}],
+    \qquad
+    h_s^{\mathbf c}
+    =\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0.
+\]
+Thus \(\mathcal G\) determines \(\prod_s(k_s-1)\) physical cells whose union is exactly \(\mathcal P\). The grid does not sample or approximate the box geometry. Gridding is nevertheless a modeling approximation because it restricts the infinite-dimensional search for \(y\) to the selected finite-dimensional space of continuous piecewise-polynomial decision functions.
+
+To make this general tensor geometry visible, now take the separate nonuniform two-dimensional example
+\[
+    \mathcal G_1=\{0,0.4,1\},
+    \qquad
+    \mathcal G_2=\{0,0.25,1\}.
+\]
+Their tensor grid \(\mathcal G=\mathcal G_1\times\mathcal G_2\) has nine physical nodes and exactly partitions \([0,1]^2\) into four physical cells. The one-based cell indices are \((1,1)\), \((1,2)\), \((2,1)\), and \((2,2)\).
 
 \begin{figure}[H]
 \centering
@@ -120,33 +138,41 @@ Their tensor product \(G=G_1\times G_2\) has nine physical nodes and exactly par
 \label{fig:intro-two-dimensional-grid}
 \end{figure}
 
-For a tensor-product polynomial of degree two in each direction, every selected cell contains the nine zero-based local labels \(\mathbf i=(i_1,i_2)\in\{0,1,2\}^2\). Those labels identify Bernstein coefficients inside the cell; they are not nine additional physical sample points. In general, if direction \(s\) has \(k_s\) physical nodes, then \(G=G_1\times\cdots\times G_\ell\) has \(\prod_s k_s\) physical nodes and \(\prod_s(k_s-1)\) physical cells, while a degree-\(m\) tensor basis has \((m+1)^\ell\) local labels per cell. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
+For a tensor-product polynomial of modeled degree \(m=2\) in each direction, every selected cell contains the nine zero-based local labels \(\mathbf i=(i_1,i_2)\in\{0,1,2\}^2\). Those labels identify Bernstein coefficients inside the cell; they are not nine additional physical sample points. In general, a degree-\(m\) tensor basis has \((m+1)^\ell\) local labels per cell. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
 
 \section[Bernstein Basis on Each Cell]{\texorpdfstring{\hspace{0.3em}Bernstein Basis on Each Cell}{Bernstein Basis on Each Cell}}
 \label{sec:continuous-bernstein-representation}
 \index{Bernstein basis}\index{cell-local storage}\index{local Bernstein label}
 
-The two-dimensional interlude established only the grid and indexing geometry. Now fix a one-dimensional physical cell \(\mathcal H_c=[g_c,g_{c+1}]\) and map it forward to the unit interval with
+Fix any physical cell \(\mathcal H_{\mathbf c}\). Its forward affine map from the unit box to the physical cell is
 \[
-    \alpha_c(\rho)=\frac{\rho-g_c}{g_{c+1}-g_c}\in[0,1].
+    \phi_{\mathbf c}:[0,1]^\ell\longrightarrow\mathcal H_{\mathbf c},
+    \qquad
+    \phi_{\mathbf c,s}(\alpha_s)
+    =\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s.
 \]
-For degree \(m\), the normalized Bernstein basis on that cell is
+Hence \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\), with \(\alpha_s=(\rho_s-\rho_s^{(c_s)})/h_s^{\mathbf c}\). For any cellwise quantity \(X\), write its pullback as \(X^{(\mathbf c)}=X\circ\phi_{\mathbf c}\). The normalized tensor Bernstein basis of modeled degree \(m\) is
 \[
-    B_i^m(\alpha)=\binom{m}{i}(1-\alpha)^{m-i}\alpha^i,
-    \qquad i=0,\ldots,m,
+    B_{\mathbf i}^{m}(\boldsymbol\alpha)
+    =\prod_{s=1}^{\ell}
+    \binom{m}{i_s}(1-\alpha_s)^{m-i_s}\alpha_s^{i_s},
+    \qquad
+    \mathbf i\in\{0,\ldots,m\}^{\ell},
 \]
-and a cell-local polynomial is represented as
+and a cell-local polynomial is represented by
 \begin{equation}
-    a^{(c)}(\rho)=\sum_{i=0}^{m}B_i^m\!\left(\alpha_c(\rho)\right)a^{(c)}[i].
+    X^{(\mathbf c)}(\boldsymbol\alpha)
+    =\sum_{\mathbf i\in\{0,\ldots,m\}^{\ell}}
+    B_{\mathbf i}^{m}(\boldsymbol\alpha)X^{(\mathbf c)}[\mathbf i].
 \label{eq:intro-cell-bernstein}
 \end{equation}
-The forward coordinate orders coefficients from the lower physical face to the upper physical face. The basis functions are nonnegative and sum to one, so the value is a convex combination of local coefficients; the endpoint identities expose the two faces directly. These properties make cellwise sign certificates, shared-face bookkeeping, degree elevation, and coefficient algebra finite and inspectable. The physical cell index \(c\) is one-based, whereas the local Bernstein label \(i\) is zero-based after the cell has been selected.
+The basis functions are nonnegative and sum to one, so the value is a convex combination of local coefficients; endpoint and face identities expose the cell boundaries directly. These properties make cellwise sign certificates, shared-face bookkeeping, degree elevation, and coefficient algebra finite and inspectable. The physical cell index \(\mathbf c\) is one-based, whereas the local Bernstein label \(\mathbf i\) is zero-based after the cell has been selected.
 
-Use the scalar known polynomial
+The preceding definition is general. For a compact one-dimensional example, use the scalar known polynomial
 \[
     a(\rho)=1+\rho+\rho^2
 \]
-on the two-cell grid \(G_1=\{0,0.5,1\}\). Supplying \code{Degree=2} asks \code{pdmat} to retain exact function evaluation and validated degree-two Bernstein coefficient evidence.
+on the two-cell grid \(\mathcal G_1=\{0,0.5,1\}\). In one dimension, write \(\mathcal H_c=[g_c,g_{c+1}]\), \(\phi_c(\alpha)=g_c+(g_{c+1}-g_c)\alpha\), and \(\alpha^{(c)}(\rho)=\phi_c^{-1}(\rho)\); the cell marker is a superscript, not a Bernstein-label subscript. Supplying \code{Degree=2} asks \code{pdmat} to retain exact function evaluation and validated degree-two Bernstein coefficient evidence.
 
 \begin{lstlisting}[style=dpmatlab]
 grid = {[0 0.5 1]};
@@ -182,12 +208,13 @@ cell2Coefficients = 1×3 double
         {[1]}        "(1-alpha)^2*1 + 2(1-alpha)alpha*1.25 + alpha^2*1.75"
 \end{lstlisting}
 
-Fix the first physical cell \(\mathcal H_1=[0,0.5]\). Its coordinate is \(\alpha_1=2\rho\), and \cref{eq:intro-cell-bernstein} becomes
+Fix the first physical cell \(\mathcal H_1=[0,0.5]\). Its inverse coordinate is \(\alpha^{(1)}(\rho)=2\rho\), and \cref{eq:intro-cell-bernstein} becomes
 \[
-    a^{(1)}(\rho)
-    =B_0^2(\alpha_1)\,1
-    +B_1^2(\alpha_1)\,1.25
-    +B_2^2(\alpha_1)\,1.75.
+    a^{(1)}(\alpha)
+    =B_0^2(\alpha)\,1
+    +B_1^2(\alpha)\,1.25
+    +B_2^2(\alpha)\,1.75,
+    \qquad \alpha=\alpha^{(1)}(\rho).
 \]
 This equality represents \(1+\rho+\rho^2\) throughout the complete cell; the three coefficients are not samples at three new physical grid points. The upper-face coefficient \(1.75\) of cell 1 equals the lower-face coefficient of cell 2, reflecting continuity of this known polynomial at the shared physical node \(\rho=0.5\). \Cref{sec:bernstein-higher-degree,sec:bernstein-degree-elevation,sec:bernstein-product-math} develop the corresponding higher-degree, elevation, and multiplication rules.
 

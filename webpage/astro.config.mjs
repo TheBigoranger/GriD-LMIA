@@ -44,30 +44,6 @@ export default defineConfig({
             { label: "Manual Index", slug: "documents" },
             { label: "Reference Lookup", slug: "documents/reference-index" },
             {
-              label: "Modeling And Analysis",
-              items: [
-                { label: "DPD-LMI And LPV L2-Gain Model", slug: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain" },
-                { label: "Rate-Box Reduction And Interface Analysis", slug: "documents/math/modeling-and-analysis/rate-box-and-interface-analysis" },
-              ],
-            },
-            {
-              label: "Coordinates And Bernstein",
-              items: [
-                { label: "Gridding And Local Coordinates", slug: "documents/math/gridding-and-degree" },
-                { label: "Bernstein Basis, Continuity, And Storage", slug: "documents/math/bernstein-polynomial" },
-                { label: "Coefficient Algebra", slug: "documents/math/coordinates-and-bernstein/coefficient-algebra" },
-              ],
-            },
-            {
-              label: "Finite Certificates",
-              items: [
-                { label: "Certificate Map And Selection Guide", slug: "documents/math/sos-certificates" },
-                { label: "Direct And Pólya", slug: "documents/math/finite-certificates/direct-and-polya" },
-                { label: "Markov–Lukács And Putinar", slug: "documents/math/finite-certificates/markov-lukacs-and-putinar" },
-                { label: "SparseFullBox And FullBox", slug: "documents/math/finite-certificates/sparsefullbox-and-fullbox" },
-              ],
-            },
-            {
               label: "pdmat",
               items: [
                 { label: "Overview", slug: "documents/reference/pdmat" },
@@ -151,6 +127,36 @@ export default defineConfig({
         },
         { label: "About me", slug: "about" },
         { label: "Thanks", link: "/thanks/" },
+        {
+          label: "Math Concepts",
+          items: [
+            { label: "Notation", slug: "documents/math/notation" },
+            {
+              label: "Modeling And Analysis",
+              items: [
+                { label: "DPD-LMI And LPV L2-Gain Model", slug: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain" },
+                { label: "Rate-Box Reduction And Interface Analysis", slug: "documents/math/modeling-and-analysis/rate-box-and-interface-analysis" },
+              ],
+            },
+            {
+              label: "Coordinates And Bernstein",
+              items: [
+                { label: "Gridding And Local Coordinates", slug: "documents/math/gridding-and-degree" },
+                { label: "Bernstein Basis, Continuity, And Storage", slug: "documents/math/bernstein-polynomial" },
+                { label: "Coefficient Algebra", slug: "documents/math/coordinates-and-bernstein/coefficient-algebra" },
+              ],
+            },
+            {
+              label: "Finite Certificates",
+              items: [
+                { label: "Certificate Map And Selection Guide", slug: "documents/math/sos-certificates" },
+                { label: "Direct And Pólya", slug: "documents/math/finite-certificates/direct-and-polya" },
+                { label: "Markov–Lukács And Putinar", slug: "documents/math/finite-certificates/markov-lukacs-and-putinar" },
+                { label: "SparseFullBox And FullBox", slug: "documents/math/finite-certificates/sparsefullbox-and-fullbox" },
+              ],
+            },
+          ],
+        },
       ],
     }),
   ],

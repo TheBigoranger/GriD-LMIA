@@ -5,7 +5,7 @@ const stages = [
   { number: "01", title: "Model the general DPD-LMI", href: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#general-dpd-lmi-template" },
   { number: "02", title: "Partition the parameter box", href: "documents/math/gridding-and-degree/" },
   { number: "03", title: "Fix a cell and use Bernstein", href: "documents/math/coordinates-and-bernstein/coefficient-algebra/" },
-  { number: "04", title: "Apply finite Direct tests", href: "documents/math/finite-certificates/direct-and-polya/" },
+  { number: "04", title: "Select a finite certificate", href: "documents/math/sos-certificates/" },
   { number: "05", title: "Export, solve, validate", href: "documents/reference/pdlmi/toyalmip/" },
 ];
 
@@ -15,7 +15,7 @@ const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}
 
 <figure class="journey-pipeline" role="img" aria-labelledby="journey-title" aria-describedby="journey-desc">
   <figcaption id="journey-title" class="journey-title">Five-stage DPD-LMI modeling and solution workflow</figcaption>
-  <p id="journey-desc" class="journey-description">A forward-only wave connects the general continuum DPD-LMI, exact partition of an axis-aligned parameter box, a fixed cell's local Bernstein representation, finite Direct coefficient tests, and YALMIP export, solution, status validation, and recovery.</p>
+  <p id="journey-desc" class="journey-description">A forward-only wave connects the general continuum DPD-LMI, exact partition of an axis-aligned parameter box, a fixed cell's local Bernstein representation, finite certificate selection, and YALMIP export, solution, status validation, and recovery.</p>
 
   <div class="journey-desktop" aria-hidden="true">
     <svg viewBox="0 0 1120 310">

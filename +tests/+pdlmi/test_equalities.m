@@ -22,7 +22,7 @@ function testOrdinaryGridDegreeAndKnownPromotions(testCase)
     R = pdvar(1, {[0 1]}, Degree=1);
     known = pdmat({[0 1]}, {1, 2}, Degree=1);
     x = sdpvar(1, 1);
-    cases = {R == known, R == 2, 2 == R, R == x, x == R};
+    cases = {R == known, known == R, R == 2, 2 == R, R == x, x == R};
     for k = 1:numel(cases)
         testCase.verifyEqual(cases{k}.Relation, "==");
         testCase.verifyEqual(numel(cases{k}.Constraints), 2);
@@ -82,18 +82,11 @@ function testDerivativeRejectsOrdinaryOperandsBothOrders(testCase)
 end
 
 function testMixedRowKindRejectedBeforeSubtraction(testCase)
-    % Scan every physical cell, regardless of which row kind appears first.
-    ordinaryFirst = mixedRowPdvar(false);
-    derivativeFirst = mixedRowPdvar(true);
-
-    testCase.verifyError(@() ordinaryFirst == 0, ...
-        "pdvar:InvalidEqualityRows");
-    testCase.verifyError(@() derivativeFirst == 0, ...
-        "pdvar:InvalidEqualityRows");
-    testCase.verifyError(@() 0 == ordinaryFirst, ...
-        "pdvar:InvalidEqualityRows");
-    testCase.verifyError(@() 0 == derivativeFirst, ...
-        "pdvar:InvalidEqualityRows");
+    % The shared storage validator rejects mixed rows before any algebra.
+    testCase.verifyError(@() mixedRowPdvar(false), ...
+        "pdbase:InvalidCoefficientRows");
+    testCase.verifyError(@() mixedRowPdvar(true), ...
+        "pdbase:InvalidCoefficientRows");
 end
 
 function testDerivativeCompatibilityErrorsRemainSubtractionOwned(testCase)
@@ -143,7 +136,7 @@ function testEqualityApplyMethodsGuardBeforeArgumentValidation(testCase)
 end
 
 function obj = mixedRowPdvar(derivativeFirst)
-    % Construct the cross-cell row-kind inconsistency rejected by eq.
+    % Construct the cross-cell row-kind inconsistency rejected by pdbase.
     ordinary = {sdpvar(1, 1)};
     derivative = {sdpvar(1, 1); sdpvar(1, 1)};
     if derivativeFirst
@@ -161,6 +154,7 @@ function obj = mixedRowPdvar(derivativeFirst)
         "ContainsDecision", true, ...
         "HasRateDependence", true, ...
         "RateBounds", [-1 1], ...
-        "SourceSummary", "test-mixed-row-kind");
+        "SourceSummary", "test-mixed-row-kind", ...
+        "ValidationMode", "strict");
     obj = pdvar(init);
 end

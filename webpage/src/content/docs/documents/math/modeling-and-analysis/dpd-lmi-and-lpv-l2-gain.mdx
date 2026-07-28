@@ -106,15 +106,16 @@ are rejected.
 
 ## From Analysis Residual To Positive Target
 
-A comparison such as `residual <= 0` stores the original residual
-$\mathcal F$ and normalizes its sign to a positive target
+A comparison such as `residual <= 0` stores the original cell-local residual
+$\mathcal F^{(\mathbf c)}$ and normalizes its sign to a positive target
 
 $$
-S=-\mathcal F.
+S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}\succ0.
 $$
 
-Certificate pages use $S\succeq0$. They do not silently replace the original
-relation or add strictness.
+The package assembles non-strict constraints. It does not silently replace
+the original relation or add the explicit
+$S^{(\mathbf c)}-\varepsilon I\succeq0$ margin required for strictness.
 
 ## Modeling Path In MATLAB
 
@@ -164,6 +165,7 @@ status is not proof that the continuous LPV problem is infeasible.
 ## See Also
 
 [Next: Rate-Box Reduction And Interface Analysis](/PD-LMI-package/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/) ·
+[Notation](/PD-LMI-package/documents/math/notation/#residual-and-positive-target) ·
 [`pdvar` constructor](/PD-LMI-package/documents/reference/pdvar/constructor/) ·
 [`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
 [`pdlmi` constructor](/PD-LMI-package/documents/reference/pdlmi/constructor/)

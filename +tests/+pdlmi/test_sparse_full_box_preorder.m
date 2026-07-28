@@ -204,14 +204,6 @@ function testMatrixEntryCellAndRateCertificatesAreIndependent(testCase)
     verifyDisjointGramVariables(testCase, rateC, psdIndices);
 end
 
-function testBenchmarkBandWidthValidation(testCase)
-    malformed = {[], 0, -1, 1.5, Inf, NaN, "two", [1 2.5]};
-    for k = 1:numel(malformed)
-        testCase.verifyError(@() tests.pdlmi.benchmark_relaxations( ...
-            2, malformed{k}), "pdlmi:InvalidBenchmarkBandWidths");
-    end
-end
-
 function verifySparse(testCase, C, order, bandWidth, gramSizes, equalityCount)
     testCase.verifyTrue(C.UseSparseFullBoxPreorder);
     testCase.verifyEqual(C.SparseFullBoxOrder, order);

@@ -11,7 +11,9 @@ import {
   KNOT_MIN,
   clampPitch,
   enumerateCells,
+  fitProjection,
   getCellBounds,
+  mapProjection,
   projectPoint,
   resetRotation,
   type Point3,
@@ -28,6 +30,13 @@ const defaults: Record<Dimension, number[]> = {
 
 const axisLabels = ["ρ₁", "ρ₂", "ρ₃"];
 const initialRotation = resetRotation();
+const cubeViewBox = { width: 420, height: 300 };
+const cubePadding = 12;
+const selectionRadius = 7;
+const cubeCorners: Point3[] = [
+  [0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
+  [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1],
+];
 
 function formatNumber(value: number): string {
   return Number(value.toFixed(2)).toString();
@@ -119,19 +128,32 @@ function Grid3D({
   pitch: number;
   onDrag: (event: PointerEvent<SVGSVGElement>) => void;
 }) {
+  const projectedCorners = useMemo(
+    () => cubeCorners.map((point) => projectPoint(point, yaw, pitch)),
+    [yaw, pitch],
+  );
+  const fit = useMemo(
+    () => fitProjection(projectedCorners, cubeViewBox, cubePadding, selectionRadius),
+    [projectedCorners],
+  );
   const lines = useMemo(() => cubeSegments(knots).map((segment) => {
     const from = projectPoint(segment.from, yaw, pitch);
     const to = projectPoint(segment.to, yaw, pitch);
-    return { from, to, depth: (from.depth + to.depth) / 2 };
-  }).sort((a, b) => a.depth - b.depth), [knots, yaw, pitch]);
+    return {
+      from: mapProjection(from, fit),
+      to: mapProjection(to, fit),
+      depth: (from.depth + to.depth) / 2,
+    };
+  }).sort((a, b) => a.depth - b.depth), [fit, knots, yaw, pitch]);
   const bounds = getCellBounds(knots, selected);
-  const center = projectPoint(
-    bounds.map(([lower, upper]) => (lower + upper) / 2) as [number, number, number],
-    yaw,
-    pitch,
+  const center = mapProjection(
+    projectPoint(
+      bounds.map(([lower, upper]) => (lower + upper) / 2) as [number, number, number],
+      yaw,
+      pitch,
+    ),
+    fit,
   );
-  const mapX = (value: number) => 210 + value * 210;
-  const mapY = (value: number) => 150 - value * 210;
 
   return (
     <svg
@@ -143,24 +165,24 @@ function Grid3D({
       onPointerUp={onDrag}
       role="img"
       tabIndex={0}
-      viewBox="0 0 420 300"
+      viewBox={`0 0 ${cubeViewBox.width} ${cubeViewBox.height}`}
     >
       {lines.map((line, index) => (
         <line
           className="partition-cube__line"
           key={`${index}-${line.depth}`}
-          x1={mapX(line.from.x)}
-          x2={mapX(line.to.x)}
-          y1={mapY(line.from.y)}
-          y2={mapY(line.to.y)}
+          x1={line.from.x}
+          x2={line.to.x}
+          y1={line.from.y}
+          y2={line.to.y}
         />
       ))}
       <circle
         aria-hidden="true"
         className="partition-cube__selection"
-        cx={mapX(center.x)}
-        cy={mapY(center.y)}
-        r="7"
+        cx={center.x}
+        cy={center.y}
+        r={selectionRadius}
       />
     </svg>
   );
