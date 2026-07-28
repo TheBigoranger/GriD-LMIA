@@ -1,10 +1,10 @@
 export const versionHistory = [
   {
-    version: "v1.1.2",
+    version: "v1.1.4",
     date: "2026-07-27",
     status: "current documentation snapshot",
     summary:
-      "Documents the operation-local Bernstein and Gram assembly rewrite, transient fast/strict validation, rate-aware pdmat construction and differentiation, known-data certificates, and corrected SparseFullBox band-support semantics. The ordinary modeling interface remains largely compatible. This snapshot has no Git tag or GitHub Release.",
+      "Reframes the Welcome and printable-manual openings around the five-stage continuum-to-solver overview, adds an accessible nonuniform 1D/2D/3D grid explorer, and keeps the v1.1 package API and certificate semantics unchanged. This documentation snapshot has no Git tag or GitHub Release.",
   },
   {
     version: "v1.1.0",

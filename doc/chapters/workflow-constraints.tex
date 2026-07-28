@@ -1,67 +1,73 @@
-\section{From the Residual to Finite Certificates}
+\section{From a Continuous Cell Condition to Direct}
 \label{sec:cellwise-solver-path}
-\index{residual}\index{strictness margin}\index{certificate}
+\index{residual}\index{Direct certificate}\index{finite certificate}
 
-Continue with the one-dimensional two-cell, degree-two objects introduced at the opening of the Bernstein section and choose \(\varepsilon=10^{-6}\). The comparison below is the MATLAB form of \cref{eq:running-residual}.
-
-\begin{lstlisting}[style=dpmatlab]
-epsilon = 1e-6;
-residual = P - H;
-direct = residual >= epsilon * eye(2);
-
-residualDegree = residual.Degree
-directConstraintCount = numel(direct.Constraints)
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-residualDegree = 2
-directConstraintCount = 6
-\end{lstlisting}
-
-The overloaded comparison creates a \code{pdlmi}. It stores the original residual and relation, orients the inequality as a positive target, and selects Direct by default. There are two physical cells and three degree-two coefficients per cell, hence six local matrix constraints. The shared face is visited once from each cell because certification is cell-local, even though both visits contain the same boundary decision handle.
-
-\subsection{Direct coefficient test}
-
-For one cell, write the positive target as
+Fix any physical cell \(\mathcal H_{\mathbf c}\) and one already assembled, sign-normalized matrix target \(T^{(\mathbf c)}(\boldsymbol\rho)\). Suppress any rate-row index and write its tensor-product Bernstein form as
 \[
-    T^{(c)}(\rho)=\sum_{i=0}^{2}B_i^2(\alpha_c)T^{(c)}[i].
+    T^{(\mathbf c)}(\boldsymbol\rho)
+    =\sum_{\mathbf i}B_{\mathbf i}^{m}(\boldsymbol\alpha_{\mathbf c})T^{(\mathbf c)}[\mathbf i].
 \]
-Direct imposes \(T^{(c)}[i]\succeq0\) for every cell and every local label. Since the basis is nonnegative and sums to one, these coefficient inequalities imply \(T^{(c)}(\rho)\succeq0\) throughout the cell. This implication is the certificate: a positive matrix polynomial may still have an indefinite Bernstein coefficient, so Direct failure is not a converse infeasibility test.
+The Direct certificate imposes the finite family
+\[
+    T^{(\mathbf c)}[\mathbf i]\succeq0
+    \qquad\text{for every local Bernstein label }\mathbf i.
+\]
+Because every \(B_{\mathbf i}^{m}\) is nonnegative on the unit box and the basis functions sum to one,
+\[
+    \bigl[T^{(\mathbf c)}[\mathbf i]\succeq0\ \text{for all }\mathbf i\bigr]
+    \quad\Longrightarrow\quad
+    T^{(\mathbf c)}(\boldsymbol\rho)\succeq0
+    \quad\text{for all }\boldsymbol\rho\in\mathcal H_{\mathbf c}.
+\]
+Repeating this implication for every physical cell and every stored rate row produces finitely many YALMIP constraints that suffice for the continuous sign condition. The implication is not a converse: a positive matrix polynomial may have an indefinite Bernstein coefficient, so failure of Direct does not prove that the continuous condition is infeasible.
 
-\subsection{Alternative certificates}
+\subsection{Opt-in alternatives}
 
-Four opt-in methods rebuild a certificate from the same original residual and comparison:
+Direct is the default finite certificate. The package also provides opt-in \hyperref[sec:pdlmi-polya]{P\'olya}, \hyperref[sec:pdlmi-putinar]{Putinar}, \hyperref[sec:pdlmi-sparse-full-box]{SparseFullBox}, and \hyperref[sec:pdlmi-full-box]{FullBox} alternatives. Their orders, Gram constructions, support rules, and validation boundaries belong to the detailed \code{pdlmi} chapter and Appendix~\ref{app:certificates}; they are intentionally not part of this opening overview. Each alternative remains a sufficient certificate for the parameter continuum rather than a sampling method or a solver call.
+
+\section{The Complete Path to YALMIP}
+\index{YALMIP}\index{solver status}\index{rhodiff@\texttt{rhodiff}}
+
+The full workflow now fits in one panorama: represent known data, create continuous decision functions, differentiate them cell by cell when rate terms are present, assemble and compare a residual, select a finite certificate, export it, solve, validate the status, and only then recover numerical values.
+
+\begin{center}
+\begin{tikzpicture}[node distance=4mm,font=\scriptsize]
+  \node[dp/stage] (objects) {known data and\\decisions};
+  \node[dp/stage,right=of objects] (differentiate) {optional cellwise\\\code{rhodiff}};
+  \node[dp/stage,right=of differentiate] (residual) {residual\\comparison};
+  \node[dp/stage,right=of residual] (certificate) {finite\\certificate};
+  \node[dp/stage,right=of certificate] (export) {\code{toYalmip}\\and \code{optimize}};
+  \draw[dp/arrow] (objects)--(differentiate);
+  \draw[dp/arrow] (differentiate)--(residual);
+  \draw[dp/arrow] (residual)--(certificate);
+  \draw[dp/arrow] (certificate)--(export);
+  \node[dp/result,below=7mm of export,minimum width=29mm,minimum height=12mm,align=center,font=\scriptsize] (recover) {status \(=0\), then\\recover values};
+  \draw[dp/arrow] (export)--(recover);
+\end{tikzpicture}
+\end{center}
 
 \begin{lstlisting}[style=dpmatlab]
-polya = direct.applyPolya(1);
-putinar = direct.applyPutinar();
-sparseEndpoint = direct.applySparseFullBoxPreorder(2);
-fullBox = direct.applyFullBoxPreorder();
-\end{lstlisting}
+yalmip('clear')
+grid = {[0 0.5 1]};
+rateBounds = [-0.2 0.2];
 
-For this one-parameter degree-two residual, the default absolute SparseFullBox order is \(r=1\). The requested width \(b=2=r+1\) therefore reaches the dense endpoint, so \code{sparseEndpoint} returns actual FullBox state rather than retained SparseFullBox state. Retained intermediate sparse state requires \(1<b<r+1\); the higher-order and two-dimensional examples in \cref{sec:pdlmi-sparse-full-box} show that case.
+a = pdmat(grid, @(rho) 1 + rho + rho.^2, ...
+    Degree=2, RateBounds=rateBounds);
+P = pdvar(1, grid, Degree=2, RateBounds=rateBounds);
+dP = rhodiff(P);
 
-P\'olya first elevates the local Bernstein representation by the requested nonnegative degree increment, then applies the coefficient test to the elevated coefficients. \code{applyPutinar}, \code{applySparseFullBoxPreorder}, and \code{applyFullBoxPreorder} use fixed-order Bernstein--Gram representations. Their order arguments are absolute Gram orders, not degree increments. In one parameter, Putinar and FullBox use the same parity-specific interval representation; SparseFullBox width one normalizes to Direct, while a width large enough for dense support normalizes to FullBox. In two or more parameters, Putinar uses the implemented singleton-generator box module, SparseFullBox restricts Gram support through overlapping tensor windows, and FullBox uses the complete box preordering.
-
-Each selector is a value-class operation: it returns a new wrapper, leaves \code{direct} unchanged, and replaces any earlier certificate selection by rebuilding from the stored original residual. None of the selectors adds a positivity margin or calls a solver. The complete order, width, normalization, and validation rules appear in \cref{sec:pdlmi}; the certificate formulas and their implemented boundaries appear in \cref{sec:certificate-modeling-choices,sec:certificate-boundary}.
-
-\subsection{Export and interpretation}
-
-\code{toYalmip} returns the finite constraints stored by the selected wrapper. Solver choice, objectives, and status interpretation remain explicit user decisions.
-
-\needspace{9\baselineskip}
-\begin{lstlisting}[style=dpmatlab]
-F = direct.toYalmip();
+residual = P - 0.1 * dP - a;
+certificate = residual >= 1e-6;
+F = certificate.toYalmip();
 opts = sdpsettings('solver', 'mosek', 'verbose', 0);
 sol = optimize(F, [], opts);
 assert(sol.problem == 0, sol.info)
 solvedP = value(P);
 \end{lstlisting}
 
-Only a successful solver status supports recovery of a feasible numerical decision. The returned \code{solvedP} preserves the grid, degree, matrix shape, and cell ordering while replacing symbolic coefficient payloads by their numerical values. If a selected certificate is infeasible or the solver reports a numerical or unknown status, do not interpret that result as proof that the original continuum problem is infeasible.
+Here \code{rhodiff} evaluates the affine derivative term at the vertices of the stored rate box; that vertex reduction is exact. The comparison creates a Direct \code{pdlmi} by default, and an opt-in certificate selector could be inserted before \code{toYalmip}. Solver settings and objectives remain ordinary YALMIP choices. Only \code{sol.problem == 0} supports recovery of \code{solvedP}; any infeasible, numerical, unknown, or otherwise nonzero status must be handled before retaining decisions or objectives. A failed sufficient certificate is not proof that the original continuum condition is infeasible.
 
-When connecting the mathematical model to the implementation, write \(\boldsymbol\nu=\dot{\boldsymbol\rho}\) and identify the stored rate box \(\mathcal R\) with \(\mathcal V\). The \code{RateBounds} rows contain \([\underline v_s,\overline v_s]\), and \code{rhodiff} constructs cell-local derivative data with one stored row per vertex \(\boldsymbol\nu\in\operatorname{vert}(\mathcal R)\). Traversing all rate vertices is exact for the affine rate dependence in \cref{eq:general-pdlmi}; Direct or a selected Gram certificate is subsequently applied to every stored row over every parameter cell. Nonaffine rate dependence does not inherit this exact vertex argument.
-
+\needspace{18\baselineskip}
 \section{Manual Outline}
 
 \begin{center}

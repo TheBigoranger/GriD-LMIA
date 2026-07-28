@@ -10,8 +10,14 @@ interface CertificateFlowOption {
   href: string;
 }
 
-/** Choose a compact certificate summary before opening its reference page. */
-export default function CertificateFlow({ options }: { options: CertificateFlowOption[] }) {
+/** Choose a certificate name before opening its detailed reference page. */
+export default function CertificateFlow({
+  compact = false,
+  options,
+}: {
+  compact?: boolean;
+  options: CertificateFlowOption[];
+}) {
   const [selected, setSelected] = useState(0);
   const id = useId();
   const option = options[selected];
@@ -46,18 +52,25 @@ export default function CertificateFlow({ options }: { options: CertificateFlowO
               tabIndex={selected === index ? 0 : -1}
               type="button"
             >
-              <strong>{item.label}</strong><code>{item.command}</code>
+              <strong>{item.label}</strong>{!compact && <code>{item.command}</code>}
             </button>
           ))}
         </div>
         <section aria-labelledby={`${id}-tab-${selected}`} className="certificate-flow-panel" id={`${id}-panel`} role="tabpanel">
-          <p className="certificate-flow-panel__formula" dangerouslySetInnerHTML={{ __html: renderInlineMath(option.formula) }} />
-          {option.notation && <p className="certificate-flow-panel__notation" dangerouslySetInnerHTML={{ __html: renderInlineMath(option.notation) }} />}
-          <p><strong>Key code:</strong> <code>selected = {option.command};</code></p>
+          {!compact && <p className="certificate-flow-panel__formula" dangerouslySetInnerHTML={{ __html: renderInlineMath(option.formula) }} />}
+          {!compact && option.notation && <p className="certificate-flow-panel__notation" dangerouslySetInnerHTML={{ __html: renderInlineMath(option.notation) }} />}
+          {!compact && <p><strong>Key code:</strong> <code>selected = {option.command};</code></p>}
+          {compact && (
+            <p>
+              {option.key === "direct"
+                ? "Direct is the default finite certificate. Its detailed assumptions and construction are kept out of this overview."
+                : `${option.label} is an opt-in finite certificate. Its detailed assumptions and construction are kept out of this overview.`}
+            </p>
+          )}
           <a href={option.href}>Open the {option.label} reference →</a>
         </section>
       </div>
-      <figcaption>Select a certificate to reveal its key code, then open its API reference for the complete method details.</figcaption>
+      <figcaption>{compact ? "Select a certificate name, then open its reference for complete method details." : "Select a certificate to reveal its key code, then open its API reference for the complete method details."}</figcaption>
     </figure>
   );
 }

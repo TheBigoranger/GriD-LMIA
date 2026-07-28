@@ -2,7 +2,7 @@
 import CellStorageExplorer from "./CellStorageExplorer.tsx";
 import CertificateFlow from "./CertificateFlow.astro";
 import ExportSolveFlow from "./ExportSolveFlow.astro";
-import InterfaceRegularityDiagram from "./InterfaceRegularityDiagram.astro";
+import GridPartitionExplorer from "./GridPartitionExplorer.tsx";
 import JourneyCurve from "./JourneyCurve.astro";
 import { renderDisplayMath, renderInlineMath } from "../lib/katex.js";
 import { versionInfo } from "../data/version.js";
@@ -22,54 +22,55 @@ const lmiSteps = [
     number: "01",
     title: "Model the general DPD-LMI problem",
     inlineMath: "\\boldsymbol y:\\mathcal P\\to\\mathbb R^N,\\qquad \\boldsymbol y(\\boldsymbol\\rho)=\\bigl(y_1(\\boldsymbol\\rho),\\ldots,y_N(\\boldsymbol\\rho)\\bigr)^\\top.",
-    math: "\\mathcal F(\\boldsymbol\\rho)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}T_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\prec0,\\qquad\\forall\\boldsymbol\\rho\\in\\mathcal P.",
+    textHtml: `Induced-${renderInlineMath("L_2")} gain is one representative application; <a href="${local("documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/")}">open the mathematical guide</a> for that specialization.`,
+    math: "\\mathcal F(\\boldsymbol\\rho,\\dot{\\boldsymbol\\rho};y)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\preceq0.",
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#general-dpd-lmi-template",
   },
   {
     number: "02",
-    title: "Grid ",
-    titleMath: "\\mathcal P",
-    titleSuffix: " and impose interface regularity",
-    text: "Grid the parameter domain into axis-aligned cells.",
-    math: "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},\\qquad\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
-    regularityText: "Across each shared boundary, decision values must remain continuous, but adjacent one-sided derivatives may differ.",
-    visual: "regularity",
-    manual: "documents/math/modeling-and-analysis/rate-box-and-interface-analysis/",
-    visibleCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);",
-    fullCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);\nA.cells()\nA.LocalValues{c1}{1}",
+    title: "Partition the supported parameter box",
+    text: "Assume axis-aligned parameter and rate boxes. Independent nonuniform axis grids exactly partition the parameter box into physical cells. Gridding becomes an approximation only when it restricts the admissible decision-function space; affine rate-vertex reduction is a separate exact step.",
+    math: [
+      "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
+      "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},\\qquad\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
+    ],
+    visual: "grid",
+    manual: "documents/math/gridding-and-degree/",
+    fullCode: "grid = {[0 0.4 1], [0 0.25 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);",
   },
   {
     number: "03",
-    title: "Expand each cell in the Bernstein basis",
-    textHtml: `Pull each physical cell back to ${renderInlineMath("\\boldsymbol\\alpha\\in[0,1]^\\ell")}, then represent its known and decision data by tensor Bernstein coefficients. Complete face controls are shared to enforce value continuity; derivatives remain cell-local.`,
+    title: "Fix one cell and use the Bernstein basis",
+    textHtml: `Pull one physical cell back to ${renderInlineMath("\\boldsymbol\\alpha\\in[0,1]^\\ell")}. The normalized basis is nonnegative and sums to one, exposes endpoint and face coefficients, and supports cell-local coefficient algebra.`,
     math: [
       "\\boldsymbol\\alpha=\\phi_{\\mathbf c}(\\boldsymbol\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{(\\mathbf c)}}.",
-      "\\footnotesize A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
-      "y^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i}Y^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha).",
+      "B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad \\sum_{\\mathbf i}B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=1.",
+      "A^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha).",
     ],
+    storageMath: "\\footnotesize A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
     visual: "storage",
-    visibleCode: "P = pdvar(n, grid, \"symmetric\", Degree=2); D = rhodiff(P, rateBounds);\nL = D + P*A + A'*P <= -epsilon*eye(n);",
-    fullCode: "yalmip('clear')\nP = pdvar(n, grid, \"symmetric\", Degree=2);\nD = rhodiff(P, rateBounds);\nL = D + P*A + A'*P <= -epsilon*eye(n);",
+    fullCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);\nA.cells()\nA.LocalValues{1}{1}",
     manual: "documents/math/coordinates-and-bernstein/coefficient-algebra/",
   },
   {
     number: "04",
-    title: "Select a finite certificate",
-    text: "Choose one finite sufficient representation for the same sign-normalized target. Direct is the default; Pólya, Putinar, SparseFullBox, and FullBox are explicit alternatives. This certificate step is not the exact rate-box reduction.",
-    math: "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\mathcal I_M}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{M}(\\boldsymbol\\alpha)\\succeq0.",
+    title: "Replace one continuous cell condition by Direct tests",
+    textHtml: `Because every normalized Bernstein basis function is nonnegative, positive-semidefinite coefficient matrices are a finite sufficient condition for the continuous target. Direct is the default; <a href="${local("documents/math/finite-certificates/direct-and-polya/")}">Pólya</a>, <a href="${local("documents/math/finite-certificates/markov-lukacs-and-putinar/")}">Putinar</a>, <a href="${local("documents/math/finite-certificates/sparsefullbox-and-fullbox/")}">SparseFullBox and FullBox</a> are opt-in alternatives described in the detailed certificate material.`,
+    math: [
+      "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\mathcal I_M}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{M}(\\boldsymbol\\alpha).",
+      "\\bigl[C^{(\\mathbf c)}[\\mathbf i]\\succeq0\\;\\;\\forall\\mathbf i\\bigr]\\;\\Longrightarrow\\;\\bigl[S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succeq0\\;\\;\\forall\\boldsymbol\\alpha\\in[0,1]^\\ell\\bigr].",
+    ],
     visual: "certificate",
-    visibleCode: "selected = L.applyPolya(d);\n% or L, Putinar, SparseFullBox, FullBox",
-    fullCode: "selected = L;                                  % Direct\nselected = L.applyPolya(d);                    % Pólya increment d\nselected = L.applyPutinar(r);                  % absolute Gram order r\nselected = L.applySparseFullBoxPreorder(b, r); % bandwidth b\nselected = L.applyFullBoxPreorder(r);          % full-box preordering",
-    manual: "documents/math/sos-certificates/",
+    fullCode: "selected = L;  % Direct coefficient tests",
+    manual: "documents/math/finite-certificates/direct-and-polya/",
   },
   {
     number: "05",
-    title: "Export, solve, and recover the decision matrix",
-    text: "Export the finite constraints to YALMIP, call the selected solver, validate diagnostics.problem == 0, and only then evaluate P and retain gamma. A failed certificate or nonzero solver status is inconclusive for the continuous problem.",
+    title: "Assemble the panorama, solve, and validate status",
+    text: "Combine known pdmat data with pdvar decisions, optional cellwise rhodiff terms, a residual comparison, and the selected finite certificate. Export to YALMIP, solve, require sol.problem == 0, and only then recover decisions or objectives.",
     math: "\\texttt{toYalmip}\\;\\longrightarrow\\;\\texttt{optimize}\\;\\longrightarrow\\;\\texttt{value(P)}",
     visual: "export",
-    visibleCode: "optimize(selected.toYalmip(), objective, options);\nPsol = value(P);",
-    fullCode: "constraints = selected.toYalmip();\ndiagnostics = optimize(constraints, objective, options);\nassert(diagnostics.problem == 0)\nPsol = value(P);",
+    fullCode: "yalmip('clear')\nP = pdvar(n, grid, \"symmetric\", Degree=2);\nD = rhodiff(P, rateBounds);                 % optional rate term\nL = D + P*A + A'*P <= -epsilon*eye(n);     % residual comparison\nselected = L;                              % Direct by default\nsol = optimize(selected.toYalmip(), objective, options);\nif sol.problem == 0\n    Psol = value(P);\n    gammaSol = value(gamma);\nend",
     manual: "documents/reference/pdlmi/toyalmip/",
   },
 ];
@@ -112,16 +113,15 @@ const lmiSteps = [
               {step.inlineMath && <div class="step-inline-math" set:html={renderInlineMath(step.inlineMath)} />}
               {step.textHtml ? <p set:html={step.textHtml} /> : step.text ? <p>{step.text}</p> : null}
               {step.visual === "storage"
-                ? <div class="cell-storage-compact"><CellStorageExplorer client:load formulaHtml={step.math.map(renderDisplayMath)} axisHtml={{ x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"].map(renderInlineMath), y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"].map(renderInlineMath) }} /></div>
-                : step.visual === "regularity"
+                ? <div class="cell-storage-compact"><CellStorageExplorer client:visible formulaHtml={["", step.storageMath].map(renderDisplayMath)} axisHtml={{ x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"].map(renderInlineMath), y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"].map(renderInlineMath) }} /></div>
+                : step.visual === "grid"
                   ? <>
                       <div class:list={["math-strip", { "math-strip--stacked": Array.isArray(step.math) }]}>
                         {(Array.isArray(step.math) ? step.math : [step.math]).map((line) => (
                           <div class="math-strip__row" set:html={renderDisplayMath(line)} />
                         ))}
                       </div>
-                      <p>{step.regularityText}</p>
-                      <InterfaceRegularityDiagram />
+                      <GridPartitionExplorer client:visible />
                     </>
                 : step.visual === "export"
                   ? <ExportSolveFlow />
@@ -130,7 +130,7 @@ const lmiSteps = [
                       <div class="math-strip__row" set:html={renderDisplayMath(line)} />
                     ))}
                   </div>}
-              {step.visual === "certificate" && <CertificateFlow />}
+              {step.visual === "certificate" && <CertificateFlow compact />}
               {step.fullCode && <div class="example-disclosure"><pre class="example-disclosure__essential"><code>{step.fullCode}</code></pre></div>}
               {step.manual && <a class="manual-step-link" href={local(step.manual)}>Open the detailed manual section ↗</a>}
             </div>

@@ -5,7 +5,7 @@ It represents continuous piecewise-polynomial decision matrices in cell-local
 tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
 models are called differentiable parameter-dependent LMIs (DPD-LMIs).
 
-Documentation: **v1.1.2**. Latest GitHub Release: **v1.1.0**.
+Documentation: **v1.1.4**. Latest GitHub Release: **v1.1.0**.
 
 The current implementation provides:
 
@@ -17,6 +17,25 @@ The current implementation provides:
 - `pdlmi` for direct equality constraints on `pdvar`, known-data inequalities from coefficient-backed `pdmat`, and direct, Pólya-elevated, Putinar box, band-limited SparseFullBox, or dense full-box-preordering inequality assembly with `toYalmip` handoff.
 - `bernsteinTable` methods on both `pdmat` and `pdvar` for command-window
   inspection of local Bernstein coefficient and rate-vertex rows.
+
+## How the Package Solves a DPD-LMI
+
+1. **State the continuum problem.** Write one affine DPD-LMI residual
+   $\mathcal F(\rho,\dot\rho;y)\preceq0$; LPV induced-$L_2$ analysis is one
+   representative application.
+2. **Partition the parameter box.** Choose independent, possibly nonuniform
+   axis grids. Their tensor product covers the complete box with physical
+   cells; it is not a set of sampled operating points.
+3. **Represent one cell in Bernstein form.** `pdmat` stores known data and
+   `pdvar` stores continuous decisions as cell-local Bernstein coefficients,
+   with shared decision values on common faces.
+4. **Choose a finite certificate.** Direct coefficient inequalities are the
+   default; Pólya, Putinar, SparseFullBox, and FullBox are explicit opt-in
+   alternatives. Every certificate is sufficient rather than a converse
+   feasibility test.
+5. **Hand the finite model to YALMIP.** `toYalmip` exports constraints for an
+   ordinary `optimize` call. Retain recovered decisions or objective values
+   only after checking `sol.problem == 0`.
 
 ## Why Bernstein Form?
 
@@ -68,7 +87,7 @@ The test entry point covers installer behavior, helper utilities, `pdbase`,
 `pdmat`, `pdvar`, and `pdlmi`. Its solver smoke tests use the same
 commercial-first working-solver policy as `install_pd_lmi`.
 
-The v1.1.2 implementation keeps the established modeling interfaces while
+The v1.1.4 documentation keeps the established modeling interfaces while
 using operation-local plans for Bernstein products, elevation, Direct/Pólya
 assembly, and Bernstein-Gram coefficient maps. Constructors and certificate
 selectors accept transient `ValidationMode="fast"` or `"strict"` where
