@@ -2,6 +2,7 @@
 import CellStorageExplorer from "./CellStorageExplorer.tsx";
 import CertificateFlow from "./CertificateFlow.astro";
 import ExportSolveFlow from "./ExportSolveFlow.astro";
+import InterfaceRegularityDiagram from "./InterfaceRegularityDiagram.astro";
 import JourneyCurve from "./JourneyCurve.astro";
 import { renderDisplayMath, renderInlineMath } from "../lib/katex.js";
 import { versionInfo } from "../data/version.js";
@@ -20,36 +21,39 @@ const lmiSteps = [
   {
     number: "01",
     title: "Model the general DPD-LMI problem",
-    textHtml: `Choose continuous piecewise-polynomial decision matrices ${renderInlineMath("Y_1,\\ldots,Y_N")} so that one or more symmetric residuals ${renderInlineMath("\\mathcal F_a")} are negative semidefinite throughout the parameter box and, when rate dependence is present, the optional bounded rate box. Equivalently, certify ${renderInlineMath("S_a=-\\mathcal F_a\\succeq0")} as a positive target.`,
     math: [
-      "Y_1(\\boldsymbol\\rho),\\ldots,Y_N(\\boldsymbol\\rho)\\quad\\text{continuous piecewise-polynomial decisions}.",
-      "\\mathcal F_a\\!\\left(\\boldsymbol\\rho,\\boldsymbol\\nu;Y_1,\\ldots,Y_N\\right)\\preceq0,\\qquad \\forall(\\boldsymbol\\rho,\\boldsymbol\\nu)\\in\\mathcal P\\times\\mathcal R,\\quad a=1,\\ldots,q.",
-      "\\mathcal R\\text{ is included only for rate-dependent models},\\qquad S_a=-\\mathcal F_a\\succeq0.",
+      "\\boldsymbol y:\\mathcal P\\to\\mathbb R^N,",
+      "\\boldsymbol y(\\boldsymbol\\rho)=\\bigl(y_1(\\boldsymbol\\rho),\\ldots,y_N(\\boldsymbol\\rho)\\bigr)^\\top,",
+      "\\mathcal F(\\boldsymbol\\rho)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}T_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\prec0,\\qquad\\forall\\boldsymbol\\rho\\in\\mathcal P.",
     ],
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#general-dpd-lmi-template",
   },
   {
     number: "02",
-    title: "Reduce the rate box and grid ",
-    titleMath: "\\boldsymbol\\rho",
-    text: "Affine dependence on the scheduling rate makes rate-box vertex reduction exact. The remaining parameter box is partitioned by an anisotropic tensor grid.",
+    title: "Grid ",
+    titleMath: "\\mathcal P",
+    titleSuffix: " and impose interface regularity",
+    textHtml: `Assumption 1 makes the parameter domain and scheduling-rate domain hyperrectangles before the parameter domain is gridded. Under Assumption 2, the known matrices are ${renderInlineMath("C^0")}; the decision variables are ${renderInlineMath("C^{0,1}")} (Lipschitz) on the parameter domain and polynomial on each cell. Values agree at a shared boundary, but the limiting derivatives from adjacent cells need not agree.`,
     math: [
+      "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
       "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},\\qquad\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
-      "\\footnotesize A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
+      "\\lim_{\\rho\\to\\rho_\\star^-}y(\\rho)=y(\\rho_\\star)=\\lim_{\\rho\\to\\rho_\\star^+}y(\\rho),\\qquad \\lim_{\\rho\\to\\rho_\\star^-}y'(\\rho)\\ne\\lim_{\\rho\\to\\rho_\\star^+}y'(\\rho).",
     ],
-    visual: "storage",
+    visual: "regularity",
     manual: "documents/math/modeling-and-analysis/rate-box-and-interface-analysis/",
     visibleCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);",
     fullCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);\nA.cells()\nA.LocalValues{c1}{1}",
   },
   {
     number: "03",
-    title: "Pull back, differentiate, and assemble coefficients",
-    textHtml: `Map every physical cell forward to ${renderInlineMath("\\boldsymbol\\alpha\\in[0,1]^\\ell")}. Value continuity shares complete face controls, while cellwise derivatives retain the reciprocal width ${renderInlineMath("1/h_s^{(\\mathbf c)}")}. Stored rate rows are then stacked into a local Bernstein residual.`,
+    title: "Expand each cell in the Bernstein basis",
+    textHtml: `Pull each physical cell back to ${renderInlineMath("\\boldsymbol\\alpha\\in[0,1]^\\ell")}, then represent its known and decision data by tensor Bernstein coefficients. Complete face controls are shared to enforce value continuity; derivatives remain cell-local.`,
     math: [
       "\\boldsymbol\\alpha=\\phi_{\\mathbf c}(\\boldsymbol\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{(\\mathbf c)}}.",
-      "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{\\mathbf M}(\\boldsymbol\\alpha)\\succeq0.",
+      "\\footnotesize A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
+      "y^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i}Y^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha).",
     ],
+    visual: "storage",
     visibleCode: "P = pdvar(n, grid, \"symmetric\", Degree=2); D = rhodiff(P, rateBounds);\nL = D + P*A + A'*P <= -epsilon*eye(n);",
     fullCode: "yalmip('clear')\nP = pdvar(n, grid, \"symmetric\", Degree=2);\nD = rhodiff(P, rateBounds);\nL = D + P*A + A'*P <= -epsilon*eye(n);",
     manual: "documents/math/coordinates-and-bernstein/coefficient-algebra/",
@@ -111,9 +115,18 @@ const lmiSteps = [
           <div class="step-content">
             <div class="step-copy">
               <h3>{step.title}{step.titleMath && <span class="step-title-math" set:html={renderInlineMath(step.titleMath)} />}{step.titleSuffix}</h3>
-              {step.textHtml ? <p set:html={step.textHtml} /> : <p>{step.text}</p>}
+              {step.textHtml ? <p set:html={step.textHtml} /> : step.text ? <p>{step.text}</p> : null}
               {step.visual === "storage"
                 ? <div class="cell-storage-compact"><CellStorageExplorer client:load formulaHtml={step.math.map(renderDisplayMath)} axisHtml={{ x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"].map(renderInlineMath), y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"].map(renderInlineMath) }} /></div>
+                : step.visual === "regularity"
+                  ? <>
+                      <div class:list={["math-strip", { "math-strip--stacked": Array.isArray(step.math) }]}>
+                        {(Array.isArray(step.math) ? step.math : [step.math]).map((line) => (
+                          <div class="math-strip__row" set:html={renderDisplayMath(line)} />
+                        ))}
+                      </div>
+                      <InterfaceRegularityDiagram />
+                    </>
                 : step.visual === "export"
                   ? <ExportSolveFlow />
                 : <div class:list={["math-strip", { "math-strip--stacked": Array.isArray(step.math) }]}>

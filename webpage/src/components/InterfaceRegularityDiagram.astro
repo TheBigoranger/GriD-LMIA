@@ -1,0 +1,42 @@
+---
+import DiagramFrame from "./DiagramFrame.astro";
+---
+
+<DiagramFrame
+  class="interface-regularity"
+  label="A continuous piecewise-polynomial decision variable with unequal one-sided derivatives at a shared cell boundary"
+  caption="A one-dimensional cross-section of two adjacent cells. The decision has one shared value at the interface, while its left and right limiting slopes are different."
+>
+  <svg viewBox="0 0 720 270" role="img" aria-labelledby="interface-title interface-desc">
+    <title id="interface-title">Continuous value with a derivative jump</title>
+    <desc id="interface-desc">Two polynomial arcs meet at rho star. The filled point marks their common value. Two tangent arrows at the point have visibly different slopes.</desc>
+    <path class="axis" d="M58 226 H680 M58 226 V28" />
+    <path class="boundary" d="M360 30 V226" />
+    <path class="cell cell--left" d="M70 190 C165 178 255 145 360 102" />
+    <path class="cell cell--right" d="M360 102 C430 156 530 176 670 184" />
+    <path class="tangent tangent--left" d="M268 142 L352 106" />
+    <path class="tangent tangent--right" d="M368 108 L452 164" />
+    <circle class="shared-value" cx="360" cy="102" r="7" />
+    <text x="170" y="58" text-anchor="middle">cell c</text>
+    <text x="550" y="58" text-anchor="middle">cell c + 1</text>
+    <text x="360" y="250" text-anchor="middle">ρ★</text>
+    <text x="244" y="128" text-anchor="end">left slope</text>
+    <text x="472" y="175">right slope</text>
+    <text x="373" y="91">shared value</text>
+  </svg>
+</DiagramFrame>
+
+<style>
+  svg { display: block; width: 100%; height: auto; }
+  .axis { fill: none; stroke: var(--sl-color-gray-4); stroke-width: 2; }
+  .boundary { fill: none; stroke: var(--sl-color-gray-3); stroke-width: 2; stroke-dasharray: 7 7; }
+  .cell { fill: none; stroke-width: 6; stroke-linecap: round; }
+  .cell--left { stroke: var(--diagram-input); }
+  .cell--right { stroke: var(--diagram-result); }
+  .tangent { fill: none; stroke: var(--diagram-contribution); stroke-width: 3; stroke-linecap: round; }
+  .shared-value { fill: var(--sl-color-accent); stroke: var(--sl-color-bg); stroke-width: 3; }
+  text { fill: var(--sl-color-text); font: 17px system-ui, sans-serif; }
+  @media (max-width: 560px) {
+    text { font-size: 19px; }
+  }
+</style>

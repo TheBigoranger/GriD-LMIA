@@ -3,8 +3,8 @@ import { renderInlineMath } from "../lib/katex.js";
 
 const stages = [
   { number: "01", title: "Model the general DPD-LMI", href: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#general-dpd-lmi-template" },
-  { number: "02", title: "Reduce rates and grid ", math: "\\boldsymbol\\rho", href: "documents/math/modeling-and-analysis/rate-box-and-interface-analysis/" },
-  { number: "03", title: "Pull back and assemble coefficients", href: "documents/math/coordinates-and-bernstein/coefficient-algebra/" },
+  { number: "02", title: "Grid and impose interface regularity", href: "documents/math/modeling-and-analysis/rate-box-and-interface-analysis/" },
+  { number: "03", title: "Expand in the Bernstein basis", href: "documents/math/coordinates-and-bernstein/coefficient-algebra/" },
   { number: "04", title: "Select a certificate", href: "documents/math/sos-certificates/" },
   { number: "05", title: "Export, solve, recover", href: "documents/reference/pdlmi/toyalmip/" },
 ];
@@ -15,7 +15,7 @@ const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}
 
 <figure class="journey-pipeline" role="img" aria-labelledby="journey-title" aria-describedby="journey-desc">
   <figcaption id="journey-title" class="journey-title">Five-stage DPD-LMI modeling and solution workflow</figcaption>
-  <p id="journey-desc" class="journey-description">A forward-only wave connects a general continuum DPD-LMI, optional exact rate-box reduction and parameter gridding, local Bernstein residual assembly, finite certificate selection, and YALMIP export, solution, and recovery.</p>
+  <p id="journey-desc" class="journey-description">A forward-only wave connects the paper's general continuum DPD-LMI, parameter gridding with continuous values and potentially unequal one-sided derivatives, cell-local Bernstein expansion, finite certificate selection, and YALMIP export, solution, and recovery.</p>
 
   <div class="journey-desktop" aria-hidden="true">
     <svg viewBox="0 0 1120 310">
