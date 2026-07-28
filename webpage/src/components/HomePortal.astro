@@ -21,11 +21,8 @@ const lmiSteps = [
   {
     number: "01",
     title: "Model the general DPD-LMI problem",
-    math: [
-      "\\boldsymbol y:\\mathcal P\\to\\mathbb R^N,",
-      "\\boldsymbol y(\\boldsymbol\\rho)=\\bigl(y_1(\\boldsymbol\\rho),\\ldots,y_N(\\boldsymbol\\rho)\\bigr)^\\top,",
-      "\\mathcal F(\\boldsymbol\\rho)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}T_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\prec0,\\qquad\\forall\\boldsymbol\\rho\\in\\mathcal P.",
-    ],
+    inlineMath: "\\boldsymbol y:\\mathcal P\\to\\mathbb R^N,\\qquad \\boldsymbol y(\\boldsymbol\\rho)=\\bigl(y_1(\\boldsymbol\\rho),\\ldots,y_N(\\boldsymbol\\rho)\\bigr)^\\top.",
+    math: "\\mathcal F(\\boldsymbol\\rho)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}T_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\prec0,\\qquad\\forall\\boldsymbol\\rho\\in\\mathcal P.",
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#general-dpd-lmi-template",
   },
   {
@@ -33,12 +30,9 @@ const lmiSteps = [
     title: "Grid ",
     titleMath: "\\mathcal P",
     titleSuffix: " and impose interface regularity",
-    textHtml: `Assumption 1 makes the parameter domain and scheduling-rate domain hyperrectangles before the parameter domain is gridded. Under Assumption 2, the known matrices are ${renderInlineMath("C^0")}; the decision variables are ${renderInlineMath("C^{0,1}")} (Lipschitz) on the parameter domain and polynomial on each cell. Values agree at a shared boundary, but the limiting derivatives from adjacent cells need not agree.`,
-    math: [
-      "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
-      "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},\\qquad\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
-      "\\lim_{\\rho\\to\\rho_\\star^-}y(\\rho)=y(\\rho_\\star)=\\lim_{\\rho\\to\\rho_\\star^+}y(\\rho),\\qquad \\lim_{\\rho\\to\\rho_\\star^-}y'(\\rho)\\ne\\lim_{\\rho\\to\\rho_\\star^+}y'(\\rho).",
-    ],
+    text: "Grid the parameter domain into axis-aligned cells.",
+    math: "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},\\qquad\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
+    regularityText: "Across each shared boundary, decision values must remain continuous, but adjacent one-sided derivatives may differ.",
     visual: "regularity",
     manual: "documents/math/modeling-and-analysis/rate-box-and-interface-analysis/",
     visibleCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);",
@@ -115,6 +109,7 @@ const lmiSteps = [
           <div class="step-content">
             <div class="step-copy">
               <h3>{step.title}{step.titleMath && <span class="step-title-math" set:html={renderInlineMath(step.titleMath)} />}{step.titleSuffix}</h3>
+              {step.inlineMath && <div class="step-inline-math" set:html={renderInlineMath(step.inlineMath)} />}
               {step.textHtml ? <p set:html={step.textHtml} /> : step.text ? <p>{step.text}</p> : null}
               {step.visual === "storage"
                 ? <div class="cell-storage-compact"><CellStorageExplorer client:load formulaHtml={step.math.map(renderDisplayMath)} axisHtml={{ x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"].map(renderInlineMath), y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"].map(renderInlineMath) }} /></div>
@@ -125,6 +120,7 @@ const lmiSteps = [
                           <div class="math-strip__row" set:html={renderDisplayMath(line)} />
                         ))}
                       </div>
+                      <p>{step.regularityText}</p>
                       <InterfaceRegularityDiagram />
                     </>
                 : step.visual === "export"
@@ -190,6 +186,8 @@ const lmiSteps = [
   .step-copy h3,
   .step-copy p { margin: 0; }
   .step-title-math :global(.katex) { font-size: 1em; }
+  .step-inline-math { min-width: 0; overflow-x: auto; padding-block: 0.15rem; white-space: nowrap; }
+  .step-inline-math :global(.katex) { font-size: 1.05em; }
   .cell-storage-compact :global(.cell-explorer) { gap: 0.65rem; }
   .cell-storage-compact :global(.diagram-frame__body) { padding: 0.65rem; }
   .cell-storage-compact :global(.cell-coeffs) { gap: 0.25rem; }

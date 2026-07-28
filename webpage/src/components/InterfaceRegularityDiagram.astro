@@ -17,24 +17,24 @@ import DiagramFrame from "./DiagramFrame.astro";
     <path class="tangent tangent--left" d="M268 142 L352 106" />
     <path class="tangent tangent--right" d="M368 108 L452 164" />
     <circle class="shared-value" cx="360" cy="102" r="7" />
-    <text x="170" y="58" text-anchor="middle">cell c</text>
-    <text x="550" y="58" text-anchor="middle">cell c + 1</text>
+    <text x="160" y="50" text-anchor="middle">cell c</text>
+    <text x="560" y="50" text-anchor="middle">cell c + 1</text>
     <text x="360" y="250" text-anchor="middle">ρ★</text>
-    <text x="244" y="128" text-anchor="end">left slope</text>
-    <text x="472" y="175">right slope</text>
-    <text x="373" y="91">shared value</text>
+    <text x="220" y="105" text-anchor="middle">left limiting slope</text>
+    <text x="520" y="122" text-anchor="middle">right limiting slope</text>
+    <text x="420" y="78" text-anchor="middle">shared value</text>
   </svg>
 </DiagramFrame>
 
 <style>
   svg { display: block; width: 100%; height: auto; }
-  .axis { fill: none; stroke: var(--sl-color-gray-4); stroke-width: 2; }
-  .boundary { fill: none; stroke: var(--sl-color-gray-3); stroke-width: 2; stroke-dasharray: 7 7; }
-  .cell { fill: none; stroke-width: 6; stroke-linecap: round; }
+  .axis { fill: none; stroke: var(--sl-color-gray-4); stroke-width: 1.25; }
+  .boundary { fill: none; stroke: var(--sl-color-gray-3); stroke-width: 1; stroke-dasharray: 7 7; }
+  .cell { fill: none; stroke-width: 3.5; stroke-linecap: round; }
   .cell--left { stroke: var(--diagram-input); }
   .cell--right { stroke: var(--diagram-result); }
-  .tangent { fill: none; stroke: var(--diagram-contribution); stroke-width: 3; stroke-linecap: round; }
-  .shared-value { fill: var(--sl-color-accent); stroke: var(--sl-color-bg); stroke-width: 3; }
+  .tangent { fill: none; stroke: var(--diagram-contribution); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 7 5; }
+  .shared-value { fill: var(--sl-color-accent); stroke: var(--sl-color-bg); stroke-width: 2; }
   text { fill: var(--sl-color-text); font: 17px system-ui, sans-serif; }
   @media (max-width: 560px) {
     text { font-size: 19px; }
