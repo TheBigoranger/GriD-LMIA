@@ -44,19 +44,19 @@ Direct is the default finite certificate. The package also provides opt-in \hype
 The full workflow now fits in one panorama: represent known data, create continuous decision functions, differentiate them cell by cell when rate terms are present, assemble and compare a residual, select a finite certificate, export it, solve, validate the status, and only then recover numerical values.
 
 \begin{center}
-\begin{tikzpicture}[node distance=4mm,font=\scriptsize]
-  \node[dp/stage] (objects) {known data and\\decisions};
-  \node[dp/stage,right=of objects] (differentiate) {optional cellwise\\\code{rhodiff}};
-  \node[dp/stage,right=of differentiate] (residual) {residual\\comparison};
-  \node[dp/stage,right=of residual] (certificate) {finite\\certificate};
-  \node[dp/stage,right=of certificate] (export) {\code{toYalmip}\\and \code{optimize}};
-  \draw[dp/arrow] (objects)--(differentiate);
-  \draw[dp/arrow] (differentiate)--(residual);
-  \draw[dp/arrow] (residual)--(certificate);
-  \draw[dp/arrow] (certificate)--(export);
-  \node[dp/result,below=7mm of export,minimum width=29mm,minimum height=12mm,align=center,font=\scriptsize] (recover) {status \(=0\), then\\recover values};
-  \draw[dp/arrow] (export)--(recover);
-\end{tikzpicture}
+    \begin{tikzpicture}[node distance=4mm,font=\scriptsize]
+        \node[dp/stage] (objects) {known data and\\decisions};
+        \node[dp/stage,right=of objects] (differentiate) {optional cellwise\\\code{rhodiff}};
+        \node[dp/stage,right=of differentiate] (residual) {residual\\comparison};
+        \node[dp/stage,right=of residual] (certificate) {finite\\certificate};
+        \node[dp/stage,right=of certificate] (export) {\code{toYalmip}\\and \code{optimize}};
+        \draw[dp/arrow] (objects)--(differentiate);
+        \draw[dp/arrow] (differentiate)--(residual);
+        \draw[dp/arrow] (residual)--(certificate);
+        \draw[dp/arrow] (certificate)--(export);
+        \node[dp/result,below=7mm of export,minimum width=29mm,minimum height=12mm,align=center,font=\scriptsize] (recover) {status \(=0\), then\\recover values};
+        \draw[dp/arrow] (export)--(recover);
+    \end{tikzpicture}
 \end{center}
 
 \begin{lstlisting}[style=dpmatlab]
@@ -84,17 +84,17 @@ Here \code{rhodiff} evaluates the affine derivative term at the vertices of the 
 \section{Manual Outline}
 
 \begin{center}
-\begin{tikzpicture}[node distance=4mm,font=\scriptsize]
-  \node[dp/known,minimum width=25mm,minimum height=12mm,align=center] (setup) {setup and\\verification};
-  \node[dp/decision,minimum width=25mm,minimum height=12mm,align=center,right=of setup] (objects) {known data and\\decisions};
-  \node[dp/certificate,minimum width=25mm,minimum height=12mm,align=center,right=of objects] (certificates) {finite\\certificates};
-  \node[dp/result,minimum width=25mm,minimum height=12mm,align=center,right=of certificates] (examples) {worked\\models};
-  \node[dp/neutral,minimum width=25mm,minimum height=12mm,align=center,right=of examples] (mathematics) {mathematical\\appendices};
-  \draw[dp/arrow] (setup)--(objects);
-  \draw[dp/arrow] (objects)--(certificates);
-  \draw[dp/arrow] (certificates)--(examples);
-  \draw[dp/arrow] (examples)--(mathematics);
-\end{tikzpicture}
+    \begin{tikzpicture}[node distance=4mm,font=\scriptsize]
+        \node[dp/known,minimum width=25mm,minimum height=12mm,align=center] (setup) {setup and\\verification};
+        \node[dp/decision,minimum width=25mm,minimum height=12mm,align=center,right=of setup] (objects) {known data and\\decisions};
+        \node[dp/certificate,minimum width=25mm,minimum height=12mm,align=center,right=of objects] (certificates) {finite\\certificates};
+        \node[dp/result,minimum width=25mm,minimum height=12mm,align=center,right=of certificates] (examples) {worked\\models};
+        \node[dp/neutral,minimum width=25mm,minimum height=12mm,align=center,right=of examples] (mathematics) {mathematical\\appendices};
+        \draw[dp/arrow] (setup)--(objects);
+        \draw[dp/arrow] (objects)--(certificates);
+        \draw[dp/arrow] (certificates)--(examples);
+        \draw[dp/arrow] (examples)--(mathematics);
+    \end{tikzpicture}
 \end{center}
 
 \Cref{sec:setup} covers installation and verification. The \code{pdbase} chapter explains shared backend geometry, after which Chapters~\ref{sec:pdmat} and~\ref{sec:pdvar} develop known data and decision functions. \Cref{sec:pdlmi} gives the complete certificate-selection and YALMIP-export contracts, the worked examples assemble application-specific residuals and objectives, and Appendices~\ref{app:bernstein-math} and~\ref{app:certificates} derive the Bernstein and certificate mathematics.

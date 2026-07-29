@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  bernsteinBasisWeights,
   bernsteinContributionsAt,
   bernsteinProduct,
   clientXToUnit,
   evaluateBernstein,
+  evaluateTensorBernstein,
   parseCoefficients,
   plotScale,
   sampleBernstein,
@@ -34,10 +36,51 @@ test("evaluates normalized Bernstein coefficients at endpoints", () => {
   assert.equal(evaluateBernstein([3, 5, 9], 1), 9);
 });
 
+test("builds a normalized Bernstein basis row on the unit interval", () => {
+  assert.deepEqual(bernsteinBasisWeights(2, 0), [1, 0, 0]);
+  assert.deepEqual(bernsteinBasisWeights(2, 1), [0, 0, 1]);
+  const weights = bernsteinBasisWeights(4, 0.37);
+  closeTo(weights.reduce((sum, value) => sum + value, 0), 1);
+  assert.throws(() => bernsteinBasisWeights(-1, 0.5), /nonnegative integer/i);
+  assert.throws(() => bernsteinBasisWeights(2, 1.1), /\[0, 1\]/);
+});
+
 test("evaluates the documented cubic represented by [1, 2, 1, 2]", () => {
   for (const alpha of [0, 0.25, 0.5, 0.75, 1]) {
     const expected = 1 + 3 * alpha - 6 * alpha ** 2 + 4 * alpha ** 3;
     closeTo(evaluateBernstein([1, 2, 1, 2], alpha), expected);
+  }
+});
+
+test("evaluates a last-axis-fastest two-parameter Bernstein lattice", () => {
+  const coeffs = [1, 3, 2, 5];
+  for (const [rho1, rho2] of [[0, 0], [0.25, 0.75], [1, 0.5], [1, 1]]) {
+    const expected = 1 + rho1 + 2 * rho2 + rho1 * rho2;
+    closeTo(evaluateTensorBernstein(coeffs, 1, [rho1, rho2]), expected);
+  }
+
+  assert.throws(
+    () => evaluateTensorBernstein([1, 2, 3], 1, [0.5, 0.5]),
+    /requires 4 finite coefficients/i,
+  );
+  assert.throws(
+    () => evaluateTensorBernstein([1], 0, []),
+    /at least one coordinate/i,
+  );
+});
+
+test("evaluates the documented degree-two bivariate surface", () => {
+  const coeffs = [1, 0.4, 1.8, 2, 2.4, 3.3, 0, 2.4, 3.8];
+  for (const [rho1, rho2] of [[0, 0], [0.25, 0.75], [0.6, 0.4], [1, 1]]) {
+    const expected = 1
+      + 2 * rho1
+      - 1.2 * rho2
+      - 3 * rho1 ** 2
+      + 2 * rho2 ** 2
+      + 4 * rho1 * rho2
+      + 2 * rho1 ** 2 * rho2
+      - 3 * rho1 * rho2 ** 2;
+    closeTo(evaluateTensorBernstein(coeffs, 2, [rho1, rho2]), expected);
   }
 });
 

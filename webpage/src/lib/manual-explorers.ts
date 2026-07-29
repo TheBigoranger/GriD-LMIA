@@ -143,7 +143,7 @@ export function buildCertificateShape(input: {
     if (!Number.isInteger(value) || value < min || value > max) throw new RangeError(`${name} must be an integer from ${min} to ${max}.`);
   }
   if (!Number.isInteger(bandWidth) || bandWidth < 1 || bandWidth > 9) {
-    throw new RangeError("band width must be an integer from 1 to 9.");
+    throw new RangeError("bandwidth w must be an integer from 1 to 9.");
   }
   if (rateRows !== 1 && rateRows !== 2 ** nPar) {
     throw new RangeError(`Active rate rows must be 1 for an ordinary residual or ${2 ** nPar} for rhodiff in ${nPar} dimensions.`);
@@ -201,10 +201,10 @@ export function buildCertificateShape(input: {
         const window = Math.min(bandWidth, axisDegree + 1);
         return Array.from({ length: axisDegree - window + 2 }, (_, index) => index);
       });
-      return combinationRows(axisStarts).map((start) => {
+      return combinationRows(axisStarts).map((start, index) => {
         const windowSize = spec.gramDegree.map((axisDegree) => Math.min(bandWidth, axisDegree + 1));
         return {
-          label: `${spec.label} window [${start.join(",")}]`,
+          label: `${spec.label} Gram block ${index + 1}`,
           gramDegree: windowSize.map((size) => size - 1),
           dimension: (mode === "semidefinite" ? matrixSize : 1)
             * windowSize.reduce((product, size) => product * size, 1),

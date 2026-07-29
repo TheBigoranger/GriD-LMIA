@@ -299,7 +299,7 @@ Partition \(Q\) into \(n\)-by-\(n\) blocks \(Q_{ij}\). The Bernstein coefficient
   \sum_{\substack{0\le i,j\le d\\i+j=k-a}}
   \binom di\binom dj\,Q_{ij}.
 \]
-Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs. For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms, while \code{applySparseFullBoxPreorder} uses the same parity terms and identities with band-limited Gram support at intermediate widths. Their minimum absolute order is \(\lfloor M/2\rfloor\), where \(M\) is the assembled residual degree.
+Equating this affine map to each target coefficient gives exact linear identities; \(Q\succeq0\) supplies the LMIs. For one parameter, \code{applyFullBoxPreorder} implements these exact parity forms, while \code{applySparseFullBoxPreorder} uses the same parity terms and identities with symmetric block-band Gram matrices \(Q_J^{(w)}\) at intermediate bandwidths. Their minimum absolute order is \(\lfloor M/2\rfloor\), where \(M\) is the assembled residual degree.
 
 \section{Putinar Modules And Schm\"udgen Preorderings}
 \label{sec:certificate-putinar-schmudgen}
@@ -440,32 +440,25 @@ fullBoxState = 1×2 double
 
 Selections rebuild from the stored original \code{Residual} and \code{Relation}. Reapplying P\'olya, Putinar, SparseFullBox, or FullBox replaces the previous selection; the certificates never compound, and the four opt-in families are mutually exclusive.
 
-\section{The Implemented SparseFullBox Band-Limited State}
+\section{The Implemented SparseFullBox Band-Matrix State}
 \label{sec:certificate-sparse-full-box}
-\index{SparseFullBox}\index{tensor window}\index{bandwidth}
+\index{SparseFullBox}\index{block-band Gram matrix}\index{bandwidth}
 
-\ideastep{Basic idea} SparseFullBox is the FullBox certificate with band-limited Gram support: it retains every FullBox parity or generator-mask term and every exact target-coefficient identity. The implementation realizes the support by replacing one dense Gram matrix with a sum of free PSD clique matrices on overlapping axis-aligned windows of the tensor Bernstein basis. Harris and Parrilo provide a close univariate Bernstein precedent, while factor-width and chordal matrix-SOS work provide broader sparse-Gram context \cite{harrisparrilo2023,gouveiakovacecsaee2022,zhengfantuzzi2023}; none of those sources defines this package's band map or window realization.
+\ideastep{Basic idea} SparseFullBox retains every FullBox parity or generator-mask term and every exact target-coefficient identity, but replaces each dense Gram matrix \(Q_J\) by a symmetric block-band Gram matrix \(Q_J^{(w)}\) of bandwidth \(w\). Only the admissible Gram entries change.
 
-\ideastep{Formula} Let one dense FullBox term use tensor basis labels
+\ideastep{Formula} For \(\ell\ge2\), use the paper notation \(\mathbf a_J=r\boldsymbol1-\boldsymbol\chi_J\) with the FullBox generators:
 \[
-  \mathcal I_{\boldsymbol d}=\prod_{s=1}^{\ell}\{0,\ldots,d_s\}.
+  S^{(\mathbf c)}=
+  \sum_{J\subseteq\{1,\ldots,\ell\}}
+  \left(\prod_{s\in J}g_s\right)
+  \left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right)^{\mathsf T}
+  Q_J^{(w)}
+  \left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right),
+  \qquad Q_J^{(w)}\succeq0.
 \]
-For positive integer bandwidth \(w\), set \(w_s=\min(w,d_s+1)\). For every start label \(\boldsymbol t\) with \(0\le t_s\le d_s-w_s+1\), define
-\[
-  W_{\boldsymbol t}=\prod_{s=1}^{\ell}\{t_s,\ldots,t_s+w_s-1\}.
-\]
-If \(Z_{W_{\boldsymbol t}}\) contains exactly the Bernstein basis functions whose tensor labels lie in \(W_{\boldsymbol t}\), SparseFullBox replaces the dense term by
-\[
-  \sum_{\boldsymbol t}
-  h_J(\boldsymbol\alpha)\,
-  Z_{W_{\boldsymbol t}}(\boldsymbol\alpha)^{\mathsf T}
-  Q_{J,\boldsymbol t}
-  Z_{W_{\boldsymbol t}}(\boldsymbol\alpha),
-  \qquad Q_{J,\boldsymbol t}\succeq0,
-\]
-where \(h_J\) is the same endpoint or box-generator weight used by the corresponding FullBox term. The implementation sums these weighted Bernstein maps and matches every coefficient of the sign-normalized, degree-elevated target exactly.
+Each \(Q_J^{(w)}\) is symmetric block-band with bandwidth \(w\); terms with negative tensor degree are omitted. The one-parameter parity forms make the same replacement \(Q_J\mapsto Q_J^{(w)}\). Every coefficient of the sign-normalized, degree-elevated target is still matched exactly.
 
-\ideastep{Worked example} For one parameter, even assembled residual degree \(M=4\), and absolute order \(r=2\), the unweighted basis has labels \(\{0,1,2\}\) and the \(\alpha(1-\alpha)\)-weighted basis has labels \(\{0,1\}\). Width \(w=2\) therefore creates unweighted windows \(\{0,1\}\) and \(\{1,2\}\), plus one complete weighted window \(\{0,1\}\). The finite certificate has three PSD blocks followed by five exact coefficient identities. The unweighted support is block tridiagonal. Width \(w=3\) includes every basis label in the unweighted block and reaches the dense FullBox endpoint.
+\ideastep{Worked example} For one parameter, even assembled residual degree \(M=4\), and absolute order \(r=2\), \(w=1\) makes each \(Q_J^{(1)}\) block diagonal and is canonicalized to Direct. At \(w=2\), each \(Q_J^{(2)}\) is block tridiagonal and the result retains SparseFullBox state. At \(w=3\), each \(Q_J^{(3)}\) is block pentadiagonal; because \(w=r+1\), the implementation canonicalizes this endpoint to FullBox.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -473,16 +466,16 @@ where \(h_J\) is the same endpoint or box-generator weight used by the correspon
   box/.style={dp/result,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm},
   endpoint/.style={dp/certificate,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm}]
   \node[endpoint] (direct) {\(w=1\)\\actual Direct state};
-  \node[box,right=of direct] (tri) {\(w=2\)\\intermediate band support};
+  \node[box,right=of direct] (tri) {\(w=2\)\\block tridiagonal};
   \node[endpoint,right=of tri] (dense) {\(w=3=r+1\)\\actual FullBox state};
   \draw[dp/arrow] (direct) -- (tri);
   \draw[dp/arrow] (tri) -- (dense);
 \end{tikzpicture}
 
-\textit{The intermediate cones are nested sufficient certificates; a wider cone need not yield a strict improvement on a particular residual.}
+\textit{Increasing the Gram-matrix bandwidth gives nested sufficient certificates; a wider cone need not yield a strict improvement on a particular residual.}
 \end{center}
 
-\code{applySparseFullBoxPreorder(w,r)} uses the same dimension-dependent absolute-order minimum as FullBox: \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) otherwise. Width one canonicalizes to actual Direct state after order validation. Width at least \(r+1\) canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, stored rate row, and entry-wise column-major matrix entry owns an independent certificate; the method adds no hidden margin and makes no solver call.
+\code{applySparseFullBoxPreorder(w,r)} uses default bandwidth \(w=2\) and the same dimension-dependent absolute-order minimum as FullBox: \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) otherwise. Width one canonicalizes to actual Direct state after order validation. Width at least \(r+1\) canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, stored rate row, and entry-wise column-major matrix entry owns an independent certificate; the method adds no hidden margin and makes no solver call.
 
 \section{Six Different Modeling Choices}
 \label{sec:certificate-modeling-choices}
@@ -499,7 +492,7 @@ These choices act on different parts of the problem.
   \node[box,below=of repr] (decision) {decision degree\\larger search space};
   \node[box,below=of decision] (grid) {physical subdivision\\more local cells};
   \node[box,below=of grid] (polya) {P\'olya increment\\same residual, elevated basis};
-  \node[box,below=of polya] (band) {SparseFullBox bandwidth \(w\)\\larger Gram support};
+  \node[box,below=of polya] (band) {SparseFullBox bandwidth \(w\)\\wider Gram matrices};
   \node[box,below=of band] (gram) {Gram order\\larger PSD certificate};
   \coordinate (busmid) at ($(grid.east)+(6mm,0)$);
   \draw[dp/bus] ($(repr.east)+(6mm,0)$) -- ($(gram.east)+(6mm,0)$);
@@ -522,11 +515,11 @@ decision degree & independent decision coefficients & certificate order \\
 subdivision & physical cells and local hulls & higher polynomial degree \\
 P\'olya increment \(d\) & elevated residual coefficients & Gram variables \\
 Putinar/full-box order & Gram bases and PSD block sizes & decision degree \\
-SparseFullBox bandwidth \(w\) & band-limited Gram support and PSD clique sizes & decision degree or physical grid \\
+SparseFullBox bandwidth \(w\) & admissible entries of the block-band Gram matrices & decision degree or physical grid \\
 \bottomrule
 \end{tabularx}
 
-When a certificate fails, do not infer continuous infeasibility. Decide separately whether the model needs a richer decision degree \(m\), a finer physical grid, a larger P\'olya increment \(d\), a wider SparseFullBox window \(w\), or a higher absolute Gram order \(r\).
+When a certificate fails, do not infer continuous infeasibility. Decide separately whether the model needs a richer decision degree \(m\), a finer physical grid, a larger P\'olya increment \(d\), a larger SparseFullBox bandwidth \(w\), or a higher absolute Gram order \(r\).
 
 \section{Implemented Boundary}
 \label{sec:certificate-boundary}
@@ -538,7 +531,7 @@ Implemented public behavior & Background only \\
 direct coefficient assembly & general full-space SOS parser \\
 uniform \code{applyPolya([d])} & direction-wise or automatic P\'olya search \\
 \code{applyPutinar([r])} & general-domain/general-generator Putinar interface \\
-\code{applySparseFullBoxPreorder([b[,r]])} & automatic or adaptive sparse-pattern selection \\
+\code{applySparseFullBoxPreorder([w[,r]])} & automatic or adaptive sparse-pattern selection \\
 \code{applyFullBoxPreorder([r])} & general-domain Schm\"udgen parser \\
 exact one-dimensional parity forms & automatic or adaptive Gram-order search \\
 all cells, active rate rows, and column-major entries & cross-cell/rate/entry Gram sharing \\

@@ -32,6 +32,7 @@ const notes = { direct: "coefficient test", polya: "exact elevation", putinar: "
 <style>
   .certificate-spectrum { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 1fr; border-block: 1px solid var(--diagram-border); }
   a { position: relative; display: grid; gap: 0.25rem; min-width: 0; padding: 1.1rem 0.65rem; color: var(--sl-color-text); text-align: center; text-decoration: none; }
+  strong { min-width: 0; overflow-wrap: anywhere; line-height: 1.15; }
   a + a { border-inline-start: 1px solid var(--diagram-border); }
   a:hover, a:focus-visible { color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); }
   a.selected { color: var(--diagram-result); background: color-mix(in srgb, var(--diagram-result) 9%, transparent); box-shadow: inset 0 3px var(--diagram-result); }

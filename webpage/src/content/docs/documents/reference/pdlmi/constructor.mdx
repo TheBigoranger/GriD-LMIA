@@ -66,8 +66,8 @@ Markov–Lukács interval form. In two or more parameters, `UsePutinar` selects
 one unweighted Gram term plus one $\alpha_s(1-\alpha_s)$-weighted term per
 axis, while `UseFullBoxPreorder` selects a term for every generator-subset
 product. `UseSparseFullBoxPreorder` retains those FullBox terms and exact
-identities while restricting Gram support to a band-limited form, implemented
-with overlapping axis-aligned tensor-window PSD clique blocks. All four opt-in selections are
+identities while replacing each dense Gram matrix $Q_J$ by a symmetric
+block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. All four opt-in selections are
 mutually exclusive.
 
 Use the direct default first. Choose Pólya when you want one exact degree
@@ -95,7 +95,7 @@ certificate order, see
 | `PutinarOrder` | Finite nonnegative integer scalar. This is an absolute order, not a degree increment. Supplying it alone enables Putinar assembly without a warning. |
 | `UseSparseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparseFullBox assembly. |
 | `SparseFullBoxOrder` | Finite nonnegative integer scalar and absolute order. Supplying it alone enables SparseFullBox assembly. |
-| `BandWidth` | Finite positive integer band width. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
+| `BandWidth` | Finite positive integer bandwidth `w` for $Q_J^{(w)}$. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient, not stored, and not inherited by later selection calls. |
 
 When full-box assembly is active, the minimum order is

@@ -16,6 +16,10 @@ import EvaluateExplorer from "../../../../../components/EvaluateExplorer.tsx";
 Here $\alpha=\phi_c^{-1}(\rho)$ is the local coordinate defined in the
 [global notation](/PD-LMI-package/documents/math/notation/#grids-cells-and-local-coordinates).
 
+The explorer compares scalar evaluation on one parameter axis with tensor
+evaluation on two axes. The 2D coefficient lattice uses the same
+last-axis-fastest label order as `A.lbls()`.
+
 <EvaluateExplorer client:visible />
 
 ## Purpose
@@ -44,17 +48,42 @@ matrix per stored rate vertex.
 
 ## Description
 
-For coefficient-backed data on one cell, `evaluate` applies local Bernstein
-interpolation. For degree-one scalar data on `[rho0,rho1]`,
+For coefficient-backed data, let the evaluation point lie in the physical cell
 
 $$
-A(\rho)=(1-\alpha)A_0+\alpha A_1,\qquad
-\alpha=\frac{\rho-\rho_1^{(c)}}{\rho_1^{(c+1)}-\rho_1^{(c)}}.
+\boldsymbol\rho\in\mathcal H_{\boldsymbol c}
+=\prod_{s=1}^{\ell}
+\left[\rho_s^{(c_s)},\rho_s^{(c_s+1)}\right],
+\qquad
+\alpha_s
+=\frac{\rho_s-\rho_s^{(c_s)}}
+{\rho_s^{(c_s+1)}-\rho_s^{(c_s)}},
+\quad s=1,\ldots,\ell.
 $$
 
-For matrix-valued data, the same formula is applied entrywise to each stored
-coefficient matrix. Function-backed objects keep the exact MATLAB function
-handle and call it directly.
+For uniform Bernstein degree $m$, `evaluate` computes the tensor expansion
+
+$$
+A(\boldsymbol\rho)
+=A^{(\boldsymbol c)}(\boldsymbol\alpha)
+=\sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+C^{(\boldsymbol c)}[\boldsymbol i]\,
+B_{\boldsymbol i}^{m}(\boldsymbol\alpha).
+$$
+
+Here the tensor-product basis is
+
+$$
+B_{\boldsymbol i}^{m}(\boldsymbol\alpha)
+=\prod_{s=1}^{\ell}
+\binom{m}{i_s}
+\alpha_s^{i_s}(1-\alpha_s)^{m-i_s}.
+$$
+
+Each $C^{(\boldsymbol c)}[\boldsymbol i]$ is the stored scalar or matrix
+coefficient at local label $\boldsymbol i$; the scalar basis weight multiplies
+the entire coefficient matrix. Function-backed objects keep the exact MATLAB
+function handle and call it directly.
 
 Explicit rate rows are interpolated independently; `evaluate` does not merge
 the alternatives:

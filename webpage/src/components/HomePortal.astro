@@ -21,18 +21,20 @@ const lmiSteps = [
   {
     number: "01",
     title: "Model the general DPD-LMI problem",
-    inlineMath: "\\boldsymbol y:\\mathcal P\\to\\mathbb R^N,\\qquad \\boldsymbol y(\\boldsymbol\\rho)=\\bigl(y_1(\\boldsymbol\\rho),\\ldots,y_N(\\boldsymbol\\rho)\\bigr)^\\top.",
-    textHtml: `Induced-${renderInlineMath("L_2")} gain is one representative application; <a href="${local("documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/")}">open the mathematical guide</a> for that specialization.`,
+    inlineMath: "\\boldsymbol y=\\bigl(y_1,\\ldots,y_N\\bigr)^\\top:\\mathcal P\\to\\mathbb R^N.",
+    inlineNoteHtml: `${renderInlineMath("\\boldsymbol y")} is the decision function, assumed locally Lipschitz continuous on ${renderInlineMath("\\mathcal P")}.`,
     math: "\\mathcal F(\\boldsymbol\\rho,\\dot{\\boldsymbol\\rho};y)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\preceq0.",
-    manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#general-dpd-lmi-template",
+    manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/",
+    manualLabel: "Open the induced-L₂-gain specialization ↗",
   },
   {
     number: "02",
     title: "Partition the supported parameter box",
-    textHtml: `Here ${renderInlineMath("\\mathcal P")} is the parameter box, ${renderInlineMath("\\mathcal R")} is the rate box, and ${renderInlineMath("\\ell")} is the number of axes. On axis ${renderInlineMath("s")}, ${renderInlineMath("\\mathcal G_s")} contains ${renderInlineMath("k_s")} physical nodes. The one-based vector ${renderInlineMath("\\mathbf c")} selects the physical cell ${renderInlineMath("\\mathcal H_{\\mathbf c}")}. The tensor grid partitions ${renderInlineMath("\\mathcal P")} exactly; approximation enters only through the restricted decision-function space, while affine rate-vertex reduction is a separate exact step.`,
+    textHtml: `Axis ${renderInlineMath("s")} uses ${renderInlineMath("k_s")} physical nodes in ${renderInlineMath("\\mathcal G_s")}; the one-based vector ${renderInlineMath("\\mathbf c")} selects ${renderInlineMath("\\mathcal H_{\\mathbf c}")}. The tensor grid partitions ${renderInlineMath("\\mathcal P")} exactly. Approximation comes only from restricting the decision-function space; affine rate-vertex reduction remains exact.`,
     math: [
       "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
-      "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\},\\qquad\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
+      "\\underbrace{\\mathcal G_s}_{\\text{axis-}s\\text{ physical nodes}}=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\}.",
+      "\\underbrace{\\mathcal H_{\\mathbf c}}_{\\text{physical cell selected by }\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
     ],
     visual: "grid",
     manual: "documents/math/gridding-and-degree/",
@@ -109,14 +111,19 @@ const lmiSteps = [
           <div class="step-content">
             <div class="step-copy">
               <h3>{step.title}{step.titleMath && <span class="step-title-math" set:html={renderInlineMath(step.titleMath)} />}{step.titleSuffix}</h3>
-              {step.inlineMath && <div class="step-inline-math" set:html={renderInlineMath(step.inlineMath)} />}
-              {step.textHtml ? <p set:html={step.textHtml} /> : step.text ? <p>{step.text}</p> : null}
+              {step.visual !== "grid" && (step.textHtml ? <p set:html={step.textHtml} /> : step.text ? <p>{step.text}</p> : null)}
               {step.visual === "storage"
                 ? <div class="cell-storage-compact"><CellStorageExplorer client:visible formulaHtml={["", step.storageMath].map(renderDisplayMath)} axisHtml={{ x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"].map(renderInlineMath), y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"].map(renderInlineMath) }} /></div>
                 : step.visual === "grid"
                   ? <>
-                      <div class:list={["math-strip", { "math-strip--stacked": Array.isArray(step.math) }]}>
-                        {(Array.isArray(step.math) ? step.math : [step.math]).map((line) => (
+                      <div class="math-strip">
+                        {(Array.isArray(step.math) ? step.math.slice(0, 1) : [step.math]).map((line) => (
+                          <div class="math-strip__row" set:html={renderDisplayMath(line)} />
+                        ))}
+                      </div>
+                      {step.textHtml ? <p set:html={step.textHtml} /> : step.text ? <p>{step.text}</p> : null}
+                      <div class="math-strip">
+                        {(Array.isArray(step.math) ? step.math.slice(1) : []).map((line) => (
                           <div class="math-strip__row" set:html={renderDisplayMath(line)} />
                         ))}
                       </div>
@@ -129,9 +136,11 @@ const lmiSteps = [
                       <div class="math-strip__row" set:html={renderDisplayMath(line)} />
                     ))}
                   </div>}
+              {step.inlineMath && <div class="step-inline-math" set:html={renderInlineMath(step.inlineMath)} />}
+              {step.inlineNoteHtml && <p class="step-inline-note" set:html={step.inlineNoteHtml} />}
               {step.visual === "certificate" && <CertificateFlow compact />}
               {step.fullCode && <div class="example-disclosure"><pre class="example-disclosure__essential"><code>{step.fullCode}</code></pre></div>}
-              {step.manual && <a class="manual-step-link" href={local(step.manual)}>Open the detailed manual section ↗</a>}
+              {step.manual && <a class="manual-step-link" href={local(step.manual)}>{step.manualLabel ?? "Open the detailed manual section ↗"}</a>}
             </div>
           </div>
         </section>
@@ -187,6 +196,7 @@ const lmiSteps = [
   .step-title-math :global(.katex) { font-size: 1em; }
   .step-inline-math { min-width: 0; overflow-x: auto; padding-block: 0.15rem; white-space: nowrap; }
   .step-inline-math :global(.katex) { font-size: 1.05em; }
+  .step-inline-note { margin-top: 0.35rem; color: var(--sl-color-gray-2); }
   .cell-storage-compact :global(.cell-explorer) { gap: 0.65rem; }
   .cell-storage-compact :global(.diagram-frame__body) { padding: 0.65rem; }
   .cell-storage-compact :global(.cell-coeffs) { gap: 0.25rem; }

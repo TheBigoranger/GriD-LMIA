@@ -177,8 +177,8 @@ const inheritedPdmat = [
   ["ncell", "Count pdmat physical cells."],
   ["ncoeff", "Count pdmat coefficient columns per cell."],
   ["npar", "Count pdmat parameter dimensions."],
-  ["elevVals", "Return elevated known-data LocalValues without changing the source."],
-  ["elevate", "Return an elevated pdmat with the same source evidence."],
+  ["elevVals", "Return elevated known-data LocalValues without changing the source.", "elevate"],
+  ["elevate", "Return an elevated pdmat with the same source evidence.", "elevate"],
 ];
 
 const inheritedPdvar = [
@@ -230,7 +230,7 @@ export const referenceEntries = [
     group: "pdmat",
   },
   ...pdmatMethods.map(([name, task, dedicated]) => entry(name, "pdmat method", task, dedicated ? `documents/reference/pdmat/${dedicated.toLowerCase()}` : operationRoute("pdmat", name), dedicated ? "" : `pdmat-${name}`, "pdmat")),
-  ...inheritedPdmat.map(([name, task]) => entry(name, "inherited pdmat method", task, "documents/reference/pdmat/storage-and-elevation", `pdmat-${name}`, "pdmat")),
+  ...inheritedPdmat.map(([name, task, page = "storage-and-elevation"]) => entry(name, "inherited pdmat method", task, `documents/reference/pdmat/${page}`, `pdmat-${name}`, "pdmat")),
   {
     name: "pdvar",
     type: "Decision class",

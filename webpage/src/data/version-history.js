@@ -1,17 +1,17 @@
 export const versionHistory = [
   {
-    version: "v1.1.5",
+    version: "v1.1.6",
     date: "2026-07-28",
     status: "current documentation snapshot",
     summary:
-      "Unifies tensor-grid, Bernstein-degree, residual, target, and Gram notation across both manuals; expands the Bernstein convolution and Gram/SOS foundations; adds Math Concepts navigation plus pdmat addition, multiplication, and elevation explorers; and keeps the three-dimensional Welcome grid visible at every supported rotation. The MATLAB API is unchanged, and this documentation snapshot has no Git tag or GitHub Release.",
+      "Unifies tensor-grid, Bernstein-degree, residual, target, and Gram notation across both manuals; states SparseFullBox directly through the paper notation Q_J^(w) for symmetric block-band Gram matrices of bandwidth w; expands the Bernstein convolution and Gram/SOS foundations; adds Math Concepts navigation plus pdmat addition, multiplication, and elevation explorers; and keeps the three-dimensional Welcome grid visible at every supported rotation. The MATLAB API is unchanged, and this documentation snapshot has no Git tag or GitHub Release.",
   },
   {
     version: "v1.1.0",
     date: "2026-07-26",
     status: "latest GitHub Release",
     summary:
-      "Documents the centralized pdbase implementation while retaining complete inherited pdmat and pdvar references, adds the SparseFullBox certificate with tensor-window widths and canonical Direct/FullBox endpoints, corrects protected backend-helper ownership, and refreshes the printable and Web manuals.",
+      "Documents the centralized pdbase implementation while retaining complete inherited pdmat and pdvar references, adds the SparseFullBox certificate with configurable bandwidth and canonical Direct/FullBox endpoints, corrects protected backend-helper ownership, and refreshes the printable and Web manuals.",
   },
   {
     version: "v1.0.0",

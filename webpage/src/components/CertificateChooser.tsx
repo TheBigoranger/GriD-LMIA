@@ -107,7 +107,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             {option.key === "direct" ? <p><strong>Order:</strong> not used by the direct selector.</p> : <label>{option.key === "polya" ? "Elevation increment" : "Gram order"}
               <input inputMode="numeric" value={draft.order} onChange={(event) => setDraft({ ...draft, order: event.target.value })} />
             </label>}
-            {option.key === "sparsefullbox" ? <label>Band width
+            {option.key === "sparsefullbox" ? <label>Bandwidth w
               <input inputMode="numeric" value={draft.bandWidth} onChange={(event) => setDraft({ ...draft, bandWidth: event.target.value })} />
             </label> : null}
             <label>Assembly mode

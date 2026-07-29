@@ -1,37 +1,12 @@
 import { useId, useState } from "react";
 import { renderDisplayMath, renderInlineMath } from "../lib/katex.js";
-
-const cells = [
-  {
-    c1: 1,
-    domainTex: "\\rho_1\\in[0,0.5],\\;\\rho_2\\in[0,1]",
-    coefficients: [
-      "[1 0; 0 2]", "[3/2 0; 0 2]", "[2 0; 0 2]",
-      "[5/4 0; 0 2]", "[7/4 1/8; 1/8 2]", "[9/4 1/4; 1/4 2]",
-      "[3/2 0; 0 9/4]", "[2 1/4; 1/4 9/4]", "[5/2 1/2; 1/2 9/4]",
-    ],
-  },
-  {
-    c1: 2,
-    domainTex: "\\rho_1\\in[0.5,1],\\;\\rho_2\\in[0,1]",
-    coefficients: [
-      "[3/2 0; 0 9/4]", "[2 1/4; 1/4 9/4]", "[5/2 1/2; 1/2 9/4]",
-      "[7/4 0; 0 5/2]", "[9/4 3/8; 3/8 5/2]", "[11/4 3/4; 3/4 5/2]",
-      "[2 0; 0 3]", "[5/2 1/2; 1/2 3]", "[3 1; 1 3]",
-    ],
-  },
-] as const;
+import { pdmatCellData as cells } from "../lib/cell-bernstein.ts";
 
 /** Select one of the two physical hypercubes that store A's degree-two data. */
 interface Props {
   formulaHtml?: string[];
   axisHtml?: { x: string[]; y: string[] };
 }
-
-const matrixToTex = (value: string) => {
-  const rows = value.slice(1, -1).split(";").map((row) => row.trim().split(/\s+/).join("&"));
-  return `\\begin{bmatrix}${rows.join("\\\\")}\\end{bmatrix}`;
-};
 
 export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: [], y: [] } }: Props) {
   const [selected, setSelected] = useState(0);
@@ -103,9 +78,9 @@ export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: 
           <div className="cell-coefficient-flow">
             <div className="cell-coeffs" aria-label={`Nine degree-two coefficient matrices in cell (${cell.c1}, 1)`}>
               {cell.coefficients.map((coefficient, index) => (
-                <span key={coefficient}>
+                <span key={`${cell.c1}-${index}`}>
                   <small dangerouslySetInnerHTML={{ __html: renderInlineMath(`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`) }} />
-                  <div className="cell-coeff-math" dangerouslySetInnerHTML={{ __html: renderInlineMath(matrixToTex(coefficient)) }} />
+                  <div className="cell-coeff-math" dangerouslySetInnerHTML={{ __html: renderInlineMath(coefficient.tex) }} />
                 </span>
               ))}
             </div>

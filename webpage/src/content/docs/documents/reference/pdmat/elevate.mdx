@@ -1,0 +1,167 @@
+---
+title: pdmat elevate
+description: Exact Bernstein degree elevation for pdmat coefficient evidence without changing the represented known-data function.
+---
+
+import DegreeElevationExplorer from "../../../../../components/DegreeElevationExplorer.tsx";
+
+<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><span>elevate</span></nav>
+
+Degree elevation changes the Bernstein representation, not the physical grid
+or the represented known-data function. The implementation is inherited from
+`pdbase`; the returned object remains a `pdmat`.
+
+## What degree elevation does
+
+On physical cell $\mathcal H_{\boldsymbol c}$, write the degree-$m$ tensor
+Bernstein coefficients as
+$C^{(\boldsymbol c)}[\boldsymbol i]$,
+$\boldsymbol i\in\{0,\ldots,m\}^{\ell}$. Uniform elevation to any
+$M\ge m$ is defined directly by
+
+$$
+\widehat C^{(\boldsymbol c)}[\boldsymbol k]
+=
+\sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+\left[
+\prod_{s=1}^{\ell}
+\frac{
+\binom{m}{i_s}\binom{M-m}{k_s-i_s}
+}{
+\binom{M}{k_s}
+}
+\right]
+C^{(\boldsymbol c)}[\boldsymbol i],
+\qquad
+\boldsymbol k\in\{0,\ldots,M\}^{\ell}.
+$$
+
+As usual, a binomial coefficient with an index outside its natural range is
+zero. The degree-$(M-m)$ elevation kernel is
+
+$$
+\mathcal E_{M-m}[\boldsymbol j]
+:=
+\prod_{s=1}^{\ell}
+\binom{M-m}{j_s},
+\qquad
+\boldsymbol j\in\{0,\ldots,M-m\}^{\ell}.
+$$
+
+Therefore the same elevation is one $\ell$-dimensional discrete convolution:
+
+$$
+\left\{
+\prod_{s=1}^{\ell}\binom{M}{k_s}
+\widehat C^{(\boldsymbol c)}[\boldsymbol k]
+\right\}_{\boldsymbol k}
+=
+\left\{
+\prod_{s=1}^{\ell}\binom{m}{i_s}
+C^{(\boldsymbol c)}[\boldsymbol i]
+\right\}_{\boldsymbol i}
+\ast_{\ell}
+\left\{
+\mathcal E_{M-m}[\boldsymbol j]
+\right\}_{\boldsymbol j}.
+$$
+
+This unique degree-$M$ coefficient tensor represents exactly the same
+polynomial. A cell grows from $(m+1)^\ell$ to $(M+1)^\ell$ local labels; only
+the representation changes.
+
+Relative to the [`pdmat Storage` figure](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/),
+`cells(A)`, the physical grid, and shared cell interfaces stay fixed.
+Only the tensor lattice inside every `LocalValues` branch is replaced by a
+larger exact representation: `ncell(A)` and `npar(A)` stay fixed, while
+`ncoeff(A)` increases.
+
+Degree elevation is therefore useful when two Bernstein operands need a common
+degree or when a finite certificate requests additional coefficient evidence.
+It is not grid refinement, interpolation, or an approximation step.
+
+## <span id="pdmat-elevVals"></span>`elevVals`
+
+```matlab
+elevatedTree = elevVals(A,degreeIncrement)
+```
+
+Returns numeric `LocalValues` elevated by the finite nonnegative integer
+increment in every parameter direction. In the Storage figure, this is the
+larger tensor lattice inside each existing cell branch. `A` remains unchanged.
+
+## <span id="pdmat-elevate"></span>`elevate`
+
+```matlab
+B = elevate(A,degreeIncrement)
+B = A.elevate(degreeIncrement)
+```
+
+Returns a `pdmat` with the same grid, matrix shape, continuity metadata,
+`SourceSummary`, and `FunctionHandle`, but with elevated degree and coefficient
+evidence. It packages the elevated `LocalValues` described above into a new
+object; evaluation is exactly preserved.
+
+### One-dimensional coefficient rule and example
+
+For one coordinate and one elevation step, the tensor convolution reduces to
+the familiar recurrence
+
+$$
+\begin{aligned}
+\widetilde a_0&=a_0,
+&\widetilde a_{m+1}&=a_m,\\
+\widetilde a_i
+&=\frac{i}{m+1}a_{i-1}
++\left(1-\frac{i}{m+1}\right)a_i,
+&1&\le i\le m.
+\end{aligned}
+$$
+
+The following degree-one row $[1,3]$ is elevated twice to the degree-three row
+$[1,\frac53,\frac73,3]$ without changing $A(\rho)=1+2\rho$.
+
+```matlab
+A = pdmat({[0 1]}, @(rho) 1 + 2*rho, Degree=1);
+B = A.elevate(2);
+classes = [string(class(A)) string(class(B))]
+degrees = [A.Degree B.Degree]
+sameValue = [A.evaluate(0.4) B.evaluate(0.4)]
+sourceUnchanged = A.Degree
+```
+
+```text
+classes =
+  1x2 string array
+    "pdmat"    "pdmat"
+
+degrees =
+     1     3
+
+sameValue =
+    1.8000    1.8000
+
+sourceUnchanged =
+     1
+```
+
+An invalid increment raises `pdbase:InvalidDegreeIncrement`. A function-only
+object constructed without explicit `Degree` raises
+`pdbase:MissingCoefficientEvidence` for both elevation methods. Elevation is
+representation-only: it does not refine the physical grid or sample a
+function-only source.
+
+## <span id="numerical-degree-elevation-explorer"></span>Numerical degree-elevation explorer
+
+Edit one normalized Bernstein row and an increment. The original and elevated
+rows represent the same one-cell polynomial.
+
+<DegreeElevationExplorer client:visible />
+
+## See Also
+
+[`pdmat storage`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
+[`pdmat evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
+[`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
+[`Bernstein polynomial mathematics`](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
+[`pdbase evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/)

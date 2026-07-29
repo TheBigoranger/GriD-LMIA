@@ -3,7 +3,7 @@ title: pdmat Constructor
 description: Construct known finite real matrix data on a parameter grid.
 ---
 
-import CellStorageDiagram from "../../../../../components/CellStorageDiagram.astro";
+import CellBernsteinExpressionExplorer from "../../../../../components/CellBernsteinExpressionExplorer.tsx";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -13,10 +13,14 @@ import CellStorageDiagram from "../../../../../components/CellStorageDiagram.ast
   <span>constructor</span>
 </nav>
 
+## Bernstein Basis Expression
+
 The grid, physical-cell, and local-coordinate symbols follow the
 [global notation](/PD-LMI-package/documents/math/notation/#grids-cells-and-local-coordinates).
+Inside each selected cell, `pdmat` stores a separate tensor Bernstein expansion
+in local coordinates $\boldsymbol\alpha\in[0,1]^2$:
 
-<CellStorageDiagram />
+<CellBernsteinExpressionExplorer client:visible />
 
 ## Purpose
 

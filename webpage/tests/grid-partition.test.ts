@@ -50,18 +50,22 @@ test("resets the three-dimensional view to the documented finite rotation", () =
   assert.ok([projected.x, projected.y, projected.depth].every(Number.isFinite));
 });
 
-test("fits every rotated cube endpoint and selected marker inside the padded viewBox", () => {
+test("fits rotated cube, axis endpoints, and selected marker inside the padded viewBox", () => {
   const corners = [
     [0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
     [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1],
   ] as const;
+  const axes = [
+    [-0.12, -0.12, -0.12], [1.12, -0.12, -0.12],
+    [-0.12, 1.12, -0.12], [-0.12, -0.12, 1.12],
+  ] as const;
   const viewBox = { width: 420, height: 300 };
-  const padding = 12;
+  const padding = 28;
   const radius = 7;
 
   for (const yaw of [-180, -90, -35, 0, 35, 90, 180]) {
     for (let pitch = -70; pitch <= 70; pitch += 10) {
-      const projected = corners.map((point) => projectPoint(point, yaw, pitch));
+      const projected = [...corners, ...axes].map((point) => projectPoint(point, yaw, pitch));
       const fit = fitProjection(projected, viewBox, padding, radius);
       for (const point of projected.map((item) => mapProjection(item, fit))) {
         assert.ok(point.x >= padding + radius - 1e-9);

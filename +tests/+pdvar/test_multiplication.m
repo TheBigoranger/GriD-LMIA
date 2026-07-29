@@ -61,12 +61,15 @@ function testConstructorDegreeTwoTimesKnownDegreeOne(testCase)
 end
 
 function testScalarPdvarScalesKnownMatrices(testCase)
-    % A scalar pdvar expression should scale known matrices like an sdpvar.
+    % A scalar pdvar should scale numeric and pdmat matrices in either order.
     G = pdvar(1, [0 1], Degree=0);
     cg = G.coeffs(1);
+    A = pdmat([0 1], {eye(2), 2 * eye(2)}, Degree=1);
 
     R = G * eye(2);
     L = eye(2) * G;
+    knownRight = G * A;
+    knownLeft = A * G;
 
     testCase.verifyEqual(size(R), [2 2]);
     testCase.verifyEqual(size(L), [2 2]);
@@ -74,6 +77,36 @@ function testScalarPdvarScalesKnownMatrices(testCase)
     testCase.verifyEqual(L.Degree, 0);
     verifyCoeffExpr(testCase, R.coeffs(1), {cg{1} * eye(2)});
     verifyCoeffExpr(testCase, L.coeffs(1), {eye(2) * cg{1}});
+    testCase.verifyEqual(size(knownRight), [2 2]);
+    testCase.verifyEqual(size(knownLeft), [2 2]);
+    testCase.verifyEqual(knownRight.Degree, 1);
+    testCase.verifyEqual(knownLeft.Degree, 1);
+    verifyCoeffExpr(testCase, knownRight.coeffs(1), ...
+        {cg{1} * eye(2), cg{1} * 2 * eye(2)});
+    verifyCoeffExpr(testCase, knownLeft.coeffs(1), ...
+        {eye(2) * cg{1}, 2 * eye(2) * cg{1}});
+end
+
+function testScalarPdmatScalesDecisionMatrices(testCase)
+    % A scalar pdmat should scale matrix-valued decisions on either side.
+    S = pdmat([0 1], {2, 4}, Degree=1);
+    P = pdvar(2, 2, [0 1], "full");
+    cp = P.coeffs(1);
+
+    knownLeft = S * P;
+    knownRight = P * S;
+    expected = {
+        2 * cp{1}, ...
+        (2 * cp{2} + 4 * cp{1}) / 2, ...
+        4 * cp{2}
+        };
+
+    testCase.verifyEqual(size(knownLeft), [2 2]);
+    testCase.verifyEqual(size(knownRight), [2 2]);
+    testCase.verifyEqual(knownLeft.Degree, 2);
+    testCase.verifyEqual(knownRight.Degree, 2);
+    verifyCoeffExpr(testCase, knownLeft.coeffs(1), expected);
+    verifyCoeffExpr(testCase, knownRight.coeffs(1), expected);
 end
 
 function testDerivativeProductsPreserveRateRows(testCase)
@@ -139,6 +172,74 @@ function testDerivativeNumericMatrixProducts(testCase)
     testCase.verifyEqual(size(R), [2 2]);
     verifyCoeffExpr(testCase, L.coeffs(1), {[1 2] * cd{1, 1}; [1 2] * cd{2, 1}});
     verifyCoeffExpr(testCase, R.coeffs(1), {cd{1, 1} * [4 5]; cd{2, 1} * [4 5]});
+end
+
+function testScalarMixedProductsAllowOneRhodiffSide(testCase)
+    % Every scalar/matrix placement should preserve one derivative row table.
+    rb = [-1 2];
+    scalarData = pdmat([0 1], {1, 3}, Degree=1, RateBounds=rb);
+    matrixData = pdmat([0 1], {eye(2), 2 * eye(2)}, ...
+        Degree=1, RateBounds=rb);
+    ordinaryScalarData = pdmat([0 1], {2, 4}, Degree=1);
+    ordinaryMatrixData = pdmat([0 1], ...
+        {eye(2), 2 * eye(2)}, Degree=1);
+    scalarDecision = pdvar(1, [0 1]);
+    matrixDecision = pdvar(2, 2, [0 1], "full");
+    derivativeScalarData = rhodiff(scalarData);
+    derivativeMatrixData = rhodiff(matrixData);
+    derivativeScalarDecision = rhodiff(scalarDecision, rb);
+    derivativeMatrixDecision = rhodiff(matrixDecision, rb);
+    cs = scalarDecision.coeffs(1);
+    cm = matrixDecision.coeffs(1);
+    cds = derivativeScalarDecision.coeffs(1);
+    cdm = derivativeMatrixDecision.coeffs(1);
+
+    expectedDataScalar = {
+        -2 * cm{1}, -2 * cm{2}
+        4 * cm{1}, 4 * cm{2}
+        };
+    expectedDecisionMatrix = {
+        2 * cdm{1, 1}, 4 * cdm{1, 1}
+        2 * cdm{2, 1}, 4 * cdm{2, 1}
+        };
+    expectedDecisionScalar = {
+        cds{1, 1} * eye(2), cds{1, 1} * 2 * eye(2)
+        cds{2, 1} * eye(2), cds{2, 1} * 2 * eye(2)
+        };
+    expectedDataMatrix = {
+        cs{1} * -eye(2), cs{2} * -eye(2)
+        cs{1} * 2 * eye(2), cs{2} * 2 * eye(2)
+        };
+
+    verifyRateProduct(testCase, derivativeScalarData * matrixDecision, ...
+        expectedDataScalar);
+    verifyRateProduct(testCase, matrixDecision * derivativeScalarData, ...
+        expectedDataScalar);
+    verifyRateProduct(testCase, ordinaryScalarData * derivativeMatrixDecision, ...
+        expectedDecisionMatrix);
+    verifyRateProduct(testCase, derivativeMatrixDecision * ordinaryScalarData, ...
+        expectedDecisionMatrix);
+    verifyRateProduct(testCase, derivativeScalarDecision * ordinaryMatrixData, ...
+        expectedDecisionScalar);
+    verifyRateProduct(testCase, ordinaryMatrixData * derivativeScalarDecision, ...
+        expectedDecisionScalar);
+    verifyRateProduct(testCase, scalarDecision * derivativeMatrixData, ...
+        expectedDataMatrix);
+    verifyRateProduct(testCase, derivativeMatrixData * scalarDecision, ...
+        expectedDataMatrix);
+
+    testCase.verifyError( ...
+        @() derivativeScalarData * derivativeMatrixDecision, ...
+        "pdvar:InvalidMultiplication");
+    testCase.verifyError( ...
+        @() derivativeMatrixDecision * derivativeScalarData, ...
+        "pdvar:InvalidMultiplication");
+    testCase.verifyError( ...
+        @() derivativeScalarDecision * derivativeMatrixData, ...
+        "pdvar:InvalidMultiplication");
+    testCase.verifyError( ...
+        @() derivativeMatrixData * derivativeScalarDecision, ...
+        "pdvar:InvalidMultiplication");
 end
 
 function testZeroProductsClearMetadataAndAvoidQuadraticGuard(testCase)
@@ -224,13 +325,19 @@ function testRejectsUnsupportedProducts(testCase)
     B = pdmat({[0 1]}, {ones(2), 2 * ones(2)}, Degree=1);
     F = pdmat({[0 1]}, @(rho) rho);
     x = sdpvar(1, 1);
+    X = pdvar(2, 2, {[0 1]}, "full");
 
     testCase.verifyError(@() P * Q, "pdvar:InvalidMultiplication");
+    testCase.verifyError(@() P * X, "pdvar:InvalidMultiplication");
+    testCase.verifyError(@() X * P, "pdvar:InvalidMultiplication");
     testCase.verifyError(@() P * x, "pdvar:InvalidMultiplication");
     testCase.verifyError(@() P * F, "pdvar:FunctionOnlyAlgebra");
+    testCase.verifyError(@() F * P, "pdvar:FunctionOnlyAlgebra");
     testCase.verifyError(@() P * A, "pdvar:MixedGrid");
     testCase.verifyError(@() V * B, "pdvar:InvalidMultiplication");
     testCase.verifyError(@() R * 2, "pdvar:InvalidMultiplication");
+    testCase.verifyError(@() R * B, "pdvar:InvalidMultiplication");
+    testCase.verifyError(@() B * R, "pdvar:InvalidMultiplication");
 end
 
 function testRejectsUnsupportedDerivativeProducts(testCase)
@@ -263,6 +370,17 @@ function verifyCoeffExpr(testCase, actual, expected)
             testCase.verifyEqual(diff, zeros(size(diff)), AbsTol=1e-10);
         end
     end
+end
+
+function verifyRateProduct(testCase, obj, expected)
+    % Check one mixed scalar/matrix product and all of its derivative rows.
+    testCase.verifyClass(obj, "pdvar");
+    testCase.verifyEqual(size(obj), [2 2]);
+    testCase.verifyEqual(obj.Degree, 1);
+    testCase.verifyTrue(obj.HasRateDependence);
+    testCase.verifyEqual(obj.RateBounds, [-1 2]);
+    testCase.verifyEqual(size(obj.coeffs(1)), [2 2]);
+    verifyCoeffExpr(testCase, obj.coeffs(1), expected);
 end
 
 function verifyZeroPdvar(testCase, obj, sz)

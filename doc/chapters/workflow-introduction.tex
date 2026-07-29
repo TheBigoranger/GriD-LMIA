@@ -1,8 +1,7 @@
-\chapter[From a Parameter Box to Finite Constraints]{\texorpdfstring{From a Parameter Box to\\Finite Constraints}{From a Parameter Box to Finite Constraints}}
-\label{sec:canonical-pdlmi}
+\chapter[From a Parameter Box to Finite Constraints]{\texorpdfstring{From a Parameter Box to Finite Constraints}{From a Parameter Box to Finite Constraints}}
 \label{sec:bernstein-motivation}
 
-This chapter gives a five-stage overview of what the package solves and how it reaches a finite semidefinite model. It begins with induced-\(L_2\)-gain analysis and the general DPD-LMI, states the box assumptions, partitions the parameter domain into physical cells, fixes one cell to introduce its Bernstein representation, derives the Direct finite implication, and closes with the complete path through YALMIP. Detailed algebra remains in Appendices~\ref{app:bernstein-math} and~\ref{app:certificates}, while complete API contracts remain in Chapters~\ref{sec:pdmat}--\ref{sec:pdlmi}.
+Parameter-dependent LMIs require a matrix inequality to hold throughout a continuous parameter domain, rather than at a single operating point. The package represents the known data and decision functions on a parameter box with cellwise Bernstein polynomials, then converts the resulting continuum condition into finite constraints for YALMIP. An LPV induced-\(L_2\)-gain problem provides the first example; the sections that follow develop the general differentiable parameter-dependent LMI (DPD-LMI) and its finite certificate construction. The supporting algebra is developed in Appendices~\ref{app:bernstein-math} and~\ref{app:certificates}, and the API contracts are collected in Chapters~\ref{sec:pdmat}--\ref{sec:pdlmi}.
 
 \section[LPV Induced-L2-Gain Motivation]{LPV Induced-\(L_2\)-Gain Motivation}
 
@@ -93,7 +92,7 @@ Their Cartesian product
 \[
     \mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell
 \]
-contains \(\prod_{s=1}^{\ell}k_s\) physical nodes. The one-based multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\), with \(c_s\in\{1,\ldots,k_s-1\}\), selects the physical cell
+contains \(\prod_{s=1}^{\ell}k_s\) physical nodes. The  multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\), with \(c_s\in\{1,\ldots,k_s-1\}\), defines the location of a physical cell $\mathbf{c}$ and its width along $s$:
 \[
     \mathcal H_{\mathbf c}
     =\prod_{s=1}^{\ell}
@@ -104,13 +103,13 @@ contains \(\prod_{s=1}^{\ell}k_s\) physical nodes. The one-based multi-index \(\
 \]
 Thus \(\mathcal G\) determines \(\prod_s(k_s-1)\) physical cells whose union is exactly \(\mathcal P\). The grid does not sample or approximate the box geometry. Gridding is nevertheless a modeling approximation because it restricts the infinite-dimensional search for \(y\) to the selected finite-dimensional space of continuous piecewise-polynomial decision functions.
 
-To make this general tensor geometry visible, now take the separate nonuniform two-dimensional example
+To make this general tensor geometry visible, take the following nonuniform two-dimensional example
 \[
     \mathcal G_1=\{0,0.4,1\},
     \qquad
     \mathcal G_2=\{0,0.25,1\}.
 \]
-Their tensor grid \(\mathcal G=\mathcal G_1\times\mathcal G_2\) has nine physical nodes and exactly partitions \([0,1]^2\) into four physical cells. The one-based cell indices are \((1,1)\), \((1,2)\), \((2,1)\), and \((2,2)\).
+Their tensor grid \(\mathcal G=\mathcal G_1\times\mathcal G_2\) has nine physical nodes and exactly partitions \([0,1]^2\) into four physical cells. The cell indices are \((1,1)\), \((1,2)\), \((2,1)\), and \((2,2)\).
 
 \begin{figure}[H]
 \centering
@@ -138,7 +137,7 @@ Their tensor grid \(\mathcal G=\mathcal G_1\times\mathcal G_2\) has nine physica
 \label{fig:intro-two-dimensional-grid}
 \end{figure}
 
-For a tensor-product polynomial of modeled degree \(m=2\) in each direction, every selected cell contains the nine zero-based local labels \(\mathbf i=(i_1,i_2)\in\{0,1,2\}^2\). Those labels identify Bernstein coefficients inside the cell; they are not nine additional physical sample points. In general, a degree-\(m\) tensor basis has \((m+1)^\ell\) local labels per cell. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
+The gridding above fixes nine physical nodes and four physical cells. Within each cell, it has its own local coordinate \(\boldsymbol\alpha\in[0,1]^\ell\) and carries a separate finite set of Bernstein coefficients. For example, a tensor-product polynomial of modeled degree \(m=3\) in each direction, that set has the sixteen local labels \(\mathbf i=(i_1,i_2)\in\{0,1,2,3\}^2\). These labels identify coefficients inside the cell and they are not sixteen additional physical sample points. In general, a degree-\(m\) tensor basis has \((m+1)^\ell\) local labels per cell. And under Bernstein basis, they share the same value at the boundary of a cell. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
 
 \section[Bernstein Basis on Each Cell]{\texorpdfstring{\hspace{0.3em}Bernstein Basis on Each Cell}{Bernstein Basis on Each Cell}}
 \label{sec:continuous-bernstein-representation}
@@ -166,13 +165,12 @@ and a cell-local polynomial is represented by
     B_{\mathbf i}^{m}(\boldsymbol\alpha)X^{(\mathbf c)}[\mathbf i].
 \label{eq:intro-cell-bernstein}
 \end{equation}
-The basis functions are nonnegative and sum to one, so the value is a convex combination of local coefficients; endpoint and face identities expose the cell boundaries directly. These properties make cellwise sign certificates, shared-face bookkeeping, degree elevation, and coefficient algebra finite and inspectable. The physical cell index \(\mathbf c\) is one-based, whereas the local Bernstein label \(\mathbf i\) is zero-based after the cell has been selected.
 
-The preceding definition is general. For a compact one-dimensional example, use the scalar known polynomial
+The notation is illustrated by the following one-dimensional known-data example. Consider the scalar polynomial
 \[
     a(\rho)=1+\rho+\rho^2
 \]
-on the two-cell grid \(\mathcal G_1=\{0,0.5,1\}\). In one dimension, write \(\mathcal H_c=[g_c,g_{c+1}]\), \(\phi_c(\alpha)=g_c+(g_{c+1}-g_c)\alpha\), and \(\alpha^{(c)}(\rho)=\phi_c^{-1}(\rho)\); the cell marker is a superscript, not a Bernstein-label subscript. Supplying \code{Degree=2} asks \code{pdmat} to retain exact function evaluation and validated degree-two Bernstein coefficient evidence.
+on the two-cell grid \(\mathcal G_1=\{0,0.5,1\}\). In this one-dimensional case, \(\mathcal H_c=\left[\rho_1^{(c)},\rho_1^{(c+1)}\right]\), \(h_1^c=\rho_1^{(c+1)}-\rho_1^{(c)}\), and \(\phi_c(\alpha)=\rho_1^{(c)}+h_1^c\alpha\), so \(\alpha=\phi_c^{-1}(\rho)=(\rho-\rho_1^{(c)})/h_1^c\). Thus \(c\) is the one-dimensional physical-cell index, while the Bernstein label remains a separate subscript. Specifying \code{Degree=2} instructs \code{pdmat} to retain exact function evaluation together with validated degree-two Bernstein coefficient data.
 
 \begin{lstlisting}[style=dpmatlab]
 grid = {[0 0.5 1]};
@@ -208,7 +206,7 @@ cell2Coefficients = 1×3 double
         {[1]}        "(1-alpha)^2*1 + 2(1-alpha)alpha*1.25 + alpha^2*1.75"
 \end{lstlisting}
 
-Fix the first physical cell \(\mathcal H_1=[0,0.5]\). Its inverse coordinate is \(\alpha^{(1)}(\rho)=2\rho\), and \cref{eq:intro-cell-bernstein} becomes
+Fix the first physical cell \(\mathcal H_1=[0,0.5]\). Its local coordinate is \(\alpha^{(1)}(\rho)=2\rho\), and \cref{eq:intro-cell-bernstein} becomes
 \[
     a^{(1)}(\alpha)
     =B_0^2(\alpha)\,1

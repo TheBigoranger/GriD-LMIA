@@ -2,7 +2,7 @@
 // Do not edit the current version by hand.
 
 export const versionInfo = {
-  current: "v1.1.5",
+  current: "v1.1.6",
   source: "doc/manual.tex",
   sourcePattern: "\\author{Version ...}",
 };

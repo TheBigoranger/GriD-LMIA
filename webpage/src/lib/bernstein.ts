@@ -58,6 +58,59 @@ export function evaluateBernstein(coeffs: readonly number[], alpha: number): num
   return work[0];
 }
 
+/** Evaluate a uniform-degree tensor Bernstein expansion in last-axis-fastest order. */
+export function evaluateTensorBernstein(
+  coeffs: readonly number[],
+  degree: number,
+  coordinates: readonly number[],
+): number {
+  if (coordinates.length === 0) {
+    throw new TypeError("Tensor evaluation requires at least one coordinate.");
+  }
+  const expected = (degree + 1) ** coordinates.length;
+  if (coeffs.length !== expected || coeffs.some((value) => !Number.isFinite(value))) {
+    throw new TypeError(`Tensor evaluation requires ${expected} finite coefficients.`);
+  }
+
+  const weights = coordinates.map((alpha) => bernsteinBasisWeights(degree, alpha));
+  let value = 0;
+  for (let flatIndex = 0; flatIndex < coeffs.length; flatIndex += 1) {
+    let remainder = flatIndex;
+    let weight = 1;
+    for (let axis = coordinates.length - 1; axis >= 0; axis -= 1) {
+      const label = remainder % (degree + 1);
+      remainder = Math.floor(remainder / (degree + 1));
+      weight *= weights[axis][label];
+    }
+    value += coeffs[flatIndex] * weight;
+  }
+  if (!Number.isFinite(value)) {
+    throw new RangeError("Tensor Bernstein evaluation produced a non-finite value.");
+  }
+  return value;
+}
+
+/** Return every normalized Bernstein basis weight of one degree on [0, 1]. */
+export function bernsteinBasisWeights(degree: number, alpha: number): number[] {
+  if (!Number.isInteger(degree) || degree < 0) {
+    throw new RangeError("Bernstein basis degree must be a nonnegative integer.");
+  }
+  if (!Number.isFinite(alpha) || alpha < 0 || alpha > 1) {
+    throw new RangeError("Bernstein basis coordinates must lie in [0, 1].");
+  }
+
+  let weights = [1];
+  for (let level = 0; level < degree; level += 1) {
+    const next = Array<number>(level + 2).fill(0);
+    for (let index = 0; index <= level; index += 1) {
+      next[index] += (1 - alpha) * weights[index];
+      next[index + 1] += alpha * weights[index];
+    }
+    weights = next;
+  }
+  return weights;
+}
+
 /** Multiply two normalized Bernstein expansions and return degree m+n coefficients. */
 export function bernsteinProduct(left: readonly number[], right: readonly number[]): number[] {
   validateFactors(left, right);

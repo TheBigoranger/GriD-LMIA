@@ -1,7 +1,7 @@
 \chapter{\texorpdfstring{\code{pdlmi}}{pdlmi}: Finite Certificate Assembly}\index{pdlmi@\texttt{pdlmi}}
 \label{sec:pdlmi}
 
-\code{pdlmi} stores finite certificates assembled from \code{pdvar} expressions or coefficient-backed \code{pdmat} inequalities. Square Hermitian inequality families use semidefinite constraints; other inequalities use entry-wise scalar constraints; \code{pdvar} equality uses direct coefficient equations. Direct assembly is the default, while cell-local P\'olya elevation, a dimension-aware Putinar selector, FullBox with band-limited Gram support (\code{SparseFullBox}), and the dense full-box preordering (\code{FullBox}) are explicit inequality alternatives. It is the package boundary between Bernstein objects and ordinary YALMIP solver calls.
+\code{pdlmi} stores finite certificates assembled from \code{pdvar} expressions or coefficient-backed \code{pdmat} inequalities. Square Hermitian inequality families use semidefinite constraints; other inequalities use entry-wise scalar constraints; \code{pdvar} equality uses direct coefficient equations. Direct assembly is the default, while cell-local P\'olya elevation, a dimension-aware Putinar selector, FullBox with symmetric block-band Gram matrices (\code{SparseFullBox}), and the dense full-box preordering (\code{FullBox}) are explicit inequality alternatives. It is the package boundary between Bernstein objects and ordinary YALMIP solver calls.
 
 \begin{center}
 \begin{tikzpicture}[node distance=4mm and 4mm]
@@ -12,7 +12,7 @@
   \node[dp/card,text width=20mm,minimum height=17mm,right=of polya] (putinar)
     {\textbf{Putinar}\\1-D parity;\\multi-D singletons};
   \node[dp/card,text width=22mm,minimum height=17mm,below=of direct,xshift=12mm] (sparse)
-    {\textbf{SparseFullBox}\\band-limited Gram support};
+    {\textbf{SparseFullBox}\\block-band Gram matrices};
   \node[dp/card,text width=20mm,minimum height=17mm,right=of sparse] (box)
     {\textbf{FullBox}\\all generator products};
   \node[dp/panel,fit=(direct)(polya)(putinar)(sparse)(box),inner sep=4mm] (options) {};
@@ -75,7 +75,7 @@ Property & Meaning \\
 \code{Residual}, \code{Relation} & Original \code{pdvar} residual and one of \code{"<="}, \code{">="}, or \code{"=="}. \\
 \code{UsePolya}, \code{PolyaDegree} & P\'olya selector and nonnegative degree increment. \\
 \code{UsePutinar}, \code{PutinarOrder} & Putinar selector and absolute Gram order. \\
-\code{UseSparseFullBoxPreorder}, \code{SparseFullBoxOrder}, \code{BandWidth} & SparseFullBox selector, absolute Gram order, and band width; intermediate support is implemented by overlapping tensor-window PSD cliques. \\
+\code{UseSparseFullBoxPreorder}, \code{SparseFullBoxOrder}, \code{BandWidth} & SparseFullBox selector, absolute Gram order, and bandwidth \(w\) of the symmetric block-band Gram matrices \(Q_J^{(w)}\). \\
 \code{UseFullBoxPreorder}, \code{FullBoxOrder} & Full-box selector and absolute Gram order. \\
 \bottomrule
 \end{tabularx}
@@ -120,7 +120,7 @@ C = lhs == rhs
   \item \code{UsePutinar} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select the dimension-appropriate Putinar certificate at the smallest admissible order.
   \item \code{PutinarOrder=r} is a finite nonnegative integer scalar and is an absolute Bernstein Gram order, not a degree increment. For assembled residual degree \(M\), its default and minimum are \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) in two or more parameters. Supplying the order without \code{UsePutinar} enables Putinar assembly. Pairing \code{UsePutinar=false} with any explicit order, including zero, raises \codeerr{pdlmi}{ConflictingPutinarOptions}.
   \item \code{UseSparseFullBox}\allowbreak\code{Preorder} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select SparseFullBox with default \code{BandWidth=2}; \code{BandWidth} or \code{SparseFullBoxOrder} alone also enables this family. Explicit \code{UseSparseFullBox}\allowbreak\code{Preorder=false} conflicts with either sparse parameter.
-  \item \code{BandWidth=w} is a finite positive integer bandwidth. Intermediate widths restrict the FullBox Gram support and are realized by overlapping axis-aligned tensor-window PSD clique blocks. \code{SparseFullBoxOrder=r} is a finite nonnegative absolute Gram order whose default and minimum are \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) otherwise, where \(M=\code{C.Residual.Degree}\). Width one canonicalizes to actual Direct state after order validation; width at least \(r+1\) canonicalizes to actual FullBox state; intermediate widths select SparseFullBox state.
+  \item \code{BandWidth=w} is a finite positive integer bandwidth for the symmetric block-band Gram matrices \(Q_J^{(w)}\). \code{SparseFullBoxOrder=r} is a finite nonnegative absolute Gram order whose default and minimum are \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) otherwise, where \(M=\code{C.Residual.Degree}\). Width one canonicalizes to actual Direct state after order validation; width at least \(r+1\) canonicalizes to actual FullBox state; intermediate widths select SparseFullBox state.
   \item \code{UseFullBoxPreorder} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select full-box assembly at the smallest admissible order.
   \item \code{FullBoxOrder=r} is a finite nonnegative integer scalar and is an absolute order, not a degree increment. Supplying it without \code{UseFullBoxPreorder} enables full-box assembly. When FullBox is enabled, the minimum is \(\lfloor M/2\rfloor\) for a one-parameter residual of degree \(M\), and \(\lceil M/2\rceil\) for two or more parameters. Explicitly pairing \code{UseFullBoxPreorder=false} with \code{FullBoxOrder=r} suppresses that automatic selection: \code{C} remains direct and records \code{r} only as inspectable metadata; the order is not applied to assembly.
   \item P\'olya, Putinar, SparseFullBox, and FullBox selection are mutually exclusive and apply only to inequalities. Any recognized certificate option on an equality raises \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before width or order validation. Enabling more than one inequality family raises \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}.
@@ -424,10 +424,10 @@ The diagram below specializes to the even one-parameter example above.
 
 \section[Select SparseFullBox with \texorpdfstring{\code{applySparseFullBoxPreorder}}{applySparseFullBoxPreorder}]{%
 Select SparseFullBox with\\[-0.15em] \texorpdfstring{\code{applySparseFullBoxPreorder}}{applySparseFullBoxPreorder}}
-\index{SparseFullBox}\index{band-limited Gram support}\index{applySparseFullBoxPreorder@\texttt{applySparseFullBoxPreorder}}\index{BandWidth@\texttt{BandWidth}}
+\index{SparseFullBox}\index{block-band Gram matrix}\index{applySparseFullBoxPreorder@\texttt{applySparseFullBoxPreorder}}\index{BandWidth@\texttt{BandWidth}}
 \label{sec:pdlmi-sparse-full-box}
 
-SparseFullBox is FullBox with band-limited Gram support. It uses the same one-parameter parity terms, multivariate box-generator masks, relation orientation, and exact target-coefficient identities as FullBox. The implementation realizes the restricted support by replacing each dense Gram block with free positive-semidefinite clique blocks on overlapping axis-aligned windows of the tensor Bernstein basis. This implementation mechanism changes only allowed Gram entries: the cell residual \(\mathcal F^{(\mathbf c)}\), physical grid, decision degree \(m\), assembled residual degree \(M\), generator weights, and coefficient identities remain unchanged.
+SparseFullBox is FullBox with each dense Gram matrix \(Q_J\) replaced by a symmetric block-band Gram matrix \(Q_J^{(w)}\) of bandwidth \(w\). It uses the same one-parameter parity terms, multivariate box-generator masks, relation orientation, and exact target-coefficient identities as FullBox. Only the admissible entries of the Gram matrices change: the cell residual \(\mathcal F^{(\mathbf c)}\), physical grid, decision degree \(m\), assembled residual degree \(M\), generator weights, and coefficient identities remain unchanged.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -438,36 +438,20 @@ Csp = C.applySparseFullBoxPreorder(..., ValidationMode=mode)
 \end{lstlisting}
 
 \arghead
-\code{w} is a finite positive integer bandwidth and defaults to two; for intermediate state it is also the side length of each overlapping implementation window. \code{r} is an optional absolute SparseFullBox Gram order and defaults to \(\lfloor M/2\rfloor\) for a one-parameter residual of degree \(M\), or \(\lceil M/2\rceil\) for two or more parameters. Every explicit order is validated against that same minimum before endpoint normalization.
+\code{w} is a finite positive integer bandwidth for \(Q_J^{(w)}\) and defaults to two. \code{r} is an optional absolute SparseFullBox Gram order and defaults to \(\lfloor M/2\rfloor\) for a one-parameter residual of degree \(M\), or \(\lceil M/2\rceil\) for two or more parameters. Every explicit order is validated against that same minimum before endpoint normalization.
 
 \descriptionhead
-For a FullBox Gram term with tensor basis degree \(\boldsymbol d\), define the complete label box \(\mathcal I_{\boldsymbol d}=\prod_s\{0,\ldots,d_s\}\). SparseFullBox sets \(w_s=\min(w,d_s+1)\) and introduces one independent PSD block for every window
+For selected absolute order \(r\), use the paper notation \(\boldsymbol\chi_J\) for the indicator of \(J\) and \(\mathbf a_J=r\boldsymbol1-\boldsymbol\chi_J\). SparseFullBox uses
 \[
-  W_{\boldsymbol t}=\prod_{s=1}^{\ell}\{t_s,\ldots,t_s+w_s-1\},
-  \qquad 0\le t_s\le d_s-w_s+1.
+S^{(\mathbf c)}(\boldsymbol\alpha)=
+  \sum_{J\subseteq\{1,\ldots,\ell\}}
+  \left(\prod_{s\in J}\alpha_s(1-\alpha_s)\right)
+  \left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right)^{\mathsf T}
+  Q_J^{(w)}
+  \left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right),
+  \qquad Q_J^{(w)}\succeq0,
 \]
-Each block contributes only through the basis labels in its own \(W_{\boldsymbol t}\); the weighted Bernstein maps of all windows and all parity/mask terms are summed and matched exactly to every coefficient of the sign-normalized target. In one parameter, \(w=2\) permits adjacent basis-label interactions and gives block-tridiagonal Gram support, while \(w=3\) gives block-pentadiagonal support. Increasing the width gives a nested sufficient hierarchy because a smaller-window PSD block can be embedded in a larger window, but feasibility need not improve strictly on any particular model.
-
-\begin{center}
-\begin{tikzpicture}[node distance=7mm and 8mm,
-  basis/.style={dp/neutral,font=\scriptsize,align=center,minimum width=13mm,minimum height=8mm},
-  win/.style={dp/certificate,font=\scriptsize,align=center,minimum width=31mm,minimum height=10mm},
-  result/.style={dp/result,font=\scriptsize,align=center,minimum width=37mm,minimum height=12mm}]
-  \node[basis] (z0) {\(0\)};
-  \node[basis,right=of z0] (z1) {\(1\)};
-  \node[basis,right=of z1] (z2) {\(2\)};
-  \node[basis,right=of z2] (z3) {\(3\)};
-  \node[win,below=8mm of z0,xshift=10mm] (w0) {window \(\{0,1\}\)\\\(Q_0\succeq0\)};
-  \node[win,right=of w0] (w1) {window \(\{1,2\}\)\\\(Q_1\succeq0\)};
-  \node[win,right=of w1] (w2) {window \(\{2,3\}\)\\\(Q_2\succeq0\)};
-  \node[result,below=of w1] (match) {sum window contributions\\and match every coefficient};
-  \draw[dp/arrow] (w0) -- (match);
-  \draw[dp/arrow] (w1) -- (match);
-  \draw[dp/arrow] (w2) -- (match);
-\end{tikzpicture}
-
-\textit{One-dimensional width two uses every adjacent basis window; tensor problems take the Cartesian window in every coordinate rather than adjacency in a flattened label list.}
-\end{center}
+where every \(Q_J^{(w)}\) is symmetric block-band with bandwidth \(w\), and terms for which \(\mathbf a_J\) has a negative component are omitted. The one-parameter parity-specific FullBox formulas use the same replacement \(Q_J\mapsto Q_J^{(w)}\). Exact coefficient matching is unchanged. In one parameter, \(w=1\) is block diagonal and the implementation canonicalizes it to Direct, \(w=2\) is block tridiagonal, and \(w=3\) is block pentadiagonal. Increasing \(w\) gives a nested sufficient hierarchy, but feasibility need not improve strictly on a particular model.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -496,12 +480,12 @@ denseEndpointState = 1×4 double
      0     1     2     7
 \end{lstlisting}
 
-The intermediate result uses three PSD blocks---two width-two windows for the unweighted degree-two basis and one complete width-two window for the generator-weighted degree-one basis---followed by five exact coefficient identities. Width one returns actual Direct state with no sparse metadata or Gram variables. Since \(w=3=r+1\), the dense endpoint returns actual FullBox state with two dense PSD blocks followed by the same five identities. These are canonical public states, not merely equivalent constraint lists.
+The intermediate result retains SparseFullBox state with \(r=2\) and \(w=2\); in one parameter its Gram matrices are block tridiagonal, and all five target coefficients are matched exactly. Width one returns actual Direct state with no sparse metadata or Gram variables. Since \(w=3=r+1\), the dense endpoint returns actual FullBox state with two dense PSD blocks followed by the same five identities. These are canonical public states, not merely equivalent constraint lists.
 
 \remarkshead
 \begin{enumerate}[leftmargin=*]
   \item \code{applySparseFullBoxPreorder} is a value-class method: it returns a new wrapper, leaves the source unchanged, and rebuilds from \code{Residual} and \code{Relation}, replacing any earlier P\'olya, Putinar, SparseFullBox, or FullBox selection. It adds no positivity margin and makes no solver call.
-  \item Every physical cell and active rate row owns independent window Gram blocks and coefficient identities. Semidefinite mode builds matrix Gram blocks; entry-wise mode builds an independent scalar certificate for every matrix entry in MATLAB column-major order.
+  \item Every physical cell and active rate row owns independent Gram matrices \(Q_J^{(w)}\) and coefficient identities. Semidefinite mode builds matrix Gram terms; entry-wise mode builds an independent scalar certificate for every matrix entry in MATLAB column-major order.
   \item Width one canonicalizes to actual Direct state. A width satisfying \code{w >= r + 1} canonicalizes to actual FullBox state. For \(1<w<r+1\), the result records \code{UseSparseFullBoxPreorder=true}, \code{SparseFullBoxOrder=r}, and \code{BandWidth=w}.
   \item Invalid widths raise \codeerr{pdlmi}{InvalidBandWidth}. Malformed orders raise \codeerr{pdlmi}{InvalidSparse}\allowbreak\code{FullBoxOrder}; orders below the dimension-dependent minimum raise \codeerr{pdlmi}{SparseFullBox}\allowbreak\code{OrderTooLow}. More than two positional inputs raise \codeerr{pdlmi}{InvalidApplyOptions}.
   \item Constructor selector conflicts use \codeerr{pdlmi}{ConflictingSparse}\allowbreak\code{FullBoxOptions} or \codeerr{pdlmi}{ConflictingRelaxations}. Equality raises \codeerr{pdlmi}{UnsupportedEquality}\allowbreak\code{Certificate} before width or order validation.

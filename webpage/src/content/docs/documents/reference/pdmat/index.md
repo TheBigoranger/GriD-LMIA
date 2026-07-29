@@ -20,7 +20,8 @@ diagnostics, known-data certificates, and coefficient-wise matrix operations.
 
 | Reference | Task |
 | :--- | :--- |
-| [`Storage and elevation`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) | Traverse known coefficient evidence and exactly elevate its Bernstein representation. |
+| [`Storage`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) | Traverse known coefficient evidence and inspect its cell-local labels and counts. |
+| [`elevate`](/PD-LMI-package/documents/reference/pdmat/elevate/) | Exactly elevate the Bernstein representation without changing the represented function. |
 | [`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) | Evaluate known data at one parameter point. |
 | [`rhodiff`](/PD-LMI-package/documents/reference/pdmat/rhodiff/) | Differentiate coefficient-backed data into numeric rate-vertex rows. |
 | [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/) | Sample one- or two-dimensional diagnostic plots. |
@@ -40,9 +41,10 @@ diagnostics, known-data certificates, and coefficient-wise matrix operations.
 
 `pdmat` extends [`pdbase`](/PD-LMI-package/documents/reference/pdbase/).
 The matrix-operation implementation is centralized there, while
-[`pdmat` storage and elevation](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/)
-and the algebra, structural, and indexing pages retain complete class-specific
-syntax and behavior.
+[`pdmat` storage](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/),
+[`pdmat elevate`](/PD-LMI-package/documents/reference/pdmat/elevate/), and the
+algebra, structural, and indexing pages retain complete class-specific syntax
+and behavior.
 
 ## Current Boundaries
 
@@ -58,7 +60,8 @@ syntax and behavior.
 ## See Also
 
 [`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) ·
-[`storage and elevation`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
+[`storage`](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
+[`elevate`](/PD-LMI-package/documents/reference/pdmat/elevate/) ·
 [`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
 [`rhodiff`](/PD-LMI-package/documents/reference/pdmat/rhodiff/) ·
 [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/) ·

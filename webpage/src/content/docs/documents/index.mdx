@@ -7,7 +7,7 @@ import ReferenceCategoryHub from "../../../components/ReferenceCategoryHub.astro
 
 Use this page as the lookup entry for current PD-LMI behavior. The reference
 pages document implemented code only, including Direct, opt-in Pólya,
-fixed-order Putinar, band-limited SparseFullBox, and fixed-order FullBox
+fixed-order Putinar, block-band SparseFullBox, and fixed-order FullBox
 assembly. Supported inputs and validation errors appear beside the constructor
 or method they affect.
 
@@ -16,7 +16,7 @@ Start mathematical reading with the
 
 PD-LMI means **parameter-dependent LMI**. The package represents continuous piecewise-polynomial matrix functions on physical grid cells in a cell-local tensor-product Bernstein basis. `pdvar` shares complete face values between adjacent cells; differentiation remains cell-local, so the representation is not a B-spline and does not assert global differentiability. Use **DPD-LMI** only for a differentiable PD-LMI with explicit derivative and rate terms.
 
-## Documentation v1.1.5 Supported Scope
+## Documentation v1.1.6 Supported Scope
 
 Version 1.1 documents the implemented package workflow after shared matrix
 protocols, unary transformations, and reductions were centralized in
@@ -57,7 +57,7 @@ The generated [categorized lookup](/PD-LMI-package/documents/reference-index/) u
 - [Certificate Map And Selection Guide](/PD-LMI-package/documents/math/sos-certificates/): five software states and failure interpretation.
 - [Direct And Pólya](/PD-LMI-package/documents/math/finite-certificates/direct-and-polya/): coefficient tests and exact elevation.
 - [Markov–Lukács And Putinar](/PD-LMI-package/documents/math/finite-certificates/markov-lukacs-and-putinar/): parity interval forms and singleton-generator modules.
-- [SparseFullBox And FullBox](/PD-LMI-package/documents/math/finite-certificates/sparsefullbox-and-fullbox/): band-limited Gram support, its tensor-window PSD-clique realization, bandwidth endpoints, and full-box preorderings.
+- [SparseFullBox And FullBox](/PD-LMI-package/documents/math/finite-certificates/sparsefullbox-and-fullbox/): symmetric block-band Gram matrices $Q_J^{(w)}$, bandwidth endpoints, and full-box preorderings.
 
 ## Install And Examples
 

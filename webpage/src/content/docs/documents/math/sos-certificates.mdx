@@ -104,9 +104,10 @@ $g_J=\prod_{s\in J}\alpha_s(1-\alpha_s)$. The software state is
 ## SparseFullBox Band-Limited Certificate
 
 The mathematical construction is FullBox with **band-limited Gram support**.
-The software state is `SparseFullBox`, selected with bandwidth
-$w$. Width one canonicalizes to Direct after order validation; width at least
-$r+1$ canonicalizes to FullBox.
+The software state is `SparseFullBox`: each dense Gram matrix $Q_J$ is replaced
+by a symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. Bandwidth
+one canonicalizes to Direct after order validation; bandwidth at least $r+1$
+canonicalizes to FullBox.
 
 ### Worked full-box example: two parameters, degree three
 
@@ -116,9 +117,8 @@ For a two-parameter target with assembled degree $M=3$, FullBox introduces
 Gram terms for the empty subset, both singleton generator subsets, and their
 two-axis product. Each term is mapped into the Bernstein basis and the sum is
 matched exactly to every $C^{(\mathbf c)}[\mathbf i]$. SparseFullBox retains
-those term families and exact identities but restricts dense Gram support to a
-band-limited form. The implementation decomposes that support into overlapping
-axis-aligned tensor-window PSD cliques.
+those term families and exact identities but replaces each dense $Q_J$ by
+$Q_J^{(w)}$, symmetric block-band with bandwidth $w$.
 The detailed basis-order boundary is documented in
 [SparseFullBox And FullBox](/PD-LMI-package/documents/math/finite-certificates/sparsefullbox-and-fullbox/).
 

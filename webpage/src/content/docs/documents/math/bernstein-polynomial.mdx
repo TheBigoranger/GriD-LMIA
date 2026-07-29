@@ -148,8 +148,9 @@ singleton box-generator terms.
 ## Fixed-Order Full-Box Preordering
 
 FullBox uses every square-free product of the box generators. SparseFullBox
-keeps the same FullBox terms and exact identities while restricting Gram
-support to a band-limited form realized with tensor-window PSD cliques.
+keeps the same FullBox terms and exact identities while replacing each dense
+Gram matrix $Q_J$ by a symmetric block-band Gram matrix $Q_J^{(w)}$ of
+bandwidth $w$.
 See the [certificate map](/PD-LMI-package/documents/math/sos-certificates/).
 
 ## Four Different Refinements
@@ -183,5 +184,6 @@ require cellwise interpretation.
 [Previous: Gridding And Local Coordinates](/PD-LMI-package/documents/math/gridding-and-degree/) ·
 [Next: Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/) ·
 [Notation](/PD-LMI-package/documents/math/notation/#bernstein-labels-and-degrees) ·
-[`pdmat` storage and elevation](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
+[`pdmat` storage](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
+[`pdmat elevate`](/PD-LMI-package/documents/reference/pdmat/elevate/) ·
 [`pdvar` storage and evaluation](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/)

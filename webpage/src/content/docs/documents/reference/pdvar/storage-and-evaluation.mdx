@@ -9,6 +9,20 @@ These methods are implemented by `pdbase` and remain complete public
 `pdvar` behavior. They preserve YALMIP expressions, variable identities,
 continuity metadata, and derivative rate-row order.
 
+The physical-cell tree, local tensor labels, and traversal functions are the
+same as in the
+[`pdmat Storage` explanation](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/).
+For `pdvar`, the leaf at cell $\boldsymbol c$ and label $\boldsymbol i$ stores
+the symbolic matrix $X^{(\boldsymbol c)}[\boldsymbol i]$:
+
+$$
+\operatorname{LocalValues}_{\boldsymbol c}[\boldsymbol i]
+=
+X^{(\boldsymbol c)}[\boldsymbol i]
+\in
+\operatorname{Aff}(\texttt{sdpvar}).
+$$
+
 ## <span id="pdvar-cells"></span>`cells`
 
 ```matlab
@@ -77,6 +91,28 @@ Returns a new nested symbolic coefficient tree. Every physical-cell and
 derivative rate row is elevated independently. The source `P`, its variables,
 and metadata remain unchanged.
 
+The coefficient map is exactly the
+[`pdmat` elevation formula](/PD-LMI-package/documents/reference/pdmat/elevate/#what-degree-elevation-does),
+applied linearly to symbolic coefficient matrices:
+
+$$
+\widehat X^{(\boldsymbol c)}[\boldsymbol k]
+=
+\sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+\left[
+\prod_{s=1}^{\ell}
+\frac{
+\binom{m}{i_s}\binom{M-m}{k_s-i_s}
+}{
+\binom{M}{k_s}
+}
+\right]
+X^{(\boldsymbol c)}[\boldsymbol i].
+$$
+
+No new independent YALMIP variable is created; the elevated coefficients are
+affine combinations of the original handles.
+
 ## <span id="pdvar-elevate"></span>`elevate`
 
 ```matlab
@@ -100,6 +136,22 @@ rateValues = evaluate(D,point)
 Ordinary `pdvar` returns one interpolated numeric/`sdpvar` matrix without
 consulting the current `assign` state. A derivative `pdvar` returns a
 `1 × 2^npar` cell array, with one affine expression per rate row.
+
+For the selected physical cell, ordinary evaluation is the symbolic Bernstein
+sum
+
+$$
+P^{(\boldsymbol c)}(\boldsymbol\rho)
+=
+\sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+X^{(\boldsymbol c)}[\boldsymbol i]\,
+B_{\boldsymbol i}^{m}
+\!\left(\phi_{\boldsymbol c}^{-1}(\boldsymbol\rho)\right).
+$$
+
+This is the same basis evaluation illustrated on
+[`pdmat evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/);
+only the stored coefficients and returned value are symbolic.
 
 Interior grid boundaries use the cell on the right, including discontinuous
 derivative rows; the last global boundary uses the last cell. Numeric and

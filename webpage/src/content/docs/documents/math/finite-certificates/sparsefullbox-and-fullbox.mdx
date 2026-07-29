@@ -52,22 +52,24 @@ selected = L.applyFullBoxPreorder(r);
 ## SparseFullBox Band-Limited Support
 
 SparseFullBox retains every FullBox parity or generator-mask term and every
-exact target-coefficient identity, but restricts each Gram term to
-band-limited support. The implementation realizes that support as a sum of
-positive-semidefinite clique blocks on overlapping axis-aligned windows of
-the tensor Bernstein basis:
+exact target-coefficient identity, but replaces each dense Gram matrix $Q_J$
+by the symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. For
+selected absolute order $r$, use the paper notation
+$\mathbf a_J=r\boldsymbol 1-\boldsymbol\chi_J$:
 
 $$
-S^{(\mathbf c)}
-=\sum_J\sum_{\mathbf t}
-g_JS_{J,\mathbf t},
-\qquad
-\operatorname{supp}S_{J,\mathbf t}
-\subseteq
-\prod_{s=1}^{\ell}\{t_s,\ldots,t_s+w-1\}.
+S^{(\mathbf c)}(\boldsymbol\alpha)
+=\sum_{J\subseteq\{1,\ldots,\ell\}}
+\left(\prod_{s\in J}g_s(\boldsymbol\alpha)\right)
+\left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right)^{\mathsf T}
+Q_J^{(w)}
+\left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right),
+\qquad Q_J^{(w)}\succeq0.
 $$
 
-The bandwidth $w$ controls Gram support; the absolute Gram order is $r$.
+Terms with a negative component in $\mathbf a_J$ are omitted. The
+one-parameter parity-specific formulas use the same replacement
+$Q_J\mapsto Q_J^{(w)}$. Exact coefficient matching is unchanged.
 
 ```matlab
 selected = L.applySparseFullBoxPreorder();
@@ -87,17 +89,17 @@ read-only `pdlmi` properties when code must report the selected state.
 ## One-Parameter Boundary
 
 In one parameter, the parity-specific Markov–Lukács terms are used. For even
-$M=4$ and $r=2$, the unweighted basis labels are $\{0,1,2\}$. Bandwidth
-$w=2$ produces the overlapping windows $\{0,1\}$ and $\{1,2\}$;
-$w=3=r+1$ reaches FullBox.
+$M=4$ and $r=2$, $Q_J^{(1)}$ is block diagonal and canonicalizes to Direct,
+$Q_J^{(2)}$ is block tridiagonal, and $Q_J^{(3)}$ is block pentadiagonal.
+Because $w=3=r+1$, that endpoint canonicalizes to FullBox.
 
 ## Multivariate Boundary
 
 For $\ell\ge2$, the minimum absolute order is
 $r=\lceil M/2\rceil$. FullBox can grow rapidly because every generator
-subset and dense tensor basis block contributes. SparseFullBox trades dense
-support for overlapping local windows while retaining exact coefficient
-matching.
+subset and dense tensor basis block contributes. SparseFullBox restricts each
+$Q_J$ to the symmetric block-band form $Q_J^{(w)}$ while retaining exact
+coefficient matching.
 
 ## Selection Guidance
 
@@ -115,8 +117,8 @@ continuous infeasibility.
 
 ## Limitations
 
-SparseFullBox uses band-limited support realized by axis-aligned tensor
-windows; it does not search arbitrary chordal patterns or adapt bandwidth
+SparseFullBox uses symmetric block-band Gram matrices of a user-selected
+bandwidth $w$; it does not search arbitrary chordal patterns or adapt $w$
 automatically. FullBox is limited to box
 generators and can become large with dimension and order. Neither selector
 calls a solver or inserts a positivity margin.
@@ -128,7 +130,7 @@ calls a solver or inserts a positivity margin.
 - Zheng and Fantuzzi, [Sum-of-squares chordal decomposition of polynomial matrix inequalities](https://arxiv.org/abs/2007.11410), for broader sparse polynomial-matrix Gram context.
 
 These sparse-Gram sources motivate structure; they do not define the package's
-band map or its tensor-window realization.
+block-band Gram matrices.
 
 ## See Also
 

@@ -71,7 +71,7 @@ test("matches multivariate Putinar and full-box source fixtures", () => {
   assert.deepEqual([orderZero.blocks.length, orderZero.totalConstraints], [1, 2]);
 });
 
-test("matches sparse full-box windows and canonical endpoints", () => {
+test("matches sparse full-box block-band shapes and canonical endpoints", () => {
   const scalar1d = { selector: "sparsefullbox" as const, cells: 1, nPar: 1,
     degree: 4, rateRows: 1, order: 2, matrixSize: 1, mode: "semidefinite" as const };
   const sparse = buildCertificateShape({ ...scalar1d, bandWidth: 2 });
@@ -80,6 +80,9 @@ test("matches sparse full-box windows and canonical endpoints", () => {
     ["sparsefullbox", 3, 5, 8],
   );
   assert.deepEqual(sparse.blocks.map((block) => block.dimension), [2, 2, 2]);
+  assert.deepEqual(sparse.blocks.map((block) => block.label), [
+    "S₀ Gram block 1", "S₀ Gram block 2", "α(1−α) S₁ Gram block 1",
+  ]);
 
   const direct = buildCertificateShape({ ...scalar1d, bandWidth: 1 });
   assert.deepEqual(
@@ -122,7 +125,7 @@ test("counts independent sparse certificates and rejects malformed widths or ord
 
   assert.throws(() => buildCertificateShape({ selector: "sparsefullbox", cells: 1,
     nPar: 1, degree: 4, rateRows: 1, order: 2, bandWidth: 0, matrixSize: 1,
-    mode: "semidefinite" }), /band width.*1 to 9/i);
+    mode: "semidefinite" }), /bandwidth w.*1 to 9/i);
   assert.throws(() => buildCertificateShape({ selector: "sparsefullbox", cells: 1,
     nPar: 2, degree: 4, rateRows: 1, order: 1, bandWidth: 2, matrixSize: 1,
     mode: "semidefinite" }), /at least 2/i);

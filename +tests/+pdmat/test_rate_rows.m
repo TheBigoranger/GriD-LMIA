@@ -80,6 +80,40 @@ function testAdditionSubtractionAndProductsPreserveRows(testCase)
     testCase.verifyError(@() R * R, "pdmat:InvalidMultiplication");
 end
 
+function testScalarMatrixProductsAllowOneRhodiffSide(testCase)
+    % Scalar scaling should preserve one complete derivative rate-row table.
+    rb = [-1 2];
+    scalarData = pdmat([0 1], {1, 3}, Degree=1, RateBounds=rb);
+    matrixData = pdmat([0 1], {eye(2), 2 * eye(2)}, ...
+        Degree=1, RateBounds=rb);
+    ordinaryScalar = pdmat([0 1], {2, 4}, Degree=1);
+    ordinaryMatrix = pdmat([0 1], {eye(2), 2 * eye(2)}, Degree=1);
+    derivativeScalar = rhodiff(scalarData);
+    derivativeMatrix = rhodiff(matrixData);
+    expected = {
+        -2 * eye(2), -4 * eye(2)
+        4 * eye(2), 8 * eye(2)
+        };
+
+    products = {
+        derivativeScalar * ordinaryMatrix, ...
+        ordinaryMatrix * derivativeScalar, ...
+        ordinaryScalar * derivativeMatrix, ...
+        derivativeMatrix * ordinaryScalar
+        };
+    for k = 1:numel(products)
+        product = products{k};
+        testCase.verifyEqual(product.Degree, 1);
+        testCase.verifyEqual(product.coeffs(1), expected, AbsTol=1e-10);
+        verifyRateMeta(testCase, product, [2 2]);
+    end
+
+    testCase.verifyError(@() derivativeScalar * derivativeMatrix, ...
+        "pdmat:InvalidMultiplication");
+    testCase.verifyError(@() derivativeMatrix * derivativeScalar, ...
+        "pdmat:InvalidMultiplication");
+end
+
 function testGridBoundsAndZeroFastPathContracts(testCase)
     % Explicit rows require exact grids and matching nonempty rate bounds.
     R = rateScalar();

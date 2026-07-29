@@ -18,6 +18,7 @@ import {
   resetRotation,
   type Point3,
 } from "../lib/grid-partition.ts";
+import { renderInlineMath } from "../lib/katex.js";
 
 type Dimension = 1 | 2 | 3;
 
@@ -31,7 +32,7 @@ const defaults: Record<Dimension, number[]> = {
 const axisLabels = ["ρ₁", "ρ₂", "ρ₃"];
 const initialRotation = resetRotation();
 const cubeViewBox = { width: 420, height: 300 };
-const cubePadding = 12;
+const cubePadding = 28;
 const selectionRadius = 7;
 const cubeCorners: Point3[] = [
   [0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
@@ -44,6 +45,22 @@ function formatNumber(value: number): string {
 
 function labelCell(cell: readonly number[]): string {
   return `(${cell.map((index) => index + 1).join(", ")})`;
+}
+
+function gridDefinition(knots: readonly number[]): string {
+  return knots
+    .map((knot, axis) => `\\mathcal G_${axis + 1}=\\{0,${formatNumber(knot)},1\\}`)
+    .join("\\qquad");
+}
+
+function cellDefinition(
+  cell: readonly number[],
+  bounds: readonly (readonly [number, number])[],
+): string {
+  const intervals = bounds
+    .map(([lower, upper]) => `[${formatNumber(lower)},${formatNumber(upper)}]`)
+    .join("\\times");
+  return `\\mathcal H_{${labelCell(cell)}}=${intervals}`;
 }
 
 function Grid1D({ knots, selected }: { knots: number[]; selected: number[] }) {
@@ -115,6 +132,18 @@ function cubeSegments(knots: number[]): Segment[] {
   return segments;
 }
 
+function cellFaces(bounds: readonly [number, number][]): Point3[][] {
+  const [[x0, x1], [y0, y1], [z0, z1]] = bounds;
+  return [
+    [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0]],
+    [[x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]],
+    [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]],
+    [[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]],
+    [[x0, y0, z0], [x0, y1, z0], [x0, y1, z1], [x0, y0, z1]],
+    [[x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [x1, y0, z1]],
+  ];
+}
+
 function Grid3D({
   knots,
   selected,
@@ -128,9 +157,15 @@ function Grid3D({
   pitch: number;
   onDrag: (event: PointerEvent<SVGSVGElement>) => void;
 }) {
+  const axes = useMemo(() => axisLabels.map((label, axis) => {
+    const from: [number, number, number] = [-0.12, -0.12, -0.12];
+    const to = [...from] as [number, number, number];
+    to[axis] = 1.12;
+    return { label, from, to };
+  }), []);
   const projectedCorners = useMemo(
-    () => cubeCorners.map((point) => projectPoint(point, yaw, pitch)),
-    [yaw, pitch],
+    () => [...cubeCorners, ...axes.flatMap((axis) => [axis.from, axis.to])].map((point) => projectPoint(point, yaw, pitch)),
+    [axes, yaw, pitch],
   );
   const fit = useMemo(
     () => fitProjection(projectedCorners, cubeViewBox, cubePadding, selectionRadius),
@@ -146,6 +181,15 @@ function Grid3D({
     };
   }).sort((a, b) => a.depth - b.depth), [fit, knots, yaw, pitch]);
   const bounds = getCellBounds(knots, selected);
+  const faces = useMemo(() => cellFaces(bounds).map((face) => {
+    const points = face.map((point) => mapProjection(projectPoint(point, yaw, pitch), fit));
+    return { points, depth: points.reduce((sum, point) => sum + point.depth, 0) / points.length };
+  }).sort((a, b) => a.depth - b.depth), [bounds, fit, pitch, yaw]);
+  const projectedAxes = useMemo(() => axes.map((axis) => ({
+    ...axis,
+    from: mapProjection(projectPoint(axis.from, yaw, pitch), fit),
+    to: mapProjection(projectPoint(axis.to, yaw, pitch), fit),
+  })), [axes, fit, pitch, yaw]);
   const center = mapProjection(
     projectPoint(
       bounds.map(([lower, upper]) => (lower + upper) / 2) as [number, number, number],
@@ -167,6 +211,15 @@ function Grid3D({
       tabIndex={0}
       viewBox={`0 0 ${cubeViewBox.width} ${cubeViewBox.height}`}
     >
+      {/* Translucent faces reveal the chosen volume without hiding the tensor lines. */}
+      {faces.map((face, index) => (
+        <polygon
+          aria-hidden="true"
+          className="partition-cube__cell"
+          key={`${index}-${face.depth}`}
+          points={face.points.map((point) => `${point.x},${point.y}`).join(" ")}
+        />
+      ))}
       {lines.map((line, index) => (
         <line
           className="partition-cube__line"
@@ -176,6 +229,20 @@ function Grid3D({
           y1={line.from.y}
           y2={line.to.y}
         />
+      ))}
+      {projectedAxes.map((axis) => (
+        <g aria-hidden="true" className="partition-cube__axis" key={axis.label}>
+          <line x1={axis.from.x} x2={axis.to.x} y1={axis.from.y} y2={axis.to.y} />
+          <text
+            dx={axis.to.x >= axis.from.x ? 7 : -7}
+            dy={axis.to.y >= axis.from.y ? 13 : -7}
+            textAnchor={axis.to.x >= axis.from.x ? "start" : "end"}
+            x={axis.to.x}
+            y={axis.to.y}
+          >
+            {axis.label}
+          </text>
+        </g>
       ))}
       <circle
         aria-hidden="true"
@@ -343,12 +410,18 @@ export default function GridPartitionExplorer() {
             )}
           </div>
 
-          <p aria-live="polite" className="grid-partition-readout">
-            <strong>Cell {labelCell(activeCell)}:</strong>{" "}
-            {bounds.map(([lower, upper], axis) => (
-              <span key={axis}>{axisLabels[axis]} ∈ [{formatNumber(lower)}, {formatNumber(upper)}]{axis < bounds.length - 1 ? "; " : ""}</span>
-            ))}
-          </p>
+          <div aria-live="polite" className="grid-partition-readout">
+            <div className="grid-partition-readout__definitions">
+              <span dangerouslySetInnerHTML={{ __html: renderInlineMath(gridDefinition(activeKnots)) }} />
+              <span dangerouslySetInnerHTML={{ __html: renderInlineMath(cellDefinition(activeCell, bounds)) }} />
+            </div>
+            <p>
+              <strong>Cell {labelCell(activeCell)}:</strong>{" "}
+              {bounds.map(([lower, upper], axis) => (
+                <span key={axis}>{axisLabels[axis]} ∈ [{formatNumber(lower)}, {formatNumber(upper)}]{axis < bounds.length - 1 ? "; " : ""}</span>
+              ))}
+            </p>
+          </div>
         </section>
       </div>
       <figcaption>

@@ -11,6 +11,7 @@ function out = mtimes(lhs, rhs)
     %
     %   Output:
     %     C - Cell-local Bernstein matrix product on the common grid.
+    %         A 1-by-1 pdmat acts as a scalar multiplier in either order.
     %
     %   Example:
     %     A = pdmat({[0 1]}, {[1 0; 0 1], [2 0; 0 2]}, Degree=1);
@@ -34,20 +35,20 @@ function out = mtimes(lhs, rhs)
             asData(grid, lhs, [], rb, "pdmat:InvalidMultiplication");
             asData(grid, rhs, [], rb, "pdmat:InvalidMultiplication");
         end
-        out = zeroObj(grid, zeroProdSz(lhs.MatrixSize, rhs.MatrixSize, ...
+        out = zeroObj(grid, prodSz(lhs.MatrixSize, rhs.MatrixSize, ...
         "pdmat:InvalidMultiplication"));
         return
     end
 
     % Collapse numeric-zero products after validating their dimensions.
     if isa(lhs, "pdmat") && helper.isZero(rhs, "num")
-        out = zeroObj(lhs.GridInfo.Vectors, zeroProdSz(lhs.MatrixSize, size(rhs), ...
+        out = zeroObj(lhs.GridInfo.Vectors, prodSz(lhs.MatrixSize, size(rhs), ...
         "pdmat:InvalidMultiplication"));
         return
     end
 
     if helper.isZero(lhs, "num") && isa(rhs, "pdmat")
-        out = zeroObj(rhs.GridInfo.Vectors, zeroProdSz(size(lhs), rhs.MatrixSize, ...
+        out = zeroObj(rhs.GridInfo.Vectors, prodSz(size(lhs), rhs.MatrixSize, ...
         "pdmat:InvalidMultiplication"));
         return
     end
@@ -83,11 +84,10 @@ function out = mtimes(lhs, rhs)
     ld = asData(grid, lhs, [], rb, "pdmat:InvalidMultiplication");
     rd = asData(grid, rhs, [], rb, "pdmat:InvalidMultiplication");
 
-    % Validate inner dimensions after numeric operands have been promoted.
-    if ld.MatrixSize(2) ~= rd.MatrixSize(1)
-        error("pdmat:InvalidMultiplication", ...
-        "Inner matrix dimensions must agree for pdmat multiplication.");
-    end
+    % A 1-by-1 coefficient payload scales the other matrix; non-scalars
+    % retain MATLAB's ordinary inner-dimension requirement.
+    productSize = prodSz(ld.MatrixSize, rd.MatrixSize, ...
+        "pdmat:InvalidMultiplication");
 
     % Multiply local Bernstein coefficients cell by cell.
     plan = anchor.productPlan(ld.Degree, rd.Degree);
@@ -97,8 +97,7 @@ function out = mtimes(lhs, rhs)
 
     % Compact products that cancel to an all-zero coefficient payload.
     if helper.isZero(vals, "vals")
-        out = zeroObj(grid, zeroProdSz(ld.MatrixSize, rd.MatrixSize, ...
-        "pdmat:InvalidMultiplication"));
+        out = zeroObj(grid, productSize);
         return
     end
 
@@ -109,8 +108,8 @@ function out = mtimes(lhs, rhs)
     out = mkObj(grid, vals, ld.Degree + rd.Degree, rb);
 end
 
-function sz = zeroProdSz(lhs, rhs, errId)
-    %ZEROPRODSZ Return scalar-aware product size after dimension validation.
+function sz = prodSz(lhs, rhs, errId)
+    %PRODSZ Return scalar-aware product size after dimension validation.
     lhsScalar = isequal(lhs, [1 1]);
     rhsScalar = isequal(rhs, [1 1]);
 

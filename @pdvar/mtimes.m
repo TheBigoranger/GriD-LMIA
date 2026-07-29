@@ -11,6 +11,7 @@ function out = mtimes(lhs, rhs)
     %
     %   Output:
     %     C - Affine cell-local product with at most one decision/rate side.
+    %         A 1-by-1 pdvar or pdmat acts as a scalar multiplier.
     %
     %   Example:
     %     P = pdvar(2, {[0 1]});

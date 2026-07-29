@@ -188,6 +188,46 @@ function testNumericMatrixMultiplication(testCase)
     verifyCoeff(testCase, R, 1, {[5; 11], [17; 23]});
 end
 
+function testScalarPdmatScalesNumericAndPdmatMatrices(testCase)
+    % A 1-by-1 pdmat should scale matrices in either operand order.
+    S = pdmat({[0 1]}, {2, 4}, Degree=1);
+    M = [1 2; 3 4];
+    A = pdmat({[0 0.5 1]}, ...
+        {eye(2), 2 * eye(2), 3 * eye(2)}, Degree=1);
+    F = pdmat({[0 1]}, @(rho) 1 + rho, Degree=1);
+
+    numericRight = S * M;
+    numericLeft = M * S;
+    knownRight = S * A;
+    knownLeft = A * S;
+
+    testCase.verifyClass(numericRight, "pdmat");
+    testCase.verifyClass(numericLeft, "pdmat");
+    testCase.verifyEqual(size(numericRight), [2 2]);
+    testCase.verifyEqual(size(numericLeft), [2 2]);
+    testCase.verifyEqual(numericRight.Degree, 1);
+    testCase.verifyEqual(numericLeft.Degree, 1);
+    verifyCoeff(testCase, numericRight, 1, {2 * M, 4 * M});
+    verifyCoeff(testCase, numericLeft, 1, {2 * M, 4 * M});
+
+    testCase.verifyEqual(knownRight.GridInfo.Vectors{1}, [0 0.5 1]);
+    testCase.verifyEqual(knownLeft.GridInfo.Vectors{1}, [0 0.5 1]);
+    testCase.verifyEqual(size(knownRight), [2 2]);
+    testCase.verifyEqual(size(knownLeft), [2 2]);
+    testCase.verifyEqual(knownRight.Degree, 2);
+    testCase.verifyEqual(knownLeft.Degree, 2);
+    verifyCoeff(testCase, knownRight, 1, ...
+        {2 * eye(2), 3.5 * eye(2), 6 * eye(2)});
+    verifyCoeff(testCase, knownLeft, 1, ...
+        {2 * eye(2), 3.5 * eye(2), 6 * eye(2)});
+    verifyCoeff(testCase, knownRight, 2, ...
+        {6 * eye(2), 8.5 * eye(2), 12 * eye(2)});
+    verifyCoeff(testCase, knownLeft, 2, ...
+        {6 * eye(2), 8.5 * eye(2), 12 * eye(2)});
+    verifyCoeff(testCase, F * M, 1, {M, 2 * M});
+    verifyCoeff(testCase, M * F, 1, {M, 2 * M});
+end
+
 function testAlgebraRejectsIncompatibleInputs(testCase)
     % Algebra should reject size, grid-bound, and function-only incompatibilities.
     A = pdmat({[0 1]}, {ones(1, 2), 2 * ones(1, 2)}, Degree=1);
@@ -199,6 +239,8 @@ function testAlgebraRejectsIncompatibleInputs(testCase)
     testCase.verifyError(@() A * A, "pdmat:InvalidMultiplication");
     testCase.verifyError(@() B + C, "pdmat:MixedGrid");
     testCase.verifyError(@() F + 1, "pdmat:FunctionOnlyAlgebra");
+    testCase.verifyError(@() F * eye(2), "pdmat:FunctionOnlyAlgebra");
+    testCase.verifyError(@() eye(2) * F, "pdmat:FunctionOnlyAlgebra");
 end
 
 function testFunctionBernsteinCanEnterAlgebra(testCase)
@@ -239,6 +281,8 @@ function testZeroFastPathsCollapseDegree(testCase)
     Z6 = Z1 * A;
     Z7 = Z1 * 2;
     Z8 = 2 * Z1;
+    Z9 = Z1 * eye(2);
+    Z10 = eye(2) * Z1;
 
     verifyZeroPdmat(testCase, Z1, [1 1]);
     verifyZeroPdmat(testCase, Z2, [1 1]);
@@ -248,6 +292,8 @@ function testZeroFastPathsCollapseDegree(testCase)
     verifyZeroPdmat(testCase, Z6, [1 1]);
     verifyZeroPdmat(testCase, Z7, [1 1]);
     verifyZeroPdmat(testCase, Z8, [1 1]);
+    verifyZeroPdmat(testCase, Z9, [2 2]);
+    verifyZeroPdmat(testCase, Z10, [2 2]);
     testCase.verifyTrue(isequal(A + Z1, A));
     testCase.verifyTrue(isequal(A - Z1, A));
     testCase.verifyError(@() F + 1, "pdmat:FunctionOnlyAlgebra");

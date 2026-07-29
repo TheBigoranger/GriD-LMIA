@@ -3,10 +3,11 @@ import BernsteinPlot from "./BernsteinPlot.tsx";
 import { buildElevation } from "../lib/manual-explorers.ts";
 import { sampleBernstein } from "../lib/bernstein.ts";
 
-const initial = buildElevation("1 2 6", 2);
+const initialCoefficients = "1 2 6 2";
+const initial = buildElevation(initialCoefficients, 2);
 
 export default function DegreeElevationExplorer() {
-  const [coefficients, setCoefficients] = useState("1 2 6");
+  const [coefficients, setCoefficients] = useState(initialCoefficients);
   const [increment, setIncrement] = useState("2");
   const [model, setModel] = useState(initial);
   const [error, setError] = useState("");
