@@ -243,7 +243,7 @@ end
 function testPolyaTensorAndRateConstraintCounts(testCase)
     % Counts include every cell, elevated tensor label, and derivative rate row.
     grid = {[0 1 2], [10 20]};
-    P = pdvar(1, grid, Degree=1, RateBounds=[-1 1; -2 2]);
+    P = pdvar(1, grid, Degree=[1 1], RateBounds=[-1 1; -2 2]);
 
     tensor = pdlmi(P, ">=", "UsePolya", PolyaDegree=2);
     D = rhodiff(P);
@@ -356,6 +356,51 @@ function testToYalmip(testCase)
     testCase.verifyTrue(isa(F, "lmi") || isa(F, "constraint"));
 end
 
+function testAnisotropicDirectPolyaCountsAndReplacement(testCase)
+    % Direction-wise increments use tensor counts and replace prior levels.
+    grid = {[0 1], [10 20]};
+    P = pdvar(1, grid, Degree=[1 3], RateBounds=[-1 2; -3 5]);
+    direct = P >= 0;
+    vector = direct.applyPolya([1 0]);
+    bare = direct.applyPolya();
+    replaced = vector.applyPolya([0 2]);
+
+    verifyDefaults(testCase, direct);
+    verifyPolya(testCase, vector, [1 0], prod([2 3] + 1));
+    verifyPolya(testCase, bare, [1 1], prod([2 4] + 1));
+    verifyPolya(testCase, replaced, [0 2], prod([1 5] + 1));
+    testCase.verifyTrue(isequal(replaced.Residual, P));
+
+    D = rhodiff(P);
+    rateDirect = D <= 0;
+    ratePolya = rateDirect.applyPolya([0 1]);
+    testCase.verifyEqual(D.Degree, [1 3]);
+    testCase.verifySize(D.coeffs([1 1]), [4 8]);
+    testCase.verifyEqual(numel(rateDirect.Constraints), 4 * 8);
+    testCase.verifyEqual(numel(ratePolya.Constraints), 4 * 2 * 5);
+end
+
+function testTensorPolyaDegreeValidation(testCase)
+    % Tensor Pólya accepts ell-vectors and rejects every other shape.
+    P = pdvar(1, {[0 1], [10 20]}, Degree=[1 2]);
+    direct = P >= 0;
+    accepted = direct.applyPolya([0; 2]);
+    testCase.verifyEqual(accepted.PolyaDegree, [0 2]);
+
+    bad = {[], [1 2 3], [1 2; 3 4], -1, 0.5, Inf, NaN};
+    for k = 1:numel(bad)
+        testCase.verifyError(@() direct.applyPolya(bad{k}), ...
+            "pdlmi:InvalidPolyaDegree");
+        testCase.verifyError(@() pdlmi(P, ">=", ...
+            UsePolya=true, PolyaDegree=bad{k}), ...
+            "pdlmi:InvalidPolyaDegree");
+    end
+    testCase.verifyError(@() direct.applyPolya("one"), ...
+        "pdlmi:InvalidPolyaDegree");
+    testCase.verifyError(@() pdlmi(P, ">=", ...
+        UsePolya=true, PolyaDegree="one"), "pdlmi:UnknownOption");
+end
+
 function testToYalmipOneShotMatchesSequential(testCase)
     % Solver-facing one-shot concatenation must match the previous loop.
     P = pdvar(2, {[0 1]}, "symmetric");
@@ -431,21 +476,24 @@ function restorePath(originalPath)
 end
 
 function verifyDefaults(testCase, C)
+    zero = zeros(1, C.Residual.npar());
     testCase.verifyFalse(C.UsePolya);
-    testCase.verifyEqual(C.PolyaDegree, 0);
+    testCase.verifyEqual(C.PolyaDegree, zero);
     testCase.verifyFalse(C.UseFullBoxPreorder);
-    testCase.verifyEqual(C.FullBoxOrder, 0);
+    testCase.verifyEqual(C.FullBoxOrder, zero);
     testCase.verifyFalse(C.UsePutinar);
-    testCase.verifyEqual(C.PutinarOrder, 0);
+    testCase.verifyEqual(C.PutinarOrder, zero);
 end
 
 function verifyPolya(testCase, C, degree, count)
+    degree = expandExpected(degree, C.Residual.npar());
+    zero = zeros(1, C.Residual.npar());
     testCase.verifyTrue(C.UsePolya);
     testCase.verifyEqual(C.PolyaDegree, degree);
     testCase.verifyFalse(C.UseFullBoxPreorder);
-    testCase.verifyEqual(C.FullBoxOrder, 0);
+    testCase.verifyEqual(C.FullBoxOrder, zero);
     testCase.verifyFalse(C.UsePutinar);
-    testCase.verifyEqual(C.PutinarOrder, 0);
+    testCase.verifyEqual(C.PutinarOrder, zero);
     testCase.verifyEqual(numel(C.Constraints), count);
     verifyConstraintCells(testCase, C);
 end
@@ -456,6 +504,15 @@ function out = callWarningOff(fun, warnId)
     cleanup = onCleanup(@() warning(state.state, warnId)); %#ok<NASGU>
     warning("off", warnId);
     out = fun();
+end
+
+function value = expandExpected(value, nPar)
+    % Expand scalar shorthand only in test expectations.
+    if isscalar(value)
+        value = repmat(value, 1, nPar);
+    else
+        value = reshape(value, 1, []);
+    end
 end
 
 function out = constructWithSingleWarning(testCase, fun)

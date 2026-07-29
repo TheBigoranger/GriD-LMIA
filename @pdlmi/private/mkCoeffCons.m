@@ -8,7 +8,7 @@ function cons = mkCoeffCons(expr, relation, usePolya, pDeg, comparisonMode, vali
     %     expr     - pdvar residual with local Bernstein coefficients.
     %     relation - Normalized "<=", ">=", or "==" relation.
     %     usePolya - True to elevate coefficients before assembly.
-    %     pDeg     - Uniform Pólya elevation increment when usePolya is true.
+    %     pDeg     - Per-parameter Pólya elevation increment.
     %     comparisonMode - "semidefinite", "elementwise", or "equality".
     %     validationMode - "fast" for representative generated-data checking,
     %                      or "strict" for a complete generated-data check.

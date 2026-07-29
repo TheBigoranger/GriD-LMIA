@@ -7,7 +7,7 @@ function vals = chkBernstein(fh, info, deg, sz)
     %   Arguments:
     %     fh         - Function handle with one input per parameter.
     %     gridInfo   - Normalized tensor-grid metadata.
-    %     degree     - Requested scalar Bernstein degree.
+    %     degree     - Requested scalar or per-parameter degree.
     %     matrixSize - Required function-output size.
     %
     %   Output:
@@ -34,7 +34,7 @@ function vals = chkBernstein(fh, info, deg, sz)
                     for c = 1:sz(2)
                         entry = raw(r, c);
                         for p = 1:nPar
-                            high = simplify(diff(entry, xs(p), deg + 1));
+                            high = simplify(diff(entry, xs(p), deg(p) + 1));
                             tf = isAlways(high == 0);
                             if isempty(tf) || ~all(tf(:))
                                 error("pdmat:NonBernsteinPolynomial", ...
@@ -93,8 +93,9 @@ function vals = chkBernstein(fh, info, deg, sz)
                 w = 1;
                 for q = 1:nPar
                     j = lbls(k, q);
-                    w = w * nchoosek(deg, j) * ...
-                        (1 - alpha(q))^(deg - j) * alpha(q)^j;
+                    oneDeg = deg(q);
+                    w = w * nchoosek(oneDeg, j) * ...
+                        (1 - alpha(q))^(oneDeg - j) * alpha(q)^j;
                 end
                 recon = recon + coeffs{k} .* w;
             end

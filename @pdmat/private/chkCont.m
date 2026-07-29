@@ -7,7 +7,7 @@ function tf = chkCont(vals, nCell, deg)
     %   Arguments:
     %     localValues - Nested physical-cell coefficient tree.
     %     numCells   - Physical-cell count per parameter direction.
-    %     degree     - Scalar Bernstein degree.
+    %     degree     - Per-parameter Bernstein degree.
     %
     %   Output:
     %     tf - True when every adjacent face agrees within tolerance.
@@ -18,12 +18,13 @@ function tf = chkCont(vals, nCell, deg)
 
     nPar = numel(nCell);
     cells = helper.combRows(arrayfun(@(n) 1:n, nCell, "UniformOutput", false));
-    lbls = helper.combRows(repmat({0:deg}, 1, nPar));
+    lbls = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, deg, ...
+        "UniformOutput", false));
     tf = true;
 
     for dim = 1:nPar
         % Label degree is the upper face; label zero is the neighbor's lower face.
-        hi = find(lbls(:, dim) == deg);
+        hi = find(lbls(:, dim) == deg(dim));
         lo = find(lbls(:, dim) == 0);
         step = zeros(1, nPar);
         step(dim) = 1;

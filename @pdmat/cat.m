@@ -15,7 +15,7 @@ function out = cat(dim, varargin)
     rb = anchor.pickRateBounds("pdmat:InvalidConcatenation", varargin{:});
     grid = anchor.mergeGrid("pdmat:MixedGrid", varargin{:});
     [data, sz] = catData(dim, varargin, grid, rb);
-    deg = max(arrayfun(@(d) d.Degree, data));
+    deg = max(vertcat(data.Degree), [], 1);
 
     data = pdbase.alignLocalDegrees(data, deg, grid);
 
@@ -125,7 +125,7 @@ function [data, outSize] = catData(dim, args, grid, rb)
                 mat = repmat(mat, sz(k, :));
             end
             data(k).MatrixSize = sz(k, :);
-            data(k).Degree = 0;
+            data(k).Degree = zeros(1, numel(grid));
             nCell = cellfun(@numel, grid) - 1;
             data(k).LocalValues = helper.mkNest(nCell, @(~) {mat});
             data(k).IsContinuous = true;

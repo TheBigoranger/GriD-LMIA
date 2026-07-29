@@ -1,23 +1,25 @@
 function plan = elevationPlan(fromDeg, toDeg, nPar)
     %ELEVATIONPLAN Precompute one sparse tensor degree-elevation operator.
 
-    fromDeg = chkDegree(fromDeg, "fromDeg");
-    toDeg = chkDegree(toDeg, "toDeg");
     nPar = double(helper.chk(nPar, "pdbase:InvalidParameterDimension", ...
         "nPar must be a positive integer scalar.", ...
         "numeric", "real", "scalar", "finite", "integer", "positive"));
-    if toDeg < fromDeg
+    fromDeg = helper.normalizeDegree(fromDeg, nPar, ...
+        "pdbase:InvalidDegree", "fromDeg");
+    toDeg = helper.normalizeDegree(toDeg, nPar, ...
+        "pdbase:InvalidDegree", "toDeg");
+    if any(toDeg < fromDeg)
         error("pdbase:InvalidDegreeElevation", ...
-            "Cannot degree-elevate from degree %d to lower degree %d.", ...
-            fromDeg, toDeg);
+            "Cannot degree-elevate to a lower degree in any parameter direction.");
     end
 
-    sourceLabels = helper.combRows(repmat({0:fromDeg}, 1, nPar));
-    targetLabels = helper.combRows(repmat({0:toDeg}, 1, nPar));
+    sourceLabels = helper.combRows(arrayfun(@(deg) 0:deg, fromDeg, ...
+        "UniformOutput", false));
+    targetLabels = helper.combRows(arrayfun(@(deg) 0:deg, toDeg, ...
+        "UniformOutput", false));
     sourceWeights = tensorWeights(sourceLabels, fromDeg);
     targetWeights = tensorWeights(targetLabels, toDeg);
     gap = toDeg - fromDeg;
-    gapChoose = arrayfun(@(k) nchoosek(gap, k), 0:gap);
 
     rows = [];
     cols = [];
@@ -26,8 +28,12 @@ function plan = elevationPlan(fromDeg, toDeg, nPar)
         delta = targetLabels(targetIdx, :) - sourceLabels;
         keep = all(delta >= 0, 2) & all(delta <= gap, 2);
         sourceIdx = find(keep);
-        selected = reshape(gapChoose(delta(keep, :) + 1), ...
-            size(delta(keep, :)));
+        selected = ones(numel(sourceIdx), nPar);
+        keptDelta = delta(keep, :);
+        for dim = 1:nPar
+            selected(:, dim) = arrayfun( ...
+                @(k) nchoosek(gap(dim), k), keptDelta(:, dim));
+        end
         scales = sourceWeights(sourceIdx) .* prod(selected, 2) ./ ...
             targetWeights(targetIdx);
         rows = [rows; repmat(targetIdx, numel(sourceIdx), 1)]; %#ok<AGROW>
@@ -46,16 +52,12 @@ function plan = elevationPlan(fromDeg, toDeg, nPar)
         plan.TargetCount, plan.SourceCount);
 end
 
-function degree = chkDegree(value, name)
-    %CHKDEGREE Validate one elevation-plan degree.
-    degree = double(helper.chk(value, "pdbase:InvalidDegree", ...
-        name + " must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-end
-
 function weights = tensorWeights(labels, degree)
     %TENSORWEIGHTS Return products of one-dimensional binomial weights.
-    choose = arrayfun(@(k) nchoosek(degree, k), 0:degree);
-    selected = reshape(choose(labels + 1), size(labels));
+    selected = ones(size(labels));
+    for dim = 1:numel(degree)
+        selected(:, dim) = arrayfun( ...
+            @(k) nchoosek(degree(dim), k), labels(:, dim));
+    end
     weights = prod(selected, 2);
 end

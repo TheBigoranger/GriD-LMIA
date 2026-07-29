@@ -62,6 +62,20 @@ function testFunctionBernsteinStillUsesHandle(testCase)
     testCase.verifyEqual(A.evaluate(0.5), 0.25, AbsTol=1e-12);
 end
 
+function testFunctionBackedEvaluationValidatesBoundsAndPayload(testCase)
+    % Exact handles still obey grid bounds and the stored matrix contract.
+    bounded = pdmat({[0 1]}, @(rho) rho);
+    throws = pdmat({[0 1]}, @(rho) failAwayFromLowerBound(rho));
+    wrongSize = pdmat({[0 1]}, @(rho) changeSizeAwayFromLowerBound(rho));
+
+    testCase.verifyError(@() bounded.evaluate(1.1), ...
+        "pdmat:PointOutOfBounds");
+    testCase.verifyError(@() throws.evaluate(0.5), ...
+        "pdmat:InvalidFunctionValue");
+    testCase.verifyError(@() wrongSize.evaluate(0.5), ...
+        "pdmat:InvalidFunctionValue");
+end
+
 function testRejectsBadPoints(testCase)
     % Evaluation should reject out-of-bounds and wrong-dimensional points.
     A = pdmat({[0 1]}, {2, 4}, Degree=1);
@@ -81,4 +95,20 @@ function testBoundaryUsesRightCell(testCase)
     testCase.verifyEqual(A.evaluate(0), 1, AbsTol=1e-12);
     testCase.verifyEqual(A.evaluate(1), 20, AbsTol=1e-12);
     testCase.verifyEqual(A.evaluate(2), 3, AbsTol=1e-12);
+end
+
+function out = failAwayFromLowerBound(rho)
+    if rho == 0
+        out = 0;
+        return
+    end
+    error("tests:ExpectedHandleFailure", "deliberate evaluation failure");
+end
+
+function out = changeSizeAwayFromLowerBound(rho)
+    if rho == 0
+        out = 0;
+    else
+        out = eye(2);
+    end
 end

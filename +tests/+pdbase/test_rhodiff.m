@@ -26,7 +26,7 @@ function testTensorRateVertexOrder(testCase)
     D = rhodiff(A);
 
     expected = repmat(num2cell([-11; 13; -5; 19]), 1, 4);
-    testCase.verifyEqual(D.Degree, 1);
+    testCase.verifyEqual(D.Degree, [1 1]);
     testCase.verifyEqual(D.coeffs([1 1]), expected);
     verifyDerivativeState(testCase, D, rb);
 end

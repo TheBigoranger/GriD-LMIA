@@ -29,10 +29,10 @@ function cons = mkPutinarCons(expr, relation, order, comparisonMode, validationM
     masks = [zeros(1, nPar); eye(nPar)];
     specs = cell(size(masks, 1), 2);
     for k = 1:size(masks, 1)
-        specs{k, 1} = order * ones(1, nPar) - masks(k, :);
+        specs{k, 1} = order - masks(k, :);
         specs{k, 2} = [masks(k, :); masks(k, :)];
     end
 
-    cons = mkGramCons(expr, relation, 2 * order, specs, ...
+    cons = mkGramCons(expr, relation, 2 .* order, specs, ...
         comparisonMode, validationMode);
 end

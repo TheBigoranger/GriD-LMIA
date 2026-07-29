@@ -9,7 +9,7 @@ function testApprovedHelperSetAndConsumers(testCase)
     files = dir(fullfile(root, "+helper", "*.m"));
     actual = sort(string(erase({files.name}, ".m")));
     approved = sort(["cellGet", "chk", "combRows", "isZero", ...
-        "mkGrid", "mkNest"]);
+        "mkGrid", "mkNest", "normalizeDegree"]);
 
     testCase.verifyEqual(actual, approved, ...
         "The +helper namespace must contain exactly the approved shared utilities.");

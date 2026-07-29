@@ -5,10 +5,10 @@ function out = elevate(obj, degreeIncrement)
     %     out = obj.elevate(degreeIncrement)
     %
     %   Arguments:
-    %     degreeIncrement - Nonnegative degree added in every parameter.
+    %     degreeIncrement - Scalar shorthand or ell-element nonnegative increment.
     %
     %   Output:
-    %     out - Same dynamic class with elevated coefficient evidence.
+    %     out - Same dynamic class with componentwise-elevated coefficient evidence.
     %
     %   elevate preserves the represented polynomial, object metadata, YALMIP
     %   variables, physical cells, and rate-row order. The source object is
@@ -24,6 +24,8 @@ function out = elevate(obj, degreeIncrement)
     % pdbase owns these private-set properties, so updating a value-class copy
     % preserves every subclass-specific property without reconstruction.
     out = obj;
-    out.Degree = obj.Degree + double(degreeIncrement);
+    inc = helper.normalizeDegree(degreeIncrement, obj.npar(), ...
+        "pdbase:InvalidDegreeIncrement", "degreeIncrement");
+    out.Degree = obj.Degree + inc;
     out.LocalValues = vals;
 end

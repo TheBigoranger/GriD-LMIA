@@ -62,11 +62,11 @@ function [lhsPlan, rhsPlan] = elevationPlans(lhsDegree, rhsDegree, targetDegree,
     %ELEVATIONPLANS Reuse one map when both operands share a source degree.
     lhsPlan = [];
     rhsPlan = [];
-    if lhsDegree < targetDegree
+    if any(lhsDegree < targetDegree)
         lhsPlan = pdbase.elevationPlan(lhsDegree, targetDegree, nPar);
     end
-    if rhsDegree < targetDegree
-        if rhsDegree == lhsDegree
+    if any(rhsDegree < targetDegree)
+        if isequal(rhsDegree, lhsDegree)
             rhsPlan = lhsPlan;
         else
             rhsPlan = pdbase.elevationPlan(rhsDegree, targetDegree, nPar);

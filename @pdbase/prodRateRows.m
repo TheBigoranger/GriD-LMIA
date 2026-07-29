@@ -28,7 +28,7 @@ function coeffs = prodRateRows(obj, lhs, lhsDeg, rhs, rhsDeg, errId, plan, valid
     end
 
     nRows = max(size(lhs, 1), size(rhs, 1));
-    nCoeff = (lhsDeg + rhsDeg + 1) ^ obj.npar();
+    nCoeff = prod(lhsDeg + rhsDeg + 1);
     coeffs = cell(nRows, nCoeff);
     for row = 1:nRows
         lhsRow = min(row, size(lhs, 1));
@@ -40,7 +40,8 @@ end
 
 function validateProductLeaf(obj, lhs, lhsDeg, rhs, rhsDeg, plan, errId)
     %VALIDATEPRODUCTLEAF Check one complete cell against its product plan.
-    if lhsDeg ~= plan.LhsDegree || rhsDeg ~= plan.RhsDegree
+    if ~isequal(lhsDeg, plan.LhsDegree) || ...
+            ~isequal(rhsDeg, plan.RhsDegree)
         error(errId, ...
             "Product-plan degrees do not match the operand coefficient rows.");
     end

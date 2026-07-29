@@ -12,16 +12,16 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
     %     n, m        - Positive matrix dimensions; one n creates n-by-n.
     %     gridVectors - Parameter grid cell array or one-vector shorthand.
     %     structure   - Optional "symmetric" or "full" YALMIP structure.
-    %     Degree      - Nonnegative scalar Bernstein degree; default 1.
+    %     Degree      - Nonnegative scalar shorthand or ell-element degree; default 1.
     %     RateBounds  - Optional parameter-rate box with one row per parameter.
     %
     %   Output:
     %     P - Continuous cell-local YALMIP decision variable.
     %
-    %   Degree accepts any finite nonnegative integer scalar and defaults to
-    %   1.  Degree 0 creates one parameter-independent decision matrix shared
-    %   across the grid.  Degree d >= 1 creates continuous piecewise Bernstein
-    %   data whose adjacent cells share complete faces of control matrices.
+    %   Degree is stored as a 1-by-ell row vector and defaults to ones(1,ell).
+    %   An explicit multidimensional scalar expands uniformly and warns once.
+    %   An all-zero Degree creates one shared decision matrix; otherwise
+    %   adjacent cells share complete control faces, including zero-degree axes.
     %
     %   Example:
     %     P = pdvar(2, [0 1 2], "symmetric", Degree=2);
@@ -85,18 +85,19 @@ function [grid, sz, deg, vals, hasRate, rb, validationMode] = ctorArgs(varargin)
     [sz, grid, info, typ, deg, rb, validationMode] = ...
         parseArgs(varargin{:});
     nCell = info.NumNodes - 1;
-    if deg == 0
+    if all(deg == 0)
         % A degree-zero pdvar is parameter-independent; every physical cell
         % stores the same symbolic coefficient while keeping grid metadata.
         val = sdpvar(sz(1), sz(2), char(typ));
         vals = helper.mkNest(nCell, @(~) {val});
     else
-        % A degree-d piecewise polynomial has d new control positions per
-        % physical cell.  Reusing this global lattice shares complete faces,
-        % edges, and corners without adding continuity equality constraints.
+        % Axis s contributes Degree_s new control positions per physical cell.
+        % Reusing the tensor lattice shares complete faces, edges, and corners
+        % without adding continuity equality constraints.
         nCtrl = nCell .* deg + 1;
         nodes = helper.mkNest(nCtrl, @(~) sdpvar(sz(1), sz(2), char(typ)));
-        lbls = helper.combRows(repmat({0:deg}, 1, numel(info.Vectors)));
+        lbls = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, deg, ...
+            "UniformOutput", false));
 
         % The global node tree is reused by every adjacent physical cell, which
         % makes continuity a shared-handle property rather than an equality LMI.
@@ -113,6 +114,7 @@ function [sz, grid, info, typ, deg, rb, validationMode] = parseArgs(varargin)
     end
 
     deg = 1;
+    degreeSpecified = false;
     rb = [];
     validationMode = "fast";
     seenValidation = false;
@@ -190,9 +192,8 @@ function [sz, grid, info, typ, deg, rb, validationMode] = parseArgs(varargin)
             case "RateBounds"
                 rb = val;
             case "Degree"
-                deg = double(helper.chk(val, "pdvar:InvalidDegree", ...
-                    "Degree must be a nonnegative integer scalar.", ...
-                    "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+                deg = val;
+                degreeSpecified = true;
             case "ValidationMode"
                 if seenValidation
                     error("pdvar:InvalidValidationMode", ...
@@ -215,6 +216,13 @@ function [sz, grid, info, typ, deg, rb, validationMode] = parseArgs(varargin)
             "symmetric pdvar variables must be square.");
     end
     info = helper.mkGrid(grid, "pdvar");
+    scalarDegree = isnumeric(deg) && isscalar(deg);
+    deg = helper.normalizeDegree(deg, numel(info.Vectors), ...
+        "pdvar:InvalidDegree", "Degree");
+    if degreeSpecified && scalarDegree && numel(info.Vectors) > 1
+        warning("pdvar:ScalarDegreeExpansion", ...
+            "Scalar Degree expands uniformly across all parameter directions.");
+    end
 end
 
 function mode = normalizeValidationMode(value)

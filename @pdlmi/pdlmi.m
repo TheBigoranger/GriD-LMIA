@@ -37,7 +37,9 @@ classdef pdlmi
     %   a certificate raises pdlmi:UnsupportedEqualityCertificate.
     %
     %   Pólya uses a nonnegative degree increment; Putinar, sparse full-box,
-    %   and full-box use absolute Gram orders. The four relaxations are mutually
+    %   and full-box use absolute Gram orders. Each accepts scalar uniform
+    %   shorthand or an ell-element vector and stores a 1-by-ell row.
+    %   The four relaxations are mutually
     %   exclusive, operate independently per physical cell and rate row, and
     %   add no implicit positivity margin. Entry-wise Gram certificates are
     %   also independent for every MATLAB column-major matrix entry. Apply
@@ -54,8 +56,9 @@ classdef pdlmi
     %   Sparse full-box defaults to BandWidth=2. Its default order is
     %   floor(expr.Degree/2) for one parameter and ceil(expr.Degree/2)
     %   otherwise. Width one always returns actual Direct state. Above that
-    %   endpoint, width at least SparseFullBoxOrder+1 returns actual FullBox
-    %   state. Intermediate widths use free PSD blocks on every axis-aligned
+    %   endpoint, a width spanning every order axis returns actual FullBox
+    %   state; equivalently BandWidth >= max(SparseFullBoxOrder+1).
+    %   Intermediate widths use free PSD blocks on every axis-aligned
     %   tensor-basis window and exact Bernstein coefficient matching. In one
     %   parameter, widths two and three give block-tridiagonal and
     %   block-pentadiagonal Gram support. Larger widths form a nested sufficient
@@ -119,7 +122,8 @@ classdef pdlmi
                     "Function-only pdmat residuals need Bernstein coefficient evidence.");
             end
 
-            opts = parseOpts(relation == "==", varargin{:});
+            nPar = expr.npar();
+            opts = parseOpts(relation == "==", nPar, varargin{:});
             comparisonMode = classifyComparison(expr, relation);
             obj.Residual = expr;
             obj.Relation = relation;
@@ -130,7 +134,7 @@ classdef pdlmi
             obj.UsePutinar = opts.UsePutinar;
             obj.PutinarOrder = opts.PutinarOrder;
             obj.UseSparseFullBoxPreorder = false;
-            obj.SparseFullBoxOrder = 0;
+            obj.SparseFullBoxOrder = zeros(1, nPar);
             obj.BandWidth = 0;
             if opts.UseFullBoxPreorder
                 if opts.FullBoxOrderSpecified
@@ -168,7 +172,7 @@ classdef pdlmi
                 if bandWidth == 1
                     obj.Constraints = mkCoeffCons(expr, relation, ...
                         false, 0, comparisonMode, opts.ValidationMode);
-                elseif bandWidth >= order + 1
+                elseif all(bandWidth >= order + 1)
                     obj.UseFullBoxPreorder = true;
                     obj.FullBoxOrder = order;
                     obj.Constraints = mkFullBoxCons(expr, relation, ...
@@ -236,16 +240,17 @@ function mode = classifyComparison(expr, relation)
     end
 end
 
-function opts = parseOpts(isEquality, varargin)
+function opts = parseOpts(isEquality, nPar, varargin)
     %PARSEOPTS Normalize selector flags and relaxation-specific orders.
     %   Order-only forms enable their relaxation; conflicting families and
     %   explicit false-plus-order Putinar input are rejected before assembly.
 
-    opts = struct("UsePolya", false, "PolyaDegree", 0, ...
-        "UseFullBoxPreorder", false, "FullBoxOrder", 0, ...
+    zeroOrder = zeros(1, nPar);
+    opts = struct("UsePolya", false, "PolyaDegree", zeroOrder, ...
+        "UseFullBoxPreorder", false, "FullBoxOrder", zeroOrder, ...
         "FullBoxOrderSpecified", false, "UsePutinar", false, ...
-        "PutinarOrder", 0, "PutinarOrderSpecified", false, ...
-        "UseSparseFullBoxPreorder", false, "SparseFullBoxOrder", 0, ...
+        "PutinarOrder", zeroOrder, "PutinarOrderSpecified", false, ...
+        "UseSparseFullBoxPreorder", false, "SparseFullBoxOrder", zeroOrder, ...
         "SparseFullBoxOrderSpecified", false, "BandWidth", 0, ...
         "ValidationMode", "fast");
     seen = struct("UsePolya", false, "PolyaDegree", false, ...
@@ -329,11 +334,8 @@ function opts = parseOpts(isEquality, varargin)
                 end
                 opts.UsePolya = val;
             case "PolyaDegree"
-                opts.PolyaDegree = double(helper.chk(val, ...
-                    "pdlmi:InvalidPolyaDegree", ...
-                    "PolyaDegree must be a finite nonnegative integer scalar.", ...
-                    "numeric", "real", "finite", "integer", ...
-                        "nonnegative", "scalar"));
+                opts.PolyaDegree = helper.normalizeDegree(val, nPar, ...
+                    "pdlmi:InvalidPolyaDegree", "PolyaDegree");
             case "UseFullBoxPreorder"
                 if ~islogical(val) || ~isscalar(val)
                     error("pdlmi:InvalidUseFullBoxPreorder", ...
@@ -341,11 +343,8 @@ function opts = parseOpts(isEquality, varargin)
                 end
                 opts.UseFullBoxPreorder = val;
             case "FullBoxOrder"
-                opts.FullBoxOrder = double(helper.chk(val, ...
-                    "pdlmi:InvalidFullBoxOrder", ...
-                    "FullBoxOrder must be a finite nonnegative integer scalar.", ...
-                    "numeric", "real", "finite", "integer", ...
-                    "nonnegative", "scalar"));
+                opts.FullBoxOrder = helper.normalizeDegree(val, nPar, ...
+                    "pdlmi:InvalidFullBoxOrder", "FullBoxOrder");
                 opts.FullBoxOrderSpecified = true;
             case "UsePutinar"
                 if ~islogical(val) || ~isscalar(val)
@@ -354,11 +353,8 @@ function opts = parseOpts(isEquality, varargin)
                 end
                 opts.UsePutinar = val;
             case "PutinarOrder"
-                opts.PutinarOrder = double(helper.chk(val, ...
-                    "pdlmi:InvalidPutinarOrder", ...
-                    "PutinarOrder must be a finite nonnegative integer scalar.", ...
-                    "numeric", "real", "finite", "integer", ...
-                    "nonnegative", "scalar"));
+                opts.PutinarOrder = helper.normalizeDegree(val, nPar, ...
+                    "pdlmi:InvalidPutinarOrder", "PutinarOrder");
                 opts.PutinarOrderSpecified = true;
             case "UseSparseFullBoxPreorder"
                 if ~islogical(val) || ~isscalar(val)
@@ -367,11 +363,9 @@ function opts = parseOpts(isEquality, varargin)
                 end
                 opts.UseSparseFullBoxPreorder = val;
             case "SparseFullBoxOrder"
-                opts.SparseFullBoxOrder = double(helper.chk(val, ...
+                opts.SparseFullBoxOrder = helper.normalizeDegree(val, nPar, ...
                     "pdlmi:InvalidSparseFullBoxOrder", ...
-                    "SparseFullBoxOrder must be a finite nonnegative integer scalar.", ...
-                    "numeric", "real", "finite", "integer", ...
-                    "nonnegative", "scalar"));
+                    "SparseFullBoxOrder");
                 opts.SparseFullBoxOrderSpecified = true;
             case "BandWidth"
                 opts.BandWidth = chkBandWidth(val);
@@ -386,9 +380,9 @@ function opts = parseOpts(isEquality, varargin)
             "PolyaDegree was supplied without UsePolya; Polya relaxation is enabled.");
         opts.UsePolya = true;
     elseif seen.UsePolya && ~seen.PolyaDegree
-        opts.PolyaDegree = double(opts.UsePolya);
+        opts.PolyaDegree = repmat(double(opts.UsePolya), 1, nPar);
     end
-    if seen.UsePolya && ~opts.UsePolya && opts.PolyaDegree > 0
+    if seen.UsePolya && ~opts.UsePolya && any(opts.PolyaDegree > 0)
         error("pdlmi:ConflictingPolyaOptions", ...
             "UsePolya=false conflicts with a positive PolyaDegree.");
     end

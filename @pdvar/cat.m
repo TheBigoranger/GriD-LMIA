@@ -22,7 +22,7 @@ function out = cat(dim, varargin)
     grid = anchor.mergeGrid("pdvar:MixedGrid", varargin{:});
     rb = anchor.pickRateBounds("pdvar:InvalidConcatenation", varargin{:});
     [data, sz] = catData(dim, varargin, grid, rb);
-    deg = max(arrayfun(@(d) d.Degree, data));
+    deg = max(vertcat(data.Degree), [], 1);
 
     data = pdbase.alignLocalDegrees(data, deg, grid);
 

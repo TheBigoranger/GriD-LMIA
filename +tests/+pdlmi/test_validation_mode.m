@@ -96,6 +96,27 @@ function testGlobalClassificationRemainsGlobalInBothModes(testCase)
     end
 end
 
+function testStrictAssemblyRejectsMalformedLaterCells(testCase)
+    % Strict assembly diagnoses later-cell tensor, rate-row, and payload drift.
+    first = sdpvar(2, 2, 'symmetric');
+    later = sdpvar(2, 2, 'symmetric');
+
+    wrongCount = internalPdvar({{first}, {later, later}}, false, [], ...
+        "test-wrong-count", "fast");
+    testCase.verifyError(@() pdlmi(wrongCount, ">=", ...
+        ValidationMode="strict"), "pdlmi:InvalidAssemblyData");
+
+    mixedRows = internalPdvar({{first}, {later; later}}, true, [-1 1], ...
+        "test-mixed-rate-layout", "fast");
+    testCase.verifyError(@() pdlmi(mixedRows, ">=", ...
+        ValidationMode="strict"), "pdlmi:InvalidAssemblyData");
+
+    wrongSize = internalPdvar({{first}, {sdpvar(1, 1)}}, false, [], ...
+        "test-wrong-payload-size", "fast");
+    testCase.verifyError(@() pdlmi(wrongSize, ">=", ...
+        ValidationMode="strict"), "pdlmi:InvalidAssemblyData");
+end
+
 function verifySamePublicAssembly(testCase, lhs, rhs)
     % Compare observable wrapper metadata and exported decision support.
     testCase.verifyEqual(lhs.Relation, rhs.Relation);
@@ -124,8 +145,11 @@ function verifyAllVectorConstraints(testCase, C, nEntry)
     end
 end
 
-function obj = internalPdvar(vals, hasRate, rb, summary)
+function obj = internalPdvar(vals, hasRate, rb, summary, validationMode)
     % Build global-classification cases public symmetric allocation excludes.
+    if nargin < 5
+        validationMode = "strict";
+    end
     init = struct;
     init.PdvarInternal = true;
     if numel(vals) == 2
@@ -141,6 +165,6 @@ function obj = internalPdvar(vals, hasRate, rb, summary)
     init.HasRateDependence = hasRate;
     init.RateBounds = rb;
     init.SourceSummary = summary;
-    init.ValidationMode = "strict";
+    init.ValidationMode = validationMode;
     obj = pdvar(init);
 end

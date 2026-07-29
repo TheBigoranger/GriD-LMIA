@@ -8,12 +8,13 @@ classdef pdbase
     %   Arguments:
     %     gridVectors - Cell array of strictly increasing parameter grids.
     %     matrixSize  - Positive [rows, columns] coefficient-matrix size.
-    %     degree      - Nonnegative scalar Bernstein degree per parameter.
+    %     degree      - Nonnegative scalar shorthand or ell-element degree.
     %     localValues - Optional nested cell-local coefficient tree.
     %     Name=Value  - Continuity, decision, rate, and source metadata.
     %
     %   Output:
-    %     obj - Shared grid and coefficient-storage object.
+    %     obj - Shared grid and coefficient-storage object whose Degree is
+    %           stored as a 1-by-ell row vector.
     %
     %   Example:
     %     obj = pdbase({[0 1 2]}, [2 2], 1);
@@ -50,10 +51,9 @@ classdef pdbase
                 "matrixSize must be a 1x2 positive integer vector.", ...
                 "numeric", "real", "finite", "integer", "positive", "Size", [1, 2]));
 
-            deg = double(helper.chk(degree, "pdbase:InvalidDegree", ...
-                "degree must be a nonnegative integer scalar.", ...
-                "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
             nPar = numel(info.Vectors);
+            deg = helper.normalizeDegree(degree, nPar, ...
+                "pdbase:InvalidDegree", "degree");
             rb = options.RateBounds;
             if isempty(rb)
                 rb = [];
@@ -68,7 +68,7 @@ classdef pdbase
             end
 
             nCell = info.NumNodes - 1;
-            nCoeff = (deg + 1) ^ nPar;
+            nCoeff = prod(deg + 1);
             if isempty(localValues)
                 % Default construction represents a coefficient-backed zero
                 % object on every physical cell, not sampled node data.

@@ -122,7 +122,7 @@ end
 function testDegreeZeroOddAndTensorBlockDimensions(testCase)
     constant = pdlmi(pdvar(2, {[0 1]}, Degree=0), ">=", UsePutinar=true);
     odd = pdlmi(pdvar(2, {[0 1]}, Degree=3), ">=", UsePutinar=true);
-    tensor = pdlmi(pdvar(2, {[0 1], [0 1]}, Degree=2), ...
+    tensor = pdlmi(pdvar(2, {[0 1], [0 1]}, Degree=[2 2]), ...
         ">=", UsePutinar=true);
 
     % Order zero omits both nominal negative-degree multiplier blocks.
@@ -130,6 +130,38 @@ function testDegreeZeroOddAndTensorBlockDimensions(testCase)
     % One-dimensional odd targets use the Markov-Lukacs endpoint facets.
     verifyPutinar(testCase, odd, 1, [4 4], 4);
     verifyPutinar(testCase, tensor, 1, [8 4 4], 9);
+end
+
+function testAnisotropicOrdersAndGramDimensions(testCase)
+    % Putinar keeps only empty and admissible singleton masks per direction.
+    grid = {[0 1], [10 20]};
+    P = pdvar(2, grid, "symmetric", Degree=[1 4]);
+    default = pdlmi(P, ">=", UsePutinar=true);
+    explicit = pdlmi(P, ">=", PutinarOrder=[2; 3]);
+
+    verifyPutinar(testCase, default, [1 2], [12 6 8], 15);
+    verifyPutinar(testCase, explicit, [2 3], [24 16 18], 35);
+
+    direct = P >= 0;
+    testCase.verifyError(@() direct.applyPutinar([0 2]), ...
+        "pdlmi:PutinarOrderTooLow");
+    bad = {[], [1 2 3], [1 2; 3 4], -1, 0.5, Inf, NaN};
+    for k = 1:numel(bad)
+        testCase.verifyError(@() direct.applyPutinar(bad{k}), ...
+            "pdlmi:InvalidPutinarOrder");
+    end
+end
+
+function testZeroOrderAxisOmitsUnavailableSingleton(testCase)
+    % A singleton multiplier is absent when its axis order is exactly zero.
+    grid = {[0 1], [10 20]};
+    firstConstant = pdlmi(pdvar(1, grid, Degree=[0 4]), ...
+        ">=", UsePutinar=true);
+    secondConstant = pdlmi(pdvar(1, grid, Degree=[4 0]), ...
+        ">=", UsePutinar=true);
+
+    verifyPutinar(testCase, firstConstant, [0 2], [3 2], 5);
+    verifyPutinar(testCase, secondConstant, [2 0], [3 2], 5);
 end
 
 function testSignsEveryCellAndRateRow(testCase)
@@ -190,19 +222,31 @@ function testEntrywiseEveryCellAndRateRow(testCase)
 end
 
 function verifyInactive(testCase, C)
+    zero = zeros(1, C.Residual.npar());
     testCase.verifyFalse(C.UsePutinar);
-    testCase.verifyEqual(C.PutinarOrder, 0);
+    testCase.verifyEqual(C.PutinarOrder, zero);
 end
 
 function verifyPutinar(testCase, C, order, gramSizes, equalityCount)
+    order = expandExpected(order, C.Residual.npar());
+    zero = zeros(1, C.Residual.npar());
     testCase.verifyTrue(C.UsePutinar);
     testCase.verifyEqual(C.PutinarOrder, order);
     testCase.verifyFalse(C.UsePolya);
-    testCase.verifyEqual(C.PolyaDegree, 0);
+    testCase.verifyEqual(C.PolyaDegree, zero);
     testCase.verifyFalse(C.UseFullBoxPreorder);
-    testCase.verifyEqual(C.FullBoxOrder, 0);
+    testCase.verifyEqual(C.FullBoxOrder, zero);
     testCase.verifyEqual(psdDimensions(C, numel(gramSizes)), gramSizes);
     testCase.verifyEqual(numel(C.Constraints), numel(gramSizes) + equalityCount);
+end
+
+function value = expandExpected(value, nPar)
+    % Expand scalar shorthand only for expected public vector state.
+    if isscalar(value)
+        value = repmat(value, 1, nPar);
+    else
+        value = reshape(value, 1, []);
+    end
 end
 
 function dims = psdDimensions(C, count)

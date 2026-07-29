@@ -87,6 +87,40 @@ function testScalarPdvarScalesKnownMatrices(testCase)
         {eye(2) * cg{1}, 2 * eye(2) * cg{1}});
 end
 
+function testAnisotropicKnownDecisionProducts(testCase)
+    % Unequal direction-wise degrees add while both operand orders stay affine.
+    grid = {[0 1], [10 20]};
+    P = pdvar(1, grid, Degree=[1 2]);
+    knownData = cell(3, 2);
+    for i = 0:2
+        for j = 0:1
+            knownData{i + 1, j + 1} = 2 + j;
+        end
+    end
+    A = pdmat(grid, knownData, Degree=[2 1]);
+
+    left = A * P;
+    right = P * A;
+
+    testCase.verifyEqual(left.Degree, [3 3]);
+    testCase.verifyEqual(right.Degree, [3 3]);
+    testCase.verifyEqual(objectVariables(left), objectVariables(P));
+    testCase.verifyEqual(objectVariables(right), objectVariables(P));
+    testCase.verifyTrue(is(left.evaluate([0.3 14]), "linear"));
+    testCase.verifyTrue(is(right.evaluate([0.3 14]), "linear"));
+
+    coeffs = P.coeffs([1 1]);
+    for k = 1:numel(coeffs)
+        assign(coeffs{k}, k);
+    end
+    point = [0.3 14];
+    expected = A.evaluate(point) * value(P.evaluate(point));
+    testCase.verifyEqual(value(left.evaluate(point)), expected, ...
+        AbsTol=1e-10);
+    testCase.verifyEqual(value(right.evaluate(point)), expected, ...
+        AbsTol=1e-10);
+end
+
 function testScalarPdmatScalesDecisionMatrices(testCase)
     % A scalar pdmat should scale matrix-valued decisions on either side.
     S = pdmat([0 1], {2, 4}, Degree=1);
@@ -386,11 +420,26 @@ end
 function verifyZeroPdvar(testCase, obj, sz)
     % Zero product shortcuts should return compact ordinary coefficients.
     testCase.verifyEqual(size(obj), sz);
-    testCase.verifyEqual(obj.Degree, 0);
+    testCase.verifyEqual(obj.Degree, zeros(1, obj.npar()));
     testCase.verifyFalse(obj.ContainsDecision);
     testCase.verifyFalse(obj.HasRateDependence);
     testCase.verifyEmpty(obj.RateBounds);
     coeffs = obj.coeffs(ones(1, obj.npar()));
     testCase.verifyEqual(numel(coeffs), 1);
     testCase.verifyEqual(coeffs{1}, zeros(sz));
+end
+
+function vars = objectVariables(obj)
+    % Collect unique symbolic identifiers across the complete coefficient tree.
+    vars = [];
+    cells = obj.cells();
+    for k = 1:size(cells, 1)
+        coeffs = obj.coeffs(cells(k, :));
+        for j = 1:numel(coeffs)
+            if isa(coeffs{j}, "sdpvar")
+                vars = [vars, getvariables(coeffs{j})]; %#ok<AGROW>
+            end
+        end
+    end
+    vars = unique(vars);
 end

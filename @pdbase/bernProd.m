@@ -6,7 +6,7 @@ function out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg, plan, validateInstance)
     %
     %   Arguments:
     %     lhs, rhs      - Flat coefficient rows for one physical cell.
-    %     lhsDeg, rhsDeg - Scalar Bernstein degrees of the operands.
+    %     lhsDeg, rhsDeg - Scalar or per-parameter operand degrees.
     %
     %   Output:
     %     out - Product coefficients at degree lhsDeg + rhsDeg.
@@ -48,14 +48,13 @@ end
 
 function sanChk(lhsDeg, rhsDeg, lhs, rhs, plan)
     %SANCHK Validate both degrees and their flat tensor coefficient counts.
-    lhsDeg = double(helper.chk(lhsDeg, "pdbase:InvalidDegree", ...
-        "lhsDeg must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-    rhsDeg = double(helper.chk(rhsDeg, "pdbase:InvalidDegree", ...
-        "rhsDeg must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+    lhsDeg = helper.normalizeDegree(lhsDeg, plan.NumParameters, ...
+        "pdbase:InvalidDegree", "lhsDeg");
+    rhsDeg = helper.normalizeDegree(rhsDeg, plan.NumParameters, ...
+        "pdbase:InvalidDegree", "rhsDeg");
 
-    if lhsDeg ~= plan.LhsDegree || rhsDeg ~= plan.RhsDegree
+    if ~isequal(lhsDeg, plan.LhsDegree) || ...
+            ~isequal(rhsDeg, plan.RhsDegree)
         error("pdbase:InvalidDegree", ...
             "The product plan degrees must match the coefficient rows.");
     end

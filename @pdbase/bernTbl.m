@@ -20,7 +20,7 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
     lbls = obj.lbls();
     basis = strings(size(lbls, 1), 1);
     for k = 1:size(lbls, 1)
-        if obj.Degree == 0
+        if all(obj.Degree == 0)
             basis(k) = "1";
             continue
         end
@@ -34,7 +34,7 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
             else
                 name = "alpha" + string(p);
             end
-            parts(p) = oneBasis(name, obj.Degree, loc(p));
+            parts(p) = oneBasis(name, obj.Degree(p), loc(p));
         end
         basis(k) = strjoin(parts, " * ");
     end
@@ -247,12 +247,14 @@ end
 function [coeffSub, nodeFlag] = coeffInfo(obj, cellSub, loc)
     % Map the local Bernstein label back to the global coefficient subscript
     % used by coeffs and physical-node diagnostics.
-    if obj.Degree == 0
+    if all(obj.Degree == 0)
         coeffSub = ones(size(cellSub));
         nodeFlag = true;
     else
         coeffSub = (cellSub - 1) .* obj.Degree + loc + 1;
-        nodeFlag = all(mod(coeffSub - 1, obj.Degree) == 0);
+        positive = obj.Degree > 0;
+        nodeFlag = all(~positive | ...
+            mod(coeffSub - 1, max(obj.Degree, 1)) == 0);
     end
 end
 

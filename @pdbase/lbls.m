@@ -15,7 +15,7 @@ function out = lbls(obj)
     %     obj = pdbase({[0 1], [10 20]}, [1 1], 1);
     %     out = obj.lbls();
 
-    nPar = obj.npar();
-    vecs = repmat({0:obj.Degree}, 1, nPar);
+    vecs = arrayfun(@(deg) 0:deg, obj.Degree, ...
+        "UniformOutput", false);
     out = helper.combRows(vecs);
 end

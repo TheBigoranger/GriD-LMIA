@@ -38,8 +38,9 @@ function out = evaluate(obj, pt)
     for k = 1:numel(weights)
         for p = 1:numel(alpha)
             j = lbls(k, p);
-            weights(k) = weights(k) * nchoosek(obj.Degree, j) ...
-                * (1 - alpha(p))^(obj.Degree - j) * alpha(p)^j;
+            deg = obj.Degree(p);
+            weights(k) = weights(k) * nchoosek(deg, j) ...
+                * (1 - alpha(p))^(deg - j) * alpha(p)^j;
         end
     end
 

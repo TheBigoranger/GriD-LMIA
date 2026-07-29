@@ -6,8 +6,8 @@ function out = bernElev(coeffs, fromDeg, toDeg, nPar, plan, validateInstance)
     %
     %   Arguments:
     %     coeffs - Flat coefficients for one physical cell.
-    %     fromDeg - Current scalar degree in every parameter direction.
-    %     toDeg   - Target degree, not smaller than fromDeg.
+    %     fromDeg - Current scalar or per-parameter degree.
+    %     toDeg   - Target scalar or per-parameter degree.
     %     nPar    - Number of parameter directions.
     %
     %   Output:
@@ -27,7 +27,7 @@ function out = bernElev(coeffs, fromDeg, toDeg, nPar, plan, validateInstance)
         sanChk(fromDeg, toDeg, coeffs, nPar, plan);
     end
 
-    if toDeg == fromDeg
+    if isequal(toDeg, fromDeg)
         out = coeffs;
         return
     end
@@ -49,22 +49,21 @@ end
 
 function sanChk(fromDeg, toDeg, coeffs, nPar, plan)
     %SANCHK Validate degree bounds and the flat tensor coefficient count.
-    fromDeg = double(helper.chk(fromDeg, "pdbase:InvalidDegree", ...
-        "fromDeg must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-    toDeg = double(helper.chk(toDeg, "pdbase:InvalidDegree", ...
-        "toDeg must be a nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
-    if toDeg < fromDeg
+    fromDeg = helper.normalizeDegree(fromDeg, nPar, ...
+        "pdbase:InvalidDegree", "fromDeg");
+    toDeg = helper.normalizeDegree(toDeg, nPar, ...
+        "pdbase:InvalidDegree", "toDeg");
+    if any(toDeg < fromDeg)
         error("pdbase:InvalidDegreeElevation", ...
-            "Cannot degree-elevate from degree %d to lower degree %d.", fromDeg, toDeg);
+            "Cannot degree-elevate to a lower degree in any parameter direction.");
     end
-    if fromDeg ~= plan.FromDegree || toDeg ~= plan.ToDegree || ...
+    if ~isequal(fromDeg, plan.FromDegree) || ...
+            ~isequal(toDeg, plan.ToDegree) || ...
             nPar ~= plan.NumParameters
         error("pdbase:InvalidDegreeElevation", ...
             "The elevation plan does not match the requested tensor degrees.");
     end
-    expected = (fromDeg + 1) ^ nPar;
+    expected = prod(fromDeg + 1);
     helper.chk(coeffs, "pdbase:InvalidCoefficientCell", ...
         "Coefficient cell count must match the source degree and parameter dimension.", ...
         "cell", "Size", [1, expected]);

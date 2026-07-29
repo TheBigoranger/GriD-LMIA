@@ -8,15 +8,17 @@ function out = applySparseFullBoxPreorder(obj, varargin)
     %
     %   Arguments:
     %     bandWidth - Positive integer tensor-window side length; default 2.
-    %     order     - Optional admissible absolute full-box Gram order. The
+    %     order     - Optional scalar shorthand or ell-element absolute order. The
     %                 default is floor(Residual.Degree/2) for one parameter and
-    %                 ceil(Residual.Degree/2) otherwise.
+    %                 componentwise ceil(Residual.Degree/2) otherwise.
     %
     %   Output:
     %     out - New pdlmi rebuilt with the selected certificate.
     %
-    %   Width one always returns actual Direct state. Above that endpoint, a
-    %   width at least order+1 returns actual dense FullBox state. Intermediate
+    %   Scalar order input expands uniformly; SparseFullBoxOrder is stored as a
+    %   1-by-ell row vector. Width one always returns actual Direct state. A
+    %   width satisfying bandWidth >= max(order+1), so every axis is saturated,
+    %   returns actual dense FullBox state. Intermediate
     %   widths use one free PSD block per axis-aligned sliding window in every
     %   parity/mask tensor basis, with exact Bernstein coefficient matching.
     %   Widths two and three are the block-tridiagonal and

@@ -6,14 +6,14 @@ function vals = elevLocalValues(vals, fromDeg, toDeg, grid, plan, validationMode
     %
     %   Arguments:
     %     vals     - Nested coefficient tree on grid.
-    %     fromDeg  - Current scalar degree in every parameter direction.
-    %     toDeg    - Target scalar degree.
+    %     fromDeg  - Current scalar or per-parameter degree.
+    %     toDeg    - Target scalar or per-parameter degree.
     %     grid     - Parameter grid owning vals.
     %
     %   Output:
     %     vals - Elevated tree with each rate-vertex row handled separately.
 
-    if fromDeg == toDeg
+    if isequal(fromDeg, toDeg)
         return
     end
 
@@ -25,8 +25,8 @@ function vals = elevLocalValues(vals, fromDeg, toDeg, grid, plan, validationMode
         validationMode = "fast";
     end
     nCell = cellfun(@numel, grid) - 1;
-    nFrom = (fromDeg + 1) ^ nPar;
-    nTo = (toDeg + 1) ^ nPar;
+    nFrom = prod(fromDeg + 1);
+    nTo = prod(toDeg + 1);
     firstCell = true;
     sourceVals = vals;
     vals = helper.mkNest(nCell, @elevateAt);

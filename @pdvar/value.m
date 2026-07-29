@@ -100,10 +100,11 @@ function tf = assignedContinuity(vals, nCell, degree)
     nPar = numel(nCell);
     cells = helper.combRows(arrayfun(@(n) 1:n, nCell, ...
         "UniformOutput", false));
-    labels = helper.combRows(repmat({0:degree}, 1, nPar));
+    labels = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, degree, ...
+        "UniformOutput", false));
     tf = true;
     for dim = 1:nPar
-        upper = find(labels(:, dim) == degree);
+        upper = find(labels(:, dim) == degree(dim));
         lower = find(labels(:, dim) == 0);
         step = zeros(1, nPar);
         step(dim) = 1;

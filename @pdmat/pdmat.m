@@ -8,7 +8,7 @@ classdef pdmat < pdbase
     %   Arguments:
     %     gridVectors - Parameter grid cell array or one-vector shorthand.
     %     source      - Function handle, global coefficient grid, or LocalValues.
-    %     Degree      - Optional nonnegative scalar Bernstein degree.
+    %     Degree      - Optional scalar shorthand or ell-element Bernstein degree.
     %     RateBounds  - Optional ell-by-2 parameter-rate box.
     %
     %   Output:
@@ -23,6 +23,9 @@ classdef pdmat < pdbase
     %   point for size; inherited LocalValues are placeholder zeros, not
     %   coefficient evidence. Function handles with explicit Degree are
     %   validated as local Bernstein data while retaining FunctionHandle.
+    %   Public Degree is a 1-by-ell row vector. Explicit multidimensional
+    %   scalar Degree expands uniformly and warns once; omitted inference and
+    %   one-dimensional construction remain warning-free.
     %   RateBounds alone is metadata. Explicit nested leaves may instead use
     %   one row per vertex, ordered by combRows(RateBounds); every physical
     %   cell must uniformly use either one row or all 2^ell vertex rows.
@@ -67,7 +70,8 @@ classdef pdmat < pdbase
                 end
                 warnCont = false;
             else
-                [degOpt, rbOpt, validationMode] = parseOpts(varargin{:});
+                [degOpt, degreeSpecified, rbOpt, validationMode] = ...
+                    parseOpts(varargin{:});
                 if isnumeric(gridVectors) && isvector(gridVectors) && numel(gridVectors) >= 2
                     % Accept scalar-parameter shorthand at the public entry;
                     % pdbase still receives its strict cell-vector grid contract.
@@ -76,7 +80,7 @@ classdef pdmat < pdbase
 
                 grid = gridVectors;
                 [sz, deg, vals, isCont, summary, fh, rb] = ...
-                    mkData(grid, source, degOpt, rbOpt);
+                    mkData(grid, source, degOpt, degreeSpecified, rbOpt);
                 hasRate = ~isempty(rb);
                 warnCont = ~isCont;
             end
@@ -106,9 +110,10 @@ classdef pdmat < pdbase
 
 end
 
-function [degOpt, rbOpt, validationMode] = parseOpts(varargin)
+function [degOpt, degreeSpecified, rbOpt, validationMode] = parseOpts(varargin)
     %PARSEOPTS Parse optional Bernstein degree and rate metadata.
     degOpt = [];
+    degreeSpecified = false;
     rbOpt = [];
     validationMode = "fast";
     seenDegree = false;
@@ -139,6 +144,7 @@ function [degOpt, rbOpt, validationMode] = parseOpts(varargin)
                 end
                 degOpt = varargin{k + 1};
                 seenDegree = true;
+                degreeSpecified = true;
             case "RateBounds"
                 if seenRate
                     error("pdmat:DuplicateOption", ...

@@ -6,13 +6,14 @@ function out = applyPolya(obj, varargin)
     %     out = obj.applyPolya(degreeIncrement)
     %
     %   Arguments:
-    %     degreeIncrement - Optional nonnegative elevation increment; default 1.
+    %     degreeIncrement - Optional scalar or ell-element increment; default 1.
     %
     %   Output:
     %     out - New pdlmi rebuilt with Pólya elevation enabled.
     %
-    %   The no-argument form uses increment one. Passing a finite nonnegative
-    %   integer replaces any prior Pólya, Putinar, sparse full-box, or FullBox
+    %   The no-argument form uses ones(1,ell). A scalar expands uniformly; an
+    %   ell-element vector elevates componentwise. Either form replaces any
+    %   prior Pólya, Putinar, sparse full-box, or FullBox
     %   selection because assembly always starts from the stored original
     %   Residual rather than existing constraints.
     %   This value-class method returns a new pdlmi and leaves obj unchanged;
@@ -39,10 +40,8 @@ function out = applyPolya(obj, varargin)
     else
         degreeIncrement = args{1};
     end
-    degreeIncrement = double(helper.chk(degreeIncrement, ...
-        "pdlmi:InvalidPolyaDegree", ...
-        "PolyaDegree must be a finite nonnegative integer scalar.", ...
-        "numeric", "real", "finite", "integer", "nonnegative", "scalar"));
+    degreeIncrement = helper.normalizeDegree(degreeIncrement, ...
+        obj.Residual.npar(), "pdlmi:InvalidPolyaDegree", "PolyaDegree");
     out = pdlmi(obj.Residual, obj.Relation, UsePolya=true, ...
         PolyaDegree=degreeIncrement, ValidationMode=validationMode);
 end

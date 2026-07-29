@@ -21,7 +21,7 @@ function display(obj)
         fprintf("    rho_%d: [%g, %g], %d nodes\n", ...
             k, v(1), v(end), numel(v));
     end
-    fprintf("  Degree: %d\n", obj.Degree);
+    fprintf("  Degree: %s\n", mat2str(obj.Degree));
     fprintf("  Physical cells: %d\n", obj.ncell());
     fprintf("  Coefficients per cell: %d\n", obj.ncoeff());
     fprintf("  Continuous: %s\n", string(obj.IsContinuous));

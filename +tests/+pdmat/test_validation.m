@@ -77,6 +77,17 @@ function testFixedOptionsAndMalformedRateBounds(testCase)
         "pdmat:InvalidRateBounds");
 end
 
+function testDegreeValidation(testCase)
+    % Explicit Degree rejects empty and every non-scalar/non-ell shape.
+    grid = {[0 1], [10 20]};
+    data = {1 2; 3 4};
+    bad = {[], [1 2 3], [1 2; 3 4], -1, 0.5, Inf, NaN, "one"};
+    for k = 1:numel(bad)
+        testCase.verifyError(@() pdmat(grid, data, Degree=bad{k}), ...
+            "pdmat:InvalidDegree");
+    end
+end
+
 function testMalformedAndMixedExplicitRateRows(testCase)
     % Explicit leaves use uniformly one row or exactly 2^ell rows.
     testCase.verifyError(@() pdmat([0 1], {{1, 2; 3, Inf}}, ...

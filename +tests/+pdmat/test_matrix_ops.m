@@ -253,6 +253,32 @@ function testSubsasgnNumericAndPdmatBlocks(testCase)
         });
 end
 
+function testAnisotropicCatBlkdiagAssignmentAndRefinement(testCase)
+    % Structural composition aligns each degree axis on a common refinement.
+    gridA = {[0 1], [10 20]};
+    gridB = {[0 0.5 1], [10 20]};
+    A = pdmat(gridA, repmat({[1; 2]}, 2, 4), Degree=[1 3]);
+    B = pdmat(gridB, repmat({[3; 4]}, 5, 2), Degree=[2 1]);
+
+    horizontal = [A, B];
+    diagonal = blkdiag(A, B);
+    assigned = A;
+    assigned(:, 1) = B;
+
+    testCase.verifyEqual(horizontal.Degree, [2 3]);
+    testCase.verifyEqual(diagonal.Degree, [2 3]);
+    testCase.verifyEqual(assigned.Degree, [2 3]);
+    testCase.verifyEqual(horizontal.GridInfo.Vectors, gridB);
+    testCase.verifyEqual(diagonal.GridInfo.Vectors, gridB);
+    testCase.verifyEqual(assigned.GridInfo.Vectors, gridB);
+    verifyCoeff(testCase, horizontal, [1 1], ...
+        repmat({[1 3; 2 4]}, 1, 12));
+    verifyCoeff(testCase, diagonal, [1 1], ...
+        repmat({blkdiag([1; 2], [3; 4])}, 1, 12));
+    verifyCoeff(testCase, assigned, [1 1], ...
+        repmat({[3; 4]}, 1, 12));
+end
+
 function testIndexingAndAssignmentRejections(testCase)
     % Unsupported indexing and assignment forms should fail with stable IDs.
     A = pdmat({[0 1]}, {zeros(2), ones(2)}, Degree=1);

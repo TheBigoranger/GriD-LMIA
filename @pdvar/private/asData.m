@@ -82,7 +82,8 @@ function data = asData(grid, val, reqSize, rb, errId)
     end
 
     mat = chkMat(val, reqSize, errId);
-    data = pack(size(mat), 0, helper.mkNest(info.NumNodes - 1, @(~) {mat}), ...
+    data = pack(size(mat), zeros(1, numel(grid)), ...
+        helper.mkNest(info.NumNodes - 1, @(~) {mat}), ...
         isa(mat, "sdpvar"), false, true, false);
 end
 
@@ -125,8 +126,9 @@ function val = evalPdvar(obj, pt)
         w = 1;
         for p = 1:numel(alpha)
             j = lbls(k, p);
-            w = w * nchoosek(obj.Degree, j) * ...
-                (1 - alpha(p))^(obj.Degree - j) * alpha(p)^j;
+            deg = obj.Degree(p);
+            w = w * nchoosek(deg, j) * ...
+                (1 - alpha(p))^(deg - j) * alpha(p)^j;
         end
         val = val + coeffs{k} .* w;
     end

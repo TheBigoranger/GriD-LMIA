@@ -11,8 +11,8 @@ end
 function testNumericThreeParameterUnequalDegreeMatrixProduct(testCase)
     % A multi-cell 3-D matrix product must match the direct Bernstein sum.
     grid = {[0 0.5 1], [10 20], [-2 3]};
-    leftDegree = 2;
-    rightDegree = 1;
+    leftDegree = [2 1 0];
+    rightDegree = [1 0 2];
     leftValues = numericTree(grid, leftDegree, [2 3], 10);
     rightValues = numericTree(grid, rightDegree, [3 2], 100);
     A = pdmat(grid, leftValues, Degree=leftDegree);
@@ -122,7 +122,9 @@ end
 function values = numericTree(grid, degree, matrixSize, offset)
     % Build deterministic nested local data on every physical tensor cell.
     nCell = cellfun(@numel, grid) - 1;
-    labels = helper.combRows(repmat({0:degree}, 1, numel(grid)));
+    degree = expandDegree(degree, numel(grid));
+    labels = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, degree, ...
+        "UniformOutput", false));
     values = helper.mkNest(nCell, @makeLeaf);
 
     function leaf = makeLeaf(subs)
@@ -137,11 +139,13 @@ end
 
 function out = legacyBernProduct(lhs, lhsDegree, rhs, rhsDegree, nParameters)
     % Direct pair-sum oracle independent of product-plan implementation.
+    lhsDegree = expandDegree(lhsDegree, nParameters);
+    rhsDegree = expandDegree(rhsDegree, nParameters);
     outputDegree = lhsDegree + rhsDegree;
-    lhsLabels = helper.combRows( ...
-        repmat({0:lhsDegree}, 1, nParameters));
-    outputLabels = helper.combRows( ...
-        repmat({0:outputDegree}, 1, nParameters));
+    lhsLabels = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, lhsDegree, ...
+        "UniformOutput", false));
+    outputLabels = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, ...
+        outputDegree, "UniformOutput", false));
     out = cell(1, size(outputLabels, 1));
     for outputIndex = 1:size(outputLabels, 1)
         outputLabel = outputLabels(outputIndex, :);
@@ -168,10 +172,12 @@ end
 
 function out = legacyElevate(source, sourceDegree, targetDegree, nParameters)
     % Direct source-to-target incidence oracle for Bernstein elevation.
-    sourceLabels = helper.combRows( ...
-        repmat({0:sourceDegree}, 1, nParameters));
-    targetLabels = helper.combRows( ...
-        repmat({0:targetDegree}, 1, nParameters));
+    sourceDegree = expandDegree(sourceDegree, nParameters);
+    targetDegree = expandDegree(targetDegree, nParameters);
+    sourceLabels = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, ...
+        sourceDegree, "UniformOutput", false));
+    targetLabels = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, ...
+        targetDegree, "UniformOutput", false));
     gap = targetDegree - sourceDegree;
     out = cell(1, size(targetLabels, 1));
     for targetIndex = 1:size(targetLabels, 1)
@@ -186,9 +192,9 @@ function out = legacyElevate(source, sourceDegree, targetDegree, nParameters)
             scale = 1;
             for parameter = 1:nParameters
                 scale = scale ...
-                    * nchoosek(sourceDegree, sourceLabel(parameter)) ...
-                    * nchoosek(gap, delta(parameter)) ...
-                    / nchoosek(targetDegree, targetLabel(parameter));
+                    * nchoosek(sourceDegree(parameter), sourceLabel(parameter)) ...
+                    * nchoosek(gap(parameter), delta(parameter)) ...
+                    / nchoosek(targetDegree(parameter), targetLabel(parameter));
             end
             term = source{sourceIndex} .* scale;
             if isempty(accumulator)
@@ -208,16 +214,24 @@ function scale = productScale(lhsLabel, lhsDegree, rhsLabel, ...
     scale = 1;
     for parameter = 1:numel(outputLabel)
         scale = scale ...
-            * nchoosek(lhsDegree, lhsLabel(parameter)) ...
-            * nchoosek(rhsDegree, rhsLabel(parameter)) ...
-            / nchoosek(outputDegree, outputLabel(parameter));
+            * nchoosek(lhsDegree(parameter), lhsLabel(parameter)) ...
+            * nchoosek(rhsDegree(parameter), rhsLabel(parameter)) ...
+            / nchoosek(outputDegree(parameter), outputLabel(parameter));
     end
 end
 
 function index = labelIndex(label, degree)
     % Convert repository mixed-radix label order to a one-based index.
-    multipliers = (degree + 1) .^ (numel(label) - 1:-1:0);
+    multipliers = fliplr(cumprod([1, fliplr(degree(2:end) + 1)]));
     index = label * multipliers' + 1;
+end
+
+function degree = expandDegree(degree, nParameters)
+    % Expand scalar shorthand without sharing production normalizer logic.
+    degree = reshape(degree, 1, []);
+    if isscalar(degree)
+        degree = repmat(degree, 1, nParameters);
+    end
 end
 
 function verifyCoefficientRow(testCase, actual, expected, tolerance)

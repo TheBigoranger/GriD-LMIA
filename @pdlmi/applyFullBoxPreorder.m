@@ -6,18 +6,20 @@ function out = applyFullBoxPreorder(obj, varargin)
     %     out = obj.applyFullBoxPreorder(order)
     %
     %   Arguments:
-    %     order - Optional admissible absolute certificate order.
+    %     order - Optional scalar shorthand or ell-element absolute order.
     %
     %   Output:
     %     out - New pdlmi rebuilt with full-box preordering enabled.
     %
-    %   The no-argument form chooses the smallest admissible absolute order.
+    %   Scalar input expands uniformly; FullBoxOrder is stored as a 1-by-ell
+    %   row vector. The no-argument form chooses the smallest admissible order.
     %   Reapplication starts from Residual, so it replaces any Pólya, Putinar,
     %   sparse full-box, or earlier FullBox selection rather than compounding
     %   it.
     %
-    %   The default is floor(m/2) for one parameter and ceil(m/2) otherwise,
-    %   where m is the residual degree. Each physical cell and active rate row
+    %   The default/minimum is floor(m/2) for one parameter and componentwise
+    %   ceil(Residual.Degree/2) otherwise; the multidimensional target degree is
+    %   2.*order. Each physical cell and active rate row
     %   receives independent PSD Gram blocks; each entry of an entry-wise
     %   inequality gets an independent scalar Gram certificate in MATLAB
     %   column-major order. For multiple parameters, the certificate includes

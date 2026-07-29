@@ -31,7 +31,7 @@ function out = blkdiag(varargin)
             "pdmat:InvalidBlkdiag");
     end
 
-    deg = max(arrayfun(@(d) d.Degree, data));
+    deg = max(vertcat(data.Degree), [], 1);
     data = pdbase.alignLocalDegrees(data, deg, grid);
 
     nCell = cellfun(@numel, grid) - 1;

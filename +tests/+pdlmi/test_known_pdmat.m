@@ -42,13 +42,41 @@ function testTensorCellsAndRateRowsAllEnterKnownCertificate(testCase)
     rb = [-1 2; -3 4];
     leaf = repmat({eye(2)}, 4, 4);
     A = pdmat({[0 1], [10 20]}, {{leaf}}, ...
-        Degree=1, RateBounds=rb);
+        Degree=[1 1], RateBounds=rb);
 
     testCase.verifyTrue(toYalmip(A >= 0));
     leaf{4, 4} = -eye(2);
     B = pdmat({[0 1], [10 20]}, {{leaf}}, ...
-        Degree=1, RateBounds=rb);
+        Degree=[1 1], RateBounds=rb);
     verifyInconclusive(testCase, @() toYalmip(B >= 0));
+end
+
+function testInconclusiveWarningIgnoresAmbientWarningState(testCase)
+    % The helper should observe the deferred warning even if callers mute it.
+    warnId = "pdlmi:InconclusiveCertificate";
+    state = warning("query", warnId);
+    cleanup = onCleanup(@() warning(state.state, warnId)); %#ok<NASGU>
+    warning("off", warnId);
+
+    verifyInconclusive(testCase, @() toYalmip(constantPdmat(-1) >= 0));
+
+    testCase.verifyEqual(string(warning("query", warnId).state), "off");
+end
+
+function testAnisotropicKnownDirectAndPolya(testCase)
+    % Known tensor coefficients retain vector degree state through Pólya.
+    grid = {[0 1], [10 20]};
+    values = repmat({eye(2)}, 2, 4);
+    A = pdmat(grid, values, Degree=[1 3]);
+
+    direct = A >= 0;
+    polya = direct.applyPolya([1 0]);
+
+    testCase.verifyTrue(toYalmip(direct));
+    testCase.verifyTrue(toYalmip(polya));
+    testCase.verifyEqual(direct.PolyaDegree, [0 0]);
+    testCase.verifyEqual(polya.PolyaDegree, [1 0]);
+    testCase.verifyTrue(isequal(polya.Residual, A));
 end
 
 function testToleranceEntrywiseAndHermitianSymmetrization(testCase)
@@ -80,22 +108,16 @@ end
 function testFalseWarningTimingCountAndConservativeMeaning(testCase)
     % The polynomial stays positive although its middle Bernstein coefficient fails.
     A = pdmat([0 1], {1, -0.1, 1}, Degree=2);
+    testCase.verifyWarningFree(@() A >= 0);
     direct = A >= 0;
     testCase.verifyGreaterThan(A.evaluate(0.5), 0);
 
-    [tf, text, warnId] = callToYalmip(direct);
-
-    testCase.verifyFalse(tf);
-    testCase.verifyEqual(string(warnId), "pdlmi:InconclusiveCertificate");
-    testCase.verifyEqual(count(string(text), ...
-        "does not prove a violation or indefiniteness"), 1);
+    verifyInconclusive(testCase, @() toYalmip(direct));
     testCase.verifyTrue(toYalmip(direct.applyPolya(1)));
 
-    lastwarn("");
     trueCert = constantPdmat(1) >= 0;
+    testCase.verifyWarningFree(@() toYalmip(trueCert));
     testCase.verifyTrue(toYalmip(trueCert));
-    [~, trueWarn] = lastwarn;
-    testCase.verifyEmpty(trueWarn);
 end
 
 function testDecisionFreePdvarDoesNotReceiveKnownWarning(testCase)
@@ -140,26 +162,19 @@ function A = constantPdmat(value)
 end
 
 function verifyInconclusive(testCase, fcn)
-    % One false export should issue exactly the dedicated warning.
-    [tf, text, warnId] = callToYalmipFcn(fcn);
+    % A false export should issue the dedicated warning in every test runner.
+    warnId = "pdlmi:InconclusiveCertificate";
+    state = warning("query", warnId);
+    cleanup = onCleanup(@() warning(state.state, warnId)); %#ok<NASGU>
+    warning("on", warnId);
+
+    tf = [];
+    testCase.verifyWarning(@captureResult, char(warnId));
     testCase.verifyFalse(tf);
-    testCase.verifyEqual(string(warnId), "pdlmi:InconclusiveCertificate");
-    testCase.verifyEqual(count(string(text), ...
-        "does not prove a violation or indefiniteness"), 1);
-end
 
-function [tf, text, warnId] = callToYalmip(C)
-    % Capture warning timing at conversion rather than wrapper construction.
-    lastwarn("");
-    text = evalc("tf = toYalmip(C);");
-    [~, warnId] = lastwarn;
-end
-
-function [tf, text, warnId] = callToYalmipFcn(fcn)
-    % Capture one deferred conversion supplied as a function handle.
-    lastwarn("");
-    text = evalc("tf = fcn();");
-    [~, warnId] = lastwarn;
+    function captureResult
+        tf = fcn();
+    end
 end
 
 function P = internalNumericPdvar(value)

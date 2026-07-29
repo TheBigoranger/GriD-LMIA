@@ -37,6 +37,43 @@ function testNumericPromotion(testCase)
     verifyCoeffExpr(testCase, D.coeffs(1), {eye(2) - cp{1}, eye(2) - cp{2}});
 end
 
+function testAdditionZeroFastPathsRetainCompatibilityChecks(testCase)
+    % Zero pdvar/pdmat/numeric operands preserve identity without skipping checks.
+    P = pdvar(1, {[0 1]});
+    Z = P - P;
+    knownZero = pdmat({[0 1]}, {0}, Degree=0);
+
+    testCase.verifyTrue(isequal(Z + P, P));
+    testCase.verifyTrue(isequal(P + Z, P));
+    testCase.verifyTrue(isequal(P + knownZero, P));
+    testCase.verifyTrue(isequal(knownZero + P, P));
+    testCase.verifyTrue(isequal(P + 0, P));
+    testCase.verifyTrue(isequal(zeros(1) + P, P));
+
+    matrixZero = pdmat({[0 1]}, {zeros(2)}, Degree=0);
+    testCase.verifyError(@() P + matrixZero, "pdvar:InvalidAddition");
+
+    otherGridZero = pdmat({[0 2]}, {0}, Degree=0);
+    testCase.verifyError(@() P + otherGridZero, "pdvar:MixedGrid");
+end
+
+function testRateRowZeroAdditionRetainsRows(testCase)
+    % A known zero rate table cannot take the metadata-free identity shortcut.
+    rb = [-1 2];
+    P = pdvar(1, [0 1]);
+    cp = P.coeffs(1);
+    Z = pdmat([0 1], {{0, 0; 0, 0}}, Degree=1, RateBounds=rb);
+
+    S = P + Z;
+
+    testCase.verifyTrue(S.HasRateDependence);
+    testCase.verifyEqual(S.RateBounds, rb);
+    verifyCoeffExpr(testCase, S.coeffs(1), {
+        cp{1}, cp{2}
+        cp{1}, cp{2}
+        });
+end
+
 function testSdpvarPromotion(testCase)
     % Bare affine sdpvar matrices promote to constant coefficient data.
     P = pdvar(2, {[0 1]}, "full");
@@ -135,6 +172,36 @@ function testMixedScalarGridUsesCommonRefinement(testCase)
     verifyCoeffExpr(testCase, S.coeffs(2), { ...
         0.5 * cp{1} + 0.5 * cp{2} + cq2{1}, ...
         cp{2} + cq2{2}});
+end
+
+function testAnisotropicPdvarAlignmentAndZeroAxisPromotion(testCase)
+    % Affine sums align unequal degrees by componentwise maximum.
+    grid = {[0 1], [10 20]};
+    P = pdvar(1, grid, Degree=[1 3]);
+    Q = pdvar(1, grid, Degree=[2 1]);
+    pe = P.elevate([1 0]);
+    qe = Q.elevate([0 2]);
+
+    S = P + Q;
+    R = P - Q;
+    testCase.verifyEqual(S.Degree, [2 3]);
+    testCase.verifyEqual(R.Degree, [2 3]);
+    verifyCoeffExpr(testCase, S.coeffs([1 1]), ...
+        cellfun(@plus, pe.coeffs([1 1]), qe.coeffs([1 1]), ...
+        UniformOutput=false));
+    verifyCoeffExpr(testCase, R.coeffs([1 1]), ...
+        cellfun(@minus, pe.coeffs([1 1]), qe.coeffs([1 1]), ...
+        UniformOutput=false));
+
+    Z = pdvar(1, grid, Degree=[0 2]);
+    plusRight = Z + 2;
+    minusLeft = 2 - Z;
+    testCase.verifyEqual(plusRight.Degree, [0 2]);
+    testCase.verifyEqual(minusLeft.Degree, [0 2]);
+    verifyCoeffExpr(testCase, plusRight.coeffs([1 1]), ...
+        cellfun(@(x) x + 2, Z.coeffs([1 1]), UniformOutput=false));
+    verifyCoeffExpr(testCase, minusLeft.coeffs([1 1]), ...
+        cellfun(@(x) 2 - x, Z.coeffs([1 1]), UniformOutput=false));
 end
 
 function testExplicitPdmatRateRowsDispatchAndPreservation(testCase)

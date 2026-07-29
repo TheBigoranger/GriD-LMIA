@@ -1,5 +1,5 @@
 function tests = test_bernstein_utils
-%TEST_BERNSTEIN_UTILS Public Bernstein row-order and count contracts.
+%TEST_BERNSTEIN_UTILS Public grid, Bernstein order, and count contracts.
 tests = functiontests(localfunctions);
 end
 
@@ -33,10 +33,13 @@ function testCoeffCount(testCase)
 scalar = pdbase({[0 1]}, [1 1], 2);
 tensorDeg1 = pdbase({[0 1], [10 20]}, [1 1], 1);
 tensorDeg2 = pdbase({[0 1], [10 20]}, [1 1], 2);
+anisotropic = pdbase({[0 1], [10 20], [-1 1]}, [1 1], [1 3 0]);
 
 testCase.verifyEqual(scalar.ncoeff(), 3);
 testCase.verifyEqual(tensorDeg1.ncoeff(), 4);
 testCase.verifyEqual(tensorDeg2.ncoeff(), 9);
+testCase.verifyEqual(anisotropic.ncoeff(), 8);
+testCase.verifyEqual(anisotropic.Degree, [1 3 0]);
 end
 
 function testDefaultCount(testCase)
@@ -50,66 +53,28 @@ for k = 1:numel(coeffs)
 end
 end
 
-function testPublicElevationScalarExactAndNonMutating(testCase)
-% Public elevation changes the basis, not the source object's evidence.
-vals = {{0, 1}, {2, 4}};
-obj = pdbase({[0 1 2]}, [1 1], 1, vals);
-before = obj.LocalValues;
+function testGridInfoFields(testCase)
+% GridInfo should expose stable primitive grid metadata only.
+obj = pdbase({[0 1], [10 20 30]}, [1 1], 1);
 
-same = obj.elevVals(0);
-once = obj.elevVals(1);
-twice = obj.elevVals(2);
-
-testCase.verifyEqual(same, vals);
-testCase.verifyEqual(once{1}, {0, 0.5, 1});
-testCase.verifyEqual(once{2}, {2, 3, 4});
-testCase.verifyEqual(twice{1}, {0, 1 / 3, 2 / 3, 1}, AbsTol=1e-14);
-testCase.verifyEqual(twice{2}, {2, 8 / 3, 10 / 3, 4}, AbsTol=1e-14);
-testCase.verifyEqual(obj.LocalValues, before);
-testCase.verifyEqual(obj.Degree, 1);
+testCase.verifyEqual(fieldnames(obj.GridInfo), ...
+    {'Vectors'; 'Points'; 'Bounds'; 'NumNodes'});
+testCase.verifyEqual(obj.GridInfo.Vectors, {[0 1], [10 20 30]});
+testCase.verifyEqual(obj.GridInfo.Bounds, [0 1; 10 30]);
+testCase.verifyEqual(obj.GridInfo.NumNodes, [2 3]);
 end
 
-function testPublicElevationTensorCombRowsOrder(testCase)
-% Tensor elevation must retain the package-wide combRows coefficient order.
-vals = {{{0, 2, 4, 6}}};
-obj = pdbase({[0 1], [10 20]}, [1 1], 1, vals);
+function testGridInfoPointOrder(testCase)
+% Tensor grid points should follow MATLAB row-order enumeration.
+obj = pdbase({[0 1], [10 20 30]}, [1 1], 0);
 
-out = obj.elevVals(1);
-
-expected = {0, 1, 2, 2, 3, 4, 4, 5, 6};
-testCase.verifyEqual(out{1}{1}, expected);
-testCase.verifyEqual(size(out{1}{1}), [1 9]);
-end
-
-function testPublicElevationPreservesRateRows(testCase)
-% Rate vertices are rows and must be elevated without reordering or mixing.
-vals = {{0, 2; 10, 14}};
-obj = pdbase({[0 1]}, [1 1], 1, vals, ...
-    HasRateDependence=true, RateBounds=[-1 1]);
-
-out = obj.elevVals(1);
-
-testCase.verifyEqual(out{1}, {0, 1, 2; 10, 12, 14});
-testCase.verifyEqual(size(out{1}), [2 3]);
-testCase.verifyEqual(obj.LocalValues, vals);
-testCase.verifyEqual(obj.RateBounds, [-1 1]);
-end
-
-function testPublicElevationRejectsInvalidIncrement(testCase)
-% Invalid increments should fail before any coefficient tree is transformed.
-obj = pdbase({[0 1]}, [1 1], 1, {{0, 1}});
-
-bad = {-1, 0.5, Inf, NaN, "one", [1 2]};
-for k = 1:numel(bad)
-    testCase.verifyError(@() obj.elevVals(bad{k}), ...
-        "pdbase:InvalidDegreeIncrement");
-end
-end
-
-function testPublicElevationRejectsFunctionOnlyPdmat(testCase)
-% Function-only pdmat placeholders are not Bernstein coefficient evidence.
-obj = pdmat({[0 1]}, @(rho) 1 + rho);
-
-testCase.verifyError(@() obj.elevVals(1), ...
-    "pdbase:MissingCoefficientEvidence");
+expected = [
+    0    10
+    0    20
+    0    30
+    1    10
+    1    20
+    1    30
+    ];
+testCase.verifyEqual(obj.GridInfo.Points, expected);
 end

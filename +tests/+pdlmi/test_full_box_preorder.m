@@ -23,12 +23,13 @@ function testDefaultOrderThroughConstructorAndApply(testCase)
     testCase.verifyFalse(direct.UseFullBoxPreorder, ...
         "Applying a certificate must not mutate the source wrapper.");
 
-    boxExpr = pdvar(1, {[0 1], [2 3]}, "symmetric", Degree=3);
+    boxExpr = pdvar(1, {[0 1], [2 3]}, ...
+        "symmetric", Degree=[3 3]);
     box = pdlmi(boxExpr, ">=", UseFullBoxPreorder=true);
     boxApplied = pdlmi(boxExpr, ">=").applyFullBoxPreorder();
 
-    testCase.verifyEqual(box.FullBoxOrder, 2);
-    testCase.verifyEqual(boxApplied.FullBoxOrder, 2);
+    testCase.verifyEqual(box.FullBoxOrder, [2 2]);
+    testCase.verifyEqual(boxApplied.FullBoxOrder, [2 2]);
 end
 
 function testExplicitOrderAndMinimumValidation(testCase)
@@ -95,6 +96,48 @@ function testSymmetricMatrixGramDimensionsRemainUnchanged(testCase)
 
     testCase.verifyEqual(numel(C.Constraints), 5);
     testCase.verifyEqual(psdDimensionsAt(C, [1 2]), [4 2]);
+end
+
+function testAnisotropicOrdersAndGramDimensions(testCase)
+    % Each Gram block uses prod(order-mask+1) in repository mask order.
+    grid = {[0 1], [10 20]};
+    P = pdvar(2, grid, "symmetric", Degree=[1 4]);
+    default = pdlmi(P, ">=", UseFullBoxPreorder=true);
+    explicit = pdlmi(P, ">=", FullBoxOrder=[2; 3]);
+
+    testCase.verifyEqual(default.FullBoxOrder, [1 2]);
+    testCase.verifyEqual(psdDimensionsAt(default, 1:4), [12 8 6 4]);
+    testCase.verifyEqual(numel(default.Constraints), 4 + 15);
+    testCase.verifyEqual(explicit.FullBoxOrder, [2 3]);
+    testCase.verifyEqual(psdDimensionsAt(explicit, 1:4), [24 18 16 12]);
+    testCase.verifyEqual(numel(explicit.Constraints), 4 + 35);
+
+    direct = P >= 0;
+    testCase.verifyError(@() direct.applyFullBoxPreorder([0 2]), ...
+        "pdlmi:FullBoxOrderTooLow");
+    bad = {[], [1 2 3], [1 2; 3 4], -1, 0.5, Inf, NaN};
+    for k = 1:numel(bad)
+        testCase.verifyError(@() direct.applyFullBoxPreorder(bad{k}), ...
+            "pdlmi:InvalidFullBoxOrder");
+    end
+end
+
+function testZeroOrderAxisOmitsNegativeMaskBlocks(testCase)
+    % Masks with order-mask below zero are absent in either axis orientation.
+    grid = {[0 1], [10 20]};
+    firstConstant = pdlmi( ...
+        pdvar(1, grid, Degree=[0 4]), ">=", ...
+        UseFullBoxPreorder=true);
+    secondConstant = pdlmi( ...
+        pdvar(1, grid, Degree=[4 0]), ">=", ...
+        UseFullBoxPreorder=true);
+
+    testCase.verifyEqual(firstConstant.FullBoxOrder, [0 2]);
+    testCase.verifyEqual(secondConstant.FullBoxOrder, [2 0]);
+    testCase.verifyEqual(psdDimensionsAt(firstConstant, 1:2), [3 2]);
+    testCase.verifyEqual(psdDimensionsAt(secondConstant, 1:2), [3 2]);
+    testCase.verifyEqual(numel(firstConstant.Constraints), 2 + 5);
+    testCase.verifyEqual(numel(secondConstant.Constraints), 2 + 5);
 end
 
 function dims = psdDimensionsAt(C, indices)

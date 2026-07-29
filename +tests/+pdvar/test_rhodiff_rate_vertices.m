@@ -53,7 +53,7 @@ function testTensorDegreeOneFormulaAndRateOrder(testCase)
     D = rhodiff(P, rb);
     cd = D.coeffs([1 1]);
 
-    testCase.verifyEqual(D.Degree, 1);
+    testCase.verifyEqual(D.Degree, [1 1]);
     testCase.verifyEqual(D.ncoeff(), 4);
     testCase.verifyEqual(size(cd), [4 4]);
 
@@ -84,7 +84,7 @@ function testTensorDegreeTwoFormula(testCase)
     % Constructor-created tensor quadratics elevate partials to common degree.
     grid = {[0 2], [10 14]};
     rb = [-1 2; -3 5];
-    C = pdvar(1, grid, Degree=2);
+    C = pdvar(1, grid, Degree=[2 2]);
     cc = C.coeffs([1 1]);
 
     D = rhodiff(C, rb);
@@ -98,11 +98,62 @@ function testTensorDegreeTwoFormula(testCase)
     ];
     exp = cell(4, 9);
     for row = 1:4
-        exp(row, :) = tensorDiffExpected(cc, 2, [2 4], verts(row, :), [1 1]);
+        exp(row, :) = tensorDiffExpected(cc, [2 2], ...
+            [2 4], verts(row, :), [1 1]);
     end
-    testCase.verifyEqual(C.Degree, 2);
-    testCase.verifyEqual(D.Degree, 2);
+    testCase.verifyEqual(C.Degree, [2 2]);
+    testCase.verifyEqual(D.Degree, [2 2]);
     verifyCoeffTable(testCase, cd, exp);
+end
+
+function testAnisotropicTensorAndZeroAxisFormula(testCase)
+    % Unequal and zero direction degrees retain one common tensor basis.
+    grid = {[0 2], [10 14]};
+    rb = [-1 2; -3 5];
+    P = pdvar(1, grid, Degree=[1 2]);
+    beforeVars = objectVariables(P);
+    cp = P.coeffs([1 1]);
+
+    D = rhodiff(P, rb);
+    verts = helper.combRows(num2cell(rb, 2).');
+    expected = cell(4, 6);
+    for row = 1:4
+        expected(row, :) = tensorDiffExpected(cp, [1 2], ...
+            [2 4], verts(row, :), [1 1]);
+    end
+    testCase.verifyEqual(D.Degree, [1 2]);
+    testCase.verifySize(D.coeffs([1 1]), [4 6]);
+    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifyEqual(D.RateBounds, rb);
+    testCase.verifyEqual(objectVariables(D), beforeVars);
+    verifyCoeffTable(testCase, D.coeffs([1 1]), expected);
+
+    Q = pdvar(1, grid, Degree=[0 2]);
+    qVars = objectVariables(Q);
+    cq = Q.coeffs([1 1]);
+    E = rhodiff(Q, rb);
+    zeroAxisExpected = cell(4, 3);
+    for row = 1:4
+        zeroAxisExpected(row, :) = tensorDiffExpected(cq, [0 2], ...
+            [2 4], verts(row, :), [1 1]);
+    end
+    testCase.verifyEqual(E.Degree, [0 2]);
+    testCase.verifyEqual(objectVariables(E), qVars);
+    verifyCoeffTable(testCase, E.coeffs([1 1]), zeroAxisExpected);
+end
+
+function testAllZeroTensorDegreeProducesCompleteRateTable(testCase)
+    % A constant tensor has one zero coefficient for every rate-box vertex.
+    P = pdvar(1, {[0 1 2], [10 20]}, Degree=[0 0]);
+    D = rhodiff(P, [-1 2; -3 5]);
+
+    testCase.verifyEqual(D.Degree, [0 0]);
+    testCase.verifyFalse(D.ContainsDecision);
+    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifySize(D.coeffs([1 1]), [4 1]);
+    testCase.verifySize(D.coeffs([2 1]), [4 1]);
+    verifyCoeffTable(testCase, D.coeffs([1 1]), {0; 0; 0; 0});
+    verifyCoeffTable(testCase, D.coeffs([2 1]), {0; 0; 0; 0});
 end
 
 function testImplicitAndInvalidRateBounds(testCase)
@@ -273,24 +324,29 @@ end
 function row = tensorDiffExpected(vals, deg, h, rate, sz)
     % Local oracle for rate-weighted tensor derivative coefficients.
     nPar = numel(h);
-    row = cell(1, (deg + 1) ^ nPar);
-    for dim = 1:nPar
-        vecs = repmat({0:deg}, 1, nPar);
-        vecs{dim} = 0:(deg - 1);
+    deg = reshape(deg, 1, []);
+    if isscalar(deg)
+        deg = repmat(deg, 1, nPar);
+    end
+    row = cell(1, prod(deg + 1));
+    for dim = find(deg > 0)
+        vecs = arrayfun(@(oneDeg) 0:oneDeg, deg, ...
+            "UniformOutput", false);
+        vecs{dim} = 0:(deg(dim) - 1);
         partLbls = helper.combRows(vecs);
         for k = 1:size(partLbls, 1)
             lbl = partLbls(k, :);
             nxt = lbl;
             nxt(dim) = nxt(dim) + 1;
             base = (vals{lblIdxExpected(nxt, deg)} - vals{lblIdxExpected(lbl, deg)}) ...
-                * (deg * rate(dim) / h(dim));
+                * (deg(dim) * rate(dim) / h(dim));
             for outLabel = lbl(dim):(lbl(dim) + 1)
                 out = lbl;
                 out(dim) = outLabel;
                 idx = lblIdxExpected(out, deg);
-                scale = nchoosek(deg - 1, lbl(dim)) ...
+                scale = nchoosek(deg(dim) - 1, lbl(dim)) ...
                     * nchoosek(1, outLabel - lbl(dim)) ...
-                    / nchoosek(deg, outLabel);
+                    / nchoosek(deg(dim), outLabel);
                 if isempty(row{idx})
                     row{idx} = base * scale;
                 else
@@ -307,8 +363,23 @@ function row = tensorDiffExpected(vals, deg, h, rate, sz)
 end
 
 function idx = lblIdxExpected(lbl, deg)
-    mult = (deg + 1) .^ (numel(lbl) - 1:-1:0);
+    mult = fliplr(cumprod([1, fliplr(deg(2:end) + 1)]));
     idx = sum(lbl .* mult) + 1;
+end
+
+function vars = objectVariables(obj)
+    % Collect all unique YALMIP variables without depending on assignments.
+    vars = [];
+    cells = obj.cells();
+    for k = 1:size(cells, 1)
+        coeffs = obj.coeffs(cells(k, :));
+        for j = 1:numel(coeffs)
+            if isa(coeffs{j}, "sdpvar")
+                vars = [vars, getvariables(coeffs{j})]; %#ok<AGROW>
+            end
+        end
+    end
+    vars = unique(vars);
 end
 
 function verifyCoeffTable(testCase, actual, expected)

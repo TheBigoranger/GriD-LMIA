@@ -7,7 +7,7 @@ function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
     %   Arguments:
     %     src    - Global tensor cell grid of numeric coefficients.
     %     vecs   - Physical parameter grid vectors.
-    %     optDeg - Optional requested scalar degree.
+    %     optDeg - Optional scalar or per-parameter degree.
     %     owner  - Optional package name used in validation errors.
     %
     %   Output:
@@ -27,9 +27,8 @@ function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
         "cell", "nonempty");
 
     if ~isempty(optDeg)
-        optDeg = double(helper.chk(optDeg, owner + ":InvalidDegree", ...
-            "Degree must be a nonnegative integer scalar.", ...
-            "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+        optDeg = helper.normalizeDegree(optDeg, numel(vecs), ...
+            owner + ":InvalidDegree", "Degree");
     end
 
     nPar = numel(vecs);
@@ -42,10 +41,10 @@ function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
     cellSubs = helper.combRows(arrayfun(@(n) 1:n, nCell, "UniformOutput", false));
     flat = cell(size(cellSubs, 1), 1);
     for r = 1:size(cellSubs, 1)
-        flat{r} = coeffsFromGrid(src, cellSubs(r, :), deg, nPar);
+        flat{r} = coeffsFromGrid(src, cellSubs(r, :), deg);
     end
 
-    vals = helper.mkNest(nCell, @(subs) coeffsFromGrid(src, subs, deg, nPar));
+    vals = helper.mkNest(nCell, @(subs) coeffsFromGrid(src, subs, deg));
 end
 
 function dims = gridDims(src, nPar, owner)
@@ -67,14 +66,14 @@ function dims = gridDims(src, nPar, owner)
 end
 
 function deg = gridDeg(dims, nCell, optDeg, owner)
-    %GRIDDEG Infer the common degree or validate the requested one.
+    %GRIDDEG Infer direction-wise degree or validate the requested one.
     if isempty(optDeg)
         raw = (dims - 1) ./ nCell;
-        if any(raw ~= fix(raw)) || any(raw ~= raw(1))
+        if any(raw ~= fix(raw))
             error(owner + ":InvalidDegree", ...
                 "Global cell-grid size must equal (numCells .* Degree) + 1 in every parameter.");
         end
-        deg = raw(1);
+        deg = raw;
         return
     end
 
@@ -85,9 +84,10 @@ function deg = gridDeg(dims, nCell, optDeg, owner)
     end
 end
 
-function coeffs = coeffsFromGrid(src, cellSubs, deg, nPar)
+function coeffs = coeffsFromGrid(src, cellSubs, deg)
     %COEFFSFROMGRID Extract one local leaf, retaining shared boundaries.
-    lbls = helper.combRows(repmat({0:deg}, 1, nPar));
+    lbls = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, deg, ...
+        "UniformOutput", false));
     coeffs = cell(1, size(lbls, 1));
     for k = 1:size(lbls, 1)
         % Shared global grid boundaries become the matching local coefficient.

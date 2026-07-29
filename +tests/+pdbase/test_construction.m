@@ -73,6 +73,7 @@ function testTensorOptions(testCase)
     testCase.verifyEqual(obj.ncoeff(), 9);
 end
 
+
 function testReadOnlyProps(testCase)
     % Public state properties should be inspectable but not mutable.
     obj = pdbase({[0 1]}, [1 1], 0);

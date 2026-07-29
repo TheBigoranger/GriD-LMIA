@@ -36,10 +36,50 @@ function testSparseTensorWindows(testCase)
     verifyLegacyCertificate(testCase, actual, targetDegree, specs, 2);
 end
 
+function testAnisotropicFullBox(testCase)
+    % Unequal tensor orders must preserve the legacy coefficient-map oracle.
+    grid = {[0 1], [-1 1]};
+    residual = pdvar(1, grid, Degree=[1 4]);
+    direct = residual >= 0;
+    actual = direct.applyFullBoxPreorder([1 2]);
+    [targetDegree, specs] = fullBoxSpecs( ...
+        2, residual.Degree, [1 2]);
+
+    verifyLegacyCertificate(testCase, actual, targetDegree, specs, []);
+end
+
+function testAnisotropicPutinarZeroAxis(testCase)
+    % Negative mask degrees are omitted for either zero-degree axis.
+    grid = {[0 1], [-1 1]};
+    residual = pdvar(1, grid, Degree=[0 2]);
+    direct = residual >= 0;
+    actual = direct.applyPutinar([0 1]);
+    verifyLegacyCertificate(testCase, actual, [0 2], ...
+        putinarSpecs(2, [0 1]), []);
+
+    reversed = pdvar(1, grid, Degree=[2 0]);
+    reversedDirect = reversed >= 0;
+    reversedActual = reversedDirect.applyPutinar([1 0]);
+    verifyLegacyCertificate(testCase, reversedActual, [2 0], ...
+        putinarSpecs(2, [1 0]), []);
+end
+
+function testAnisotropicSparseWindows(testCase)
+    % Scalar windows operate on per-axis anisotropic Gram cardinalities.
+    grid = {[0 1], [-1 1]};
+    residual = pdvar(1, grid, Degree=[2 6]);
+    direct = residual >= 0;
+    actual = direct.applySparseFullBoxPreorder(2, [1 3]);
+    [targetDegree, specs] = fullBoxSpecs( ...
+        2, residual.Degree, [1 3]);
+
+    verifyLegacyCertificate(testCase, actual, targetDegree, specs, 2);
+end
+
 function verifyLegacyCertificate(testCase, wrapper, targetDegree, specs, bandWidth)
     % Rebuild one local certificate from the actual Gram variables.
     nPar = numel(wrapper.Residual.GridInfo.Vectors);
-    targetDegreeVector = targetDegree * ones(1, nPar);
+    targetDegreeVector = expandDegree(targetDegree, nPar);
     maps = expandMaps(specs, nPar, bandWidth);
     targetCount = prod(targetDegreeVector + 1);
     testCase.verifyEqual(numel(wrapper.Constraints), ...
@@ -61,7 +101,7 @@ function verifyLegacyCertificate(testCase, wrapper, targetDegree, specs, bandWid
     end
 
     values = wrapper.Residual.elevVals( ...
-        targetDegree - wrapper.Residual.Degree);
+        targetDegreeVector - wrapper.Residual.Degree);
     cells = wrapper.Residual.cells();
     target = helper.cellGet(values, cells(1, :));
     target = target(1, :);
@@ -146,13 +186,15 @@ end
 
 function [targetDegree, specs] = fullBoxSpecs(nPar, degree, order)
     %FULLBOXSPECS Independent copy of the public certificate convention.
-    if nPar == 1 && mod(degree, 2) == 1
+    degree = expandDegree(degree, nPar);
+    order = expandDegree(order, nPar);
+    if nPar == 1 && mod(degree(1), 2) == 1
         targetDegree = 2 * order + 1;
         specs = {order, [0; 1]; order, [1; 0]};
     elseif nPar == 1
         targetDegree = 2 * order;
         specs = {order, [0; 0]};
-        if order > 0
+        if order(1) > 0
             specs(end + 1, :) = {order - 1, [1; 1]};
         end
     else
@@ -168,11 +210,20 @@ end
 
 function specs = putinarSpecs(nPar, order)
     %PUTINARSPECS Independent multidimensional singleton-generator form.
+    order = expandDegree(order, nPar);
     masks = [zeros(1, nPar); eye(nPar)];
     specs = cell(size(masks, 1), 2);
     for k = 1:size(masks, 1)
-        specs{k, 1} = order * ones(1, nPar) - masks(k, :);
+        specs{k, 1} = order - masks(k, :);
         specs{k, 2} = [masks(k, :); masks(k, :)];
+    end
+end
+
+function degree = expandDegree(value, nPar)
+    %EXPANDDEGREE Normalize scalar shorthand for the independent oracle.
+    degree = reshape(value, 1, []);
+    if isscalar(degree)
+        degree = repmat(degree, 1, nPar);
     end
 end
 

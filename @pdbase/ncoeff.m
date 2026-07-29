@@ -9,5 +9,5 @@ function n = ncoeff(obj)
     %     obj = pdbase({[0 1], [10 20]}, [1 1], 2);
     %     n = obj.ncoeff();
 
-    n = (obj.Degree + 1) ^ obj.npar();
+    n = prod(obj.Degree + 1);
 end

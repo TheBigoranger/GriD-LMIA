@@ -7,7 +7,7 @@ function [vals, lbls] = fitVals(info, deg, sz, evalFcn)
     %
     %   Arguments:
     %     gridInfo   - Normalized tensor-grid metadata.
-    %     degree     - Scalar Bernstein degree.
+    %     degree     - Scalar or per-parameter Bernstein degree.
     %     matrixSize - Matrix size returned by evalFcn.
     %     evalFcn    - Evaluator accepting one physical-point row.
     %
@@ -21,11 +21,15 @@ function [vals, lbls] = fitVals(info, deg, sz, evalFcn)
 
     vecs = info.Vectors;
     nPar = numel(vecs);
-    lbls = helper.combRows(repmat({0:deg}, 1, nPar));
+    deg = helper.normalizeDegree(deg, nPar, ...
+        "pdmat:InvalidDegree", "Degree");
+    lbls = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, deg, ...
+        "UniformOutput", false));
     nCoeff = size(lbls, 1);
     alphas = zeros(nCoeff, nPar);
-    if deg > 0
-        alphas = lbls ./ deg;
+    positive = deg > 0;
+    if any(positive)
+        alphas(:, positive) = lbls(:, positive) ./ deg(positive);
     end
 
     % Use forward alpha=(rho-lo)/(hi-lo), so labels count alpha powers.
@@ -37,7 +41,9 @@ function [vals, lbls] = fitVals(info, deg, sz, evalFcn)
             for p = 1:nPar
                 j = lbls(k, p);
                 a = alphas(s, p);
-                w = w * nchoosek(deg, j) * (1 - a)^(deg - j) * a^j;
+                oneDeg = deg(p);
+                w = w * nchoosek(oneDeg, j) * ...
+                    (1 - a)^(oneDeg - j) * a^j;
             end
             V(s, k) = w;
         end

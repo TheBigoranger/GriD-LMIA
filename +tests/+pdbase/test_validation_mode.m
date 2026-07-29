@@ -55,3 +55,32 @@ function testInvalidModesUseOwnerIdentifier(testCase)
     testCase.verifyError(@() pdbase({[0 1]}, [1 1], 0, {{1}}, ...
         "ValidationMode"), "pdbase:InvalidValidationMode");
 end
+
+function testStrictAnisotropicElevationChecksLaterCells(testCase)
+    % Fast construction may trust generated later cells; strict elevation must not.
+    grid = {[0 1 2], [10 20]};
+    degree = [1 0];
+    valid = helper.mkNest([2 1], ...
+        @(subs) {subs(1), subs(1) + 1});
+
+    wrongCount = valid;
+    wrongCount{2}{1} = {3};
+    countSource = pdbase(grid, [1 1], degree, wrongCount, ...
+        ValidationMode="fast");
+    testCase.verifyError(@() countSource.elevVals([0 1], "strict"), ...
+        "pdbase:InvalidCoefficientCell");
+
+    wrongPayload = valid;
+    wrongPayload{2}{1} = {3, "bad"};
+    payloadSource = pdbase(grid, [1 1], degree, wrongPayload, ...
+        ValidationMode="fast");
+    testCase.verifyError(@() payloadSource.elevVals([0 1], "strict"), ...
+        "pdbase:InvalidCoefficientPayload");
+
+    wrongSize = valid;
+    wrongSize{2}{1} = {3, [4 5]};
+    sizeSource = pdbase(grid, [1 1], degree, wrongSize, ...
+        ValidationMode="fast");
+    testCase.verifyError(@() sizeSource.elevVals([0 1], "strict"), ...
+        "pdbase:InvalidCoefficientPayload");
+end

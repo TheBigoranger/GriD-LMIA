@@ -13,7 +13,7 @@ function cons = mkGramCons(expr, relation, targetDeg, specs, comparisonMode, val
     cells = expr.cells();
     nPar = numel(expr.GridInfo.Vectors);
     certificatePlan = mkGramCertificatePlan( ...
-        specs, nPar, bandWidth, targetDeg * ones(1, nPar));
+        specs, nPar, bandWidth, targetDeg);
 
     if comparisonMode == "elementwise"
         certificatesPerRow = prod(expr.MatrixSize);

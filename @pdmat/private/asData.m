@@ -76,7 +76,7 @@ function data = asData(grid, val, reqSize, rb, errId)
     end
 
     data.MatrixSize = size(mat);
-    data.Degree = 0;
+    data.Degree = zeros(1, numel(grid));
     nCell = info.NumNodes - 1;
     data.LocalValues = helper.mkNest(nCell, @(~) {mat});
     data.IsContinuous = true;

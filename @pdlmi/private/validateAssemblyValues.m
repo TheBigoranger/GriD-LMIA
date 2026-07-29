@@ -11,7 +11,7 @@ function validateAssemblyValues(expr, vals, degree, validationMode)
     else
         cellIndices = 1:size(cells, 1);
     end
-    expectedColumns = (degree + 1) ^ expr.npar();
+    expectedColumns = prod(degree + 1);
     expectedRows = [];
     for c = cellIndices
         leaf = helper.cellGet(vals, cells(c, :));

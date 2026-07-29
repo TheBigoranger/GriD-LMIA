@@ -1,11 +1,86 @@
 function tests = test_elevate
-    %TEST_ELEVATE Object-preserving public Bernstein degree elevation.
+    %TEST_ELEVATE Public Bernstein degree-elevation APIs.
     tests = functiontests(localfunctions);
 end
 
 function setupOnce(~)
     % Keep variable and assignment checks deterministic across test sessions.
     yalmip("clear");
+end
+
+function testPublicElevationScalarExactAndNonMutating(testCase)
+    % Public coefficient elevation changes the basis, not source evidence.
+    vals = {{0, 1}, {2, 4}};
+    obj = pdbase({[0 1 2]}, [1 1], 1, vals);
+    before = obj.LocalValues;
+
+    same = obj.elevVals(0);
+    once = obj.elevVals(1);
+    twice = obj.elevVals(2);
+
+    testCase.verifyEqual(same, vals);
+    testCase.verifyEqual(once{1}, {0, 0.5, 1});
+    testCase.verifyEqual(once{2}, {2, 3, 4});
+    testCase.verifyEqual(twice{1}, {0, 1 / 3, 2 / 3, 1}, AbsTol=1e-14);
+    testCase.verifyEqual(twice{2}, {2, 8 / 3, 10 / 3, 4}, AbsTol=1e-14);
+    testCase.verifyEqual(obj.LocalValues, before);
+    testCase.verifyEqual(obj.Degree, 1);
+end
+
+function testPublicElevationTensorCombRowsOrder(testCase)
+    % Tensor elevation must retain the package-wide coefficient row order.
+    vals = {{{0, 2, 4, 6}}};
+    obj = pdbase({[0 1], [10 20]}, [1 1], 1, vals);
+
+    out = obj.elevVals(1);
+
+    expected = {0, 1, 2, 2, 3, 4, 4, 5, 6};
+    testCase.verifyEqual(out{1}{1}, expected);
+    testCase.verifyEqual(size(out{1}{1}), [1 9]);
+end
+
+function testPublicElevationPreservesRateRows(testCase)
+    % Rate rows must be elevated without reordering or mixing.
+    vals = {{0, 2; 10, 14}};
+    obj = pdbase({[0 1]}, [1 1], 1, vals, ...
+        HasRateDependence=true, RateBounds=[-1 1]);
+
+    out = obj.elevVals(1);
+
+    testCase.verifyEqual(out{1}, {0, 1, 2; 10, 12, 14});
+    testCase.verifyEqual(size(out{1}), [2 3]);
+    testCase.verifyEqual(obj.LocalValues, vals);
+    testCase.verifyEqual(obj.RateBounds, [-1 1]);
+end
+
+function testPublicElevationRejectsInvalidIncrement(testCase)
+    % Invalid increments must fail before transforming the coefficient tree.
+    obj = pdbase({[0 1]}, [1 1], 1, {{0, 1}});
+
+    bad = {-1, 0.5, Inf, NaN, "one", [1 2]};
+    for k = 1:numel(bad)
+        testCase.verifyError(@() obj.elevVals(bad{k}), ...
+            "pdbase:InvalidDegreeIncrement");
+    end
+end
+
+function testPublicElevationRejectsFunctionOnlyPdmat(testCase)
+    % Function-only pdmat placeholders are not coefficient evidence.
+    obj = pdmat({[0 1]}, @(rho) 1 + rho);
+
+    testCase.verifyError(@() obj.elevVals(1), ...
+        "pdbase:MissingCoefficientEvidence");
+end
+
+function testPublicElevationRejectsInvalidTransientMode(testCase)
+    % The call-local validation mode remains scalar text owned by pdbase.
+    obj = pdbase({[0 1], [10 20]}, [1 1], [1 0], {{{1, 2}}});
+    bad = {42, ["fast", "strict"], string(missing), '', "sample"};
+
+    for k = 1:numel(bad)
+        testCase.verifyError(@() obj.elevVals([0 1], bad{k}), ...
+            "pdbase:InvalidValidationMode");
+    end
 end
 
 function testPdbaseZeroAndPositiveIncrements(testCase)
@@ -17,16 +92,16 @@ function testPdbaseZeroAndPositiveIncrements(testCase)
     out = obj.elevate(1);
 
     testCase.verifyClass(same, "pdbase");
-    testCase.verifyEqual(same.Degree, 1);
+    testCase.verifyEqual(same.Degree, [1 1]);
     testCase.verifyEqual(same.LocalValues, vals);
     testCase.verifyClass(out, "pdbase");
-    testCase.verifyEqual(out.Degree, 2);
+    testCase.verifyEqual(out.Degree, [2 2]);
     pts = [0 10; 0.25 14; 1 20];
     for k = 1:size(pts, 1)
         testCase.verifyEqual(out.evaluate(pts(k, :)), ...
             obj.evaluate(pts(k, :)), AbsTol=1e-12);
     end
-    testCase.verifyEqual(obj.Degree, 1);
+    testCase.verifyEqual(obj.Degree, [1 1]);
     testCase.verifyEqual(obj.LocalValues, vals);
 end
 
@@ -74,7 +149,7 @@ end
 
 function testDerivativeRowsElevateIndependently(testCase)
     % Every physical-cell rate row is elevated without mixing its neighbors.
-    P = pdvar(1, {[0 1], [10 12]}, Degree=2);
+    P = pdvar(1, {[0 1], [10 12]}, Degree=[2 2]);
     lbls = P.lbls();
     vals = arrayfun(@(k) 1 + 2 * lbls(k, 1) + ...
         3 * lbls(k, 2) + 4 * prod(lbls(k, :)), ...
@@ -83,11 +158,11 @@ function testDerivativeRowsElevateIndependently(testCase)
     D = rhodiff(P, [-1 2; -3 5]);
     beforeVars = objectVariables(D);
 
-    E = D.elevate(1);
+    E = D.elevate([1 0]);
 
     testCase.verifyClass(E, "pdvar");
-    testCase.verifyEqual(E.Degree, D.Degree + 1);
-    testCase.verifySize(E.coeffs([1 1]), [4 16]);
+    testCase.verifyEqual(E.Degree, D.Degree + [1 0]);
+    testCase.verifySize(E.coeffs([1 1]), [4 12]);
     testCase.verifyEqual(E.IsContinuous, D.IsContinuous);
     testCase.verifyEqual(E.HasRateDependence, D.HasRateDependence);
     testCase.verifyEqual(E.RateBounds, D.RateBounds);
@@ -101,7 +176,7 @@ function testDerivativeRowsElevateIndependently(testCase)
                 AbsTol=1e-12);
         end
     end
-    testCase.verifyEqual(D.Degree, 2);
+    testCase.verifyEqual(D.Degree, [2 2]);
     testCase.verifySize(D.coeffs([1 1]), [4 9]);
 end
 

@@ -5,14 +5,14 @@ function vals = elevVals(obj, degreeIncrement, validationMode)
     %     vals = obj.elevVals(degreeIncrement)
     %
     %   Arguments:
-    %     degreeIncrement - Nonnegative degree added in every parameter.
+    %     degreeIncrement - Scalar shorthand or ell-element nonnegative increment.
     %
     %   Output:
     %     vals - Elevated LocalValues tree; obj is unchanged.
     %
     %   vals = obj.elevVals(degreeIncrement) preserves the represented
-    %   polynomial, physical-cell tree, and rate-row ordering while adding
-    %   degreeIncrement to every parameter direction. The object is unchanged.
+    %   polynomial, physical-cell tree, and rate-row ordering while adding the
+    %   increment componentwise. Scalar input expands uniformly. The object is unchanged.
     %   Invalid increments raise pdbase:InvalidDegreeIncrement. Function-only
     %   pdmat sources have no coefficient evidence and raise
     %   pdbase:MissingCoefficientEvidence.
@@ -27,10 +27,8 @@ function vals = elevVals(obj, degreeIncrement, validationMode)
         validationMode = normalizeValidationMode(validationMode);
     end
 
-    inc = double(helper.chk(degreeIncrement, ...
-        "pdbase:InvalidDegreeIncrement", ...
-        "degreeIncrement must be a finite nonnegative integer scalar.", ...
-        "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+    inc = helper.normalizeDegree(degreeIncrement, obj.npar(), ...
+        "pdbase:InvalidDegreeIncrement", "degreeIncrement");
     if obj.SourceSummary == "function"
         error("pdbase:MissingCoefficientEvidence", ...
             "Degree elevation requires stored Bernstein coefficient evidence.");

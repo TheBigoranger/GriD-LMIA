@@ -18,7 +18,7 @@ function testConstructorFormsDefaultsAndImmutableSource(testCase)
     widthOnly = pdlmi(P, ">=", BandWidth=2);
     orderOnly = pdlmi(P, ">=", SparseFullBoxOrder=3);
     applied = direct.applySparseFullBoxPreorder();
-    tensorP = pdvar(1, {[0 1], [0 1]}, Degree=3);
+    tensorP = pdvar(1, {[0 1], [0 1]}, Degree=[3 3]);
     tensorDefault = pdlmi(tensorP, ">=", ...
         UseSparseFullBoxPreorder=true);
 
@@ -143,7 +143,7 @@ end
 
 function testAsymmetricTensorWindowIncidence(testCase)
     % Tensor corners identify both axes without relying on flattened adjacency.
-    P = pdvar(1, {[0 1], [0 1]}, Degree=4);
+    P = pdvar(1, {[0 1], [0 1]}, Degree=[4 4]);
     direct = P >= 0;
     C = direct.applySparseFullBoxPreorder(2, 2);
 
@@ -160,6 +160,30 @@ function testAsymmetricTensorWindowIncidence(testCase)
         testCase.verifyEqual(active, expectedEmptyWindows(k), ...
             "Each tensor corner must use its coordinate-aligned empty-mask window.");
     end
+end
+
+function testAnisotropicWindowsAndDenseEndpoint(testCase)
+    % Width becomes dense only after it saturates every anisotropic axis.
+    grid = {[0 1], [10 20]};
+    P = pdvar(1, grid, Degree=[2 6]);
+    direct = P >= 0;
+    sparse = direct.applySparseFullBoxPreorder(2);
+    dense = direct.applySparseFullBoxPreorder(4);
+
+    expectedDims = [4 4 4, 4 4, 2 2 2, 2 2];
+    verifySparse(testCase, sparse, [1 3], 2, expectedDims, 21);
+    verifyDenseEndpoint(testCase, dense, [1 3], [8 6 4 3], 21);
+
+    testCase.verifyTrue(sparse.UseSparseFullBoxPreorder);
+    testCase.verifyFalse(sparse.UseFullBoxPreorder);
+    testCase.verifyFalse(dense.UseSparseFullBoxPreorder);
+    testCase.verifyTrue(dense.UseFullBoxPreorder);
+
+    reversed = pdlmi(pdvar(1, grid, Degree=[6 2]), ">=", ...
+        UseSparseFullBoxPreorder=true);
+    testCase.verifyEqual(reversed.SparseFullBoxOrder, [3 1]);
+    testCase.verifyEqual(psdDimensionsAt(reversed, 1:10), ...
+        [4 4 4, 2 2 2, 4 4, 2 2]);
 end
 
 function testMatrixEntryCellAndRateCertificatesAreIndependent(testCase)
@@ -205,41 +229,55 @@ function testMatrixEntryCellAndRateCertificatesAreIndependent(testCase)
 end
 
 function verifySparse(testCase, C, order, bandWidth, gramSizes, equalityCount)
+    order = expandExpected(order, C.Residual.npar());
+    zero = zeros(1, C.Residual.npar());
     testCase.verifyTrue(C.UseSparseFullBoxPreorder);
     testCase.verifyEqual(C.SparseFullBoxOrder, order);
     testCase.verifyEqual(C.BandWidth, bandWidth);
     testCase.verifyFalse(C.UsePolya);
-    testCase.verifyEqual(C.PolyaDegree, 0);
+    testCase.verifyEqual(C.PolyaDegree, zero);
     testCase.verifyFalse(C.UsePutinar);
-    testCase.verifyEqual(C.PutinarOrder, 0);
+    testCase.verifyEqual(C.PutinarOrder, zero);
     testCase.verifyFalse(C.UseFullBoxPreorder);
-    testCase.verifyEqual(C.FullBoxOrder, 0);
+    testCase.verifyEqual(C.FullBoxOrder, zero);
     testCase.verifyEqual(psdDimensionsAt(C, 1:numel(gramSizes)), gramSizes);
     testCase.verifyEqual(numel(C.Constraints), numel(gramSizes) + equalityCount);
 end
 
 function verifyInactive(testCase, C)
+    zero = zeros(1, C.Residual.npar());
     testCase.verifyFalse(C.UsePolya);
-    testCase.verifyEqual(C.PolyaDegree, 0);
+    testCase.verifyEqual(C.PolyaDegree, zero);
     testCase.verifyFalse(C.UsePutinar);
-    testCase.verifyEqual(C.PutinarOrder, 0);
+    testCase.verifyEqual(C.PutinarOrder, zero);
     testCase.verifyFalse(C.UseFullBoxPreorder);
-    testCase.verifyEqual(C.FullBoxOrder, 0);
+    testCase.verifyEqual(C.FullBoxOrder, zero);
     verifySparseInactive(testCase, C);
 end
 
 function verifySparseInactive(testCase, C)
     testCase.verifyFalse(C.UseSparseFullBoxPreorder);
-    testCase.verifyEqual(C.SparseFullBoxOrder, 0);
+    testCase.verifyEqual(C.SparseFullBoxOrder, ...
+        zeros(1, C.Residual.npar()));
     testCase.verifyEqual(C.BandWidth, 0);
 end
 
 function verifyDenseEndpoint(testCase, C, order, gramSizes, equalityCount)
+    order = expandExpected(order, C.Residual.npar());
     testCase.verifyTrue(C.UseFullBoxPreorder);
     testCase.verifyEqual(C.FullBoxOrder, order);
     verifySparseInactive(testCase, C);
     testCase.verifyEqual(psdDimensionsAt(C, 1:numel(gramSizes)), gramSizes);
     testCase.verifyEqual(numel(C.Constraints), numel(gramSizes) + equalityCount);
+end
+
+function value = expandExpected(value, nPar)
+    % Expand scalar shorthand only in expected public state.
+    if isscalar(value)
+        value = repmat(value, 1, nPar);
+    else
+        value = reshape(value, 1, []);
+    end
 end
 
 function dims = psdDimensionsAt(C, indices)

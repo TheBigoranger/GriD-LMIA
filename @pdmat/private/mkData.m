@@ -1,14 +1,16 @@
 function [sz, deg, vals, isCont, summary, fh, rb] = ...
-        mkData(grid, src, optDeg, rb)
+        mkData(grid, src, optDeg, degreeSpecified, rb)
     %MKDATA Route pdmat constructor sources into pdbase constructor inputs.
     %
     %   Syntax:
-    %     [sz, deg, vals, isCont, summary, fh] = mkData(grid, src, optDeg)
+    %     [sz, deg, vals, isCont, summary, fh] = ...
+    %         mkData(grid, src, optDeg, degreeSpecified)
     %
     %   Arguments:
     %     grid   - Physical parameter grid vectors.
     %     src    - Function, global coefficient grid, or nested LocalValues.
-    %     optDeg - Optional requested scalar degree.
+    %     optDeg - Requested scalar or per-parameter degree payload.
+    %     degreeSpecified - True only when the public Degree option appeared.
     %
     %   Output:
     %     sz, deg - Inferred matrix size and Bernstein degree.
@@ -29,7 +31,7 @@ function [sz, deg, vals, isCont, summary, fh, rb] = ...
 
     info = helper.mkGrid(grid, "pdmat");
     vecs = info.Vectors;
-    if nargin < 4 || isempty(rb)
+    if nargin < 5 || isempty(rb)
         rb = [];
     else
         rb = double(helper.chk(rb, "pdmat:InvalidRateBounds", ...
@@ -37,10 +39,14 @@ function [sz, deg, vals, isCont, summary, fh, rb] = ...
             "numeric", "real", "finite", "rowbounds", ...
             "Size", [numel(vecs), 2]));
     end
-    if ~isempty(optDeg)
-        optDeg = double(helper.chk(optDeg, "pdmat:InvalidDegree", ...
-            "Degree must be a nonnegative integer scalar.", ...
-            "numeric", "real", "scalar", "finite", "integer", "nonnegative"));
+    if degreeSpecified
+        scalarDegree = isnumeric(optDeg) && isscalar(optDeg);
+        optDeg = helper.normalizeDegree(optDeg, numel(vecs), ...
+            "pdmat:InvalidDegree", "Degree");
+        if scalarDegree && numel(vecs) > 1
+            warning("pdmat:ScalarDegreeExpansion", ...
+                "Scalar Degree expands uniformly across all parameter directions.");
+        end
     end
     if isa(src, "function_handle")
         [sz, deg, vals, summary, fh] = fcnData(src, info, optDeg);
@@ -76,12 +82,12 @@ function [sz, deg, vals, summary, fh] = fcnData(fh, info, optDeg)
     %   certify the returned function before coefficient algebra can use it.
 
     vecs = info.Vectors;
+    nPar = numel(vecs);
     if isempty(optDeg)
-        deg = 1;
+        deg = ones(1, nPar);
     else
         deg = optDeg;
     end
-    nPar = numel(vecs);
     try
         nArg = nargin(fh);
     catch
@@ -135,14 +141,15 @@ function [sz, deg, vals, isCont] = localData(src, vecs, optDeg, rb)
     end
 
     if isempty(optDeg)
-        deg = round(nCoeff ^ (1 / nPar) - 1);
-        if deg < 0 || (deg + 1) ^ nPar ~= nCoeff
+        uniformDeg = round(nCoeff ^ (1 / nPar) - 1);
+        if uniformDeg < 0 || (uniformDeg + 1) ^ nPar ~= nCoeff
             error("pdmat:InvalidDegree", ...
                 "Coefficient count must equal (Degree + 1)^numParameters.");
         end
+        deg = repmat(uniformDeg, 1, nPar);
     else
         deg = optDeg;
-        if nCoeff ~= (deg + 1) ^ nPar
+        if nCoeff ~= prod(deg + 1)
             error("pdmat:InvalidDegree", ...
                 "Local coefficient count does not match the requested Degree.");
         end

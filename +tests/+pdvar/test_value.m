@@ -94,7 +94,7 @@ function testTensorDerivativeReturnsCombRowsOrder(testCase)
     % Tensor rate cells retain helper.combRows lower/upper vertex order.
     grid = {[0 2], [10 14]};
     rb = [-1 2; -3 5];
-    P = pdvar(1, grid, Degree=2);
+    P = pdvar(1, grid, Degree=[2 2]);
     cp = P.coeffs([1 1]);
     lbls = helper.combRows({0:2, 0:2});
     expectedP = arrayfun(@(k) 5 + 2 * lbls(k, 1) + 3 * lbls(k, 2), ...
@@ -111,10 +111,30 @@ function testTensorDerivativeReturnsCombRowsOrder(testCase)
     testCase.verifyEmpty(warnMsg);
     testCase.verifySize(rows, [1 4]);
     for k = 1:4
-        verifyRatePdmat(testCase, rows{k}, 2, ...
+        verifyRatePdmat(testCase, rows{k}, [2 2], ...
             repmat(expectedRows(k), 1, 9));
         testCase.verifyEqual(rows{k}.GridInfo.Vectors, grid);
     end
+end
+
+function testAssignedAnisotropicMulticellContinuityIsReclassified(testCase)
+    % Assigned values, not stale source metadata, determine exported continuity.
+    degree = [0 2];
+    grid = {[0 1 2], [10 20]};
+    continuous = internalNumericPdvar(grid, degree, ...
+        helper.mkNest([2 1], @(~) num2cell([1, 2, 3])));
+    discontinuousValues = continuous.LocalValues;
+    discontinuousValues{2}{1}{1} = 20;
+    discontinuous = internalNumericPdvar(grid, degree, discontinuousValues);
+
+    A = value(continuous);
+    B = value(discontinuous);
+
+    testCase.verifyEqual(A.Degree, degree);
+    testCase.verifyTrue(A.IsContinuous);
+    testCase.verifyFalse(B.IsContinuous);
+    secondCell = B.coeffs([2 1]);
+    testCase.verifyEqual(secondCell{1}, 20);
 end
 
 function assignCoeffs(coeffs, vals)
@@ -144,4 +164,21 @@ function verifyRatePdmat(testCase, obj, degree, expected)
     testCase.verifyEmpty(obj.FunctionHandle);
     verifyNumericCoeffs(testCase, obj.coeffs(ones(1, obj.npar())), ...
         num2cell(expected));
+end
+
+function obj = internalNumericPdvar(grid, degree, vals)
+    % Build assigned numeric cells whose face agreement is independently controlled.
+    init = struct( ...
+        "PdvarInternal", true, ...
+        "Grid", {grid}, ...
+        "MatrixSize", [1 1], ...
+        "Degree", degree, ...
+        "LocalValues", {vals}, ...
+        "IsContinuous", false, ...
+        "ContainsDecision", false, ...
+        "HasRateDependence", false, ...
+        "RateBounds", [], ...
+        "SourceSummary", "test-assigned-continuity", ...
+        "ValidationMode", "strict");
+    obj = pdvar(init);
 end

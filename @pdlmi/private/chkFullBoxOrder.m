@@ -7,13 +7,14 @@ function order = chkFullBoxOrder(expr, order)
     %
     %   Arguments:
     %     expr  - pdvar residual that supplies the parameter dimension and degree.
-    %     order - Optional finite nonnegative integer scalar order.
+    %     order - Optional scalar shorthand or ell-element absolute order.
     %
     %   Output:
-    %     order - Admissible absolute Gram order for the full box preordering.
+    %     order - Admissible absolute Gram order as a 1-by-ell row vector.
     %
     %   In one parameter, an omitted order is floor(expr.Degree/2); otherwise
-    %   it is ceil(expr.Degree/2). Malformed and insufficient orders retain
+    %   it is componentwise ceil(expr.Degree/2), with target degree 2.*order.
+    %   Malformed and insufficient orders retain
     %   distinct error identifiers for input versus certificate-degree errors.
 
     if nargin < 2
@@ -23,18 +24,16 @@ function order = chkFullBoxOrder(expr, order)
             order = ceil(expr.Degree / 2);
         end
     end
-    order = double(helper.chk(order, ...
-        "pdlmi:InvalidFullBoxOrder", ...
-        "FullBoxOrder must be a finite nonnegative integer scalar.", ...
-        "numeric", "real", "finite", "integer", "nonnegative", "scalar"));
+    order = helper.normalizeDegree(order, expr.npar(), ...
+        "pdlmi:InvalidFullBoxOrder", "FullBoxOrder");
     if numel(expr.GridInfo.Vectors) == 1
         minOrder = floor(expr.Degree / 2);
     else
         minOrder = ceil(expr.Degree / 2);
     end
-    if order < minOrder
+    if any(order < minOrder)
         error("pdlmi:FullBoxOrderTooLow", ...
-            "FullBoxOrder %d is below the minimum admissible order %d.", ...
-            order, minOrder);
+            "FullBoxOrder %s is below the minimum admissible order %s.", ...
+            mat2str(order), mat2str(minOrder));
     end
 end

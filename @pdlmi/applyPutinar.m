@@ -6,15 +6,17 @@ function out = applyPutinar(obj, varargin)
     %     out = obj.applyPutinar(order)
     %
     %   Arguments:
-    %     order - Optional absolute tensor Bernstein Gram order.
+    %     order - Optional scalar shorthand or ell-element absolute Gram order.
     %
     %   Output:
     %     out - New pdlmi rebuilt with the Putinar certificate enabled.
     %
-    %   For one parameter, the default order and certificate are the
+    %   Scalar input expands uniformly; PutinarOrder is stored as a 1-by-ell
+    %   row vector. For one parameter, the default order and certificate are the
     %   parity-specific Markov-Lukacs form used by applyFullBoxPreorder.
-    %   For two or more parameters, the default order is
-    %   ceil(Residual.Degree/2) and the quadratic-module form is used.
+    %   For two or more parameters, the default/minimum order is componentwise
+    %   ceil(Residual.Degree/2), the target degree is 2.*order, and the
+    %   quadratic-module form is used.
     %   Reapplication rebuilds from Residual and replaces any Pólya, Putinar,
     %   sparse full-box, or FullBox selection.
     %

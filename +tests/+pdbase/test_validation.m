@@ -18,10 +18,16 @@ function testBadGridNodes(testCase)
 end
 
 function testBadDeg(testCase)
-    % Degree should be a finite nonnegative integer.
-    testCase.verifyError(@() pdbase({[0 1]}, [1 1], -1), "pdbase:InvalidDegree");
-    testCase.verifyError(@() pdbase({[0 1]}, [1 1], 1.5), "pdbase:InvalidDegree");
-    testCase.verifyError(@() pdbase({[0 1]}, [1 1], Inf), "pdbase:InvalidDegree");
+    % Degree accepts only a scalar or one finite integer per parameter.
+    grid = {[0 1], [10 20]};
+    valid = pdbase(grid, [1 1], [0; 2]);
+    testCase.verifyEqual(valid.Degree, [0 2]);
+
+    bad = {[], [1 2 3], [1 2; 3 4], -1, 1.5, Inf, NaN, "one"};
+    for k = 1:numel(bad)
+        testCase.verifyError(@() pdbase(grid, [1 1], bad{k}), ...
+            "pdbase:InvalidDegree");
+    end
 end
 
 function testBadSize(testCase)

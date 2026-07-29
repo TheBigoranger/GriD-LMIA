@@ -376,6 +376,34 @@ function testSubsasgnNumericAndPdvarBlocks(testCase)
         [50 60; cp{2}(2, 1), 5]});
 end
 
+function testAnisotropicCatBlkdiagAndAssignment(testCase)
+    % Composition and assignment use componentwise maximum degree.
+    grid = {[0 1], [10 20]};
+    P = pdvar(2, 1, grid, "full", Degree=[1 3]);
+    B = pdmat(grid, repmat({[10; 20]}, 3, 2), Degree=[2 1]);
+    S = pdmat(grid, repmat({30}, 3, 2), Degree=[2 1]);
+    elevated = P.elevate([1 0]);
+    ep = elevated.coeffs([1 1]);
+
+    horizontal = [P, B];
+    diagonal = blkdiag(P, B);
+    assigned = P;
+    assigned(1, 1) = S;
+
+    testCase.verifyEqual(horizontal.Degree, [2 3]);
+    testCase.verifyEqual(diagonal.Degree, [2 3]);
+    testCase.verifyEqual(assigned.Degree, [2 3]);
+    testCase.verifyEqual(horizontal.ncoeff(), 12);
+    testCase.verifyEqual(diagonal.ncoeff(), 12);
+    testCase.verifyEqual(assigned.ncoeff(), 12);
+    verifyCoeffExpr(testCase, horizontal.coeffs([1 1]), ...
+        cellfun(@(x) [x, [10; 20]], ep, UniformOutput=false));
+    verifyCoeffExpr(testCase, diagonal.coeffs([1 1]), ...
+        cellfun(@(x) blkdiag(x, [10; 20]), ep, UniformOutput=false));
+    verifyCoeffExpr(testCase, assigned.coeffs([1 1]), ...
+        cellfun(@(x) [30; x(2, 1)], ep, UniformOutput=false));
+end
+
 function testSubsasgnBroadcastsDerivativeRateRows(testCase)
     % Assignment should use the same ordinary/rate-row broadcast as affine ops.
     P = pdvar(2, {[0 1]}, "full");

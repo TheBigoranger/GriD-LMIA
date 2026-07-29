@@ -81,19 +81,33 @@ function testScalarGridVectorShorthand(testCase)
 end
 
 function testDegreeValidation(testCase)
-    % Degree must be one finite nonnegative integer scalar.
-    testCase.verifyError(@() pdvar(2, {[0 1]}, Degree=-1), ...
-        "pdvar:InvalidDegree");
-    testCase.verifyError(@() pdvar(2, {[0 1]}, Degree=1.5), ...
-        "pdvar:InvalidDegree");
-    testCase.verifyError(@() pdvar(2, {[0 1]}, Degree=NaN), ...
-        "pdvar:InvalidDegree");
-    testCase.verifyError(@() pdvar(2, {[0 1]}, Degree=Inf), ...
-        "pdvar:InvalidDegree");
-    testCase.verifyError(@() pdvar(2, {[0 1]}, Degree="two"), ...
-        "pdvar:InvalidDegree");
-    testCase.verifyError(@() pdvar(2, {[0 1]}, Degree=[1 2]), ...
-        "pdvar:InvalidDegree");
+    % Degree accepts row/column ell-vectors and rejects all other shapes.
+    grid = {[0 1], [10 20]};
+    row = pdvar(1, grid, Degree=[0 2]);
+    column = pdvar(1, grid, Degree=[0; 2]);
+    testCase.verifyEqual(row.Degree, [0 2]);
+    testCase.verifyEqual(column.Degree, [0 2]);
+
+    bad = {[], [1 2 3], [1 2; 3 4], -1, 1.5, NaN, Inf, "two"};
+    for k = 1:numel(bad)
+        testCase.verifyError(@() pdvar(2, grid, Degree=bad{k}), ...
+            "pdvar:InvalidDegree");
+    end
+end
+
+function testScalarDegreeWarningAndSilentDefaults(testCase)
+    % Explicit multidimensional scalar shorthand warns; defaults and 1-D do not.
+    grid = {[0 1], [10 20]};
+    explicit = constructWithWarning(testCase, ...
+        @() pdvar(1, grid, Degree=1), ...
+        "pdvar:ScalarDegreeExpansion");
+    default = constructWarningFree(testCase, @() pdvar(1, grid));
+    oneDimensional = constructWarningFree(testCase, ...
+        @() pdvar(1, [0 1], Degree=1));
+
+    testCase.verifyEqual(explicit.Degree, [1 1]);
+    testCase.verifyEqual(default.Degree, [1 1]);
+    testCase.verifyEqual(oneDimensional.Degree, 1);
 end
 
 function testBoundarySharing(testCase)
@@ -135,7 +149,7 @@ end
 
 function testTensorDegreeTwoSharesCompleteFaces(testCase)
     % Adjacent quadratic tensor cells reuse every control on their full face.
-    P = pdvar(1, {[0 1 2], [10 20 30]}, Degree=2);
+    P = pdvar(1, {[0 1 2], [10 20 30]}, Degree=[2 2]);
     c11 = P.coeffs([1 1]);
     c21 = P.coeffs([2 1]);
     c12 = P.coeffs([1 2]);
@@ -153,6 +167,26 @@ function testTensorDegreeTwoSharesCompleteFaces(testCase)
     center = getvariables(c11{labelIndex(lbls, [1 1])});
     testCase.verifyNotEqual(center, getvariables(c21{labelIndex(lbls, [1 1])}));
     testCase.verifyNotEqual(center, getvariables(c12{labelIndex(lbls, [1 1])}));
+end
+
+function testPartiallyConstantAxisUsesExpectedGlobalControls(testCase)
+    % Degree [0 2] shares the complete constant axis and quadratic faces.
+    P = pdvar(1, {[0 1 2], [10 20 30]}, Degree=[0 2]);
+    c11 = P.coeffs([1 1]);
+    c21 = P.coeffs([2 1]);
+    c12 = P.coeffs([1 2]);
+    c22 = P.coeffs([2 2]);
+
+    testCase.verifyEqual(P.Degree, [0 2]);
+    testCase.verifyEqual(P.ncoeff(), 3);
+    for k = 1:3
+        verifySameVars(testCase, c11{k}, c21{k});
+        verifySameVars(testCase, c12{k}, c22{k});
+    end
+    verifySameVars(testCase, c11{3}, c12{1});
+
+    vars = cellfun(@getvariables, [c11, c21, c12, c22]);
+    testCase.verifyEqual(numel(unique(vars)), 5);
 end
 
 function testRateBounds(testCase)
@@ -182,4 +216,24 @@ end
 function idx = labelIndex(lbls, label)
     % Locate one tensor Bernstein label in the package-wide combRows order.
     idx = find(all(lbls == label, 2), 1);
+end
+
+function obj = constructWithWarning(testCase, fcn, warningId)
+    % Capture the public scalar-expansion warning and retain the result.
+    obj = [];
+    testCase.verifyWarning(@construct, warningId);
+
+    function construct
+        obj = fcn();
+    end
+end
+
+function obj = constructWarningFree(testCase, fcn)
+    % Defaults and one-dimensional shorthand must remain warning-free.
+    obj = [];
+    testCase.verifyWarningFree(@construct);
+
+    function construct
+        obj = fcn();
+    end
 end

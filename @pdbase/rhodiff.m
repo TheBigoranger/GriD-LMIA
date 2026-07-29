@@ -54,26 +54,34 @@ function out = rhodiff(obj, rb)
     % combRows supplies the same deterministic order used throughout storage.
     verts = helper.combRows(num2cell(rb, 2).');
     deg = obj.Degree;
-    if deg == 0 || nPar == 1
+    if nPar == 1
         outDeg = max(deg - 1, 0);
     else
         outDeg = deg;
     end
+    plans = cell(1, nPar);
+    if nPar > 1
+        for dim = find(deg > 0)
+            partDeg = deg;
+            partDeg(dim) = partDeg(dim) - 1;
+            plans{dim} = pdbase.elevationPlan(partDeg, outDeg, nPar);
+        end
+    end
 
     nCell = obj.GridInfo.NumNodes - 1;
     vals = helper.mkNest(nCell, ...
-        @(subs) diffCell(obj, subs, verts, outDeg));
-    hasDec = obj.ContainsDecision && deg > 0;
+        @(subs) diffCell(obj, subs, verts, outDeg, plans));
+    hasDec = obj.ContainsDecision && any(deg > 0);
     out = obj.mkRhodiff(outDeg, vals, rb, hasDec);
 end
 
-function coeffs = diffCell(obj, subs, verts, outDeg)
+function coeffs = diffCell(obj, subs, verts, outDeg, plans)
     %DIFFCELL Build all rate-vertex derivative rows for one physical cell.
     deg = obj.Degree;
     nPar = obj.npar();
     nVert = size(verts, 1);
-    nOut = (outDeg + 1) ^ nPar;
-    if deg == 0
+    nOut = prod(outDeg + 1);
+    if all(deg == 0)
         coeffs = repmat({zeros(obj.MatrixSize)}, nVert, nOut);
         return
     end
@@ -88,10 +96,11 @@ function coeffs = diffCell(obj, subs, verts, outDeg)
     coeffs = cell(nVert, nOut);
     for row = 1:nVert
         if nPar == 1
-            coeffs(row, :) = scalarDiff(vals, deg, h(1), verts(row, 1));
+            coeffs(row, :) = scalarDiff(vals, deg(1), h(1), ...
+                verts(row, 1));
         else
             coeffs(row, :) = tensorDiff(vals, deg, h, ...
-                verts(row, :), obj.MatrixSize);
+                verts(row, :), obj.MatrixSize, plans);
         end
     end
 end
@@ -105,44 +114,52 @@ function row = scalarDiff(vals, deg, h, rate)
     end
 end
 
-function row = tensorDiff(vals, deg, h, rate, sz)
+function row = tensorDiff(vals, deg, h, rate, sz, plans)
     %TENSORDIFF Elevate mixed tensor partials into one common degree.
-    nPar = numel(h);
-    row = cell(1, (deg + 1) ^ nPar);
-    mult = (deg + 1) .^ (nPar - 1:-1:0);
+    row = repmat({zeros(sz)}, 1, prod(deg + 1));
+    mult = rowMajorMultipliers(deg);
 
-    for dim = 1:nPar
-        vecs = repmat({0:deg}, 1, nPar);
-        vecs{dim} = 0:(deg - 1);
+    for dim = find(deg > 0)
+        partDeg = deg;
+        partDeg(dim) = partDeg(dim) - 1;
+        vecs = arrayfun(@(oneDeg) 0:oneDeg, partDeg, ...
+            "UniformOutput", false);
         partLbls = helper.combRows(vecs);
+        part = cell(1, size(partLbls, 1));
         for k = 1:size(partLbls, 1)
             lbl = partLbls(k, :);
             nxt = lbl;
             nxt(dim) = nxt(dim) + 1;
-            base = (vals{sum(nxt .* mult) + 1} - ...
+            part{k} = (vals{sum(nxt .* mult) + 1} - ...
                 vals{sum(lbl .* mult) + 1}) .* ...
-                (deg * rate(dim) / h(dim));
+                (deg(dim) / h(dim));
+        end
 
-            for outLabel = lbl(dim):(lbl(dim) + 1)
-                out = lbl;
-                out(dim) = outLabel;
-                idx = sum(out .* mult) + 1;
-                scale = nchoosek(deg - 1, lbl(dim)) ...
-                    * nchoosek(1, outLabel - lbl(dim)) ...
-                    / nchoosek(deg, outLabel);
-                term = base .* scale;
-                if isempty(row{idx})
-                    row{idx} = term;
-                else
-                    row{idx} = row{idx} + term;
-                end
-            end
+        % Each partial has one reduced axis. Elevating it independently before
+        % applying the rate vertex keeps all directions in one tensor basis.
+        elevated = applyElevation(part, plans{dim});
+        for k = 1:numel(row)
+            row{k} = row{k} + elevated{k} .* rate(dim);
         end
     end
+end
 
-    for k = 1:numel(row)
-        if isempty(row{k})
-            row{k} = zeros(sz);
-        end
+function out = applyElevation(coeffs, plan)
+    %APPLYELEVATION Apply a prevalidated local plan without access dispatch.
+    matrixColumns = size(coeffs{1}, 2);
+    packed = horzcat(coeffs{:});
+    packed = packed * kron(plan.Operator', speye(matrixColumns));
+    if isnumeric(packed)
+        packed = full(packed);
     end
+    out = cell(1, plan.TargetCount);
+    for targetIdx = 1:plan.TargetCount
+        columns = (targetIdx - 1) * matrixColumns + (1:matrixColumns);
+        out{targetIdx} = packed(:, columns);
+    end
+end
+
+function multipliers = rowMajorMultipliers(degree)
+    %ROWMAJORMULTIPLIERS Map tensor labels to repository flat positions.
+    multipliers = fliplr(cumprod([1, fliplr(degree(2:end) + 1)]));
 end
