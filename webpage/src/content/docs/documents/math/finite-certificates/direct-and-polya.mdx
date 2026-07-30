@@ -18,13 +18,14 @@ import CertificateSpectrum from "../../../../../components/CertificateSpectrum.a
 Both methods use the sign-normalized positive target
 
 $$
+\begin{aligned}
 S^{(\mathbf c)}(\boldsymbol\alpha)
-=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{\mathbf i}
-C^{(\mathbf c)}[\mathbf i]
-B_{\mathbf i}^{M}(\boldsymbol\alpha),
-\qquad
-C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}.
+&=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha),\\
+S^{(\mathbf c)}(\boldsymbol\alpha)
+&=\sum_{\mathbf i}C^{(\mathbf c)}[\mathbf i]
+B_{\mathbf i}^{M}(\boldsymbol\alpha),\\
+C^{(\mathbf c)}&=-\mathcal C^{(\mathbf c)}.
+\end{aligned}
 $$
 
 The stored rate rows have already been stacked, so the certificate notation
@@ -35,8 +36,10 @@ does not carry a rate-vertex index.
 Direct enforces
 
 $$
-C^{(\mathbf c)}[\mathbf i]\succeq0
-\qquad\text{for every cell and label}.
+\begin{aligned}
+C^{(\mathbf c)}[\mathbf i]&\succeq0,\\
+&\text{for every cell and label}.
+\end{aligned}
 $$
 
 Nonnegative Bernstein basis functions sum to one, so this condition implies

@@ -2,7 +2,7 @@
 
 \input{manual-style}
 
-\title{\pkg\\User Manual} \author{Version v1.2.0} \date{July 29, 2026}
+\title{\pkg\\User Manual} \author{Version v1.2.1} \date{July 29, 2026}
 
 % \includeonly{chapters/workflow-introduction}
 % \includeonly{chapters/installation}
@@ -17,11 +17,11 @@
 \maketitle
 
 \begin{abstract}
-The \pkg{} is a MATLAB/YALMIP package for modelling and certifying parameter-dependent linear matrix inequalities (PD-LMIs). It represents coefficient-backed known matrices and decision matrices as cell-local tensor-product Bernstein polynomials on a physical parameter grid, with continuous shared-face storage for decision functions. This representation provides a finite, inspectable bridge from a continuous parameter domain to semidefinite constraints.
+The \pkg{} is a MATLAB/YALMIP package for modelling and certifying parameter-dependent and differentiable parameter-dependent linear matrix inequalities (PD-LMIs and DPD-LMIs) over axis-aligned parameter and rate boxes. It represents coefficient-backed known matrices and continuous decision matrices as cell-local tensor-product Bernstein polynomials on an independently partitioned physical parameter grid. This finite representation supports exact cellwise coefficient algebra and differentiation, while Direct, P\'olya, Putinar, SparseFullBox, and FullBox constructions turn the remaining continuum sign condition into inspectable YALMIP constraints.
 
-The manual develops that bridge through a reproducible differentiable PD-LMI workflow: define the parameter grid and known data, construct continuous decision matrices, differentiate them cell by cell when scheduling-rate terms are present, form a residual inequality, choose a direct or certificate-based positivity condition, export the resulting constraints to YALMIP, and solve them with an available SDP solver.  It also makes explicit the distinction between shared-face continuity of the represented function and the generally discontinuous cellwise derivative data.
+The intended workflow is direct: define the tensor grid and coefficient-backed known data with \code{pdmat}; create continuous polynomial decisions with \code{pdvar}; use \code{rhodiff} when scheduling-rate terms are present; form an affine residual comparison; optionally replace the default Direct certificate by one of the four supported alternatives; call \code{toYalmip}; then solve with YALMIP and recover values only after checking the solver status. The manual develops each step from runnable examples through the underlying tensor convolution, degree alignment, rate-row, and Gram-assembly mathematics.
 
-Version v1.2.0 adds direction-wise Bernstein degrees throughout the public object model. \code{Degree} and the four certificate degree/order properties accept scalar uniform shorthand or one value per parameter direction and are stored as row vectors; tensor counts, alignment, multiplication, elevation, differentiation, and Gram targets now follow those componentwise degrees. The release also documents zero-degree axes, the constructor warning for explicit multidimensional scalar \code{Degree}, and the scalar \code{BandWidth} endpoint rules for anisotropic SparseFullBox orders. Version v1.2.0 is the current and latest tagged GitHub Release.
+The representation keeps four ideas distinct: the tensor grid exactly partitions the parameter box; the chosen piecewise-polynomial decision space is a finite modelling restriction; rate-vertex reduction is exact because rate dependence is affine; and each finite certificate is a sufficient condition over the parameter continuum.
 \end{abstract}
 
 \clearpage

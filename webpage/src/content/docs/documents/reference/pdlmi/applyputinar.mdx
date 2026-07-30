@@ -56,10 +56,15 @@ Markov–Lukács form as `applyFullBoxPreorder`. For two or more parameters, it
 represents the target as
 
 $$
+\begin{aligned}
+g_s(\boldsymbol\alpha)
+&:=\alpha_s(1-\alpha_s),\\
+\mathcal M_s(\boldsymbol\alpha)
+&:=g_s(\boldsymbol\alpha)S_s(\boldsymbol\alpha),\\
 S^{(\mathbf c)}(\boldsymbol\alpha)
-=S_0(\boldsymbol\alpha)
-+\sum_{s=1}^{\ell}
-\alpha_s(1-\alpha_s)S_s(\boldsymbol\alpha).
+&=S_0(\boldsymbol\alpha)
++\sum_{s=1}^{\ell}\mathcal M_s(\boldsymbol\alpha).
+\end{aligned}
 $$
 
 At order $\mathbf r$, $S_0$ uses a tensor Bernstein Gram basis of degree
@@ -82,7 +87,7 @@ margin in the residual.
 | Input | Description |
 | :--- | :--- |
 | `C` | Any `pdlmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
-| `order` | Optional finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute Gram order. It must satisfy $r\ge\lfloor M/2\rfloor$ in one parameter or $\mathbf r\ge\lceil\mathbf M/2\rceil$ componentwise in two or more parameters. |
+| `order` | Optional finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute Gram order. It must satisfy $r\ge\lfloor M/2\rfloor$ in one parameter or $\mathbf r\ge\lceil\mathbf M/2\rceil$ componentwise in two or more parameters. |
 
 ## Returned Object
 

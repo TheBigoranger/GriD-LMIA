@@ -262,7 +262,7 @@ Q = P.elevate(degreeIncrement)
 \end{lstlisting}
 
 \descriptionhead
-The storage queries use the shared \code{pdbase} cell and label order and return the symbolic \code{sdpvar} coefficient payloads of the selected decision expression. \code{evaluate} reconstructs the affine symbolic matrix at one in-bounds parameter point; a derivative/rate-row object returns a \(1\)-by-\(2^\ell\) cell array in stored rate-vertex order. \code{elevVals} returns only an elevated nested coefficient tree. \code{elevate} returns a new \code{pdvar} of the same dynamic class with the same represented expression, physical cells, YALMIP decision variables, metadata, and rate-row order at the higher degree; it does not create new decision freedom or modify \code{P}.
+The storage queries use the shared \code{pdbase} cell and label order and return the symbolic \code{sdpvar} coefficient payloads of the selected decision expression. \code{evaluate} reconstructs the affine symbolic matrix at one in-bounds parameter point; a derivative/rate-row object returns a \(1\)-by-\(2^\ell\) cell array in stored rate-vertex order. \code{elevVals} returns only an elevated nested coefficient tree. \code{elevate} returns a new \code{pdvar} of the same dynamic class with the same represented expression, physical cells, YALMIP decision variables, metadata, and rate-row order at the higher degree; it does not create new decision freedom or modify \code{P}. The backend performs the same binomially normalized \(\ell\)-dimensional convolution as known-data elevation, using the fixed separable kernel \(K_{\mathbf M-\mathbf m}[\mathbf r]=\prod_s\binom{M_s-m_s}{r_s}\). \Cref{sec:bernstein-degree-elevation} derives this exact representation change.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -299,6 +299,32 @@ elevatedCoefficientTableSize = 1×2 double
      1     4
 \end{lstlisting}
 
+Vector increments may elevate different axes by different amounts, including an axis on which the original decision is constant.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(1, {[0 1], [0 1]}, Degree=[1 0]);
+Q = P.elevate([1 2]);
+sourceDegree = P.Degree
+elevatedDegree = Q.Degree
+coefficientCounts = [P.ncoeff(), Q.ncoeff()]
+elevatedCoefficientTableSize = size(Q.coeffs([1 1]))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+sourceDegree = 1×2 double
+     1     0
+
+elevatedDegree = 1×2 double
+     2     2
+
+coefficientCounts = 1×2 double
+     2     9
+
+elevatedCoefficientTableSize = 1×2 double
+     1     9
+\end{lstlisting}
+
 \remarkshead
 Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}. Malformed points raise \codeerr{pdvar}{InvalidPoint}; out-of-bounds points raise \codeerr{pdvar}{PointOutOfBounds}. Invalid elevation increments raise \codeerr{pdbase}{InvalidDegreeIncrement}. Evaluation returns symbolic expressions until the user assigns or solves the underlying YALMIP variables; use \code{value} for the post-assignment numeric conversion documented in \cref{sec:pdvar-value}.
 
@@ -317,7 +343,16 @@ D = rhodiff(P, rb)
   \item \code{P} is a \code{pdvar} without existing rate-vertex rows. \item \code{rb} is a finite \(\ell\)-by-\(2\) numeric matrix of lower and upper parameter-rate bounds, with each lower bound no greater than its upper bound. It must equal \code{P.RateBounds} when the object already carries nonempty bounds. \item Without \code{rb}, \code{rhodiff(P)} requires nonempty \code{P.RateBounds}. \item \code{D} is a discontinuous \code{pdvar} with one coefficient row per rate vertex. In one parameter, degree \(m>0\) becomes \(m-1\), while degree zero remains zero. In two or more parameters, every nonzero-axis partial is elevated exactly from \(\mathbf m-\mathbf e_s\) to the common tensor degree \(\mathbf m=\code{P.Degree}\) before summation; a zero-degree axis contributes zero. An all-zero tensor degree returns a complete zero row for every rate vertex.
 \end{itemize}
 
-For a one-parameter degree-one coefficient pair \(P^{(c)}[0],P^{(c)}[1]\) on \(\mathcal H_c=[\rho_1^{(c)},\rho_1^{(c+1)}]\), define \(h_1^c=\rho_1^{(c+1)}-\rho_1^{(c)}>0\). The rate-dependent derivative row is then
+For a coefficient row of direction-wise degree \(\mathbf m\) on physical cell \(\mathcal H_{\mathbf c}\), define \(h_s^{\mathbf c}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0\). Before rate substitution, differentiation along a nonzero-degree axis uses the forward difference
+\[
+\left(\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}\right)[\mathbf i]
+=\frac{m_s}{h_s^{\mathbf c}}
+\left(P^{(\mathbf c)}[\mathbf i+\mathbf e_s]-P^{(\mathbf c)}[\mathbf i]\right),
+\qquad i_s=0,\ldots,m_s-1.
+\]
+Thus the \(s\)-th partial has degree \(\mathbf m-\mathbf e_s\). In one parameter this reduced degree is the public result degree. In two or more parameters, \code{rhodiff} elevates every nonzero partial back to the common degree \(\mathbf m\) before adding the rate-weighted rows, so partials from different axes have compatible tensor labels. \Cref{sec:bernstein-differentiation} derives the reduction and exact re-elevation.
+
+For a one-parameter degree-one coefficient pair \(P^{(c)}[0],P^{(c)}[1]\), the rate-dependent derivative row reduces to
 \[
   \dot P(\rho,\nu)
 =\nu\,\frac{P^{(c)}[1]-P^{(c)}[0]}{h_1^c}.
@@ -343,7 +378,7 @@ This is the one-dimensional special case: the two rows correspond to the lower a
 \textit{Differentiation changes local coefficients; rate substitution creates rows.  Neither operation adds physical cells.}
 \end{center}
 
-For \(\ell\) parameters, work cell by cell with \(h_s^{\mathbf c}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0\) in direction \(s\) of \(\mathcal H_{\mathbf c}\). Thus nonuniform grids use a distinct step length in every direction and cell:
+For \(\ell\) parameters, nonuniform grids use a distinct step length in every direction and cell:
 \[
     \dot P^{(\mathbf c)}(\boldsymbol\rho,\boldsymbol\nu)=\sum_{s=1}^{\ell}\nu_s\,\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}(\boldsymbol\rho).
 \]
@@ -403,6 +438,29 @@ coefficientsPerRateVertex = 4
 rateBounds = 2×2 double
      -1     1
      -2     2
+\end{lstlisting}
+
+A zero-degree axis contributes exactly zero but remains present in the common multivariate degree and in the rate-vertex enumeration.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(1, {[0 1], [10 20]}, Degree=[2 0]);
+D = rhodiff(P, [-1 1; -2 2]);
+derivativeDegree = D.Degree
+coefficientTableSize = size(D.coeffs([1 1]))
+rateVertexCount = coefficientTableSize(1)
+coefficientsPerRateVertex = coefficientTableSize(2)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+derivativeDegree = 1×2 double
+     2     0
+
+coefficientTableSize = 1×2 double
+     4     3
+
+rateVertexCount = 4
+coefficientsPerRateVertex = 3
 \end{lstlisting}
 
 \section{\texorpdfstring{\code{bernsteinTable}}{bernsteinTable}}
@@ -492,7 +550,7 @@ A \code{pdvar} result must remain affine in the underlying YALMIP decisions. The
 
 \subsection{Signs, Addition, And Subtraction}
 
-Use this family to combine compatible decision expressions, coefficient-backed known data, finite real numeric data, and affine \code{sdpvar} matrices. Operands with the same physical bounds are aligned on a common grid and elevated exactly to the componentwise maximum degree. The corresponding overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}.
+Use this family to combine compatible decision expressions, coefficient-backed known data, finite real numeric data, and affine \code{sdpvar} matrices. For two parameter-dependent operands, alignment proceeds in a fixed order: verify matching outer bounds, form the sorted union of interior nodes on each axis, exactly subdivide/re-express both coefficient trees on that common grid, elevate both to the componentwise maximum degree, and finally add or subtract matching coefficients. Numeric and affine constant operands are promoted before the last two steps. The corresponding overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}; see \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -542,21 +600,32 @@ differenceClass = 'pdvar'
 negativeClass = 'pdvar'
 \end{lstlisting}
 
-\begin{center}
-\begin{tikzpicture}[>=Latex,node distance=7mm and 10mm,
-  box/.style={dp/neutral,font=\scriptsize,
-    align=center,minimum width=31mm,minimum height=9mm},
-  result/.style={dp/result,
-    font=\scriptsize,align=center,minimum width=34mm,minimum height=9mm}]
-  \node[box] (p) {\(P(\rho)\)\\degree-one decisions};
-  \node[box,below=of p] (x) {\(X\)\\constant affine \code{sdpvar}};
-  \node[result,right=of p,yshift=-7mm] (s) {\(P(\rho)+X\)\\same grid and degree};
-  \draw[->,thick,dpblue] (p.east) -- (s.west);
-  \draw[->,thick,dpblue] (x.east) -- (s.west);
-\end{tikzpicture}
-\end{center}
-
 A nonlinear symbolic operand such as \code{eta*eta} is rejected. Rate-vertex rows from \code{rhodiff} may be added to compatible ordinary expressions; the ordinary rows are broadcast over the active rate vertices.
+
+The next example exercises both stages of parameter-dependent alignment: a coarse degree-one decision is refined to the known operand's two-cell grid and elevated to degree two before coefficientwise addition.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(1, {[0 1]}, Degree=1);
+A = pdmat({[0 0.5 1]}, @(rho) rho.^2, Degree=2);
+S = P + A;
+resultClass = class(S)
+mergedGrid = S.GridInfo.Vectors{1}
+resultDegree = S.Degree
+storageCounts = [S.ncell(), S.ncoeff()]
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+resultClass = 'pdvar'
+
+mergedGrid = 1×3 double
+         0    0.5000    1.0000
+
+resultDegree = 2
+
+storageCounts = 1×2 double
+     2     3
+\end{lstlisting}
 
 \subsection{Multiplication By Known Or Numeric Data}
 \label{sec:pdvar-operator-entries}
@@ -603,7 +672,7 @@ A known parameter-dependent factor adds its Bernstein degree componentwise throu
   \frac{\binom2i\binom1j}{\binom3k}\,P[i]A[j],
   \qquad k=0,1,2,3.
 \]
-The same backend rule is documented at \code{bernProd} in \cref{sec:pdbase-bernprod} and derived step by step in Appendix~\ref{app:bernstein-math}.
+The same backend rule is documented at \code{bernProd} in \cref{sec:pdbase-bernprod} and derived step by step in \cref{sec:bernstein-product-math}. In \(\ell\) parameters, the ordered products are grouped by \(\mathbf k=\mathbf i+\mathbf j\) and weighted by the product of the one-dimensional binomial normalization ratios; the result degree is the componentwise sum.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -626,21 +695,29 @@ knownRightDegree = 3
 coefficientsPerCell = 4
 \end{lstlisting}
 
-\begin{center}
-\begin{tikzpicture}[>=Latex,node distance=8mm and 11mm,
-  known/.style={dp/known,font=\scriptsize,
-    align=center,minimum width=30mm,minimum height=10mm},
-  decision/.style={dp/decision,font=\scriptsize,
-    align=center,minimum width=30mm,minimum height=10mm},
-  result/.style={dp/result,
-    font=\scriptsize,align=center,minimum width=35mm,minimum height=10mm}]
-  \node[known] (a) {\(A(\rho)\) known\\degree 1};
-  \node[decision,below=of a] (p) {\(P(\rho)\) decision\\degree 2};
-  \node[result,right=of a,yshift=-7mm] (ap) {\(A(\rho)P(\rho)\)\\affine, degree 3};
-  \draw[->,thick,dpblue] (a.east) -- (ap.west);
-  \draw[->,thick,dpblue] (p.east) -- (ap.west);
-\end{tikzpicture}
-\end{center}
+Direction-wise degrees add independently. A known factor that varies only in the second parameter raises only the second component of the result degree.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(1, {[0 1], [0 1]}, Degree=[2 0]);
+A = pdmat({[0 1], [0 1]}, ...
+    @(rho1, rho2) 1 + rho2, Degree=[0 1]);
+L = A * P;
+R = P * A;
+leftDegree = L.Degree
+rightDegree = R.Degree
+coefficientsPerCell = L.ncoeff()
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+leftDegree = 1×2 double
+     2     1
+
+rightDegree = 1×2 double
+     2     1
+
+coefficientsPerCell = 6
+\end{lstlisting}
 
 A derivative object may be multiplied by numeric data or a matching-grid known object while preserving every rate row.  Products with rate dependence on both sides, products of a derivative with an ordinary decision expression, and products involving metadata-only rate dependence are rejected.
 
@@ -976,20 +1053,6 @@ blockDiagonalSize = 1×2 double
      4     4
 \end{lstlisting}
 
-\begin{center}
-\begin{tikzpicture}[>=Latex,node distance=18mm,
-  b/.style={dp/neutral,font=\scriptsize,
-    minimum width=18mm,minimum height=10mm},
-  o/.style={dp/result,
-    font=\scriptsize,minimum width=35mm,minimum height=13mm,align=center}]
-  \node[b] (p) {\(P\)};
-  \node[o,right=of p] (h) {\([P\ P]\)\\\(2\times4\)};
-  \node[o,below=of h] (d) {\(\operatorname{blkdiag}(P,I)\)\\\(4\times4\)};
-  \draw[->,thick,dpblue] (p) -- (h);
-  \draw[->,thick,dpblue] (p) -- (d);
-\end{tikzpicture}
-\end{center}
-
 Incompatible blocks or rate metadata raise \codeerr{pdvar}{InvalidConcatenation}; unsupported dimensions raise \linebreak[4]\code{pdvar:}\allowbreak\code{UnsupportedCat}\allowbreak\code{Dimension}; invalid block-diagonal inputs raise \codeerr{pdvar}{InvalidBlkdiag}.  Incompatible bounds raise \codeerr{pdvar}{MixedGrid}; function-only known blocks raise \linebreak[4]\code{pdvar:}\allowbreak\code{FunctionOnly}\allowbreak\code{Algebra}.
 
 \subsection{Repetition}
@@ -1027,7 +1090,7 @@ Invalid repetition shapes raise \codeerr{pdvar}{InvalidRepmat}.
 \section{Index and Assign \texorpdfstring{\code{pdvar}}{pdvar} Entries}
 \label{sec:pdvar-indexing}
 
-Parenthesis indexing selects a matrix block from every symbolic coefficient. Assignment writes a compatible numeric, \code{pdvar}, coefficient-backed \code{pdmat}, or affine \code{sdpvar} block into that position after exact alignment to the componentwise maximum degree. It does not select one physical cell.
+Parenthesis indexing selects a matrix block from every symbolic coefficient. Assignment writes a compatible numeric, \code{pdvar}, coefficient-backed \code{pdmat}, or affine \code{sdpvar} block into that position after the same common-grid refinement and componentwise maximum-degree elevation used by affine addition. The left object and parameter-dependent right-hand side are exactly re-expressed on the sorted union grid before the selected payload block is replaced at every aligned label. It does not select one physical cell. See \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1065,19 +1128,35 @@ containsDecision =
    1
 \end{lstlisting}
 
-\begin{center}
-\begin{tikzpicture}[node distance=9mm,
-  b/.style={dp/stage,text width=32mm},
-  o/.style={dp/result,font=\scriptsize,align=center,text width=32mm,
-    minimum height=12mm,inner sep=4pt}]
-  \node[b] (p) {decision column\((p_{11},\ p_{21})^{\mathsf T}\)};
-  \node[dp/contribution,right=of p,font=\scriptsize,align=center,
-    text width=23mm,minimum height=12mm] (assign) {assign \code{0}\\to column 1};
-  \node[o,right=of assign] (q) {updated decision matrix\(\left[\begin{smallmatrix}0&p_{12}&p_{13}\\0&p_{22}&p_{23}\end{smallmatrix}\right]\)};
-  \draw[dp/arrow] (p) -- (assign);
-  \draw[dp/arrow] (assign) -- (q);
-\end{tikzpicture}
-\end{center}
+Assignment may therefore increase both the grid resolution and the degree of the complete decision expression while retaining its affine decision content.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(2, 2, {[0 1]}, "full", Degree=1);
+A = pdmat({[0 0.5 1]}, ...
+    @(rho) [rho.^2; 1+rho], Degree=2);
+P(:, 2) = A;
+assignedGrid = P.GridInfo.Vectors{1}
+assignedDegree = P.Degree
+assignedClass = class(P)
+storageCounts = [P.ncell(), P.ncoeff()]
+containsDecision = P.ContainsDecision
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+assignedGrid = 1×3 double
+         0    0.5000    1.0000
+
+assignedDegree = 2
+assignedClass = 'pdvar'
+
+storageCounts = 1×2 double
+     2     3
+
+containsDecision =
+  logical
+   1
+\end{lstlisting}
 
 Invalid selectors raise \codeerr{pdvar}{InvalidSubscript}.  Linear indexing, deletion, or non-parenthesis assignment raises \codeerr{pdvar}{UnsupportedAssignment}; incompatible or nonlinear right-hand sides raise \codeerr{pdvar}{InvalidAssignment}.
 \section{\texorpdfstring{\code{value}}{value}}
@@ -1105,6 +1184,30 @@ assignedCoefficients = cell2mat(A.coeffs(1))
 \begin{lstlisting}[style=dpoutput]
 assignedCoefficients = 1×3 double
      1     2     4
+\end{lstlisting}
+
+For rate rows, \code{value} returns one known object per rate vertex rather than collapsing the rows.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(1, [0 1], Degree=1);
+c = P.coeffs(1);
+assign([c{:}], [1 3]);
+D = rhodiff(P, [-1 1]);
+rows = value(D);
+rowCount = numel(rows)
+lowerRowClass = class(rows{1})
+upperRowClass = class(rows{2})
+lowerRateCoefficients = cell2mat(rows{1}.coeffs(1))
+upperRateCoefficients = cell2mat(rows{2}.coeffs(1))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+rowCount = 2
+lowerRowClass = 'pdmat'
+upperRowClass = 'pdmat'
+lowerRateCoefficients = -2
+upperRateCoefficients = 2
 \end{lstlisting}
 
 \section{Comparisons To \texorpdfstring{\code{pdlmi}}{pdlmi}}

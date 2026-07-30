@@ -54,8 +54,8 @@ export default function CellBernsteinExpressionExplorer() {
               \\begin{bmatrix}
               1+\\rho_1+\\rho_2 & \\rho_1\\rho_2\\\\
               \\rho_1\\rho_2 & 2+\\rho_1^2
-              \\end{bmatrix},
-              \\qquad \\boldsymbol\\rho\\in[0,1]^2.
+              \\end{bmatrix},\\\\
+              \\boldsymbol\\rho&\\in[0,1]^2.
               \\end{aligned}`,
             ),
           }}
@@ -101,7 +101,15 @@ export default function CellBernsteinExpressionExplorer() {
             className="cell-basis-expression__formula"
             dangerouslySetInnerHTML={{
               __html: renderDisplayMath(
-                `\\begin{aligned}A^{(${model.cell.c1},1)}(\\boldsymbol\\alpha)&=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{2}}C_{\\mathbf i}^{(${model.cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha),\\\\B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)&=B_{i_1}^{2}(\\alpha_1)B_{i_2}^{2}(\\alpha_2).\\end{aligned}`,
+                `\\begin{aligned}
+                \\mathcal I_2&:=\\{0,1,2\\}^{2},\\\\
+                A^{(${model.cell.c1},1)}(\\boldsymbol\\alpha)
+                &=\\sum_{\\mathbf i\\in\\mathcal I_2}
+                C_{\\mathbf i}^{(${model.cell.c1},1)}
+                B_{\\mathbf i}^{2}(\\boldsymbol\\alpha),\\\\
+                B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)
+                &=B_{i_1}^{2}(\\alpha_1)B_{i_2}^{2}(\\alpha_2).
+                \\end{aligned}`,
               ),
             }}
           />
@@ -136,12 +144,18 @@ export default function CellBernsteinExpressionExplorer() {
             </div>
             <aside className="cell-basis-readout" aria-live="polite">
               <strong>Selected term</strong>
-              <p dangerouslySetInnerHTML={{ __html: renderInlineMath(`C_{${term.i},${term.j}}^{(${model.cell.c1},1)}=${term.coefficient.tex}`) }} />
+              <p>
+                <span dangerouslySetInnerHTML={{ __html: renderInlineMath(`C_{${term.i},${term.j}}^{(${model.cell.c1},1)}=`) }} />
+                <span dangerouslySetInnerHTML={{ __html: renderInlineMath(term.coefficient.tex) }} />
+              </p>
               <p dangerouslySetInnerHTML={{ __html: renderInlineMath(`B_{${term.i}}^2(\\alpha_1)B_{${term.j}}^2(\\alpha_2)=${formatNumber(term.weight)}`) }} />
               <span>Weighted contribution</span>
               <p dangerouslySetInnerHTML={{ __html: renderInlineMath(matrixToTex(contribution)) }} />
               <span>Complete cell value</span>
-              <p dangerouslySetInnerHTML={{ __html: renderInlineMath(`A^{(${model.cell.c1},1)}(\\boldsymbol\\alpha)=${matrixToTex(model.value)}`) }} />
+              <p>
+                <span dangerouslySetInnerHTML={{ __html: renderInlineMath(`A^{(${model.cell.c1},1)}(\\boldsymbol\\alpha)=`) }} />
+                <span dangerouslySetInnerHTML={{ __html: renderInlineMath(matrixToTex(model.value)) }} />
+              </p>
             </aside>
           </div>
         </section>

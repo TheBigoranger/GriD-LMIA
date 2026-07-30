@@ -137,7 +137,7 @@ Their tensor grid \(\mathcal G=\mathcal G_1\times\mathcal G_2\) has nine physica
 \label{fig:intro-two-dimensional-grid}
 \end{figure}
 
-The gridding above fixes nine physical nodes and four physical cells. Within each cell, it has its own local coordinate \(\boldsymbol\alpha\in[0,1]^\ell\) and carries a separate finite set of Bernstein coefficients. For example, a tensor-product polynomial of modeled degree \(m=3\) in each direction, that set has the sixteen local labels \(\mathbf i=(i_1,i_2)\in\{0,1,2,3\}^2\). These labels identify coefficients inside the cell and they are not sixteen additional physical sample points. In general, a degree-\(m\) tensor basis has \((m+1)^\ell\) local labels per cell. And under Bernstein basis, they share the same value at the boundary of a cell. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
+The gridding above fixes nine physical nodes and four physical cells. Within each cell, it has its own local coordinate \(\boldsymbol\alpha\in[0,1]^\ell\) and carries a separate finite set of Bernstein coefficients. For example, a tensor-product polynomial of modeled degree \(m=3\) in each direction has sixteen local labels \(\mathbf i=(i_1,i_2)\in\{0,1,2,3\}^2\). These labels identify coefficients inside the cell; they are not sixteen additional physical sample points. In general, a degree-\(m\) tensor-product basis has \((m+1)^\ell\) local labels per cell. Shared-face coefficient identification makes the represented decision function continuous across neighboring cells. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
 
 \section[Bernstein Basis on Each Cell]{\texorpdfstring{\hspace{0.3em}Bernstein Basis on Each Cell}{Bernstein Basis on Each Cell}}
 \label{sec:continuous-bernstein-representation}
@@ -150,7 +150,7 @@ Fix any physical cell \(\mathcal H_{\mathbf c}\). Its forward affine map from th
     \phi_{\mathbf c,s}(\alpha_s)
     =\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s.
 \]
-Hence \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\), with \(\alpha_s=(\rho_s-\rho_s^{(c_s)})/h_s^{\mathbf c}\). For any cellwise quantity \(X\), write its pullback as \(X^{(\mathbf c)}=X\circ\phi_{\mathbf c}\). The normalized tensor Bernstein basis of modeled degree \(m\) is
+Hence \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\), with \(\alpha_s=(\rho_s-\rho_s^{(c_s)})/h_s^{\mathbf c}\). For any cellwise quantity \(X\), write its pullback as \(X^{(\mathbf c)}=X\circ\phi_{\mathbf c}\). The normalized tensor-product Bernstein basis of modeled degree \(m\) is
 \[
     B_{\mathbf i}^{m}(\boldsymbol\alpha)
     =\prod_{s=1}^{\ell}

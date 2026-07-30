@@ -33,9 +33,11 @@ For a one-dimensional coefficient sequence $C[i]$ of degree $m$, one
 elevation step gives
 
 $$
+\begin{aligned}
 \widetilde C[i]
-=\frac{i}{m+1}C[i-1]
-+\left(1-\frac{i}{m+1}\right)C[i],
+&=\frac{i}{m+1}C[i-1]\\
+&\quad+\left(1-\frac{i}{m+1}\right)C[i].
+\end{aligned}
 $$
 
 with missing endpoint terms omitted. Tensor elevation applies this map axis by
@@ -49,24 +51,35 @@ represented polynomial.
 If
 
 $$
+\begin{aligned}
 P(\boldsymbol\alpha)
-=\sum_{\mathbf i}P[\mathbf i]B_{\mathbf i}^{\mathbf m},
-\qquad
+&=\sum_{\mathbf i}P[\mathbf i]B_{\mathbf i}^{\mathbf m},\\
 Q(\boldsymbol\alpha)
-=\sum_{\mathbf j}Q[\mathbf j]B_{\mathbf j}^{\mathbf n},
+&=\sum_{\mathbf j}Q[\mathbf j]B_{\mathbf j}^{\mathbf n}.
+\end{aligned}
 $$
 
-then the product has degree $\mathbf m+\mathbf n$ and coefficient
+then the product has degree $\mathbf m+\mathbf n$. Define
 
 $$
+\begin{aligned}
+\omega_s(i_s,j_s)
+&:=\frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
+{\binom{m_s+n_s}{i_s+j_s}},\\
+\Omega(\mathbf i,\mathbf j)
+&:=\prod_{s=1}^{\ell}\omega_s(i_s,j_s).
+\end{aligned}
+$$
+
+The coefficient is the ordered convolution
+
+$$
+\begin{aligned}
 R[\mathbf k]
-=\sum_{\mathbf i+\mathbf j=\mathbf k}
-\left[
-\prod_{s=1}^{\ell}
-\frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
-{\binom{m_s+n_s}{k_s}}
-\right]
-P[\mathbf i]Q[\mathbf j].
+&=\sum_{\mathbf i+\mathbf j=\mathbf k}
+\Omega(\mathbf i,\mathbf j)\\
+&\qquad{}\cdot P[\mathbf i]Q[\mathbf j].
+\end{aligned}
 $$
 
 Matrix-factor order is preserved: `P*Q` does not commute coefficient matrices.
@@ -82,11 +95,19 @@ rejected.
 Along local axis $s$,
 
 $$
+\Delta_sP[\mathbf i]
+:=P[\mathbf i+\mathbf e_s]-P[\mathbf i].
+$$
+
+Then
+
+$$
+\begin{aligned}
 \frac{\partial P^{(\mathbf c)}}{\partial\rho_s}
-=\frac{m_s}{h_s^{\mathbf c}}
-\sum_{\mathbf i}
-\bigl(P[\mathbf i+\mathbf e_s]-P[\mathbf i]\bigr)
-B_{\mathbf i}^{\mathbf m-\mathbf e_s}.
+&=\frac{m_s}{h_s^{\mathbf c}}
+\sum_{\mathbf i}\Delta_sP[\mathbf i]\\
+&\qquad{}\cdot B_{\mathbf i}^{\mathbf m-\mathbf e_s}.
+\end{aligned}
 $$
 
 The implementation elevates every nonzero axis-wise partial exactly back to the
@@ -99,13 +120,14 @@ The resulting rate-vertex index belongs to stored rows. Once those rows are
 stacked, write the sign-normalized target as
 
 $$
+\begin{aligned}
 S^{(\mathbf c)}(\boldsymbol\alpha)
-=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{\mathbf i}
-C^{(\mathbf c)}[\mathbf i]
-B_{\mathbf i}^{M}(\boldsymbol\alpha),
-\qquad
-C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}
+&=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha),\\
+S^{(\mathbf c)}(\boldsymbol\alpha)
+&=\sum_{\mathbf i}C^{(\mathbf c)}[\mathbf i]
+B_{\mathbf i}^{M}(\boldsymbol\alpha),\\
+C^{(\mathbf c)}&=-\mathcal C^{(\mathbf c)}.
+\end{aligned}
 $$
 
 without carrying the row index through every certificate formula.

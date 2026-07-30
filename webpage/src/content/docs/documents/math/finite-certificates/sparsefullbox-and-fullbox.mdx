@@ -24,20 +24,24 @@ the software state is `SparseFullBox`. The dense construction is the
 For each subset $J\subseteq\{1,\ldots,\ell\}$, define
 
 $$
+\begin{aligned}
 g_J(\boldsymbol\alpha)
-=\prod_{s\in J}\alpha_s(1-\alpha_s),
-\qquad g_{\varnothing}=1.
+&=\prod_{s\in J}\alpha_s(1-\alpha_s),\\
+g_{\varnothing}&=1.
+\end{aligned}
 $$
 
 FullBox represents
 
 $$
+\begin{aligned}
 S^{(\mathbf c)}(\boldsymbol\alpha)
-=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{J\subseteq[\ell]}
-g_J(\boldsymbol\alpha)S_J(\boldsymbol\alpha),
-\qquad
-C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)},
+&=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha),\\
+S^{(\mathbf c)}(\boldsymbol\alpha)
+&=\sum_{J\subseteq[\ell]}
+g_J(\boldsymbol\alpha)S_J(\boldsymbol\alpha),\\
+C^{(\mathbf c)}&=-\mathcal C^{(\mathbf c)}.
+\end{aligned}
 $$
 
 where every $S_J$ has a free positive-semidefinite Gram matrix. The weighted
@@ -55,16 +59,35 @@ SparseFullBox retains every FullBox parity or generator-mask term and every
 exact target-coefficient identity, but replaces each dense Gram matrix $Q_J$
 by the symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. For
 selected absolute order $r$, use the paper notation
-$\mathbf a_J=r\boldsymbol 1-\boldsymbol\chi_J$:
+$\mathbf a_J=r\boldsymbol 1-\boldsymbol\chi_J$. Introduce the generator
+weight and lifted Bernstein basis
+
+$$
+\begin{aligned}
+g_J(\boldsymbol\alpha)
+&:=\prod_{s\in J}g_s(\boldsymbol\alpha),\\
+Z_J(\boldsymbol\alpha)
+&:=\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n.
+\end{aligned}
+$$
+
+Each band-limited Gram contribution is
+
+$$
+\begin{aligned}
+T_J^{(w)}(\boldsymbol\alpha)
+&:=g_J(\boldsymbol\alpha)\,
+  Z_J(\boldsymbol\alpha)^{\mathsf T}\\
+&\qquad{}\cdot Q_J^{(w)}Z_J(\boldsymbol\alpha),\\
+Q_J^{(w)}&\succeq0.
+\end{aligned}
+$$
+
+The complete certificate is the short subset sum
 
 $$
 S^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{J\subseteq\{1,\ldots,\ell\}}
-\left(\prod_{s\in J}g_s(\boldsymbol\alpha)\right)
-\left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right)^{\mathsf T}
-Q_J^{(w)}
-\left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right),
-\qquad Q_J^{(w)}\succeq0.
+=\sum_{J\subseteq\{1,\ldots,\ell\}}T_J^{(w)}(\boldsymbol\alpha).
 $$
 
 Terms with a negative component in $\mathbf a_J$ are omitted. The

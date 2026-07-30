@@ -21,9 +21,9 @@ const lmiSteps = [
   {
     number: "01",
     title: "Model the general DPD-LMI problem",
-    inlineMath: "\\boldsymbol y=\\bigl(y_1,\\ldots,y_N\\bigr)^\\top:\\mathcal P\\to\\mathbb R^N.",
+    inlineMath: "\\boldsymbol y:\\mathcal P\\to\\mathbb R^N.",
     inlineNoteHtml: `${renderInlineMath("\\boldsymbol y")} is the decision function, assumed locally Lipschitz continuous on ${renderInlineMath("\\mathcal P")}.`,
-    math: "\\mathcal F(\\boldsymbol\\rho,\\dot{\\boldsymbol\\rho};y)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\preceq0.",
+    math: "\\begin{aligned}\\mathcal F_{\\mathrm{alg}}&:=F_0+\\sum_{k=1}^{N}F_k y_k,\\\\\\mathcal F_{\\mathrm{rate}}&:=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}\\frac{\\partial y_k}{\\partial\\rho_s},\\\\\\mathcal F&=\\mathcal F_{\\mathrm{alg}}+\\mathcal F_{\\mathrm{rate}}\\preceq0.\\end{aligned}",
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/",
     manualLabel: "Open the induced-L₂-gain specialization ↗",
   },
@@ -32,9 +32,9 @@ const lmiSteps = [
     title: "Partition the supported parameter box",
     textHtml: `Axis ${renderInlineMath("s")} uses ${renderInlineMath("k_s")} physical nodes in ${renderInlineMath("\\mathcal G_s")}; the one-based vector ${renderInlineMath("\\mathbf c")} selects ${renderInlineMath("\\mathcal H_{\\mathbf c}")}. The tensor grid partitions ${renderInlineMath("\\mathcal P")} exactly. Approximation comes only from restricting the decision-function space; affine rate-vertex reduction remains exact.`,
     math: [
-      "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
+      "\\begin{aligned}\\mathcal P&=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\\\\\mathcal R&=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].\\end{aligned}",
       "\\underbrace{\\mathcal G_s}_{\\text{axis-}s\\text{ physical nodes}}=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\}.",
-      "\\underbrace{\\mathcal H_{\\mathbf c}}_{\\text{physical cell selected by }\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
+      "\\begin{aligned}\\mathcal H_{\\mathbf c}&:=\\prod_{s=1}^{\\ell}I_s^{(c_s)},\\\\I_s^{(c_s)}&:=\\left[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}\\right].\\end{aligned}",
     ],
     visual: "grid",
     manual: "documents/math/gridding-and-degree/",
@@ -45,11 +45,11 @@ const lmiSteps = [
     title: "Fix one cell and use the Bernstein basis",
     textHtml: `Pull one physical cell back to ${renderInlineMath("\\boldsymbol\\alpha\\in[0,1]^\\ell")}. The normalized basis is nonnegative and sums to one, exposes endpoint and face coefficients, and supports cell-local coefficient algebra.`,
     math: [
-      "\\boldsymbol\\alpha=\\phi_{\\mathbf c}^{-1}(\\boldsymbol\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{\\mathbf c}}.",
-      "B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad \\sum_{\\mathbf i}B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=1.",
+      "\\begin{aligned}\\boldsymbol\\alpha&=\\phi_{\\mathbf c}^{-1}(\\boldsymbol\\rho),\\\\\\alpha_s&=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{\\mathbf c}}.\\end{aligned}",
+      "\\begin{aligned}b_s(i_s,\\alpha_s)&:=\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\\\B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)&:=\\prod_{s=1}^{\\ell}b_s(i_s,\\alpha_s),\\\\\\sum_{\\mathbf i}B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)&=1.\\end{aligned}",
       "A^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha).",
     ],
-    storageMath: "\\footnotesize A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
+    storageMath: "\\begin{aligned}A(\\rho_1,\\rho_2)&=\\begin{bmatrix}a_{11}&a_{12}\\\\a_{12}&a_{22}\\end{bmatrix},\\\\a_{11}&=1+\\rho_1+\\rho_2,\\\\a_{12}&=\\rho_1\\rho_2,\\\\a_{22}&=2+\\rho_1^2.\\end{aligned}",
     visual: "storage",
     fullCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=[2 2]);\nA.cells()\nA.LocalValues{1}{1}",
     manual: "documents/math/coordinates-and-bernstein/coefficient-algebra/",
@@ -194,7 +194,7 @@ const lmiSteps = [
   .step-copy h3,
   .step-copy p { margin: 0; }
   .step-title-math :global(.katex) { font-size: 1em; }
-  .step-inline-math { min-width: 0; overflow-x: auto; padding-block: 0.15rem; white-space: nowrap; }
+  .step-inline-math { min-width: 0; padding-block: 0.15rem; }
   .step-inline-math :global(.katex) { font-size: 1.05em; }
   .step-inline-note { margin-top: 0.35rem; color: var(--sl-color-gray-2); }
   .cell-storage-compact :global(.cell-explorer) { gap: 0.65rem; }
@@ -232,8 +232,8 @@ const lmiSteps = [
   }
   .step-copy p { color: var(--sl-color-gray-2); line-height: 1.65; }
   .math-strip { inline-size: min(100%, 54rem); min-width: 0; margin-inline: auto; border-inline-start: 3px solid var(--sl-color-accent); padding-inline-start: 0.8rem; }
-  /* Long matrix conditions stay intact and scroll only within their own row. */
-  .math-strip__row { min-width: 0; overflow-x: auto; overflow-y: hidden; }
+  /* Ordinary mathematics is authored as short or multiline displays. */
+  .math-strip__row { min-width: 0; }
   .math-strip :global(.katex-display) { margin: 0; }
   .step-content :global(.diagram-frame) { margin-block: 0.4rem 0; }
   .step-content :global(.certificate-flow) { inline-size: min(100%, 54rem); margin-inline: auto; }
@@ -253,6 +253,30 @@ const lmiSteps = [
     .home-hero,
     .download-panel { grid-template-columns: 1fr; }
     .download-links { justify-content: flex-start; }
+
+    .cell-storage-compact :global(.cell-summary),
+    .cell-storage-compact :global(.cell-layout) { grid-template-columns: minmax(0, 1fr); }
+    .cell-storage-compact :global(.cell-transform-arrow),
+    .cell-storage-compact :global(.cell-storage-connector) { width: auto; height: 2.5rem; justify-self: center; }
+    .cell-storage-compact :global(.cell-transform-arrow i),
+    .cell-storage-compact :global(.cell-storage-connector i) {
+      width: 0;
+      height: 1.2rem;
+      justify-self: center;
+      border-block-start: 0;
+      border-inline-start: 2px solid var(--sl-color-accent);
+    }
+    .cell-storage-compact :global(.cell-transform-arrow i::after),
+    .cell-storage-compact :global(.cell-storage-connector i::after) {
+      inset-block-start: auto;
+      inset-block-end: -1px;
+      inset-inline-start: -5px;
+      inset-inline-end: auto;
+      border-block-start: 0;
+      border-inline-end: 2px solid var(--sl-color-accent);
+      border-block-end: 2px solid var(--sl-color-accent);
+      transform: rotate(45deg);
+    }
   }
 
   @media (max-width: 600px) {

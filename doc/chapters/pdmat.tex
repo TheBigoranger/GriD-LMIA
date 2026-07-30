@@ -67,28 +67,6 @@ A = pdmat(..., ValidationMode=mode)
   \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It controls only repeated post-normalization structural checks and is not stored. Public source validation remains complete in both modes.
 \end{itemize}
 
-\begin{center}
-\begin{tikzpicture}[node distance=5mm and 9mm]
-  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
-    minimum height=11mm] (f) {function handle\\exact evaluator};
-  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
-    minimum height=11mm,below=of f] (g)
-    {global coefficient grid\\shared physical nodes};
-  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
-    minimum height=11mm,below=of g] (l)
-    {nested \code{LocalValues}\\cell-local coefficients};
-  \node[dp/contribution,right=of g,align=center,font=\scriptsize,
-    minimum width=17mm,minimum height=17mm] (or) {\textbf{one}\\source};
-  \node[dp/result,right=of or,align=center,font=\scriptsize,text width=39mm,
-    minimum height=17mm] (a) {\code{pdmat}\\grid, size, degree,\\
-    optional coefficient evidence};
-  \draw[dp/arrow] (f.east) -| ([xshift=-2mm]or.north);
-  \draw[dp/arrow] (g.east) -- (or.west);
-  \draw[dp/arrow] (l.east) -| ([xshift=-2mm]or.south);
-  \draw[dp/arrow] (or.east) -- (a.west);
-\end{tikzpicture}
-\end{center}
-
 \examplehead
 The scalar-grid shorthand is the shortest coefficient-backed form.  The three numeric cells below are the global Bernstein coefficients for two physical cells with degree one.
 
@@ -248,7 +226,7 @@ B = A.elevate(degreeIncrement)
 \end{lstlisting}
 
 \descriptionhead
-The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row; \code{lbls} returns the zero-based tensor labels \(\mathbf i\in\prod_s\{0,\ldots,m_s\}\); \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, \(\prod_s(m_s+1)\) coefficients per cell, and parameter directions. \code{elevVals} accepts a scalar shorthand or direction-wise increment and returns an elevated nested coefficient tree without modifying \code{A}; \code{elevate} returns a new \code{pdmat} at the componentwise degree sum while preserving the represented known function and dynamic-class metadata.
+The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row; \code{lbls} returns the zero-based tensor labels \(\mathbf i\in\prod_s\{0,\ldots,m_s\}\); \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, \(\prod_s(m_s+1)\) coefficients per cell, and parameter directions. \code{elevVals} accepts a scalar shorthand or direction-wise increment and returns an elevated nested coefficient tree without modifying \code{A}; \code{elevate} returns a new \code{pdmat} at the componentwise degree sum while preserving the represented known function and dynamic-class metadata. Mechanically, the backend binomially scales each tensor coefficient, performs an \(\ell\)-dimensional discrete convolution with the fixed separable kernel \(K_{\mathbf M-\mathbf m}[\mathbf r]=\prod_s\binom{M_s-m_s}{r_s}\), and divides by the target binomial weights. \Cref{sec:bernstein-degree-elevation} derives this exact representation change.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -279,6 +257,33 @@ elevatedObjectCoefficients = 1×3 double
      1     2     3
 degrees = 1×2 double
      1     2
+\end{lstlisting}
+
+A direction-wise increment changes only the requested axes. This two-parameter example elevates the first axis while retaining the second.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1], [0 1]}, ...
+    @(rho1, rho2) rho1 + 2*rho2, Degree=[1 1]);
+B = A.elevate([1 0]);
+sourceDegree = A.Degree
+elevatedDegree = B.Degree
+coefficientCounts = [A.ncoeff(), B.ncoeff()]
+sameValue = [A.evaluate([0.25 0.75]), ...
+    B.evaluate([0.25 0.75])]
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+sourceDegree = 1×2 double
+     1     1
+
+elevatedDegree = 1×2 double
+     2     1
+
+coefficientCounts = 1×2 double
+     4     6
+
+sameValue = 1×2 double
+    1.7500    1.7500
 \end{lstlisting}
 
 \remarkshead
@@ -381,7 +386,7 @@ D = rhodiff(A)
 D = rhodiff(A, rateBounds)
 \end{lstlisting}
 
-\arghead \code{rhodiff} differentiates coefficient-backed \code{pdmat} data cell by cell and returns a \code{pdmat} with numeric rate-vertex rows. Explicit \code{rateBounds} supplies missing metadata; when \code{A.RateBounds} is already stored, the explicit bounds must match it exactly. Without either source of bounds, the call raises \codeerr{pdmat}{MissingRateBounds}. For one parameter, degree \(m>0\) returns degree \(m-1\), while degree zero remains degree zero. For more than one parameter, each nonzero-axis partial is elevated exactly from \(\mathbf m-\mathbf e_s\) back to the common tensor degree \(\mathbf m=\code{A.Degree}\) before summation; a zero-degree axis contributes zero, and an all-zero tensor degree produces complete zero rate rows. The result is rate-dependent and generally discontinuous across cell faces. A function-only source raises \codeerr{pdmat}{FunctionOnlyDiff}; malformed or inconsistent bounds raise \codeerr{pdmat}{InvalidRateBounds} or \codeerr{pdmat}{RateBoundsMismatch}; data that already contain explicit rate rows, including a previous derivative, raise \codeerr{pdmat}{InvalidDiff}.
+\arghead \code{rhodiff} differentiates coefficient-backed \code{pdmat} data cell by cell and returns a \code{pdmat} with numeric rate-vertex rows. Explicit \code{rateBounds} supplies missing metadata; when \code{A.RateBounds} is already stored, the explicit bounds must match it exactly. Without either source of bounds, the call raises \codeerr{pdmat}{MissingRateBounds}. Along axis \(s\), the local derivative coefficients are \(\frac{m_s}{h_s^{\mathbf c}}\bigl(A^{(\mathbf c)}[\mathbf i+\mathbf e_s]-A^{(\mathbf c)}[\mathbf i]\bigr)\). For one parameter, degree \(m>0\) therefore returns degree \(m-1\), while degree zero remains degree zero. For more than one parameter, each nonzero-axis partial is elevated exactly from \(\mathbf m-\mathbf e_s\) back to the common tensor degree \(\mathbf m=\code{A.Degree}\) before summation; a zero-degree axis contributes zero, and an all-zero tensor degree produces complete zero rate rows. The result is rate-dependent and generally discontinuous across cell faces. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the reduction, re-elevation, and deterministic rate-row order. A function-only source raises \codeerr{pdmat}{FunctionOnlyDiff}; malformed or inconsistent bounds raise \codeerr{pdmat}{InvalidRateBounds} or \codeerr{pdmat}{RateBoundsMismatch}; data that already contain explicit rate rows, including a previous derivative, raise \codeerr{pdmat}{InvalidDiff}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -404,6 +409,28 @@ derivativeDegree =
 derivativeRowValues =
     -2
      4
+\end{lstlisting}
+
+In several parameters, each partial is restored to the common tensor degree before the rate-weighted sum. Here the four rate rows are constant over all four local labels, but the stored degree remains \([1,1]\).
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1], [0 1]}, ...
+    @(rho1, rho2) rho1 + 2*rho2, ...
+    Degree=[1 1], RateBounds=[-1 1; -2 3]);
+D = rhodiff(A);
+derivativeDegree = D.Degree
+derivativeRows = cell2mat(D.coeffs([1 1]))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+derivativeDegree = 1×2 double
+     1     1
+
+derivativeRows = 4×4 double
+    -5    -5    -5    -5
+     5     5     5     5
+    -3    -3    -3    -3
+     7     7     7     7
 \end{lstlisting}
 
 \section{Inspect Coefficients and Plot Values}
@@ -667,7 +694,7 @@ A \code{pdmat} operation acts on complete matrix coefficients while the physical
 
 \subsection{Signs, Addition, And Subtraction}
 
-Use signs, sums, and differences to build known matrix expressions. Compatible physical bounds are refined to the union grid, and both operands are elevated exactly to the componentwise maximum degree before matching coefficients are combined. The corresponding MATLAB overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}.
+Use signs, sums, and differences to build known matrix expressions. For two parameter-dependent operands, the backend first checks matching outer bounds, forms the sorted union of the interior nodes on every axis, and exactly subdivides/re-expresses both coefficient trees on that common grid. It then elevates both operands componentwise to \(\max(\mathbf m_A,\mathbf m_B)\) and combines matching coefficients. Numeric and affine constant operands are promoted on the active grid before the same coefficientwise operation. The corresponding MATLAB overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}; \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation} document the exact grid and degree mechanisms.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -731,7 +758,30 @@ positiveClass = 'pdmat'
 \end{tikzpicture}
 \end{center}
 
-When grids have the same outer bounds but different interior nodes, the union grid is used before addition or subtraction.  For example, \code{pdmat({[0 1]},...)+pdmat({[0 .5 1]},...)} has grid \code{[0 .5 1]}; each operand is represented exactly on both resulting cells.
+When grids have the same outer bounds but different interior nodes, the union grid is used before addition or subtraction. The next example combines this refinement with unequal degrees; the two input objects remain unchanged.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, @(rho) rho, Degree=1);
+B = pdmat({[0 0.5 1]}, @(rho) 2*rho, Degree=2);
+S = A + B;
+mergedGrid = S.GridInfo.Vectors{1}
+resultDegree = S.Degree
+cell1Coefficients = cell2mat(S.coeffs(1))
+cell2Coefficients = cell2mat(S.coeffs(2))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+mergedGrid = 1×3 double
+         0    0.5000    1.0000
+
+resultDegree = 2
+
+cell1Coefficients = 1×3 double
+         0    0.7500    1.5000
+
+cell2Coefficients = 1×3 double
+    1.5000    2.2500    3.0000
+\end{lstlisting}
 
 \subsection{Ordered Matrix Multiplication}
 \index{ordered matrix multiplication}\index{Bernstein product}\index{known data}
@@ -752,7 +802,7 @@ K^{(c)}[k]=\sum_{i+j=k}
   \frac{\binom mi\binom nj}{\binom{m+n}{k}}\,
 A^{(c)}[i]D^{(c)}[j].
 \]
-The left/right matrix order is never exchanged. It is worthnoting that the above formula is a weighted convolution of the local coefficients, not a simple sum of products.  The binomial weights are the Bernstein basis evaluations at the local coordinate \(\alpha=i/(m+n)\) for each anti-diagonal \(i+j=k\).
+The left/right matrix order is never exchanged. The formula is a weighted convolution of the local coefficients, not a simple sum of products. Its weights are combinatorial normalization ratios: multiplying \(B_i^mB_j^n\) yields \(\binom mi\binom nj/\binom{m+n}{i+j}\) times \(B_{i+j}^{m+n}\). They are not Bernstein-basis evaluations at a selected local coordinate.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -795,7 +845,7 @@ productCoefficients = 1×4 double
 \textit{Coefficient labels add under the weighted convolution; payload matrices multiply in the written order.  The three panels make the convolution readable without crossing contribution arrows.}
 \end{center}
 
-For tensor data, label addition and binomial weights are applied independently in each parameter direction.  If \(\mathbf m,\mathbf n\in\mathbb N^\ell\) are direction-wise basis degrees, the \(\ell\)-dimensional ordered convolution is
+For tensor data, label addition and binomial weights are applied independently in each parameter direction. If \(\mathbf m,\mathbf n\in\mathbb N^\ell\) are direction-wise basis degrees, the \(\ell\)-dimensional ordered tensor convolution is
 \[
 K^{(\mathbf c)}[\mathbf k] =\sum_{\mathbf i+\mathbf j=\mathbf k}
    \left(\prod_{s=1}^{\ell}
@@ -803,7 +853,7 @@ K^{(\mathbf c)}[\mathbf k] =\sum_{\mathbf i+\mathbf j=\mathbf k}
         {\binom{m_s+n_s}{k_s}}\right)
 A^{(\mathbf c)}[\mathbf i]D^{(\mathbf c)}[\mathbf j].
 \]
-Two degree-one factors in two parameters produce degree two and \(3^2=9\) coefficients per physical cell.
+Two degree-one factors in two parameters produce degree two and \(3^2=9\) coefficients per physical cell. \Cref{sec:bernstein-product-math} derives the convolution by multiplying normalized tensor-product basis functions and grouping every ordered contribution with \(\mathbf k=\mathbf i+\mathbf j\).
 
 \remarkshead
 Incompatible operands for \code{+}, \code{-}, and \code{*} raise \codeerr{pdmat}{InvalidAddition}, \codeerr{pdmat}{InvalidSubtraction}, or \codeerr{pdmat}{InvalidMultiplication}.  Parameter counts or outer bounds that cannot be merged raise \codeerr{pdmat}{MixedGrid}.  Coefficient algebra on a function-only object raises \code{pdmat:}\allowbreak\code{FunctionOnly}%
@@ -1195,24 +1245,6 @@ blockDiagonalAtZero = 2×2 double
      0     5
 \end{lstlisting}
 
-\begin{center}
-\begin{tikzpicture}[node distance=8mm and 8mm,
-  flow/.style={dp/stage,text width=27mm}]
-  \node[flow] (hinput) {inputs\(a,\ b\)};
-  \node[flow,right=of hinput] (hop) {\code{horzcat}};
-  \node[flow,dp/result,right=of hop] (hout) {result\([a\ b]\)};
-  \draw[dp/arrow] (hinput) -- (hop);
-  \draw[dp/arrow] (hop) -- (hout);
-
-  \node[flow,below=7mm of hinput] (dinput) {inputs\(a,\ 5\)};
-  \node[flow,right=of dinput] (dop) {\code{blkdiag}};
-  \node[flow,dp/result,right=of dop] (dout)
-    {result\(\left[\begin{smallmatrix}a&0\\0&5\end{smallmatrix}\right]\)};
-  \draw[dp/arrow] (dinput) -- (dop);
-  \draw[dp/arrow] (dop) -- (dout);
-\end{tikzpicture}
-\end{center}
-
 Incompatible blocks or syntax raise \codeerr{pdmat}{InvalidConcatenation}; unsupported dimensions raise \codeerr{pdmat}{UnsupportedCatDimension}; invalid block-diagonal inputs raise \codeerr{pdmat}{InvalidBlkdiag}.  Function-only operands raise \codeerr{pdmat}{FunctionOnlyAlgebra}.
 
 \subsection{Repetition}
@@ -1250,7 +1282,7 @@ Invalid repetition shapes raise \codeerr{pdmat}{InvalidRepmat}.
 \index{subsref@\texttt{subsref}}\index{subsasgn@\texttt{subsasgn}}\index{end@\texttt{end}}\index{numArgumentsFromSubscript@\texttt{numArgumentsFromSubscript}}
 \label{sec:pdmat-indexing}
 
-Parenthesis indexing selects a matrix block from every coefficient. Assignment writes the selected block into every coefficient after compatible promotion and exact alignment to the componentwise maximum degree. It does not select a physical cell; use \code{coeffs} for cell inspection.
+Parenthesis indexing selects a matrix block from every coefficient. Assignment writes the selected block into every coefficient after the same common-grid refinement and componentwise maximum-degree elevation used by addition: the left object and parameter-dependent right-hand side are exactly re-expressed on the sorted union grid, both coefficient families are elevated, and then only the selected payload block is replaced at every aligned label. It does not select a physical cell; use \code{coeffs} for cell inspection. See \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1286,19 +1318,27 @@ assignedAtZero = 2×3 double
      4     5     6
 \end{lstlisting}
 
-\begin{center}
-\begin{tikzpicture}[node distance=9mm,
-  b/.style={dp/stage,text width=30mm},
-  o/.style={dp/result,font=\scriptsize,align=center,text width=30mm,
-    minimum height=12mm,inner sep=4pt}]
-  \node[b] (a) {selected column\(2,\ 5\)};
-  \node[dp/contribution,right=of a,font=\scriptsize,align=center,
-    text width=23mm,minimum height=12mm] (assign) {assign \code{5}\\to column 2};
-  \node[o,right=of assign] (u) {updated matrix\(\left[\begin{smallmatrix}1&5&3\\4&5&6\end{smallmatrix}\right]\)};
-  \draw[dp/arrow] (a) -- (assign);
-  \draw[dp/arrow] (assign) -- (u);
-\end{tikzpicture}
-\end{center}
+Assignment also aligns a parameter-dependent right-hand side with a different grid and degree.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, @(rho) [1 rho; 2 3*rho], Degree=1);
+B = pdmat({[0 0.5 1]}, @(rho) [rho.^2; 1+rho], Degree=2);
+A(:, 2) = B;
+assignedGrid = A.GridInfo.Vectors{1}
+assignedDegree = A.Degree
+assignedValue = A.evaluate(0.25)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+assignedGrid = 1×3 double
+         0    0.5000    1.0000
+
+assignedDegree = 2
+
+assignedValue = 2×2 double
+    1.0000    0.0625
+    2.0000    1.2500
+\end{lstlisting}
 
 \code{subsref}, \code{subsasgn}, \code{end}, and \code{numArgumentsFromSubscript} implement this two-index MATLAB protocol. Invalid selectors raise \codeerr{pdmat}{InvalidSubscript}.  Linear indexing, deletion, or non-parenthesis assignment raises \codeerr{pdmat}{UnsupportedAssignment}; an incompatible right-hand side raises \codeerr{pdmat}{InvalidAssignment}.  Slicing and assignment require coefficient evidence and otherwise raise \codeerr{pdmat}{FunctionOnlyAlgebra}.
 \section{Boundaries and Related APIs}

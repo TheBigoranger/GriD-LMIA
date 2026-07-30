@@ -34,7 +34,7 @@ D = rhodiff(P)
 | Argument | Description |
 | :--- | :--- |
 | `P` | A `pdvar` expression that is not already a rate-vertex derivative expression. |
-| `rb` | Finite `ell x 2` rate-bound table, such as `[-1 1]` or `[-1 2; -3 5]`. Required unless `P` already carries matching `RateBounds`. |
+| `rb` | Finite $\ell\times2$ rate-bound table, such as `[-1 1]` or `[-1 2; -3 5]`. Required unless `P` already carries matching `RateBounds`. |
 
 ## Output
 
@@ -45,8 +45,8 @@ D = rhodiff(P)
 `coeffs`.
 
 Each physical cell stores one coefficient row per active `rho_dot` vertex. If
-`rb` has `ell` rows, each row contributes a lower and upper rate choice, so
-`rhodiff` forms the Cartesian product of those choices and stores `2^ell`
+`rb` has $\ell$ rows, each row contributes a lower and upper rate choice, so
+`rhodiff` enumerates the Cartesian product of those choices and stores $2^\ell$
 rate rows. The coefficient columns still follow the Bernstein label order
 returned by `D.lbls()`.
 
@@ -99,7 +99,7 @@ has two vertices, `-1` and `1`; it has one coefficient column because scalar
 degree-1 derivatives become degree-0 coefficient rows.
 
 For multiple parameters, the rate vertices are ordered as the same
-lower/upper tensor product used by `helper.combRows`. For example,
+lower/upper Cartesian-product order used by `helper.combRows`. For example,
 `rb = [-1 2; -3 5]` gives four rows:
 
 ```text

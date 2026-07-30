@@ -27,11 +27,22 @@ $Q\succeq0$.
 For assembled degree $M=2r$, represent the target as
 
 $$
+\begin{aligned}
+G_0(\alpha)&:=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha),\\
+G_1(\alpha)&:=Z_{r-1}(\alpha)^{\mathsf T}
+Q_1Z_{r-1}(\alpha).
+\end{aligned}
+$$
+
+Thus
+
+$$
+\begin{aligned}
 S^{(\mathbf c)}(\alpha)
-=-\mathcal F^{(\mathbf c)}(\alpha)
-=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha)
-+\alpha(1-\alpha)
-Z_{r-1}(\alpha)^{\mathsf T}Q_1Z_{r-1}(\alpha),
+&=-\mathcal F^{(\mathbf c)}(\alpha),\\
+S^{(\mathbf c)}(\alpha)
+&=G_0(\alpha)+\alpha(1-\alpha)G_1(\alpha).
+\end{aligned}
 $$
 
 with $Q_0,Q_1\succeq0$. The basis-to-coefficient Gram map is affine, and
@@ -43,10 +54,12 @@ $C^{(\mathbf c)}[i]$.
 For $M=2r+1$, use endpoint weights:
 
 $$
+\begin{aligned}
+G_j(\alpha)&:=Z_r(\alpha)^{\mathsf T}Q_jZ_r(\alpha),\\
 S^{(\mathbf c)}(\alpha)
-=(1-\alpha)Z_r^{\mathsf T}Q_0Z_r
-+\alpha Z_r^{\mathsf T}Q_1Z_r,
-\qquad Q_0,Q_1\succeq0.
+&=(1-\alpha)G_0(\alpha)+\alpha G_1(\alpha),\\
+Q_0&\succeq0,\qquad Q_1\succeq0.
+\end{aligned}
 $$
 
 The minimum absolute order is $r=\lfloor M/2\rfloor$ in one parameter.

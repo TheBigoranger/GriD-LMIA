@@ -43,8 +43,8 @@ A = pdmat(..., ValidationMode=mode)
 | :--- | :--- |
 | `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of strictly increasing vectors, such as `{[0 1], [10 20]}`. |
 | `source` | Function handle, global cell grid of numeric Bernstein coefficients such as `{1, 2, 3}`, or explicit nested `LocalValues` such as `{{[1 0], [0 1]}, {[2 0], [0 2]}}`. |
-| `Degree` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise vector, such as `Degree=[1 3]`. The accepted value is stored as a `1 × ell` row. Required when a function handle should be validated as Bernstein coefficient evidence. |
-| `RateBounds` | Finite `ell`-by-2 lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`; explicit nested leaves may instead contain all `2^ell` rate-vertex rows. |
+| `Degree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector, such as `Degree=[1 3]`. The accepted value is stored as a $1\times\ell$ row. Required when a function handle should be validated as Bernstein coefficient evidence. |
+| `RateBounds` | Finite $\ell\times2$ lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`; explicit nested leaves may instead contain all $2^\ell$ rate-vertex rows. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient and not stored. Public source validation remains complete in both modes. |
 
 Unsupported metadata options: `IsContinuous`, `ContainsDecision`, and
@@ -63,7 +63,7 @@ readable through dot syntax and have private set access:
 | :--- | :--- | :--- |
 | `GridInfo` | `A.GridInfo.Vectors{1}`, `A.GridInfo.Points`, `A.GridInfo.Bounds` | Validated tensor-grid metadata. |
 | `MatrixSize` | `A.MatrixSize` | Matrix size of each numeric payload. |
-| `Degree` | `A.Degree` | Direction-wise local Bernstein degree stored as a `1 × ell` row. |
+| `Degree` | `A.Degree` | Direction-wise local Bernstein degree stored as a $1\times\ell$ row. |
 | `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | Cell-local numeric Bernstein coefficients. |
 | `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces; otherwise the constructor warns and returns `false`. |
 | `ContainsDecision` | `A.ContainsDecision` | Always `false`; no YALMIP decisions are stored. |

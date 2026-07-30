@@ -16,11 +16,12 @@ For `pdvar`, the leaf at cell $\boldsymbol c$ and label $\boldsymbol i$ stores
 the symbolic matrix $X^{(\boldsymbol c)}[\boldsymbol i]$:
 
 $$
+\begin{aligned}
 \operatorname{LocalValues}_{\boldsymbol c}[\boldsymbol i]
-=
+&=X^{(\boldsymbol c)}[\boldsymbol i],\\
 X^{(\boldsymbol c)}[\boldsymbol i]
-\in
-\operatorname{Aff}(\texttt{sdpvar}).
+&\in\operatorname{Aff}(\texttt{sdpvar}).
+\end{aligned}
 $$
 
 ## <span id="pdvar-cells"></span>`cells`
@@ -93,25 +94,41 @@ and metadata remain unchanged.
 
 The coefficient map is exactly the
 [`pdmat` elevation formula](/PD-LMI-package/documents/reference/pdmat/elevate/#what-degree-elevation-does),
-applied linearly to symbolic coefficient matrices:
+applied linearly to symbolic coefficient matrices. Let
 
 $$
+\begin{aligned}
+\mathcal I_{\boldsymbol m}
+&:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
+\mathcal I_{\boldsymbol M}
+&:=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}.
+\end{aligned}
+$$
+
+For $\boldsymbol M\ge\boldsymbol m$, define the direction-wise and tensor
+weights
+
+$$
+\begin{aligned}
+\omega_s(i_s,k_s)
+&:=\frac{\binom{m_s}{i_s}
+  \binom{M_s-m_s}{k_s-i_s}}
+  {\binom{M_s}{k_s}},\\
+\Omega(\boldsymbol i,\boldsymbol k)
+&:=\prod_{s=1}^{\ell}\omega_s(i_s,k_s).
+\end{aligned}
+$$
+
+Then symbolic elevation is the short affine map
+
+$$
+\begin{aligned}
 \widehat X^{(\boldsymbol c)}[\boldsymbol k]
-=
-\sum_{\boldsymbol i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
-\left[
-\prod_{s=1}^{\ell}
-\frac{
-\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}
-}{
-\binom{M_s}{k_s}
-}
-\right]
-X^{(\boldsymbol c)}[\boldsymbol i],
-\qquad
-\boldsymbol k\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\},
-\quad
-\boldsymbol M\ge\boldsymbol m.
+&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
+\Omega(\boldsymbol i,\boldsymbol k)
+X^{(\boldsymbol c)}[\boldsymbol i],\\
+\boldsymbol k&\in\mathcal I_{\boldsymbol M}.
+\end{aligned}
 $$
 
 No new independent YALMIP variable is created; the elevated coefficients are
@@ -145,12 +162,16 @@ For the selected physical cell, ordinary evaluation is the symbolic Bernstein
 sum
 
 $$
+\begin{aligned}
+\mathcal I_{\boldsymbol m}
+&:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
+\boldsymbol\alpha
+&:=\phi_{\boldsymbol c}^{-1}(\boldsymbol\rho),\\
 P^{(\boldsymbol c)}(\boldsymbol\rho)
-=
-\sum_{\boldsymbol i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
+&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
 X^{(\boldsymbol c)}[\boldsymbol i]\,
-B_{\boldsymbol i}^{\boldsymbol m}
-\!\left(\phi_{\boldsymbol c}^{-1}(\boldsymbol\rho)\right).
+B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha).
+\end{aligned}
 $$
 
 This is the same basis evaluation illustrated on

@@ -39,12 +39,12 @@ Csparse = pdlmi(expr, relation, BandWidth=w, SparseFullBoxOrder=r)
 | :--- | :--- |
 | `C` | Any `pdlmi` object. The method always rebuilds from `C.Residual`; it does not add constraints to the currently selected family. |
 | `w` | Finite positive integer bandwidth for the symmetric block-band Gram matrix $Q_J^{(w)}$. Default `2`. |
-| `r` | Finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute Gram order. It is not an increment from the residual degree. |
+| `r` | Finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute Gram order. It is not an increment from the residual degree. |
 
 For assembled residual degree `M`, the default and minimum admissible order are
 `floor(M/2)` in one parameter and componentwise `ceil(M/2)` in two or more
 parameters. Order validation occurs before endpoint normalization. The
-accepted order is stored as a `1 × ell` row.
+accepted order is stored as a $1\times\ell$ row.
 
 ## Returned Object And Read-Only State
 
@@ -74,16 +74,31 @@ returned object instead of inferring its family from the requested width.
 ## Certificate Construction
 
 For selected absolute order $\mathbf r$, use the paper notation
-$\mathbf a_J=\mathbf r-\boldsymbol\chi_J$. SparseFullBox uses
+$\mathbf a_J=\mathbf r-\boldsymbol\chi_J$. Define the generator weight and
+lifted Bernstein basis by
 
 $$
+\begin{aligned}
+g_J(\boldsymbol\alpha)
+&:=\prod_{s\in J}g_s(\boldsymbol\alpha),\\
+Z_J(\boldsymbol\alpha)
+&:=\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n.
+\end{aligned}
+$$
+
+The contribution for subset $J$ and the complete certificate are
+
+$$
+\begin{aligned}
+T_J^{(w)}(\boldsymbol\alpha)
+&:=g_J(\boldsymbol\alpha)\,
+  Z_J(\boldsymbol\alpha)^{\mathsf T}\\
+&\qquad{}\cdot Q_J^{(w)}Z_J(\boldsymbol\alpha),\\
+Q_J^{(w)}&\succeq0,\\
 S^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{J\subseteq\{1,\ldots,\ell\}}
-\left(\prod_{s\in J}g_s(\boldsymbol\alpha)\right)
-\left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right)^{\mathsf T}
-Q_J^{(w)}
-\left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right),
-\qquad Q_J^{(w)}\succeq0.
+&=\sum_{J\subseteq\{1,\ldots,\ell\}}
+  T_J^{(w)}(\boldsymbol\alpha).
+\end{aligned}
 $$
 
 Every $Q_J^{(w)}$ is symmetric block-band with bandwidth $w$; terms with a

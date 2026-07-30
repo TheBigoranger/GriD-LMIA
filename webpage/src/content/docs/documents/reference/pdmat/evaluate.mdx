@@ -43,7 +43,7 @@ val = A.evaluate(pt)
 ## Output
 
 For ordinary data, `val` is a numeric matrix with size `A.MatrixSize`. For
-explicit rate-row data, it is a `1`-by-`2^ell` cell row containing one numeric
+explicit rate-row data, it is a $1\times2^\ell$ cell row containing one numeric
 matrix per stored rate vertex.
 
 ## Description
@@ -51,34 +51,44 @@ matrix per stored rate vertex.
 For coefficient-backed data, let the evaluation point lie in the physical cell
 
 $$
-\boldsymbol\rho\in\mathcal H_{\boldsymbol c}
-=\prod_{s=1}^{\ell}
-\left[\rho_s^{(c_s)},\rho_s^{(c_s+1)}\right],
-\qquad
+\begin{aligned}
+\mathcal H_{\boldsymbol c}
+&:=\prod_{s=1}^{\ell}
+\left[\rho_s^{(c_s)},\rho_s^{(c_s+1)}\right],\\
+\boldsymbol\rho&\in\mathcal H_{\boldsymbol c},\\
 \alpha_s
-=\frac{\rho_s-\rho_s^{(c_s)}}
-{\rho_s^{(c_s+1)}-\rho_s^{(c_s)}},
-\quad s=1,\ldots,\ell.
+&:=\frac{\rho_s-\rho_s^{(c_s)}}
+{\rho_s^{(c_s+1)}-\rho_s^{(c_s)}},\\
+s&=1,\ldots,\ell.
+\end{aligned}
 $$
 
 For direction-wise Bernstein degree
 $\boldsymbol m=(m_1,\ldots,m_\ell)$, `evaluate` computes the tensor expansion
 
 $$
+\begin{aligned}
+\mathcal I_{\boldsymbol m}
+&:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
 A(\boldsymbol\rho)
-=A^{(\boldsymbol c)}(\boldsymbol\alpha)
-=\sum_{\boldsymbol i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
+&=A^{(\boldsymbol c)}(\boldsymbol\alpha),\\
+A^{(\boldsymbol c)}(\boldsymbol\alpha)
+&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
 C^{(\boldsymbol c)}[\boldsymbol i]\,
 B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha).
+\end{aligned}
 $$
 
 Here the tensor-product basis is
 
 $$
+\begin{aligned}
+b_s(i_s,\alpha_s)
+&:=\binom{m_s}{i_s}
+\alpha_s^{i_s}(1-\alpha_s)^{m_s-i_s},\\
 B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)
-=\prod_{s=1}^{\ell}
-\binom{m_s}{i_s}
-\alpha_s^{i_s}(1-\alpha_s)^{m_s-i_s}.
+&:=\prod_{s=1}^{\ell}b_s(i_s,\alpha_s).
+\end{aligned}
 $$
 
 Each $C^{(\boldsymbol c)}[\boldsymbol i]$ is the stored scalar or matrix

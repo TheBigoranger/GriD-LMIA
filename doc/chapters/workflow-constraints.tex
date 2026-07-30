@@ -2,20 +2,20 @@
 \label{sec:cellwise-solver-path}
 \index{residual}\index{Direct certificate}\index{finite certificate}
 
-Fix any physical cell \(\mathcal H_{\mathbf c}\) and suppress the already enumerated rate-row index. After all local operations have been aligned to the assembled residual degree \(M\), the pullback of the residual has the general form
+Fix any physical cell \(\mathcal H_{\mathbf c}\) and suppress the already enumerated rate-row index. After all local operations have been aligned to the assembled residual degree \(\mathbf M\), the pullback of the residual has the general form
 \[
     \mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
-    =\sum_{\mathbf i\in\{0,\ldots,M\}^{\ell}}
-    B_{\mathbf i}^{M}(\boldsymbol\alpha)
+    =\sum_{\mathbf i\in\prod_s\{0,\ldots,M_s\}}
+    B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)
     \mathcal C^{(\mathbf c)}[\mathbf i]
     \prec0.
 \]
-Here \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\), \(B_{\mathbf i}^{M}\) is the degree-\(M\) tensor Bernstein basis, \(\mathbf i\) is a zero-based local label, and \(\mathcal C^{(\mathbf c)}[\mathbf i]\) is the corresponding residual coefficient. Define the sign-normalized positive target and its coefficients by
+Here \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\), \(B_{\mathbf i}^{\mathbf M}\) is the direction-wise degree-\(\mathbf M\) tensor-product Bernstein basis, \(\mathbf i\) is a zero-based local label, and \(\mathcal C^{(\mathbf c)}[\mathbf i]\) is the corresponding residual coefficient. Define the sign-normalized positive target and its coefficients by
 \[
     S^{(\mathbf c)}(\boldsymbol\alpha)
     =-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
-    =\sum_{\mathbf i\in\{0,\ldots,M\}^{\ell}}
-    B_{\mathbf i}^{M}(\boldsymbol\alpha)
+    =\sum_{\mathbf i\in\prod_s\{0,\ldots,M_s\}}
+    B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)
     C^{(\mathbf c)}[\mathbf i],
     \qquad
     C^{(\mathbf c)}[\mathbf i]=-\mathcal C^{(\mathbf c)}[\mathbf i].

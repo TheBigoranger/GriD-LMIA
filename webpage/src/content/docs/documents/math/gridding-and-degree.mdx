@@ -24,9 +24,10 @@ choices.
 For scheduling axis $s$, define the ordered grid
 
 $$
-\mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},
-\qquad
-\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell.
+\begin{aligned}
+\mathcal G_s&=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},\\
+\mathcal G&=\mathcal G_1\times\cdots\times\mathcal G_\ell.
+\end{aligned}
 $$
 
 The one-based symbol $\rho_s^{(j)}$ denotes physical node $j$ on axis
@@ -39,12 +40,13 @@ The one-based physical cell index
 $\mathbf c=(c_1,\ldots,c_\ell)$ selects
 
 $$
+\begin{aligned}
 \mathcal H_{\mathbf c}
-=\prod_{s=1}^{\ell}
-[\rho_s^{(c_s)},\rho_s^{(c_s+1)}],
-\qquad
+&=\prod_{s=1}^{\ell}
+[\rho_s^{(c_s)},\rho_s^{(c_s+1)}],\\
 h_s^{\mathbf c}
-=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
+&=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
+\end{aligned}
 $$
 
 The grid determines where cells begin and end. The decision degree $m$
@@ -58,13 +60,17 @@ For $\mathcal G_1=\{0,0.5,1\}$, there are two cells. The physical map
 $\phi_{\mathbf c}:[0,1]^\ell\to\mathcal H_{\mathbf c}$ and its inverse are
 
 $$
-\rho_s=\phi_{\mathbf c,s}(\boldsymbol\alpha)
-=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,
-\qquad
-\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho),
-\qquad
-\alpha_s=
-\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{\mathbf c}}\in[0,1].
+\begin{aligned}
+\rho_s
+&=\phi_{\mathbf c,s}(\boldsymbol\alpha),\\
+\rho_s
+&=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,\\
+\boldsymbol\alpha
+&=\phi_{\mathbf c}^{-1}(\boldsymbol\rho),\\
+\alpha_s
+&=\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{\mathbf c}}
+\in[0,1].
+\end{aligned}
 $$
 
 Consequently,
@@ -98,7 +104,7 @@ $\prod_s(m_s+1)=9$ labels $\mathbf i=(i_1,i_2)$.
 
 <TensorTraversalExplorer client:visible />
 
-## The ell-Dimensional Case
+## The ℓ-Dimensional Case
 
 The number of physical cells is
 $\prod_{s=1}^{\ell}(k_s-1)$. For direction-wise degree

@@ -30,7 +30,7 @@ $$
 Because $\mathcal R$ is a box and the residual is affine in
 $\boldsymbol\nu$, requiring the matrix inequality at every vertex of
 $\mathcal R$ is equivalent to requiring it throughout $\mathcal R$. This
-step introduces $2^\ell$ rate rows, ordered by lower/upper tensor choices.
+step introduces $2^\ell$ rate rows, ordered by lower/upper Cartesian-product choices.
 
 <RhodiffDiagram />
 
@@ -65,13 +65,13 @@ between neighboring cells. Therefore its values agree on each face. The
 normal derivative need not agree:
 
 $$
+\begin{aligned}
 P_{\mathbf c^-}|_{\text{face}}
-=P_{\mathbf c^+}|_{\text{face}},
-\qquad
+&=P_{\mathbf c^+}|_{\text{face}},\\
 \nabla P_{\mathbf c^-}|_{\text{face}}
-\ne
-\nabla P_{\mathbf c^+}|_{\text{face}}
+&\ne\nabla P_{\mathbf c^+}|_{\text{face}}
 \quad\text{is allowed}.
+\end{aligned}
 $$
 
 This is $C^0$ piecewise-polynomial storage, not a claim of global $C^1$

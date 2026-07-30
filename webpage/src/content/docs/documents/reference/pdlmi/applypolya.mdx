@@ -31,7 +31,7 @@ Cpolya = C.applyPolya(..., ValidationMode=mode)
 ## Description
 
 The no-argument form selects uniform increment one. An explicit increment is a
-finite nonnegative integer scalar shorthand or an `ell`-element direction-wise
+finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise
 vector. It elevates the residual componentwise before `pdlmi` constrains every
 elevated coefficient and every active rate-vertex row. The method is
 value-like: it returns a new object and leaves `C` unchanged.
@@ -67,7 +67,8 @@ ans =
 ## Validation And Errors
 
 The increment must be a finite nonnegative integer scalar shorthand or an
-`ell`-element vector. The selected `PolyaDegree` is stored as a `1 × ell` row.
+$\ell$-element vector. The selected `PolyaDegree` is stored as a
+$1\times\ell$ row.
 Invalid values raise `pdlmi:InvalidPolyaDegree`.
 
 Semidefinite inequalities retain semidefinite coefficient tests. Entry-wise

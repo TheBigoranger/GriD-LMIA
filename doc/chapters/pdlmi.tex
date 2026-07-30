@@ -172,21 +172,6 @@ sparseFullBoxOrder = 0
 bandWidth = 0
 \end{lstlisting}
 
-\begin{center}
-\begin{tikzpicture}[>=Latex,node distance=9mm,
-  box/.style={dp/neutral,font=\scriptsize,
-    align=center,minimum width=33mm,minimum height=11mm},
-  result/.style={dp/result,
-    font=\scriptsize,align=center,minimum width=37mm,minimum height=11mm}]
-  \node[box] (lhs) {\code{lhs >= rhs}\\matrix comparison};
-  \node[result,right=of lhs] (res) {\code{Residual = lhs-rhs}\\
-    \code{Relation = ">="}};
-  \node[result,right=of res] (con) {\code{Constraints}\\one per selected certificate};
-  \draw[->,thick,dpblue] (lhs) -- (res);
-  \draw[->,thick,dpblue] (res) -- (con);
-\end{tikzpicture}
-\end{center}
-
 \remarkshead
 \begin{enumerate}[leftmargin=*,itemsep=0.55\baselineskip]
   \item A residual outside the supported \code{pdvar}/\code{pdmat} forms raises \codeerr{pdlmi}{InvalidExpression}; a function-only \code{pdmat} raises \codeerr{pdlmi}{MissingCoefficientEvidence}; \code{pdlmi(A,"==")} for \code{pdmat} raises \codeerr{pdlmi}{UnsupportedPdmatEquality}; an unsupported relation raises \codeerr{pdlmi}{InvalidRelation}. \item Malformed, unknown, or duplicate options raise \codeerr{pdlmi}{InvalidOptions}, \codeerr{pdlmi}{UnknownOption}, or \codeerr{pdlmi}{DuplicateOption}; invalid validation modes raise \codeerr{pdlmi}{InvalidValidationMode}; nonlogical selectors use their corresponding \code{InvalidUse...} identifier. \item Malformed P\'olya increments, Putinar orders, sparse orders, widths, and full-box orders raise, respectively, \codeerr{pdlmi}{Invalid}\allowbreak\code{PolyaDegree}, \codeerr{pdlmi}{Invalid}\allowbreak\code{PutinarOrder}, \codeerr{pdlmi}{InvalidSparseFullBoxOrder}, \codeerr{pdlmi}{InvalidBandWidth}, and \codeerr{pdlmi}{Invalid}\allowbreak\code{FullBoxOrder}. An integer below an active Gram-family minimum raises \codeerr{pdlmi}{PutinarOrder}\allowbreak\code{TooLow}, \codeerr{pdlmi}{SparseFullBoxOrderTooLow}, or \codeerr{pdlmi}{FullBoxOrder}\allowbreak\code{TooLow}. \item Explicit false plus a Putinar order raises \codeerr{pdlmi}{ConflictingPutinarOptions}; explicit false plus a sparse order or width raises \codeerr{pdlmi}{ConflictingSparseFullBoxOptions}; explicit false plus a positive P\'olya increment raises \codeerr{pdlmi}{ConflictingPolyaOptions}. The full-box explicit-false form remains direct and retains the supplied order as metadata. \needspace{9\baselineskip} \item An inequality with any nonsquare or non-Hermitian original coefficient is assembled entry-wise and emits \codeerr{pdlmi}{ElementwiseInequality}; it is not rejected. Numeric Hermitian testing accepts equality at the inclusive \(10^{-10}\) infinity-norm tolerance. \item Equality is direct-only. Every \code{apply...} method raises\newline \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before validating its supplied increment, width, or order.
@@ -205,7 +190,7 @@ S^{(\mathbf c)}(\boldsymbol\alpha)=
 \]
 where \(\mathbf M\) is the assembled residual tensor degree and \(\mathbf i\in\prod_s\{0,\ldots,M_s\}\). The semidefinite direct certificate requires \(C^{(\mathbf c)}[\mathbf i]\succeq0\) for every physical cell \(\mathbf c\) and local label \(\mathbf i\), repeated independently for every stored rate row. This is sufficient, not necessary.
 
-For an entry-wise inequality, replace each matrix coefficient by \code{C(:)} and impose the oriented scalar sign on every component. The global classification is made before P\'olya elevation or Gram assembly, so every coefficient and every certificate in one wrapper uses the same mode. Putinar, SparseFullBox, and FullBox create one independent scalar Gram certificate for each column-major entry. Direct equality simply imposes \code{C(:) == 0}; it does not use a positivity certificate or an implicit tolerance.
+For an entry-wise inequality, replace each matrix coefficient by \code{C(:)} and impose the oriented scalar sign on every component. The global classification is made before P\'olya elevation or Gram assembly, so every coefficient and every certificate in one wrapper uses the same mode. Putinar, SparseFullBox, and FullBox create one independent scalar Gram certificate for each column-major entry. Direct equality simply imposes \code{C(:) == 0}; it does not use a positivity certificate or an implicit tolerance. \Cref{sec:certificate-direct} proves the convex-hull implication and separates this sufficient coefficient test from point sampling.
 
 \begin{center}
 The diagram specializes to one parameter, degree two, and one ordinary (non-rate) row; therefore \(c\) is a scalar one-based cell index and \(i\in\{0,1,2\}\).
@@ -321,7 +306,7 @@ constraintCount = 4
 \textit{P\'olya degree is a representation increment that may differ by direction; it is not a new decision degree, a grid refinement, or a Gram order.}
 \end{center}
 
-The mathematical background and the limits of fixed-increment coefficient positivity are developed in \cref{app:certificates}.
+The mathematical background, its interpretation as lossless tensor degree elevation, and the limits of fixed-increment coefficient positivity are developed in \cref{sec:certificate-polya}.
 
 \section{Select Putinar Assembly with
 \texorpdfstring{\code{applyPutinar}}{applyPutinar}}
@@ -357,7 +342,7 @@ Cputinar = C.applyPutinar(r)
 Cputinar = C.applyPutinar(..., ValidationMode=mode)
 \end{lstlisting}
 
-Here \code{r} is scalar shorthand or a direction-wise absolute Bernstein Gram order \(\mathbf r\). The no-argument form uses the dimension-dependent minima above; an explicit order must satisfy the same applicable componentwise bound. In the multivariate branch, the unweighted block \(S_0\) uses tensor basis degree \(\mathbf r\), while \(S_s\) uses degree \(\mathbf r-\boldsymbol e_s\). A nominal block with a negative component is omitted. The target is degree-elevated without changing its represented polynomial, and the multivariate Gram sum is matched exactly at tensor degree \(2\mathbf r\).
+Here \code{r} is scalar shorthand or a direction-wise absolute Bernstein Gram order \(\mathbf r\). The no-argument form uses the dimension-dependent minima above; an explicit order must satisfy the same applicable componentwise bound. In the multivariate branch, the unweighted block \(S_0\) uses tensor-product basis degree \(\mathbf r\), while \(S_s\) uses degree \(\mathbf r-\boldsymbol e_s\). A nominal block with a negative component is omitted. The target is degree-elevated without changing its represented polynomial, and the multivariate Gram sum is matched exactly at tensor degree \(2\mathbf r\).
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -415,7 +400,7 @@ The diagram below specializes to the even one-parameter example above.
 \textit{The method changes the finite certificate, not the stored residual, decision degree, or physical grid.}
 \end{center}
 
-\code{applyPutinar} is a value-class method: it returns a new \code{pdlmi}, leaves \code{C} unchanged, and rebuilds from the original \code{Residual} and \code{Relation}. Reapplication replaces any earlier P\'olya, Putinar, SparseFullBox, or FullBox selection. It adds no implicit margin and makes no solver call.
+\code{applyPutinar} is a value-class method: it returns a new \code{pdlmi}, leaves \code{C} unchanged, and rebuilds from the original \code{Residual} and \code{Relation}. Reapplication replaces any earlier P\'olya, Putinar, SparseFullBox, or FullBox selection. It adds no implicit margin and makes no solver call. \Cref{sec:certificate-markov-lukacs,sec:certificate-putinar-schmudgen} derive the one-dimensional parity form and the multivariate singleton-generator module used by this selector.
 
 \remarkshead
 \begin{enumerate}[leftmargin=*]
@@ -451,7 +436,7 @@ S^{(\mathbf c)}(\boldsymbol\alpha)=
   \left(\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n\right),
   \qquad Q_J^{(w)}\succeq0,
 \]
-where every \(Q_J^{(w)}\) is symmetric block-band with bandwidth \(w\), and terms for which \(\mathbf a_J\) has a negative component are omitted. The one-parameter parity-specific FullBox formulas use the same replacement \(Q_J\mapsto Q_J^{(w)}\). Exact coefficient matching is unchanged. In one parameter, \(w=1\) is block diagonal and the implementation canonicalizes it to Direct, \(w=2\) is block tridiagonal, and \(w=3\) is block pentadiagonal. Increasing \(w\) gives a nested sufficient hierarchy, but feasibility need not improve strictly on a particular model.
+where every \(Q_J^{(w)}\) is symmetric block-band with bandwidth \(w\), and terms for which \(\mathbf a_J\) has a negative component are omitted. The one-parameter parity-specific FullBox formulas use the same replacement \(Q_J\mapsto Q_J^{(w)}\). Exact coefficient matching is unchanged. In one parameter, \(w=1\) is block diagonal and the implementation canonicalizes it to Direct, \(w=2\) is block tridiagonal, and \(w=3\) is block pentadiagonal. Increasing \(w\) gives a nested sufficient hierarchy, but feasibility need not improve strictly on a particular model. \Cref{sec:certificate-sparse-full-box} explains how the retained tensor windows determine the banded Gram map and why the two endpoint requests rebuild canonical Direct or FullBox state.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -516,8 +501,7 @@ S^{(\mathbf c)}(\boldsymbol\alpha)=
 Q_JZ_{\mathbf a_J}(\boldsymbol\alpha),
   \qquad Q_J\succeq0.
 \]
-Terms for which \(\mathbf a_J\) has a negative component are omitted.
-In one parameter the implementation uses the even/odd Markov--Luk\'acs forms, with minimum absolute order \(\lfloor M/2\rfloor\) for assembled residual degree \(M\). For two or more parameters it uses every subset product of the \(\ell\) box generators and componentwise minimum order \(\lceil\mathbf M/2\rceil\). The selected order fixes the dense Bernstein Gram bases; it is not added to \(\mathbf M\).
+Terms for which \(\mathbf a_J\) has a negative component are omitted. In one parameter the implementation uses the even/odd Markov--Luk\'acs forms, with minimum absolute order \(\lfloor M/2\rfloor\) for assembled residual degree \(M\). For two or more parameters it uses every subset product of the \(\ell\) box generators and componentwise minimum order \(\lceil\mathbf M/2\rceil\). The selected order fixes the dense Bernstein Gram bases; it is not added to \(\mathbf M\).
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -568,7 +552,7 @@ The Bernstein basis degrees are respectively \((r,r)\), \((r-1,r)\), \((r,r-1)\)
 \end{tikzpicture}
 \end{center}
 
-Appendix~\ref{app:certificates} derives the one-dimensional parity forms, explains the multivariate subset masks, and distinguishes this implemented box preordering from the multivariate singleton-generator Putinar branch, full-space SOS, and general polynomial parsers. Assembly is independent for every physical cell and every active rate-vertex row; Gram variables are not shared across either boundary.  For \code{>=}, the method represents the residual.  For \code{<=}, it negates the target before forming the positive-semidefinite representation.  Within each cell and row, the stored constraints are ordered as all PSD Gram blocks followed by exact equalities matching every Bernstein coefficient.  Consequently, the number of stored constraints is not the direct coefficient count.
+\Cref{sec:certificate-markov-lukacs,sec:certificate-full-box} derive the one-dimensional parity forms, explain the multivariate subset masks, and distinguish this implemented box preordering from the multivariate singleton-generator Putinar branch, full-space SOS, and general polynomial parsers. Assembly is independent for every physical cell and every active rate-vertex row; Gram variables are not shared across either boundary. For \code{>=}, the method represents the residual. For \code{<=}, it negates the target before forming the positive-semidefinite representation. Within each cell and row, the stored constraints are ordered as all PSD Gram blocks followed by exact equalities matching every Bernstein coefficient. Consequently, the number of stored constraints is not the direct coefficient count.
 
 \remarkshead
 \begin{enumerate}[leftmargin=*,nosep]

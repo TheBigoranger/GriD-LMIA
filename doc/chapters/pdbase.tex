@@ -259,7 +259,14 @@ D = rhodiff(A, rateBounds)
 \end{lstlisting}
 
 \arghead
-\code{rhodiff} differentiates coefficient-backed storage cell by cell and returns the same dynamic class as \code{A}. The no-argument form uses \code{A.RateBounds}; if those bounds are empty, explicit \code{rateBounds} is required. Explicit bounds supply missing metadata, but when \code{A.RateBounds} is already stored they must match it exactly. For one parameter, an input of degree \(m>0\) returns degree \(m-1\), while degree zero remains degree zero. For more than one parameter, a nonzero-axis partial first has degree \(\mathbf m-\mathbf e_s\), then is elevated exactly to the common tensor degree \(\mathbf m=\code{A.Degree}\) before the rate-weighted partials are added; hence \code{D.Degree=A.Degree}. A zero-degree axis contributes the zero partial and still remains part of that common degree vector. Each physical-cell leaf has one row per rate-box vertex, in the order produced by applying \code{helper.combRows} to the parameter-wise bound rows. The result has \code{IsContinuous=false}, \code{HasRateDependence=true}, and derivative source metadata.
+\code{rhodiff} differentiates coefficient-backed storage cell by cell and returns the same dynamic class as \code{A}. The no-argument form uses \code{A.RateBounds}; if those bounds are empty, explicit \code{rateBounds} is required. Explicit bounds supply missing metadata, but when \code{A.RateBounds} is already stored they must match it exactly. On physical cell \(\mathbf c\), the partial coefficient along a nonzero-degree axis \(s\) is
+\[
+\left(\partial_s A^{(\mathbf c)}\right)[\mathbf i]
+=\frac{m_s}{h_s^{\mathbf c}}
+\left(A^{(\mathbf c)}[\mathbf i+\mathbf e_s]-A^{(\mathbf c)}[\mathbf i]\right),
+\qquad i_s=0,\ldots,m_s-1.
+\]
+For one parameter, an input of degree \(m>0\) returns degree \(m-1\), while degree zero remains degree zero. For more than one parameter, a nonzero-axis partial first has degree \(\mathbf m-\mathbf e_s\), then is elevated exactly to the common tensor degree \(\mathbf m=\code{A.Degree}\) before the rate-weighted partials are added; hence \code{D.Degree=A.Degree}. A zero-degree axis contributes the zero partial and still remains part of that common degree vector. Each physical-cell leaf has one row per rate-box vertex, in the order produced by applying \code{helper.combRows} to the parameter-wise bound rows. The result has \code{IsContinuous=false}, \code{HasRateDependence=true}, and derivative source metadata. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the degree reduction, common-degree restoration, and row ordering.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -580,7 +587,15 @@ out = obj.elevate(degreeIncrement)
 \end{lstlisting}
 
 \descriptionhead
-\code{degreeIncrement} is one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector. A scalar expands uniformly; the vector adds direction-wise. \code{out} is the same dynamic class as \code{obj}; it contains elevated coefficient evidence at the componentwise sum \code{obj.Degree + degreeIncrement} while preserving the represented polynomial, physical cells, metadata, YALMIP decision variables, rate-row order, and subclass properties. The source object is unchanged, and elevation introduces no new decision freedom.
+\code{degreeIncrement} is one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector. A scalar expands uniformly; the vector adds direction-wise. \code{out} is the same dynamic class as \code{obj}; it contains elevated coefficient evidence at the componentwise sum \code{obj.Degree + degreeIncrement} while preserving the represented polynomial, physical cells, metadata, YALMIP decision variables, rate-row order, and subclass properties. If \(\mathbf m=\code{obj.Degree}\), \(\mathbf M=\mathbf m+\code{degreeIncrement}\), and \(U_{\mathbf m}^{(\mathbf c)}[\mathbf i]=\bigl(\prod_s\binom{m_s}{i_s}\bigr)C^{(\mathbf c)}[\mathbf i]\), the backend computes
+\[
+\widehat C^{(\mathbf c)}[\mathbf k]
+=\frac{\bigl(U_{\mathbf m}^{(\mathbf c)}*_\ell K_{\mathbf M-\mathbf m}\bigr)[\mathbf k]}
+{\prod_s\binom{M_s}{k_s}},
+\qquad
+K_{\mathbf M-\mathbf m}[\mathbf r]=\prod_s\binom{M_s-m_s}{r_s}.
+\]
+Thus elevation is an \(\ell\)-dimensional discrete convolution with a fixed separable kernel followed by binomial normalization. The source object is unchanged, and elevation introduces no new decision freedom. \Cref{sec:bernstein-degree-elevation} derives the formula and its exactness.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -741,7 +756,14 @@ For one parameter, the protected helper implements
     C[k]=\sum_{i+j=k}
     \frac{\binom mi\binom nj}{\binom{m+n}{k}}\,A[i]B[j].
 \]
-It enumerates ordered payload products, groups them by the anti-diagonal \(i+j=k\), and only then applies the binomial normalization.  For tensor labels the same rule is applied componentwise.  See the public \code{pdmat} multiplication entry in \cref{sec:pdmat-operator-entries}, the \code{pdvar} known-data boundary in \cref{sec:pdvar-algebra}, and the full derivation in Appendix~\ref{app:bernstein-math}.
+It enumerates ordered payload products, groups them by the anti-diagonal \(i+j=k\), and only then applies the binomial normalization. For tensor labels, it performs the \(\ell\)-dimensional ordered convolution
+\[
+C[\mathbf k]=\sum_{\mathbf i+\mathbf j=\mathbf k}
+\left(\prod_{s=1}^{\ell}
+\frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
+{\binom{m_s+n_s}{k_s}}\right)A[\mathbf i]B[\mathbf j].
+\]
+See the public \code{pdmat} multiplication entry in \cref{sec:pdmat-operator-entries}, the \code{pdvar} known-data boundary in \cref{sec:pdvar-algebra}, and the full derivation in \cref{sec:bernstein-product-math}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -806,7 +828,7 @@ grid = obj.mergeGrid(errId, other1, other2, ...)
 \begin{itemize}[leftmargin=*]
     \item \code{errId} is the error identifier used when parameter counts or physical bounds are incompatible. \item \code{other1, other2, ...} are coefficient-backed operands, including function-backed operands constructed with an explicit \code{Degree}. They must have equal parameter counts and matching first and last nodes on every parameter axis. \item \code{grid} has the sorted union of the interior nodes.  Public algebra re-expresses operands on these cells before degree elevation, coefficient-wise addition, or product convolution.
 \end{itemize}
-This protected helper is invoked by public algebra methods rather than called directly by users.
+This protected helper is invoked by public algebra methods rather than called directly by users. Public addition, subtraction, concatenation, and assignment then apply a common four-stage alignment: form this sorted union grid, use exact subdivision to re-express every operand on its physical cells, elevate direction-wise to the componentwise maximum degree, and only then operate on matching local coefficients. Grid alignment changes neither the represented functions nor the outer parameter box. \Cref{sec:bernstein-degree-elevation} gives the degree step, while \cref{sec:bernstein-tensor-grids} fixes the physical-cell and tensor-label ordering.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]

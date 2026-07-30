@@ -36,7 +36,19 @@ export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: 
           </section>
           <div className="cell-summary__basis" aria-label="Tensor Bernstein basis">
             <a className="cell-basis-link" href="https://en.wikipedia.org/wiki/Bernstein_polynomial">Bernstein basis</a>
-            <div dangerouslySetInnerHTML={{ __html: renderDisplayMath("\\footnotesize B_{\\mathbf i}^{m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m-i_s}") }} />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: renderDisplayMath(
+                  `\\begin{aligned}
+                  u_s&:=\\alpha_s^{i_s},\\\\
+                  v_s&:=(1-\\alpha_s)^{m-i_s},\\\\
+                  b_s&:=\\binom{m}{i_s}u_sv_s,\\\\
+                  B_{\\mathbf i}^{m}(\\boldsymbol\\alpha)
+                  &:=\\prod_{s=1}^{\\ell}b_s.
+                  \\end{aligned}`,
+                ),
+              }}
+            />
           </div>
         </div>
         <div className="cell-layout">
@@ -91,7 +103,18 @@ export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: 
             <div
               className="cell-bernstein-formula"
               dangerouslySetInnerHTML={{
-                __html: renderDisplayMath(`\\footnotesize\\begin{gathered}A^{(${cell.c1},1)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\mathcal I_m}C_{\\mathbf i}^{(${cell.c1},1)}B_{\\mathbf i}^{m}(\\boldsymbol\\alpha)\\\\\\mathcal I_m=\\{0,\\ldots,m\\}^{\\ell},\\quad m=2\\end{gathered}`),
+                __html: renderDisplayMath(
+                  `\\begin{aligned}
+                  \\mathcal I_2&:=\\{0,1,2\\}^{\\ell},\\\\
+                  \\beta_{\\mathbf i}
+                  &:=B_{\\mathbf i}^{2}(\\boldsymbol\\alpha),\\\\
+                  T_{\\mathbf i}^{(${cell.c1},1)}
+                  &:=C_{\\mathbf i}^{(${cell.c1},1)}\\beta_{\\mathbf i},\\\\
+                  A^{(${cell.c1},1)}(\\boldsymbol\\alpha)
+                  &=\\sum_{\\mathbf i\\in\\mathcal I_2}
+                  T_{\\mathbf i}^{(${cell.c1},1)}.
+                  \\end{aligned}`,
+                ),
               }}
             />
           </aside>

@@ -19,11 +19,12 @@ examples. A deep page still defines the symbols needed for its own argument.
 ## <span id="domains"></span>Parameter And Rate Domains
 
 $$
-\mathcal P=\prod_{s=1}^{\ell}
-[\underline\rho_s,\overline\rho_s],
-\qquad
-\mathcal R=\prod_{s=1}^{\ell}
+\begin{aligned}
+\mathcal P&=\prod_{s=1}^{\ell}
+[\underline\rho_s,\overline\rho_s],\\
+\mathcal R&=\prod_{s=1}^{\ell}
 [\underline\nu_s,\overline\nu_s].
+\end{aligned}
 $$
 
 - $\boldsymbol\rho\in\mathcal P$ is the scheduling parameter and
@@ -38,21 +39,23 @@ $$
 ## <span id="grid"></span>Tensor Grid And Physical Cells
 
 $$
-\mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},
-\qquad
-\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell.
+\begin{aligned}
+\mathcal G_s&=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},\\
+\mathcal G&=\mathcal G_1\times\cdots\times\mathcal G_\ell.
+\end{aligned}
 $$
 
 Here $k_s$ is the number of nodes on axis $s$. The one-based physical-cell
 index $\mathbf c=(c_1,\ldots,c_\ell)$ selects
 
 $$
+\begin{aligned}
 \mathcal H_{\mathbf c}
-=\prod_{s=1}^{\ell}
-[\rho_s^{(c_s)},\rho_s^{(c_s+1)}],
-\qquad
+&=\prod_{s=1}^{\ell}
+[\rho_s^{(c_s)},\rho_s^{(c_s+1)}],\\
 h_s^{\mathbf c}
-=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
+&=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
+\end{aligned}
 $$
 
 The tensor grid partitions $\mathcal P$ exactly. Gridding becomes a modeling
@@ -64,9 +67,10 @@ The physical map $\phi_{\mathbf c}:[0,1]^\ell\to\mathcal H_{\mathbf c}$ and
 its inverse are
 
 $$
-\rho_s=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,
-\qquad
-\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho).
+\begin{aligned}
+\rho_s&=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,\\
+\boldsymbol\alpha&=\phi_{\mathbf c}^{-1}(\boldsymbol\rho).
+\end{aligned}
 $$
 
 Physical nodes and $\mathbf c$ are one-based. A local Bernstein label
@@ -85,7 +89,7 @@ $\mathbf i=(i_1,\ldots,i_\ell)$ is zero-based.
 | $w$ | Scalar SparseFullBox bandwidth. |
 
 The public MATLAB properties store these degree and order vectors as
-`1 × ell` rows. Scalar inputs are uniform shorthand. These quantities are
+$1\times\ell$ rows. Scalar inputs are uniform shorthand. These quantities are
 independent of the number of physical grid cells.
 
 <span id="residual-and-positive-target"></span>
@@ -95,18 +99,21 @@ independent of the number of physical grid cells.
 On one physical cell,
 
 $$
+\begin{aligned}
 \mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{\mathbf i\in\{0,\ldots,M\}^{\ell}}
-B_{\mathbf i}^{M}(\boldsymbol\alpha)
-\mathcal C^{(\mathbf c)}[\mathbf i],
+&=\sum_{\mathbf i\in\{0,\ldots,M\}^{\ell}}
+B_{\mathbf i}^{M}(\boldsymbol\alpha)\\
+&\qquad{}\cdot\mathcal C^{(\mathbf c)}[\mathbf i].
+\end{aligned}
 $$
 
 and a negative-semidefinite residual is sign-normalized as
 
 $$
-S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)},
-\qquad
-C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}.
+\begin{aligned}
+S^{(\mathbf c)}&=-\mathcal F^{(\mathbf c)},\\
+C^{(\mathbf c)}&=-\mathcal C^{(\mathbf c)}.
+\end{aligned}
 $$
 
 The theoretical target is
@@ -122,10 +129,11 @@ $S^{(\mathbf c)}(\boldsymbol\alpha)-\varepsilon I\succeq0$.
 For tensor Bernstein basis vector $\mathbf b_{\mathbf a}$, define
 
 $$
-Z_{\mathbf a}=\mathbf b_{\mathbf a}\otimes I_n,
-\qquad
-Z_{\mathbf a}^{\mathsf T}QZ_{\mathbf a},
-\qquad Q\succeq0.
+\begin{aligned}
+Z_{\mathbf a}&=\mathbf b_{\mathbf a}\otimes I_n,\\
+G_{\mathbf a}&:=Z_{\mathbf a}^{\mathsf T}QZ_{\mathbf a},\\
+Q&\succeq0.
+\end{aligned}
 $$
 
 The multi-index $\mathbf a$ specifies the basis degree, $I_n$ matches the

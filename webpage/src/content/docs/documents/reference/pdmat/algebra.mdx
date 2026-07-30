@@ -57,7 +57,45 @@ $$
 
 If compatible operands have different interior nodes, their sorted union is the common refinement. Grid refinement and degree elevation are independent alignment steps.
 
-### <span id="numerical-addition-explorer"></span>Numerical addition explorer
+### Different grids and direction-wise degrees
+
+The two alignment stages are visible together in this example. `A` is affine
+only along the first parameter, while `B` is quadratic only along the second.
+Their physical grids have different interior nodes on both axes.
+
+```matlab
+A = pdmat({[0 0.4 1], [0 1]}, @(r1,r2) r1, Degree=[1 0]);
+B = pdmat({[0 0.7 1], [0 0.25 1]}, @(r1,r2) r2^2, Degree=[0 2]);
+S = A + B;
+S.GridInfo.Vectors{1}
+S.GridInfo.Vectors{2}
+S.Degree
+S.evaluate([0.2 0.5])
+```
+
+```text
+ans =
+         0    0.4000    0.7000    1.0000
+
+ans =
+         0    0.2500    1.0000
+
+ans =
+     1     2
+
+ans =
+    0.4500
+```
+
+The represented functions are re-expressed exactly on the sorted-union grid,
+then elevated to the componentwise maximum degree `[1 2]`. No sampling or
+approximate interpolation is used. See
+[Gridding and local coordinates](/PD-LMI-package/documents/math/gridding-and-degree/)
+for physical-cell refinement and
+[`elevate`](/PD-LMI-package/documents/reference/pdmat/elevate/) for the
+componentwise coefficient transform.
+
+### Numerical addition explorer
 
 Edit either one-cell coefficient row. The explorer elevates both rows exactly
 to their common degree, then displays and plots the aligned operands and sum.
@@ -73,12 +111,28 @@ K = A * B;
 `mtimes` multiplies coefficient-backed functions exactly rather than at sample points. On one cell,
 
 $$
-R^{(c)}[\mathbf k]=
-\sum_{\mathbf i+\mathbf j=\mathbf k}
-\prod_{s=1}^{\ell}
-  \frac{\binom {m_s}{i_s}\binom {n_s}{j_s}}
-  {\binom{m_s+n_s}{k_s}}
-P^{(c)}[\mathbf i]Q^{(c)}[\mathbf j].
+\omega_s(i_s,j_s)
+:=\frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
+{\binom{m_s+n_s}{i_s+j_s}},
+$$
+
+and let the tensor-product weight be
+
+$$
+\Omega(\mathbf i,\mathbf j)
+:=\prod_{s=1}^{\ell}\omega_s(i_s,j_s).
+$$
+
+The ordered coefficient convolution is then
+
+$$
+\begin{aligned}
+R^{(c)}[\mathbf k]
+&=\sum_{\mathbf i+\mathbf j=\mathbf k}
+  \Omega(\mathbf i,\mathbf j)\\
+&\qquad{}\cdot
+  P^{(c)}[\mathbf i]Q^{(c)}[\mathbf j].
+\end{aligned}
 $$
 
 Matrix order is preserved. Numeric scalars and matrices use the corresponding MATLAB-compatible left or right product. Degrees and tensor labels add componentwise.
@@ -109,9 +163,36 @@ convolution, not a pointwise product of sampled rows.
   summary="Show the complete runnable two-parameter example"
 />
 
+The degrees need not match or be positive on every axis:
+
+```matlab
+A = pdmat({[0 1], [0 2]}, @(r1,r2) 1 + r1, Degree=[1 0]);
+B = pdmat({[0 1], [0 2]}, @(r1,r2) 2 + r2^2, Degree=[0 2]);
+K = A * B;
+K.Degree
+K.ncoeff()
+K.evaluate([0.25 1.5])
+```
+
+```text
+ans =
+     1     2
+
+ans =
+     6
+
+ans =
+    5.3125
+```
+
+The tensor convolution adds degrees componentwise, so `[1 0]+[0 2]=[1 2]`;
+the zero-degree axes remain valid inputs rather than being promoted before
+multiplication. The complete coefficient rule is derived in
+[Coefficient algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/).
+
 <MultiplicationDiagram />
 
-### <span id="numerical-multiplication-explorer"></span>Numerical multiplication explorer
+### Numerical multiplication explorer
 
 The weighted convolution below uses the same normalized Bernstein rule as
 `pdmat.mtimes` and preserves the written factor order.

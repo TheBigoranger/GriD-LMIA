@@ -24,8 +24,11 @@ On one local coordinate $\alpha\in[0,1]$, the modeled degree-$m$ Bernstein
 basis is
 
 $$
-B_i^m(\alpha)=\binom{m}{i}\alpha^i(1-\alpha)^{m-i},
-\qquad i=0,\ldots,m.
+\begin{aligned}
+B_i^m(\alpha)
+&=\binom{m}{i}\alpha^i(1-\alpha)^{m-i},\\
+i&=0,\ldots,m.
+\end{aligned}
 $$
 
 After residual assembly, use $M$ for the target degree. For
@@ -33,9 +36,12 @@ $\mathcal F^{(\mathbf c)}
 =\sum_i\mathcal C^{(\mathbf c)}[i]B_i^M$, define
 
 $$
+\begin{aligned}
 S^{(\mathbf c)}(\alpha)
-=-\mathcal F^{(\mathbf c)}(\alpha)
-=\sum_{i=0}^{M}C^{(\mathbf c)}[i]B_i^M(\alpha).
+&=-\mathcal F^{(\mathbf c)}(\alpha),\\
+S^{(\mathbf c)}(\alpha)
+&=\sum_{i=0}^{M}C^{(\mathbf c)}[i]B_i^M(\alpha).
+\end{aligned}
 $$
 
 Here $C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}$. The coefficients are

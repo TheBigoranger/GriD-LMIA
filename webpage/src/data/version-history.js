@@ -2,7 +2,7 @@ export const versionHistory = [
   {
     version: "v1.2.0",
     date: "2026-07-29",
-    status: "current and latest GitHub Release",
+    status: "latest tagged GitHub Release",
     summary:
       "Adds direction-wise Bernstein degrees to pdbase, pdmat, and pdvar; scalar-or-vector elevation and componentwise degree algebra; exact multivariate rhodiff alignment with zero-degree-axis support; and scalar-or-vector Pólya, Putinar, SparseFullBox, and FullBox certificate parameters. Degrees and orders are stored as row vectors, tensor counts use the product of per-axis cardinalities, and SparseFullBox retains a scalar bandwidth with anisotropic endpoint normalization.",
   },

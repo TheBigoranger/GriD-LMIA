@@ -88,13 +88,13 @@ certificate order, see
 | `expr` | `pdvar` residual expression, or coefficient-backed `pdmat` residual for `"<="`/`">="`. A known `pdmat` equality is instead scalar logical `A == B`. |
 | `relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya` | Logical option. Default `false`. The bare flag `"UsePolya"` enables Pólya assembly with increment one. |
-| `PolyaDegree` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise increment. Default `zeros(1,ell)`. Supplying it without `UsePolya` enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
+| `PolyaDegree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise increment. Default `zeros(1,ell)`. Supplying it without `UsePolya` enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
 | `UseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select full-box assembly at the minimum admissible order. |
-| `FullBoxOrder` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute order. Supplying it alone enables full-box assembly without a warning. |
+| `FullBoxOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables full-box assembly without a warning. |
 | `UsePutinar` | Logical scalar. Default `false`. The bare flag and explicit `true` select Putinar box assembly at the minimum admissible order. |
-| `PutinarOrder` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute order. Supplying it alone enables Putinar assembly without a warning. |
+| `PutinarOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables Putinar assembly without a warning. |
 | `UseSparseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparseFullBox assembly. |
-| `SparseFullBoxOrder` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute order. Supplying it alone enables SparseFullBox assembly. |
+| `SparseFullBoxOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables SparseFullBox assembly. |
 | `BandWidth` | Finite positive integer bandwidth `w` for $Q_J^{(w)}$. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient, not stored, and not inherited by later selection calls. |
 

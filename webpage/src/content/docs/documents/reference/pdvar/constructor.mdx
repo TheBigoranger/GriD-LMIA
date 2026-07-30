@@ -18,24 +18,37 @@ The geometry and tensor Bernstein basis are identical to
 [`pdmat Constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/).
 The difference is the payload: each local coefficient is a YALMIP decision
 matrix or affine expression rather than a known numeric matrix. On cell
-$\mathcal H_{\boldsymbol c}$,
+$\mathcal H_{\boldsymbol c}$, set
+
+$$
+\begin{aligned}
+\mathcal I_{\boldsymbol m}
+&:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
+\boldsymbol\alpha
+&:=\phi_{\boldsymbol c}^{-1}(\boldsymbol\rho).
+\end{aligned}
+$$
+
+The tensor-product basis and decision expansion are
+
+$$
+\begin{aligned}
+B_{i_s}^{m_s}(\alpha_s)
+&:=\binom{m_s}{i_s}
+  \alpha_s^{i_s}(1-\alpha_s)^{m_s-i_s},\\
+B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)
+&:=\prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
+\end{aligned}
+$$
+
+Therefore,
 
 $$
 \begin{aligned}
 P^{(\boldsymbol c)}(\boldsymbol\rho)
-&=
-\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}
-X^{(\boldsymbol c)}[\boldsymbol i]\,
-B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha),\\
-B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)
-&=
-\prod_{s=1}^{\ell}
-\binom{m_s}{i_s}
-\alpha_s^{i_s}(1-\alpha_s)^{m_s-i_s},
-\qquad
-\boldsymbol\alpha
-=
-\phi_{\boldsymbol c}^{-1}(\boldsymbol\rho).
+&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
+  X^{(\boldsymbol c)}[\boldsymbol i]\,
+  B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha).
 \end{aligned}
 $$
 
@@ -69,8 +82,8 @@ P = pdvar(..., ValidationMode=mode)
 | `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of grid vectors, such as `{[0 1], [10 20]}`. |
 | `"full"` | Use full YALMIP matrix coefficients, as in `pdvar(2,2,{[0 1]},"full")`. |
 | `"symmetric"` | Use symmetric YALMIP matrix coefficients, as in `pdvar(2,{[0 1]},"symmetric")`. Requires square dimensions. |
-| `Degree` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise vector. The default is `ones(1,ell)`; use an all-zero row for a parameter-independent decision. The accepted value is stored as a `1 × ell` row. |
-| `RateBounds` | Finite `ell x 2` lower/upper rate-bound table stored as metadata, such as `RateBounds=[-1 1]` or `RateBounds=[-1 2; -3 4]`. |
+| `Degree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector. The default is `ones(1,ell)`; use an all-zero row for a parameter-independent decision. The accepted value is stored as a $1\times\ell$ row. |
+| `RateBounds` | Finite $\ell\times2$ lower/upper rate-bound table stored as metadata, such as `RateBounds=[-1 1]` or `RateBounds=[-1 2; -3 4]`. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`; default `"fast"`, transient, and not stored. |
 
 Unsupported public options: `IsContinuous`, `ContainsDecision`, and `HasRateDependence`.
@@ -87,12 +100,15 @@ are YALMIP `sdpvar` matrices, and the cell-local storage lives in
 For one parameter segment, the scalar-entry mental model is:
 
 $$
-P^{(c)}(\rho) =
-B_0^1(\alpha)P^{(c)}[0] + B_1^1(\alpha)P^{(c)}[1],
-\qquad
-\alpha = \frac{\rho-\rho_1^{(c)}}{\rho_1^{(c+1)}-\rho_1^{(c)}},
-\qquad
-B_j^1(\alpha)=(1-\alpha)^{1-j}\alpha^j.
+\begin{aligned}
+\alpha
+&:=\frac{\rho-\rho_1^{(c)}}
+{\rho_1^{(c+1)}-\rho_1^{(c)}},\\
+B_j^1(\alpha)&:=(1-\alpha)^{1-j}\alpha^j,\\
+P^{(c)}(\rho)
+&=B_0^1(\alpha)P^{(c)}[0]\\
+&\quad+B_1^1(\alpha)P^{(c)}[1].
+\end{aligned}
 $$
 
 Here $P^{(c)}[0]$ and $P^{(c)}[1]$ stand for YALMIP matrix coefficients. Adjacent
@@ -122,12 +138,12 @@ access:
 | :--- | :--- | :--- |
 | `GridInfo` | `P.GridInfo.Vectors{1}`, `P.GridInfo.Points`, `P.GridInfo.Bounds` | Tensor-grid metadata inherited from `pdbase`. |
 | `MatrixSize` | `P.MatrixSize` | Matrix size of each YALMIP coefficient payload. |
-| `Degree` | `P.Degree` | Constructor-created objects accept every nonnegative direction-wise integer degree; algebra can also raise components. Stored as a `1 × ell` row. |
+| `Degree` | `P.Degree` | Constructor-created objects accept every nonnegative direction-wise integer degree; algebra can also raise components. Stored as a $1\times\ell$ row. |
 | `LocalValues` | `P.LocalValues{1}` or `P.coeffs(1)` | Cell-local YALMIP coefficient payloads. |
 | `IsContinuous` | `P.IsContinuous` | `true` for constructor-created variables; `rhodiff` outputs are discontinuous. |
 | `ContainsDecision` | `P.ContainsDecision` | `true` unless algebra proves a zero/nondecision result. |
 | `HasRateDependence` | `P.HasRateDependence` | `true` when rate metadata or rate rows are present. |
-| `RateBounds` | `P.RateBounds` | Empty or the `ell x 2` rate-bound table. |
+| `RateBounds` | `P.RateBounds` | Empty or the $\ell\times2$ rate-bound table. |
 | `SourceSummary` | `P.SourceSummary` | Source label such as `decision` or `derivative`. |
 
 `pdvar` has no `FunctionHandle` field. Its internal values are symbolic

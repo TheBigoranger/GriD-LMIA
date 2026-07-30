@@ -17,24 +17,24 @@ On physical cell $\mathcal H_{\boldsymbol c}$, write the
 direction-wise-degree-$\boldsymbol m$ tensor
 Bernstein coefficients as
 $C^{(\boldsymbol c)}[\boldsymbol i]$,
-$\boldsymbol i\in\prod_s\{0,\ldots,m_s\}$. Elevation to any
+$\boldsymbol i\in\mathcal I_{\boldsymbol m}$. Here
+$\mathcal I_{\boldsymbol m}=\prod_s\{0,\ldots,m_s\}$ is the local
+tensor-product label set. Elevation to any
 $\boldsymbol M\ge\boldsymbol m$ componentwise is defined directly by
 
 $$
+\begin{aligned}
 \widehat C^{(\boldsymbol c)}[\boldsymbol k]
-=
-\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}
-\left[
-\prod_{s=1}^{\ell}
-\frac{
-  \binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}
-}{
-  \binom{M_s}{k_s}
-}
-\right]
-C^{(\boldsymbol c)}[\boldsymbol i],
-\qquad
-\boldsymbol k\in\prod_s\{0,\ldots,M_s\}.
+&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
+  w_{\boldsymbol i,\boldsymbol k}\,
+  C^{(\boldsymbol c)}[\boldsymbol i],\\
+w_{\boldsymbol i,\boldsymbol k}
+&=\prod_{s=1}^{\ell}
+  \frac{\binom{m_s}{i_s}
+  \binom{M_s-m_s}{k_s-i_s}}
+  {\binom{M_s}{k_s}},\\
+\boldsymbol k&\in\mathcal I_{\boldsymbol M}.
+\end{aligned}
 $$
 
 As usual, a binomial coefficient with an index outside its natural range is
@@ -42,30 +42,33 @@ zero. The direction-wise degree-$(\boldsymbol M-\boldsymbol m)$ elevation
 kernel is
 
 $$
+\begin{aligned}
 \mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
-:=
-\prod_{s=1}^{\ell}
-\binom{M_s-m_s}{j_s},
-\qquad
-\boldsymbol j\in\prod_s\{0,\ldots,M_s-m_s\}.
+&:=\prod_{s=1}^{\ell}\binom{M_s-m_s}{j_s},\\
+\boldsymbol j&\in\mathcal I_{\boldsymbol M-\boldsymbol m}.
+\end{aligned}
 $$
 
-Therefore the same elevation is one $\ell$-dimensional discrete convolution:
+Scale the input and output coefficient tensors direction by direction:
 
 $$
-\left\{
-  \prod_{s=1}^{\ell}\binom{M_s}{k_s}
-\widehat C^{(\boldsymbol c)}[\boldsymbol k]
-\right\}_{\boldsymbol k}
-=
-\left\{
-  \prod_{s=1}^{\ell}\binom{m_s}{i_s}
-C^{(\boldsymbol c)}[\boldsymbol i]
-\right\}_{\boldsymbol i}
-\ast_{\ell}
-\left\{
-  \mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
-\right\}_{\boldsymbol j}.
+\begin{aligned}
+\mathcal U_{\boldsymbol m}[\boldsymbol i]
+&:=\left(\prod_{s=1}^{\ell}\binom{m_s}{i_s}\right)
+  C^{(\boldsymbol c)}[\boldsymbol i],\\
+\widehat{\mathcal U}_{\boldsymbol M}[\boldsymbol k]
+&:=\left(\prod_{s=1}^{\ell}\binom{M_s}{k_s}\right)
+  \widehat C^{(\boldsymbol c)}[\boldsymbol k].
+\end{aligned}
+$$
+
+The complete elevation is then the short $\ell$-dimensional convolution
+identity
+
+$$
+\widehat{\mathcal U}_{\boldsymbol M}
+=\mathcal U_{\boldsymbol m}
+\ast_{\ell}\mathcal E_{\boldsymbol M-\boldsymbol m}.
 $$
 
 This unique degree-$\boldsymbol M$ coefficient tensor represents exactly the
@@ -112,12 +115,12 @@ the familiar recurrence
 
 $$
 \begin{aligned}
-\widetilde a_0&=a_0,
-&\widetilde a_{m+1}&=a_m,\\
+\widetilde a_0&=a_0,\\
+\widetilde a_{m+1}&=a_m,\\
 \widetilde a_i
-&=\frac{i}{m+1}a_{i-1}
-+\left(1-\frac{i}{m+1}\right)a_i,
-&1&\le i\le m.
+&=\frac{i}{m+1}a_{i-1}\\
+&\quad+\left(1-\frac{i}{m+1}\right)a_i,\\
+&\hspace{1.1em}1\le i\le m.
 \end{aligned}
 $$
 
@@ -148,13 +151,40 @@ sourceUnchanged =
      1
 ```
 
+### Direction-wise elevation with a zero-degree axis
+
+An increment is applied componentwise. This example starts from
+`Degree=[1 0]`, so the second parameter is present in the tensor grid but the
+represented function is constant along that axis. Elevating by `[1 2]`
+produces `Degree=[2 2]` and nine local tensor-product labels per cell without
+changing any evaluated value.
+
+```matlab
+A2 = pdmat({[0 1], [0 2]}, @(r1,r2) 1 + r1, Degree=[1 0]);
+B2 = A2.elevate([1 2]);
+B2.Degree
+B2.ncoeff()
+[A2.evaluate([0.25 1.5]) B2.evaluate([0.25 1.5])]
+```
+
+```text
+ans =
+     2     2
+
+ans =
+     9
+
+ans =
+    1.2500    1.2500
+```
+
 An invalid increment raises `pdbase:InvalidDegreeIncrement`. A function-only
 object constructed without explicit `Degree` raises
 `pdbase:MissingCoefficientEvidence` for both elevation methods. Elevation is
 representation-only: it does not refine the physical grid or sample a
 function-only source.
 
-## <span id="numerical-degree-elevation-explorer"></span>Numerical degree-elevation explorer
+## Numerical degree-elevation explorer
 
 Edit one normalized Bernstein row and an increment. The original and elevated
 rows represent the same one-cell polynomial.
