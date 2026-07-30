@@ -18,7 +18,6 @@ import {
   resetRotation,
   type Point3,
 } from "../lib/grid-partition.ts";
-import { InlineMath } from "./MathJaxMath.tsx";
 
 type Dimension = 1 | 2 | 3;
 
@@ -47,20 +46,50 @@ function labelCell(cell: readonly number[]): string {
   return `(${cell.map((index) => index + 1).join(", ")})`;
 }
 
-function gridDefinition(knots: readonly number[]): string {
-  return knots
-    .map((knot, axis) => `\\mathcal G_${axis + 1}=\\{0,${formatNumber(knot)},1\\}`)
-    .join("\\qquad");
+function GridDefinition({ knots }: { knots: readonly number[] }) {
+  const label = knots
+    .map((knot, axis) => `G ${axis + 1} equals set 0, ${formatNumber(knot)}, 1`)
+    .join("; ");
+  return (
+    <span aria-label={label} className="structured-math structured-math--definitions" role="math">
+      {knots.map((knot, axis) => (
+        <span key={axis}>
+          <span className="structured-math__cal">G</span><sub>{axis + 1}</sub>
+          ={"{"}0, {formatNumber(knot)}, 1{"}"}
+        </span>
+      ))}
+    </span>
+  );
 }
 
-function cellDefinition(
-  cell: readonly number[],
-  bounds: readonly (readonly [number, number])[],
-): string {
+function CellDefinition({
+  cell,
+  bounds,
+}: {
+  cell: readonly number[];
+  bounds: readonly (readonly [number, number])[];
+}) {
   const intervals = bounds
-    .map(([lower, upper]) => `[${formatNumber(lower)},${formatNumber(upper)}]`)
-    .join("\\times");
-  return `\\mathcal H_{${labelCell(cell)}}=${intervals}`;
+    .map(([lower, upper]) => `[${formatNumber(lower)}, ${formatNumber(upper)}]`)
+    .join(" times ");
+  return (
+    <span
+      aria-label={`H sub ${labelCell(cell)} equals ${intervals}`}
+      className="structured-math structured-math--definitions"
+      role="math"
+    >
+      <span>
+        <span className="structured-math__cal">H</span><sub>{labelCell(cell)}</sub>
+        =
+        {bounds.map(([lower, upper], axis) => (
+          <span key={axis}>
+            [{formatNumber(lower)}, {formatNumber(upper)}]
+            {axis < bounds.length - 1 ? " × " : ""}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
 }
 
 function Grid1D({ knots, selected }: { knots: number[]; selected: number[] }) {
@@ -412,8 +441,8 @@ export default function GridPartitionExplorer() {
 
           <div aria-live="polite" className="grid-partition-readout">
             <div className="grid-partition-readout__definitions">
-              <InlineMath tex={gridDefinition(activeKnots)} />
-              <InlineMath tex={cellDefinition(activeCell, bounds)} />
+              <GridDefinition knots={activeKnots} />
+              <CellDefinition bounds={bounds} cell={activeCell} />
             </div>
             <p>
               <strong>Cell {labelCell(activeCell)}:</strong>{" "}

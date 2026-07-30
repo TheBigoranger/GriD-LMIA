@@ -1,10 +1,19 @@
 ---
 import CertificateChooser from "./CertificateChooser.tsx";
 import { certificateSources } from "../data/certificate-data";
+import { renderMath } from "../lib/katex-renderer.js";
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const options = certificateSources.map((item) => ({
-  ...item,
+  key: item.key,
+  anchor: item.anchor,
+  label: item.label,
+  description: item.description,
+  command: item.command,
+  exportCommand: item.exportCommand,
+  constraintCount: item.constraintCount,
+  boundaryNote: item.boundaryNote,
+  formulaMarkup: item.formula.map((tex) => renderMath(tex, { displayMode: true })),
   href: `${base}${item.detailRoute}`,
 }));
 ---

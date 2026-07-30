@@ -51,9 +51,13 @@ L = A * P; R = P * A;
 For a quadratic decision and affine known factor on one cell,
 
 $$
-(PA)[k]=\sum_{i+j=k}
-\frac{\binom{2}{i}\binom{1}{j}}{\binom{3}{k}}P[i]A[j],
-\qquad k=0,1,2,3.
+\begin{aligned}
+(PA)[k]
+&=\sum_{i+j=k}
+\frac{\binom{2}{i}\binom{1}{j}}{\binom{3}{k}}\\
+&\qquad{}\cdot P[i]A[j],\\
+k&=0,1,2,3.
+\end{aligned}
 $$
 
 Written matrix order is preserved; $P[i]A[j]$ is not exchanged with $A[j]P[i]$.

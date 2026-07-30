@@ -7,6 +7,7 @@ const root = resolve("dist");
 const base = "/PD-LMI-package";
 const defaultViewports = [320, 390, 700, 768, 1024, 1440];
 const tolerance = 1;
+const formulaShiftTolerance = 1;
 
 function commaSeparated(value) {
   return value?.split(",").map((item) => item.trim()).filter(Boolean) ?? [];
@@ -125,6 +126,116 @@ function closeServer(server) {
   });
 }
 
+async function formulaSnapshot(page) {
+  return page.evaluate(() => [...document.querySelectorAll(".katex")]
+    .filter((formula) => {
+      const rect = formula.getBoundingClientRect();
+      const style = getComputedStyle(formula);
+      return rect.width > 0 &&
+        rect.height > 0 &&
+        style.display !== "none" &&
+        style.visibility !== "hidden";
+    })
+    .map((formula, index) => {
+      const wrapper = formula.closest(".formula-math") ??
+        formula.closest(".katex-display")?.parentElement ??
+        formula.parentElement ??
+        formula;
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const formulaRect = formula.getBoundingClientRect();
+      return {
+        index,
+        markup: formula.outerHTML,
+        rootCount: 1,
+        display: Boolean(formula.closest(".katex-display")),
+        wrapperRect: {
+          left: wrapperRect.left,
+          top: wrapperRect.top,
+          width: wrapperRect.width,
+          height: wrapperRect.height,
+        },
+        formulaRect: {
+          left: formulaRect.left,
+          top: formulaRect.top,
+          width: formulaRect.width,
+          height: formulaRect.height,
+        },
+      };
+    }));
+}
+
+function recordHydrationStability(before, after, failures, route, width) {
+  const count = Math.max(before.length, after.length);
+  for (let index = 0; index < count; index += 1) {
+    const initial = before[index];
+    const hydrated = after[index];
+    if (
+      !initial ||
+      !hydrated ||
+      initial.rootCount !== 1 ||
+      hydrated.rootCount !== 1 ||
+      initial.display !== hydrated.display ||
+      initial.markup !== hydrated.markup
+    ) {
+      failures.push({
+        width,
+        route,
+        type: "formula-hydration",
+        selector: `.katex[data-index="${index}"]`,
+        context: JSON.stringify({
+          beforeCount: before.length,
+          afterCount: after.length,
+          initialRootCount: initial?.rootCount ?? 0,
+          hydratedRootCount: hydrated?.rootCount ?? 0,
+        }),
+      });
+    }
+  }
+}
+
+function recordFontStability(before, after, failures, route, width) {
+  const relativeRect = ({ formulaRect, wrapperRect } = {}) => formulaRect && wrapperRect
+    ? {
+        left: formulaRect.left - wrapperRect.left,
+        top: formulaRect.top - wrapperRect.top,
+        width: formulaRect.width,
+        height: formulaRect.height,
+      }
+    : null;
+  const count = Math.max(before.length, after.length);
+  for (let index = 0; index < count; index += 1) {
+    const initial = relativeRect(before[index]);
+    const settled = relativeRect(after[index]);
+    if (!initial || !settled) {
+      failures.push({
+        width,
+        route,
+        type: "formula-layout-shift",
+        selector: `.katex[data-index="${index}"]`,
+        context: "Formula geometry was unavailable before or after local font readiness.",
+      });
+      continue;
+    }
+    const shift = Math.max(
+      Math.abs(settled.left - initial.left),
+      Math.abs(settled.top - initial.top),
+      Math.abs(settled.width - initial.width),
+      Math.abs(settled.height - initial.height),
+    );
+    if (shift > formulaShiftTolerance) {
+      failures.push({
+        width,
+        route,
+        type: "formula-layout-shift",
+        selector: `.katex[data-index="${index}"]`,
+        actual: Math.round(shift * 100) / 100,
+        allowed: formulaShiftTolerance,
+        context: JSON.stringify({ before: initial, after: settled }),
+      });
+    }
+  }
+}
+
 async function inspect(page) {
   return page.evaluate(({ tolerance }) => {
     const failures = [];
@@ -137,11 +248,40 @@ async function inspect(page) {
       return `${tag}${id}${classes}`;
     };
     const contextFor = (node, fallback = "") => {
+      const tex = node.querySelector?.('annotation[encoding="application/x-tex"]')?.textContent;
       const aria = node.getAttribute?.("aria-label") ??
         node.closest?.("[aria-label]")?.getAttribute("aria-label");
-      const tex = node.querySelector?.('annotation[encoding="application/x-tex"]')?.textContent;
       const caption = node.querySelector?.("figcaption")?.textContent;
-      return normalize(aria || tex || caption || node.textContent || fallback);
+      return normalize(tex || aria || caption || node.textContent || fallback);
+    };
+    const contentBox = (node) => {
+      const rect = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      const scaleX = node.offsetWidth > 0 ? rect.width / node.offsetWidth : 1;
+      const insetStart = (
+        Number.parseFloat(style.borderInlineStartWidth) +
+        Number.parseFloat(style.paddingInlineStart)
+      ) * scaleX;
+      const insetEnd = (
+        Number.parseFloat(style.borderInlineEndWidth) +
+        Number.parseFloat(style.paddingInlineEnd)
+      ) * scaleX;
+      return {
+        left: rect.left + insetStart,
+        right: rect.right - insetEnd,
+        width: Math.max(0, rect.width - insetStart - insetEnd),
+      };
+    };
+    const inlineContainingBlock = (wrapper) => {
+      for (
+        let candidate = wrapper.parentElement;
+        candidate && candidate !== root;
+        candidate = candidate.parentElement
+      ) {
+        const display = getComputedStyle(candidate).display;
+        if (display !== "contents" && !display.startsWith("inline")) return candidate;
+      }
+      return document.body;
     };
     if (root.scrollWidth > root.clientWidth + tolerance) {
       failures.push({
@@ -153,7 +293,28 @@ async function inspect(page) {
       });
     }
 
-    for (const wrapper of document.querySelectorAll(".tex-math")) {
+    for (const formula of document.querySelectorAll(".katex")) {
+      const rendered = formula.getBoundingClientRect();
+      const style = getComputedStyle(formula);
+      if (
+        !formula.querySelector(".katex-html") ||
+        !formula.querySelector("math") ||
+        formula.querySelector("svg") ||
+        rendered.width <= 0 ||
+        rendered.height <= 0 ||
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        Number(style.opacity) === 0
+      ) {
+        failures.push({
+          type: "formula-readable",
+          selector: describe(formula),
+          context: contextFor(formula),
+        });
+      }
+    }
+
+    for (const wrapper of document.querySelectorAll(".formula-math")) {
       const outer = wrapper.getBoundingClientRect();
       if (outer.width <= 0 || outer.height <= 0 || wrapper.closest("pre")) continue;
       const island = wrapper.closest("astro-island");
@@ -165,28 +326,40 @@ async function inspect(page) {
         });
         continue;
       }
-      const directContainers = [...wrapper.querySelectorAll(":scope > mjx-container")];
-      if (directContainers.length !== 1) {
+      const roots = [...wrapper.querySelectorAll(".katex")];
+      if (roots.length !== 1) {
         failures.push({
           type: "formula-render-count",
           selector: describe(wrapper),
-          actual: directContainers.length,
+          actual: roots.length,
           allowed: 1,
           context: contextFor(wrapper),
         });
         continue;
       }
-      const container = directContainers[0];
-      const inner = container.querySelector("mjx-math");
-      const rendered = (inner ?? container).getBoundingClientRect();
-      const style = getComputedStyle(container);
+      const formula = roots[0];
+      const displayRoot = wrapper.querySelector(":scope > .katex-display");
+      const expectsDisplay = wrapper.classList.contains("formula-display");
+      if (expectsDisplay !== Boolean(displayRoot)) {
+        failures.push({
+          type: "formula-render-count",
+          selector: describe(wrapper),
+          actual: displayRoot ? 1 : 0,
+          allowed: expectsDisplay ? 1 : 0,
+          context: `${contextFor(wrapper)}; display wrapper/root mismatch`,
+        });
+      }
+      const rendered = formula.getBoundingClientRect();
+      const style = getComputedStyle(formula);
       const residualSource = [...wrapper.childNodes]
         .filter((node) => node.nodeType === Node.TEXT_NODE)
         .map((node) => node.textContent ?? "")
         .join("")
         .trim();
       if (
-        !inner ||
+        !formula.querySelector(".katex-html") ||
+        !formula.querySelector("math") ||
+        wrapper.querySelector("svg") ||
         rendered.width <= 0 ||
         rendered.height <= 0 ||
         style.display === "none" ||
@@ -200,36 +373,75 @@ async function inspect(page) {
           context: contextFor(wrapper, residualSource),
         });
       }
-    }
 
-    // MathJax may split a display into several CHTML lines. Every rendered line,
-    // not merely the full-width container, must remain inside its TeX wrapper.
-    for (const display of document.querySelectorAll('.tex-display > mjx-container[display="true"]')) {
-      if (display.closest("pre")) continue;
-      const wrapper = display.parentElement;
-      const outer = wrapper?.getBoundingClientRect();
-      if (!wrapper || !outer || outer.width <= 0 || outer.height <= 0) continue;
-      const lines = [...display.querySelectorAll("mjx-line")];
-      const renderedParts = lines.length ? lines : [display.querySelector("mjx-math") ?? display];
-
-      for (const part of renderedParts) {
-        const inner = part.getBoundingClientRect();
-        if (inner.left < outer.left - tolerance || inner.right > outer.right + tolerance) {
+      const localScroller = wrapper.closest(".elevate-direct-coefficient-scroll");
+      const localScrollerStyle = localScroller ? getComputedStyle(localScroller) : null;
+      const localScrollActive = Boolean(
+        localScroller &&
+        localScrollerStyle &&
+        ["auto", "scroll"].includes(localScrollerStyle.overflowX) &&
+        localScroller.scrollWidth > localScroller.clientWidth + tolerance
+      );
+      if (localScroller) {
+        const scrollerBounds = localScroller.getBoundingClientRect();
+        if (
+          scrollerBounds.left < -tolerance ||
+          scrollerBounds.right > root.clientWidth + tolerance
+        ) {
           failures.push({
-            type: "formula-bounds",
-            selector: describe(wrapper),
-            actual: Math.ceil(inner.width),
-            allowed: Math.floor(outer.width),
+            type: "local-formula-scroll-bounds",
+            selector: describe(localScroller),
+            actual: Math.ceil(scrollerBounds.width),
+            allowed: root.clientWidth,
+            context: contextFor(wrapper),
+          });
+        }
+        if (innerWidth <= 320 && !localScrollActive) {
+          failures.push({
+            type: "local-formula-scroll-required",
+            selector: describe(localScroller),
+            actual: localScroller.scrollWidth,
+            allowed: localScroller.clientWidth,
+            context: contextFor(wrapper),
+          });
+        }
+        if (innerWidth >= 390 && localScrollActive) {
+          failures.push({
+            type: "local-formula-scroll-unneeded",
+            selector: describe(localScroller),
+            actual: localScroller.scrollWidth,
+            allowed: localScroller.clientWidth,
             context: contextFor(wrapper),
           });
         }
       }
-      if (wrapper.scrollWidth > wrapper.clientWidth + tolerance) {
+      const available = contentBox(
+        expectsDisplay ? wrapper : inlineContainingBlock(wrapper),
+      );
+      if (
+        !localScrollActive &&
+        (
+          rendered.left < available.left - tolerance ||
+          rendered.right > available.right + tolerance
+        )
+      ) {
+        failures.push({
+          type: "formula-bounds",
+          selector: describe(wrapper),
+          actual: Math.ceil(rendered.width),
+          allowed: Math.floor(available.width),
+          context: contextFor(wrapper),
+        });
+      }
+      if (
+        !localScrollActive &&
+        rendered.width > available.width + tolerance
+      ) {
         failures.push({
           type: "formula-width",
           selector: describe(wrapper),
-          actual: wrapper.scrollWidth,
-          allowed: wrapper.clientWidth,
+          actual: Math.ceil(rendered.width),
+          allowed: Math.floor(available.width),
           context: contextFor(wrapper),
         });
       }
@@ -237,6 +449,22 @@ async function inspect(page) {
 
     for (const diagram of document.querySelectorAll(".diagram-frame")) {
       const rect = diagram.getBoundingClientRect();
+      const hasLocalHorizontalScroll = (node) => {
+        for (
+          let current = node.parentElement;
+          current && current !== diagram;
+          current = current.parentElement
+        ) {
+          const style = getComputedStyle(current);
+          if (
+            ["auto", "scroll"].includes(style.overflowX) &&
+            current.scrollWidth > current.clientWidth + tolerance
+          ) {
+            return true;
+          }
+        }
+        return false;
+      };
       if (rect.left < -tolerance || rect.right > root.clientWidth + tolerance) {
         failures.push({
           type: "diagram-bounds",
@@ -246,13 +474,48 @@ async function inspect(page) {
           context: contextFor(diagram),
         });
       }
-      if (diagram.scrollWidth > diagram.clientWidth + tolerance) {
+      let visibleOverflow = null;
+      for (const node of diagram.querySelectorAll("*")) {
+        if (node.closest(".katex-mathml") || hasLocalHorizontalScroll(node)) continue;
+        const style = getComputedStyle(node);
+        if (
+          style.display === "none" ||
+          style.visibility === "hidden" ||
+          Number(style.opacity) === 0
+        ) {
+          continue;
+        }
+        const bounds = [...node.getClientRects()].find((fragment) =>
+          fragment.width > 0 &&
+          fragment.height > 0 &&
+          (
+            fragment.left < rect.left - tolerance ||
+            fragment.right > rect.right + tolerance
+          )
+        );
+        if (bounds) {
+          visibleOverflow = { node, bounds };
+          break;
+        }
+      }
+      if (visibleOverflow) {
+        const overflowBounds = visibleOverflow.bounds;
+        const overflowNode = visibleOverflow.node;
+        const parentBounds = overflowNode.parentElement?.getBoundingClientRect();
         failures.push({
           type: "diagram-width",
           selector: describe(diagram),
-          actual: diagram.scrollWidth,
-          allowed: diagram.clientWidth,
-          context: contextFor(diagram),
+          actual: Math.ceil(overflowBounds.width),
+          allowed: Math.floor(rect.width),
+          context: `${contextFor(diagram)}; visible overflow: ${describe(overflowNode)} ` +
+            JSON.stringify({
+              frameLeft: rect.left,
+              frameRight: rect.right,
+              left: overflowBounds.left,
+              right: overflowBounds.right,
+              parentLeft: parentBounds?.left,
+              parentRight: parentBounds?.right,
+            }),
         });
       }
     }
@@ -305,8 +568,7 @@ async function hydrateIslands(page) {
       { timeout: 10_000 },
     );
   }
-  await page.evaluate(async () => {
-    await window.pdLmiMathQueue;
+  await page.evaluate(() => {
     window.scrollTo(0, 0);
   });
 }
@@ -314,10 +576,7 @@ async function hydrateIslands(page) {
 function attachProductionSignals(page, origin, issues, state) {
   page.on("console", (message) => {
     const text = message.text();
-    const invalidMathJaxOption = message.type() === "warning" &&
-      /mathjax/i.test(text) &&
-      /invalid option/i.test(text);
-    if (message.type() === "error" || invalidMathJaxOption) {
+    if (message.type() === "error") {
       issues.push({
         type: "console",
         route: state.route,
@@ -336,9 +595,9 @@ function attachProductionSignals(page, origin, issues, state) {
   });
   page.on("request", (request) => {
     const requestUrl = request.url();
-    if (/^https?:/i.test(requestUrl) && !requestUrl.startsWith(origin)) {
+    if (/^https?:/i.test(requestUrl) && new URL(requestUrl).origin !== origin) {
       issues.push({
-        type: /mathjax/i.test(requestUrl) ? "external-mathjax" : "external-request",
+        type: "external-request",
         route: state.route,
         width: state.width,
         context: requestUrl,
@@ -358,17 +617,11 @@ function attachProductionSignals(page, origin, issues, state) {
 
 async function settleRootHydration(page) {
   await page.waitForFunction(
-    () => document.documentElement.dataset.mathjaxReady === "true",
-    null,
-    { timeout: 15_000 },
-  );
-  await page.waitForFunction(
     () => document.querySelectorAll("astro-island[ssr]").length === 0,
     null,
     { timeout: 15_000 },
   );
   await page.evaluate(async () => {
-    await window.pdLmiMathQueue;
     await document.fonts.ready;
     await new Promise((resolveFrame) => {
       requestAnimationFrame(() => requestAnimationFrame(resolveFrame));
@@ -394,7 +647,7 @@ async function auditRootWalkthroughs(browser, origin, failures) {
       await settleRootHydration(page);
 
       const hydration = await page.evaluate(() => {
-        const visibleInteractiveMath = [...document.querySelectorAll("astro-island .tex-math")]
+        const visibleInteractiveMath = [...document.querySelectorAll("astro-island .formula-math")]
           .filter((wrapper) => {
             const rect = wrapper.getBoundingClientRect();
             const style = getComputedStyle(wrapper);
@@ -404,14 +657,17 @@ async function auditRootWalkthroughs(browser, origin, failures) {
               style.visibility !== "hidden";
           });
         const formulaIssues = visibleInteractiveMath.flatMap((wrapper) => {
-          const containers = [...wrapper.querySelectorAll(":scope > mjx-container")];
+          const roots = [...wrapper.querySelectorAll(".katex")];
           const raw = [...wrapper.childNodes]
             .filter((node) => node.nodeType === Node.TEXT_NODE)
             .map((node) => node.textContent ?? "")
             .join("")
             .trim();
-          const rendered = containers[0]?.querySelector("mjx-math")?.getBoundingClientRect();
-          return containers.length === 1 &&
+          const rendered = roots[0]?.getBoundingClientRect();
+          return roots.length === 1 &&
+              roots[0]?.querySelector(".katex-html") &&
+              roots[0]?.querySelector("math") &&
+              !wrapper.querySelector("svg") &&
               rendered &&
               rendered.width > 0 &&
               rendered.height > 0 &&
@@ -420,7 +676,7 @@ async function auditRootWalkthroughs(browser, origin, failures) {
             ? []
             : [{
                 className: wrapper.className,
-                containers: containers.length,
+                roots: roots.length,
                 raw,
                 width: rendered?.width ?? 0,
                 height: rendered?.height ?? 0,
@@ -520,6 +776,7 @@ async function auditRootWalkthroughs(browser, origin, failures) {
           };
           const descendantsOutside = [...figure.querySelectorAll("*")]
             .filter((node) => {
+              if (node.closest(".katex-mathml")) return false;
               const rect = node.getBoundingClientRect();
               return rect.width > 0 &&
                 rect.height > 0 &&
@@ -527,11 +784,30 @@ async function auditRootWalkthroughs(browser, origin, failures) {
                 !locallyScrollable(node);
             })
             .slice(0, 10)
-            .map((node) => ({
-              className: node.className,
-              left: node.getBoundingClientRect().left,
-              right: node.getBoundingClientRect().right,
-            }));
+            .map((node) => {
+              const formula = node.closest(".formula-math");
+              const region = node.closest(
+                ".cell-summary, .cell-layout, .cell-coeffs, .cell-bernstein-readout",
+              );
+              const formulaRect = formula?.getBoundingClientRect();
+              const regionRect = region?.getBoundingClientRect();
+              return {
+                className: node.className,
+                formulaClassName: formula?.className ?? "",
+                tex: formula
+                  ?.querySelector('annotation[encoding="application/x-tex"]')
+                  ?.textContent,
+                formulaLeft: formulaRect?.left,
+                formulaRight: formulaRect?.right,
+                parentClassName: formula?.parentElement?.className ?? "",
+                regionClassName: region?.className ?? "",
+                regionColumns: region ? getComputedStyle(region).gridTemplateColumns : "",
+                regionLeft: regionRect?.left,
+                regionRight: regionRect?.right,
+                left: node.getBoundingClientRect().left,
+                right: node.getBoundingClientRect().right,
+              };
+            });
           return {
             clientWidth: figure.clientWidth,
             documentClientWidth: document.documentElement.clientWidth,
@@ -589,11 +865,6 @@ async function auditMobileStorageAnnotations(browser, origin, failures) {
         issues.push({ type: "http", route, width: 390, context: String(response?.status()) });
         continue;
       }
-      await page.waitForFunction(
-        () => document.documentElement.dataset.mathjaxReady === "true",
-        null,
-        { timeout: 15_000 },
-      );
       await page.evaluate(() => document.fonts.ready);
       const annotations = await page.locator(".cell-storage-diagram .control-strip em")
         .evaluateAll((nodes) => nodes.map((node) => ({
@@ -657,11 +928,6 @@ async function auditRhodiffEditor(browser, origin, failures) {
     try {
       const response = await page.goto(`${origin}${route}`, { waitUntil: "networkidle" });
       if (!response?.ok()) throw new Error(`rhodiff returned ${response?.status() ?? "no response"}`);
-      await page.waitForFunction(
-        () => document.documentElement.dataset.mathjaxReady === "true",
-        null,
-        { timeout: 15_000 },
-      );
 
       const bounds = page.getByLabel("Rate bounds (one lower upper row per axis)");
       const columns = page.getByLabel("Coefficient columns per cell");
@@ -791,10 +1057,21 @@ async function auditRhodiffEditor(browser, origin, failures) {
 }
 
 await access(join(root, "index.html"));
-await access(join(root, "mathjax/sre/speech-worker.js"));
-await access(join(root, "mathjax/input/tex/extensions/boldsymbol.js"));
-await access(join(root, "mathjax/mathjax-modern/chtml/woff2/mjx-mm-i.woff2"));
-const allRoutes = (await walk(root))
+const builtFiles = await walk(root);
+const builtCss = builtFiles.filter((file) => file.endsWith(".css"));
+const katexCss = [];
+for (const file of builtCss) {
+  if (/\.katex(?:-display)?\b/.test(await readFile(file, "utf8"))) katexCss.push(file);
+}
+if (!katexCss.length) {
+  throw new Error("Built output does not contain the locally bundled KaTeX CSS.");
+}
+const katexFonts = builtFiles.filter((file) =>
+  /\.(?:woff2?|ttf)$/i.test(file) && /katex/i.test(file));
+if (!katexFonts.length) {
+  throw new Error("Built output does not contain locally bundled KaTeX font assets.");
+}
+const allRoutes = builtFiles
   .filter((file) => file.endsWith(".html") && !file.endsWith("404.html"))
   .map(routeFor)
   .sort();
@@ -813,10 +1090,7 @@ try {
   let currentWidth = 0;
   page.on("console", (message) => {
     const text = message.text();
-    const invalidMathJaxOption = message.type() === "warning" &&
-      /mathjax/i.test(text) &&
-      /invalid option/i.test(text);
-    if (message.type() === "error" || invalidMathJaxOption) {
+    if (message.type() === "error") {
       failures.push({
         width: currentWidth,
         route: currentRoute,
@@ -837,7 +1111,7 @@ try {
   });
   page.on("request", (request) => {
     const requestUrl = request.url();
-    if (/^https?:/i.test(requestUrl) && !requestUrl.startsWith(origin)) {
+    if (/^https?:/i.test(requestUrl) && new URL(requestUrl).origin !== origin) {
       failures.push({
         width: currentWidth,
         route: currentRoute,
@@ -864,7 +1138,7 @@ try {
     for (const route of routes) {
       currentRoute = route;
       currentWidth = width;
-      const response = await page.goto(`${origin}${route}`, { waitUntil: "networkidle" });
+      const response = await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
       if (!response?.ok()) {
         failures.push({
           width,
@@ -875,22 +1149,9 @@ try {
         });
         continue;
       }
-      try {
-        await page.waitForFunction(
-          () => document.documentElement.dataset.mathjaxReady === "true",
-          null,
-          { timeout: 15_000 },
-        );
-      } catch {
-        failures.push({
-          width,
-          route,
-          type: "mathjax-readiness",
-          selector: "html",
-          context: "documentElement.dataset.mathjaxReady did not become true",
-        });
-        continue;
-      }
+      const beforeFonts = await formulaSnapshot(page);
+      const beforeHydration = await formulaSnapshot(page);
+      await page.waitForLoadState("networkidle");
       try {
         await hydrateIslands(page);
       } catch (error) {
@@ -902,10 +1163,14 @@ try {
           context: error instanceof Error ? error.message : String(error),
         });
       }
+      const afterHydration = await formulaSnapshot(page);
+      recordHydrationStability(beforeHydration, afterHydration, failures, route, width);
       await page.evaluate(() => document.fonts.ready);
       await page.evaluate(() => new Promise((resolveFrame) => {
         requestAnimationFrame(() => requestAnimationFrame(resolveFrame));
       }));
+      const afterFonts = await formulaSnapshot(page);
+      recordFontStability(beforeFonts, afterFonts, failures, route, width);
       const result = await inspect(page);
       for (const failure of result.failures) {
         failures.push({ width, route, ...failure });
@@ -957,7 +1222,11 @@ if (failures.length) {
     };
     viewport.issues += 1;
     viewport.routes.add(failure.route);
-    if (failure.actual && failure.allowed) {
+    if (
+      Number.isFinite(failure.actual) &&
+      Number.isFinite(failure.allowed) &&
+      failure.allowed > 0
+    ) {
       viewport.maxRatio = Math.max(viewport.maxRatio, failure.actual / failure.allowed);
     }
     viewportSummary.set(failure.width, viewport);
@@ -977,8 +1246,10 @@ if (failures.length) {
     };
     group.count += 1;
     if (failure.context) group.contexts.add(failure.context);
-    if (failure.actual && failure.allowed) {
-      group.maxRatio = Math.max(group.maxRatio, failure.actual / failure.allowed);
+    if (Number.isFinite(failure.actual) && Number.isFinite(failure.allowed)) {
+      if (failure.allowed > 0) {
+        group.maxRatio = Math.max(group.maxRatio, failure.actual / failure.allowed);
+      }
       group.maxActual = Math.max(group.maxActual, failure.actual);
       group.minAllowed = Math.min(group.minAllowed, failure.allowed);
     }
@@ -999,8 +1270,10 @@ if (failures.length) {
     left.route.localeCompare(right.route) ||
     left.type.localeCompare(right.type));
   for (const group of sortedGroups) {
-    const ratio = group.maxRatio
-      ? `max ${group.maxActual}/${group.minAllowed} = ${group.maxRatio.toFixed(2)}`
+    const hasMeasurements = Number.isFinite(group.minAllowed);
+    const ratio = hasMeasurements
+      ? `max ${group.maxActual}/${group.minAllowed}` +
+        (group.maxRatio ? ` = ${group.maxRatio.toFixed(2)}` : "")
       : `status ${group.status}`;
     console.error(
       `- ${group.width}px ${group.route} [${group.type} ${group.selector}] ` +

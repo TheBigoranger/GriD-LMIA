@@ -1,6 +1,7 @@
 ---
 import CertificateFlow from "./CertificateFlow.tsx";
 import { certificateSources } from "../data/certificate-data";
+import { renderMath } from "../lib/katex-renderer.js";
 
 const { compact = false, eager = false } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
@@ -15,12 +16,25 @@ const options = certificateSources.map((item) => ({
   key: item.key,
   label: item.label,
   command: item.command,
-  formula: item.cardFormula,
-  notation: cardNotation[item.key],
+  formulaMarkup: renderMath(item.cardFormula),
+  notationMarkup: renderMath(cardNotation[item.key]),
+  notationRows: item.key === "direct"
+    ? [
+        {
+          formulaMarkup: renderMath("C^{(\\mathbf c)}[\\mathbf i]"),
+          label: "target coefficient matrix",
+        },
+        {
+          formulaMarkup: renderMath("\\mathbf i\\in\\mathcal I_M=\\{0,\\ldots,M\\}^{\\ell}"),
+          label: "local label",
+        },
+      ]
+    : undefined,
   href: `${base}${item.detailRoute}`,
 }));
+const residualMarkup = renderMath("S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0");
 ---
 
 {eager
-  ? <CertificateFlow compact={compact} options={options} client:load />
-  : <CertificateFlow compact={compact} options={options} client:visible />}
+  ? <CertificateFlow compact={compact} options={options} residualMarkup={residualMarkup} client:load />
+  : <CertificateFlow compact={compact} options={options} residualMarkup={residualMarkup} client:visible />}

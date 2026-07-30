@@ -4,75 +4,9 @@ import starlight from "@astrojs/starlight";
 import react from "@astrojs/react";
 import { unified } from "@astrojs/markdown-remark";
 import remarkMath from "remark-math";
-import rehypeMathJaxDelimiters from "./src/lib/rehype-mathjax.js";
-import { selfHostedMathJax } from "./src/lib/mathjax-assets.js";
-
-const base = "/PD-LMI-package";
-const mathJaxRoot = `${base}/mathjax`;
-const mathJaxConfig = `
-window.pdLmiMathQueue = Promise.resolve();
-window.pdLmiTypeset = (elements, update) => {
-  const task = window.pdLmiMathQueue.then(() => {
-    const mathJax = window.MathJax;
-    if (!mathJax?.typesetPromise || !mathJax.typesetClear) return;
-    mathJax.typesetClear(elements);
-    update?.();
-    return mathJax.typesetPromise(elements);
-  });
-  window.pdLmiMathQueue = task.catch((error) => {
-    console.error("MathJax typesetting failed:", error);
-  });
-  return window.pdLmiMathQueue;
-};
-
-const typesetStaticMath = () => {
-  const elements = [...document.querySelectorAll(".tex-math")]
-    .filter((element) => !element.closest("astro-island"));
-  return window.pdLmiTypeset(elements).then(() => {
-    document.documentElement.dataset.mathjaxReady = "true";
-    document.dispatchEvent(new CustomEvent("mathjax:ready"));
-  });
-};
-
-window.MathJax = {
-  loader: {
-    paths: {
-      "mathjax-modern": "${mathJaxRoot}/mathjax-modern"
-    }
-  },
-  tex: {
-    inlineMath: [["\\\\(", "\\\\)"]],
-    displayMath: [["\\\\[", "\\\\]"]]
-  },
-  output: {
-    scale: 1.0,
-    font: "mathjax-modern",
-    fontPath: "${mathJaxRoot}/mathjax-modern",
-    displayOverflow: "linebreak",
-    linebreaks: {
-      inline: true,
-      width: "100%"
-    }
-  },
-  options: {
-    enableMenu: true,
-    enableEnrichment: true,
-    enableComplexity: true
-  },
-  startup: {
-    typeset: false,
-    pageReady() {
-      return MathJax.startup.defaultPageReady().then(typesetStaticMath);
-    }
-  }
-};
-
-document.addEventListener("astro:page-load", () => {
-  const mathJax = window.MathJax;
-  if (!mathJax?.startup?.promise) return;
-  mathJax.startup.promise.then(typesetStaticMath);
-});
-`;
+import rehypeKatex from "rehype-katex";
+import { katexOptions } from "./src/lib/katex-options.js";
+import rehypeKatexStrict from "./src/lib/rehype-katex-strict.js";
 
 // https://astro.build/config
 export default defineConfig({
@@ -81,31 +15,16 @@ export default defineConfig({
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath],
-      rehypePlugins: [rehypeMathJaxDelimiters],
+      rehypePlugins: [[rehypeKatex, katexOptions], rehypeKatexStrict],
     }),
   },
   integrations: [
-    selfHostedMathJax(),
     react(),
     starlight({
       title: "PD-LMI Manual",
       description:
         "Reference-first manual for the PD-LMI MATLAB/YALMIP package.",
-      customCss: ["./src/styles/manual.css"],
-      head: [
-        {
-          tag: "script",
-          content: mathJaxConfig,
-        },
-        {
-          tag: "script",
-          attrs: {
-            id: "MathJax-script",
-            src: `${mathJaxRoot}/tex-mml-chtml-mathjax-modern.js`,
-            defer: true,
-          },
-        },
-      ],
+      customCss: ["katex/dist/katex.min.css", "./src/styles/manual.css"],
       social: [
         {
           icon: "github",
@@ -114,6 +33,7 @@ export default defineConfig({
         },
       ],
       components: {
+        Head: "./src/components/Head.astro",
         Header: "./src/components/Header.astro",
       },
       sidebar: [

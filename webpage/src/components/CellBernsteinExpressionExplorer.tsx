@@ -5,19 +5,43 @@ import {
   orderCellBernsteinTermsForAxes,
   pdmatCellData,
 } from "../lib/cell-bernstein.ts";
-import { DisplayMath, InlineMath } from "./MathJaxMath.tsx";
+import { DisplayMath, InlineMath } from "./RenderedMath.tsx";
 
 const formatNumber = (value: number) => {
   const rounded = Math.abs(value) < 5e-10 ? 0 : Number(value.toFixed(4));
   return `${rounded}`;
 };
 
-const matrixToTex = (matrix: Matrix2) => (
-  `\\begin{bmatrix}${formatNumber(matrix[0])}&${formatNumber(matrix[1])}\\\\${formatNumber(matrix[2])}&${formatNumber(matrix[3])}\\end{bmatrix}`
-);
+interface MathMarkup {
+  globalFormula: string;
+  alpha1: string[];
+  alpha2: string[];
+  termBasis: string[];
+  termWeightPrefix: string[];
+  cells: Array<{
+    domain: string;
+    formula: string;
+    coefficientLabels: string[];
+    coefficientValues: string[];
+    valuePrefix: string;
+  }>;
+}
+
+function MatrixMath({ matrix }: { matrix: Matrix2 }) {
+  const values = matrix.map(formatNumber);
+  return (
+    <span
+      aria-label={`matrix ${values[0]}, ${values[1]}; ${values[2]}, ${values[3]}`}
+      className="structured-math-matrix"
+      role="math"
+    >
+      {values.map((value, index) => <span key={index}>{value}</span>)}
+    </span>
+  );
+}
 
 /** Explore the tensor Bernstein expression stored independently on each physical cell. */
-export default function CellBernsteinExpressionExplorer() {
+export default function CellBernsteinExpressionExplorer({ mathMarkup }: { mathMarkup: MathMarkup }) {
   const [selectedCell, setSelectedCell] = useState(0);
   const [alpha1, setAlpha1] = useState(0.35);
   const [alpha2, setAlpha2] = useState(0.6);
@@ -27,6 +51,8 @@ export default function CellBernsteinExpressionExplorer() {
     () => buildCellBernsteinModel(selectedCell, alpha1, alpha2),
     [selectedCell, alpha1, alpha2],
   );
+  const cellMath = mathMarkup.cells[selectedCell];
+  const sliderIndex = (value: number) => Math.round(value * 20);
   const displayedTerms = orderCellBernsteinTermsForAxes(model.terms);
   const term = model.terms[selectedTerm];
   const contribution: Matrix2 = [
@@ -46,15 +72,7 @@ export default function CellBernsteinExpressionExplorer() {
       <div className="diagram-frame__body">
         <DisplayMath
           className="cell-basis-expression__global-formula"
-          tex={`\\begin{aligned}
-              A(\\boldsymbol\\rho)
-              &=
-              \\begin{bmatrix}
-              1+\\rho_1+\\rho_2 & \\rho_1\\rho_2\\\\
-              \\rho_1\\rho_2 & 2+\\rho_1^2
-              \\end{bmatrix},
-              \\qquad \\boldsymbol\\rho\\in[0,1]^2.
-              \\end{aligned}`}
+          markup={mathMarkup.globalFormula}
         />
         <p className="cell-basis-expression__global-note">
           The tabs below show how this single matrix function is pulled back to local
@@ -83,7 +101,7 @@ export default function CellBernsteinExpressionExplorer() {
               type="button"
             >
               <strong>Cell {cell.c1}</strong>
-              <InlineMath tex={cell.domainTex} />
+              <InlineMath markup={mathMarkup.cells[index].domain} />
             </button>
           ))}
         </div>
@@ -95,13 +113,13 @@ export default function CellBernsteinExpressionExplorer() {
         >
           <DisplayMath
             className="cell-basis-expression__formula"
-            tex={`\\begin{aligned}A^{(${model.cell.c1},1)}(\\boldsymbol\\alpha)&=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{2}}C_{\\mathbf i}^{(${model.cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha),\\\\B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)&=B_{i_1}^{2}(\\alpha_1)B_{i_2}^{2}(\\alpha_2).\\end{aligned}`}
+            markup={cellMath.formula}
           />
           <div className="cell-basis-workspace">
             <div className="cell-basis-coordinate-frame">
               <strong className="cell-basis-coordinate-frame__title">Local coordinates</strong>
               <label className="cell-basis-axis cell-basis-axis--vertical" htmlFor={`${id}-alpha-2`}>
-                <InlineMath tex={`\\alpha_2=${alpha2.toFixed(2)}`} />
+                <InlineMath markup={mathMarkup.alpha2[sliderIndex(alpha2)]} />
                 <input id={`${id}-alpha-2`} max="1" min="0" onChange={(event) => setAlpha2(Number(event.target.value))} step="0.05" type="range" value={alpha2} />
               </label>
               <div className="cell-basis-term-grid" aria-label="Select one tensor Bernstein term">
@@ -114,7 +132,7 @@ export default function CellBernsteinExpressionExplorer() {
                     onClick={() => setSelectedTerm(storageIndex)}
                     type="button"
                   >
-                    <InlineMath tex={`B_{(${item.i},${item.j})}^{2}(\\boldsymbol\\alpha)`} />
+                    <InlineMath markup={mathMarkup.termBasis[storageIndex]} />
                     <small>{formatNumber(item.weight)}</small>
                   </button>
                   );
@@ -122,23 +140,23 @@ export default function CellBernsteinExpressionExplorer() {
               </div>
               <label className="cell-basis-axis cell-basis-axis--horizontal" htmlFor={`${id}-alpha-1`}>
                 <input id={`${id}-alpha-1`} max="1" min="0" onChange={(event) => setAlpha1(Number(event.target.value))} step="0.05" type="range" value={alpha1} />
-                <InlineMath tex={`\\alpha_1=${alpha1.toFixed(2)}`} />
+                <InlineMath markup={mathMarkup.alpha1[sliderIndex(alpha1)]} />
               </label>
               <p className="cell-basis-coordinate-frame__storage"><code>A.LocalValues{'{'}{model.cell.c1}{'}'}{'{'}1{'}'}</code> stores the nine coefficient matrices above.</p>
             </div>
             <aside className="cell-basis-readout" aria-live="polite">
               <strong>Selected term</strong>
               <p>
-                <InlineMath tex={`C_{${term.i},${term.j}}^{(${model.cell.c1},1)}=`} />
-                <InlineMath tex={term.coefficient.tex} />
+                <InlineMath markup={cellMath.coefficientLabels[selectedTerm]} />
+                <InlineMath markup={cellMath.coefficientValues[selectedTerm]} />
               </p>
-              <p><InlineMath tex={`B_{${term.i}}^2(\\alpha_1)B_{${term.j}}^2(\\alpha_2)=${formatNumber(term.weight)}`} /></p>
+              <p><InlineMath markup={mathMarkup.termWeightPrefix[selectedTerm]} /><span className="structured-math-number">{formatNumber(term.weight)}</span></p>
               <span>Weighted contribution</span>
-              <p><InlineMath tex={matrixToTex(contribution)} /></p>
+              <p><MatrixMath matrix={contribution} /></p>
               <span>Complete cell value</span>
               <p>
-                <InlineMath tex={`A^{(${model.cell.c1},1)}(\\boldsymbol\\alpha)=`} />
-                <InlineMath tex={matrixToTex(model.value)} />
+                <InlineMath markup={cellMath.valuePrefix} />
+                <MatrixMath matrix={model.value} />
               </p>
             </aside>
           </div>

@@ -4,8 +4,10 @@ import CertificateFlow from "./CertificateFlow.astro";
 import ExportSolveFlow from "./ExportSolveFlow.astro";
 import GridPartitionExplorer from "./GridPartitionExplorer.tsx";
 import JourneyCurve from "./JourneyCurve.astro";
-import MathJaxMath from "./MathJaxMath.astro";
+import KaTeXMath from "./KaTeXMath.astro";
 import { versionInfo } from "../data/version.js";
+import { pdmatCellData } from "../lib/cell-bernstein.ts";
+import { renderMath } from "../lib/katex-renderer.js";
 
 const base = import.meta.env.BASE_URL;
 const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}`;
@@ -28,7 +30,7 @@ const lmiSteps = [
       { tex: "\\mathcal P" },
       ".",
     ],
-    math: "\\mathcal F(\\boldsymbol\\rho,\\dot{\\boldsymbol\\rho};y)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\preceq0.",
+    math: "\\begin{aligned}&\\mathcal F(\\boldsymbol\\rho,\\dot{\\boldsymbol\\rho};y)\\\\&=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}(\\boldsymbol\\rho)\\\\&\\quad{}\\cdot\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)\\\\&\\quad+F_0(\\boldsymbol\\rho)\\\\&\\quad+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\preceq0.\\end{aligned}",
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/",
     manualLabel: "Open the induced-L₂-gain specialization ↗",
   },
@@ -43,9 +45,13 @@ const lmiSteps = [
       " exactly. Approximation comes only from restricting the decision-function space; affine rate-vertex reduction remains exact.",
     ],
     math: [
-      "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
-      "\\underbrace{\\mathcal G_s}_{\\text{axis-}s\\text{ physical nodes}}=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\}.",
-      "\\underbrace{\\mathcal H_{\\mathbf c}}_{\\text{physical cell selected by }\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].",
+      "\\begin{aligned}\\mathcal P&=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\\\\\mathcal R&=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].\\end{aligned}",
+      "\\mathcal G_s=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\}.",
+      "\\begin{aligned}\\mathcal H_{\\mathbf c}&=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}].\\end{aligned}",
+    ],
+    mathLabels: [
+      ["axis-", { tex: "s" }, " physical nodes"],
+      ["physical cell selected by ", { tex: "\\mathbf c" }],
     ],
     visual: "grid",
     manual: "documents/math/gridding-and-degree/",
@@ -63,7 +69,7 @@ const lmiSteps = [
       "B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad\\sum_{\\mathbf i}B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=1.",
       "A^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha).",
     ],
-    storageMath: "A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
+    storageMath: "\\begin{gathered}A(\\rho_1,\\rho_2)=\\\\\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.\\end{gathered}",
     visual: "storage",
     fullCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=[2 2]);\nA.cells()\nA.LocalValues{1}{1}",
     manual: "documents/math/coordinates-and-bernstein/coefficient-algebra/",
@@ -94,6 +100,29 @@ const lmiSteps = [
     manual: "documents/reference/pdlmi/toyalmip/",
   },
 ];
+
+const storageAxisTex = {
+  x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"],
+  y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"],
+};
+const storageMathMarkup = {
+  formula: renderMath(lmiSteps[2].storageMath, { displayMode: true }),
+  basis: renderMath("\\begin{aligned}B_{\\mathbf i}^{m}(\\boldsymbol\\alpha)&=\\prod_{s=1}^{\\ell}\\binom{m}{i_s}\\\\&\\quad{}\\cdot\\alpha_s^{i_s}\\\\&\\quad{}\\cdot(1-\\alpha_s)^{m-i_s}\\end{aligned}", { displayMode: true }),
+  axis: {
+    x: storageAxisTex.x.map((tex) => renderMath(tex)),
+    y: storageAxisTex.y.map((tex) => renderMath(tex)),
+  },
+  cells: pdmatCellData.map((cell) => ({
+    selection: renderMath(`c=(${cell.c1},1)`),
+    domain: renderMath(cell.domainTex),
+    button: renderMath(`c_1=${cell.c1}`),
+    coefficients: cell.coefficients.map((coefficient, index) => ({
+      label: renderMath(`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`),
+      value: renderMath(coefficient.tex),
+    })),
+    bernstein: renderMath(`A^{(${cell.c1},1)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{\\ell}}C_{\\mathbf i}^{(${cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)`, { displayMode: true }),
+  })),
+};
 
 ---
 
@@ -129,25 +158,33 @@ const lmiSteps = [
           <div class="step-number" aria-hidden="true">{step.number}</div>
           <div class="step-content">
             <div class="step-copy">
-              <h3>{step.title}{step.titleMath && <MathJaxMath class="step-title-math" tex={step.titleMath} />}{step.titleSuffix}</h3>
+              <h3>{step.title}{step.titleMath && <KaTeXMath class="step-title-math" tex={step.titleMath} />}{step.titleSuffix}</h3>
               {step.visual !== "grid" && (step.textParts
-                ? <p>{step.textParts.map((part) => typeof part === "string" ? part : <MathJaxMath tex={part.tex} />)}</p>
+                ? <p>{step.textParts.map((part) => typeof part === "string" ? part : <KaTeXMath tex={part.tex} />)}</p>
                 : step.text ? <p>{step.text}</p> : null)}
               {step.visual === "storage"
-                ? <div class="cell-storage-compact"><CellStorageExplorer client:load formulaTex={step.storageMath} axisTex={{ x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"], y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"] }} /></div>
+                ? <div class="cell-storage-compact"><CellStorageExplorer client:load mathMarkup={storageMathMarkup} /></div>
                 : step.visual === "grid"
                   ? <>
                       <div class="math-strip">
                         {(Array.isArray(step.math) ? step.math.slice(0, 1) : [step.math]).map((line) => (
-                          <MathJaxMath class="math-strip__row" display tex={line} />
+                          <KaTeXMath class="math-strip__row" display tex={line} />
                         ))}
                       </div>
                       {step.textParts
-                        ? <p>{step.textParts.map((part) => typeof part === "string" ? part : <MathJaxMath tex={part.tex} />)}</p>
+                        ? <p>{step.textParts.map((part) => typeof part === "string" ? part : <KaTeXMath tex={part.tex} />)}</p>
                         : step.text ? <p>{step.text}</p> : null}
-                      <div class="math-strip">
-                        {(Array.isArray(step.math) ? step.math.slice(1) : []).map((line) => (
-                          <MathJaxMath class="math-strip__row" display tex={line} />
+                      <div class:list={["math-strip", { "math-strip--annotated": step.mathLabels }]}>
+                        {(Array.isArray(step.math) ? step.math.slice(1) : []).map((line, index) => (
+                          step.mathLabels
+                            ? <div class="math-strip__annotated-row">
+                                <p class="math-strip__label">
+                                  {step.mathLabels[index].map((part) =>
+                                    typeof part === "string" ? part : <KaTeXMath tex={part.tex} />)}
+                                </p>
+                                <KaTeXMath class="math-strip__row" display tex={line} />
+                              </div>
+                            : <KaTeXMath class="math-strip__row" display tex={line} />
                         ))}
                       </div>
                       <GridPartitionExplorer client:load />
@@ -156,11 +193,11 @@ const lmiSteps = [
                   ? <ExportSolveFlow />
                 : <div class:list={["math-strip", { "math-strip--stacked": Array.isArray(step.math) }]}>
                     {(Array.isArray(step.math) ? step.math : [step.math]).map((line) => (
-                      <MathJaxMath class="math-strip__row" display tex={line} />
+                      <KaTeXMath class="math-strip__row" display tex={line} />
                     ))}
                   </div>}
-              {step.inlineMath && <MathJaxMath class="step-inline-math" tex={step.inlineMath} />}
-              {step.inlineNoteParts && <p class="step-inline-note">{step.inlineNoteParts.map((part) => typeof part === "string" ? part : <MathJaxMath tex={part.tex} />)}</p>}
+              {step.inlineMath && <KaTeXMath class="step-inline-math" tex={step.inlineMath} />}
+              {step.inlineNoteParts && <p class="step-inline-note">{step.inlineNoteParts.map((part) => typeof part === "string" ? part : <KaTeXMath tex={part.tex} />)}</p>}
               {step.visual === "certificate" && <CertificateFlow compact eager />}
               {step.fullCode && <div class="example-disclosure"><pre class="example-disclosure__essential"><code>{step.fullCode}</code></pre></div>}
               {step.manual && <a class="manual-step-link" href={local(step.manual)}>{step.manualLabel ?? "Open the detailed manual section ↗"}</a>}
@@ -223,10 +260,10 @@ const lmiSteps = [
   .cell-storage-compact :global(.cell-coeffs) { gap: 0.25rem; }
   .cell-storage-compact :global(.cell-coeffs > span) { padding: 0.35rem 0.2rem; }
   .cell-storage-compact :global(.cell-explorer__formula) { display: grid; gap: 0.35rem; padding: 0.75rem 1rem 0.2rem; text-align: center; }
-  .cell-storage-compact :global(.cell-explorer__formula .tex-display) { margin: 0; }
+  .cell-storage-compact :global(.cell-explorer__formula .formula-display) { margin: 0; }
   .cell-storage-compact :global(.cell-grid-panel) { display: grid; gap: 0.35rem; min-width: 0; }
   .cell-storage-compact :global(.cell-grid-stage__formula) { justify-self: center; width: 100%; max-width: 100%; padding-block-end: 0.1rem; text-align: center; }
-  .cell-storage-compact :global(.cell-grid-stage__formula .tex-display) { margin: 0; }
+  .cell-storage-compact :global(.cell-grid-stage__formula .formula-display) { margin: 0; }
   .cell-storage-compact :global(.cell-grid-stage) { grid-template-columns: 2rem minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 0.2rem; }
   .cell-storage-compact :global(.cell-axis-y-wrap) { display: grid; grid-column: 1; grid-row: 1; grid-template-columns: 1fr; align-items: stretch; }
   .cell-storage-compact :global(.cell-axis-ticks) { color: var(--sl-color-gray-2); font-family: "STIX Two Math", Cambria, serif; font-size: 1.15rem; font-weight: 750; }
@@ -237,7 +274,7 @@ const lmiSteps = [
   .cell-storage-compact :global(.cell-grid button) { font-size: 0.95rem; font-weight: 520; }
   .cell-storage-compact :global(.cell-grid button.selected) { font-weight: 750; }
   .cell-storage-compact :global(.cell-coeffs > span) { min-height: 3.65rem; gap: 0.08rem; padding: 0.45rem 0.18rem; border-radius: 5px; }
-  .cell-storage-compact :global(.cell-coeffs > span > small) { font-size: 0.98rem; line-height: 1.05; }
+  .cell-storage-compact :global(.cell-coeffs > span > small) { font-size: clamp(0.78rem, 0.68rem + 0.5vw, 0.98rem); line-height: 1.05; }
   .cell-storage-compact :global(.cell-coeff-math) { line-height: 1.05; margin-block-start: -0.12rem; }
   .cell-storage-compact :global(.cell-storage-connector) { z-index: 2; min-width: 0; white-space: nowrap; overflow: visible; font-size: 0.9rem; }
   .cell-storage-compact :global(.cell-readout) { padding-inline-start: 0.45rem; }
@@ -247,10 +284,15 @@ const lmiSteps = [
     .cell-storage-compact :global(.cell-coeffs) { inline-size: 100%; max-inline-size: 100%; justify-self: stretch; }
   }
   .step-copy p { color: var(--sl-color-gray-2); line-height: 1.65; }
-  .math-strip { inline-size: min(100%, 54rem); min-width: 0; margin-inline: auto; border-inline-start: 3px solid var(--sl-color-accent); padding-inline-start: 0.8rem; }
+  .math-strip { display: grid; inline-size: min(100%, 54rem); min-width: 0; margin-inline: auto; border-inline-start: 3px solid var(--sl-color-accent); padding-inline-start: 0.8rem; font-size: clamp(0.72rem, 0.63rem + 0.45vw, 1rem); }
   /* Ordinary mathematics is authored as short or multiline displays. */
   .math-strip__row { min-width: 0; }
-  .math-strip :global(.tex-display) { margin: 0; }
+  .math-strip--annotated { gap: clamp(0.65rem, 1.5vw, 1rem); }
+  .math-strip__annotated-row { display: grid; min-width: 0; gap: 0.2rem; }
+  .math-strip__label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.15rem; margin: 0; color: var(--sl-color-gray-2); font-size: clamp(0.74rem, 0.7rem + 0.2vw, 0.88rem); font-weight: 700; line-height: 1.35; }
+  .math-strip__annotated-row :global(.formula-display) { margin: 0; text-align: start; }
+  .math-strip :global(.formula-display),
+  .math-strip :global(.katex-display) { margin: 0; }
   .step-content :global(.diagram-frame) { margin-block: 0.4rem 0; }
   .step-content :global(.certificate-flow) { inline-size: min(100%, 54rem); margin-inline: auto; }
   .step-content :global(.export-solve-flow) { inline-size: min(100%, 58rem); margin-inline: auto; }

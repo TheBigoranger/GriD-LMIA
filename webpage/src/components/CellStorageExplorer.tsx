@@ -1,17 +1,28 @@
 import { useId, useState } from "react";
 import { pdmatCellData as cells } from "../lib/cell-bernstein.ts";
-import { DisplayMath, InlineMath } from "./MathJaxMath.tsx";
+import { DisplayMath, InlineMath } from "./RenderedMath.tsx";
 
 /** Select one of the two physical hypercubes that store A's degree-two data. */
 interface Props {
-  formulaTex?: string;
-  axisTex?: { x: string[]; y: string[] };
+  mathMarkup: {
+    formula: string;
+    basis: string;
+    axis: { x: string[]; y: string[] };
+    cells: Array<{
+      selection: string;
+      domain: string;
+      button: string;
+      coefficients: Array<{ label: string; value: string }>;
+      bernstein: string;
+    }>;
+  };
 }
 
-export default function CellStorageExplorer({ formulaTex = "", axisTex = { x: [], y: [] } }: Props) {
+export default function CellStorageExplorer({ mathMarkup }: Props) {
   const [selected, setSelected] = useState(0);
   const groupId = useId();
   const cell = cells[selected];
+  const cellMath = mathMarkup.cells[selected];
 
   const move = (index: number, key: string) => {
     const next = ["ArrowLeft", "ArrowUp"].includes(key)
@@ -27,16 +38,16 @@ export default function CellStorageExplorer({ formulaTex = "", axisTex = { x: []
         <div className="cell-summary">
           <div className="cell-summary__formula" aria-label="Known matrix formula">
             <strong>Known matrix</strong>
-            {formulaTex && <DisplayMath tex={formulaTex} />}
+            <DisplayMath markup={mathMarkup.formula} />
           </div>
           <section className="cell-summary__selection" aria-live="polite">
-            <p><strong>Selected hypercube:</strong>{" "}<InlineMath tex={`c=(${cell.c1},1)`} /></p>
-            <p><strong>Physical domain:</strong>{" "}<InlineMath tex={cell.domainTex} /></p>
+            <p><strong>Selected hypercube:</strong>{" "}<InlineMath markup={cellMath.selection} /></p>
+            <p><strong>Physical domain:</strong>{" "}<InlineMath markup={cellMath.domain} /></p>
             <p className="cell-storage-path"><strong>Storage:</strong> <code>A.LocalValues{'{'}c1{'}'}{'{'}1{'}'}</code> → <code>A.LocalValues{'{'}{cell.c1}{'}'}{'{'}1{'}'}</code></p>
           </section>
           <div className="cell-summary__basis" aria-label="Tensor Bernstein basis">
             <a className="cell-basis-link" href="https://en.wikipedia.org/wiki/Bernstein_polynomial">Bernstein basis</a>
-            <DisplayMath tex="B_{\mathbf i}^{m}(\boldsymbol\alpha)=\prod_{s=1}^{\ell}\binom{m}{i_s}\alpha_s^{i_s}(1-\alpha_s)^{m-i_s}" />
+            <DisplayMath markup={mathMarkup.basis} />
           </div>
         </div>
         <div className="cell-layout">
@@ -44,7 +55,7 @@ export default function CellStorageExplorer({ formulaTex = "", axisTex = { x: []
           <div className="cell-grid-stage">
             <div className="cell-axis-y-wrap">
               <div className="cell-axis-ticks cell-axis-ticks--y" aria-label="ρ₁ grid knots">
-                {[...axisTex.y].reverse().map((label) => <InlineMath key={label} tex={label} />)}
+                {[...mathMarkup.axis.y].reverse().map((markup, index) => <InlineMath key={index} markup={markup} />)}
               </div>
             </div>
             <div className="cell-grid" role="group" aria-label="Select one of two hypercubes with arrow keys">
@@ -64,12 +75,12 @@ export default function CellStorageExplorer({ formulaTex = "", axisTex = { x: []
                   style={{ gridRow: cells.length - index }}
                   type="button"
                 >
-                  <InlineMath tex={`c_1=${item.c1}`} />
+                  <InlineMath markup={mathMarkup.cells[index].button} />
                 </button>
               ))}
             </div>
             <div className="cell-axis-ticks cell-axis-ticks--x" aria-label="ρ₂ grid knots">
-              {axisTex.x.map((label) => <InlineMath key={label} tex={label} />)}
+              {mathMarkup.axis.x.map((markup, index) => <InlineMath key={index} markup={markup} />)}
             </div>
             </div>
           </div>
@@ -77,10 +88,10 @@ export default function CellStorageExplorer({ formulaTex = "", axisTex = { x: []
           <section className="cell-coefficient-structure" aria-label="Local Bernstein coefficient structure">
           <div className="cell-coefficient-flow">
             <div className="cell-coeffs" aria-label={`Nine degree-two coefficient matrices in cell (${cell.c1}, 1)`}>
-              {cell.coefficients.map((coefficient, index) => (
+              {cell.coefficients.map((_, index) => (
                 <span key={`${cell.c1}-${index}`}>
-                  <small><InlineMath tex={`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`} /></small>
-                  <div className="cell-coeff-math"><InlineMath tex={coefficient.tex} /></div>
+                  <small><InlineMath markup={cellMath.coefficients[index].label} /></small>
+                  <div className="cell-coeff-math"><InlineMath markup={cellMath.coefficients[index].value} /></div>
                 </span>
               ))}
             </div>
@@ -90,7 +101,7 @@ export default function CellStorageExplorer({ formulaTex = "", axisTex = { x: []
           <aside className="cell-bernstein-readout" aria-label="Bernstein representation of the selected matrix">
             <DisplayMath
               className="cell-bernstein-formula"
-              tex={`A^{(${cell.c1},1)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{\\ell}}C_{\\mathbf i}^{(${cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)`}
+              markup={cellMath.bernstein}
             />
           </aside>
         </div>

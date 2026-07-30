@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import vm from "node:vm";
 
 const root = path.resolve(import.meta.dirname, "..");
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
@@ -55,52 +54,165 @@ function unbracedBinomials() {
   return { count, failures };
 }
 
-test("uses only self-hosted MathJax 4 CommonHTML with mathjax-modern", () => {
-  const packageJson = read("package.json");
-  const packageLock = read("package-lock.json");
+test("uses build-time KaTeX with local CSS and no client fallback", () => {
+  const packageJson = JSON.parse(read("package.json"));
+  const packageLock = JSON.parse(read("package-lock.json"));
   const config = read("astro.config.mjs");
-  const assetPlugin = read("src/lib/mathjax-assets.js");
+  const dependencies = packageJson.dependencies ?? {};
+  const lockRoot = packageLock.packages[""]?.dependencies ?? {};
+  const retiredRenderer = new RegExp(["math", "jax"].join(""), "i");
 
-  assert.match(packageJson, /"mathjax":\s*"\^4\./);
-  assert.match(packageJson, /"@mathjax\/mathjax-modern-font":\s*"\^4\./);
-  const lockRoot = JSON.parse(packageLock).packages[""]?.dependencies ?? {};
-  assert.ok(!("katex" in lockRoot));
-  assert.ok(!("rehype-katex" in lockRoot));
-  assert.doesNotMatch(packageJson, /(?:rehype-katex|"katex")/i);
-  assert.doesNotMatch(allSource, /\bkatex\b|render(?:Display|Inline)Math|--formula-size|formulaScale/i);
-  assert.match(config, /src:\s*`\$\{mathJaxRoot\}\/tex-mml-chtml-mathjax-modern\.js`/);
-  assert.match(config, /font:\s*"mathjax-modern"/);
-  assert.match(config, /scale:\s*1\.0/);
-  assert.match(config, /displayOverflow:\s*"linebreak"/);
-  assert.match(config, /linebreaks:\s*\{[\s\S]*inline:\s*true[\s\S]*width:\s*"100%"/);
-  assert.match(config, /enableMenu:\s*true/);
-  assert.match(config, /enableEnrichment:\s*true/);
-  assert.match(config, /enableComplexity:\s*true/);
-  assert.doesNotMatch(config, /enableAssistiveMml/);
-  assert.match(assetPlugin, /node_modules\/@mathjax\/mathjax-modern-font/);
-  assert.match(assetPlugin, /tex-mml-chtml-mathjax-modern\.js/);
-  assert.match(assetPlugin, /mathjax-modern\/chtml/);
+  // Direct dependencies make the renderer and both build plugins explicit, reproducible inputs.
+  for (const dependency of ["katex", "remark-math", "rehype-katex"]) {
+    assert.ok(
+      Object.hasOwn(dependencies, dependency),
+      `package.json must declare "${dependency}" as a direct dependency`,
+    );
+    assert.ok(
+      Object.hasOwn(lockRoot, dependency),
+      `package-lock.json must lock "${dependency}" as a direct dependency`,
+    );
+  }
+
+  assert.match(config, /import\s+remarkMath\s+from\s+["']remark-math["']/);
+  assert.match(config, /import\s+rehypeKatex\s+from\s+["']rehype-katex["']/);
+  assert.match(config, /remarkPlugins:\s*\[[^\]]*\bremarkMath\b[^\]]*\]/s);
+  assert.match(config, /rehypePlugins:\s*\[[^\]]*\brehypeKatex\b[^\]]*\]/s);
+  assert.match(config, /["']katex\/dist\/katex\.min\.css["']/);
+  assert.doesNotMatch(config, /https?:\/\/[^"'`\s]*katex/i);
+
+  // A clean renderer boundary forbids dependency, plugin, and injected runtime fallbacks.
+  assert.deepEqual(
+    Object.keys(dependencies).filter((dependency) => retiredRenderer.test(dependency)),
+    [],
+  );
+  assert.deepEqual(
+    Object.keys(lockRoot).filter((dependency) => retiredRenderer.test(dependency)),
+    [],
+  );
+  assert.doesNotMatch(config, retiredRenderer);
+});
+
+test("ships local CSS and font payloads without formula SVG assets", () => {
+  const packageRoot = path.join(root, "node_modules/katex/dist");
+  const stylesheet = readFileSync(path.join(packageRoot, "katex.min.css"), "utf8");
+
+  assert.ok(existsSync(path.join(packageRoot, "fonts/KaTeX_Main-Regular.woff2")));
+  assert.ok(existsSync(path.join(packageRoot, "fonts/KaTeX_Math-Italic.woff2")));
+  assert.ok(existsSync(path.join(packageRoot, "fonts/KaTeX_AMS-Regular.woff2")));
+  assert.match(stylesheet, /url\(fonts\/KaTeX_Main-Regular\.woff2\)/);
+  assert.doesNotMatch(stylesheet, /url\([^)]*https?:|<svg/i);
+});
+
+test("preserves intrinsic fraction, script, and accent metrics", () => {
+  const options = read("src/lib/katex-options.js");
+  const css = read("src/styles/manual.css");
+
+  assert.match(options, /output:\s*"htmlAndMathml"/);
+  assert.match(options, /throwOnError:\s*true/);
+  assert.match(options, /strict:\s*"error"/);
   assert.doesNotMatch(
-    config + assetPlugin,
-    /(?:cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com|unpkg\.com|esm\.sh|mathjax\.org\/mathjax\/latest)/i,
+    css,
+    /\.katex(?:-[\w-]+)?[^{]*\{[^}]*(?:font-size|font-family|transform|zoom)\s*:/gis,
   );
 });
 
-test("ships the complete local MathJax runtime and modern CHTML font payload", () => {
-  const packageRoot = path.join(root, "node_modules/@mathjax/mathjax-modern-font");
-  assert.ok(existsSync(path.join(packageRoot, "tex-mml-chtml-mathjax-modern.js")));
-  assert.ok(existsSync(path.join(packageRoot, "chtml/woff2/mjx-mm-i.woff2")));
-  assert.ok(existsSync(path.join(packageRoot, "chtml/woff2/mjx-mm-s4.woff2")));
-  assert.ok(existsSync(path.join(packageRoot, "chtml/woff2/mjx-mm-sy.woff2")));
+test("authors the Welcome DPD-LMI as one deliberate multiline aligned display", () => {
+  const homePortal = read("src/components/HomePortal.astro");
+  const firstStep = homePortal.slice(
+    homePortal.indexOf('number: "01"'),
+    homePortal.indexOf('number: "02"'),
+  );
+  const css = read("src/styles/manual.css");
+
+  assert.match(firstStep, /math:\s*"\\\\begin\{aligned\}[\s\S]*\\\\mathcal F/);
+  assert.match(
+    firstStep,
+    /&\\\\mathcal F[\s\S]*\\\\\\\\&=\\\\sum_\{k=1\}\^\{N\}\\\\sum_\{s=1\}\^\{\\\\ell\}[\s\S]*T_\{k,s\}\(\\\\boldsymbol\\\\rho\)\\\\\\\\&\\\\quad\{\}\\\\cdot\\\\frac\{\\\\partial y_k\}\{\\\\partial\\\\rho_s\}\(\\\\boldsymbol\\\\rho\)\\\\\\\\&\\\\quad\+F_0\(\\\\boldsymbol\\\\rho\)\\\\\\\\&\\\\quad\+\\\\sum_\{k=1\}\^\{N\}F_k\(\\\\boldsymbol\\\\rho\)y_k\(\\\\boldsymbol\\\\rho\)\\\\preceq0\.\\\\end\{aligned\}"/,
+  );
+  assert.doesNotMatch(
+    css,
+    /\.katex(?:-[\w-]+)?[^{]*\{[^}]*(?:font-size|transform|zoom)\s*:/gis,
+  );
 });
 
-test("the current production build contains lazy MathJax runtime dependencies", () => {
+test("only the direct elevation coefficient formula opts into local scrolling", () => {
+  const elevate = read("src/content/docs/documents/reference/pdmat/elevate.mdx");
+  const css = read("src/styles/manual.css");
+  const geometry = read("scripts/check-rendered-geometry.mjs");
+
+  assert.equal(
+    (allSource.match(/className="elevate-direct-coefficient-scroll"/g) ?? []).length,
+    1,
+  );
+  assert.match(
+    elevate,
+    /<div className="elevate-direct-coefficient-scroll">[\s\S]*\\hat C\^\{\(\\boldsymbol c\)\}\[\\boldsymbol k\][\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*<\/div>/,
+  );
+  assert.match(
+    css,
+    /\.elevate-direct-coefficient-scroll\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
+  );
+  assert.doesNotMatch(
+    allSource,
+    /(?:\.formula-display|\.math-strip(?:__row)?)\s*\{[^}]*overflow-x:\s*(?:auto|scroll)/si,
+  );
+  assert.match(geometry, /closest\("\.elevate-direct-coefficient-scroll"\)/);
+  assert.match(
+    geometry,
+    /\["auto",\s*"scroll"\]\.includes\(localScrollerStyle\.overflowX\)[\s\S]*localScroller\.scrollWidth\s*>\s*localScroller\.clientWidth/,
+  );
+  assert.match(geometry, /type:\s*"local-formula-scroll-bounds"/);
+  assert.match(geometry, /type:\s*"local-formula-scroll-required"/);
+  assert.match(geometry, /type:\s*"local-formula-scroll-unneeded"/);
+});
+
+test("elevation kernel shorthand stays consistent with the direct coefficient rule", () => {
+  const elevate = read("src/content/docs/documents/reference/pdmat/elevate.mdx");
+
+  assert.match(elevate, /Let \$\\boldsymbol d:=\\boldsymbol M-\\boldsymbol m\$/);
+  assert.match(
+    elevate,
+    /\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\][\s\S]*&:=\s*\\prod_\{s=1\}\^\{\\ell\}\\binom\{d_s\}\{j_s\},\\\\[\s\S]*\\boldsymbol j\s*&\\in\\prod_s\\\{0,\\ldots,d_s\\\}/,
+  );
+  assert.equal(
+    (elevate.match(/\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\]/g) ?? []).length,
+    2,
+  );
+  assert.match(
+    elevate,
+    /\\ast_\{\\ell\}[\s\S]*\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\]/,
+  );
+  assert.doesNotMatch(elevate, /\\mathcal E_\{\\boldsymbol M-\\boldsymbol m\}/);
+  assert.match(
+    elevate,
+    /<div className="elevate-direct-coefficient-scroll">[\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*\\binom\{M_s\}\{k_s\}[\s\S]*<\/div>/,
+  );
+});
+
+test("the shared renderer owns strict HTML and MathML output", () => {
+  const renderer = read("src/lib/katex-renderer.js");
+  const options = read("src/lib/katex-options.js");
+
+  assert.match(renderer, /katex\.renderToString\(tex,/);
+  assert.match(renderer, /\.\.\.katexOptions/);
+  assert.match(renderer, /displayMode/);
+  assert.match(options, /output:\s*"htmlAndMathml"/);
+  assert.match(options, /trust:\s*false/);
+});
+
+test("the current production build contains local formula CSS and fonts", () => {
   const dist = path.join(root, "dist");
   if (!existsSync(dist)) return;
 
-  assert.ok(existsSync(path.join(dist, "mathjax/sre/speech-worker.js")));
-  assert.ok(existsSync(path.join(dist, "mathjax/input/tex/extensions/boldsymbol.js")));
-  assert.ok(existsSync(path.join(dist, "mathjax/mathjax-modern/chtml/woff2/mjx-mm-i.woff2")));
+  const files = readdirSync(dist, { recursive: true }).map(String);
+  assert.ok(files.some((file) => /KaTeX_Main-Regular\.[^.]+\.woff2$/.test(file)));
+  const css = files
+    .filter((file) => file.endsWith(".css"))
+    .map((file) => readFileSync(path.join(dist, file), "utf8"))
+    .join("\n");
+  assert.match(css, /\.katex(?:-display)?\s*\{/);
+  assert.doesNotMatch(css, /url\((?:["'])?(?:https?:)?\/\//i);
 });
 
 test("all 25 binomials use two explicit braced arguments", () => {
@@ -114,38 +226,48 @@ test("does not override TeX script, fraction, binomial, or display metrics", () 
   const metricCommands =
     /\\(?:displaystyle|textstyle|scriptstyle|scriptscriptstyle|tiny|scriptsize|footnotesize|small|large|Large|LARGE|huge|Huge)\b/;
   const mathMetricRule =
-    /(?:mjx-|mjx-container|\.tex-(?:display|inline|math))[^{]*\{[^}]*(?:font-size|font-family|transform|zoom|--mjx|--math-scale)\s*:/gis;
+    /\.katex(?:-[\w-]+)?[^{]*\{[^}]*(?:font-size|font-family|transform|zoom)\s*:/gis;
 
   assert.doesNotMatch(allSource, metricCommands);
   assert.doesNotMatch(css, mathMetricRule);
-  assert.doesNotMatch(css, /(?:\.tex-display|mjx-container)[^{]*\{[^}]*1\.5em/si);
+  assert.doesNotMatch(css, /\.katex(?:-display)?[^{]*\{[^}]*1\.5em/si);
 });
 
-test("dynamic React math serializes clear, TeX replacement, and typesetting", () => {
-  const config = read("astro.config.mjs");
-  const helper = read("src/components/MathJaxMath.tsx");
-  const clear = config.indexOf("typesetClear(elements)");
-  const update = config.indexOf("update?.()");
-  const typeset = config.indexOf("typesetPromise(elements)");
+test("every component wrapper isolates formula internals from Starlight content flow", () => {
+  const astro = read("src/components/KaTeXMath.astro");
+  const react = read("src/components/RenderedMath.tsx");
+  const missing: string[] = [];
 
-  assert.match(config, /pdLmiTypeset\s*=\s*\(elements,\s*update\)/);
-  assert.ok(clear >= 0, "the shared queue must clear the supplied elements");
-  assert.ok(update > clear, "the queued update callback must run after typesetClear");
-  assert.ok(typeset > update, "typesetPromise must run after the queued TeX update");
-  assert.match(
-    helper,
-    /pdLmiTypeset\?\.\(\[element\],\s*\(\)\s*=>\s*\{?[\s\S]*?element\.textContent/,
-  );
-  assert.doesNotMatch(helper, /dangerouslySetInnerHTML|render(?:Display|Inline)Math/);
+  for (const [name, source] of [
+    ["Astro", astro],
+    ["React", react],
+  ] as const) {
+    const classes = source.match(/const classes\s*=\s*`([^`]+)`/)?.[1] ?? "";
+    if (!/\bformula-math\b/.test(classes) || !/\bnot-content\b/.test(classes)) {
+      missing.push(`${name} formula wrapper`);
+    }
+  }
+
+  assert.deepEqual(missing, []);
+});
+
+test("React formulas consume trusted build-time markup without a document typesetting pass", () => {
+  const helper = read("src/components/RenderedMath.tsx");
+
+  assert.match(helper, /\bmarkup:\s*string\b/);
+  assert.match(helper, /dangerouslySetInnerHTML=\{\{\s*__html:\s*markup\s*\}\}/);
+  assert.doesNotMatch(helper, /\brenderMath\s*\(|\brenderToString\s*\(|katex-renderer/i);
+  assert.doesNotMatch(helper, /\btex\s*:\s*string\b/);
+  assert.doesNotMatch(helper, /\buseEffect\b|\buseRef\b|textContent|document\.|window\./);
 });
 
 test("the React wrapper stays internal while public formula wrappers are consumed", () => {
-  const helper = read("src/components/MathJaxMath.tsx");
+  const helper = read("src/components/RenderedMath.tsx");
   const reactConsumers = sourceEntries
-    .filter(({ source }) => /from\s+["'][^"']*MathJaxMath\.tsx["']/.test(source));
+    .filter(({ source }) => /from\s+["'][^"']*RenderedMath\.tsx["']/.test(source));
 
-  assert.match(helper, /function MathJaxMath\s*\(/);
-  assert.doesNotMatch(helper, /export\s+(?:default\s+)?function\s+MathJaxMath\b/);
+  assert.match(helper, /function RenderedMath\s*\(/);
+  assert.doesNotMatch(helper, /export\s+(?:default\s+)?function\s+RenderedMath\b/);
   assert.match(helper, /export const DisplayMath\s*=/);
   assert.match(helper, /export const InlineMath\s*=/);
   assert.ok(reactConsumers.length >= 4, "the public wrappers must remain used by React islands");
@@ -153,91 +275,45 @@ test("the React wrapper stays internal while public formula wrappers are consume
     assert.match(source, /import\s*\{[^}]*\b(?:DisplayMath|InlineMath)\b[^}]*\}\s*from/);
     assert.doesNotMatch(
       source,
-      /import\s*(?:MathJaxMath|\{[^}]*\bMathJaxMath\b)/,
+      /import\s*(?:RenderedMath|\{[^}]*\bRenderedMath\b)/,
       `${file} must consume DisplayMath or InlineMath instead of the internal component`,
     );
   }
 });
 
-test("the global queue recovers after a rejected MathJax typeset task", async () => {
-  const config = read("astro.config.mjs");
-  const helperStart = config.indexOf("window.pdLmiMathQueue = Promise.resolve();");
-  const helperEnd = config.indexOf("const typesetStaticMath", helperStart);
-  assert.ok(helperStart >= 0 && helperEnd > helperStart, "the global helper must remain extractable");
+test("strict rendering throws on malformed TeX and never emits formula SVG", async () => {
+  const { renderMath } = await import("../src/lib/katex-renderer.js");
+  const markup = renderMath(String.raw`\frac{x}{y}`, { displayMode: true });
 
-  const order: string[] = [];
-  const errors: unknown[][] = [];
-  let typesetCount = 0;
-  const context = vm.createContext({
-    console: {
-      error: (...args: unknown[]) => errors.push(args),
-    },
-    Promise,
-    window: {
-      MathJax: {
-        typesetClear: (elements: unknown[]) => order.push(`clear:${String(elements[0])}`),
-        typesetPromise: async (elements: unknown[]) => {
-          typesetCount += 1;
-          order.push(`typeset:${String(elements[0])}`);
-          if (typesetCount === 1) throw new Error("first task failed");
-        },
-      },
-    },
-  });
-  vm.runInContext(config.slice(helperStart, helperEnd), context);
-  const runtime = context.window as {
-    pdLmiMathQueue: Promise<unknown>;
-    pdLmiTypeset: (elements: unknown[], update: () => void) => Promise<unknown>;
-  };
-
-  await assert.doesNotReject(runtime.pdLmiTypeset(["first"], () => order.push("update:first")));
-  await assert.doesNotReject(runtime.pdLmiTypeset(["second"], () => order.push("update:second")));
-  await assert.doesNotReject(runtime.pdLmiMathQueue);
-  assert.deepEqual(order, [
-    "clear:first",
-    "update:first",
-    "typeset:first",
-    "clear:second",
-    "update:second",
-    "typeset:second",
-  ]);
-  assert.equal(errors.length, 1);
-  assert.equal(errors[0][0], "MathJax typesetting failed:");
-  assert.match(String(errors[0][1]), /first task failed/);
+  assert.match(markup, /class="katex-html"/);
+  assert.match(markup, /<math(?:\s|>)/);
+  assert.doesNotMatch(markup, /<svg(?:\s|>)/i);
+  assert.throws(() => renderMath(String.raw`\frac{1}{`));
 });
 
-test("late-hydrated React math uses durable readiness before startup and event fallbacks", () => {
+test("late-hydrated React formulas need no readiness or queue fallback", () => {
   const config = read("astro.config.mjs");
-  const helper = read("src/components/MathJaxMath.tsx");
-  const durableReady = helper.indexOf('document.documentElement.dataset.mathjaxReady === "true"');
-  const startup = helper.indexOf("window.MathJax?.startup?.promise");
-  const startupFallback = helper.indexOf("else if (startup)");
-  const eventFallback = helper.indexOf('document.addEventListener("mathjax:ready"');
-  const cleanup = helper.indexOf("return () =>");
+  const helper = read("src/components/RenderedMath.tsx");
+  const deferredRuntime = /documentElement\.dataset|addEventListener|dispatchEvent|\bqueue\b|typeset|startup/i;
 
-  assert.match(config, /document\.documentElement\.dataset\.mathjaxReady\s*=\s*"true"/);
-  assert.match(config, /document\.dispatchEvent\(new CustomEvent\("mathjax:ready"\)\)/);
-  assert.ok(durableReady >= 0, "late islands must first consult the durable ready dataset");
-  assert.ok(startup >= 0 && startup < durableReady, "the startup promise must be captured before readiness branching");
-  assert.ok(startupFallback > durableReady, "startup.promise must be the second readiness path");
-  assert.ok(eventFallback > startupFallback, "the one-shot ready event must be the final fallback");
-  assert.match(helper, /startup\.then\(typeset\)/);
-  assert.match(helper, /document\.addEventListener\("mathjax:ready",\s*typeset,\s*\{\s*once:\s*true\s*\}\)/);
-  assert.ok(cleanup > eventFallback, "effect cleanup must follow all readiness paths");
-  assert.match(
-    helper.slice(cleanup),
-    /removeEventListener\("mathjax:ready",\s*typeset\)[\s\S]*pdLmiTypeset\?\.\(\[element\],[\s\S]*element\.textContent\s*=\s*""/,
-  );
+  assert.doesNotMatch(config, deferredRuntime);
+  assert.doesNotMatch(helper, deferredRuntime);
+  assert.match(helper, /\bmarkup:\s*string\b/);
+  assert.match(helper, /dangerouslySetInnerHTML=\{\{\s*__html:\s*markup\s*\}\}/);
+  assert.doesNotMatch(helper, /\brenderMath\s*\(|\brenderToString\s*\(|katex-renderer/i);
 });
 
-test("the Markdown pipeline relies on remark-math HAST classes, not a dollar scanner", () => {
-  const plugin = read("src/lib/rehype-mathjax.js");
+test("the Markdown pipeline uses standard plugins rather than a dollar scanner", () => {
+  const config = read("astro.config.mjs");
   assert.doesNotMatch(
-    plugin,
+    config,
     /splitInlineMath|nextSingleDollar|isEscaped|source\[index\]\s*===\s*["']\$["']/,
   );
-  assert.match(plugin, /math-inline/);
-  assert.match(plugin, /math-display/);
+  assert.match(config, /remarkPlugins:\s*\[\s*remarkMath\s*\]/);
+  assert.match(
+    config,
+    /rehypePlugins:\s*\[\s*\[\s*rehypeKatex,\s*katexOptions\s*\]\s*,\s*rehypeKatexStrict\s*\]/,
+  );
 });
 
 test("commits the clean-session bernsteinTable transcripts byte for byte", () => {
@@ -344,17 +420,17 @@ test("CellStorageDiagram API links use the BASE_URL pdmat storage route", () => 
 
 });
 
-test("development MathJax middleware is BASE_URL-aware and path-safe", () => {
-  const assets = read("src/lib/mathjax-assets.js");
+test("static math assets use the normal build graph without development middleware", () => {
+  const config = read("astro.config.mjs");
+  const packageJson = JSON.parse(read("package.json"));
+  const retiredRenderer = ["math", "jax"].join("");
+  const retiredPattern = new RegExp(retiredRenderer, "i");
 
-  assert.match(assets, /"astro:config:done":\s*\(\{\s*config\s*\}\)\s*=>/);
-  assert.match(assets, /assetPrefix\s*=\s*mathJaxPrefix\(config\.base\)/);
-  assert.match(assets, /pathname\.startsWith\("\/mathjax\/"\)/);
-  assert.match(assets, /decodeURIComponent/);
-  assert.ok(assets.includes('assetPath.includes("\\0")'));
-  assert.match(assets, /part === "\.\."|part === "\."/);
-  assert.match(assets, /details\.isFile\(\)/);
-  assert.equal(existsSync(path.join(root, "public/mathjax")), false);
+  assert.equal(typeof packageJson.dependencies?.katex, "string");
+  assert.match(config, /customCss:\s*\[[^\]]*["']katex\/dist\/katex\.min\.css["']/s);
+  assert.doesNotMatch(config, /astro:server:setup|configureServer|createServer/);
+  assert.doesNotMatch(config, retiredPattern);
+  assert.equal(existsSync(path.join(root, "public", "katex")), false);
 });
 
 test("only the root walkthroughs opt into eager React hydration", () => {
@@ -367,7 +443,7 @@ test("only the root walkthroughs opt into eager React hydration", () => {
   assert.match(home, /<CertificateFlow compact eager\s*\/>/);
   assert.match(
     certificateWrapper,
-    /eager\s*\?\s*<CertificateFlow compact=\{compact\} options=\{options\} client:load\s*\/>\s*:\s*<CertificateFlow compact=\{compact\} options=\{options\} client:visible\s*\/>/,
+    /eager\s*\?\s*<CertificateFlow compact=\{compact\} options=\{options\} residualMarkup=\{residualMarkup\} client:load\s*\/>\s*:\s*<CertificateFlow compact=\{compact\} options=\{options\} residualMarkup=\{residualMarkup\} client:visible\s*\/>/,
   );
   assert.match(certificateConcept, /<CertificateFlow\s*\/>/);
   assert.doesNotMatch(certificateConcept, /<CertificateFlow\b[^>]*\beager\b/);
@@ -384,9 +460,8 @@ test("only the root walkthroughs opt into eager React hydration", () => {
   }
 });
 
-test("browser test resources install cleanup guards before fallible follow-up work", () => {
+test("browser geometry resources install cleanup guards before fallible follow-up work", () => {
   const geometry = read("scripts/check-rendered-geometry.mjs");
-  const devSmoke = read("tests/mathjax-dev-server.test.ts");
 
   assert.match(
     geometry,
@@ -399,18 +474,6 @@ test("browser test resources install cleanup guards before fallible follow-up wo
   assert.match(
     geometry,
     /if \(primaryError\)[\s\S]*throw primaryError;[\s\S]*throw new AggregateError\(cleanupErrors, "Geometry cleanup failed\."\)/,
-  );
-
-  const spawnAt = devSmoke.indexOf("const child = spawn(");
-  const guardAt = devSmoke.indexOf("\n  try {", spawnAt);
-  const awaitStartAt = devSmoke.indexOf("const started = await launcherExit", spawnAt);
-  const pidAssertAt = devSmoke.indexOf("assert.ok(managedPid", spawnAt);
-  assert.ok(spawnAt >= 0 && guardAt > spawnAt);
-  assert.ok(awaitStartAt > guardAt, "launcher completion must be protected by managed cleanup");
-  assert.ok(pidAssertAt > guardAt, "PID parsing assertions must be protected by managed cleanup");
-  assert.match(
-    devSmoke.slice(guardAt),
-    /finally \{[\s\S]*await astroControl\("stop"\);[\s\S]*await astroControl\("status"\);[\s\S]*if \(managedPid\)[\s\S]*throw primaryError;[\s\S]*AggregateError/,
   );
 });
 

@@ -64,22 +64,23 @@ $$
 and
 
 $$
-\begin{bmatrix}
+\Biggl[\begin{matrix}
 \dot P+\operatorname{He}(PA) & PB & C^{\mathsf T}\\
 B^{\mathsf T}P & -\gamma I & D^{\mathsf T}\\
 C & D & -\gamma I
-\end{bmatrix}\prec0
+\end{matrix}\Biggr]\prec0
 $$
 
 for every
 $(\boldsymbol\rho,\boldsymbol\nu)\in\mathcal P\times\mathcal R$, where
 
 $$
+\begin{aligned}
 \dot P(\boldsymbol\rho,\boldsymbol\nu)
-=\sum_{s=1}^{\ell}
-\nu_s\frac{\partial P}{\partial\rho_s}(\boldsymbol\rho),
-\qquad
-\operatorname{He}(X)=X+X^{\mathsf T}.
+&=\sum_{s=1}^{\ell}\nu_s\\
+&\quad{}\cdot\frac{\partial P}{\partial\rho_s}(\boldsymbol\rho),\\
+\operatorname{He}(X)&=X+X^{\mathsf T}.
+\end{aligned}
 $$
 
 The strict signs describe the mathematical analysis condition. The package
@@ -92,12 +93,13 @@ The same workflow applies to residuals affine in general decision functions
 $y_k(\boldsymbol\rho)$ and their partial derivatives:
 
 $$
+\begin{aligned}
 \mathcal F(\boldsymbol\rho,\boldsymbol\nu)
-=F_0(\boldsymbol\rho)
-+\sum_{k=1}^{N}F_k(\boldsymbol\rho)y_k(\boldsymbol\rho)
-+\sum_{k=1}^{N}\sum_{s=1}^{\ell}
-R_{ks}(\boldsymbol\rho)
-\frac{\partial y_k}{\partial\rho_s}(\boldsymbol\rho)\nu_s.
+&=F_0(\boldsymbol\rho)\\
+&\quad+\sum_{k=1}^{N}F_k(\boldsymbol\rho)y_k(\boldsymbol\rho)\\
+&\quad+\sum_{k=1}^{N}\sum_{s=1}^{\ell}R_{ks}(\boldsymbol\rho)\\
+&\qquad{}\cdot\frac{\partial y_k}{\partial\rho_s}(\boldsymbol\rho)\nu_s.
+\end{aligned}
 $$
 
 The package supports affine decision expressions. Products nonlinear in

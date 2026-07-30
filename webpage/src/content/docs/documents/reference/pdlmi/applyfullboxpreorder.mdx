@@ -76,15 +76,15 @@ constraint list has four PSD Gram constraints, followed by 25 exact affine
 matrix equalities:
 
 $$
-\begin{gathered}
-Q_{\varnothing}\succeq0,\quad Q_{\{1\}}\succeq0,\\
-Q_{\{2\}}\succeq0,\quad Q_{\{1,2\}}\succeq0,\\
-\widetilde C^{(\mathbf c)}[(p,q)]=
-\mathcal A_{p,q}\bigl(
-Q_{\varnothing},Q_{\{1\}},Q_{\{2\}},Q_{\{1,2\}}
-\bigr),\\
-p,q=0,\ldots,4.
-\end{gathered}
+\begin{aligned}
+&Q_{\varnothing}\succeq0,\quad Q_{\{1\}}\succeq0,\\
+&Q_{\{2\}}\succeq0,\quad Q_{\{1,2\}}\succeq0,\\
+&\tilde C^{(\mathbf c)}[(p,q)]\\
+&\quad=\mathcal A_{p,q}\bigl(\\
+&\qquad Q_{\varnothing},Q_{\{1\}},\\
+&\qquad Q_{\{2\}},Q_{\{1,2\}}\bigr),\\
+&p,q=0,\ldots,4.
+\end{aligned}
 $$
 
 Each $\mathcal A_{p,q}$ is a fixed affine Bernstein-coefficient map of the
@@ -98,7 +98,8 @@ while
 
 $$
 \begin{aligned}
-\tfrac14C^{(\mathbf c)}[(0,0)]+\tfrac34C^{(\mathbf c)}[(1,0)]
+&\tfrac14C^{(\mathbf c)}[(0,0)]
+ +\tfrac34C^{(\mathbf c)}[(1,0)]\\
 &=\tfrac12[Q_{\varnothing}]_{(0,0),(1,0)}\\
 &\quad+\tfrac12[Q_{\varnothing}]_{(1,0),(0,0)}\\
 &\quad+\tfrac14[Q_{\{1\}}]_{(0,0),(0,0)}.

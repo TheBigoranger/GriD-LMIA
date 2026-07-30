@@ -2,7 +2,7 @@ import { useId, useState } from "react";
 
 import type { CertificateKey } from "../data/certificate-data.ts";
 import { buildCertificateShape, type CertificateMode } from "../lib/manual-explorers.ts";
-import { DisplayMath } from "./MathJaxMath.tsx";
+import { DisplayMath } from "./RenderedMath.tsx";
 
 export interface CertificateOption {
   key: CertificateKey;
@@ -13,7 +13,7 @@ export interface CertificateOption {
   exportCommand: string;
   constraintCount: string;
   boundaryNote: string;
-  formula: readonly string[];
+  formulaMarkup: readonly string[];
   href: string;
 }
 
@@ -123,11 +123,11 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             <p className="explorer-error" role="alert">{error}</p>
           </div>
           <div className="certificate-formula">
-            {option.formula.map((tex, index) => (
+            {option.formulaMarkup.map((markup, index) => (
               <DisplayMath
                 className="certificate-formula__row"
                 key={`${option.key}-${index}`}
-                tex={tex}
+                markup={markup}
               />
             ))}
           </div>

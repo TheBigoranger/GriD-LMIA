@@ -24,20 +24,22 @@ $\boldsymbol M\ge\boldsymbol m$ componentwise is defined directly by
 $$
 \begin{aligned}
 A^{(\boldsymbol c)}(\boldsymbol\alpha)
-&=\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}
-C^{(\boldsymbol c)}[\boldsymbol i]
-B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)\\
-&=\sum_{\boldsymbol k\in\prod_s\{0,\ldots,M_s\}}
-\widehat C^{(\boldsymbol c)}[\boldsymbol k]
-B_{\boldsymbol k}^{\boldsymbol M}(\boldsymbol\alpha).
+&=\sum_{\substack{\boldsymbol i\in\\\prod_s\{0,\ldots,m_s\}}}
+C^{(\boldsymbol c)}[\boldsymbol i]\\
+&\qquad{}\cdot B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)\\
+&=\sum_{\substack{\boldsymbol k\in\\\prod_s\{0,\ldots,M_s\}}}
+\hat C^{(\boldsymbol c)}[\boldsymbol k]\\
+&\qquad{}\cdot B_{\boldsymbol k}^{\boldsymbol M}(\boldsymbol\alpha).
 \end{aligned}
 $$
 
 The elevated coefficients are
 
+<div className="elevate-direct-coefficient-scroll">
+
 $$
 \begin{aligned}
-\widehat C^{(\boldsymbol c)}[\boldsymbol k]
+\hat C^{(\boldsymbol c)}[\boldsymbol k]
 &=
 \sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}
 \left[
@@ -54,6 +56,8 @@ $$
 \end{aligned}
 $$
 
+</div>
+
 As usual, a binomial coefficient with an index outside its natural range is
 zero. This direct sum is the mathematical coefficient rule: it gives every
 elevated coefficient from the original coefficient tensor without introducing
@@ -62,15 +66,17 @@ an implementation-specific data layout.
 <Aside type="note" title="Implementation remark: normalized convolution">
 
 The package evaluates the same direct rule as a normalized tensor convolution.
-Its direction-wise degree-$(\boldsymbol M-\boldsymbol m)$ elevation kernel is
+Let $\boldsymbol d:=\boldsymbol M-\boldsymbol m$. Its direction-wise
+degree-$\boldsymbol d$ elevation kernel is
 
 $$
-\mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
-:=
-\prod_{s=1}^{\ell}
-\binom{M_s-m_s}{j_s},
-\qquad
-\boldsymbol j\in\prod_s\{0,\ldots,M_s-m_s\}.
+\begin{aligned}
+\mathcal E_{\boldsymbol d}[\boldsymbol j]
+&:=
+\prod_{s=1}^{\ell}\binom{d_s}{j_s},\\
+\boldsymbol j
+&\in\prod_s\{0,\ldots,d_s\}.
+\end{aligned}
 $$
 
 The complete elevation is the normalized $\ell$-dimensional convolution
@@ -78,20 +84,26 @@ of the original coefficient tensor with that kernel:
 
 $$
 \begin{aligned}
-\left\{
-  \prod_{s=1}^{\ell}\binom{M_s}{k_s}
-  \widehat C^{(\boldsymbol c)}[\boldsymbol k]
-\right\}_{\boldsymbol k}
-&=
-\left\{
-  \prod_{s=1}^{\ell}\binom{m_s}{i_s}
+&
+\Biggl\{
+  \begin{gathered}
+  \prod_{s=1}^{\ell}\binom{M_s}{k_s}\\
+  \hat C^{(\boldsymbol c)}[\boldsymbol k]
+  \end{gathered}
+\Biggr\}_{\boldsymbol k}
+\\
+&\quad{}=
+\Biggl\{
+  \begin{gathered}
+  \prod_{s=1}^{\ell}\binom{m_s}{i_s}\\
   C^{(\boldsymbol c)}[\boldsymbol i]
-\right\}_{\boldsymbol i}
+  \end{gathered}
+\Biggr\}_{\boldsymbol i}
 \\
 &\qquad{}\ast_{\ell}
-\left\{
-  \mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
-\right\}_{\boldsymbol j}.
+\Biggl\{
+  \mathcal E_{\boldsymbol d}[\boldsymbol j]
+\Biggr\}_{\boldsymbol j}.
 \end{aligned}
 $$
 
@@ -141,12 +153,12 @@ the familiar recurrence
 
 $$
 \begin{aligned}
-\widetilde a_0&=a_0,\\
-\widetilde a_{m+1}&=a_m,\\
-\widetilde a_i
-&=\frac{i}{m+1}a_{i-1}
-+\left(1-\frac{i}{m+1}\right)a_i,
-\qquad 1\le i\le m.
+\tilde a_0&=a_0,\\
+\tilde a_{m+1}&=a_m,\\
+\tilde a_i
+&=\frac{i}{m+1}a_{i-1}\\
+&\quad+\left(1-\frac{i}{m+1}\right)a_i,\\
+&1\le i\le m.
 \end{aligned}
 $$
 

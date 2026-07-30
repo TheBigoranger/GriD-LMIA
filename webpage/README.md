@@ -1,6 +1,6 @@
 # PD-LMI Manual Website
 
-This directory contains the GitHub Pages documentation site for the PD-LMI (parameter-dependent LMI) MATLAB/YALMIP package. The site is built with npm, Astro, Starlight, and build-time MathJax rendering.
+This directory contains the GitHub Pages documentation site for the PD-LMI (parameter-dependent LMI) MATLAB/YALMIP package. The site is built with npm, Astro, and Starlight; Markdown math is rendered at build time through `remark-math` → `rehype-katex`, with KaTeX CSS and fonts bundled locally, so no client-side runtime typesetting or external asset fetch is required.
 
 ## Structure
 

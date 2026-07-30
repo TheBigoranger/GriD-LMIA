@@ -1,0 +1,17 @@
+---
+import { renderMath } from "../lib/katex-renderer.js";
+
+interface Props {
+  class?: string;
+  display?: boolean;
+  tex: string;
+}
+
+const { class: className = "", display = false, tex } = Astro.props;
+const classes = `not-content formula-math ${display ? "formula-display" : "formula-inline"} ${className}`.trim();
+const markup = renderMath(tex, { displayMode: display });
+---
+
+{display
+  ? <div class={classes} set:html={markup} />
+  : <span class={classes} set:html={markup} />}

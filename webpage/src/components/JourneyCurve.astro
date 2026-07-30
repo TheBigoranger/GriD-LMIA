@@ -1,5 +1,5 @@
 ---
-import MathJaxMath from "./MathJaxMath.astro";
+import KaTeXMath from "./KaTeXMath.astro";
 
 const stages = [
   { number: "01", title: "Model the general DPD-LMI", href: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#general-dpd-lmi-template" },
@@ -29,12 +29,12 @@ const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}
       <g class="journey-nodes"><circle cx="112" cy="156" r="13" /><circle cx="336" cy="140" r="13" /><circle cx="560" cy="148" r="13" /><circle cx="784" cy="138" r="13" /><circle cx="1008" cy="102" r="13" /></g>
     </svg>
     <ol class="journey-stage-map">
-      {stages.map((stage) => <li><a href={local(stage.href)}><span>{stage.number}</span><strong>{stage.title}{stage.math && <MathJaxMath class="journey-math" tex={stage.math} />}{stage.suffix}</strong></a></li>)}
+      {stages.map((stage) => <li><a href={local(stage.href)}><span>{stage.number}</span><strong>{stage.title}{stage.math && <KaTeXMath class="journey-math" tex={stage.math} />}{stage.suffix}</strong></a></li>)}
     </ol>
   </div>
 
   <ol class="journey-mobile" aria-hidden="true">
-    {stages.map((stage) => <li><a href={local(stage.href)}><span>{stage.number}</span><strong>{stage.title}{stage.math && <MathJaxMath class="journey-math" tex={stage.math} />}{stage.suffix}</strong></a></li>)}
+    {stages.map((stage) => <li><a href={local(stage.href)}><span>{stage.number}</span><strong>{stage.title}{stage.math && <KaTeXMath class="journey-math" tex={stage.math} />}{stage.suffix}</strong></a></li>)}
   </ol>
 </figure>
 
