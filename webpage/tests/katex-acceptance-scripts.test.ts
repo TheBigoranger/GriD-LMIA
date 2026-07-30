@@ -101,6 +101,16 @@ test("acceptance scripts verify static local KaTeX rendering at every target wid
     geometry.includes(".elevate-direct-coefficient-scroll"),
     "geometry acceptance must retain the one approved formula scroller",
   );
+  assert.match(
+    geometry,
+    /const certificateStates\s*=\s*\[[\s\S]*Direct[\s\S]*Pólya[\s\S]*Putinar[\s\S]*SparseFullBox[\s\S]*FullBox/,
+    "geometry acceptance must exercise every certificate tab state",
+  );
+  assert.match(
+    geometry,
+    /querySelector\(["']svg["']\)[\s\S]*certificate-formula-state/,
+    "every hydrated certificate state must reject formula SVG",
+  );
   for (const diagnostic of [
     "local-formula-scroll-bounds",
     "local-formula-scroll-required",

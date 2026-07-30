@@ -749,14 +749,41 @@ async function auditRootWalkthroughs(browser, origin, failures) {
         .waitFor({ state: "visible", timeout: 5_000 });
 
       const certificate = page.getByRole("figure", { name: "Finite certificate selection flow" });
-      const polya = certificate.getByRole("tab", { name: "Pólya", exact: true });
-      await polya.click();
-      if (await polya.getAttribute("aria-selected") !== "true") {
-        throw new Error("Pólya tab did not become selected");
+      const certificateStates = [
+        { name: "Direct", command: "selected = L;" },
+        { name: "Pólya", command: "selected = L.applyPolya(d);" },
+        { name: "Putinar", command: "selected = L.applyPutinar();" },
+        { name: "SparseFullBox", command: "selected = L.applySparseFullBoxPreorder();" },
+        { name: "FullBox", command: "selected = L.applyFullBoxPreorder();" },
+      ];
+      for (const { name, command } of certificateStates) {
+        const tab = certificate.getByRole("tab", { name, exact: true });
+        await tab.click();
+        if (await tab.getAttribute("aria-selected") !== "true") {
+          throw new Error(`${name} tab did not become selected`);
+        }
+        const certificatePanel = certificate.getByRole("tabpanel");
+        await certificatePanel.locator("code").filter({ hasText: command })
+          .waitFor({ state: "visible", timeout: 5_000 });
+        const formulaState = await certificate.evaluate((figure) => {
+          const roots = [...figure.querySelectorAll(".formula-math .katex")];
+          const invalid = roots
+            .filter((root) =>
+              !root.querySelector(".katex-html") ||
+              !root.querySelector("math") ||
+              root.querySelector("svg"))
+            .map((root) =>
+              root.querySelector('annotation[encoding="application/x-tex"]')?.textContent ??
+              root.textContent?.trim().slice(0, 160) ??
+              "");
+          return { count: roots.length, invalid };
+        });
+        if (formulaState.count === 0 || formulaState.invalid.length) {
+          throw new Error(
+            `certificate-formula-state ${name}: ${JSON.stringify(formulaState)}`,
+          );
+        }
       }
-      const certificatePanel = certificate.getByRole("tabpanel");
-      await certificatePanel.locator("code").filter({ hasText: "selected = L.applyPolya(d);" })
-        .waitFor({ state: "visible", timeout: 5_000 });
 
       if (viewport.width === 390) {
         const storageGeometry = await storage.evaluate((figure) => {

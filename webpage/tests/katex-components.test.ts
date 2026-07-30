@@ -3,6 +3,9 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+import { certificateSources } from "../src/data/certificate-data.ts";
+import { renderMath } from "../src/lib/katex-renderer.js";
+
 const root = path.resolve(import.meta.dirname, "..");
 const components = path.join(root, "src/components");
 const read = (file: string) => readFileSync(path.join(components, file), "utf8");
@@ -83,4 +86,25 @@ test("Astro renders formulas at build time and React islands never load the rend
       `${file.replaceAll("\\", "/")} must not reference the retired renderer`,
     );
   }
+});
+
+test("every interactive certificate state renders without formula SVG", () => {
+  const flow = read("CertificateFlow.astro");
+  const formulaSources = certificateSources.flatMap((source) => [
+    ...source.formula,
+    source.cardFormula,
+  ]);
+
+  for (const tex of formulaSources) {
+    assert.doesNotMatch(
+      renderMath(tex, { displayMode: true }),
+      /<svg(?:\s|>)/i,
+      `certificate formula must use HTML/CSS-compatible accents: ${tex}`,
+    );
+  }
+  assert.doesNotMatch(
+    flow,
+    /\\widetilde\b/,
+    "the compact certificate flow must not use KaTeX's SVG-producing wide tilde",
+  );
 });
