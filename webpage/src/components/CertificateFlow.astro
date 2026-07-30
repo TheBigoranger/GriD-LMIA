@@ -2,7 +2,7 @@
 import CertificateFlow from "./CertificateFlow.tsx";
 import { certificateSources } from "../data/certificate-data";
 
-const { compact = false } = Astro.props;
+const { compact = false, eager = false } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const cardNotation = {
   direct: "\\begin{gathered}C^{(\\mathbf c)}[\\mathbf i]:\\text{ target coefficient matrix}\\\\\\mathbf i\\in\\mathcal I_M=\\{0,\\ldots,M\\}^{\\ell}:\\text{ local label}\\end{gathered}",
@@ -21,4 +21,6 @@ const options = certificateSources.map((item) => ({
 }));
 ---
 
-<CertificateFlow compact={compact} options={options} client:visible />
+{eager
+  ? <CertificateFlow compact={compact} options={options} client:load />
+  : <CertificateFlow compact={compact} options={options} client:visible />}

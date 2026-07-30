@@ -4,7 +4,7 @@ import CertificateFlow from "./CertificateFlow.astro";
 import ExportSolveFlow from "./ExportSolveFlow.astro";
 import GridPartitionExplorer from "./GridPartitionExplorer.tsx";
 import JourneyCurve from "./JourneyCurve.astro";
-import { renderDisplayMath, renderInlineMath } from "../lib/katex.js";
+import MathJaxMath from "./MathJaxMath.astro";
 import { versionInfo } from "../data/version.js";
 
 const base = import.meta.env.BASE_URL;
@@ -22,7 +22,12 @@ const lmiSteps = [
     number: "01",
     title: "Model the general DPD-LMI problem",
     inlineMath: "\\boldsymbol y=\\bigl(y_1,\\ldots,y_N\\bigr)^\\top:\\mathcal P\\to\\mathbb R^N.",
-    inlineNoteHtml: `${renderInlineMath("\\boldsymbol y")} is the decision function, assumed locally Lipschitz continuous on ${renderInlineMath("\\mathcal P")}.`,
+    inlineNoteParts: [
+      { tex: "\\boldsymbol y" },
+      " is the decision function, assumed locally Lipschitz continuous on ",
+      { tex: "\\mathcal P" },
+      ".",
+    ],
     math: "\\mathcal F(\\boldsymbol\\rho,\\dot{\\boldsymbol\\rho};y)=\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}(\\boldsymbol\\rho)\\frac{\\partial y_k}{\\partial\\rho_s}(\\boldsymbol\\rho)+F_0(\\boldsymbol\\rho)+\\sum_{k=1}^{N}F_k(\\boldsymbol\\rho)y_k(\\boldsymbol\\rho)\\preceq0.",
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/",
     manualLabel: "Open the induced-L₂-gain specialization ↗",
@@ -30,7 +35,13 @@ const lmiSteps = [
   {
     number: "02",
     title: "Partition the supported parameter box",
-    textHtml: `Axis ${renderInlineMath("s")} uses ${renderInlineMath("k_s")} physical nodes in ${renderInlineMath("\\mathcal G_s")}; the one-based vector ${renderInlineMath("\\mathbf c")} selects ${renderInlineMath("\\mathcal H_{\\mathbf c}")}. The tensor grid partitions ${renderInlineMath("\\mathcal P")} exactly. Approximation comes only from restricting the decision-function space; affine rate-vertex reduction remains exact.`,
+    textParts: [
+      "Axis ", { tex: "s" }, " uses ", { tex: "k_s" }, " physical nodes in ",
+      { tex: "\\mathcal G_s" }, "; the one-based vector ", { tex: "\\mathbf c" },
+      " selects ", { tex: "\\mathcal H_{\\mathbf c}" },
+      ". The tensor grid partitions ", { tex: "\\mathcal P" },
+      " exactly. Approximation comes only from restricting the decision-function space; affine rate-vertex reduction remains exact.",
+    ],
     math: [
       "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
       "\\underbrace{\\mathcal G_s}_{\\text{axis-}s\\text{ physical nodes}}=\\{\\rho_s^{(1)},\\ldots,\\rho_s^{(k_s)}\\}.",
@@ -43,7 +54,10 @@ const lmiSteps = [
   {
     number: "03",
     title: "Fix one cell and use the Bernstein basis",
-    textHtml: `Pull one physical cell back to ${renderInlineMath("\\boldsymbol\\alpha\\in[0,1]^\\ell")}. The normalized basis is nonnegative and sums to one, exposes endpoint and face coefficients, and supports cell-local coefficient algebra.`,
+    textParts: [
+      "Pull one physical cell back to ", { tex: "\\boldsymbol\\alpha\\in[0,1]^\\ell" },
+      ". The normalized basis is nonnegative and sums to one, exposes endpoint and face coefficients, and supports cell-local coefficient algebra.",
+    ],
     math: [
       "\\boldsymbol\\alpha=\\phi_{\\mathbf c}^{-1}(\\boldsymbol\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{\\mathbf c}}.",
       "B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad\\sum_{\\mathbf i}B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=1.",
@@ -57,7 +71,12 @@ const lmiSteps = [
   {
     number: "04",
     title: "Select a finite certificate for the positive target",
-    textHtml: `The theoretical cell target is ${renderInlineMath("S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0")}. YALMIP uses non-strict semidefinite constraints, so a required numerical margin must be written explicitly as ${renderInlineMath("S^{(\\mathbf c)}-\\varepsilon I\\succeq0")}. Expand any method below to see one representative identity, its notation, the MATLAB selector, and the detailed reference.`,
+    textParts: [
+      "The theoretical cell target is ", { tex: "S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0" },
+      ". YALMIP uses non-strict semidefinite constraints, so a required numerical margin must be written explicitly as ",
+      { tex: "S^{(\\mathbf c)}-\\varepsilon I\\succeq0" },
+      ". Expand any method below to see one representative identity, its notation, the MATLAB selector, and the detailed reference.",
+    ],
     math: [
       "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=-\\mathcal F^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0.",
     ],
@@ -110,35 +129,39 @@ const lmiSteps = [
           <div class="step-number" aria-hidden="true">{step.number}</div>
           <div class="step-content">
             <div class="step-copy">
-              <h3>{step.title}{step.titleMath && <span class="step-title-math" set:html={renderInlineMath(step.titleMath)} />}{step.titleSuffix}</h3>
-              {step.visual !== "grid" && (step.textHtml ? <p set:html={step.textHtml} /> : step.text ? <p>{step.text}</p> : null)}
+              <h3>{step.title}{step.titleMath && <MathJaxMath class="step-title-math" tex={step.titleMath} />}{step.titleSuffix}</h3>
+              {step.visual !== "grid" && (step.textParts
+                ? <p>{step.textParts.map((part) => typeof part === "string" ? part : <MathJaxMath tex={part.tex} />)}</p>
+                : step.text ? <p>{step.text}</p> : null)}
               {step.visual === "storage"
-                ? <div class="cell-storage-compact"><CellStorageExplorer client:visible formulaHtml={["", step.storageMath].map(renderDisplayMath)} axisHtml={{ x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"].map(renderInlineMath), y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"].map(renderInlineMath) }} /></div>
+                ? <div class="cell-storage-compact"><CellStorageExplorer client:load formulaTex={step.storageMath} axisTex={{ x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"], y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"] }} /></div>
                 : step.visual === "grid"
                   ? <>
                       <div class="math-strip">
                         {(Array.isArray(step.math) ? step.math.slice(0, 1) : [step.math]).map((line) => (
-                          <div class="math-strip__row" set:html={renderDisplayMath(line)} />
+                          <MathJaxMath class="math-strip__row" display tex={line} />
                         ))}
                       </div>
-                      {step.textHtml ? <p set:html={step.textHtml} /> : step.text ? <p>{step.text}</p> : null}
+                      {step.textParts
+                        ? <p>{step.textParts.map((part) => typeof part === "string" ? part : <MathJaxMath tex={part.tex} />)}</p>
+                        : step.text ? <p>{step.text}</p> : null}
                       <div class="math-strip">
                         {(Array.isArray(step.math) ? step.math.slice(1) : []).map((line) => (
-                          <div class="math-strip__row" set:html={renderDisplayMath(line)} />
+                          <MathJaxMath class="math-strip__row" display tex={line} />
                         ))}
                       </div>
-                      <GridPartitionExplorer client:visible />
+                      <GridPartitionExplorer client:load />
                     </>
                 : step.visual === "export"
                   ? <ExportSolveFlow />
                 : <div class:list={["math-strip", { "math-strip--stacked": Array.isArray(step.math) }]}>
                     {(Array.isArray(step.math) ? step.math : [step.math]).map((line) => (
-                      <div class="math-strip__row" set:html={renderDisplayMath(line)} />
+                      <MathJaxMath class="math-strip__row" display tex={line} />
                     ))}
                   </div>}
-              {step.inlineMath && <div class="step-inline-math" set:html={renderInlineMath(step.inlineMath)} />}
-              {step.inlineNoteHtml && <p class="step-inline-note" set:html={step.inlineNoteHtml} />}
-              {step.visual === "certificate" && <CertificateFlow compact />}
+              {step.inlineMath && <MathJaxMath class="step-inline-math" tex={step.inlineMath} />}
+              {step.inlineNoteParts && <p class="step-inline-note">{step.inlineNoteParts.map((part) => typeof part === "string" ? part : <MathJaxMath tex={part.tex} />)}</p>}
+              {step.visual === "certificate" && <CertificateFlow compact eager />}
               {step.fullCode && <div class="example-disclosure"><pre class="example-disclosure__essential"><code>{step.fullCode}</code></pre></div>}
               {step.manual && <a class="manual-step-link" href={local(step.manual)}>{step.manualLabel ?? "Open the detailed manual section ↗"}</a>}
             </div>
@@ -193,37 +216,30 @@ const lmiSteps = [
   .step-copy { display: grid; gap: 0.75rem; min-width: 0; }
   .step-copy h3,
   .step-copy p { margin: 0; }
-  .step-title-math :global(.katex) { font-size: 1em; }
   .step-inline-math { min-width: 0; padding-block: 0.15rem; }
-  .step-inline-math :global(.katex) { font-size: 1.05em; }
   .step-inline-note { margin-top: 0.35rem; color: var(--sl-color-gray-2); }
   .cell-storage-compact :global(.cell-explorer) { gap: 0.65rem; }
   .cell-storage-compact :global(.diagram-frame__body) { padding: 0.65rem; }
   .cell-storage-compact :global(.cell-coeffs) { gap: 0.25rem; }
   .cell-storage-compact :global(.cell-coeffs > span) { padding: 0.35rem 0.2rem; }
   .cell-storage-compact :global(.cell-explorer__formula) { display: grid; gap: 0.35rem; padding: 0.75rem 1rem 0.2rem; text-align: center; }
-  .cell-storage-compact :global(.cell-explorer__formula .katex-display) { margin: 0; }
+  .cell-storage-compact :global(.cell-explorer__formula .tex-display) { margin: 0; }
   .cell-storage-compact :global(.cell-grid-panel) { display: grid; gap: 0.35rem; min-width: 0; }
   .cell-storage-compact :global(.cell-grid-stage__formula) { justify-self: center; width: 100%; max-width: 100%; padding-block-end: 0.1rem; text-align: center; }
-  .cell-storage-compact :global(.cell-grid-stage__formula .katex-display) { margin: 0; }
+  .cell-storage-compact :global(.cell-grid-stage__formula .tex-display) { margin: 0; }
   .cell-storage-compact :global(.cell-grid-stage) { grid-template-columns: 2rem minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 0.2rem; }
   .cell-storage-compact :global(.cell-axis-y-wrap) { display: grid; grid-column: 1; grid-row: 1; grid-template-columns: 1fr; align-items: stretch; }
   .cell-storage-compact :global(.cell-axis-ticks) { color: var(--sl-color-gray-2); font-family: "STIX Two Math", Cambria, serif; font-size: 1.15rem; font-weight: 750; }
-  .cell-storage-compact :global(.cell-axis-ticks .katex) { font-size: 1.15em; }
   .cell-storage-compact :global(.cell-axis-ticks--y) { display: grid; align-content: space-between; justify-items: end; padding-block: 0.2rem; }
   .cell-storage-compact :global(.cell-axis-ticks--x) { display: flex; grid-column: 2; grid-row: 2; justify-content: space-between; padding-inline: 0.15rem; }
   .cell-storage-compact :global(.cell-grid) { grid-column: 2; grid-row: 1; aspect-ratio: 1 / 1.8; }
   .cell-storage-compact :global(.cell-axis) { font-size: 1.25rem; font-weight: 400; }
-  .cell-storage-compact :global(.cell-axis .katex) { font-size: 1.08em; }
   .cell-storage-compact :global(.cell-grid button) { font-size: 0.95rem; font-weight: 520; }
   .cell-storage-compact :global(.cell-grid button.selected) { font-weight: 750; }
   .cell-storage-compact :global(.cell-coeffs > span) { min-height: 3.65rem; gap: 0.08rem; padding: 0.45rem 0.18rem; border-radius: 5px; }
   .cell-storage-compact :global(.cell-coeffs > span > small) { font-size: 0.98rem; line-height: 1.05; }
-  .cell-storage-compact :global(.cell-coeffs > span > small .katex) { font-size: 1.08em; }
   .cell-storage-compact :global(.cell-coeff-math) { line-height: 1.05; margin-block-start: -0.12rem; }
-  .cell-storage-compact :global(.cell-coeff-math .katex) { font-size: 0.78em; }
   .cell-storage-compact :global(.cell-storage-connector) { z-index: 2; min-width: 0; white-space: nowrap; overflow: visible; font-size: 0.9rem; }
-  .cell-storage-compact :global(.cell-storage-connector .katex) { font-size: 1.08em; }
   .cell-storage-compact :global(.cell-readout) { padding-inline-start: 0.45rem; }
   @media (min-width: 701px) {
     .cell-storage-compact :global(.cell-explorer) { inline-size: min(100%, 66rem); margin-inline: auto; gap: 0.85rem; }
@@ -234,7 +250,7 @@ const lmiSteps = [
   .math-strip { inline-size: min(100%, 54rem); min-width: 0; margin-inline: auto; border-inline-start: 3px solid var(--sl-color-accent); padding-inline-start: 0.8rem; }
   /* Ordinary mathematics is authored as short or multiline displays. */
   .math-strip__row { min-width: 0; }
-  .math-strip :global(.katex-display) { margin: 0; }
+  .math-strip :global(.tex-display) { margin: 0; }
   .step-content :global(.diagram-frame) { margin-block: 0.4rem 0; }
   .step-content :global(.certificate-flow) { inline-size: min(100%, 54rem); margin-inline: auto; }
   .step-content :global(.export-solve-flow) { inline-size: min(100%, 58rem); margin-inline: auto; }

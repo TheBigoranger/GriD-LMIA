@@ -4,7 +4,75 @@ import starlight from "@astrojs/starlight";
 import react from "@astrojs/react";
 import { unified } from "@astrojs/markdown-remark";
 import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
+import rehypeMathJaxDelimiters from "./src/lib/rehype-mathjax.js";
+import { selfHostedMathJax } from "./src/lib/mathjax-assets.js";
+
+const base = "/PD-LMI-package";
+const mathJaxRoot = `${base}/mathjax`;
+const mathJaxConfig = `
+window.pdLmiMathQueue = Promise.resolve();
+window.pdLmiTypeset = (elements, update) => {
+  const task = window.pdLmiMathQueue.then(() => {
+    const mathJax = window.MathJax;
+    if (!mathJax?.typesetPromise || !mathJax.typesetClear) return;
+    mathJax.typesetClear(elements);
+    update?.();
+    return mathJax.typesetPromise(elements);
+  });
+  window.pdLmiMathQueue = task.catch((error) => {
+    console.error("MathJax typesetting failed:", error);
+  });
+  return window.pdLmiMathQueue;
+};
+
+const typesetStaticMath = () => {
+  const elements = [...document.querySelectorAll(".tex-math")]
+    .filter((element) => !element.closest("astro-island"));
+  return window.pdLmiTypeset(elements).then(() => {
+    document.documentElement.dataset.mathjaxReady = "true";
+    document.dispatchEvent(new CustomEvent("mathjax:ready"));
+  });
+};
+
+window.MathJax = {
+  loader: {
+    paths: {
+      "mathjax-modern": "${mathJaxRoot}/mathjax-modern"
+    }
+  },
+  tex: {
+    inlineMath: [["\\\\(", "\\\\)"]],
+    displayMath: [["\\\\[", "\\\\]"]]
+  },
+  output: {
+    scale: 1.0,
+    font: "mathjax-modern",
+    fontPath: "${mathJaxRoot}/mathjax-modern",
+    displayOverflow: "linebreak",
+    linebreaks: {
+      inline: true,
+      width: "100%"
+    }
+  },
+  options: {
+    enableMenu: true,
+    enableEnrichment: true,
+    enableComplexity: true
+  },
+  startup: {
+    typeset: false,
+    pageReady() {
+      return MathJax.startup.defaultPageReady().then(typesetStaticMath);
+    }
+  }
+};
+
+document.addEventListener("astro:page-load", () => {
+  const mathJax = window.MathJax;
+  if (!mathJax?.startup?.promise) return;
+  mathJax.startup.promise.then(typesetStaticMath);
+});
+`;
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,10 +81,11 @@ export default defineConfig({
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath],
-      rehypePlugins: [rehypeKatex],
+      rehypePlugins: [rehypeMathJaxDelimiters],
     }),
   },
   integrations: [
+    selfHostedMathJax(),
     react(),
     starlight({
       title: "PD-LMI Manual",
@@ -26,8 +95,13 @@ export default defineConfig({
       head: [
         {
           tag: "script",
+          content: mathJaxConfig,
+        },
+        {
+          tag: "script",
           attrs: {
-            src: "/PD-LMI-package/scripts/fit-display-math.js",
+            id: "MathJax-script",
+            src: `${mathJaxRoot}/tex-mml-chtml-mathjax-modern.js`,
             defer: true,
           },
         },

@@ -1,14 +1,14 @@
 import { useId, useState } from "react";
-import { renderDisplayMath, renderInlineMath } from "../lib/katex.js";
 import { pdmatCellData as cells } from "../lib/cell-bernstein.ts";
+import { DisplayMath, InlineMath } from "./MathJaxMath.tsx";
 
 /** Select one of the two physical hypercubes that store A's degree-two data. */
 interface Props {
-  formulaHtml?: string[];
-  axisHtml?: { x: string[]; y: string[] };
+  formulaTex?: string;
+  axisTex?: { x: string[]; y: string[] };
 }
 
-export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: [], y: [] } }: Props) {
+export default function CellStorageExplorer({ formulaTex = "", axisTex = { x: [], y: [] } }: Props) {
   const [selected, setSelected] = useState(0);
   const groupId = useId();
   const cell = cells[selected];
@@ -27,16 +27,16 @@ export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: 
         <div className="cell-summary">
           <div className="cell-summary__formula" aria-label="Known matrix formula">
             <strong>Known matrix</strong>
-            {formulaHtml[1] && <div dangerouslySetInnerHTML={{ __html: formulaHtml[1] }} />}
+            {formulaTex && <DisplayMath tex={formulaTex} />}
           </div>
           <section className="cell-summary__selection" aria-live="polite">
-            <p><strong>Selected hypercube:</strong>{" "}<span dangerouslySetInnerHTML={{ __html: renderInlineMath(`c=(${cell.c1},1)`) }} /></p>
-            <p><strong>Physical domain:</strong>{" "}<span dangerouslySetInnerHTML={{ __html: renderInlineMath(cell.domainTex) }} /></p>
+            <p><strong>Selected hypercube:</strong>{" "}<InlineMath tex={`c=(${cell.c1},1)`} /></p>
+            <p><strong>Physical domain:</strong>{" "}<InlineMath tex={cell.domainTex} /></p>
             <p className="cell-storage-path"><strong>Storage:</strong> <code>A.LocalValues{'{'}c1{'}'}{'{'}1{'}'}</code> → <code>A.LocalValues{'{'}{cell.c1}{'}'}{'{'}1{'}'}</code></p>
           </section>
           <div className="cell-summary__basis" aria-label="Tensor Bernstein basis">
             <a className="cell-basis-link" href="https://en.wikipedia.org/wiki/Bernstein_polynomial">Bernstein basis</a>
-            <div dangerouslySetInnerHTML={{ __html: renderDisplayMath("B_{\\mathbf i}^{m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m-i_s}") }} />
+            <DisplayMath tex="B_{\mathbf i}^{m}(\boldsymbol\alpha)=\prod_{s=1}^{\ell}\binom{m}{i_s}\alpha_s^{i_s}(1-\alpha_s)^{m-i_s}" />
           </div>
         </div>
         <div className="cell-layout">
@@ -44,7 +44,7 @@ export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: 
           <div className="cell-grid-stage">
             <div className="cell-axis-y-wrap">
               <div className="cell-axis-ticks cell-axis-ticks--y" aria-label="ρ₁ grid knots">
-                {[...axisHtml.y].reverse().map((label) => <span key={label} dangerouslySetInnerHTML={{ __html: label }} />)}
+                {[...axisTex.y].reverse().map((label) => <InlineMath key={label} tex={label} />)}
               </div>
             </div>
             <div className="cell-grid" role="group" aria-label="Select one of two hypercubes with arrow keys">
@@ -64,12 +64,12 @@ export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: 
                   style={{ gridRow: cells.length - index }}
                   type="button"
                 >
-                  <span dangerouslySetInnerHTML={{ __html: renderInlineMath(`c_1=${item.c1}`) }} />
+                  <InlineMath tex={`c_1=${item.c1}`} />
                 </button>
               ))}
             </div>
             <div className="cell-axis-ticks cell-axis-ticks--x" aria-label="ρ₂ grid knots">
-              {axisHtml.x.map((label) => <span key={label} dangerouslySetInnerHTML={{ __html: label }} />)}
+              {axisTex.x.map((label) => <InlineMath key={label} tex={label} />)}
             </div>
             </div>
           </div>
@@ -79,8 +79,8 @@ export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: 
             <div className="cell-coeffs" aria-label={`Nine degree-two coefficient matrices in cell (${cell.c1}, 1)`}>
               {cell.coefficients.map((coefficient, index) => (
                 <span key={`${cell.c1}-${index}`}>
-                  <small dangerouslySetInnerHTML={{ __html: renderInlineMath(`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`) }} />
-                  <div className="cell-coeff-math" dangerouslySetInnerHTML={{ __html: renderInlineMath(coefficient.tex) }} />
+                  <small><InlineMath tex={`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`} /></small>
+                  <div className="cell-coeff-math"><InlineMath tex={coefficient.tex} /></div>
                 </span>
               ))}
             </div>
@@ -88,11 +88,9 @@ export default function CellStorageExplorer({ formulaHtml = [], axisHtml = { x: 
           </section>
           <div className="cell-transform-arrow" aria-hidden="true"><i /></div>
           <aside className="cell-bernstein-readout" aria-label="Bernstein representation of the selected matrix">
-            <div
+            <DisplayMath
               className="cell-bernstein-formula"
-              dangerouslySetInnerHTML={{
-                __html: renderDisplayMath(`A^{(${cell.c1},1)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{\\ell}}C_{\\mathbf i}^{(${cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)`),
-              }}
+              tex={`A^{(${cell.c1},1)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{\\ell}}C_{\\mathbf i}^{(${cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)`}
             />
           </aside>
         </div>

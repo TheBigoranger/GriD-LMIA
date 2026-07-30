@@ -1,5 +1,8 @@
 ---
 import DiagramFrame from "./DiagramFrame.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const pdmatStorage = `${base}documents/reference/pdmat/storage-and-elevation/`;
 ---
 
 <DiagramFrame
@@ -11,7 +14,7 @@ import DiagramFrame from "./DiagramFrame.astro";
     <section class="storage-panel" aria-labelledby="storage-one-title">
       <h4 id="storage-one-title">Two physical cells · three local labels each</h4>
       <div class="storage-row storage-grid-row" aria-label="Physical grid from zero to one with a boundary at one half">
-        <b>physical grid <a class="storage-api-link" href="#pdmat-cells">cells</a></b>
+        <b>physical grid <a class="storage-api-link" href={`${pdmatStorage}#pdmat-cells`}>cells</a></b>
         <div class="physical-track">
           <span>cell 1</span><span>cell 2</span>
           <div class="track-nodes" aria-hidden="true">
@@ -25,7 +28,7 @@ import DiagramFrame from "./DiagramFrame.astro";
         <p><strong>P₂</strong> is one continuous boundary handle: cell 1 label [2] = cell 2 label [0].</p>
       </div>
       <div class="storage-row storage-coeff-row">
-        <b>global controls <a class="storage-api-link" href="#pdmat-coeffs">coeffs</a></b>
+        <b>global controls <a class="storage-api-link" href={`${pdmatStorage}#pdmat-coeffs`}>coeffs</a></b>
         <div class="control-strip" aria-label="Five global coefficient handles">
           <span><small>P₀</small><em>cell 1 [0]</em></span>
           <span><small>P₁</small><em>cell 1 [1]</em></span>
@@ -35,7 +38,7 @@ import DiagramFrame from "./DiagramFrame.astro";
         </div>
       </div>
       <div class="storage-row storage-map-row">
-        <b>cell-local leaves <a class="storage-api-link" href="#pdmat-coeffs">coeffs</a></b>
+        <b>cell-local leaves <a class="storage-api-link" href={`${pdmatStorage}#pdmat-coeffs`}>coeffs</a></b>
         <p><code>LocalValues&#123;1&#125; = &#123;P₀,P₁,P₂&#125;</code><br/><code>LocalValues&#123;2&#125; = &#123;P₂,P₃,P₄&#125;</code></p>
       </div>
     </section>
@@ -44,20 +47,20 @@ import DiagramFrame from "./DiagramFrame.astro";
       <h4 id="storage-two-title">Selected 2-D hypercube · degree 2</h4>
       <div class="tensor-layout">
         <div>
-          <a class="storage-api-link storage-api-link--standalone" href="#pdmat-cells">cells</a>
+          <a class="storage-api-link storage-api-link--standalone" href={`${pdmatStorage}#pdmat-cells`}>cells</a>
           <div class="physical-cells" aria-label="Two by two physical grid with the upper-right cell selected">
           <span></span><span class="selected"></span><span></span><span></span>
           </div>
         </div>
         <span class="zoom-arrow" aria-hidden="true">→</span>
         <div>
-          <strong><code>LocalValues&#123;i1&#125;&#123;i2&#125;</code> <a class="storage-api-link" href="#pdmat-lbls">lbls</a></strong>
+          <strong><code>LocalValues&#123;i1&#125;&#123;i2&#125;</code> <a class="storage-api-link" href={`${pdmatStorage}#pdmat-lbls`}>lbls</a></strong>
           <div class="tensor-lattice" aria-label="Nine degree-two tensor labels">
             <span>[0,0]</span><span>[0,1]</span><span>[0,2]</span>
             <span>[1,0]</span><span>[1,1]</span><span>[1,2]</span>
             <span>[2,0]</span><span>[2,1]</span><span>[2,2]</span>
           </div>
-          <p class="tensor-count"><a class="storage-api-link" href="#pdmat-ncoeff">ncoeff</a><span>prod(Degree + 1) = 9 local labels</span></p>
+          <p class="tensor-count"><a class="storage-api-link" href={`${pdmatStorage}#pdmat-ncoeff`}>ncoeff</a><span>prod(Degree + 1) = 9 local labels</span></p>
         </div>
       </div>
     </section>
@@ -103,6 +106,8 @@ import DiagramFrame from "./DiagramFrame.astro";
     .storage-row { grid-template-columns: 1fr; gap: 0.35rem; }
     .grid-values { grid-column: 1; }
     .control-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .control-strip span { min-height: 4.4rem; }
+    .control-strip em { font-size: 0.78rem; line-height: 1.35; }
     .tensor-layout { grid-template-columns: 5rem 1.5rem minmax(0, 1fr); }
   }
 </style>

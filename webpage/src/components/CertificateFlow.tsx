@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { renderInlineMath } from "../lib/katex.js";
+import { InlineMath } from "./MathJaxMath.tsx";
 
 interface CertificateFlowOption {
   key: string;
@@ -32,7 +32,7 @@ export default function CertificateFlow({
   return (
     <figure className="diagram-frame certificate-flow-figure" aria-label="Finite certificate selection flow">
       <div className="diagram-frame__body certificate-flow">
-        <div className="certificate-flow__residual"><strong>Theoretical positive target</strong><span dangerouslySetInnerHTML={{ __html: renderInlineMath("S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0") }} /></div>
+        <div className="certificate-flow__residual"><strong>Theoretical positive target</strong><InlineMath tex="S^{(\mathbf c)}(\boldsymbol\alpha)\succ0" /></div>
         <span className="certificate-flow__arrow" aria-hidden="true">↓</span>
         <div aria-label="Finite certificate method" className="certificate-flow-tabs" role="tablist">
           {options.map((item, index) => (
@@ -57,8 +57,8 @@ export default function CertificateFlow({
           ))}
         </div>
         <section aria-labelledby={`${id}-tab-${selected}`} className="certificate-flow-panel" id={`${id}-panel`} role="tabpanel">
-          <p className="certificate-flow-panel__formula" dangerouslySetInnerHTML={{ __html: renderInlineMath(option.formula) }} />
-          {option.notation && <p className="certificate-flow-panel__notation" dangerouslySetInnerHTML={{ __html: renderInlineMath(option.notation) }} />}
+          <p className="certificate-flow-panel__formula"><InlineMath tex={option.formula} /></p>
+          {option.notation && <p className="certificate-flow-panel__notation"><InlineMath tex={option.notation} /></p>}
           <p><strong>MATLAB selector:</strong> <code>selected = {option.command};</code></p>
           <a href={option.href}>Open the {option.label} reference →</a>
         </section>

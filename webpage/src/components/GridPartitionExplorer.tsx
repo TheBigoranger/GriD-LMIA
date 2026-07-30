@@ -18,7 +18,7 @@ import {
   resetRotation,
   type Point3,
 } from "../lib/grid-partition.ts";
-import { renderInlineMath } from "../lib/katex.js";
+import { InlineMath } from "./MathJaxMath.tsx";
 
 type Dimension = 1 | 2 | 3;
 
@@ -412,8 +412,8 @@ export default function GridPartitionExplorer() {
 
           <div aria-live="polite" className="grid-partition-readout">
             <div className="grid-partition-readout__definitions">
-              <span dangerouslySetInnerHTML={{ __html: renderInlineMath(gridDefinition(activeKnots)) }} />
-              <span dangerouslySetInnerHTML={{ __html: renderInlineMath(cellDefinition(activeCell, bounds)) }} />
+              <InlineMath tex={gridDefinition(activeKnots)} />
+              <InlineMath tex={cellDefinition(activeCell, bounds)} />
             </div>
             <p>
               <strong>Cell {labelCell(activeCell)}:</strong>{" "}

@@ -4,6 +4,7 @@ description: Exact Bernstein degree elevation for pdmat coefficient evidence wit
 ---
 
 import DegreeElevationExplorer from "../../../../../components/DegreeElevationExplorer.tsx";
+import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><span>elevate</span></nav>
 
@@ -54,8 +55,14 @@ $$
 $$
 
 As usual, a binomial coefficient with an index outside its natural range is
-zero. The direction-wise degree-$(\boldsymbol M-\boldsymbol m)$ elevation
-kernel is
+zero. This direct sum is the mathematical coefficient rule: it gives every
+elevated coefficient from the original coefficient tensor without introducing
+an implementation-specific data layout.
+
+<Aside type="note" title="Implementation remark: normalized convolution">
+
+The package evaluates the same direct rule as a normalized tensor convolution.
+Its direction-wise degree-$(\boldsymbol M-\boldsymbol m)$ elevation kernel is
 
 $$
 \mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
@@ -67,7 +74,7 @@ $$
 $$
 
 The complete elevation is the normalized $\ell$-dimensional convolution
-written directly in the original and elevated coefficients:
+of the original coefficient tensor with that kernel:
 
 $$
 \begin{aligned}
@@ -87,6 +94,8 @@ $$
 \right\}_{\boldsymbol j}.
 \end{aligned}
 $$
+
+</Aside>
 
 This unique degree-$\boldsymbol M$ coefficient tensor represents exactly the
 same polynomial. A cell grows from $\prod_s(m_s+1)$ to

@@ -1,5 +1,3 @@
-@import "katex/dist/katex.min.css";
-
 :root {
   color-scheme: light;
   --sl-color-accent-low: #e0f2fe;
@@ -399,23 +397,18 @@
   }
 }
 
-.katex-display {
+.tex-display {
   display: block;
-  /* The fitter changes this variable only when an intact phone formula is wider than its container. */
-  font-size: var(--formula-size, 1.5em);
+  min-width: 0;
   max-width: 100%;
   margin-inline: auto;
   padding-block: 0.25rem;
   text-align: center;
-  overflow: visible;
 }
 
-.katex {
-  font-size: 1em;
-}
-
-.katex-display > .katex {
-  font-size: 1em;
+.tex-display > mjx-container[display="true"] {
+  max-width: 100%;
+  margin-block: 0.35rem;
 }
 
 .sl-markdown-content pre {
@@ -544,7 +537,7 @@
 .cell-panel-title,
 .cell-basis-link { color: var(--sl-color-text-accent); font-size: 1.15rem; text-align: center; font-weight: 700; text-decoration: none; }
 .cell-basis-link:hover { text-decoration: underline; }
-.cell-summary__formula .katex-display { margin: 0; }
+.cell-summary__formula .tex-display { margin: 0; }
 .cell-summary__selection { display: grid; align-content: center; gap: 0.35rem; }
 .cell-summary__selection p { margin: 0; }
 .cell-layout { align-items: center; }
@@ -927,15 +920,13 @@
 
 .certificate-flow { display: grid; justify-items: center; gap: 0.6rem; }
 .certificate-flow__residual { display: grid; gap: 0.25rem; inline-size: min(100%, 34rem); padding: 0.75rem 1rem; border: 1px solid var(--diagram-result); border-radius: 10px; color: var(--diagram-result); text-align: center; background: color-mix(in srgb, var(--diagram-result) 8%, transparent); }
-.certificate-flow__residual .katex { color: inherit; font-size: 1em; }
+.certificate-flow__residual mjx-container { color: inherit; }
 .certificate-flow__arrow { color: var(--sl-color-text-accent); font-size: 1.5rem; line-height: 1; }
 .certificate-flow-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 1fr; width: 100%; gap: 0.35rem; }
 .certificate-flow-tabs button { display: grid; align-content: center; justify-items: center; gap: 0.2rem; min-width: 0; min-block-size: 5rem; margin: 0; border: 1px solid var(--diagram-border); border-radius: 8px; padding: 0.5rem 0.35rem; color: var(--sl-color-text); text-align: center; background: var(--sl-color-bg); cursor: pointer; }
 .certificate-flow-tabs button code { overflow-wrap: anywhere; color: var(--sl-color-gray-2); font-size: 0.72rem; }
 .certificate-flow-panel__formula { display: grid; min-block-size: 5rem; place-items: center; color: var(--sl-color-text); line-height: 1.05; text-align: center; }
-.certificate-flow-panel__formula .katex { font-size: 1.35em; }
 .certificate-flow-panel__notation { max-width: 100%; padding-block-end: 0.15rem; color: var(--sl-color-gray-2); font-size: 0.92rem; line-height: 1.35; text-align: center; }
-.certificate-flow-panel__notation .katex { font-size: 1em; }
 .certificate-flow-tabs button[aria-selected="true"] { border-color: var(--diagram-result); color: var(--diagram-result); box-shadow: inset 0 3px var(--diagram-result); }
 .certificate-flow-panel { display: grid; width: 100%; gap: 0.35rem; border-inline-start: 3px solid var(--diagram-result); padding: 0.15rem 0 0.15rem 0.75rem; }
 .certificate-flow-panel p { margin: 0; color: var(--sl-color-gray-2); }
@@ -952,7 +943,7 @@
 .certificate-chooser section > p { margin: 0; color: var(--sl-color-gray-2); }
 .certificate-formula { display: grid; gap: 0.3rem; max-width: 100%; }
 .certificate-formula__row { min-width: 0; }
-.certificate-formula .katex-display { margin: 0 !important; text-align: start !important; }
+.certificate-formula .tex-display { margin: 0; text-align: start; }
 
 .certificate-export {
   display: flex;
@@ -1362,16 +1353,23 @@
 
 .coefficient-row-map {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   gap: 0.5rem 0.8rem;
   align-items: center;
 }
 
 .coefficient-row-map code,
 .coefficient-row-map strong {
+  box-sizing: border-box;
+  min-width: 0;
   border-block-start: 2px solid var(--diagram-input);
   padding: 0.55rem;
   background: var(--sl-color-bg);
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .coefficient-row-map strong {
@@ -1503,6 +1501,31 @@
 
   .evaluate-expression { display: grid; }
   .evaluate-expression output { margin-inline-start: 0; }
+  .cell-basis-tabs { grid-template-columns: minmax(0, 1fr); }
+  .cell-basis-coordinate-frame {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+  .cell-basis-coordinate-frame__title,
+  .cell-basis-axis--vertical,
+  .cell-basis-coordinate-frame .cell-basis-term-grid,
+  .cell-basis-axis--horizontal,
+  .cell-basis-coordinate-frame__storage {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .cell-basis-axis--vertical {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    height: auto;
+  }
+  .cell-basis-axis--vertical input {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    direction: ltr;
+    writing-mode: horizontal-tb;
+  }
   .cell-basis-term-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cell-basis-readout p { display: grid; justify-items: start; gap: 0.2rem; }
   .decision-handles {

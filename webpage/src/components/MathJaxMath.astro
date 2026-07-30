@@ -1,0 +1,13 @@
+---
+interface Props {
+  class?: string;
+  display?: boolean;
+  tex: string;
+}
+
+const { class: className = "", display = false, tex } = Astro.props;
+const classes = `tex-math ${display ? "tex-display" : "tex-inline"} ${className}`.trim();
+const delimited = display ? `\\[${tex}\\]` : `\\(${tex}\\)`;
+---
+
+{display ? <div class={classes}>{delimited}</div> : <span class={classes}>{delimited}</span>}
