@@ -17,8 +17,6 @@
   --diagram-border: color-mix(in srgb, var(--sl-color-accent) 28%, var(--sl-color-gray-5));
   --diagram-radius: 14px;
   --diagram-gap: clamp(0.7rem, 2vw, 1rem);
-  --katex-script-scale: 0.78em;
-  --katex-script-min: 0.7rem;
 }
 
 [data-theme="dark"] {
@@ -403,7 +401,8 @@
 
 .katex-display {
   display: block;
-  font-size: 1.5em;
+  /* The fitter changes this variable only when an intact phone formula is wider than its container. */
+  font-size: var(--formula-size, 1.5em);
   max-width: 100%;
   margin-inline: auto;
   padding-block: 0.25rem;
@@ -417,11 +416,6 @@
 
 .katex-display > .katex {
   font-size: 1em;
-}
-
-.katex .msupsub .mtight {
-  /* The rem floor prevents nested KaTeX scripts from compounding below legibility. */
-  font-size: max(var(--katex-script-scale), var(--katex-script-min)) !important;
 }
 
 .sl-markdown-content pre {
@@ -534,8 +528,9 @@
   gap: 1rem;
 }
 
-.cell-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.75rem; }
-.cell-layout { display: grid; grid-template-columns: minmax(0, 1fr) 3rem minmax(0, 1fr) 3rem minmax(0, 1fr); gap: 0.65rem; }
+.cell-summary { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 1.75rem; }
+.cell-summary__basis { grid-column: 1 / -1; }
+.cell-layout { display: grid; grid-template-columns: minmax(8rem, 0.65fr) 3rem minmax(16rem, 1.3fr) 3rem minmax(22rem, 1.45fr); gap: 0.65rem; }
 .cell-summary > *,
 .cell-layout > * { min-width: 0; }
 .cell-summary__formula,
@@ -543,12 +538,13 @@
 .cell-bernstein-readout { display: grid; gap: 0.4rem; align-content: center; text-align: center; }
 .cell-summary__formula,
 .cell-summary__basis { max-width: 100%; }
+.cell-summary__formula > div,
+.cell-summary__basis > div { min-width: 0; }
 .cell-summary strong,
 .cell-panel-title,
 .cell-basis-link { color: var(--sl-color-text-accent); font-size: 1.15rem; text-align: center; font-weight: 700; text-decoration: none; }
 .cell-basis-link:hover { text-decoration: underline; }
 .cell-summary__formula .katex-display { margin: 0; }
-.cell-summary__basis > div { min-width: 0; }
 .cell-summary__selection { display: grid; align-content: center; gap: 0.35rem; }
 .cell-summary__selection p { margin: 0; }
 .cell-layout { align-items: center; }
@@ -1433,6 +1429,7 @@
 
   .cell-summary,
   .cell-layout { grid-template-columns: 1fr; }
+  .cell-summary__basis { grid-column: auto; }
   .evaluate-two-dimensional { grid-template-columns: 1fr; }
   .evaluate-coordinate-controls { grid-column: auto; }
 

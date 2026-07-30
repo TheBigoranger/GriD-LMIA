@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 
 const root = resolve("dist");
 const base = "/PD-LMI-package";
-const defaultViewports = [390, 768, 1024, 1440];
+const defaultViewports = [320, 390, 700, 768, 1024, 1440];
 const tolerance = 1;
 
 function commaSeparated(value) {
@@ -149,11 +149,51 @@ async function inspect(page) {
 
     // KaTeX displays are ordinary documentation formulas. Their rendered child,
     // not only the full-width wrapper, must stay inside the wrapper.
+    let scaledDisplays = 0;
     for (const display of document.querySelectorAll(".katex-display")) {
       const formula = display.firstElementChild;
       if (!formula || display.closest("pre")) continue;
       const outer = display.getBoundingClientRect();
+      if (outer.width <= 0 || outer.height <= 0) continue;
       const inner = formula.getBoundingClientRect();
+      const tex = display.querySelector('annotation[encoding="application/x-tex"]');
+      const html = display.querySelector(".katex-html");
+      if (!tex?.textContent?.trim() || !html) {
+        failures.push({
+          type: "formula-source",
+          selector: describe(display),
+          context: contextFor(display),
+        });
+      }
+
+      const scaleText = display.dataset.formulaScale;
+      const formulaSize = display.style.getPropertyValue("--formula-size");
+      if (window.innerWidth <= 700) {
+        const scale = Number(scaleText);
+        if (!scaleText || !Number.isFinite(scale) || scale <= 0 || scale > 1) {
+          failures.push({
+            type: "formula-scale-marker",
+            selector: describe(display),
+            context: contextFor(display),
+          });
+        } else if (scale < 0.9999) {
+          scaledDisplays += 1;
+        }
+        if (!formulaSize) {
+          failures.push({
+            type: "formula-scale-variable",
+            selector: describe(display),
+            context: contextFor(display),
+          });
+        }
+      } else if (scaleText || formulaSize) {
+        failures.push({
+          type: "desktop-formula-scale",
+          selector: describe(display),
+          context: contextFor(display),
+        });
+      }
+
       if (inner.left < outer.left - tolerance || inner.right > outer.right + tolerance) {
         failures.push({
           type: "formula-bounds",
@@ -196,7 +236,7 @@ async function inspect(page) {
       }
     }
 
-    return failures;
+    return { failures, scaledDisplays };
   }, { tolerance });
 }
 
@@ -211,6 +251,7 @@ const viewports = selectedViewports();
 const { server, origin } = await startServer();
 const browser = await chromium.launch({ headless: true });
 const failures = [];
+const scaledByWidth = new Map();
 
 try {
   const page = await browser.newPage();
@@ -229,9 +270,26 @@ try {
         continue;
       }
       await page.evaluate(() => document.fonts.ready);
-      for (const failure of await inspect(page)) {
+      await page.evaluate(() => new Promise((resolveFrame) => {
+        requestAnimationFrame(() => requestAnimationFrame(resolveFrame));
+      }));
+      const result = await inspect(page);
+      scaledByWidth.set(width, (scaledByWidth.get(width) ?? 0) + result.scaledDisplays);
+      for (const failure of result.failures) {
         failures.push({ width, route, ...failure });
       }
+    }
+  }
+
+  for (const width of viewports.filter((value) => value <= 700)) {
+    if ((scaledByWidth.get(width) ?? 0) === 0) {
+      failures.push({
+        width,
+        route: "*",
+        type: "mobile-formula-scaling",
+        selector: ".katex-display",
+        context: "No over-wide display formula exercised the mobile fitter.",
+      });
     }
   }
 } finally {

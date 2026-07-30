@@ -23,6 +23,15 @@ export default defineConfig({
       description:
         "Reference-first manual for the PD-LMI MATLAB/YALMIP package.",
       customCss: ["./src/styles/manual.css"],
+      head: [
+        {
+          tag: "script",
+          attrs: {
+            src: "/PD-LMI-package/scripts/fit-display-math.js",
+            defer: true,
+          },
+        },
+      ],
       social: [
         {
           icon: "github",

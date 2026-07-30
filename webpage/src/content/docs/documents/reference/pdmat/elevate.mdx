@@ -17,23 +17,39 @@ On physical cell $\mathcal H_{\boldsymbol c}$, write the
 direction-wise-degree-$\boldsymbol m$ tensor
 Bernstein coefficients as
 $C^{(\boldsymbol c)}[\boldsymbol i]$,
-$\boldsymbol i\in\mathcal I_{\boldsymbol m}$. Here
-$\mathcal I_{\boldsymbol m}=\prod_s\{0,\ldots,m_s\}$ is the local
-tensor-product label set. Elevation to any
+$\boldsymbol i\in\prod_s\{0,\ldots,m_s\}$. Elevation to any
 $\boldsymbol M\ge\boldsymbol m$ componentwise is defined directly by
 
 $$
 \begin{aligned}
+A^{(\boldsymbol c)}(\boldsymbol\alpha)
+&=\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}
+C^{(\boldsymbol c)}[\boldsymbol i]
+B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)\\
+&=\sum_{\boldsymbol k\in\prod_s\{0,\ldots,M_s\}}
 \widehat C^{(\boldsymbol c)}[\boldsymbol k]
-&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
-  w_{\boldsymbol i,\boldsymbol k}\,
-  C^{(\boldsymbol c)}[\boldsymbol i],\\
-w_{\boldsymbol i,\boldsymbol k}
-&=\prod_{s=1}^{\ell}
-  \frac{\binom{m_s}{i_s}
-  \binom{M_s-m_s}{k_s-i_s}}
-  {\binom{M_s}{k_s}},\\
-\boldsymbol k&\in\mathcal I_{\boldsymbol M}.
+B_{\boldsymbol k}^{\boldsymbol M}(\boldsymbol\alpha).
+\end{aligned}
+$$
+
+The elevated coefficients are
+
+$$
+\begin{aligned}
+\widehat C^{(\boldsymbol c)}[\boldsymbol k]
+&=
+\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}
+\left[
+\prod_{s=1}^{\ell}
+\frac{
+  \binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}
+}{
+  \binom{M_s}{k_s}
+}
+\right]\\
+&\qquad{}\cdot C^{(\boldsymbol c)}[\boldsymbol i],\\
+\boldsymbol k
+&\in\prod_s\{0,\ldots,M_s\}.
 \end{aligned}
 $$
 
@@ -42,33 +58,34 @@ zero. The direction-wise degree-$(\boldsymbol M-\boldsymbol m)$ elevation
 kernel is
 
 $$
-\begin{aligned}
 \mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
-&:=\prod_{s=1}^{\ell}\binom{M_s-m_s}{j_s},\\
-\boldsymbol j&\in\mathcal I_{\boldsymbol M-\boldsymbol m}.
-\end{aligned}
+:=
+\prod_{s=1}^{\ell}
+\binom{M_s-m_s}{j_s},
+\qquad
+\boldsymbol j\in\prod_s\{0,\ldots,M_s-m_s\}.
 $$
 
-Scale the input and output coefficient tensors direction by direction:
+The complete elevation is the normalized $\ell$-dimensional convolution
+written directly in the original and elevated coefficients:
 
 $$
 \begin{aligned}
-\mathcal U_{\boldsymbol m}[\boldsymbol i]
-&:=\left(\prod_{s=1}^{\ell}\binom{m_s}{i_s}\right)
-  C^{(\boldsymbol c)}[\boldsymbol i],\\
-\widehat{\mathcal U}_{\boldsymbol M}[\boldsymbol k]
-&:=\left(\prod_{s=1}^{\ell}\binom{M_s}{k_s}\right)
-  \widehat C^{(\boldsymbol c)}[\boldsymbol k].
+\left\{
+  \prod_{s=1}^{\ell}\binom{M_s}{k_s}
+  \widehat C^{(\boldsymbol c)}[\boldsymbol k]
+\right\}_{\boldsymbol k}
+&=
+\left\{
+  \prod_{s=1}^{\ell}\binom{m_s}{i_s}
+  C^{(\boldsymbol c)}[\boldsymbol i]
+\right\}_{\boldsymbol i}
+\\
+&\qquad{}\ast_{\ell}
+\left\{
+  \mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
+\right\}_{\boldsymbol j}.
 \end{aligned}
-$$
-
-The complete elevation is then the short $\ell$-dimensional convolution
-identity
-
-$$
-\widehat{\mathcal U}_{\boldsymbol M}
-=\mathcal U_{\boldsymbol m}
-\ast_{\ell}\mathcal E_{\boldsymbol M-\boldsymbol m}.
 $$
 
 This unique degree-$\boldsymbol M$ coefficient tensor represents exactly the
@@ -118,9 +135,9 @@ $$
 \widetilde a_0&=a_0,\\
 \widetilde a_{m+1}&=a_m,\\
 \widetilde a_i
-&=\frac{i}{m+1}a_{i-1}\\
-&\quad+\left(1-\frac{i}{m+1}\right)a_i,\\
-&\hspace{1.1em}1\le i\le m.
+&=\frac{i}{m+1}a_{i-1}
++\left(1-\frac{i}{m+1}\right)a_i,
+\qquad 1\le i\le m.
 \end{aligned}
 $$
 

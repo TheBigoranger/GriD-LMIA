@@ -51,19 +51,9 @@ L = A * P; R = P * A;
 For a quadratic decision and affine known factor on one cell,
 
 $$
-\omega(i,j;k):=\frac{\binom2i\binom1j}{\binom3k}.
-$$
-
-Define one ordered contribution by
-
-$$
-T_{ij}^{(k)}:=\omega(i,j;k)P[i]A[j].
-$$
-
-Then, for $k=0,1,2,3$, the ordered convolution is
-
-$$
-(PA)[k]=\sum_{i+j=k}T_{ij}^{(k)}.
+(PA)[k]=\sum_{i+j=k}
+\frac{\binom2i\binom1j}{\binom3k}P[i]A[j],
+\qquad k=0,1,2,3.
 $$
 
 Written matrix order is preserved; $P[i]A[j]$ is not exchanged with $A[j]P[i]$.

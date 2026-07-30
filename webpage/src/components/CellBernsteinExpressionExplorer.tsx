@@ -54,8 +54,8 @@ export default function CellBernsteinExpressionExplorer() {
               \\begin{bmatrix}
               1+\\rho_1+\\rho_2 & \\rho_1\\rho_2\\\\
               \\rho_1\\rho_2 & 2+\\rho_1^2
-              \\end{bmatrix},\\\\
-              \\boldsymbol\\rho&\\in[0,1]^2.
+              \\end{bmatrix},
+              \\qquad \\boldsymbol\\rho\\in[0,1]^2.
               \\end{aligned}`,
             ),
           }}
@@ -101,15 +101,7 @@ export default function CellBernsteinExpressionExplorer() {
             className="cell-basis-expression__formula"
             dangerouslySetInnerHTML={{
               __html: renderDisplayMath(
-                `\\begin{aligned}
-                \\mathcal I_2&:=\\{0,1,2\\}^{2},\\\\
-                A^{(${model.cell.c1},1)}(\\boldsymbol\\alpha)
-                &=\\sum_{\\mathbf i\\in\\mathcal I_2}
-                C_{\\mathbf i}^{(${model.cell.c1},1)}
-                B_{\\mathbf i}^{2}(\\boldsymbol\\alpha),\\\\
-                B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)
-                &=B_{i_1}^{2}(\\alpha_1)B_{i_2}^{2}(\\alpha_2).
-                \\end{aligned}`,
+                `\\begin{aligned}A^{(${model.cell.c1},1)}(\\boldsymbol\\alpha)&=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{2}}C_{\\mathbf i}^{(${model.cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha),\\\\B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)&=B_{i_1}^{2}(\\alpha_1)B_{i_2}^{2}(\\alpha_2).\\end{aligned}`,
               ),
             }}
           />

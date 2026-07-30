@@ -19,24 +19,25 @@ explicit $\varepsilon I$ margin as described in the
 The first smoke test compares a constant Lyapunov matrix against a parameter-dependent Lyapunov matrix for
 
 $$
-\begin{aligned}
-A_0&:=
-\begin{bmatrix}-1&-1\\1&-1\end{bmatrix},\\
-A_1&:=
-\begin{bmatrix}-1&-10\\0.1&-1\end{bmatrix},\\
-A(\rho)&=(1-\rho)A_0+\rho A_1,\\
-\rho&\in[0,1].
-\end{aligned}
+A(\rho)=(1-\rho)
+\begin{bmatrix}
+-1 & -1 \\
+1 & -1
+\end{bmatrix}
++\rho
+\begin{bmatrix}
+-1 & -10 \\
+0.1 & -1
+\end{bmatrix},
+\qquad \rho\in[0,1].
 $$
 
 The tested constraints are
 
 $$
-\begin{aligned}
-P(\rho)A(\rho)+A(\rho)^\top P(\rho)
-&\preceq-10^{-10}I,\\
-P(\rho)&\succeq I.
-\end{aligned}
+P(\rho)A(\rho)+A(\rho)^\top P(\rho)\preceq -10^{-10}I,
+\qquad
+P(\rho)\succeq I.
 $$
 
 With `Degree=0`, `P` is constant over the cell. With the default degree, `P` is parameter-dependent.
@@ -80,46 +81,41 @@ After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov ma
 The second smoke test assembles a block residual with a rate-dependent derivative term. The parameter-dependent matrices are
 
 $$
-\begin{aligned}
-A_0&:=\begin{bmatrix}-1&0.5\\-1&-2\end{bmatrix},\\
-A_1&:=\begin{bmatrix}-1.3&-20\\2&-10\end{bmatrix},\\
-A(\rho)&=A_0+\rho A_1.
-\end{aligned}
-$$
-
-$$
-\begin{aligned}
-B_0&:=\begin{bmatrix}1&-4\\-1&-1\end{bmatrix},\\
-B_1&:=\begin{bmatrix}2.2&0.5\\-6&-5\end{bmatrix},\\
-B(\rho)&=B_0+\rho B_1.
-\end{aligned}
-$$
-
-With $C=I$, $D=0$, $\dot{P}=\mathrm{rhodiff}(P,[-1,1])$, and scalar $\gamma$, the block residual is
-
-$$
-\begin{aligned}
-L_{11}&:=\dot P+PA+A^\top P,\\
-L_{12}&:=PB,\\
-L_{13}&:=C^\top,\\
-L_{22}&:=-\gamma I,\\
-L_{23}&:=D^\top,\\
-L_{33}&:=-\gamma I.
-\end{aligned}
-$$
-
-Thus the tested block condition is
-
-$$
-\begin{aligned}
+A(\rho)=
 \begin{bmatrix}
-L_{11} & L_{12} & L_{13} \\
-L_{12}^\top & L_{22} & L_{23} \\
-L_{13}^\top & L_{23}^\top & L_{33}
+-1 & 0.5 \\
+-1 & -2
 \end{bmatrix}
-&\preceq0,\\
-P(\rho)&\succeq0.
-\end{aligned}
++\rho
+\begin{bmatrix}
+-1.3 & -20 \\
+2 & -10
+\end{bmatrix},
+$$
+
+$$
+B(\rho)=
+\begin{bmatrix}
+1 & -4 \\
+-1 & -1
+\end{bmatrix}
++\rho
+\begin{bmatrix}
+2.2 & 0.5 \\
+-6 & -5
+\end{bmatrix}.
+$$
+
+With $C=I$, $D=0$, $\dot{P}=\mathrm{rhodiff}(P,[-1,1])$, and scalar $\gamma$, the tested block condition is
+
+$$
+\begin{bmatrix}
+\dot{P}+PA+A^\top P & PB & C^\top \\
+B^\top P & -\gamma I & D^\top \\
+C & D & -\gamma I
+\end{bmatrix}
+\preceq 0,
+\qquad P(\rho)\succeq 0.
 $$
 
 ```matlab
