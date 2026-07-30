@@ -21,10 +21,11 @@ a finite positivity certificate is selected.
 
 ## Degree Convention
 
-Use $m$ for decision degree and $M$ for assembled residual degree. Products,
-known-data degrees, derivatives, and common-degree alignment determine $M$.
-Pólya increment $d$, absolute Gram order $r$, and SparseFullBox bandwidth
-$w$ are certificate parameters, not polynomial degrees.
+Use $\mathbf m$ for direction-wise decision degree and $\mathbf M$ for
+direction-wise assembled residual degree. Products, known-data degrees,
+derivatives, and componentwise common-degree alignment determine $\mathbf M$.
+Pólya increment $\mathbf d$, absolute Gram order $\mathbf r$, and scalar
+SparseFullBox bandwidth $w$ are certificate parameters, not polynomial degrees.
 
 ## Exact Degree Elevation
 
@@ -88,8 +89,9 @@ $$
 B_{\mathbf i}^{\mathbf m-\mathbf e_s}.
 $$
 
-The implementation elevates axis-wise partials to a common tensor degree before
-rate weighting.
+The implementation elevates every nonzero axis-wise partial exactly back to the
+common vector degree $\mathbf m$ before rate weighting. A zero-degree axis
+contributes the zero partial.
 
 <RhodiffDiagram />
 

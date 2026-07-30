@@ -79,13 +79,13 @@ parameterCount = npar(A)
 ```
 
 `ncell` counts physical tensor cells, `ncoeff` returns
-`(Degree+1)^npar`, and `npar` counts grid vectors. None of these counts matrix
+`prod(Degree+1)`, and `npar` counts grid vectors. None of these counts matrix
 entries. In the figure these are, respectively, the number of selectable
 hypercubes, the number of labels in the selected cell lattice, and the number
 of independent grid axes.
 
 ```matlab
-A = pdmat({[0 1 2], [10 20]}, {1 3; 5 7}, Degree=1);
+A = pdmat({[0 1 2], [10 20]}, {1 3; 5 7}, Degree=[1 1]);
 cellSubscripts = A.cells()
 counts = [A.ncell() A.ncoeff() A.npar()]
 labels = A.lbls()

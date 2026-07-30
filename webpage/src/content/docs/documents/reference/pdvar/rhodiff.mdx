@@ -57,6 +57,10 @@ returned by `D.lbls()`.
 The forward differences stay inside physical cell $c$. Rate rows are neither
 new cells nor new local Bernstein labels; they enumerate the vertices needed
 because the derivative expression is affine in $\dot{\boldsymbol\rho}$.
+For several parameters, the partial along each nonconstant axis is elevated
+exactly to `P.Degree` before the rate-weighted rows are added. A zero-degree
+axis contributes the zero partial. Consequently, multivariate `rhodiff`
+preserves the common direction-wise degree row.
 
 ## Example
 
@@ -121,7 +125,7 @@ ans =
 ```
 
 The first `8` is the number of rate vertices. The second `8` is
-`(D.Degree+1)^3`; multivariate derivatives are elevated into a common tensor
+`prod(D.Degree+1)`; multivariate derivatives are elevated into a common tensor
 degree basis before the rate-weighted sum is stored. This design keeps
 derivative evidence cell-local and lets `pdlmi` later check affine
 `rho_dot` dependence by finite rate-box vertices.

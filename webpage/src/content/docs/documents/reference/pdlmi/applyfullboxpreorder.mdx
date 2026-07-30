@@ -45,7 +45,8 @@ an $\alpha(1-\alpha)$-weighted block when that block has a nonempty basis.
 Odd-degree residuals use separate $\alpha$- and
 $(1-\alpha)$-weighted blocks.
 
-For two or more parameters, the minimum is $\lceil M/2\rceil$. The
+For two or more parameters, the minimum is componentwise
+$\lceil\mathbf M/2\rceil$. The
 certificate contains one Gram term for every subset product of the box
 generators $\alpha_s(1-\alpha_s)$. A term whose tensor Gram degree would have
 a negative component is omitted.
@@ -108,7 +109,7 @@ The detailed identity, basis degrees, and Gram dimensions are in the
 | Input | Description |
 | :--- | :--- |
 | `C` | Any `pdlmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
-| `order` | Optional finite nonnegative integer scalar. It is an absolute full-box order and must meet the dimension-dependent minimum. |
+| `order` | Optional finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute full-box order. It must meet the dimension-dependent minimum componentwise. |
 
 ## Returned Object
 

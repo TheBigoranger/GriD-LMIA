@@ -38,7 +38,7 @@ const lmiSteps = [
     ],
     visual: "grid",
     manual: "documents/math/gridding-and-degree/",
-    fullCode: "grid = {[0 0.4 1], [0 0.25 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);",
+    fullCode: "grid = {[0 0.4 1], [0 0.25 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=[2 2]);",
   },
   {
     number: "03",
@@ -51,7 +51,7 @@ const lmiSteps = [
     ],
     storageMath: "\\footnotesize A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
     visual: "storage",
-    fullCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=2);\nA.cells()\nA.LocalValues{1}{1}",
+    fullCode: "grid = {[0 0.5 1], [0 1]};\nA = pdmat(grid, @(r1,r2) [1+r1+r2 r1*r2; r1*r2 2+r1^2], Degree=[2 2]);\nA.cells()\nA.LocalValues{1}{1}",
     manual: "documents/math/coordinates-and-bernstein/coefficient-algebra/",
   },
   {
@@ -71,7 +71,7 @@ const lmiSteps = [
     text: "Combine known pdmat data with pdvar decisions, optional cellwise rhodiff terms, a residual comparison, and the selected finite certificate. Export to YALMIP, solve, require sol.problem == 0, and only then recover decisions or objectives.",
     math: "\\texttt{toYalmip}\\;\\longrightarrow\\;\\texttt{optimize}\\;\\longrightarrow\\;\\texttt{value(P)}",
     visual: "export",
-    fullCode: "yalmip('clear')\nP = pdvar(n, grid, \"symmetric\", Degree=2);\nD = rhodiff(P, rateBounds);                 % optional rate term\nL = D + P*A + A'*P <= -epsilon*eye(n);     % residual comparison\nselected = L;                              % Direct by default\nsol = optimize(selected.toYalmip(), objective, options);\nif sol.problem == 0\n    Psol = value(P);\n    gammaSol = value(gamma);\nend",
+    fullCode: "yalmip('clear')\nP = pdvar(n, grid, \"symmetric\", Degree=[2 2]);\nD = rhodiff(P, rateBounds);                 % optional rate term\nL = D + P*A + A'*P <= -epsilon*eye(n);     % residual comparison\nselected = L;                              % Direct by default\nsol = optimize(selected.toYalmip(), objective, options);\nif sol.problem == 0\n    Psol = value(P);\n    gammaSol = value(gamma);\nend",
     manual: "documents/reference/pdlmi/toyalmip/",
   },
 ];

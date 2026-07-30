@@ -30,10 +30,11 @@ Cpolya = C.applyPolya(..., ValidationMode=mode)
 
 ## Description
 
-The no-argument form selects increment one. A finite nonnegative integer
-increment elevates the residual in every parameter direction before `pdlmi`
-constrains every elevated coefficient and every active rate-vertex row. The
-method is value-like: it returns a new object and leaves `C` unchanged.
+The no-argument form selects uniform increment one. An explicit increment is a
+finite nonnegative integer scalar shorthand or an `ell`-element direction-wise
+vector. It elevates the residual componentwise before `pdlmi` constrains every
+elevated coefficient and every active rate-vertex row. The method is
+value-like: it returns a new object and leaves `C` unchanged.
 
 Each call rebuilds from `C.Residual`, rather than compounding a previous
 elevation. Thus `C.applyPolya(2)` and `C.applyPolya().applyPolya(2)` both use
@@ -65,8 +66,9 @@ ans =
 
 ## Validation And Errors
 
-The increment must be a finite nonnegative integer scalar. Invalid values raise
-`pdlmi:InvalidPolyaDegree`.
+The increment must be a finite nonnegative integer scalar shorthand or an
+`ell`-element vector. The selected `PolyaDegree` is stored as a `1 × ell` row.
+Invalid values raise `pdlmi:InvalidPolyaDegree`.
 
 Semidefinite inequalities retain semidefinite coefficient tests. Entry-wise
 inequalities retain their global entry-wise mode after elevation. Equality is

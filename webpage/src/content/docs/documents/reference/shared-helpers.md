@@ -1,11 +1,11 @@
 ---
 title: Shared Helper Utilities
-description: Six backend-only +helper utilities shared across the package.
+description: Seven backend-only +helper utilities shared across the package.
 ---
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><span>shared helpers</span></nav>
 
-The `+helper` namespace contains exactly six shared implementation utilities.
+The `+helper` namespace contains exactly seven shared implementation utilities.
 They are documented for maintainers, not as primary modeling API. `bernTbl`,
 `mapVals`, and `matSubs` are protected `pdbase` methods and therefore belong
 on the [protected backend utilities](/PD-LMI-package/documents/reference/bernstein-utilities/)
@@ -63,6 +63,27 @@ and `NumNodes`. Errors use `<owner>:InvalidGrid` or
 Constructs `values{i1}{i2}...{i_npar}` and calls `makeLeaf` once for each
 physical-cell subscript row. Inputs are internal validated values; allocation
 or callback failures propagate.
+
+## <span id="helper-normalizedegree"></span>`helper.normalizeDegree`
+
+**Syntax:** `degree = helper.normalizeDegree(value,nPar,errorId,label)`.
+
+Accepts one finite nonnegative integer scalar shorthand or an `nPar`-element
+direction-wise vector. A scalar expands uniformly, a column vector is reshaped,
+and every accepted result is a `1 × nPar` double row. Empty, nonnumeric,
+complex, nonfinite, noninteger, negative, or incorrectly sized input raises the
+caller-owned `errorId`; `label` supplies the public option name in the message
+and defaults to `"Degree"`.
+
+```matlab
+degree = helper.normalizeDegree([0; 2; 1], 3, ...
+    "demo:InvalidDegree", "Degree")
+```
+
+```text
+degree =
+     0     2     1
+```
 
 ## Ordering example
 

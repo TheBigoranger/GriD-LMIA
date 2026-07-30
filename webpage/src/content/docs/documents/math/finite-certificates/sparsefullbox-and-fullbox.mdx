@@ -80,8 +80,8 @@ selected = L.applySparseFullBoxPreorder(w, r);
 ## Canonical Endpoints
 
 - $w=1$ canonicalizes to actual Direct state after validating $r$.
-- $1<w<r+1$ stores actual SparseFullBox state.
-- $w\ge r+1$ canonicalizes to actual FullBox state.
+- $1<w<\max_s(r_s+1)$ stores actual SparseFullBox state.
+- $w\ge\max_s(r_s+1)$ canonicalizes to actual FullBox state.
 
 These are state transitions, not merely descriptive similarities. Inspect the
 read-only `pdlmi` properties when code must report the selected state.
@@ -95,8 +95,8 @@ Because $w=3=r+1$, that endpoint canonicalizes to FullBox.
 
 ## Multivariate Boundary
 
-For $\ell\ge2$, the minimum absolute order is
-$r=\lceil M/2\rceil$. FullBox can grow rapidly because every generator
+For $\ell\ge2$, the minimum absolute order is componentwise
+$\mathbf r=\lceil\mathbf M/2\rceil$. FullBox can grow rapidly because every generator
 subset and dense tensor basis block contributes. SparseFullBox restricts each
 $Q_J$ to the symmetric block-band form $Q_J^{(w)}$ while retaining exact
 coefficient matching.
@@ -106,7 +106,7 @@ coefficient matching.
 Use Direct as the baseline. Use SparseFullBox when a Gram certificate is
 desired but dense FullBox blocks are too large, and vary $w$ independently
 of $r$. Use FullBox when the dense preordering is computationally acceptable.
-Always record $\mathcal G_s$, $m$, $M$, $r$, $w$, solver, and solver
+Always record $\mathcal G_s$, $\mathbf m$, $\mathbf M$, $\mathbf r$, $w$, solver, and solver
 status.
 
 ## Failure Interpretation

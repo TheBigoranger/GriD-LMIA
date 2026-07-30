@@ -125,4 +125,4 @@ class-preserving reconstruction without calling protected methods directly.
 [`pdbase matrix operations`](/PD-LMI-package/documents/reference/pdbase/matrix-operations/) ·
 [`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
 [`pdvar algebra`](/PD-LMI-package/documents/reference/pdvar/algebra/) ·
-[`six shared helpers`](/PD-LMI-package/documents/reference/shared-helpers/)
+[`seven shared helpers`](/PD-LMI-package/documents/reference/shared-helpers/)

@@ -76,7 +76,7 @@ Gram selectors are equivalent. In two or more parameters, choose FullBox for
 every generator-subset product or Putinar for the unweighted term plus the
 separate axis generators. Choose SparseFullBox when intermediate band-limited
 support is useful; its exact endpoints return Direct at width
-one and FullBox at width at least `order + 1`.
+  one and FullBox at width at least `max(order + 1)`.
 For derivations and the difference between representation degree and
 certificate order, see
 [Certificate Map And Selection Guide](/PD-LMI-package/documents/math/sos-certificates/).
@@ -88,34 +88,36 @@ certificate order, see
 | `expr` | `pdvar` residual expression, or coefficient-backed `pdmat` residual for `"<="`/`">="`. A known `pdmat` equality is instead scalar logical `A == B`. |
 | `relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya` | Logical option. Default `false`. The bare flag `"UsePolya"` enables Pólya assembly with increment one. |
-| `PolyaDegree` | Finite nonnegative integer scalar. Default `0`. Supplying it without `UsePolya` enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
+| `PolyaDegree` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise increment. Default `zeros(1,ell)`. Supplying it without `UsePolya` enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
 | `UseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select full-box assembly at the minimum admissible order. |
-| `FullBoxOrder` | Finite nonnegative integer scalar. This is an absolute order, not a degree increment. Supplying it alone enables full-box assembly without a warning. |
+| `FullBoxOrder` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute order. Supplying it alone enables full-box assembly without a warning. |
 | `UsePutinar` | Logical scalar. Default `false`. The bare flag and explicit `true` select Putinar box assembly at the minimum admissible order. |
-| `PutinarOrder` | Finite nonnegative integer scalar. This is an absolute order, not a degree increment. Supplying it alone enables Putinar assembly without a warning. |
+| `PutinarOrder` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute order. Supplying it alone enables Putinar assembly without a warning. |
 | `UseSparseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparseFullBox assembly. |
-| `SparseFullBoxOrder` | Finite nonnegative integer scalar and absolute order. Supplying it alone enables SparseFullBox assembly. |
+| `SparseFullBoxOrder` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute order. Supplying it alone enables SparseFullBox assembly. |
 | `BandWidth` | Finite positive integer bandwidth `w` for $Q_J^{(w)}$. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient, not stored, and not inherited by later selection calls. |
 
 When full-box assembly is active, the minimum order is
-`floor(expr.Degree/2)` for one parameter and `ceil(expr.Degree/2)` for two or
-more parameters. Explicitly pairing `UseFullBoxPreorder=false` with
+`floor(expr.Degree/2)` for one parameter and componentwise
+`ceil(expr.Degree/2)` for two or more parameters. Explicitly pairing
+`UseFullBoxPreorder=false` with
 `FullBoxOrder=r` keeps direct assembly active while retaining `r` as
 inspectable metadata. This combination is valid and is not a relaxation
 conflict.
 
 When Putinar assembly is active, the minimum and default order are
-`floor(expr.Degree/2)` in one parameter and `ceil(expr.Degree/2)` in two or
-more parameters. Unlike the full-box metadata form, explicitly pairing
+`floor(expr.Degree/2)` in one parameter and componentwise
+`ceil(expr.Degree/2)` in two or more parameters. Unlike the full-box metadata
+form, explicitly pairing
 `UsePutinar=false` with any supplied `PutinarOrder` is rejected. Enabling more
 than one of Pólya, Putinar, SparseFullBox, and FullBox assembly is also
 rejected.
 
 SparseFullBox uses the same dimension-dependent minimum and default order.
-The width is interpreted independently on every tensor axis. Width one
+`BandWidth` remains one scalar width interpreted on every tensor axis. Width one
 returns actual Direct state after order validation; width at least
-`SparseFullBoxOrder + 1` returns actual FullBox state.
+`max(SparseFullBoxOrder + 1)` returns actual FullBox state.
 
 ## Returned Object
 

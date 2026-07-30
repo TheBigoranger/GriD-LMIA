@@ -30,10 +30,10 @@ Create a known-data `pdmat` object over one or more parameter-grid dimensions.
 
 ```matlab
 A = pdmat(gridVector, source)
-A = pdmat(gridVector, source, Degree=m)
+A = pdmat(gridVector, source, Degree=degree)
 A = pdmat(gridVector, source, RateBounds=rb)
 A = pdmat(gridVectors, source)
-A = pdmat(gridVectors, source, Degree=m, RateBounds=rb)
+A = pdmat(gridVectors, source, Degree=degree, RateBounds=rb)
 A = pdmat(..., ValidationMode=mode)
 ```
 
@@ -43,7 +43,7 @@ A = pdmat(..., ValidationMode=mode)
 | :--- | :--- |
 | `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of strictly increasing vectors, such as `{[0 1], [10 20]}`. |
 | `source` | Function handle, global cell grid of numeric Bernstein coefficients such as `{1, 2, 3}`, or explicit nested `LocalValues` such as `{{[1 0], [0 1]}, {[2 0], [0 2]}}`. |
-| `Degree` | Nonnegative integer Bernstein degree, such as `Degree=1` or `Degree=2`. Required when a function handle should be validated as Bernstein coefficient evidence. |
+| `Degree` | One finite nonnegative integer scalar shorthand or an `ell`-element direction-wise vector, such as `Degree=[1 3]`. The accepted value is stored as a `1 × ell` row. Required when a function handle should be validated as Bernstein coefficient evidence. |
 | `RateBounds` | Finite `ell`-by-2 lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`; explicit nested leaves may instead contain all `2^ell` rate-vertex rows. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient and not stored. Public source validation remains complete in both modes. |
 
@@ -63,7 +63,7 @@ readable through dot syntax and have private set access:
 | :--- | :--- | :--- |
 | `GridInfo` | `A.GridInfo.Vectors{1}`, `A.GridInfo.Points`, `A.GridInfo.Bounds` | Validated tensor-grid metadata. |
 | `MatrixSize` | `A.MatrixSize` | Matrix size of each numeric payload. |
-| `Degree` | `A.Degree` | Local Bernstein degree. |
+| `Degree` | `A.Degree` | Direction-wise local Bernstein degree stored as a `1 × ell` row. |
 | `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | Cell-local numeric Bernstein coefficients. |
 | `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces; otherwise the constructor warns and returns `false`. |
 | `ContainsDecision` | `A.ContainsDecision` | Always `false`; no YALMIP decisions are stored. |
@@ -120,7 +120,7 @@ $(1-\alpha)$ at local label `0` to $\alpha$ at local label `1`.
 ### Tensor-grid coefficient ordering
 
 ```matlab
-A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=[1 1]);
 A.GridInfo.Vectors{2}
 A.coeffs([1 1])
 A.lbls()
@@ -209,6 +209,25 @@ ans =
 Adding `Degree=2` tells the constructor to validate and store Bernstein
 coefficient evidence while retaining the exact function handle for evaluation.
 
+### Direction-wise degree
+
+```matlab
+A = pdmat({[0 1], [10 20]}, @(rho,eta) rho.^2, Degree=[2 0]);
+A.Degree
+A.ncoeff()
+```
+
+```text
+ans =
+     2     0
+
+ans =
+     3
+```
+
+The zero second component records that the coefficient-backed polynomial is
+constant along the second parameter axis.
+
 ### Explicit rate-vertex rows
 
 ```matlab
@@ -243,6 +262,9 @@ row, uniformly. Vertex order is
   coefficient grids raise `pdmat:InvalidData`.
 - Invalid degrees and malformed nested storage raise `pdmat:InvalidDegree` and
   `pdmat:InvalidLocalValues`.
+- An explicit multidimensional scalar `Degree` expands uniformly and warns
+  `pdmat:ScalarDegreeExpansion`. Omitted degree inference, function-only
+  construction without `Degree`, and all one-dimensional forms are silent.
 - Malformed rate boxes raise `pdmat:InvalidRateBounds`; malformed, duplicate,
   or missing validation values raise `pdmat:InvalidValidationMode`.
 - Malformed explicit coefficient-leaf counts or shapes raise

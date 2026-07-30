@@ -69,7 +69,8 @@ has no Gram variables, and inserts no hidden positivity margin.
 
 ## <span id="polya-type-coefficient-relaxation"></span>Pólya-Type Coefficient Relaxation
 
-Pólya applies exact degree elevation by increment $d$, then runs the Direct
+Pólya applies exact degree elevation by direction-wise increment $\mathbf d$,
+then runs the Direct
 test on the elevated coefficients. Read
 [Direct And Pólya](/PD-LMI-package/documents/math/finite-certificates/direct-and-polya/)
 for the formula and selection boundary.
@@ -79,8 +80,8 @@ for the formula and selection boundary.
 For one parameter, the minimum absolute order is
 $r=\lfloor M/2\rfloor$. For two or more parameters
 $(\ell\ge2)$, Putinar uses an unweighted Gram/SOS term plus the singleton
-generators $g_s=\alpha_s(1-\alpha_s)$, with minimum
-$r=\lceil M/2\rceil$.
+generators $g_s=\alpha_s(1-\alpha_s)$, with componentwise minimum
+$\mathbf r=\lceil\mathbf M/2\rceil$.
 
 ### Implemented Putinar selector
 
@@ -106,7 +107,8 @@ $g_J=\prod_{s\in J}\alpha_s(1-\alpha_s)$. The software state is
 The mathematical construction is FullBox with **band-limited Gram support**.
 The software state is `SparseFullBox`: each dense Gram matrix $Q_J$ is replaced
 by a symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. Bandwidth
-one canonicalizes to Direct after order validation; bandwidth at least $r+1$
+one canonicalizes to Direct after order validation; bandwidth at least
+$\max_s(r_s+1)$
 canonicalizes to FullBox.
 
 ### Worked full-box example: two parameters, degree three

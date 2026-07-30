@@ -61,23 +61,24 @@ $$
 \quad s=1,\ldots,\ell.
 $$
 
-For uniform Bernstein degree $m$, `evaluate` computes the tensor expansion
+For direction-wise Bernstein degree
+$\boldsymbol m=(m_1,\ldots,m_\ell)$, `evaluate` computes the tensor expansion
 
 $$
 A(\boldsymbol\rho)
 =A^{(\boldsymbol c)}(\boldsymbol\alpha)
-=\sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+=\sum_{\boldsymbol i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
 C^{(\boldsymbol c)}[\boldsymbol i]\,
-B_{\boldsymbol i}^{m}(\boldsymbol\alpha).
+B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha).
 $$
 
 Here the tensor-product basis is
 
 $$
-B_{\boldsymbol i}^{m}(\boldsymbol\alpha)
+B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)
 =\prod_{s=1}^{\ell}
-\binom{m}{i_s}
-\alpha_s^{i_s}(1-\alpha_s)^{m-i_s}.
+\binom{m_s}{i_s}
+\alpha_s^{i_s}(1-\alpha_s)^{m_s-i_s}.
 $$
 
 Each $C^{(\boldsymbol c)}[\boldsymbol i]$ is the stored scalar or matrix

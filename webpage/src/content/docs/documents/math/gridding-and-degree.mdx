@@ -85,14 +85,14 @@ An anisotropic grid is valid and often useful:
 ```matlab
 grid = {[0 0.25 1], [-1 1]};
 A = pdmat(grid, @(rho1,rho2) [1+rho1 rho1*rho2; rho1*rho2 2+rho2^2], ...
-    Degree=2);
+    Degree=[2 2]);
 ```
 
 The first axis has two physical intervals and the second has one. Every cell
 still uses local coordinates
 $\boldsymbol\alpha=(\alpha_1,\alpha_2)\in[0,1]^2$.
-For tensor degree $m=2$, each local coefficient array has
-$(m+1)^2=9$ labels $\mathbf i=(i_1,i_2)$.
+For direction-wise degree $\mathbf m=(2,2)$, each local coefficient array has
+$\prod_s(m_s+1)=9$ labels $\mathbf i=(i_1,i_2)$.
 
 <CellStorageDiagram />
 
@@ -101,8 +101,10 @@ $(m+1)^2=9$ labels $\mathbf i=(i_1,i_2)$.
 ## The ell-Dimensional Case
 
 The number of physical cells is
-$\prod_{s=1}^{\ell}(k_s-1)$. For scalar tensor degree $m$, each cell has
-$(m+1)^\ell$ local labels. The two products measure different things:
+$\prod_{s=1}^{\ell}(k_s-1)$. For direction-wise degree
+$\mathbf m=(m_1,\ldots,m_\ell)$, each cell has
+$\prod_s(m_s+1)$ local labels. A scalar input is uniform shorthand for this
+row vector. The two products measure different things:
 physical partition size and local polynomial representation size.
 
 `pdbase.cells()` traverses physical cells, while `pdbase.labels()` traverses
@@ -116,10 +118,11 @@ for the exact traversal contract.
   conservatism.
 - Degree elevation changes only the Bernstein representation of the same
   polynomial.
-- Increasing decision degree $m$ enlarges the decision-function family.
-- Increasing residual degree $M$ can result from products and common-degree
-  alignment even when $m$ is unchanged.
-- Increasing Pólya increment $d$, Gram order $r$, or SparseFullBox
+- Increasing one or more components of decision degree $\mathbf m$ enlarges
+  the decision-function family in those directions.
+- Increasing residual degree $\mathbf M$ can result from products and
+  componentwise common-degree alignment even when $\mathbf m$ is unchanged.
+- Increasing Pólya increment $\mathbf d$, Gram order $\mathbf r$, or SparseFullBox
   bandwidth $w$ changes the selected finite certificate.
 
 ## Limitations

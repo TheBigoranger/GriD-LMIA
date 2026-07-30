@@ -5,7 +5,7 @@ export const referenceGroups = [
   { id: "pdvar", label: "pdvar", description: "Continuous arbitrary-degree affine decisions and rate-vertex differentiation." },
   { id: "pdlmi", label: "pdlmi", description: "Direct constraints and four opt-in finite certificate families." },
   { id: "pdbase-backend", label: "pdbase / backend", description: "Inherited matrix protocols, cell-local storage, and protected Bernstein utilities." },
-  { id: "shared-helpers", label: "Shared helpers", description: "Six implementation helpers shared across the package." },
+  { id: "shared-helpers", label: "Shared helpers", description: "Seven implementation helpers shared across the package." },
 ];
 
 const entry = (name, type, task, path, anchor = "", group = "shared-helpers") => ({
@@ -275,4 +275,5 @@ export const referenceEntries = [
   entry("helper.isZero", "shared backend helper", "Classify numeric, additive, coefficient-tree, or object zero evidence.", "documents/reference/shared-helpers", "helper-iszero"),
   entry("helper.mkGrid", "shared backend helper", "Validate grid vectors and construct GridInfo.", "documents/reference/shared-helpers", "helper-mkgrid"),
   entry("helper.mkNest", "shared backend helper", "Construct nested physical-cell storage.", "documents/reference/shared-helpers", "helper-mknest"),
+  entry("helper.normalizeDegree", "shared backend helper", "Normalize scalar shorthand or direction-wise degrees to a row vector.", "documents/reference/shared-helpers", "helper-normalizedegree"),
 ];

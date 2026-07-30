@@ -40,8 +40,8 @@ unweighted Gram term plus one generator-weighted term per axis at minimum
 **SparseFullBox** retains the FullBox parity/generator-mask terms and exact
 coefficient identities while replacing each dense Gram matrix $Q_J$ by a
 symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. Bandwidth one
-canonicalizes to Direct, and bandwidth at least
-`order + 1` canonicalizes to FullBox. Every Gram path matches exact
+  canonicalizes to Direct, and bandwidth at least
+  `max(order + 1)` canonicalizes to FullBox. Every Gram path matches exact
 box-polynomial identities. The
 [SOS certificate chapter](/PD-LMI-package/documents/math/sos-certificates/)
 derives these ideas; the API pages below stay focused on callable syntax.
@@ -68,7 +68,7 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 ## Implemented Behavior
 
-Documentation v1.1.6 describes `<=`, `>=`, and `==` for affine `pdvar`
+Documentation v1.2.0 describes `<=`, `>=`, and `==` for affine `pdvar`
 residuals and `<=`/`>=` for coefficient-backed known `pdmat` residuals.
 Inequalities select
 one global semidefinite or entry-wise interpretation from all original
@@ -101,7 +101,7 @@ The constructor exposes private-set, read-only properties through dot access:
 | `Relation` | `C.Relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya`, `PolyaDegree` | `C.UsePolya`, `C.PolyaDegree` | Pólya selector and degree increment. |
 | `UsePutinar`, `PutinarOrder` | `C.UsePutinar`, `C.PutinarOrder` | Putinar selector and absolute order. |
-| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, absolute order, and bandwidth `w` of $Q_J^{(w)}$. Bandwidth one normalizes to Direct; bandwidth at least `order + 1` normalizes to FullBox. |
+| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar bandwidth `w` of $Q_J^{(w)}$. Bandwidth one normalizes to Direct; bandwidth at least `max(order + 1)` normalizes to FullBox. |
 | `UseFullBoxPreorder`, `FullBoxOrder` | `C.UseFullBoxPreorder`, `C.FullBoxOrder` | Full-box selector and absolute order. |
 
 Certificate selectors apply only to inequalities. Any selector on equality raises `pdlmi:UnsupportedEqualityCertificate`.

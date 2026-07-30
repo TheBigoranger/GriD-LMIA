@@ -15,7 +15,10 @@ import ExampleDisclosure from "../../../../../components/ExampleDisclosure.astro
 R = P + Q; D = P - Q; U = +P; N = -P;
 ```
 
-Compatible grids and degrees are aligned before coefficient rows are combined. Numeric constants, affine `sdpvar`, and coefficient-backed `pdmat` operands are promoted. `uplus` preserves the expression; `uminus` negates every symbolic coefficient.
+Compatible grids are aligned and direction-wise degrees are elevated to their
+componentwise maximum before coefficient rows are combined. Numeric constants,
+affine `sdpvar`, and coefficient-backed `pdmat` operands are promoted. `uplus`
+preserves the expression; `uminus` negates every symbolic coefficient.
 
 ```matlab
 yalmip('clear')
@@ -54,6 +57,8 @@ $$
 $$
 
 Written matrix order is preserved; $P[i]A[j]$ is not exchanged with $A[j]P[i]$.
+For tensor operands, the output degree is the componentwise sum of the two
+degree rows.
 
 <ExampleDisclosure
   visibleCode={"L = A * P;\nR = P * A;"}

@@ -30,8 +30,11 @@ D = rhodiff(A, rateBounds)
 stored bounds when both are present.
 
 For one parameter, degree `m > 0` returns degree `m - 1`; degree zero remains
-zero. For several parameters, each shortened partial derivative is elevated
-back to the common tensor degree `m` before the rate-weighted sum is formed.
+zero. For several parameters, the partial along axis `s` has degree
+`A.Degree-e_s` when `A.Degree(s)>0`, then is elevated exactly back to the common
+vector `A.Degree` before the rate-weighted sum is formed. A zero-degree axis
+contributes the zero partial, so multivariate `rhodiff` preserves the complete
+direction-wise degree row.
 `D` is a `pdmat` with `IsContinuous=false`, `HasRateDependence=true`, and one
 numeric coefficient row per rate-box vertex in `helper.combRows` order.
 

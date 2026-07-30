@@ -36,13 +36,13 @@ Cputinar = C.applyPutinar(..., ValidationMode=mode)
 The no-argument form selects the smallest admissible absolute order
 
 $$
-r=\begin{cases}
+\mathbf r=\begin{cases}
 \left\lfloor M/2\right\rfloor,&\ell=1,\\
-\left\lceil M/2\right\rceil,&\ell\ge2,
+\left\lceil \mathbf M/2\right\rceil,&\ell\ge2,
 \end{cases}
 $$
 
-where $M$ is `C.Residual.Degree` and $\ell$ is the parameter count. The
+where $\mathbf M$ is `C.Residual.Degree` and $\ell$ is the parameter count. The
 explicit form selects `order`; it does
 not add `order` to the residual degree. Both forms rebuild from `C.Residual`
 and `C.Relation`, return a new value object, and leave `C` unchanged. Applying
@@ -62,12 +62,12 @@ S^{(\mathbf c)}(\boldsymbol\alpha)
 \alpha_s(1-\alpha_s)S_s(\boldsymbol\alpha).
 $$
 
-At order $r$, $S_0$ uses a tensor Bernstein Gram basis of degree
-$r\mathbf 1$. The multiplier $S_s$ uses degree
-$r\mathbf 1-\mathbf e_s$; a block is omitted if that vector has a negative
+At order $\mathbf r$, $S_0$ uses a tensor Bernstein Gram basis of degree
+$\mathbf r$. The multiplier $S_s$ uses degree
+$\mathbf r-\mathbf e_s$; a block is omitted if that vector has a negative
 component. Every present Gram matrix is constrained positive semidefinite.
 The target is exactly elevated and matched coefficient by coefficient at
-tensor degree $2r\mathbf 1$.
+tensor degree $2\mathbf r$.
 
 For an entry-wise inequality, each MATLAB column-major scalar entry receives
 an independent scalar certificate. Each cell and rate row receives independent dense Gram blocks and independent
@@ -82,7 +82,7 @@ margin in the residual.
 | Input | Description |
 | :--- | :--- |
 | `C` | Any `pdlmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
-| `order` | Optional finite nonnegative integer scalar. It is an absolute Gram order and must satisfy $r\ge\lfloor M/2\rfloor$ in one parameter or $r\ge\lceil M/2\rceil$ in two or more parameters. |
+| `order` | Optional finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute Gram order. It must satisfy $r\ge\lfloor M/2\rfloor$ in one parameter or $\mathbf r\ge\lceil\mathbf M/2\rceil$ componentwise in two or more parameters. |
 
 ## Returned Object
 

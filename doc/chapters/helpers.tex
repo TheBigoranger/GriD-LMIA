@@ -1,7 +1,7 @@
 \chapter{Shared Helper Utilities}
 \label{sec:helpers}
 
-The \code{+helper} namespace contains exactly six implementation utilities whose ownership genuinely crosses class boundaries: \code{cellGet}, \code{chk}, \code{combRows}, \code{isZero}, \code{mkGrid}, and \code{mkNest}. They are developer-facing building blocks, not an alternative modeling API: ordinary users should enter through \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}. The object-aware \code{bernTbl}, \code{mapVals}, and \code{matSubs} mechanisms are protected \code{pdbase} backend utilities and are documented in \cref{sec:pdbase-backend-utilities}, not as \code{helper.*} functions.
+The \code{+helper} namespace contains exactly seven implementation utilities whose ownership genuinely crosses class boundaries: \code{cellGet}, \code{chk}, \code{combRows}, \code{isZero}, \code{mkGrid}, \code{mkNest}, and \code{normalizeDegree}. They are developer-facing building blocks, not an alternative modeling API: ordinary users should enter through \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}. The object-aware \code{bernTbl}, \code{mapVals}, and \code{matSubs} mechanisms are protected \code{pdbase} backend utilities and are documented in \cref{sec:pdbase-backend-utilities}, not as \code{helper.*} functions.
 
 \section{\texorpdfstring{\code{helper.cellGet}}{helper.cellGet}}
 
@@ -172,3 +172,28 @@ secondLeaf = 3
 
 \remarkshead
 \code{mkLeaf} owns the leaf payload.  The helper supplies deterministic physical-cell subscripts but does not infer coefficient count, matrix size, or rate semantics.
+
+\section{\texorpdfstring{\code{helper.normalizeDegree}}{helper.normalizeDegree}}
+
+\textit{Purpose.} Validate scalar shorthand or direction-wise Bernstein degrees while preserving the caller's error namespace.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+degree = helper.normalizeDegree(value, nPar, errId, label)
+\end{lstlisting}
+
+\descriptionhead
+\code{value} must be one finite nonnegative integer scalar or an \code{nPar}-element vector. A scalar expands uniformly, a column vector is reshaped, and every accepted result is a \code{1}-by-\code{nPar} double row. \code{errId} is raised for empty, nonnumeric, complex, nonfinite, noninteger, negative, or incorrectly sized input; \code{label} supplies the public option name in the error message and defaults to \code{"Degree"}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+degree = helper.normalizeDegree([0; 2; 1], 3, ...
+    "demo:InvalidDegree", "Degree")
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+degree = 1×3 double
+     0     2     1
+\end{lstlisting}
+
+\remarkshead
+The helper performs normalization only. Constructors and certificate selectors own user-facing warnings, minimum-order checks, and their class-specific error identifiers.

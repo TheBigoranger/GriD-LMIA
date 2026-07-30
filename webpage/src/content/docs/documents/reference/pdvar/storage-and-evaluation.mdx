@@ -63,7 +63,7 @@ rate rows.
 
 ```matlab
 yalmip('clear')
-P = pdvar(2, {[0 1 2], [10 20]}, "symmetric", Degree=2);
+P = pdvar(2, {[0 1 2], [10 20]}, "symmetric", Degree=[2 2]);
 cellSubscripts = P.cells()
 counts = [P.ncell() P.ncoeff() P.npar()]
 coefficientShape = size(P.coeffs([1 1]))
@@ -98,16 +98,20 @@ applied linearly to symbolic coefficient matrices:
 $$
 \widehat X^{(\boldsymbol c)}[\boldsymbol k]
 =
-\sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+\sum_{\boldsymbol i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
 \left[
 \prod_{s=1}^{\ell}
 \frac{
-\binom{m}{i_s}\binom{M-m}{k_s-i_s}
+\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}
 }{
-\binom{M}{k_s}
+\binom{M_s}{k_s}
 }
 \right]
-X^{(\boldsymbol c)}[\boldsymbol i].
+X^{(\boldsymbol c)}[\boldsymbol i],
+\qquad
+\boldsymbol k\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\},
+\quad
+\boldsymbol M\ge\boldsymbol m.
 $$
 
 No new independent YALMIP variable is created; the elevated coefficients are
@@ -143,9 +147,9 @@ sum
 $$
 P^{(\boldsymbol c)}(\boldsymbol\rho)
 =
-\sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+\sum_{\boldsymbol i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
 X^{(\boldsymbol c)}[\boldsymbol i]\,
-B_{\boldsymbol i}^{m}
+B_{\boldsymbol i}^{\boldsymbol m}
 \!\left(\phi_{\boldsymbol c}^{-1}(\boldsymbol\rho)\right).
 $$
 

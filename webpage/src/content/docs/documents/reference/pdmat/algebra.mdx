@@ -19,7 +19,11 @@ Every operation acts on the matrix payload stored at each local Bernstein label.
 S = A + B; D = A - B; U = +A; N = -A;
 ```
 
-`plus` and `minus` align compatible physical grids and exactly elevate the lower Bernstein degree before combining corresponding coefficients. Numeric constants are promoted to the payload size. `uplus` preserves the object; `uminus` negates every stored coefficient.
+`plus` and `minus` align compatible physical grids and exactly elevate each
+operand to the componentwise maximum of their direction-wise degrees before
+combining corresponding coefficients. Numeric constants are promoted to the
+payload size. `uplus` preserves the object; `uminus` negates every stored
+coefficient.
 
 ```matlab
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
@@ -72,7 +76,8 @@ $$
 R^{(c)}[\mathbf k]=
 \sum_{\mathbf i+\mathbf j=\mathbf k}
 \prod_{s=1}^{\ell}
-\frac{\binom m{i_s}\binom n{j_s}}{\binom{m+n}{k_s}}
+  \frac{\binom {m_s}{i_s}\binom {n_s}{j_s}}
+  {\binom{m_s+n_s}{k_s}}
 P^{(c)}[\mathbf i]Q^{(c)}[\mathbf j].
 $$
 
@@ -100,7 +105,7 @@ convolution, not a pointwise product of sampled rows.
 
 <ExampleDisclosure
   visibleCode={"K = A * B;\ncK = K.coeffs([1 1]);"}
-  fullCode={"grid = {[0 1], [10 20]};\nA = pdmat(grid, {1 2; 3 4}, Degree=1);\nB = pdmat(grid, {5 6; 7 8}, Degree=1);\nK = A * B;\ncK = K.coeffs([1 1]);\nassert(K.Degree == 2)\nassert(K.ncoeff() == 9)\ndisp([cK{:}])"}
+  fullCode={"grid = {[0 1], [10 20]};\nA = pdmat(grid, {1 2; 3 4}, Degree=[1 1]);\nB = pdmat(grid, {5 6; 7 8}, Degree=[1 1]);\nK = A * B;\ncK = K.coeffs([1 1]);\nassert(isequal(K.Degree, [2 2]))\nassert(K.ncoeff() == 9)\ndisp([cK{:}])"}
   summary="Show the complete runnable two-parameter example"
 />
 

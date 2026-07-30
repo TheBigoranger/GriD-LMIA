@@ -13,62 +13,64 @@ or the represented known-data function. The implementation is inherited from
 
 ## What degree elevation does
 
-On physical cell $\mathcal H_{\boldsymbol c}$, write the degree-$m$ tensor
+On physical cell $\mathcal H_{\boldsymbol c}$, write the
+direction-wise-degree-$\boldsymbol m$ tensor
 Bernstein coefficients as
 $C^{(\boldsymbol c)}[\boldsymbol i]$,
-$\boldsymbol i\in\{0,\ldots,m\}^{\ell}$. Uniform elevation to any
-$M\ge m$ is defined directly by
+$\boldsymbol i\in\prod_s\{0,\ldots,m_s\}$. Elevation to any
+$\boldsymbol M\ge\boldsymbol m$ componentwise is defined directly by
 
 $$
 \widehat C^{(\boldsymbol c)}[\boldsymbol k]
 =
-\sum_{\boldsymbol i\in\{0,\ldots,m\}^{\ell}}
+\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}
 \left[
 \prod_{s=1}^{\ell}
 \frac{
-\binom{m}{i_s}\binom{M-m}{k_s-i_s}
+  \binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}
 }{
-\binom{M}{k_s}
+  \binom{M_s}{k_s}
 }
 \right]
 C^{(\boldsymbol c)}[\boldsymbol i],
 \qquad
-\boldsymbol k\in\{0,\ldots,M\}^{\ell}.
+\boldsymbol k\in\prod_s\{0,\ldots,M_s\}.
 $$
 
 As usual, a binomial coefficient with an index outside its natural range is
-zero. The degree-$(M-m)$ elevation kernel is
+zero. The direction-wise degree-$(\boldsymbol M-\boldsymbol m)$ elevation
+kernel is
 
 $$
-\mathcal E_{M-m}[\boldsymbol j]
+\mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
 :=
 \prod_{s=1}^{\ell}
-\binom{M-m}{j_s},
+\binom{M_s-m_s}{j_s},
 \qquad
-\boldsymbol j\in\{0,\ldots,M-m\}^{\ell}.
+\boldsymbol j\in\prod_s\{0,\ldots,M_s-m_s\}.
 $$
 
 Therefore the same elevation is one $\ell$-dimensional discrete convolution:
 
 $$
 \left\{
-\prod_{s=1}^{\ell}\binom{M}{k_s}
+  \prod_{s=1}^{\ell}\binom{M_s}{k_s}
 \widehat C^{(\boldsymbol c)}[\boldsymbol k]
 \right\}_{\boldsymbol k}
 =
 \left\{
-\prod_{s=1}^{\ell}\binom{m}{i_s}
+  \prod_{s=1}^{\ell}\binom{m_s}{i_s}
 C^{(\boldsymbol c)}[\boldsymbol i]
 \right\}_{\boldsymbol i}
 \ast_{\ell}
 \left\{
-\mathcal E_{M-m}[\boldsymbol j]
+  \mathcal E_{\boldsymbol M-\boldsymbol m}[\boldsymbol j]
 \right\}_{\boldsymbol j}.
 $$
 
-This unique degree-$M$ coefficient tensor represents exactly the same
-polynomial. A cell grows from $(m+1)^\ell$ to $(M+1)^\ell$ local labels; only
-the representation changes.
+This unique degree-$\boldsymbol M$ coefficient tensor represents exactly the
+same polynomial. A cell grows from $\prod_s(m_s+1)$ to
+$\prod_s(M_s+1)$ local labels; only the representation changes.
 
 Relative to the [`pdmat Storage` figure](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/),
 `cells(A)`, the physical grid, and shared cell interfaces stay fixed.
@@ -86,8 +88,9 @@ It is not grid refinement, interpolation, or an approximation step.
 elevatedTree = elevVals(A,degreeIncrement)
 ```
 
-Returns numeric `LocalValues` elevated by the finite nonnegative integer
-increment in every parameter direction. In the Storage figure, this is the
+Returns numeric `LocalValues` elevated by a finite nonnegative integer scalar
+shorthand or an `npar(A)`-element vector. The increment is added
+componentwise; a scalar expands uniformly. In the Storage figure, this is the
 larger tensor lattice inside each existing cell branch. `A` remains unchanged.
 
 ## <span id="pdmat-elevate"></span>`elevate`

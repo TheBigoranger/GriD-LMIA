@@ -39,11 +39,12 @@ Csparse = pdlmi(expr, relation, BandWidth=w, SparseFullBoxOrder=r)
 | :--- | :--- |
 | `C` | Any `pdlmi` object. The method always rebuilds from `C.Residual`; it does not add constraints to the currently selected family. |
 | `w` | Finite positive integer bandwidth for the symmetric block-band Gram matrix $Q_J^{(w)}$. Default `2`. |
-| `r` | Finite nonnegative integer scalar and absolute Gram order. It is not an increment from the residual degree. |
+| `r` | Finite nonnegative integer scalar shorthand or an `ell`-element direction-wise absolute Gram order. It is not an increment from the residual degree. |
 
 For assembled residual degree `M`, the default and minimum admissible order are
-`floor(M/2)` in one parameter and `ceil(M/2)` in two or more parameters. Order
-validation occurs before endpoint normalization.
+`floor(M/2)` in one parameter and componentwise `ceil(M/2)` in two or more
+parameters. Order validation occurs before endpoint normalization. The
+accepted order is stored as a `1 × ell` row.
 
 ## Returned Object And Read-Only State
 
@@ -63,17 +64,17 @@ The exact endpoints are canonical:
 
 - `w == 1` returns an actual Direct object. Its sparse selector is false and
   its sparse order and width are zero.
-- `w >= r + 1` returns an actual FullBox object. Its sparse selector is false,
+- `w >= max(r + 1)` returns an actual FullBox object. Its sparse selector is false,
   and `UseFullBoxPreorder` and `FullBoxOrder` describe the selected family.
-- `1 < w < r + 1` returns a SparseFullBox object.
+- `1 < w < max(r + 1)` returns a SparseFullBox object.
 
 The endpoint states are intentionally normalized; callers should inspect the
 returned object instead of inferring its family from the requested width.
 
 ## Certificate Construction
 
-For selected absolute order $r$, use the paper notation
-$\mathbf a_J=r\boldsymbol 1-\boldsymbol\chi_J$. SparseFullBox uses
+For selected absolute order $\mathbf r$, use the paper notation
+$\mathbf a_J=\mathbf r-\boldsymbol\chi_J$. SparseFullBox uses
 
 $$
 S^{(\mathbf c)}(\boldsymbol\alpha)

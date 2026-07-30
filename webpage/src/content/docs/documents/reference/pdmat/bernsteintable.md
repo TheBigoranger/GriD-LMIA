@@ -112,7 +112,7 @@ Bernstein coefficient for the single physical cell.
 ### Tensor-grid label order
 
 ```matlab
-A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=[1 1]);
 T = bernsteinTable(A, [1 1]);
 T(:, ["TermIndex", "LocalIndex", "Value"])
 ```

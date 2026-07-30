@@ -28,8 +28,8 @@ obj = pdbase(..., ValidationMode=mode)
 | :--- | :--- |
 | `gridVectors` | Nonempty cell array of finite, real, strictly increasing vectors, each with at least two nodes. |
 | `matrixSize` | Positive integer row vector `[rows columns]`. |
-| `degree` | Finite nonnegative integer scalar, used on every parameter axis. |
-| `localValues` | Optional nested physical-cell tree. An ordinary leaf is a `1 × (degree+1)^npar` coefficient cell; a rate-dependent leaf is a rate-row-by-coefficient cell array. |
+| `degree` | One finite nonnegative integer scalar shorthand or an `npar`-element direction-wise vector. A scalar expands uniformly, and the result is stored as a `1 × npar` row. |
+| `localValues` | Optional nested physical-cell tree. An ordinary leaf is a `1 × prod(degree+1)` coefficient cell; a rate-dependent leaf is a rate-row-by-coefficient cell array. |
 | `IsContinuous` | Logical scalar metadata; default `false`. |
 | `ContainsDecision` | Logical scalar metadata; default `false`. |
 | `HasRateDependence` | Logical scalar metadata; default `false`. |
@@ -43,7 +43,8 @@ payloads require nonempty `RateBounds`.
 
 ## Returned object
 
-The returned value has private-set `GridInfo`, `MatrixSize`, `Degree`,
+The returned value has private-set `GridInfo`, `MatrixSize`, direction-wise
+row-vector `Degree`,
 `LocalValues`, `IsContinuous`, `ContainsDecision`, `HasRateDependence`,
 `RateBounds`, and `SourceSummary` properties. It is a value object: later
 operations return new values without mutating the source.

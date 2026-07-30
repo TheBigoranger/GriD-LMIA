@@ -93,6 +93,9 @@ export default function CertificateChooser({ options }: { options: CertificateOp
         <section aria-labelledby={`${panelId}-tab-${selected}`} id={`${panelId}-panel`} role="tabpanel">
           <h3>{option.label}: <code>selected = {option.command}</code></h3>
           <p>{option.description}</p>
+          <p><strong>Calculator scope:</strong> uniform residual degree and
+            uniform certificate order across all parameter axes. The MATLAB API
+            also accepts direction-wise degree and order vectors.</p>
           <div className="certificate-shape-controls">
             {(["cells", "nPar", "degree", "matrixSize"] as const).map((key) => (
               <label key={key}>{({ cells: "Physical cells", nPar: "Parameter axes", degree: "Residual degree", matrixSize: "Square matrix size n" })[key]}

@@ -1,339 +1,113 @@
-# PD-LMI Package
+# PD-LMI
 
-PD-LMI is a MATLAB/YALMIP research package for parameter-dependent LMIs.
-It represents continuous piecewise-polynomial decision matrices in cell-local
-tensor-product Bernstein bases on a user grid. Derivative- and rate-bearing
-models are called differentiable parameter-dependent LMIs (DPD-LMIs).
+PD-LMI is a MATLAB/YALMIP research package for modeling parameter-dependent
+LMIs on tensor-product box grids. It represents known data (`pdmat`) and
+continuous decision matrices (`pdvar`) in cell-local Bernstein bases, forms
+rate-vertex derivatives with `rhodiff`, and exports finite certificates to
+YALMIP through `pdlmi`.
 
-Documentation: **v1.1.5**. Latest GitHub Release: **v1.1.0**.
+Documentation and latest stable release: **v1.2.0**.
 
-The current implementation provides:
+## What is new in v1.2.0
 
-- `pdbase` as the backend parent for tensor-grid metadata, nested `LocalValues`, local Bernstein labels, coefficient inspection, and the shared matrix protocols and operations inherited by `pdmat` and `pdvar`.
-- `pdmat` for known finite real matrix data from coefficient grids, explicit local values, or exact function handles, with optional rate-box metadata and explicit rate-vertex coefficient rows.
-- `pdvar` for arbitrary-degree continuous YALMIP-backed Bernstein decision
-  expressions whose neighboring cells share boundary values.
-- `rhodiff` for discontinuous numeric `pdmat` or decision-bearing `pdvar` rate-vertex derivative expressions.
-- `pdlmi` for direct equality constraints on `pdvar`, known-data inequalities from coefficient-backed `pdmat`, and direct, Pólya-elevated, Putinar box, band-limited SparseFullBox, or dense full-box-preordering inequality assembly with `toYalmip` handoff.
-- `bernsteinTable` methods on both `pdmat` and `pdvar` for command-window
-  inspection of local Bernstein coefficient and rate-vertex rows.
+- Bernstein degree is direction-wise: `Degree=[d1 ... dell]`. A scalar remains
+  shorthand and is expanded uniformly; explicitly using that shorthand in a
+  multidimensional constructor emits a warning.
+- Tensor coefficient counts are `prod(Degree + 1)`. Alignment uses the
+  componentwise maximum, multiplication adds degrees componentwise, and
+  elevation accepts direction-wise increments.
+- A zero-degree axis means that the object is constant in that direction.
+  `rhodiff` preserves a common tensor degree by exact elevation.
+- `PolyaDegree`, `PutinarOrder`, `SparseFullBoxOrder`, and `FullBoxOrder`
+  accept scalar shorthand or per-axis vectors. `BandWidth` remains scalar.
 
-## How the Package Solves a DPD-LMI
+See the [v1.2.0 Release](https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v1.2.0)
+for the complete verification record.
 
-1. **State the continuum problem.** Write one affine DPD-LMI residual
-   $\mathcal F(\rho,\dot\rho;y)\preceq0$; LPV induced-$L_2$ analysis is one
-   representative application.
-2. **Partition the parameter box.** Choose independent, possibly nonuniform
-   axis grids. Their tensor product covers the complete box with physical
-   cells; it is not a set of sampled operating points.
-3. **Represent one cell in Bernstein form.** `pdmat` stores known data and
-   `pdvar` stores continuous decisions as cell-local Bernstein coefficients,
-   with shared decision values on common faces.
-4. **Choose a finite certificate.** Direct coefficient inequalities are the
-   default; Pólya, Putinar, SparseFullBox, and FullBox are explicit opt-in
-   alternatives. Every certificate is sufficient rather than a converse
-   feasibility test.
-5. **Hand the finite model to YALMIP.** `toYalmip` exports constraints for an
-   ordinary `optimize` call. Retain recovered decisions or objective values
-   only after checking `sol.problem == 0`.
+## Requirements and installation
 
-## Why Bernstein Form?
+- MATLAB
+- A complete YALMIP installation on the MATLAB path
+- A working SDP solver visible to YALMIP
 
-On each physical parameter cell, the Bernstein basis is nonnegative and sums
-to one. A matrix-valued Bernstein polynomial is therefore a convex combination
-of its local coefficient matrices, so coefficient-wise semidefinite
-inequalities give a safe finite certificate over the whole cell. The
-certificate is sufficient, not necessary: a failed coefficient test does not
-by itself prove that the continuous PD-LMI is infeasible. The manual and
-website background explain tensor-product storage, coefficient convolution,
-derivatives, degree elevation, subdivision, and the current refinement
-boundary.
-
-## Requirements
-
-- MATLAB.
-- A complete YALMIP installation already on the current MATLAB path.
-- One working SDP solver visible to YALMIP. The installer probes MOSEK,
-  COPT, SeDuMi, SDPT3, then LMILAB in that order; it does not download
-  dependencies or obtain solver licenses.
-
-## Installation
-
-From MATLAB with YALMIP already on the path, run the one-shot installer:
+Clone or download a tagged release, make it the MATLAB working directory, and
+run:
 
 ```matlab
 report = install_pd_lmi();
 ```
 
-The report records `PackageRoot`, `YALMIPRoot`, the working `Solver`, newly
-`AddedPaths`, and whether the path was `Persisted`. Installation stops without
-saving any path change when YALMIP is missing or incomplete, no supported SDP
-solver completes its bounded probe, another PD-LMI class shadows this package,
-or `savepath` fails. The installer never edits `startup.m` or changes your
-solver defaults. It adds only the repository root at the end of the MATLAB
-path; MATLAB resolves the class, package, and private directories from that
-root, so the installer does not recursively traverse documentation, Web, or
-dependency trees. Repeated calls are idempotent.
+The installer adds only the repository root, checks YALMIP and a supported
+solver, and does not edit `startup.m` or change solver defaults.
 
-## Verification
+## Minimal anisotropic example
 
-Run the current test suite from MATLAB:
+```matlab
+yalmip("clear")
+
+grid = {[0 1], [-1 1]};
+A = pdmat(grid, ...
+    @(rho, eta) [1 + rho, eta; eta, 2 + eta.^2], ...
+    Degree=[1 2]);
+P = pdvar(2, grid, "symmetric", Degree=[1 2]);
+
+constraint = P >= A;
+F = constraint.toYalmip();
+solution = optimize(F);
+assert(solution.problem == 0)
+```
+
+Here the first parameter direction is affine and the second is quadratic.
+`Degree` is stored as the row vector `[1 2]`; using `Degree=2` on this
+two-parameter grid would request the uniform degree `[2 2]` and emit the
+documented scalar-expansion warning.
+
+## Certificate choices
+
+Direct coefficient inequalities are the default. Alternative finite
+certificates are explicit and replace the current certificate selection:
+
+| Certificate | Selection | Role |
+| --- | --- | --- |
+| Direct | `P >= A` | Coefficient-wise Bernstein certificate |
+| Pólya | `constraint.applyPolya([1 2])` | Direction-wise degree elevation before coefficient tests |
+| Putinar | `constraint.applyPutinar([2 3])` | Box quadratic-module Gram certificate |
+| SparseFullBox | `constraint.applySparseFullBoxPreorder(2, [2 3])` | Band-limited tensor-window Gram certificate |
+| FullBox | `constraint.applyFullBoxPreorder([2 3])` | Dense full-box preordering |
+
+These are sufficient certificates. Failure of one finite certificate does not
+prove that the original continuous-domain inequality is infeasible. Always
+accept solver results or recovered objectives only after checking
+`solution.problem == 0`.
+
+## Current boundaries
+
+- Grids are tensor products of one-dimensional box partitions.
+- Decision expressions are affine in YALMIP variables; products with decision
+  dependence on both sides are rejected.
+- Putinar, SparseFullBox, and FullBox are box-specific fixed-order
+  constructions, not a general SOS parser.
+- Function-only `pdmat` data need explicit Bernstein coefficient evidence
+  before coefficient algebra or certificate assembly.
+- YALMIP owns objectives, solver selection, optimization, and diagnostics.
+
+## Verify a checkout
+
+Run the complete MATLAB runtime suite from the repository root:
 
 ```matlab
 results = tests.run_all();
-```
-
-The test entry point covers installer behavior, helper utilities, `pdbase`,
-`pdmat`, `pdvar`, and `pdlmi`. Its solver smoke tests use the same
-commercial-first working-solver policy as `install_pd_lmi`.
-
-The v1.1.5 documentation keeps the established MATLAB API while unifying the
-notation used by the printable and Web manuals. Its Math Concepts navigation
-collects the global symbol dictionary, modeling background, cell coordinates,
-Bernstein algebra, and finite certificates. The numerical `pdmat` reference
-now includes interactive addition, multiplication, and degree-elevation
-explorers; the `pdvar` reference keeps the same algebra symbolic and links to
-those numerical demonstrations. Constructors and certificate selectors still
-accept transient `ValidationMode="fast"` or `"strict"` where documented.
-
-## Quick Start
-
-Known scalar data:
-
-```matlab
-A = pdmat({[0 1]}, {1, 3}, Degree=1);
-T = bernsteinTable(A, "oneLine");
-disp(T)
-```
-
-MATLAB output:
-
-```text
-    CellSubscript          Expression
-    _____________    _______________________
-
-        {[1]}        "(1-alpha)*1 + alpha*3"
-```
-
-Known rate metadata and explicit rate rows:
-
-```matlab
-rb = [-1 2];
-R = pdmat([0 1], {{1, 3; 10, 14}}, Degree=1, RateBounds=rb);
-D = rhodiff(pdmat([0 1], {0, 1}, Degree=1, RateBounds=rb));
-rows = bernsteinTable(D, "oneLine");
-```
-
-`RateBounds` alone is metadata. Explicit nested coefficient leaves may instead
-store one row for every vertex in the deterministic `helper.combRows` order
-induced by the rows of `RateBounds`.
-Rate-row-aware evaluation, algebra, structural operations, assignment,
-elevation, tables, display, and `plot(...,RateVertex=k)` preserve that order.
-
-Inspect a YALMIP-backed decision expression:
-
-```matlab
-yalmip('clear')
-P = pdvar(1, {[0 1]});
-T = bernsteinTable(P, "oneLine");
-disp(T)
-```
-
-The `pdmat/bernsteinTable` and `pdvar/bernsteinTable` reference pages document
-the full table columns, physical-cell selectors, rate-vertex rows, and the
-`"oneLine"` option.
-
-YALMIP-backed decision expression and direct LMI assembly:
-
-```matlab
-yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric");
-C = P >= 0;
-F = toYalmip(C);
-```
-
-`F` can be used with ordinary YALMIP calls such as `optimize(F, objective, sdpsettings(...))`.
-
-## Comparison Semantics
-
-For `P >= Q` and `P <= Q`, PD-LMI inspects every original coefficient in
-every physical cell and active rate row. The complete relation is
-semidefinite only when all coefficients are square and Hermitian; otherwise,
-the complete relation is entry-wise and emits
-`pdlmi:ElementwiseInequality`. Entry-wise inequalities support direct, Pólya,
-Putinar, SparseFullBox, and full-box certificates, with independent scalar
-certificates in MATLAB column-major entry order. Numeric comparisons include
-the boundary at the package tolerance of `1e-10`.
-
-For known `pdmat` objects, `A == B` returns one scalar logical after compatible
-coefficient representations are aligned. `A >= B` and `A <= B` create a
-`pdlmi` wrapper. Direct and Pólya `toYalmip` export one logical certificate;
-a false result emits `pdlmi:InconclusiveCertificate` because coefficient
-failure does not prove a continuous-domain violation. Putinar, SparseFullBox,
-and FullBox still create ordinary YALMIP constraints with auxiliary Gram
-variables. Function-only `pdmat` data need coefficient evidence before these
-paths, and `pdlmi` equality remains `pdvar`-only.
-
-`P == Q` creates direct coefficient equalities. Rectangular and non-Hermitian
-matrices are supported, and compatible derivative expressions compare every
-matching rate row. Equality does not accept certificate selectors or
-`applyPolya`, `applyPutinar`, `applySparseFullBoxPreorder`, or
-`applyFullBoxPreorder`; `P == P` exports an empty constraint collection. Use
-`isequal(P,Q)` when the intent is structural object comparison rather than
-constraint construction.
-
-Incompatible equality row structures raise `pdvar:InvalidEqualityRows`, and
-any equality certificate request raises `pdlmi:UnsupportedEqualityCertificate`.
-
-```matlab
-yalmip('clear')
-X = pdvar([2 3], {[0 1]}, "full");
-entrywise = X >= 0;
-equalities = X == zeros(2, 3);
-F = [entrywise.toYalmip(), equalities.toYalmip()];
-```
-
-See the online [`pdvar` comparison reference](https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdvar/comparisons/)
-and [`pdlmi` reference](https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/)
-for constraint counts, certificate behavior, validation errors, and derivative-row rules.
-
-## Opt-in Pólya Certificate
-
-Direct coefficient-wise assembly remains the default. `UsePolya` elevates the
-stored residual by `PolyaDegree` in every parameter direction before applying
-the same coefficient-wise constraints; the bare flag selects an increment of
-one.
-
-```matlab
-yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric", Degree=2);
-direct = P <= 0;
-polya = direct.applyPolya(1);
-```
-
-The same selection can be supplied to `pdlmi` as a bare or logical option,
-for example `pdlmi(P, "<=", "UsePolya")` or
-`pdlmi(P, "<=", UsePolya=true, PolyaDegree=1)`.
-`applyPolya()` returns a new value object and rebuilds from the original
-residual, so repeated calls replace rather than compound the selected
-increment. This is a sufficient certificate, not an infeasibility test.
-
-## Opt-in Putinar Box Certificate
-
-`applyPutinar([order])` replaces direct, Pólya, SparseFullBox, or full-box
-assembly with a cell-local quadratic-module certificate for every physical
-cell and active rate row. At absolute tensor order `r`, it represents the
-sign-normalized target as
-
-```text
-S0 + sum_s alpha_s(1-alpha_s) Ss
-```
-
-using an order-`r` Bernstein Gram basis for `S0` and an order-`r-e_s` basis
-for each `Ss`. Coefficients are matched exactly at tensor degree `2*r`. The
-one-parameter default and minimum is `floor(Residual.Degree/2)`, using the
-parity-specific Markov–Lukács form. For two or more parameters, the default
-and minimum is `ceil(Residual.Degree/2)`. The method adds no implicit
-positivity margin and does not call a solver.
-
-```matlab
-yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric", Degree=3);
-direct = P >= 0;
-putinar = direct.applyPutinar(2);
-F = putinar.toYalmip();
-```
-
-The constructor forms `pdlmi(P, ">=", "UsePutinar")`,
-`pdlmi(P, ">=", UsePutinar=true, PutinarOrder=2)`, and
-`pdlmi(P, ">=", PutinarOrder=2)` select the same certificate family. A new
-Pólya, Putinar, SparseFullBox, or FullBox selection always rebuilds from the
-original residual and replaces the previous family.
-
-## Opt-in SparseFullBox Hierarchy
-
-`applySparseFullBoxPreorder([bandWidth[, order]])` keeps the same
-parity/generator-mask terms and exact coefficient identities as the dense
-FullBox preordering while restricting its Gram support to a band-limited form.
-The implementation realizes that support as overlapping axis-aligned
-tensor-window PSD clique blocks. The no-argument form uses `BandWidth=2` and
-the same dimension-dependent absolute order as FullBox. Matrix entries,
-physical cells, and active rate rows receive independent certificates.
-
-```matlab
-yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric", Degree=4);
-direct = P >= 0;
-sparse = direct.applySparseFullBoxPreorder(2, 2);
-F = sparse.toYalmip();
-```
-
-The constructor forms
-`pdlmi(P, ">=", "UseSparseFullBoxPreorder")`,
-`pdlmi(P, ">=", BandWidth=2)`, and
-`pdlmi(P, ">=", BandWidth=2, SparseFullBoxOrder=2)` select the same family.
-Width one normalizes to actual Direct state. A width at least `order+1`
-normalizes to actual FullBox state. Only intermediate widths retain
-`UseSparseFullBoxPreorder=true`, `SparseFullBoxOrder`, and `BandWidth`.
-SparseFullBox is a box-specific sufficient certificate, not a generic sparse
-SOS parser or an automatic solver-selection layer.
-
-## Opt-in FullBox Preordering
-
-`applyFullBoxPreorder([order])` replaces direct, Pólya, Putinar, or
-SparseFullBox assembly with a cell-local dense Bernstein–Gram certificate for
-every physical cell and active rate row. In one parameter it uses the
-parity-specific Markov–Lukács form; in multiple parameters it includes every
-subset product of the box generators `alpha_s(1-alpha_s)` at the selected
-absolute order. It is not a general SOS parser and adds no implicit strictness
-margin.
-
-```matlab
-yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric", Degree=2);
-direct = P >= 0;
-preorder = direct.applyFullBoxPreorder();
-F = preorder.toYalmip();
+assert(all([results.Passed]))
 ```
 
 ## Documentation
 
-- Online manual: https://thebigoranger.github.io/PD-LMI-package/
-- Printable TeX manual: https://thebigoranger.github.io/PD-LMI-package/manual.pdf
-- Math Concepts notation: https://thebigoranger.github.io/PD-LMI-package/documents/math/notation/
-- Mathematical guide: https://thebigoranger.github.io/PD-LMI-package/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/
-- Bernstein overview: https://thebigoranger.github.io/PD-LMI-package/documents/math/bernstein-polynomial/
-- `pdmat` algebra explorers: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdmat/algebra/
-- `pdmat` storage and elevation explorer: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/
-- Install and downloads: https://thebigoranger.github.io/PD-LMI-package/install/
-- Latest GitHub Release (v1.1.0): https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v1.1.0
-- Version history: https://thebigoranger.github.io/PD-LMI-package/version-history/
-- Solver smoke examples: https://thebigoranger.github.io/PD-LMI-package/examples/solver-smoke/
-- `applyPutinar` reference: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/applyputinar/
-- `applySparseFullBoxPreorder` reference: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/
-- `pdvar` comparisons: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdvar/comparisons/
-- `pdlmi` reference: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdlmi/
-- `pdmat/plot` output examples: https://thebigoranger.github.io/PD-LMI-package/documents/reference/pdmat/plot/
-- Reference lookup table: https://thebigoranger.github.io/PD-LMI-package/documents/reference-index/
-- Local PDF manual: `doc/manual.pdf`
-- Manual source: `doc/manual.tex`
+- [Web manual](https://thebigoranger.github.io/PD-LMI-package/)
+- [Printable manual (PDF)](https://thebigoranger.github.io/PD-LMI-package/manual.pdf)
+- [Install and download](https://thebigoranger.github.io/PD-LMI-package/install/)
+- [Reference index](https://thebigoranger.github.io/PD-LMI-package/documents/reference-index/)
+- [Version history](https://thebigoranger.github.io/PD-LMI-package/version-history/)
+- [GitHub Releases](https://github.com/TheBigoranger/PD-LMI-package/releases)
 
-The local manual is the most complete reference: Bernstein background appears
-before setup, and each class chapter starts with lookup tables before detailed
-MATLAB-style function pages. The GitHub Pages source lives in `webpage/` and is
-built with npm, Astro, and Starlight.
-
-## Scope Boundaries
-
-- Direct, Pólya, Putinar, SparseFullBox, and full-box assembly are sufficient
-  finite certificates; a failed certificate does not prove continuous PD-LMI
-  infeasibility.
-- Package-owned solver wrappers, strictness-margin diagnostics, residual
-  evidence, general-domain generator parsing, and general SOS hierarchies
-  remain future layers. The implemented Putinar, SparseFullBox, and full-box
-  certificates are box-specific fixed-order assemblies and are cross-validated
-  outside the ordinary runtime suite.
-- `pdbase` is backend architecture context, not the primary modeling API.
-  Centralized matrix-operation implementations remain fully documented as
-  public `pdmat` and `pdvar` behavior.
-- Function-only `pdmat` objects without explicit Bernstein evidence do not enter coefficient algebra.
+The printable manual source is in `doc/`; the Astro/Starlight Web manual is in
+`webpage/`.

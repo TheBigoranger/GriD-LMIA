@@ -19,7 +19,7 @@ metadata and coefficients consistent.
 | :--- | :--- |
 | `GridInfo` | `Vectors`, tensor-product `Points`, per-axis `Bounds`, and `NumNodes`. |
 | `MatrixSize` | Always-two-dimensional `[rows columns]` payload size. |
-| `Degree` | Scalar Bernstein degree used on every parameter axis. |
+| `Degree` | Direction-wise Bernstein degree stored as a `1 × npar` row. |
 | `LocalValues` | Nested physical-cell tree; each leaf is an ordinary coefficient row or a derivative rate-row table. |
 | `IsContinuous` | Whether adjacent physical cells represent continuous data. |
 | `ContainsDecision` | Whether payloads contain YALMIP decision dependence. |
@@ -59,12 +59,12 @@ Malformed, wrong-length, or out-of-range selectors raise
 labels = lbls(obj)
 ```
 
-Returns `ncoeff(obj) × npar(obj)` integer multi-indices. Each coordinate runs
-from zero through `Degree`; earlier axes vary more slowly. The row order is the
+Returns `ncoeff(obj) × npar(obj)` integer multi-indices. Coordinate `s` runs
+from zero through `Degree(s)`; earlier axes vary more slowly. The row order is the
 coefficient-column order returned by `coeffs`.
 
 ```matlab
-A = pdmat({[0 1 2], [10 20]}, {1 3; 5 7}, Degree=1);
+A = pdmat({[0 1 2], [10 20]}, {1 3; 5 7}, Degree=[1 1]);
 cellSubscripts = A.cells()
 labels = A.lbls()
 firstCell = [A.coeffs([1 1]){:}]
@@ -101,8 +101,8 @@ Returns `prod(GridInfo.NumNodes - 1)`.
 count = ncoeff(obj)
 ```
 
-Returns `(Degree + 1)^npar(obj)`, the coefficient columns in each cell. Rate
-rows do not multiply this result.
+Returns `prod(Degree + 1)`, the coefficient columns in each cell. Rate rows do
+not multiply this result.
 
 ### <span id="pdbase-npar"></span>`npar`
 

@@ -34,7 +34,7 @@ val =
 ## Tensor-Grid `pdmat`
 
 ```matlab
-A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=1);
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=[1 1]);
 A.lbls()
 ```
 

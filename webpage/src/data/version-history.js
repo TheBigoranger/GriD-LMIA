@@ -1,17 +1,17 @@
 export const versionHistory = [
   {
-    version: "v1.1.6",
-    date: "2026-07-28",
-    status: "current documentation snapshot",
+    version: "v1.2.0",
+    date: "2026-07-29",
+    status: "current and latest GitHub Release",
     summary:
-      "Unifies tensor-grid, Bernstein-degree, residual, target, and Gram notation across both manuals; states SparseFullBox directly through the paper notation Q_J^(w) for symmetric block-band Gram matrices of bandwidth w; expands the Bernstein convolution and Gram/SOS foundations; adds Math Concepts navigation plus pdmat addition, multiplication, and elevation explorers; and keeps the three-dimensional Welcome grid visible at every supported rotation. The MATLAB API is unchanged, and this documentation snapshot has no Git tag or GitHub Release.",
+      "Adds direction-wise Bernstein degrees to pdbase, pdmat, and pdvar; scalar-or-vector elevation and componentwise degree algebra; exact multivariate rhodiff alignment with zero-degree-axis support; and scalar-or-vector Pólya, Putinar, SparseFullBox, and FullBox certificate parameters. Degrees and orders are stored as row vectors, tensor counts use the product of per-axis cardinalities, and SparseFullBox retains a scalar bandwidth with anisotropic endpoint normalization.",
   },
   {
-    version: "v1.1.0",
-    date: "2026-07-26",
-    status: "latest GitHub Release",
+    version: "v1.1.6",
+    date: "2026-07-28",
+    status: "final v1.1 documentation snapshot",
     summary:
-      "Documents the centralized pdbase implementation while retaining complete inherited pdmat and pdvar references, adds the SparseFullBox certificate with configurable bandwidth and canonical Direct/FullBox endpoints, corrects protected backend-helper ownership, and refreshes the printable and Web manuals.",
+      "Unifies tensor-grid, cell, Bernstein-degree, residual, target, and Gram notation across both manuals; states SparseFullBox through Q_J^(w) for symmetric block-band Gram matrices of bandwidth w; expands the Bernstein convolution and Gram/SOS foundations; adds Math Concepts navigation plus pdmat addition, multiplication, and elevation explorers; and keeps the three-dimensional Welcome grid visible at every supported rotation. The MATLAB API is unchanged.",
   },
   {
     version: "v1.0.0",

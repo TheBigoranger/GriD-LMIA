@@ -60,10 +60,11 @@ values = elevVals(obj, degreeIncrement)
 values = obj.elevVals(degreeIncrement)
 ```
 
-The finite nonnegative integer `degreeIncrement` is added in every parameter
-direction. The returned value is an elevated nested `LocalValues` tree, not an
-object. Physical cells, numeric or symbolic payloads, and independent rate-row
-order are preserved; `obj` is unchanged.
+`degreeIncrement` accepts one finite nonnegative integer scalar shorthand or an
+`npar(obj)`-element vector. It is added componentwise to `obj.Degree`; a scalar
+expands uniformly. The returned value is an elevated nested `LocalValues` tree,
+not an object. Physical cells, numeric or symbolic payloads, and independent
+rate-row order are preserved; `obj` is unchanged.
 
 ```matlab
 A = pdmat({[0 1]}, {0, 1}, Degree=1);
@@ -93,7 +94,8 @@ out = elevate(obj, degreeIncrement)
 out = obj.elevate(degreeIncrement)
 ```
 
-`elevate` returns a new object with `Degree + degreeIncrement` and the
+`elevate` returns a new object with componentwise
+`Degree + degreeIncrement` and the
 elevated coefficients. It preserves the exact dynamic class, parameter grid,
 payload shape, source metadata, `pdmat.FunctionHandle`, YALMIP variables,
 continuity metadata, rate bounds, and rate-row order. The source value remains
@@ -133,9 +135,11 @@ D = rhodiff(A, rateBounds)
 `rhodiff` differentiates coefficient-backed storage cell by cell and returns
 the same dynamic class. Explicit bounds supply missing metadata but must match
 stored bounds when both are present. One-parameter degree `m > 0` becomes
-`m-1`; multidimensional partials are elevated back to common degree `m`.
-Every physical cell stores one row per rate-box vertex in `helper.combRows`
-order.
+`m-1`, while degree zero stays zero. With several parameters, the partial along
+axis `s` has degree `Degree-e_s` when `Degree(s)>0`, then is elevated exactly
+to the common vector `Degree` before rate weighting. A zero-degree axis
+contributes the zero partial. Every physical cell stores one row per rate-box
+vertex in `helper.combRows` order.
 
 ```matlab
 A = pdbase({[0 2]}, [1 1], 1, {{1, 5}}, ...

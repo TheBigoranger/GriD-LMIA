@@ -64,11 +64,12 @@ nodes $\rho_s^{(j)}$ and cell indices $\mathbf c$ are one-based.
 The multivariate basis is
 
 $$
-B_{\mathbf i}^{M}(\boldsymbol\alpha)
-=\prod_{s=1}^{\ell}B_{i_s}^{M}(\alpha_s).
+B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)
+=\prod_{s=1}^{\ell}B_{i_s}^{M_s}(\alpha_s).
 $$
 
-For scalar assembled degree $M$, each $i_s\in\{0,\ldots,M\}$.
+For assembled degree $\mathbf M$, each
+$i_s\in\{0,\ldots,M_s\}$.
 
 ## Nonnegativity, Unit Sum, And Convex Hulls
 
@@ -124,8 +125,8 @@ coefficient matrices. Matrix-factor order is preserved. See
 
 ## Hypercube Counts And Traversal
 
-There are $\prod_s(k_s-1)$ physical cells and, for scalar degree $M$,
-$(M+1)^\ell$ local residual labels per cell. The public traversal and storage
+There are $\prod_s(k_s-1)$ physical cells and
+$\prod_s(M_s+1)$ local residual labels per cell. The public traversal and storage
 contracts are documented under
 [pdbase](/PD-LMI-package/documents/reference/pdbase/).
 
@@ -155,8 +156,9 @@ See the [certificate map](/PD-LMI-package/documents/math/sos-certificates/).
 
 ## Four Different Refinements
 
-Decision degree $m$, residual degree $M$, Pólya increment $d$, absolute
-Gram order $r$, and SparseFullBox bandwidth $w$ are distinct quantities.
+Decision degree $\mathbf m$, residual degree $\mathbf M$, Pólya increment
+$\mathbf d$, absolute Gram order $\mathbf r$, and scalar SparseFullBox bandwidth
+$w$ are distinct quantities.
 Grid refinement is another independent choice.
 
 ## Control Literature And Scope

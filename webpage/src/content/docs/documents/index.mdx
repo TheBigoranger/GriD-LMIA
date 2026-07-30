@@ -16,7 +16,7 @@ Start mathematical reading with the
 
 PD-LMI means **parameter-dependent LMI**. The package represents continuous piecewise-polynomial matrix functions on physical grid cells in a cell-local tensor-product Bernstein basis. `pdvar` shares complete face values between adjacent cells; differentiation remains cell-local, so the representation is not a B-spline and does not assert global differentiability. Use **DPD-LMI** only for a differentiable PD-LMI with explicit derivative and rate terms.
 
-## Documentation v1.1.6 Supported Scope
+## Documentation v1.2.0 Supported Scope
 
 Version 1.1 documents the implemented package workflow after shared matrix
 protocols, unary transformations, and reductions were centralized in
@@ -26,7 +26,7 @@ surface also includes function-backed and coefficient-backed `pdmat` known
 data; degree-zero or continuous arbitrary-degree `pdvar` decisions;
 discontinuous rate-vertex data produced by `rhodiff`; Direct `pdlmi`
 constraints; opt-in Pólya degree increments; fixed-order Putinar,
-SparseFullBox, and FullBox Bernstein–Gram certificates; and six shared `+helper`
+SparseFullBox, and FullBox Bernstein–Gram certificates; and seven shared `+helper`
 functions.
 
 The package remains intentionally bounded to tensor-product box grids and affine decision expressions. Products with decision dependence on both sides, including decision-by-decision and decision-by-rate products, are rejected. Equality assembly is direct-only. Certificate failure does not prove the original continuum inequality infeasible, no assembly mode inserts a positivity margin, and YALMIP continues to own objectives, solver choice, optimization, and diagnostics. General-domain or general-generator SOS hierarchies are mathematical context rather than implemented APIs.

@@ -3,7 +3,7 @@
 
 \code{pdmat} stores known finite real matrix data on a tensor grid. Objects can be coefficient-backed, function-only, or function-backed with explicit Bernstein coefficient evidence. Coefficient-backed objects participate in algebra. Function-only objects evaluate exactly through the stored handle, but do not expose coefficient evidence for \code{bernsteinTable} or coefficient algebra. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdmat} behavior; this chapter documents their known-data syntax, numeric examples, validations, and boundaries.
 
-For coefficient-backed data, one storage leaf is the pullback \(A^{(\mathbf c)}=A\circ\phi_{\mathbf c}\), with local expansion \(A^{(\mathbf c)}(\boldsymbol\alpha)=\sum_{\mathbf i}B_{\mathbf i}^{m}(\boldsymbol\alpha)A^{(\mathbf c)}[\mathbf i]\) and \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\). Construction chooses the source of those coefficients; \code{evaluate} reconstructs the matrix value; \code{elevate} changes the coefficient representation without changing the polynomial; and ordered multiplication applies the binomial-weighted convolution in \cref{sec:bernstein-product-math}. A function-backed object keeps exact handle evaluation separate from its finite coefficient evidence, while a function-only object has no coefficient algebra to certify.
+For coefficient-backed data, one storage leaf is the pullback \(A^{(\mathbf c)}=A\circ\phi_{\mathbf c}\), with local expansion \(A^{(\mathbf c)}(\boldsymbol\alpha)=\sum_{\mathbf i}B_{\mathbf i}^{\mathbf m}(\boldsymbol\alpha)A^{(\mathbf c)}[\mathbf i]\) and \(\boldsymbol\alpha=\phi_{\mathbf c}^{-1}(\boldsymbol\rho)\). Construction chooses the source of those coefficients; \code{evaluate} reconstructs the matrix value; \code{elevate} changes the coefficient representation without changing the polynomial; and ordered multiplication applies the binomial-weighted convolution in \cref{sec:bernstein-product-math}. A function-backed object keeps exact handle evaluation separate from its finite coefficient evidence, while a function-only object has no coefficient algebra to certify.
 
 \section{API Map}
 \label{sec:pdmat-lookup}
@@ -45,10 +45,10 @@ Compare/certify &
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 A = pdmat(gridVector, source)
-A = pdmat(gridVector, source, Degree=m)
+A = pdmat(gridVector, source, Degree=degree)
 A = pdmat(gridVector, source, RateBounds=rb)
 A = pdmat(gridVectors, source)
-A = pdmat(gridVectors, source, Degree=m, RateBounds=rb)
+A = pdmat(gridVectors, source, Degree=degree, RateBounds=rb)
 A = pdmat(..., ValidationMode=mode)
 \end{lstlisting}
 
@@ -62,7 +62,7 @@ A = pdmat(..., ValidationMode=mode)
       \item A global cell grid of numeric Bernstein coefficients, e.g., \code{{[1 2], [3 4]}} is a two-cell degree-one grid with two \(1\times1\) coefficients per cell.
       \item A explicit nested \code{LocalValues}, e.g., \code{{1, 2, 3}} is scalar degree-two data on one cell.
   \end{enumerate}
-  \item \code{Degree=m} sets the local Bernstein degree.  For function handles, omitting \code{Degree} creates a function-only object; passing a value such as \code{Degree=2} validates and stores Bernstein coefficient evidence while retaining the exact function handle for \code{evaluate}.
+  \item \code{Degree=degree} accepts one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector and is stored as a \(1\)-by-\(\ell\) row \(\mathbf m=(m_1,\ldots,m_\ell)\). A scalar expands uniformly. An explicitly supplied scalar on a multidimensional grid emits \codeerr{pdmat}{ScalarDegreeExpansion} once; omitted degree inference, function-only defaults, and one-dimensional forms remain warning-free. For function handles, omitting \code{Degree} creates a function-only object; supplying \code{Degree} validates and stores Bernstein coefficient evidence while retaining the exact function handle for \code{evaluate}.
   \item \code{RateBounds=rb} is an \(\ell\)-by-\(2\) finite real matrix of lower and upper scheduling-rate bounds and is accepted with every source family. With an ordinary one-row source it is metadata used by \code{rhodiff}. An explicit nested leaf may instead contain either one ordinary row or all \(2^\ell\) rate-vertex rows, uniformly across every physical cell; their deterministic order is induced by applying \code{helper.combRows} to \code{num2cell(rb,2).'}.
   \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It controls only repeated post-normalization structural checks and is not stored. Public source validation remains complete in both modes.
 \end{itemize}
@@ -113,14 +113,14 @@ sourceSummary = "coefficient-backed"
 For tensor grids, pass one grid vector per parameter.  The source cell array matches the global coefficient grid implied by the two parameter directions.
 
 \begin{lstlisting}[style=dpmatlab]
-B = pdmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=1);
+B = pdmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=[1 1]);
 disp(B)
 secondGridVector = B.GridInfo.Vectors{2}
 labels = B.lbls()
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-pdmat [1 1] over 2-D grid, degree 1, source coefficient-backed, rate rows false
+pdmat [1 1] over 2-D grid, degree [1 1], source coefficient-backed, rate rows false
 
 secondGridVector = 1×2 double
     10    20
@@ -213,7 +213,7 @@ rateRowValues =
 \begin{itemize}[leftmargin=*]
   \item Constructor option errors use \codeerr{pdmat}{InvalidOptions}, \codeerr{pdmat}{Unsupported}\allowbreak\code{Option}, or \codeerr{pdmat}{Unknown}\allowbreak\code{Option}; grid errors use \codeerr{pdmat}{InvalidGrid} or \codeerr{pdmat}{Invalid}\allowbreak\code{GridVector}.
   \item Source and function validation uses \codeerr{pdmat}{InvalidSource}, \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionHandle}, \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionOutput}, or \codeerr{pdmat}{InvalidData}.
-  \item Degree, rate, and storage failures use \codeerr{pdmat}{InvalidDegree}, \codeerr{pdmat}{Invalid}\allowbreak\code{RateBounds}, \codeerr{pdmat}{Invalid}\allowbreak\code{Local}\allowbreak\code{Values}, \codeerr{pdmat}{Invalid}\allowbreak\code{Coefficient}\allowbreak\code{Cell}, or \codeerr{pdmat}{Invalid}\allowbreak\code{Coefficient}\allowbreak\code{Payload}.
+  \item Degree, rate, and storage failures use \codeerr{pdmat}{InvalidDegree}, \codeerr{pdmat}{Invalid}\allowbreak\code{RateBounds}, \codeerr{pdmat}{Invalid}\allowbreak\code{Local}\allowbreak\code{Values}, \codeerr{pdmat}{Invalid}\allowbreak\code{Coefficient}\allowbreak\code{Cell}, or \codeerr{pdmat}{Invalid}\allowbreak\code{Coefficient}\allowbreak\code{Payload}. Explicit multidimensional scalar degree expansion is accepted with warning \codeerr{pdmat}{ScalarDegreeExpansion}.
   \item Invalid validation modes raise \codeerr{pdmat}{Invalid}\allowbreak\code{ValidationMode}. With explicit \code{Degree}, nonrepresentable functions raise \codeerr{pdmat}{NonBernstein}\allowbreak\code{Polynomial}; invalid validation probes raise \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionValue}.
   \item Mismatched shared faces are retained as discontinuous local data and emit warning \codeerr{pdmat}{Discontinuous}\allowbreak\code{LocalValues}.
 \end{itemize}
@@ -248,7 +248,7 @@ B = A.elevate(degreeIncrement)
 \end{lstlisting}
 
 \descriptionhead
-The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row; \code{lbls} returns zero-based tensor Bernstein labels; \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, coefficients per cell, and parameter directions. \code{elevVals} returns an elevated nested coefficient tree without modifying \code{A}; \code{elevate} returns a new \code{pdmat} with the same represented known function and dynamic-class metadata at the higher degree.
+The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row; \code{lbls} returns the zero-based tensor labels \(\mathbf i\in\prod_s\{0,\ldots,m_s\}\); \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, \(\prod_s(m_s+1)\) coefficients per cell, and parameter directions. \code{elevVals} accepts a scalar shorthand or direction-wise increment and returns an elevated nested coefficient tree without modifying \code{A}; \code{elevate} returns a new \code{pdmat} at the componentwise degree sum while preserving the represented known function and dynamic-class metadata.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -381,7 +381,7 @@ D = rhodiff(A)
 D = rhodiff(A, rateBounds)
 \end{lstlisting}
 
-\arghead \code{rhodiff} differentiates coefficient-backed \code{pdmat} data cell by cell and returns a \code{pdmat} with numeric rate-vertex rows. Explicit \code{rateBounds} supplies missing metadata; when \code{A.RateBounds} is already stored, the explicit bounds must match it exactly. Without either source of bounds, the call raises \codeerr{pdmat}{MissingRateBounds}. For one parameter, degree \(m>0\) returns degree \(m-1\), while degree zero remains degree zero. For more than one parameter, the partial derivatives are elevated back to the common tensor degree \(m\). The result is rate-dependent and generally discontinuous across cell faces. A function-only source raises \codeerr{pdmat}{FunctionOnlyDiff}; malformed or inconsistent bounds raise \codeerr{pdmat}{InvalidRateBounds} or \codeerr{pdmat}{RateBoundsMismatch}; data that already contain explicit rate rows, including a previous derivative, raise \codeerr{pdmat}{InvalidDiff}.
+\arghead \code{rhodiff} differentiates coefficient-backed \code{pdmat} data cell by cell and returns a \code{pdmat} with numeric rate-vertex rows. Explicit \code{rateBounds} supplies missing metadata; when \code{A.RateBounds} is already stored, the explicit bounds must match it exactly. Without either source of bounds, the call raises \codeerr{pdmat}{MissingRateBounds}. For one parameter, degree \(m>0\) returns degree \(m-1\), while degree zero remains degree zero. For more than one parameter, each nonzero-axis partial is elevated exactly from \(\mathbf m-\mathbf e_s\) back to the common tensor degree \(\mathbf m=\code{A.Degree}\) before summation; a zero-degree axis contributes zero, and an all-zero tensor degree produces complete zero rate rows. The result is rate-dependent and generally discontinuous across cell faces. A function-only source raises \codeerr{pdmat}{FunctionOnlyDiff}; malformed or inconsistent bounds raise \codeerr{pdmat}{InvalidRateBounds} or \codeerr{pdmat}{RateBoundsMismatch}; data that already contain explicit rate rows, including a previous derivative, raise \codeerr{pdmat}{InvalidDiff}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -667,7 +667,7 @@ A \code{pdmat} operation acts on complete matrix coefficients while the physical
 
 \subsection{Signs, Addition, And Subtraction}
 
-Use signs, sums, and differences to build known matrix expressions.  Compatible physical bounds are refined to the union grid, and lower-degree operands are elevated exactly before matching coefficients are combined.  The corresponding MATLAB overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}.
+Use signs, sums, and differences to build known matrix expressions. Compatible physical bounds are refined to the union grid, and both operands are elevated exactly to the componentwise maximum degree before matching coefficients are combined. The corresponding MATLAB overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -737,7 +737,7 @@ When grids have the same outer bounds but different interior nodes, the union gr
 \index{ordered matrix multiplication}\index{Bernstein product}\index{known data}
 \label{sec:pdmat-operator-entries}
 
-Use \code{mtimes} for a matrix product.  The inner payload dimensions must match.  Two parameter-dependent factors produce the degree sum; a numeric factor is constant and does not raise the degree.
+Use \code{mtimes} for a matrix product. The inner payload dimensions must match. Two parameter-dependent factors produce the componentwise degree sum; a numeric factor is constant and does not raise any degree component.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1160,7 +1160,7 @@ Invalid dimensions or quarter-turn counts raise \codeerr{pdmat}{InvalidFlip} or 
 \index{concatenation}\index{block assembly}
 \label{sec:pdmat-matrix-assembly}
 
-Concatenation joins payload matrices after compatible grid refinement and degree elevation.  Numeric blocks are promoted to constant known data. \code{cat} supports only dimensions 1 and 2.
+Concatenation joins payload matrices after compatible grid refinement and exact elevation to the componentwise maximum degree. Numeric blocks are promoted to constant known data. \code{cat} supports only dimensions 1 and 2.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1250,7 +1250,7 @@ Invalid repetition shapes raise \codeerr{pdmat}{InvalidRepmat}.
 \index{subsref@\texttt{subsref}}\index{subsasgn@\texttt{subsasgn}}\index{end@\texttt{end}}\index{numArgumentsFromSubscript@\texttt{numArgumentsFromSubscript}}
 \label{sec:pdmat-indexing}
 
-Parenthesis indexing selects a matrix block from every coefficient.  Assignment writes the selected block into every coefficient after compatible promotion and degree alignment.  It does not select a physical cell; use \code{coeffs} for cell inspection.
+Parenthesis indexing selects a matrix block from every coefficient. Assignment writes the selected block into every coefficient after compatible promotion and exact alignment to the componentwise maximum degree. It does not select a physical cell; use \code{coeffs} for cell inspection.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]

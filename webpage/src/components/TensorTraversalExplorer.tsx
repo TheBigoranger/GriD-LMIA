@@ -27,8 +27,12 @@ export default function TensorTraversalExplorer() {
           <label htmlFor={`${id}-degree`}>Common degree</label><input id={`${id}-degree`} inputMode="numeric" value={degree} onChange={(event) => setDegree(event.target.value)} />
           <button type="button" onClick={update}>Build tensor traversal</button><p className="explorer-error" role="alert">{error}</p>
         </div>
-        <div className="tensor-counts" aria-live="polite">
-          <span><strong>{model.nodeCount}</strong> grid nodes</span><span><strong>{model.cellCount}</strong> physical cells</span><span><strong>{model.coefficientsPerCell}</strong> coefficients/cell</span>
+        <div
+          className="tensor-counts"
+          aria-live="polite"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(8.5rem, 1fr))" }}
+        >
+          <span><strong>{model.nodeCount}</strong> grid nodes</span><span><strong>{model.cellCount}</strong> physical cells</span><span><strong>{model.coefficientsPerCell}</strong> coefficients/<wbr />cell</span>
         </div>
         <div className="tensor-selectors">
           <label htmlFor={`${id}-cell`}>Cell in traversal order</label>

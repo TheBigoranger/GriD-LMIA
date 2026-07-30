@@ -112,7 +112,7 @@ The vector \(\mathbf b_{\mathbf a}\) has \(\prod_s(a_s+1)\) entries. Therefore \
   g_J(\boldsymbol\alpha)
   =\prod_{s\in J}\alpha_s(1-\alpha_s)
 \]
-adds \(2\boldsymbol\chi_J\) to that coordinatewise degree. Consequently, a box-weighted term matched at degree \(2r\boldsymbol1\) uses \(\mathbf a=r\boldsymbol1-\boldsymbol\chi_J\). In the odd one-dimensional interval form, the endpoint weights \(\alpha\) and \(1-\alpha\) instead add degree one. Expanding each weighted Bernstein Gram form and equating it to the target Bernstein array produces affine coefficient identities, just as in the monomial example.
+adds \(2\boldsymbol\chi_J\) to that coordinatewise degree. Consequently, a box-weighted term matched at direction-wise degree \(2\mathbf r\) uses \(\mathbf a=\mathbf r-\boldsymbol\chi_J\). The uniform choice \(\mathbf r=r\boldsymbol1\) is a specialization. In the odd one-dimensional interval form, the endpoint weights \(\alpha\) and \(1-\alpha\) instead add degree one. Expanding each weighted Bernstein Gram form and equating it to the target Bernstein array produces affine coefficient identities, just as in the monomial example.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -140,10 +140,10 @@ An unweighted monomial Gram form proves \(S^{(\mathbf c)}(\boldsymbol\xi)\succeq
 
 \ideastep{Basic idea} If every local coefficient matrix has the requested sign, every convex combination of those coefficients has the same sign.  This yields a small, transparent sufficient certificate.
 
-\ideastep{Formula} After any rate rows have been stacked, write the residual and target coefficients on physical cell \(\mathbf c\) as \(\mathcal F^{(\mathbf c)}=\sum_{\mathbf i}B_{\mathbf i}^{M}\mathcal C^{(\mathbf c)}[\mathbf i]\) and \(C^{(\mathbf c)}[\mathbf i]=-\mathcal C^{(\mathbf c)}[\mathbf i]\). Then
+\ideastep{Formula} After any rate rows have been stacked, write the residual and target coefficients on physical cell \(\mathbf c\) as \(\mathcal F^{(\mathbf c)}=\sum_{\mathbf i}B_{\mathbf i}^{\mathbf M}\mathcal C^{(\mathbf c)}[\mathbf i]\) and \(C^{(\mathbf c)}[\mathbf i]=-\mathcal C^{(\mathbf c)}[\mathbf i]\), where \(\mathbf i\in\prod_s\{0,\ldots,M_s\}\). Then
 \[
  S^{(\mathbf c)}(\boldsymbol\alpha)=
-  \sum_{\mathbf i}B_{\mathbf i}^M(\boldsymbol\alpha)
+  \sum_{\mathbf i}B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)
 C^{(\mathbf c)}[\mathbf i].
 \]
 Because the basis weights are nonnegative and sum to one,
@@ -236,7 +236,7 @@ after one elevation.  Every new coefficient is positive, so the elevated coeffic
 \end{tikzpicture}
 \end{center}
 
-\code{applyPolya(d)} applies one scalar increment in every parameter direction and then coefficient constraints to every cell and rate row.  It adds neither Gram variables nor decision freedom.  A fixed-level failure is inconclusive; the package makes no tensor-box completeness claim.
+\code{applyPolya(d)} accepts scalar uniform shorthand or a direction-wise increment \(\mathbf d\), elevates from \(\mathbf M\) to \(\mathbf M+\mathbf d\), and then applies coefficient constraints to every cell and rate row. It adds neither Gram variables nor decision freedom. A fixed-level failure is inconclusive; the package makes no tensor-box completeness claim.
 
 \section{Exact Interval Markov--Luk\'acs Forms}
 \label{sec:certificate-markov-lukacs}
@@ -325,12 +325,12 @@ and \code{applyPutinar(r)} uses
 \[
   S^{(\mathbf c)}=S_0+\sum_{s=1}^{\ell}g_sS_s,
   \qquad
-  S_0=Z_{r\boldsymbol1}^{\mathsf T}Q_0
-       Z_{r\boldsymbol1},\quad
-  S_s=Z_{r\boldsymbol1-\boldsymbol e_s}^{\mathsf T}Q_s
-       Z_{r\boldsymbol1-\boldsymbol e_s},
+  S_0=Z_{\mathbf r}^{\mathsf T}Q_0
+       Z_{\mathbf r},\quad
+  S_s=Z_{\mathbf r-\boldsymbol e_s}^{\mathsf T}Q_s
+       Z_{\mathbf r-\boldsymbol e_s},
 \]
-where every present \(Q_s\succeq0\). In this multivariate branch the order is absolute and satisfies \(r\ge\lceil M/2\rceil\). Exact identities match the sign-normalized target, elevated without changing it, at tensor degree \(2r\). Negative-degree multiplier blocks are omitted at \(r=0\). Each physical cell and stored rate row owns independent Gram and equality blocks; no generator products, implicit margin, or solver call are introduced.
+where every present \(Q_s\succeq0\). In this multivariate branch the direction-wise order \(\mathbf r\) is absolute and satisfies \(\mathbf r\ge\lceil\mathbf M/2\rceil\) componentwise. Exact identities match the sign-normalized target, elevated without changing it, at tensor degree \(2\mathbf r\). A multiplier block whose basis degree has a negative component is omitted. Each physical cell and stored rate row owns independent Gram and equality blocks; no generator products, implicit margin, or solver call are introduced.
 
 A Schm\"udgen full preordering includes every square-free generator product:
 \[
@@ -364,30 +364,30 @@ Strict positivity on a compact basic closed semialgebraic set has such a represe
 \end{tikzpicture}
 \end{center}
 
-For \(\ell\ge2\) and absolute order \(r\), use the already defined tensor Bernstein lift \(Z_{\mathbf a}=\mathbf b_{\mathbf a}\otimes I_n\). The implemented form is
+For \(\ell\ge2\) and direction-wise absolute order \(\mathbf r\), use the already defined tensor Bernstein lift \(Z_{\mathbf a}=\mathbf b_{\mathbf a}\otimes I_n\). The implemented form is
 \[
   S^{(\mathbf c)}=
   \sum_{J\subseteq\{1,\ldots,\ell\}}
   \left(\prod_{s\in J}g_s\right)
-  Z_{r\boldsymbol1-\boldsymbol\chi_J}^{\mathsf T}
+  Z_{\mathbf r-\boldsymbol\chi_J}^{\mathsf T}
   Q_J
-  Z_{r\boldsymbol1-\boldsymbol\chi_J},
+  Z_{\mathbf r-\boldsymbol\chi_J},
   \qquad Q_J\succeq0.
 \]
 Terms with negative tensor degree are omitted.  A present block has dimension
 \[
-  n\prod_{s=1}^{\ell}\left(r+1-\mathbf1_{s\in J}\right).
+  n\prod_{s=1}^{\ell}\left(r_s+1-\mathbf1_{s\in J}\right).
 \]
-Every physical cell and stored rate row gets independent dense Gram blocks and exact coefficient identities. The minimum order is \(\lceil M/2\rceil\) for \(\ell\ge2\). This is a specific dense Bernstein realization of the full-box preordering, not a full-space SOS, Putinar-only, sparse, or general-domain parser. A fixed multivariate order is sufficient rather than exact.
+Every physical cell and stored rate row gets independent dense Gram blocks and exact coefficient identities. The minimum order is componentwise \(\lceil\mathbf M/2\rceil\) for \(\ell\ge2\). This is a specific dense Bernstein realization of the full-box preordering, not a full-space SOS, Putinar-only, sparse, or general-domain parser. A fixed multivariate order is sufficient rather than exact.
 
-\ideastep{Finite SDP example: \(\ell=2\), \(M=3\)} Let \((\alpha_1,\alpha_2)\in[0,1]^2\) be the local coordinates of one cell, and suppose the sign-normalized target is
+\ideastep{Finite SDP example: \(\ell=2\), \(\mathbf M=(3,3)\)} Let \((\alpha_1,\alpha_2)\in[0,1]^2\) be the local coordinates of one cell, and suppose the sign-normalized target is
 \[
   S^{(\mathbf c)}(\boldsymbol\alpha)=
   \sum_{i_1=0}^3\sum_{i_2=0}^3
     B_{i_1}^3(\alpha_1)B_{i_2}^3(\alpha_2)
     C^{(\mathbf c)}[i_1,i_2]\succeq0.
 \]
-The default order is \(r=\lceil3/2\rceil=2\).  After exact elevation to degree \((4,4)\), the implementation introduces four independent PSD Gram matrices and enforces the identity
+This is the uniform specialization \(\mathbf r=(2,2)=\lceil\mathbf M/2\rceil\). After exact elevation to degree \((4,4)\), the implementation introduces four independent PSD Gram matrices and enforces the identity
 \begin{align*}
   S^{(\mathbf c)}(\boldsymbol\alpha)={}&
     Z_{(2,2)}^{\mathsf T}Q_{\varnothing}Z_{(2,2)}
@@ -446,7 +446,7 @@ Selections rebuild from the stored original \code{Residual} and \code{Relation}.
 
 \ideastep{Basic idea} SparseFullBox retains every FullBox parity or generator-mask term and every exact target-coefficient identity, but replaces each dense Gram matrix \(Q_J\) by a symmetric block-band Gram matrix \(Q_J^{(w)}\) of bandwidth \(w\). Only the admissible Gram entries change.
 
-\ideastep{Formula} For \(\ell\ge2\), use the paper notation \(\mathbf a_J=r\boldsymbol1-\boldsymbol\chi_J\) with the FullBox generators:
+\ideastep{Formula} For \(\ell\ge2\), use the paper notation \(\mathbf a_J=\mathbf r-\boldsymbol\chi_J\) with the FullBox generators:
 \[
   S^{(\mathbf c)}=
   \sum_{J\subseteq\{1,\ldots,\ell\}}
@@ -475,7 +475,7 @@ Each \(Q_J^{(w)}\) is symmetric block-band with bandwidth \(w\); terms with nega
 \textit{Increasing the Gram-matrix bandwidth gives nested sufficient certificates; a wider cone need not yield a strict improvement on a particular residual.}
 \end{center}
 
-\code{applySparseFullBoxPreorder(w,r)} uses default bandwidth \(w=2\) and the same dimension-dependent absolute-order minimum as FullBox: \(\lfloor M/2\rfloor\) in one parameter and \(\lceil M/2\rceil\) otherwise. Width one canonicalizes to actual Direct state after order validation. Width at least \(r+1\) canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, stored rate row, and entry-wise column-major matrix entry owns an independent certificate; the method adds no hidden margin and makes no solver call.
+\code{applySparseFullBoxPreorder(w,r)} uses one scalar bandwidth \(w\), default two, and the same dimension-dependent absolute-order minimum as FullBox: \(\lfloor M/2\rfloor\) in one parameter and componentwise \(\lceil\mathbf M/2\rceil\) otherwise. The order accepts scalar shorthand or a direction-wise row \(\mathbf r\). Width one canonicalizes to actual Direct state after order validation. Width at least \(\max_s(r_s+1)\) canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, stored rate row, and entry-wise column-major matrix entry owns an independent certificate; the method adds no hidden margin and makes no solver call.
 
 \section{Six Different Modeling Choices}
 \label{sec:certificate-modeling-choices}
@@ -519,7 +519,7 @@ SparseFullBox bandwidth \(w\) & admissible entries of the block-band Gram matric
 \bottomrule
 \end{tabularx}
 
-When a certificate fails, do not infer continuous infeasibility. Decide separately whether the model needs a richer decision degree \(m\), a finer physical grid, a larger P\'olya increment \(d\), a larger SparseFullBox bandwidth \(w\), or a higher absolute Gram order \(r\).
+When a certificate fails, do not infer continuous infeasibility. Decide separately whether the model needs a richer direction-wise decision degree \(\mathbf m\), a finer physical grid, a larger direction-wise P\'olya increment \(\mathbf d\), a larger scalar SparseFullBox bandwidth \(w\), or a higher direction-wise absolute Gram order \(\mathbf r\).
 
 \section{Implemented Boundary}
 \label{sec:certificate-boundary}
@@ -529,10 +529,10 @@ When a certificate fails, do not infer continuous infeasibility. Decide separate
 Implemented public behavior & Background only \\
 \midrule
 direct coefficient assembly & general full-space SOS parser \\
-uniform \code{applyPolya([d])} & direction-wise or automatic P\'olya search \\
-\code{applyPutinar([r])} & general-domain/general-generator Putinar interface \\
-\code{applySparseFullBoxPreorder([w[,r]])} & automatic or adaptive sparse-pattern selection \\
-\code{applyFullBoxPreorder([r])} & general-domain Schm\"udgen parser \\
+\code{applyPolya([d])} with scalar or direction-wise increment & automatic P\'olya search \\
+\code{applyPutinar([r])} with scalar or direction-wise absolute order & general-domain/general-generator Putinar interface \\
+\code{applySparseFullBoxPreorder([w[,r]])} with scalar \(w\) and scalar or direction-wise \(r\) & automatic or adaptive sparse-pattern selection \\
+\code{applyFullBoxPreorder([r])} with scalar or direction-wise absolute order & general-domain Schm\"udgen parser \\
 exact one-dimensional parity forms & automatic or adaptive Gram-order search \\
 all cells, active rate rows, and column-major entries & cross-cell/rate/entry Gram sharing \\
 explicit user margins & package-owned strictness or solver policy \\

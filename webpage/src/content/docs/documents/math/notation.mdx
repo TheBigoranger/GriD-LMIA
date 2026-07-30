@@ -78,13 +78,15 @@ $\mathbf i=(i_1,\ldots,i_\ell)$ is zero-based.
 
 | Symbol | Meaning |
 | :--- | :--- |
-| $m$ | Modeled Bernstein degree of a decision function. |
-| $M$ | Assembled Bernstein degree of the residual or sign-normalized target. |
-| $d$ | Pólya degree-elevation increment. |
-| $r$ | Absolute Gram order; it is not an increment from $M$. |
-| $w$ | SparseFullBox bandwidth. |
+| $\mathbf m$ | Direction-wise modeled Bernstein degree of a decision function. |
+| $\mathbf M$ | Direction-wise assembled Bernstein degree of the residual or sign-normalized target. |
+| $\mathbf d$ | Direction-wise Pólya degree-elevation increment. |
+| $\mathbf r$ | Direction-wise absolute Gram order; it is not an increment from $\mathbf M$. |
+| $w$ | Scalar SparseFullBox bandwidth. |
 
-These quantities are independent of the number of physical grid cells.
+The public MATLAB properties store these degree and order vectors as
+`1 × ell` rows. Scalar inputs are uniform shorthand. These quantities are
+independent of the number of physical grid cells.
 
 <span id="residual-and-positive-target"></span>
 
