@@ -5,7 +5,8 @@ import { chromium } from "playwright";
 
 const root = resolve("dist");
 const base = "/PD-LMI-package";
-const defaultViewports = [320, 390, 700, 768, 1024, 1440];
+const defaultViewports = [320, 390, 700, 768, 1024, 1280, 1440];
+const defaultThemes = ["light", "dark"];
 const tolerance = 1;
 const formulaShiftTolerance = 1;
 
@@ -21,6 +22,15 @@ function selectedViewports() {
     throw new Error("GEOMETRY_VIEWPORTS must be a comma-separated list of positive integer widths.");
   }
   return [...new Set(widths)];
+}
+
+function selectedThemes() {
+  const requested = commaSeparated(process.env.GEOMETRY_THEMES);
+  if (!requested.length) return defaultThemes;
+  if (requested.some((theme) => !defaultThemes.includes(theme))) {
+    throw new Error('GEOMETRY_THEMES accepts only "light" and "dark".');
+  }
+  return [...new Set(requested)];
 }
 
 function selectRoutes(routes) {
@@ -418,6 +428,22 @@ async function inspect(page) {
       const available = contentBox(
         expectsDisplay ? wrapper : inlineContainingBlock(wrapper),
       );
+      const tex = formula
+        .querySelector('annotation[encoding="application/x-tex"]')
+        ?.textContent ?? "";
+      if (
+        wrapper.classList.contains("formula-one-line") &&
+        rendered.width <= available.width + tolerance &&
+        /\\begin\{(?:aligned|gathered|split)\}/.test(tex)
+      ) {
+        failures.push({
+          type: "formula-unexpected-multiline",
+          selector: describe(wrapper),
+          actual: Math.ceil(rendered.width),
+          allowed: Math.floor(available.width),
+          context: contextFor(wrapper, tex),
+        });
+      }
       if (
         !localScrollActive &&
         (
@@ -748,6 +774,52 @@ async function auditRootWalkthroughs(browser, origin, failures) {
       await storage.locator('[aria-label="Nine degree-two coefficient matrices in cell (2, 1)"]')
         .waitFor({ state: "visible", timeout: 5_000 });
 
+      const stageGeometry = await storage.evaluate((figure) => {
+        const specs = [
+          ["matrix", ".cell-grid-panel"],
+          ["coefficients", ".cell-coefficient-flow"],
+          ["basis", ".cell-bernstein-readout"],
+        ];
+        return specs.map(([name, visualSelector]) => {
+          const stage = figure.querySelector(`[data-cell-stage="${name}"]`);
+          const heading = stage?.querySelector(".cell-stage__heading");
+          const visual = stage?.querySelector(visualSelector);
+          const stageRect = stage?.getBoundingClientRect();
+          const headingRect = heading?.getBoundingClientRect();
+          const visualRect = visual?.getBoundingClientRect();
+          return {
+            name,
+            stage: stageRect && {
+              left: stageRect.left,
+              right: stageRect.right,
+              top: stageRect.top,
+              bottom: stageRect.bottom,
+            },
+            heading: headingRect && {
+              center: (headingRect.left + headingRect.right) / 2,
+              top: headingRect.top,
+              bottom: headingRect.bottom,
+            },
+            visual: visualRect && {
+              center: (visualRect.left + visualRect.right) / 2,
+              top: visualRect.top,
+              bottom: visualRect.bottom,
+            },
+          };
+        });
+      });
+      for (const pair of stageGeometry) {
+        if (!pair.stage || !pair.heading || !pair.visual) {
+          throw new Error(`storage stage pair missing: ${JSON.stringify(pair)}`);
+        }
+        if (Math.abs(pair.heading.center - pair.visual.center) > 2) {
+          throw new Error(`storage stage centers diverge: ${JSON.stringify(pair)}`);
+        }
+        if (pair.visual.top < pair.heading.bottom - 1 || pair.visual.top - pair.heading.bottom > 40) {
+          throw new Error(`storage heading is not adjacent to its visual: ${JSON.stringify(pair)}`);
+        }
+      }
+
       const certificate = page.getByRole("figure", { name: "Finite certificate selection flow" });
       const certificateStates = [
         { name: "Direct", command: "selected = L;" },
@@ -814,7 +886,7 @@ async function auditRootWalkthroughs(browser, origin, failures) {
             .map((node) => {
               const formula = node.closest(".formula-math");
               const region = node.closest(
-                ".cell-summary, .cell-layout, .cell-coeffs, .cell-bernstein-readout",
+                ".cell-stage, .cell-stage-layout, .cell-coeffs, .cell-bernstein-readout",
               );
               const formulaRect = formula?.getBoundingClientRect();
               const regionRect = region?.getBoundingClientRect();
@@ -1104,6 +1176,7 @@ const allRoutes = builtFiles
   .sort();
 const routes = selectRoutes(allRoutes);
 const viewports = selectedViewports();
+const themes = selectedThemes();
 
 const { server, origin } = await startServer();
 let browser = null;
@@ -1160,47 +1233,53 @@ try {
   });
 
   for (const width of viewports) {
-    console.log(`Checking ${routes.length} routes at ${width}px...`);
     await page.setViewportSize({ width, height: 1000 });
-    for (const route of routes) {
-      currentRoute = route;
-      currentWidth = width;
-      const response = await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
-      if (!response?.ok()) {
-        failures.push({
-          width,
-          route,
-          type: "http",
-          selector: "document",
-          status: response?.status() ?? "no response",
-        });
-        continue;
-      }
-      const beforeFonts = await formulaSnapshot(page);
-      const beforeHydration = await formulaSnapshot(page);
-      await page.waitForLoadState("networkidle");
-      try {
-        await hydrateIslands(page);
-      } catch (error) {
-        failures.push({
-          width,
-          route,
-          type: "island-hydration",
-          selector: "astro-island",
-          context: error instanceof Error ? error.message : String(error),
-        });
-      }
-      const afterHydration = await formulaSnapshot(page);
-      recordHydrationStability(beforeHydration, afterHydration, failures, route, width);
-      await page.evaluate(() => document.fonts.ready);
-      await page.evaluate(() => new Promise((resolveFrame) => {
-        requestAnimationFrame(() => requestAnimationFrame(resolveFrame));
-      }));
-      const afterFonts = await formulaSnapshot(page);
-      recordFontStability(beforeFonts, afterFonts, failures, route, width);
-      const result = await inspect(page);
-      for (const failure of result.failures) {
-        failures.push({ width, route, ...failure });
+    for (const theme of themes) {
+      console.log(`Checking ${routes.length} routes at ${width}px in ${theme} theme...`);
+      for (const route of routes) {
+        currentRoute = `${route} [${theme}]`;
+        currentWidth = width;
+        const response = await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
+        if (!response?.ok()) {
+          failures.push({
+            width,
+            route: currentRoute,
+            type: "http",
+            selector: "document",
+            status: response?.status() ?? "no response",
+          });
+          continue;
+        }
+        await page.evaluate((activeTheme) => {
+          document.documentElement.dataset.theme = activeTheme;
+          document.documentElement.style.colorScheme = activeTheme;
+        }, theme);
+        const beforeFonts = await formulaSnapshot(page);
+        const beforeHydration = await formulaSnapshot(page);
+        await page.waitForLoadState("networkidle");
+        try {
+          await hydrateIslands(page);
+        } catch (error) {
+          failures.push({
+            width,
+            route: currentRoute,
+            type: "island-hydration",
+            selector: "astro-island",
+            context: error instanceof Error ? error.message : String(error),
+          });
+        }
+        const afterHydration = await formulaSnapshot(page);
+        recordHydrationStability(beforeHydration, afterHydration, failures, currentRoute, width);
+        await page.evaluate(() => document.fonts.ready);
+        await page.evaluate(() => new Promise((resolveFrame) => {
+          requestAnimationFrame(() => requestAnimationFrame(resolveFrame));
+        }));
+        const afterFonts = await formulaSnapshot(page);
+        recordFontStability(beforeFonts, afterFonts, failures, currentRoute, width);
+        const result = await inspect(page);
+        for (const failure of result.failures) {
+          failures.push({ width, route: currentRoute, ...failure });
+        }
       }
     }
   }
@@ -1312,5 +1391,5 @@ if (failures.length) {
   }
   process.exitCode = 1;
 } else {
-  console.log(`Rendered geometry check passed: ${routes.length} routes at ${viewports.join("/")} px.`);
+  console.log(`Rendered geometry check passed: ${routes.length} routes at ${viewports.join("/")} px in ${themes.join("/")} themes.`);
 }

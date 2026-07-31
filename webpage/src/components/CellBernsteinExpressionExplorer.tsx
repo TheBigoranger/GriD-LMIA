@@ -5,7 +5,7 @@ import {
   orderCellBernsteinTermsForAxes,
   pdmatCellData,
 } from "../lib/cell-bernstein.ts";
-import { DisplayMath, InlineMath } from "./RenderedMath.tsx";
+import { InlineMath } from "./RenderedMath.tsx";
 
 const formatNumber = (value: number) => {
   const rounded = Math.abs(value) < 5e-10 ? 0 : Number(value.toFixed(4));
@@ -13,14 +13,18 @@ const formatNumber = (value: number) => {
 };
 
 interface MathMarkup {
-  globalFormula: string;
+  globalLhs: string;
+  globalMatrix: string;
+  globalDomain: string;
   alpha1: string[];
   alpha2: string[];
   termBasis: string[];
   termWeightPrefix: string[];
   cells: Array<{
     domain: string;
-    formula: string;
+    representationLhs: string;
+    representationSum: string;
+    basisDefinition: string;
     coefficientLabels: string[];
     coefficientValues: string[];
     valuePrefix: string;
@@ -70,10 +74,11 @@ export default function CellBernsteinExpressionExplorer({ mathMarkup }: { mathMa
   return (
     <figure className="diagram-frame interactive-figure cell-basis-expression">
       <div className="diagram-frame__body">
-        <DisplayMath
-          className="cell-basis-expression__global-formula"
-          markup={mathMarkup.globalFormula}
-        />
+        <div className="cell-basis-expression__global-formula formula-one-line">
+          <InlineMath markup={mathMarkup.globalLhs} />
+          <InlineMath markup={mathMarkup.globalMatrix} />
+          <InlineMath markup={mathMarkup.globalDomain} />
+        </div>
         <p className="cell-basis-expression__global-note">
           The tabs below show how this single matrix function is pulled back to local
           coordinates and represented independently on each physical cell.
@@ -111,10 +116,11 @@ export default function CellBernsteinExpressionExplorer({ mathMarkup }: { mathMa
           id={`${id}-panel`}
           role="tabpanel"
         >
-          <DisplayMath
-            className="cell-basis-expression__formula"
-            markup={cellMath.formula}
-          />
+          <div className="cell-basis-expression__formula formula-one-line">
+            <InlineMath markup={cellMath.representationLhs} />
+            <InlineMath markup={cellMath.representationSum} />
+            <InlineMath markup={cellMath.basisDefinition} />
+          </div>
           <div className="cell-basis-workspace">
             <div className="cell-basis-coordinate-frame">
               <strong className="cell-basis-coordinate-frame__title">Local coordinates</strong>

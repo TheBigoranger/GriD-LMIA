@@ -15,6 +15,11 @@
   --diagram-border: color-mix(in srgb, var(--sl-color-accent) 28%, var(--sl-color-gray-5));
   --diagram-radius: 14px;
   --diagram-gap: clamp(0.7rem, 2vw, 1rem);
+  --home-canvas: #f7faff;
+  --home-panel: rgb(255 255 255 / 0.78);
+  --home-grid: rgb(37 99 235 / 0.055);
+  --home-glow: rgb(56 189 248 / 0.13);
+  --home-shadow: rgb(15 23 42 / 0.09);
 }
 
 [data-theme="dark"] {
@@ -23,6 +28,11 @@
   --sl-color-accent: #60a5fa;
   --sl-color-accent-high: #dbeafe;
   --sl-color-bg-sidebar: #0f172a;
+  --home-canvas: #08111f;
+  --home-panel: rgb(15 23 42 / 0.78);
+  --home-grid: rgb(96 165 250 / 0.07);
+  --home-glow: rgb(14 116 144 / 0.2);
+  --home-shadow: rgb(0 0 0 / 0.26);
 }
 
 [data-theme="dark"] .sl-skip-link:focus {
@@ -406,6 +416,13 @@
   display: inline;
 }
 
+.formula-block {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  text-align: center;
+}
+
 .formula-display {
   display: block;
   min-width: 0;
@@ -596,26 +613,62 @@
   gap: 1rem;
 }
 
-.cell-summary { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 1.75rem; }
-.cell-summary__basis { grid-column: 1 / -1; }
-.cell-layout { display: grid; grid-template-columns: minmax(8rem, 0.65fr) 3rem minmax(16rem, 1.3fr) 3rem minmax(22rem, 1.45fr); gap: 0.65rem; }
-.cell-summary > *,
-.cell-layout > * { min-width: 0; }
-.cell-summary__formula,
-.cell-summary__basis,
-.cell-bernstein-readout { display: grid; gap: 0.4rem; align-content: center; text-align: center; }
-.cell-summary__formula,
-.cell-summary__basis { max-width: 100%; }
-.cell-summary__formula > div,
-.cell-summary__basis > div { min-width: 0; }
-.cell-summary strong,
+.cell-stage-layout {
+  display: grid;
+  grid-template-columns: minmax(12.5rem, 0.95fr) minmax(16rem, 1.25fr) minmax(16rem, 1.2fr);
+  gap: clamp(0.55rem, 1.4vw, 0.9rem);
+  align-items: stretch;
+}
+
+/* Pair every stage title with the visual it explains so responsive reflow
+   cannot detach the basis heading from the final Bernstein expression. */
+.cell-stage {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  min-width: 0;
+  border: 1px solid var(--diagram-border);
+  border-radius: 10px;
+  padding: clamp(0.55rem, 1.4vw, 0.8rem);
+  background: color-mix(in srgb, var(--sl-color-bg) 84%, transparent);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.35);
+}
+
+.cell-stage__heading,
+.cell-bernstein-readout {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  align-content: start;
+  text-align: center;
+}
+
+.cell-stage__heading > strong,
+.cell-stage__heading > .cell-basis-link {
+  display: grid;
+  min-height: 2.8rem;
+  place-items: center;
+}
+
+.cell-stage__heading--selection > div {
+  display: grid;
+  gap: 0.25rem;
+  text-align: start;
+}
+
+.cell-stage__heading--selection p {
+  margin: 0;
+}
+
+.cell-stage__heading .formula-display {
+  margin: 0;
+}
+
+.cell-stage__heading strong,
 .cell-panel-title,
 .cell-basis-link { color: var(--sl-color-text-accent); font-size: 1.15rem; text-align: center; font-weight: 700; text-decoration: none; }
 .cell-basis-link:hover { text-decoration: underline; }
-.cell-summary__formula .formula-display { margin: 0; }
-.cell-summary__selection { display: grid; align-content: center; gap: 0.35rem; }
-.cell-summary__selection p { margin: 0; }
-.cell-layout { align-items: center; }
+
 .cell-grid-panel,
 .cell-coefficient-structure { display: grid; gap: 0.55rem; }
 .cell-grid-panel { justify-items: center; }
@@ -692,10 +745,6 @@
 
 .cell-coefficient-flow { min-width: 0; }
 
-.cell-transform-arrow { display: grid; align-items: center; color: var(--sl-color-text-accent); }
-.cell-transform-arrow i { position: relative; display: block; border-block-start: 2px solid var(--sl-color-accent); }
-.cell-transform-arrow i::after { position: absolute; content: ""; inset-block-start: -5px; inset-inline-end: -1px; width: 8px; height: 8px; border-block-start: 2px solid var(--sl-color-accent); border-inline-end: 2px solid var(--sl-color-accent); transform: rotate(45deg); }
-
 .cell-coeffs > span {
   display: grid;
   gap: 0.25rem;
@@ -716,13 +765,29 @@
 
 .cell-basis-expression .diagram-frame__body,
 .cell-basis-panel { display: grid; gap: 1rem; }
-.cell-basis-expression__global-formula { min-width: 0; color: var(--sl-color-text); text-align: center; }
+.cell-basis-expression__global-formula,
+.cell-basis-expression__formula {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  column-gap: 1em;
+  row-gap: 0.45rem;
+  min-width: 0;
+  color: var(--sl-color-text);
+  text-align: center;
+}
+.cell-basis-expression__global-formula > .formula-inline,
+.cell-basis-expression__formula > .formula-inline {
+  flex: 0 0 auto;
+  max-width: 100%;
+  white-space: nowrap;
+}
 .cell-basis-expression__global-note { max-width: 72ch; margin: 0 auto; color: var(--sl-color-gray-2); text-align: center; }
 .cell-basis-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
 .cell-basis-tabs button { display: grid; gap: 0.2rem; min-width: 0; margin: 0; border: 1px solid var(--diagram-border); border-radius: 8px; padding: 0.65rem; color: var(--sl-color-text); text-align: center; background: var(--sl-color-bg); cursor: pointer; }
 .cell-basis-tabs button[aria-selected="true"] { border-color: var(--diagram-result); color: var(--diagram-result); box-shadow: inset 0 3px var(--diagram-result); }
 .cell-basis-tabs button span { color: var(--sl-color-gray-2); font-size: 0.78rem; }
-.cell-basis-expression__formula { min-width: 0; color: var(--sl-color-text); text-align: center; }
 .cell-basis-workspace { display: grid; grid-template-columns: minmax(20rem, 1.45fr) minmax(12rem, 0.85fr); gap: 1rem; align-items: start; }
 .cell-basis-workspace > * { min-width: 0; }
 .cell-basis-coordinate-frame { display: grid; grid-template-columns: 4.75rem minmax(0, 1fr); grid-template-rows: auto auto auto auto; gap: 0.45rem 0.6rem; min-width: 0; }
@@ -1503,19 +1568,13 @@
   .cell-explorer,
   .coefficient-inputs { grid-template-columns: 1fr; }
 
-  .cell-summary,
-  .cell-layout { grid-template-columns: 1fr; }
-  .cell-summary__basis { grid-column: auto; }
+  .cell-stage-layout { grid-template-columns: 1fr; }
   .evaluate-two-dimensional { grid-template-columns: 1fr; }
   .evaluate-coordinate-controls { grid-column: auto; }
 
   .cell-basis-workspace { grid-template-columns: 1fr; }
   .cell-basis-readout { grid-column: auto; }
   .cell-basis-coordinate-frame { grid-template-columns: 4rem minmax(0, 1fr); }
-
-  .cell-transform-arrow { width: auto; height: 2.5rem; justify-self: center; }
-  .cell-transform-arrow i { width: 0; height: 1.2rem; justify-self: center; border-block-start: 0; border-inline-start: 2px solid var(--sl-color-accent); }
-  .cell-transform-arrow i::after { inset-block-start: auto; inset-block-end: -1px; inset-inline-start: -5px; border-block-start: 0; border-inline-end: 2px solid var(--sl-color-accent); border-block-end: 2px solid var(--sl-color-accent); transform: rotate(45deg); }
 
   .cell-coefficient-flow { grid-template-columns: 1fr; }
 
@@ -1686,6 +1745,12 @@
 @media (max-width: 390px) {
   .diagram-frame__body {
     padding: 0.65rem;
+  }
+
+  .cell-basis-expression__global-formula,
+  .cell-basis-expression__formula {
+    flex-direction: column;
+    flex-wrap: nowrap;
   }
 
   .cell-coeffs {

@@ -4,6 +4,7 @@ description: Exact Bernstein degree elevation for pdmat coefficient evidence wit
 ---
 
 import DegreeElevationExplorer from "../../../../../components/DegreeElevationExplorer.tsx";
+import KaTeXMath from "../../../../../components/KaTeXMath.astro";
 import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><span>elevate</span></nav>
@@ -21,17 +22,10 @@ $C^{(\boldsymbol c)}[\boldsymbol i]$,
 $\boldsymbol i\in\prod_s\{0,\ldots,m_s\}$. Elevation to any
 $\boldsymbol M\ge\boldsymbol m$ componentwise is defined directly by
 
-$$
-\begin{aligned}
-A^{(\boldsymbol c)}(\boldsymbol\alpha)
-&=\sum_{\substack{\boldsymbol i\in\\\prod_s\{0,\ldots,m_s\}}}
-C^{(\boldsymbol c)}[\boldsymbol i]\\
-&\qquad{}\cdot B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)\\
-&=\sum_{\substack{\boldsymbol k\in\\\prod_s\{0,\ldots,M_s\}}}
-\hat C^{(\boldsymbol c)}[\boldsymbol k]\\
-&\qquad{}\cdot B_{\boldsymbol k}^{\boldsymbol M}(\boldsymbol\alpha).
-\end{aligned}
-$$
+<KaTeXMath
+  class="formula-block formula-one-line"
+  tex={String.raw`A^{(\boldsymbol c)}(\boldsymbol\alpha)=\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}C^{(\boldsymbol c)}[\boldsymbol i]B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)=\sum_{\boldsymbol k\in\prod_s\{0,\ldots,M_s\}}\hat C^{(\boldsymbol c)}[\boldsymbol k]B_{\boldsymbol k}^{\boldsymbol M}(\boldsymbol\alpha).`}
+/>
 
 The elevated coefficients are
 
@@ -69,43 +63,18 @@ The package evaluates the same direct rule as a normalized tensor convolution.
 Let $\boldsymbol d:=\boldsymbol M-\boldsymbol m$. Its direction-wise
 degree-$\boldsymbol d$ elevation kernel is
 
-$$
-\begin{aligned}
-\mathcal E_{\boldsymbol d}[\boldsymbol j]
-&:=
-\prod_{s=1}^{\ell}\binom{d_s}{j_s},\\
-\boldsymbol j
-&\in\prod_s\{0,\ldots,d_s\}.
-\end{aligned}
-$$
+<KaTeXMath
+  class="formula-block formula-one-line"
+  tex={String.raw`\mathcal E_{\boldsymbol d}[\boldsymbol j]:=\prod_{s=1}^{\ell}\binom{d_s}{j_s},\qquad\boldsymbol j\in\prod_s\{0,\ldots,d_s\}.`}
+/>
 
 The complete elevation is the normalized $\ell$-dimensional convolution
 of the original coefficient tensor with that kernel:
 
-$$
-\begin{aligned}
-&
-\Biggl\{
-  \begin{gathered}
-  \prod_{s=1}^{\ell}\binom{M_s}{k_s}\\
-  \hat C^{(\boldsymbol c)}[\boldsymbol k]
-  \end{gathered}
-\Biggr\}_{\boldsymbol k}
-\\
-&\quad{}=
-\Biggl\{
-  \begin{gathered}
-  \prod_{s=1}^{\ell}\binom{m_s}{i_s}\\
-  C^{(\boldsymbol c)}[\boldsymbol i]
-  \end{gathered}
-\Biggr\}_{\boldsymbol i}
-\\
-&\qquad{}\ast_{\ell}
-\Biggl\{
-  \mathcal E_{\boldsymbol d}[\boldsymbol j]
-\Biggr\}_{\boldsymbol j}.
-\end{aligned}
-$$
+<KaTeXMath
+  class="formula-block formula-one-line"
+  tex={String.raw`\left\{\left(\prod_{s=1}^{\ell}\binom{M_s}{k_s}\right)\hat C^{(\boldsymbol c)}[\boldsymbol k]\right\}_{\boldsymbol k}=\left\{\left(\prod_{s=1}^{\ell}\binom{m_s}{i_s}\right)C^{(\boldsymbol c)}[\boldsymbol i]\right\}_{\boldsymbol i}\ast_{\ell}\left\{\mathcal E_{\boldsymbol d}[\boldsymbol j]\right\}_{\boldsymbol j}.`}
+/>
 
 </Aside>
 
@@ -118,6 +87,18 @@ Relative to the [`pdmat Storage` figure](/PD-LMI-package/documents/reference/pdm
 Only the tensor lattice inside every `LocalValues` branch is replaced by a
 larger exact representation: `ncell(A)` and `npar(A)` stay fixed, while
 `ncoeff(A)` increases.
+
+<Aside type="note" title="Implementation remark: copy, do not reconstruct">
+
+The inherited value-class implementation first computes the elevated tree,
+then assigns `out = obj` and updates only `out.Degree` and
+`out.LocalValues`. Copying the existing dynamic object preserves its concrete
+class, physical grid, matrix and continuity metadata, `SourceSummary`,
+`FunctionHandle`, rate-row ordering, and any YALMIP variables already stored
+in subclass state. Elevation therefore replaces coefficient evidence without
+reconstructing either a `pdmat` or a `pdvar`.
+
+</Aside>
 
 Degree elevation is therefore useful when two Bernstein operands need a common
 degree or when a finite certificate requests additional coefficient evidence.
@@ -151,16 +132,10 @@ object; evaluation is exactly preserved.
 For one coordinate and one elevation step, the tensor convolution reduces to
 the familiar recurrence
 
-$$
-\begin{aligned}
-\tilde a_0&=a_0,\\
-\tilde a_{m+1}&=a_m,\\
-\tilde a_i
-&=\frac{i}{m+1}a_{i-1}\\
-&\quad+\left(1-\frac{i}{m+1}\right)a_i,\\
-&1\le i\le m.
-\end{aligned}
-$$
+<KaTeXMath
+  class="formula-block formula-one-line"
+  tex={String.raw`\tilde a_0=a_0,\qquad\tilde a_{m+1}=a_m,\qquad\tilde a_i=\frac{i}{m+1}a_{i-1}+\left(1-\frac{i}{m+1}\right)a_i,\quad 1\le i\le m.`}
+/>
 
 The following degree-one row $[1,3]$ is elevated twice to the degree-three row
 $[1,\frac53,\frac73,3]$ without changing $A(\rho)=1+2\rho$.

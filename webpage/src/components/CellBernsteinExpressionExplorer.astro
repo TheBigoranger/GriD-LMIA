@@ -5,17 +5,12 @@ import { renderMath } from "../lib/katex-renderer.js";
 
 const sliderValues = Array.from({ length: 21 }, (_, index) => index / 20);
 const mathMarkup = {
-  globalFormula: renderMath(`\\begin{aligned}
-    A(\\boldsymbol\\rho)
-    &=
-    \\begin{bmatrix}
+  globalLhs: renderMath(`A(\\boldsymbol\\rho)=`),
+  globalMatrix: renderMath(`\\begin{bmatrix}
     1+\\rho_1+\\rho_2 & \\rho_1\\rho_2\\\\
     \\rho_1\\rho_2 & 2+\\rho_1^2
-    \\end{bmatrix},
-    \\\\
-    \\boldsymbol\\rho
-    &\\in[0,1]^2.
-    \\end{aligned}`, { displayMode: true }),
+    \\end{bmatrix},`),
+  globalDomain: renderMath(`\\boldsymbol\\rho\\in[0,1]^2.`),
   alpha1: sliderValues.map((value) => renderMath(`\\alpha_1=${value.toFixed(2)}`)),
   alpha2: sliderValues.map((value) => renderMath(`\\alpha_2=${value.toFixed(2)}`)),
   termBasis: Array.from({ length: 9 }, (_, index) => {
@@ -30,7 +25,9 @@ const mathMarkup = {
   }),
   cells: pdmatCellData.map((cell) => ({
     domain: renderMath(cell.domainTex),
-    formula: renderMath(`\\begin{aligned}A^{(${cell.c1},1)}(\\boldsymbol\\alpha)&=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{2}}C_{\\mathbf i}^{(${cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha),\\\\B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)&=B_{i_1}^{2}(\\alpha_1)B_{i_2}^{2}(\\alpha_2).\\end{aligned}`, { displayMode: true }),
+    representationLhs: renderMath(`A^{(${cell.c1},1)}(\\boldsymbol\\alpha)=`),
+    representationSum: renderMath(`\\sum_{\\mathbf i\\in\\{0,1,2\\}^{2}}C_{\\mathbf i}^{(${cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha),`),
+    basisDefinition: renderMath(`B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)=B_{i_1}^{2}(\\alpha_1)B_{i_2}^{2}(\\alpha_2).`),
     coefficientLabels: cell.coefficients.map((_, index) => {
       const i = Math.floor(index / 3);
       const j = index % 3;

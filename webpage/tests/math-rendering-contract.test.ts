@@ -117,7 +117,7 @@ test("preserves intrinsic fraction, script, and accent metrics", () => {
   );
 });
 
-test("authors the Welcome DPD-LMI as one deliberate multiline aligned display", () => {
+test("authors the Welcome DPD-LMI as one unbroken centered display", () => {
   const homePortal = read("src/components/HomePortal.astro");
   const firstStep = homePortal.slice(
     homePortal.indexOf('number: "01"'),
@@ -125,15 +125,43 @@ test("authors the Welcome DPD-LMI as one deliberate multiline aligned display", 
   );
   const css = read("src/styles/manual.css");
 
-  assert.match(firstStep, /math:\s*"\\\\begin\{aligned\}[\s\S]*\\\\mathcal F/);
   assert.match(
     firstStep,
-    /&\\\\mathcal F[\s\S]*\\\\\\\\&=\\\\sum_\{k=1\}\^\{N\}\\\\sum_\{s=1\}\^\{\\\\ell\}[\s\S]*T_\{k,s\}\(\\\\boldsymbol\\\\rho\)\\\\\\\\&\\\\quad\{\}\\\\cdot\\\\frac\{\\\\partial y_k\}\{\\\\partial\\\\rho_s\}\(\\\\boldsymbol\\\\rho\)\\\\\\\\&\\\\quad\+F_0\(\\\\boldsymbol\\\\rho\)\\\\\\\\&\\\\quad\+\\\\sum_\{k=1\}\^\{N\}F_k\(\\\\boldsymbol\\\\rho\)y_k\(\\\\boldsymbol\\\\rho\)\\\\preceq0\.\\\\end\{aligned\}"/,
+    /math:\s*"\\\\mathcal F\(\\\\boldsymbol\\\\rho,\\\\dot\{\\\\boldsymbol\\\\rho\};y\)=F_0\+\\\\sum_\{k=1\}\^\{N\}F_ky_k\+\\\\sum_\{k=1\}\^\{N\}\\\\sum_\{s=1\}\^\{\\\\ell\}\\\\dot\\\\rho_sT_\{k,s\}\\\\frac\{\\\\partial y_k\}\{\\\\partial\\\\rho_s\}\\\\preceq0\."/,
   );
+  assert.match(firstStep, /All coefficient functions in the residual are evaluated at/);
+  assert.match(firstStep, /oneLine:\s*true/);
+  assert.doesNotMatch(firstStep, /\\begin\{(?:aligned|gathered|split)\}|\\\\\\\\/);
   assert.doesNotMatch(
     css,
     /\.katex(?:-[\w-]+)?[^{]*\{[^}]*(?:font-size|transform|zoom)\s*:/gis,
   );
+});
+
+test("Welcome stages 02 and 03 keep semantic formulas paired through responsive reflow", () => {
+  const home = read("src/components/HomePortal.astro");
+  const explorer = read("src/components/CellStorageExplorer.tsx");
+  const secondStep = home.slice(home.indexOf('number: "02"'), home.indexOf('number: "03"'));
+  const thirdStep = home.slice(home.indexOf('number: "03"'), home.indexOf('number: "04"'));
+
+  assert.match(secondStep, /annotatedMath:\s*\[/);
+  assert.match(secondStep, /label:\s*\["axis-",\s*\{\s*tex:\s*"s"\s*\},\s*" physical nodes"\]/);
+  assert.match(secondStep, /label:[^\n]*physical cell selected by[^\n]*mathbf c/);
+  assert.doesNotMatch(secondStep, /\\underbrace|\\begin\{(?:aligned|gathered|split)\}/);
+  assert.equal((home.match(/class="math-square-underbracket"/g) ?? []).length, 1);
+  assert.match(home, /math-square-underbracket__expression[\s\S]*math-square-underbracket__label/);
+  assert.match(home, /\.math-strip--underbrackets\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*max-content\)/s);
+  assert.match(home, /@media \(max-width: 700px\)[\s\S]*\.math-strip--underbrackets\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+
+  assert.doesNotMatch(thirdStep, /storageMath:[^\n]*\\begin\{gathered\}/);
+  for (const stage of ["matrix", "coefficients", "basis"]) {
+    assert.match(explorer, new RegExp(`data-cell-stage="${stage}"`));
+  }
+  assert.match(explorer, /Known matrix and cell selector[\s\S]*cell-grid-panel/);
+  assert.match(explorer, /Selected cell and coefficient lattice[\s\S]*cell-coeffs/);
+  assert.match(explorer, /Bernstein basis and final representation[\s\S]*cell-bernstein-readout/);
+  assert.match(explorer, /ArrowLeft[\s\S]*ArrowRight[\s\S]*ArrowUp[\s\S]*ArrowDown/);
+  assert.match(explorer, /A\.LocalValues[\s\S]*cell\.coefficients\.map/);
 });
 
 test("only the direct elevation coefficient formula opts into local scrolling", () => {
@@ -173,7 +201,7 @@ test("elevation kernel shorthand stays consistent with the direct coefficient ru
   assert.match(elevate, /Let \$\\boldsymbol d:=\\boldsymbol M-\\boldsymbol m\$/);
   assert.match(
     elevate,
-    /\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\][\s\S]*&:=\s*\\prod_\{s=1\}\^\{\\ell\}\\binom\{d_s\}\{j_s\},\\\\[\s\S]*\\boldsymbol j\s*&\\in\\prod_s\\\{0,\\ldots,d_s\\\}/,
+    /\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\]:=\\prod_\{s=1\}\^\{\\ell\}\\binom\{d_s\}\{j_s\},\\qquad\\boldsymbol j\\in\\prod_s\\\{0,\\ldots,d_s\\\}/,
   );
   assert.equal(
     (elevate.match(/\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\]/g) ?? []).length,

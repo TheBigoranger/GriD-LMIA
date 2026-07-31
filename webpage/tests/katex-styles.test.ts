@@ -84,6 +84,13 @@ test("formula styles use stable fluid wrappers without changing KaTeX metrics", 
   assert.match(
     welcomeFormulaRules,
     /display\s*:\s*(?:grid|flex)/i,
-    "Welcome Step 01 multiline grouping must use a fluid layout container",
+    "Welcome one-line displays must remain centered in a fluid layout container",
+  );
+  const firstStep = home.slice(home.indexOf('number: "01"'), home.indexOf('number: "02"'));
+  assert.match(firstStep, /oneLine:\s*true/);
+  assert.doesNotMatch(
+    firstStep,
+    /\\begin\{(?:aligned|gathered|split)\}/,
+    "Welcome Step 01 must not author a multiline TeX table when the display fits",
   );
 });

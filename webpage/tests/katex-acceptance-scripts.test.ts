@@ -51,9 +51,10 @@ test("acceptance scripts verify static local KaTeX rendering at every target wid
   );
 
   // Both source and browser acceptance retain the same fluid viewport coverage.
-  const widthMatrix = /320\s*,\s*390\s*,\s*700\s*,\s*768\s*,\s*1024\s*,\s*1440/;
-  assert.match(visual, widthMatrix, "visual acceptance must preserve the six-width matrix");
-  assert.match(geometry, widthMatrix, "geometry acceptance must preserve the six-width matrix");
+  const widthMatrix = /320\s*,\s*390\s*,\s*700\s*,\s*768\s*,\s*1024\s*,\s*1280\s*,\s*1440/;
+  assert.match(visual, widthMatrix, "visual acceptance must preserve the seven-width matrix");
+  assert.match(geometry, widthMatrix, "geometry acceptance must preserve the seven-width matrix");
+  assert.match(geometry, /defaultThemes\s*=\s*\["light",\s*"dark"\]/);
 
   for (const selector of [".formula-math", ".katex", ".katex-display"]) {
     assert.ok(geometry.includes(selector), `geometry acceptance must query ${selector}`);
@@ -64,6 +65,7 @@ test("acceptance scripts verify static local KaTeX rendering at every target wid
     "formula-bounds",
     "formula-width",
     "formula-hydration",
+    "formula-unexpected-multiline",
   ]) {
     assert.ok(geometry.includes(diagnostic), `geometry acceptance must retain ${diagnostic}`);
   }
