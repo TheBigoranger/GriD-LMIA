@@ -294,12 +294,25 @@ async function inspect(page) {
       return document.body;
     };
     if (root.scrollWidth > root.clientWidth + tolerance) {
+      const overflowNode = [...document.body.querySelectorAll("*")]
+        .map((node) => ({ node, rect: node.getBoundingClientRect() }))
+        .filter(({ rect }) =>
+          rect.width > 0 &&
+          rect.height > 0 &&
+          (rect.left < -tolerance || rect.right > root.clientWidth + tolerance))
+        .sort((left, right) => right.rect.right - left.rect.right)[0];
       failures.push({
         type: "page",
-        selector: "html",
+        selector: overflowNode ? describe(overflowNode.node) : "html",
         actual: root.scrollWidth,
         allowed: root.clientWidth,
-        context: contextFor(document.querySelector("main") ?? document.body, document.title),
+        context: overflowNode
+          ? `${contextFor(overflowNode.node)} ${JSON.stringify({
+            left: overflowNode.rect.left,
+            right: overflowNode.rect.right,
+            width: overflowNode.rect.width,
+          })}`
+          : contextFor(document.querySelector("main") ?? document.body, document.title),
       });
     }
 
@@ -384,7 +397,11 @@ async function inspect(page) {
         });
       }
 
-      const localScroller = wrapper.closest(".elevate-direct-coefficient-scroll");
+      const localScroller = wrapper.closest(
+        ".elevate-direct-coefficient-scroll, .solver-one-line",
+      );
+      const isElevationScroller = localScroller
+        ?.classList.contains("elevate-direct-coefficient-scroll");
       const localScrollerStyle = localScroller ? getComputedStyle(localScroller) : null;
       const localScrollActive = Boolean(
         localScroller &&
@@ -406,7 +423,7 @@ async function inspect(page) {
             context: contextFor(wrapper),
           });
         }
-        if (innerWidth <= 320 && !localScrollActive) {
+        if (isElevationScroller && innerWidth <= 320 && !localScrollActive) {
           failures.push({
             type: "local-formula-scroll-required",
             selector: describe(localScroller),
@@ -415,7 +432,7 @@ async function inspect(page) {
             context: contextFor(wrapper),
           });
         }
-        if (innerWidth >= 390 && localScrollActive) {
+        if (isElevationScroller && innerWidth >= 390 && localScrollActive) {
           failures.push({
             type: "local-formula-scroll-unneeded",
             selector: describe(localScroller),
@@ -564,6 +581,46 @@ async function inspect(page) {
       }
     }
 
+    if (location.pathname.endsWith("/documents/math/bernstein-polynomial/")) {
+      const figures = [...document.querySelectorAll(".bernstein-concept, .cell-storage-diagram")];
+      if (
+        figures.length !== 3 ||
+        figures.some((figure) => {
+          const body = figure.querySelector(".diagram-frame__body");
+          return !body || body.children.length === 0 || body.getBoundingClientRect().height <= 32;
+        })
+      ) {
+        failures.push({
+          type: "bernstein-empty-figure",
+          selector: ".bernstein-concept, .cell-storage-diagram",
+          actual: figures.length,
+          allowed: 3,
+          context: figures.map((figure) => ({
+            className: figure.className,
+            children: figure.querySelector(".diagram-frame__body")?.children.length ?? 0,
+            height: figure.querySelector(".diagram-frame__body")?.getBoundingClientRect().height ?? 0,
+          })),
+        });
+      }
+    }
+
+    if (location.pathname.endsWith("/examples/solver-smoke/")) {
+      const firstPlant = [...document.querySelectorAll(".solver-one-line")]
+        .find((formula) => formula.querySelector(
+          'annotation[encoding="application/x-tex"]',
+        )?.textContent?.includes("A(\\rho)=(1-\\rho)"));
+      const tex = firstPlant
+        ?.querySelector('annotation[encoding="application/x-tex"]')
+        ?.textContent ?? "";
+      if (!firstPlant || /\\begin\{(?:aligned|gathered|split)\}/.test(tex)) {
+        failures.push({
+          type: "solver-plant-one-line",
+          selector: ".solver-one-line",
+          context: tex || "first A(rho) display not found",
+        });
+      }
+    }
+
     if (
       innerWidth <= 390 &&
       location.pathname.endsWith("/documents/reference/pdmat/constructor/") &&
@@ -672,6 +729,28 @@ async function auditRootWalkthroughs(browser, origin, failures) {
       if (!response?.ok()) throw new Error(`root returned ${response?.status() ?? "no response"}`);
       await settleRootHydration(page);
 
+      const portalSurface = await page.evaluate(() => {
+        const portal = document.querySelector(".home-portal");
+        const panel = portal?.closest(".content-panel");
+        const panelRect = panel?.getBoundingClientRect();
+        const portalRect = portal?.getBoundingClientRect();
+        const background = panel ? getComputedStyle(panel, "::before").backgroundImage : "";
+        return {
+          contains: Boolean(panel && portal && panel.contains(portal)),
+          panelWidth: panelRect?.width ?? 0,
+          portalWidth: portalRect?.width ?? 0,
+          background,
+        };
+      });
+      if (
+        !portalSurface.contains ||
+        portalSurface.panelWidth + 1 < portalSurface.portalWidth ||
+        (portalSurface.background.match(/radial-gradient/g)?.length ?? 0) < 2 ||
+        /42px|repeating-linear-gradient/.test(portalSurface.background)
+      ) {
+        throw new Error(`full-panel aurora background missing: ${JSON.stringify(portalSurface)}`);
+      }
+
       const hydration = await page.evaluate(() => {
         const visibleInteractiveMath = [...document.querySelectorAll("astro-island .formula-math")]
           .filter((wrapper) => {
@@ -730,6 +809,19 @@ async function auditRootWalkthroughs(browser, origin, failures) {
       }
 
       const grid = page.locator("figure.grid-partition-explorer");
+      const dynamicMathStyles = await grid.evaluate((figure) =>
+        [...figure.querySelectorAll(".structured-math, .structured-math__cal")]
+          .map((node) => ({
+            className: node.className,
+            fontStyle: getComputedStyle(node).fontStyle,
+          })));
+      if (
+        dynamicMathStyles.length === 0 ||
+        dynamicMathStyles.some(({ fontStyle }) => fontStyle !== "normal")
+      ) {
+        throw new Error(`dynamic React math is not upright: ${JSON.stringify(dynamicMathStyles)}`);
+      }
+
       const slider = grid.getByRole("slider").first();
       const output = grid.locator("output").first();
       const previousOutput = (await output.textContent())?.trim() ?? "";
@@ -817,6 +909,91 @@ async function auditRootWalkthroughs(browser, origin, failures) {
         }
         if (pair.visual.top < pair.heading.bottom - 1 || pair.visual.top - pair.heading.bottom > 40) {
           throw new Error(`storage heading is not adjacent to its visual: ${JSON.stringify(pair)}`);
+        }
+      }
+
+      if (viewport.width === 1440) {
+        const alignment = await page.evaluate(() => {
+          const bracketTops = [...document.querySelectorAll(
+            ".math-strip--underbrackets .math-square-underbracket__rule",
+          )].map((node) => node.getBoundingClientRect().top);
+          const storageFigure = document.querySelector(
+            ".cell-storage-compact figure.interactive-figure",
+          );
+          const stages = storageFigure
+            ? [...storageFigure.querySelectorAll(".cell-stage")]
+            : [];
+          const stageTops = stages.map((node) => node.getBoundingClientRect().top);
+          const grid = storageFigure?.querySelector(".cell-grid");
+          const yTicks = storageFigure
+            ? [...storageFigure.querySelectorAll(".cell-axis-ticks--y > .formula-inline")]
+            : [];
+          const xTicks = storageFigure
+            ? [...storageFigure.querySelectorAll(".cell-axis-ticks--x > .formula-inline")]
+            : [];
+          const gridRect = grid?.getBoundingClientRect();
+          const expectedY = gridRect
+            ? [gridRect.top, (gridRect.top + gridRect.bottom) / 2, gridRect.bottom]
+            : [];
+          const yCenters = yTicks.map((node) => {
+            const rect = node.getBoundingClientRect();
+            return (rect.top + rect.bottom) / 2;
+          });
+          const xGap = gridRect && xTicks.length
+            ? Math.max(...xTicks.map((node) => node.getBoundingClientRect().top - gridRect.bottom))
+            : Number.POSITIVE_INFINITY;
+          const bottomYRect = yTicks.at(-1)?.getBoundingClientRect();
+          const leftXRect = xTicks.at(0)?.getBoundingClientRect();
+          const cornerLabelsOverlap = Boolean(
+            bottomYRect &&
+            leftXRect &&
+            bottomYRect.left < leftXRect.right &&
+            bottomYRect.right > leftXRect.left &&
+            bottomYRect.top < leftXRect.bottom &&
+            bottomYRect.bottom > leftXRect.top
+          );
+          const basisStage = storageFigure?.querySelector(".cell-stage--basis");
+          const basisReadout = basisStage?.querySelector(".cell-bernstein-readout");
+          const basisFormula = basisReadout?.querySelector(".cell-bernstein-formula");
+          const readoutRect = basisReadout?.getBoundingClientRect();
+          const formulaRect = basisFormula?.getBoundingClientRect();
+          return {
+            bracketTops,
+            stageTops,
+            expectedY,
+            yCenters,
+            xGap,
+            cornerLabelsOverlap,
+            basisOffset: readoutRect && formulaRect
+              ? Math.abs(
+                (formulaRect.top + formulaRect.bottom) / 2 -
+                (readoutRect.top + readoutRect.bottom) / 2
+              )
+              : Number.POSITIVE_INFINITY,
+          };
+        });
+        const spread = (values) => values.length
+          ? Math.max(...values) - Math.min(...values)
+          : Number.POSITIVE_INFINITY;
+        const yOffsets = alignment.yCenters.map(
+          (center, index) => Math.abs(center - alignment.expectedY[index]),
+        );
+        if (
+          alignment.bracketTops.length !== 2 ||
+          spread(alignment.bracketTops) > 1 ||
+          alignment.stageTops.length !== 3 ||
+          spread(alignment.stageTops) > 1 ||
+          alignment.yCenters.length !== 3 ||
+          yOffsets.some((offset) => offset > 2) ||
+          alignment.xGap < 0 ||
+          alignment.xGap > 8 ||
+          alignment.cornerLabelsOverlap ||
+          alignment.basisOffset > 2
+        ) {
+          throw new Error(`welcome alignment regression: ${JSON.stringify({
+            ...alignment,
+            yOffsets,
+          })}`);
         }
       }
 

@@ -23,8 +23,12 @@ const lmiSteps = [
   {
     number: "01",
     title: "Model the general DPD-LMI problem",
-    inlineMath: "\\boldsymbol y=\\bigl(y_1,\\ldots,y_N\\bigr)^\\top:\\mathcal P\\to\\mathbb R^N.",
+    inlineMath: "\\boldsymbol\\rho\\in\\mathcal P,\\qquad\\dot{\\boldsymbol\\rho}\\in\\mathcal R,\\qquad\\boldsymbol y:\\mathcal P\\to\\mathbb R^N.",
     inlineNoteParts: [
+      { tex: "\\mathcal P" },
+      " is the supported parameter domain, ",
+      { tex: "\\mathcal R" },
+      " is the supported scheduling-rate domain, and ",
       { tex: "\\boldsymbol y" },
       " is the decision function, assumed locally Lipschitz continuous on ",
       { tex: "\\mathcal P" },
@@ -132,6 +136,19 @@ const storageMathMarkup = {
   })),
 };
 
+const gridCellKeys = [
+  "1", "2",
+  "1,1", "1,2", "2,1", "2,2",
+  "1,1,1", "1,1,2", "1,2,1", "1,2,2",
+  "2,1,1", "2,1,2", "2,2,1", "2,2,2",
+];
+const gridPartitionMathMarkup = {
+  gridPrefixes: [1, 2, 3].map((axis) => renderMath(`\\mathcal G_{${axis}}=`)),
+  cellPrefixes: Object.fromEntries(
+    gridCellKeys.map((key) => [key, renderMath(`\\mathcal H_{(${key})}=`)]),
+  ),
+};
+
 ---
 
 <div class="home-portal">
@@ -188,6 +205,7 @@ const storageMathMarkup = {
                             <div class="math-square-underbracket__expression">
                               <KaTeXMath class="formula-block formula-one-line" tex={item.tex} />
                             </div>
+                            <span class="math-square-underbracket__rule" aria-hidden="true"></span>
                             <p class="math-square-underbracket__label">
                               {item.label.map((part) =>
                                 typeof part === "string" ? part : <KaTeXMath tex={part.tex} />)}
@@ -195,7 +213,7 @@ const storageMathMarkup = {
                           </div>
                         ))}
                       </div>
-                      <GridPartitionExplorer client:load />
+                      <GridPartitionExplorer client:load mathMarkup={gridPartitionMathMarkup} />
                     </>
                 : step.visual === "export"
                   ? <ExportSolveFlow />
@@ -233,29 +251,31 @@ const storageMathMarkup = {
   :global(.sl-container) { max-width: 1180px; }
   :global(.sl-markdown-content) { max-width: none; }
   :global(.sl-markdown-content > .home-portal) { margin-block: -1rem 2rem; }
+  :global(.content-panel:has(.home-portal)) {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+  }
+  :global(.content-panel:has(.home-portal))::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 72rem 52rem at -4% 4%, var(--home-aurora-blue), transparent 66%),
+      radial-gradient(ellipse 68rem 50rem at 104% 34%, var(--home-aurora-teal), transparent 68%),
+      radial-gradient(ellipse 58rem 42rem at 24% 86%, var(--home-aurora-violet), transparent 72%),
+      linear-gradient(118deg, transparent 25%, var(--home-aurora-band) 46%, transparent 66%),
+      linear-gradient(150deg, var(--home-canvas), color-mix(in srgb, var(--home-canvas) 72%, #dff8f2));
+    content: "";
+    pointer-events: none;
+  }
 
   .home-portal {
     position: relative;
-    z-index: 0;
     display: grid;
     gap: clamp(2rem, 4vw, 3.2rem);
     padding: clamp(0.6rem, 2vw, 1.2rem);
-    isolation: isolate;
     overflow-x: clip;
-  }
-  /* A quiet technical canvas adds depth while keeping the manual content primary. */
-  .home-portal::before {
-    position: absolute;
-    z-index: -1;
-    inset: clamp(-1.4rem, -2vw, -0.7rem);
-    border-radius: 28px;
-    background:
-      radial-gradient(circle at 14% 4%, var(--home-glow), transparent 32rem),
-      linear-gradient(90deg, var(--home-grid) 1px, transparent 1px),
-      linear-gradient(180deg, var(--home-grid) 1px, transparent 1px),
-      linear-gradient(155deg, var(--home-canvas), color-mix(in srgb, var(--home-canvas) 82%, var(--sl-color-bg)));
-    background-size: auto, 42px 42px, 42px 42px, auto;
-    content: "";
   }
   .home-hero,
   .download-panel {
@@ -300,11 +320,16 @@ const storageMathMarkup = {
   .cell-storage-compact :global(.cell-grid-panel) { display: grid; gap: 0.35rem; min-width: 0; }
   .cell-storage-compact :global(.cell-grid-stage__formula) { justify-self: center; width: 100%; max-width: 100%; padding-block-end: 0.1rem; text-align: center; }
   .cell-storage-compact :global(.cell-grid-stage__formula .formula-display) { margin: 0; }
-  .cell-storage-compact :global(.cell-grid-stage) { grid-template-columns: 2rem minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 0.2rem; }
+  .cell-storage-compact :global(.cell-grid-stage) { grid-template-columns: 2rem minmax(0, 1fr); grid-template-rows: auto 1.65rem; column-gap: 0.2rem; row-gap: 0.35rem; align-content: center; }
+  .cell-storage-compact :global(.cell-grid-stage > *) { margin-block: 0; }
   .cell-storage-compact :global(.cell-axis-y-wrap) { display: grid; grid-column: 1; grid-row: 1; grid-template-columns: 1fr; align-items: stretch; }
   .cell-storage-compact :global(.cell-axis-ticks) { color: var(--sl-color-gray-2); font-family: "STIX Two Math", Cambria, serif; font-size: 1.15rem; font-weight: 750; }
-  .cell-storage-compact :global(.cell-axis-ticks--y) { display: grid; align-content: space-between; justify-items: end; padding-block: 0.2rem; }
-  .cell-storage-compact :global(.cell-axis-ticks--x) { display: flex; grid-column: 2; grid-row: 2; justify-content: space-between; padding-inline: 0.15rem; }
+  .cell-storage-compact :global(.cell-axis-ticks--y) { position: relative; block-size: 100%; padding: 0; }
+  .cell-storage-compact :global(.cell-axis-ticks--y > .formula-inline) { position: absolute; inset-inline-end: 0; transform: translateY(-50%); }
+  .cell-storage-compact :global(.cell-axis-ticks--y > .formula-inline:nth-child(1)) { inset-block-start: 0; }
+  .cell-storage-compact :global(.cell-axis-ticks--y > .formula-inline:nth-child(2)) { inset-block-start: 50%; }
+  .cell-storage-compact :global(.cell-axis-ticks--y > .formula-inline:nth-child(3)) { inset-block-start: 100%; }
+  .cell-storage-compact :global(.cell-axis-ticks--x) { display: flex; grid-column: 2; grid-row: 2; justify-content: space-between; align-self: start; padding-inline: 0.15rem; transform: translateY(0.15rem); }
   .cell-storage-compact :global(.cell-grid) { grid-column: 2; grid-row: 1; aspect-ratio: 1 / 1.8; }
   .cell-storage-compact :global(.cell-axis) { font-size: 1.25rem; font-weight: 400; }
   .cell-storage-compact :global(.cell-grid button) { font-size: 0.95rem; font-weight: 520; }
@@ -314,6 +339,9 @@ const storageMathMarkup = {
   .cell-storage-compact :global(.cell-coeff-math) { line-height: 1.05; margin-block-start: -0.12rem; }
   .cell-storage-compact :global(.cell-storage-connector) { z-index: 2; min-width: 0; white-space: nowrap; overflow: visible; font-size: 0.9rem; }
   .cell-storage-compact :global(.cell-readout) { padding-inline-start: 0.45rem; }
+  .cell-storage-compact :global(.cell-stage-layout > .cell-stage),
+  .cell-storage-compact :global(.cell-stage > *) { margin-block: 0; }
+  .cell-storage-compact :global(.cell-stage--basis .cell-bernstein-readout) { align-content: center; }
   @media (min-width: 701px) {
     .cell-storage-compact :global(.cell-explorer) { inline-size: min(100%, 66rem); margin-inline: auto; gap: 0.85rem; }
     .cell-storage-compact :global(.cell-grid-stage) { inline-size: min(100%, 9.5rem); justify-self: center; }
@@ -330,27 +358,32 @@ const storageMathMarkup = {
     border-inline-start: 0;
     padding-inline-start: 0;
   }
-  .math-square-underbracket { display: grid; min-width: 0; justify-items: center; }
+  .math-square-underbracket { display: grid; grid-template-rows: auto 0.48rem auto; min-width: 0; margin-block: 0; justify-items: stretch; }
+  .math-square-underbracket > * { margin-block: 0; }
   .math-square-underbracket__expression {
-    position: relative;
     min-width: 0;
-    padding: 0 0.35rem 0.45rem;
+    padding-inline: 0.35rem;
+  }
+  .math-square-underbracket__rule {
+    position: relative;
+    display: block;
+    min-width: 0;
+    margin-inline: 0;
     border-block-end: 1.5px solid currentColor;
   }
-  .math-square-underbracket__expression::before,
-  .math-square-underbracket__expression::after {
+  .math-square-underbracket__rule::before,
+  .math-square-underbracket__rule::after {
     position: absolute;
     inset-block-end: -1.5px;
     width: 0.35rem;
     height: 0.42rem;
-    border-block-end: 1.5px solid currentColor;
     content: "";
   }
-  .math-square-underbracket__expression::before {
+  .math-square-underbracket__rule::before {
     inset-inline-start: 0;
     border-inline-start: 1.5px solid currentColor;
   }
-  .math-square-underbracket__expression::after {
+  .math-square-underbracket__rule::after {
     inset-inline-end: 0;
     border-inline-end: 1.5px solid currentColor;
   }
@@ -358,7 +391,8 @@ const storageMathMarkup = {
     display: flex;
     align-items: baseline;
     gap: 0.12rem;
-    margin: 0.28rem 0 0;
+    justify-content: center;
+    margin: 0.34rem 0 0;
     color: var(--sl-color-gray-2);
     font-size: clamp(0.72rem, 0.68rem + 0.2vw, 0.84rem);
     font-weight: 700;

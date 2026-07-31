@@ -15,11 +15,13 @@
   --diagram-border: color-mix(in srgb, var(--sl-color-accent) 28%, var(--sl-color-gray-5));
   --diagram-radius: 14px;
   --diagram-gap: clamp(0.7rem, 2vw, 1rem);
-  --home-canvas: #f7faff;
-  --home-panel: rgb(255 255 255 / 0.78);
-  --home-grid: rgb(37 99 235 / 0.055);
-  --home-glow: rgb(56 189 248 / 0.13);
-  --home-shadow: rgb(15 23 42 / 0.09);
+  --home-canvas: #edf4ff;
+  --home-panel: rgb(255 255 255 / 0.8);
+  --home-aurora-blue: rgb(37 99 235 / 0.3);
+  --home-aurora-teal: rgb(13 148 136 / 0.24);
+  --home-aurora-violet: rgb(99 102 241 / 0.18);
+  --home-aurora-band: rgb(255 255 255 / 0.52);
+  --home-shadow: rgb(30 64 175 / 0.13);
 }
 
 [data-theme="dark"] {
@@ -30,8 +32,10 @@
   --sl-color-bg-sidebar: #0f172a;
   --home-canvas: #08111f;
   --home-panel: rgb(15 23 42 / 0.78);
-  --home-grid: rgb(96 165 250 / 0.07);
-  --home-glow: rgb(14 116 144 / 0.2);
+  --home-aurora-blue: rgb(37 99 235 / 0.23);
+  --home-aurora-teal: rgb(13 148 136 / 0.2);
+  --home-aurora-violet: rgb(99 102 241 / 0.16);
+  --home-aurora-band: rgb(125 211 252 / 0.065);
   --home-shadow: rgb(0 0 0 / 0.26);
 }
 
@@ -452,6 +456,7 @@
   display: inline-flex;
   max-width: 100%;
   align-items: baseline;
+  font-style: normal;
 }
 
 .structured-math--definitions {
@@ -460,8 +465,14 @@
 }
 
 .structured-math__cal {
-  font-family: "KaTeX_Caligraphic", "STIX Two Math", Cambria, serif;
-  font-style: italic;
+  font-family: "KaTeX_Main", "STIX Two Math", Cambria, serif;
+  font-style: normal;
+}
+
+.structured-math *,
+.structured-math-number,
+.structured-math-matrix {
+  font-style: normal;
 }
 
 .structured-math sub {
@@ -501,6 +512,22 @@
   max-width: 100%;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
+}
+
+.elevate-direct-coefficient-scroll > .formula-display {
+  width: max-content;
+  min-width: 100%;
+}
+
+.solver-one-line {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.solver-one-line > .formula-display {
+  width: max-content;
+  min-width: 100%;
 }
 
 .sl-markdown-content pre {
@@ -620,6 +647,10 @@
   align-items: stretch;
 }
 
+.cell-stage-layout > .cell-stage {
+  margin-block: 0;
+}
+
 /* Pair every stage title with the visual it explains so responsive reflow
    cannot detach the basis heading from the final Bernstein expression. */
 .cell-stage {
@@ -736,6 +767,10 @@
 }
 
 .cell-bernstein-formula { min-width: 0; color: var(--sl-color-text); text-align: center; }
+
+.cell-stage--basis .cell-bernstein-readout {
+  align-content: center;
+}
 
 .cell-coeffs {
   display: grid;

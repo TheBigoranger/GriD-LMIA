@@ -8,6 +8,7 @@ import MultiplicationDiagram from "../../../../../components/MultiplicationDiagr
 import ExampleDisclosure from "../../../../../components/ExampleDisclosure.astro";
 import AdditionExplorer from "../../../../../components/AdditionExplorer.tsx";
 import MultiplicationExplorer from "../../../../../components/MultiplicationExplorer.tsx";
+import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
 
@@ -56,6 +57,14 @@ $$
 <MatrixGlyphDiagram before={[["a₀", "½(a₀+a₁)", "a₁"], ["b₀", "b₁", "b₂"]]} after={[["a₀+b₀", "½(a₀+a₁)+b₁", "a₁+b₂"]]} beforeLabel="degree-elevated rows" afterLabel="coefficient sum" caption="Degree elevation changes the representation, not the polynomial; addition then combines aligned local labels." />
 
 If compatible operands have different interior nodes, their sorted union is the common refinement. Grid refinement and degree elevation are independent alignment steps.
+
+<Aside type="note" title="Implementation remark: exact addition alignment">
+`plus` and `minus` first form the sorted-union refinement of compatible grid vectors and
+exactly re-express both operands on that refinement. They then elevate every
+direction to the componentwise maximum degree and apply addition or subtraction
+coefficient by coefficient. Neither alignment stage samples the represented
+function.
+</Aside>
 
 ### Different grids and direction-wise degrees
 
@@ -136,6 +145,14 @@ R^{(c)}[\mathbf k]
 $$
 
 Matrix order is preserved. Numeric scalars and matrices use the corresponding MATLAB-compatible left or right product. Degrees and tensor labels add componentwise.
+
+<Aside type="note" title="Implementation remark: ordered product convolution">
+`mtimes` builds one normalized Bernstein product plan for the two
+direction-wise degree rows. On each common-refinement cell it accumulates
+left-label/right-label pairs in written matrix-factor order, and stores the
+result at their summed tensor label. The output degree is the componentwise
+sum, not a fitted degree inferred from samples.
+</Aside>
 
 The implementation visits contribution pairs in increasing left label, with
 `j = k-i`, and keeps matrix multiplication in that order. A scalar

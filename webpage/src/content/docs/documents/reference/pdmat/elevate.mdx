@@ -31,24 +31,10 @@ The elevated coefficients are
 
 <div className="elevate-direct-coefficient-scroll">
 
-$$
-\begin{aligned}
-\hat C^{(\boldsymbol c)}[\boldsymbol k]
-&=
-\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}
-\left[
-\prod_{s=1}^{\ell}
-\frac{
-  \binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}
-}{
-  \binom{M_s}{k_s}
-}
-\right]\\
-&\qquad{}\cdot C^{(\boldsymbol c)}[\boldsymbol i],\\
-\boldsymbol k
-&\in\prod_s\{0,\ldots,M_s\}.
-\end{aligned}
-$$
+<KaTeXMath
+  class="formula-block formula-one-line"
+  tex={String.raw`\hat C^{(\boldsymbol c)}[\boldsymbol k]=\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}\left[\prod_{s=1}^{\ell}\frac{\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}}{\binom{M_s}{k_s}}\right]\cdot C^{(\boldsymbol c)}[\boldsymbol i],\qquad \boldsymbol k\in\prod_s\{0,\ldots,M_s\}.`}
+/>
 
 </div>
 

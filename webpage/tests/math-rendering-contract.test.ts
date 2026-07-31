@@ -149,7 +149,9 @@ test("Welcome stages 02 and 03 keep semantic formulas paired through responsive 
   assert.match(secondStep, /label:[^\n]*physical cell selected by[^\n]*mathbf c/);
   assert.doesNotMatch(secondStep, /\\underbrace|\\begin\{(?:aligned|gathered|split)\}/);
   assert.equal((home.match(/class="math-square-underbracket"/g) ?? []).length, 1);
-  assert.match(home, /math-square-underbracket__expression[\s\S]*math-square-underbracket__label/);
+  assert.match(home, /math-square-underbracket__expression[\s\S]*math-square-underbracket__rule[\s\S]*math-square-underbracket__label/);
+  assert.match(home, /\.math-square-underbracket__rule\s*\{[^}]*border-block-end:\s*1\.5px solid currentColor/s);
+  assert.doesNotMatch(home, /\.math-square-underbracket__expression::(?:before|after)/);
   assert.match(home, /\.math-strip--underbrackets\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*max-content\)/s);
   assert.match(home, /@media \(max-width: 700px\)[\s\S]*\.math-strip--underbrackets\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
 
@@ -164,8 +166,9 @@ test("Welcome stages 02 and 03 keep semantic formulas paired through responsive 
   assert.match(explorer, /A\.LocalValues[\s\S]*cell\.coefficients\.map/);
 });
 
-test("only the direct elevation coefficient formula opts into local scrolling", () => {
+test("only explicitly indivisible one-line formulas opt into local scrolling", () => {
   const elevate = read("src/content/docs/documents/reference/pdmat/elevate.mdx");
+  const solverSmoke = read("src/content/docs/examples/solver-smoke.md");
   const css = read("src/styles/manual.css");
   const geometry = read("scripts/check-rendered-geometry.mjs");
 
@@ -173,6 +176,7 @@ test("only the direct elevation coefficient formula opts into local scrolling", 
     (allSource.match(/className="elevate-direct-coefficient-scroll"/g) ?? []).length,
     1,
   );
+  assert.equal((solverSmoke.match(/className="solver-one-line"/g) ?? []).length, 3);
   assert.match(
     elevate,
     /<div className="elevate-direct-coefficient-scroll">[\s\S]*\\hat C\^\{\(\\boldsymbol c\)\}\[\\boldsymbol k\][\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*<\/div>/,
@@ -181,11 +185,18 @@ test("only the direct elevation coefficient formula opts into local scrolling", 
     css,
     /\.elevate-direct-coefficient-scroll\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
   );
+  assert.match(
+    css,
+    /\.solver-one-line\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
+  );
   assert.doesNotMatch(
     allSource,
     /(?:\.formula-display|\.math-strip(?:__row)?)\s*\{[^}]*overflow-x:\s*(?:auto|scroll)/si,
   );
-  assert.match(geometry, /closest\("\.elevate-direct-coefficient-scroll"\)/);
+  assert.match(
+    geometry,
+    /closest\(\s*"\.elevate-direct-coefficient-scroll, \.solver-one-line",\s*\)/s,
+  );
   assert.match(
     geometry,
     /\["auto",\s*"scroll"\]\.includes\(localScrollerStyle\.overflowX\)[\s\S]*localScroller\.scrollWidth\s*>\s*localScroller\.clientWidth/,
@@ -466,7 +477,7 @@ test("only the root walkthroughs opt into eager React hydration", () => {
   const certificateWrapper = read("src/components/CertificateFlow.astro");
   const certificateConcept = read("src/content/docs/documents/math/sos-certificates.mdx");
 
-  assert.match(home, /<GridPartitionExplorer client:load\s*\/>/);
+  assert.match(home, /<GridPartitionExplorer client:load mathMarkup=\{gridPartitionMathMarkup\}\s*\/>/);
   assert.match(home, /<CellStorageExplorer client:load\b/);
   assert.match(home, /<CertificateFlow compact eager\s*\/>/);
   assert.match(

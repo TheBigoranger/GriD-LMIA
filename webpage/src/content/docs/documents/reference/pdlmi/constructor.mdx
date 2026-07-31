@@ -4,6 +4,7 @@ description: Select Direct, Pólya, Putinar, SparseFullBox, or FullBox PD-LMI as
 ---
 
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -193,6 +194,15 @@ rate-vertex row. It does not mutate the input expression or source `pdlmi`:
 `one.UsePolya` true. Reapplying another selector likewise rebuilds a new
 object from `Residual`; it never accumulates certificate constraints in the
 existing object.
+
+<Aside type="note" title="Implementation remark: rebuild, do not stack">
+Every certificate selector constructs a new object from the stored original
+`Residual` and relation; it never transforms an earlier selector's finite
+constraints. Direct and Pólya coefficient constraints follow `cells()` order,
+then stored rate-row order, then `lbls()` coefficient order. Entry-wise
+inequalities and equalities use MATLAB column-major vectorization within each
+coefficient matrix.
+</Aside>
 
 ### Full-box option forms
 

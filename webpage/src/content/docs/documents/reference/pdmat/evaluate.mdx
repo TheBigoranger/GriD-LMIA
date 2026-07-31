@@ -4,6 +4,7 @@ description: Evaluate known pdmat data at one parameter point.
 ---
 
 import EvaluateExplorer from "../../../../../components/EvaluateExplorer.tsx";
+import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -95,6 +96,14 @@ Each $C^{(\boldsymbol c)}[\boldsymbol i]$ is the stored scalar or matrix
 coefficient at local label $\boldsymbol i$; the scalar basis weight multiplies
 the entire coefficient matrix. Function-backed objects keep the exact MATLAB
 function handle and call it directly.
+
+<Aside type="note" title="Implementation remark: boundary ownership and row reconstruction">
+At an interior grid node, `evaluate` selects the cell on the right; only the
+global upper endpoint belongs to the final cell. It forms every tensor
+Bernstein weight explicitly from the local coordinates and reconstructs each
+stored ordinary or rate-vertex row independently in storage order. This path
+does not use de Casteljau recursion or merge rate alternatives.
+</Aside>
 
 Explicit rate rows are interpolated independently; `evaluate` does not merge
 the alternatives:

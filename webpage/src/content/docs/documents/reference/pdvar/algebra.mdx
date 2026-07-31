@@ -4,6 +4,7 @@ description: Detailed affine-algebra syntax, formulas, examples, outputs, and er
 ---
 
 import ExampleDisclosure from "../../../../../components/ExampleDisclosure.astro";
+import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
 
@@ -40,6 +41,13 @@ the [`pdmat` numerical addition explorer](/PD-LMI-package/documents/reference/pd
 to inspect the coefficient transformation; `pdvar` replaces those numeric
 entries with affine YALMIP expressions.
 
+<Aside type="note" title="Implementation remark: exact addition alignment">
+`plus` and `minus` use the same sorted-union grid refinement and componentwise
+degree elevation as `pdmat`, then combine aligned affine coefficients. Shared
+YALMIP decision handles are re-expressed rather than recreated, so the result
+remains the exact sum or difference of the original decision expressions.
+</Aside>
+
 ## <span id="pdvar-mtimes"></span>Multiply by known data
 
 ```matlab
@@ -74,6 +82,14 @@ The [`pdmat` numerical multiplication explorer](/PD-LMI-package/documents/refere
 shows the same ordered Bernstein convolution with numeric coefficients.
 For `pdvar`, the additional boundary is decision linearity: at most one
 converted operand may carry decision dependence.
+
+<Aside type="note" title="Implementation remark: ordered product convolution">
+`mtimes` applies the planned normalized Bernstein convolution cell by cell,
+adds the operand degrees componentwise, and preserves the written
+matrix-factor order. The route is accepted only when decision dependence
+occurs on at most one converted operand; two decision-bearing sides would
+leave the package's affine YALMIP layer.
+</Aside>
 
 ## Validation and operation boundaries
 

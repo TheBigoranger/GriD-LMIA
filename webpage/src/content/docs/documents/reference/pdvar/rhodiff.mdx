@@ -5,6 +5,7 @@ description: Rate-weighted cell-local derivative of a pdvar expression.
 
 import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
 import RateVertexExplorer from "../../../../../components/RateVertexExplorer.tsx";
+import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail">
   <a href="/PD-LMI-package/documents/">Documents</a>
@@ -61,6 +62,14 @@ For several parameters, the partial along each nonconstant axis is elevated
 exactly to `P.Degree` before the rate-weighted rows are added. A zero-degree
 axis contributes the zero partial. Consequently, multivariate `rhodiff`
 preserves the common direction-wise degree row.
+
+<Aside type="note" title="Implementation remark: common-basis rate rows">
+Within each physical cell, `rhodiff` forms forward differences along every
+nonconstant parameter axis and scales them by degree over cell width. It
+elevates the directional partials independently to one common tensor degree,
+then weights and sums them for the deterministic `helper.combRows` ordering of
+rate-box vertices. Each vertex remains a separate stored row.
+</Aside>
 
 ## Example
 

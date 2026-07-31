@@ -100,8 +100,8 @@ test("acceptance scripts verify static local KaTeX rendering at every target wid
   );
 
   assert.ok(
-    geometry.includes(".elevate-direct-coefficient-scroll"),
-    "geometry acceptance must retain the one approved formula scroller",
+    geometry.includes(".elevate-direct-coefficient-scroll, .solver-one-line"),
+    "geometry acceptance must retain the two narrowly scoped formula scrollers",
   );
   assert.match(
     geometry,

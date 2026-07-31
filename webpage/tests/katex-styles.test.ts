@@ -58,13 +58,13 @@ test("formula styles use stable fluid wrappers without changing KaTeX metrics", 
 
   const formulaScrollers = cssRules
     .filter(({ selector, body }) =>
-      /formula-|katex|math-strip|elevate-direct-coefficient-scroll/.test(selector)
+      /formula-|katex|math-strip|elevate-direct-coefficient-scroll|solver-one-line/.test(selector)
       && /overflow(?:-x|-inline)?\s*:\s*(?:auto|scroll)/i.test(body))
     .map(({ selector }) => selector);
   assert.deepEqual(
     formulaScrollers,
-    [".elevate-direct-coefficient-scroll"],
-    "only the direct elevation coefficient formula may scroll horizontally",
+    [".elevate-direct-coefficient-scroll", ".solver-one-line"],
+    "only indivisible elevation and solver one-line formulas may scroll horizontally",
   );
 
   const welcomeFormulaRules = cssRules

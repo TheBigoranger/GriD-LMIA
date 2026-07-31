@@ -18,6 +18,7 @@ import {
   resetRotation,
   type Point3,
 } from "../lib/grid-partition.ts";
+import { InlineMath } from "./RenderedMath.tsx";
 
 type Dimension = 1 | 2 | 3;
 
@@ -38,6 +39,11 @@ const cubeCorners: Point3[] = [
   [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1],
 ];
 
+interface GridPartitionMathMarkup {
+  cellPrefixes: Record<string, string>;
+  gridPrefixes: string[];
+}
+
 function formatNumber(value: number): string {
   return Number(value.toFixed(2)).toString();
 }
@@ -46,7 +52,13 @@ function labelCell(cell: readonly number[]): string {
   return `(${cell.map((index) => index + 1).join(", ")})`;
 }
 
-function GridDefinition({ knots }: { knots: readonly number[] }) {
+function GridDefinition({
+  knots,
+  mathMarkup,
+}: {
+  knots: readonly number[];
+  mathMarkup: GridPartitionMathMarkup;
+}) {
   const label = knots
     .map((knot, axis) => `G ${axis + 1} equals set 0, ${formatNumber(knot)}, 1`)
     .join("; ");
@@ -54,8 +66,8 @@ function GridDefinition({ knots }: { knots: readonly number[] }) {
     <span aria-label={label} className="structured-math structured-math--definitions" role="math">
       {knots.map((knot, axis) => (
         <span key={axis}>
-          <span className="structured-math__cal">G</span><sub>{axis + 1}</sub>
-          ={"{"}0, {formatNumber(knot)}, 1{"}"}
+          <InlineMath markup={mathMarkup.gridPrefixes[axis]} />
+          {"{"}0, {formatNumber(knot)}, 1{"}"}
         </span>
       ))}
     </span>
@@ -65,9 +77,11 @@ function GridDefinition({ knots }: { knots: readonly number[] }) {
 function CellDefinition({
   cell,
   bounds,
+  mathMarkup,
 }: {
   cell: readonly number[];
   bounds: readonly (readonly [number, number])[];
+  mathMarkup: GridPartitionMathMarkup;
 }) {
   const intervals = bounds
     .map(([lower, upper]) => `[${formatNumber(lower)}, ${formatNumber(upper)}]`)
@@ -79,8 +93,7 @@ function CellDefinition({
       role="math"
     >
       <span>
-        <span className="structured-math__cal">H</span><sub>{labelCell(cell)}</sub>
-        =
+        <InlineMath markup={mathMarkup.cellPrefixes[cell.map((index) => index + 1).join(",")]} />
         {bounds.map(([lower, upper], axis) => (
           <span key={axis}>
             [{formatNumber(lower)}, {formatNumber(upper)}]
@@ -285,7 +298,11 @@ function Grid3D({
 }
 
 /** Explore one independently movable internal knot on each active parameter axis. */
-export default function GridPartitionExplorer() {
+export default function GridPartitionExplorer({
+  mathMarkup,
+}: {
+  mathMarkup: GridPartitionMathMarkup;
+}) {
   const [dimension, setDimension] = useState<Dimension>(1);
   const [knots, setKnots] = useState<Record<Dimension, number[]>>({
     1: [...defaults[1]],
@@ -441,8 +458,8 @@ export default function GridPartitionExplorer() {
 
           <div aria-live="polite" className="grid-partition-readout">
             <div className="grid-partition-readout__definitions">
-              <GridDefinition knots={activeKnots} />
-              <CellDefinition bounds={bounds} cell={activeCell} />
+              <GridDefinition knots={activeKnots} mathMarkup={mathMarkup} />
+              <CellDefinition bounds={bounds} cell={activeCell} mathMarkup={mathMarkup} />
             </div>
             <p>
               <strong>Cell {labelCell(activeCell)}:</strong>{" "}

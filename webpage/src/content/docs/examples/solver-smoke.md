@@ -18,23 +18,15 @@ explicit $\varepsilon I$ margin as described in the
 
 The first smoke test compares a constant Lyapunov matrix against a parameter-dependent Lyapunov matrix for
 
+<div className="solver-one-line">
+
 $$
-\begin{aligned}
-A(\rho)&=(1-\rho)\\
-&\quad{}\cdot
-\begin{bmatrix}
--1 & -1 \\
-1 & -1
-\end{bmatrix}\\
-&\quad+\rho\\
-&\quad{}\cdot
-\begin{bmatrix}
--1 & -10 \\
-0.1 & -1
-\end{bmatrix},\\
-\rho&\in[0,1].
-\end{aligned}
+A(\rho)=(1-\rho)\begin{bmatrix}-1&-1\\1&-1\end{bmatrix}
++\rho\begin{bmatrix}-1&-10\\0.1&-1\end{bmatrix},
+\qquad \rho\in[0,1].
 $$
+
+</div>
 
 The tested constraints are
 
@@ -86,34 +78,23 @@ After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov ma
 
 The second smoke test assembles a block residual with a rate-dependent derivative term. The parameter-dependent matrices are
 
-$$
-\begin{aligned}
-A(\rho)&=
-\begin{bmatrix}
--1 & 0.5 \\
--1 & -2
-\end{bmatrix}\\
-&\quad+\rho\\
-&\quad{}\cdot
-\begin{bmatrix}
--1.3 & -20 \\
-2 & -10
-\end{bmatrix}.
-\end{aligned}
-$$
+<div className="solver-one-line">
 
 $$
-B(\rho)=
-\begin{bmatrix}
-1 & -4 \\
--1 & -1
-\end{bmatrix}
-+\rho
-\begin{bmatrix}
-2.2 & 0.5 \\
--6 & -5
-\end{bmatrix}.
+A(\rho)=\begin{bmatrix}-1&0.5\\-1&-2\end{bmatrix}
++\rho\begin{bmatrix}-1.3&-20\\2&-10\end{bmatrix}.
 $$
+
+</div>
+
+<div className="solver-one-line">
+
+$$
+B(\rho)=\begin{bmatrix}1&-4\\-1&-1\end{bmatrix}
++\rho\begin{bmatrix}2.2&0.5\\-6&-5\end{bmatrix}.
+$$
+
+</div>
 
 With $C=I$, $D=0$, $\dot{P}=\mathrm{rhodiff}(P,[-1,1])$, and scalar $\gamma$, the tested block condition is
 
