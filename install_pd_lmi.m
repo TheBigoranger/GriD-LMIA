@@ -1,5 +1,5 @@
 function report = install_pd_lmi()
-%INSTALL_PD_LMI Validate and persist a usable PD-LMI MATLAB installation.
+%INSTALL_PD_LMI Validate and persist a usable GriD-LMIA MATLAB installation.
 %   INSTALL_PD_LMI() adds the repository root to the end of the current
 %   MATLAB path, verifies the existing YALMIP installation and a working SDP
 %   solver, then persists the path with a user-level fallback. REPORT =
@@ -46,7 +46,7 @@ function [root, files] = validateYalmip()
         if isempty(file)
             if k == 1
                 error("install_pd_lmi:MissingYALMIP", ...
-                    "YALMIP is not on the current MATLAB path. Add YALMIP before installing PD-LMI.");
+                    "YALMIP is not on the current MATLAB path. Add YALMIP before installing GriD-LMIA.");
             end
             error("install_pd_lmi:IncompleteYALMIP", ...
                 "YALMIP is incomplete: required entry point '%s' is unavailable.", names{k});
@@ -166,7 +166,7 @@ function tf = isOnPath(folder)
 end
 
 function verifyPackageClasses(packageRoot)
-%VERIFYPACKAGECLASSES Refuse persistence if another package shadows PD-LMI.
+%VERIFYPACKAGECLASSES Refuse persistence if another package shadows GriD-LMIA.
     names = ["pdbase", "pdmat", "pdvar", "pdlmi"];
     for k = 1:numel(names)
         name = names(k);
@@ -181,7 +181,7 @@ function verifyPackageClasses(packageRoot)
                 found = string(hits{1});
             end
             error("install_pd_lmi:PathConflict", ...
-                "PD-LMI class '%s' is shadowed by %s.", name, found);
+                "GriD-LMIA class '%s' is shadowed by %s.", name, found);
         end
     end
 end

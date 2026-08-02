@@ -7,7 +7,7 @@ import BernsteinConceptDiagram from "../../../../components/BernsteinConceptDiag
 import CellStorageDiagram from "../../../../components/CellStorageDiagram.astro";
 
 <nav class="manual-trail">
-  <a href="/PD-LMI-package/documents/">Documents</a>
+  <a href="/GriD-LMIA/documents/">Documents</a>
   <span>/</span>
   <span>Coordinates And Bernstein</span>
   <span>/</span>
@@ -16,7 +16,7 @@ import CellStorageDiagram from "../../../../components/CellStorageDiagram.astro"
 
 This retained route is the conceptual overview. Detailed elevation,
 differentiation, convolution, subdivision, and traversal formulas now live in
-[Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/).
+[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
 
 ## Local Coordinates And The Tensor Representation
 
@@ -103,9 +103,9 @@ forward coefficient differences are multiplied by $M_s$ and divided by the
 physical width $h_s^{\mathbf c}$. `rhodiff` elevates the directional partials
 to a common tensor degree, combines them with rate-box vertices in a
 deterministic order, and stores one row per vertex. The interface interpretation
-is developed in [Rate-Box Reduction And Interface Analysis](/PD-LMI-package/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/);
+is developed in [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/);
 the exact coefficient formulas are in
-[Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-row-storage).
+[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-row-storage).
 
 ## Exact Algebra, Finite Certificates, And Independent Refinements
 
@@ -115,7 +115,7 @@ representation. Refining the physical grid re-expresses the same polynomial on
 smaller cells. Multiplication adds direction-wise degrees and uses an ordered,
 binomially normalized convolution, so matrix-factor order is preserved.
 Exact subdivision and the full formulas are collected in
-[Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/).
+[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
 
 These transformations feed several finite certificates. Direct constrains the
 target coefficients. Pólya first performs an exact degree elevation and then
@@ -124,7 +124,7 @@ blocks with an unweighted term and box-generator terms. FullBox uses every
 square-free generator product; SparseFullBox retains those identities while
 replacing each dense $Q_J$ by a symmetric block-band Gram matrix
 $Q_J^{(w)}$ of scalar bandwidth $w$. The
-[Certificate Map And Selection Guide](/PD-LMI-package/documents/math/sos-certificates/)
+[Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/)
 states the exact one- and multi-parameter forms.
 
 <span id="fixed-order-full-box-preordering"></span>
@@ -150,9 +150,9 @@ problem exactly.
 
 ## See Also
 
-[Previous: Gridding And Local Coordinates](/PD-LMI-package/documents/math/gridding-and-degree/) ·
-[Next: Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/) ·
-[Notation](/PD-LMI-package/documents/math/notation/#bernstein-labels-and-degrees) ·
-[`pdmat` storage](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/) ·
-[`pdmat elevate`](/PD-LMI-package/documents/reference/pdmat/elevate/) ·
-[`pdvar` storage and evaluation](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/)
+[Previous: Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/) ·
+[Next: Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/) ·
+[Notation](/GriD-LMIA/documents/math/notation/#bernstein-labels-and-degrees) ·
+[`pdmat` storage](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) ·
+[`pdmat elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) ·
+[`pdvar` storage and evaluation](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/)

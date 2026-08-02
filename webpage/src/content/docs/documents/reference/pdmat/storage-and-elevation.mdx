@@ -5,7 +5,7 @@ description: Class-specific cell traversal, coefficient evidence, labels, and co
 
 import CellStorageDiagram from "../../../../../components/CellStorageDiagram.astro";
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><span>storage</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a><span>/</span><span>storage</span></nav>
 
 The implementation is inherited from `pdbase`, but these methods are complete
 public `pdmat` behavior. They expose known numeric coefficient evidence and
@@ -48,7 +48,7 @@ entryCoefficients = coeffs(A(rowIndex,columnIndex),cellSubscript)
 Returns the known numeric coefficient row for one physical cell. `cellSubscript`
 must contain one finite, in-range positive integer per parameter. Failures use
 `pdbase:InvalidCellSubs`. A function-only `pdmat` has an empty placeholder
-rather than coefficient evidence; use [`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/)
+rather than coefficient evidence; use [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/)
 for that source.
 
 In the figure, this call selects one `LocalValues{c₁}...{cₙ}` branch. A shared
@@ -112,9 +112,9 @@ firstCell =
 
 ## See Also
 
-[`pdmat elevate`](/PD-LMI-package/documents/reference/pdmat/elevate/) ·
-[`pdmat evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
-[`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
-[`Mathematical notation`](/PD-LMI-package/documents/math/notation/) ·
-[`pdbase evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/) ·
-[`pdvar storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/)
+[`pdmat elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) ·
+[`pdmat evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) ·
+[`pdmat algebra`](/GriD-LMIA/documents/reference/pdmat/algebra/) ·
+[`Mathematical notation`](/GriD-LMIA/documents/math/notation/) ·
+[`pdbase evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/) ·
+[`pdvar storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/)

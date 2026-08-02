@@ -1,6 +1,6 @@
 ---
 title: Examples
-description: Runnable PD-LMI workflows using current public APIs.
+description: Runnable GriD-LMIA workflows using current public APIs.
 ---
 
 These examples are intentionally small and deterministic. They complement the reference pages without replacing them.
@@ -8,7 +8,7 @@ These examples are intentionally small and deterministic. They complement the re
 ## Setup And Verification
 
 ```matlab
-projectRoot = "path/to/PD-LMI-package";
+projectRoot = "path/to/GriD-LMIA";
 cd(projectRoot)
 report = install_pd_lmi();
 results = tests.run_all();
@@ -104,30 +104,30 @@ ans =
 
 ## Deterministic Full-Box Selection
 
-The [`applyFullBoxPreorder` reference](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/#deterministic-transcript-example)
+The [`applyFullBoxPreorder` reference](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/#deterministic-transcript-example)
 contains a solver-independent transcript that compares direct assembly, the
 minimum full-box order, an explicit higher order, replacement of a Pólya
 selection, and `toYalmip` export counts.
 
 ## Deterministic Putinar Selection
 
-The [`applyPutinar` reference](/PD-LMI-package/documents/reference/pdlmi/applyputinar/#deterministic-transcript-example)
+The [`applyPutinar` reference](/GriD-LMIA/documents/reference/pdlmi/applyputinar/#deterministic-transcript-example)
 contains a solver-independent transcript that compares direct assembly, the
 minimum Putinar order, an explicit higher order, replacement of a Pólya
 selection, and `toYalmip` export counts.
 
 ## Deterministic SparseFullBox Selection
 
-The [`applySparseFullBoxPreorder` reference](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/#deterministic-transcript)
+The [`applySparseFullBoxPreorder` reference](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/#deterministic-transcript)
 compares an intermediate band-limited certificate with its exact Direct and
 FullBox endpoints, and records the corresponding read-only state.
 
 ## Solver Smoke Cases
 
-The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](https://github.com/TheBigoranger/PD-LMI-package/blob/main/%2Btests/%2Bpdlmi/test_solver_smoke.m) are documented on a dedicated page:
+The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/%2Btests/%2Bpdlmi/test_solver_smoke.m) are documented on a dedicated page:
 
-- [Parameter-dependent Lyapunov variable](/PD-LMI-package/examples/solver-smoke/#parameter-dependent-lyapunov-variable)
-- [Block PD-LMI objective](/PD-LMI-package/examples/solver-smoke/#block-pd-lmi-objective)
+- [Parameter-dependent Lyapunov variable](/GriD-LMIA/examples/solver-smoke/#parameter-dependent-lyapunov-variable)
+- [Block PD-LMI objective](/GriD-LMIA/examples/solver-smoke/#block-pd-lmi-objective)
 
 ## Current Solver Boundary
 
@@ -138,6 +138,6 @@ residual diagnostic layer.
 
 ## See Also
 
-[LPV induced-L2-gain modeling guide](/PD-LMI-package/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/) ·
-[Certificate map](/PD-LMI-package/documents/math/sos-certificates/) ·
-[`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)
+[LPV induced-L2-gain modeling guide](/GriD-LMIA/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/) ·
+[Certificate map](/GriD-LMIA/documents/math/sos-certificates/) ·
+[`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)

@@ -6,15 +6,15 @@ description: Rebuild a PD-LMI residual with a fixed-order full-box Bernstein-Gra
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
 
 <nav class="manual-trail">
-  <a href="/PD-LMI-package/documents/">Documents</a>
+  <a href="/GriD-LMIA/documents/">Documents</a>
   <span>/</span>
-  <a href="/PD-LMI-package/documents/reference/pdlmi/">pdlmi</a>
+  <a href="/GriD-LMIA/documents/reference/pdlmi/">pdlmi</a>
   <span>/</span>
   <span>applyFullBoxPreorder</span>
 </nav>
 
 Gram bases, absolute order $r$, and target coefficients follow the
-[global certificate notation](/PD-LMI-package/documents/math/notation/#gram-basis-and-certificate-parameters).
+[global certificate notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters).
 
 <CertificateNavigation selected="fullbox" showSections={false} />
 
@@ -64,7 +64,7 @@ $\varepsilon I$ margin before selecting this non-strict certificate.
 For two parameters the four illustrated blocks correspond to the empty
 subset, each single generator, and their product. In $\ell$ parameters the
 same pattern has up to $2^\ell$ subset products. The
-[SOS certificate chapter](/PD-LMI-package/documents/math/sos-certificates/)
+[SOS certificate chapter](/GriD-LMIA/documents/math/sos-certificates/)
 develops the Gram and Markov–Lukács background step by step.
 
 ### Finite-SDP shape: two parameters, degree three
@@ -107,7 +107,7 @@ $$
 $$
 
 The detailed identity, basis degrees, and Gram dimensions are in the
-[worked two-parameter example](/PD-LMI-package/documents/math/sos-certificates/#worked-full-box-example-two-parameters-degree-three).
+[worked two-parameter example](/GriD-LMIA/documents/math/sos-certificates/#worked-full-box-example-two-parameters-degree-three).
 
 ## Arguments And Options
 
@@ -165,24 +165,24 @@ it does not use the already elevated constraints.
 - Semidefinite and entry-wise inequalities retain their original global mode.
 - Equality is direct-only; this method raises `pdlmi:UnsupportedEqualityCertificate` before validating `order`.
 - Constructor selection errors are documented on the
-  [`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/)
+  [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/)
   page, including `pdlmi:InvalidUseFullBoxPreorder` and
   `pdlmi:ConflictingRelaxations`.
 
 This method implements the fixed-order full-box preordering on each local
 parameter box. In one parameter it shares the parity-specific Markov–Lukács
 assembly with
-[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/).
+[`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/).
 For two or more parameters it is distinct because the full-box preordering includes every
 generator-subset product. It is not a general-domain SOS interface, a
 full-space SOS representation, or an automatic hierarchy selector.
 
 ## See Also
 
-[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) ·
-[`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) ·
-[`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) ·
-[`applySparseFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
-[`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/) ·
-[`Bernstein Polynomial`](/PD-LMI-package/documents/math/bernstein-polynomial/) ·
-[`SOS Certificates`](/PD-LMI-package/documents/math/sos-certificates/)
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) ·
+[`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) ·
+[`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) ·
+[`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
+[`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) ·
+[`Bernstein Polynomial`](/GriD-LMIA/documents/math/bernstein-polynomial/) ·
+[`SOS Certificates`](/GriD-LMIA/documents/math/sos-certificates/)

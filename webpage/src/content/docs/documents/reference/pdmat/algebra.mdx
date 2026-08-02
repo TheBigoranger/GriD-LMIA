@@ -10,7 +10,7 @@ import AdditionExplorer from "../../../../../components/AdditionExplorer.tsx";
 import MultiplicationExplorer from "../../../../../components/MultiplicationExplorer.tsx";
 import { Aside } from "@astrojs/starlight/components";
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdmat/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
 
 Every operation acts on the matrix payload stored at each local Bernstein label. The returned `pdmat` preserves known-data semantics and exposes the aligned grid, degree, and payload shape through its properties.
 
@@ -99,9 +99,9 @@ ans =
 The represented functions are re-expressed exactly on the sorted-union grid,
 then elevated to the componentwise maximum degree `[1 2]`. No sampling or
 approximate interpolation is used. See
-[Gridding and local coordinates](/PD-LMI-package/documents/math/gridding-and-degree/)
+[Gridding and local coordinates](/GriD-LMIA/documents/math/gridding-and-degree/)
 for physical-cell refinement and
-[`elevate`](/PD-LMI-package/documents/reference/pdmat/elevate/) for the
+[`elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) for the
 componentwise coefficient transform.
 
 ### Numerical addition explorer
@@ -205,7 +205,7 @@ ans =
 The tensor convolution adds degrees componentwise, so `[1 0]+[0 2]=[1 2]`;
 the zero-degree axes remain valid inputs rather than being promoted before
 multiplication. The complete coefficient rule is derived in
-[Coefficient algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/).
+[Coefficient algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
 
 <MultiplicationDiagram />
 
@@ -231,4 +231,4 @@ The weighted convolution below uses the same normalized Bernstein rule as
 
 ## See Also
 
-[`Mathematical notation`](/PD-LMI-package/documents/math/notation/) · [`structural operations`](/PD-LMI-package/documents/reference/pdmat/structural-operations/) · [`indexing and inspection`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) · [`Bernstein utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/)
+[`Mathematical notation`](/GriD-LMIA/documents/math/notation/) · [`structural operations`](/GriD-LMIA/documents/reference/pdmat/structural-operations/) · [`indexing and inspection`](/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/) · [`Bernstein utilities`](/GriD-LMIA/documents/reference/bernstein-utilities/)

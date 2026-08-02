@@ -3,15 +3,15 @@ title: pdbase Constructor
 description: Validated backend construction for shared grid and cell-local Bernstein storage.
 ---
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdbase/">pdbase</a><span>/</span><span>constructor</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdbase/">pdbase</a><span>/</span><span>constructor</span></nav>
 
 ## Purpose
 
 `pdbase` owns the common grid, payload-shape, degree, local-value, continuity,
 decision, and rate metadata inherited by `pdmat` and `pdvar`. Direct
 construction is mainly useful for backend tests and maintainers; modeling code
-normally starts with a [`pdmat`](/PD-LMI-package/documents/reference/pdmat/constructor/)
-or [`pdvar`](/PD-LMI-package/documents/reference/pdvar/constructor/).
+normally starts with a [`pdmat`](/GriD-LMIA/documents/reference/pdmat/constructor/)
+or [`pdvar`](/GriD-LMIA/documents/reference/pdvar/constructor/).
 
 ## Syntax
 
@@ -91,7 +91,7 @@ must not be inferred as the public `pdmat` or `pdvar` constructor contract.
 
 ## See Also
 
-[`storage and inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/) ·
-[`evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/) ·
-[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) ·
-[`pdvar constructor`](/PD-LMI-package/documents/reference/pdvar/constructor/)
+[`storage and inspection`](/GriD-LMIA/documents/reference/pdbase/storage-inspection/) ·
+[`evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/) ·
+[`pdmat constructor`](/GriD-LMIA/documents/reference/pdmat/constructor/) ·
+[`pdvar constructor`](/GriD-LMIA/documents/reference/pdvar/constructor/)

@@ -3,7 +3,7 @@ title: Protected pdbase Backend Utilities
 description: Protected Bernstein plans, storage, indexing, and reconstruction methods owned by pdbase.
 ---
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdbase/">pdbase</a><span>/</span><span>protected backend utilities</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdbase/">pdbase</a><span>/</span><span>protected backend utilities</span></nav>
 
 These inventoried methods are `protected` `pdbase` implementation utilities. They are
 documented for maintainers and API ownership clarity, but they are not callable
@@ -122,7 +122,7 @@ class-preserving reconstruction without calling protected methods directly.
 
 ## See Also
 
-[`pdbase matrix operations`](/PD-LMI-package/documents/reference/pdbase/matrix-operations/) ·
-[`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/) ·
-[`pdvar algebra`](/PD-LMI-package/documents/reference/pdvar/algebra/) ·
-[`seven shared helpers`](/PD-LMI-package/documents/reference/shared-helpers/)
+[`pdbase matrix operations`](/GriD-LMIA/documents/reference/pdbase/matrix-operations/) ·
+[`pdmat algebra`](/GriD-LMIA/documents/reference/pdmat/algebra/) ·
+[`pdvar algebra`](/GriD-LMIA/documents/reference/pdvar/algebra/) ·
+[`seven shared helpers`](/GriD-LMIA/documents/reference/shared-helpers/)

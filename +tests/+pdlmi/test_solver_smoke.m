@@ -7,7 +7,7 @@ function setupOnce(testCase)
     % Clear YALMIP global state so each solver smoke test builds fresh LMIs.
     yalmip("clear");
     testCase.TestData.Solver = tests.select_sdp_solver();
-    fprintf("PD-LMI solver smoke policy selected: %s\n", testCase.TestData.Solver);
+    fprintf("GriD-LMIA solver smoke policy selected: %s\n", testCase.TestData.Solver);
 end
 
 function testParameterDependentPBeatsConstantP(testCase)

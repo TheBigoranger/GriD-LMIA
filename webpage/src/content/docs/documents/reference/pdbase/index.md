@@ -1,6 +1,6 @@
 ---
 title: pdbase
-description: Shared backend parent for PD-LMI storage, evaluation, elevation, and matrix operations.
+description: Shared backend parent for GriD-LMIA storage, evaluation, elevation, and matrix operations.
 ---
 
 `pdbase` is the backend parent of `pdmat` and `pdvar`. It centralizes the
@@ -16,12 +16,12 @@ below make the common implementation and direct-backend behavior discoverable.
 
 | Reference | Coverage |
 | :--- | :--- |
-| [`Constructor`](/PD-LMI-package/documents/reference/pdbase/constructor/) | Direct backend construction, private-set metadata, validation, and limitations. |
-| [`Storage and inspection`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/) | Properties, cells, coefficients, labels, cell/label/parameter counts, and payload shape. |
-| [`Evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/) | Numeric/symbolic evaluation, right-cell ownership, `elevVals`, and class-preserving `elevate`. |
-| [`Matrix operations`](/PD-LMI-package/documents/reference/pdbase/matrix-operations/) | Unary sign, transpose, reshape, reductions, triangular transforms, repeat/reorder, and direct-base concatenation rejection. |
-| [`Indexing protocol`](/PD-LMI-package/documents/reference/pdbase/indexing-protocol/) | `end` and `numArgumentsFromSubscript` infrastructure inherited by both derived classes. |
-| [`Protected backend utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/) | All nine protected methods; not callable public API. |
+| [`Constructor`](/GriD-LMIA/documents/reference/pdbase/constructor/) | Direct backend construction, private-set metadata, validation, and limitations. |
+| [`Storage and inspection`](/GriD-LMIA/documents/reference/pdbase/storage-inspection/) | Properties, cells, coefficients, labels, cell/label/parameter counts, and payload shape. |
+| [`Evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/) | Numeric/symbolic evaluation, right-cell ownership, `elevVals`, and class-preserving `elevate`. |
+| [`Matrix operations`](/GriD-LMIA/documents/reference/pdbase/matrix-operations/) | Unary sign, transpose, reshape, reductions, triangular transforms, repeat/reorder, and direct-base concatenation rejection. |
+| [`Indexing protocol`](/GriD-LMIA/documents/reference/pdbase/indexing-protocol/) | `end` and `numArgumentsFromSubscript` infrastructure inherited by both derived classes. |
+| [`Protected backend utilities`](/GriD-LMIA/documents/reference/bernstein-utilities/) | All nine protected methods; not callable public API. |
 
 ## Current boundary
 
@@ -33,7 +33,7 @@ certificate assembly and solver handoff.
 
 ## See Also
 
-[`pdmat`](/PD-LMI-package/documents/reference/pdmat/) ·
-[`pdvar`](/PD-LMI-package/documents/reference/pdvar/) ·
-[`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) ·
-[`reference lookup`](/PD-LMI-package/documents/reference-index/)
+[`pdmat`](/GriD-LMIA/documents/reference/pdmat/) ·
+[`pdvar`](/GriD-LMIA/documents/reference/pdvar/) ·
+[`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/) ·
+[`reference lookup`](/GriD-LMIA/documents/reference-index/)

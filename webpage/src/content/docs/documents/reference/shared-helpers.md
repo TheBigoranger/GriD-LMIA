@@ -3,12 +3,12 @@ title: Shared Helper Utilities
 description: Seven backend-only +helper utilities shared across the package.
 ---
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><span>shared helpers</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><span>shared helpers</span></nav>
 
 The `+helper` namespace contains exactly seven shared implementation utilities.
 They are documented for maintainers, not as primary modeling API. `bernTbl`,
 `mapVals`, and `matSubs` are protected `pdbase` methods and therefore belong
-on the [protected backend utilities](/PD-LMI-package/documents/reference/bernstein-utilities/)
+on the [protected backend utilities](/GriD-LMIA/documents/reference/bernstein-utilities/)
 page.
 
 ## <span id="helper-cellget"></span>`helper.cellGet`
@@ -101,7 +101,7 @@ ans =
 
 ## See Also
 
-[`protected pdbase utilities`](/PD-LMI-package/documents/reference/bernstein-utilities/) ·
-[`pdbase storage`](/PD-LMI-package/documents/reference/pdbase/storage-inspection/) ·
-[`pdmat indexing`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/) ·
-[`pdvar indexing`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/)
+[`protected pdbase utilities`](/GriD-LMIA/documents/reference/bernstein-utilities/) ·
+[`pdbase storage`](/GriD-LMIA/documents/reference/pdbase/storage-inspection/) ·
+[`pdmat indexing`](/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/) ·
+[`pdvar indexing`](/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/)

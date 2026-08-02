@@ -1,6 +1,6 @@
 ---
 title: Thanks
-description: Acknowledgements and reference influences for the PD-LMI manual website.
+description: Acknowledgements and reference influences for the GriD-LMIA manual website.
 ---
 
 This package and manual are built around MATLAB and YALMIP workflows. The public documentation also uses Astro and Starlight for the GitHub Pages site.
@@ -16,7 +16,7 @@ This package and manual are built around MATLAB and YALMIP workflows. The public
 
 ## Comparison References
 
-ROLmip, LPVTools, ROMULOC, MATLAB documentation, YALMIP examples, and TikZ-style manuals are useful reference points for documentation structure, examples, and notation. They are not runtime dependencies of the PD-LMI package unless a future implementation explicitly adds such an adapter.
+ROLmip, LPVTools, ROMULOC, MATLAB documentation, YALMIP examples, and TikZ-style manuals are useful reference points for documentation structure, examples, and notation. They are not runtime dependencies of GriD-LMIA unless a future implementation explicitly adds such an adapter.
 
 ## Source Boundary
 

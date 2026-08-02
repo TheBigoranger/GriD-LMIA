@@ -4,7 +4,7 @@ description: Two solver-facing examples mirrored from +tests/+pdlmi/test_solver_
 ---
 
 <nav class="manual-trail">
-  <a href="/PD-LMI-package/examples/">Examples</a>
+  <a href="/GriD-LMIA/examples/">Examples</a>
   <span>/</span>
   <span>Solver Smoke Cases</span>
 </nav>
@@ -12,7 +12,7 @@ description: Two solver-facing examples mirrored from +tests/+pdlmi/test_solver_
 These examples mirror the tested solver-facing workflows in `+tests/+pdlmi/test_solver_smoke.m`. They use the package to assemble YALMIP constraints; solver selection and execution still happen through ordinary YALMIP calls.
 They are non-strict regression constraints; strict analysis requires an
 explicit $\varepsilon I$ margin as described in the
-[global notation](/PD-LMI-package/documents/math/notation/#strict-theory-and-software-constraints).
+[global notation](/GriD-LMIA/documents/math/notation/#strict-theory-and-software-constraints).
 
 ## Parameter-Dependent Lyapunov Variable
 
@@ -72,7 +72,7 @@ title("Solved parameter-dependent Lyapunov matrix");
 
 In the regression, MOSEK reports the constant case as infeasible and the parameter-dependent case as feasible. `lmilab` is used only as a fallback smoke path, not as the certificate for the infeasibility distinction.
 
-After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `pdmat` (`Pplot`) before calling [`plot`](/PD-LMI-package/documents/reference/pdmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
+After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `pdmat` (`Pplot`) before calling [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
 
 ## Block PD-LMI Objective
 
@@ -172,8 +172,8 @@ FullBox—through the same solver policy, which prefers MOSEK when available.
 ## Boundary
 
 These examples do not call a package-owned solver wrapper. They document the
-current boundary: PD-LMI builds direct, Pólya-elevated,
-[`Putinar box`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/), or
-[`SparseFullBox`](/PD-LMI-package/documents/reference/pdlmi/applysparsefullboxpreorder/), or
-[`full-box`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/)
+current boundary: GriD-LMIA builds direct, Pólya-elevated,
+[`Putinar box`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/), or
+[`SparseFullBox`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/), or
+[`full-box`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/)
 YALMIP constraints, and users call `optimize` directly.

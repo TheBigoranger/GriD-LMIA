@@ -3,11 +3,11 @@ title: pdvar Comparisons And Equality
 description: Create semidefinite or entry-wise inequalities with <= and >=, and direct coefficient equalities with ==.
 ---
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><span>comparisons and equality</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/">pdvar</a><span>/</span><span>comparisons and equality</span></nav>
 
 ## Purpose
 
-Overloaded `<=`, `>=`, and `==` promote compatible operands, store `lhs-rhs` as a `pdvar` residual, and return a [`pdlmi`](/PD-LMI-package/documents/reference/pdlmi/) wrapper. They assemble finite constraints; they do not choose a solver or call `optimize`.
+Overloaded `<=`, `>=`, and `==` promote compatible operands, store `lhs-rhs` as a `pdvar` residual, and return a [`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/) wrapper. They assemble finite constraints; they do not choose a solver or call `optimize`.
 
 ## Syntax
 
@@ -65,7 +65,7 @@ identity.toYalmip()    % []
 
 Proven numeric-zero identities are omitted, so `V == V` has empty `Constraints` and `toYalmip` returns `[]`. Equality is direct-only: constructor certificate options and `applyPolya`, `applyPutinar`, or `applyFullBoxPreorder` raise `pdlmi:UnsupportedEqualityCertificate` before validating an order.
 
-Use `==` to construct modeling equalities. Use [`isequal`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/#pdvar-isequal) only for MATLAB structural comparison of package objects.
+Use `==` to construct modeling equalities. Use [`isequal`](/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-isequal) only for MATLAB structural comparison of package objects.
 
 ## Returned object and properties
 
@@ -90,4 +90,4 @@ C.Constraints
 
 ## See Also
 
-[`pdlmi constructor`](/PD-LMI-package/documents/reference/pdlmi/constructor/) · [`pdlmi properties`](/PD-LMI-package/documents/reference/pdlmi/) · [`applyPolya`](/PD-LMI-package/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/PD-LMI-package/documents/reference/pdlmi/applyputinar/) · [`applyFullBoxPreorder`](/PD-LMI-package/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/PD-LMI-package/documents/reference/pdlmi/toyalmip/)
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`pdlmi properties`](/GriD-LMIA/documents/reference/pdlmi/) · [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)

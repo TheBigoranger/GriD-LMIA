@@ -3,7 +3,7 @@ title: pdvar Storage And Evaluation
 description: Class-specific cell traversal, symbolic coefficient rows, exact elevation, and ordinary or rate-aware evaluation.
 ---
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><span>storage and evaluation</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/">pdvar</a><span>/</span><span>storage and evaluation</span></nav>
 
 These methods are implemented by `pdbase` and remain complete public
 `pdvar` behavior. They preserve YALMIP expressions, variable identities,
@@ -11,7 +11,7 @@ continuity metadata, and derivative rate-row order.
 
 The physical-cell tree, local tensor labels, and traversal functions are the
 same as in the
-[`pdmat Storage` explanation](/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/).
+[`pdmat Storage` explanation](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/).
 For `pdvar`, the leaf at cell $\boldsymbol c$ and label $\boldsymbol i$ stores
 the symbolic matrix $X^{(\boldsymbol c)}[\boldsymbol i]$:
 
@@ -93,7 +93,7 @@ derivative rate row is elevated independently. The source `P`, its variables,
 and metadata remain unchanged.
 
 The coefficient map is exactly the
-[`pdmat` elevation formula](/PD-LMI-package/documents/reference/pdmat/elevate/#what-degree-elevation-does),
+[`pdmat` elevation formula](/GriD-LMIA/documents/reference/pdmat/elevate/#what-degree-elevation-does),
 applied linearly to symbolic coefficient matrices. Let
 
 $$
@@ -175,7 +175,7 @@ B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha).
 $$
 
 This is the same basis evaluation illustrated on
-[`pdmat evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/);
+[`pdmat evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/);
 only the stored coefficients and returned value are symbolic.
 
 Interior grid boundaries use the cell on the right, including discontinuous
@@ -211,7 +211,7 @@ assignment, solve, or merge derivative rows.
 
 ## See Also
 
-[`rhodiff`](/PD-LMI-package/documents/reference/pdvar/rhodiff/) ·
-[`value`](/PD-LMI-package/documents/reference/pdvar/value/) ·
-[`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/) ·
-[`pdbase evaluation and elevation`](/PD-LMI-package/documents/reference/pdbase/evaluation-and-elevation/)
+[`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) ·
+[`value`](/GriD-LMIA/documents/reference/pdvar/value/) ·
+[`bernsteinTable`](/GriD-LMIA/documents/reference/pdvar/bernsteintable/) ·
+[`pdbase evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/)

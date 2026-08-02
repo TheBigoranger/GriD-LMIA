@@ -1,14 +1,23 @@
-# PD-LMI
+# GriD-LMIA
 
-PD-LMI is a MATLAB/YALMIP research package for modeling parameter-dependent
-LMIs on tensor-product box grids. It represents known data (`pdmat`) and
+**Gri**dding-based **D**PD-**LMI A**ssembler (GriD-LMIA) is a MATLAB/YALMIP
+research package for modeling parameter-dependent LMIs on tensor-product box
+grids. It represents known data (`pdmat`) and
 continuous decision matrices (`pdvar`) in cell-local Bernstein bases, forms
 rate-vertex derivatives with `rhodiff`, and exports finite certificates to
 YALMIP through `pdlmi`.
 
-Documentation and latest stable release: **v1.2.0**.
+Current source and documentation snapshot: **v1.2.3**. Latest tagged GitHub
+Release: **v1.2.0**.
 
-## What is new in v1.2.0
+## Current source snapshot v1.2.3
+
+- Adopts GriD-LMIA as the package name and synchronizes the printable manual,
+  Web manual, repository, and GitHub Pages project path.
+- Keeps every MATLAB API, certificate selector, option, and error identifier
+  unchanged.
+
+## Latest tagged release v1.2.0
 
 - Bernstein degree is direction-wise: `Degree=[d1 ... dell]`. A scalar remains
   shorthand and is expanded uniformly; explicitly using that shorthand in a
@@ -21,7 +30,7 @@ Documentation and latest stable release: **v1.2.0**.
 - `PolyaDegree`, `PutinarOrder`, `SparseFullBoxOrder`, and `FullBoxOrder`
   accept scalar shorthand or per-axis vectors. `BandWidth` remains scalar.
 
-See the [v1.2.0 Release](https://github.com/TheBigoranger/PD-LMI-package/releases/tag/v1.2.0)
+See the [v1.2.0 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.2.0)
 for the complete verification record.
 
 ## Requirements and installation
@@ -102,12 +111,12 @@ assert(all([results.Passed]))
 
 ## Documentation
 
-- [Web manual](https://thebigoranger.github.io/PD-LMI-package/)
-- [Printable manual (PDF)](https://thebigoranger.github.io/PD-LMI-package/manual.pdf)
-- [Install and download](https://thebigoranger.github.io/PD-LMI-package/install/)
-- [Reference index](https://thebigoranger.github.io/PD-LMI-package/documents/reference-index/)
-- [Version history](https://thebigoranger.github.io/PD-LMI-package/version-history/)
-- [GitHub Releases](https://github.com/TheBigoranger/PD-LMI-package/releases)
+- [Web manual](https://thebigoranger.github.io/GriD-LMIA/)
+- [Printable manual (PDF)](https://thebigoranger.github.io/GriD-LMIA/manual.pdf)
+- [Install and download](https://thebigoranger.github.io/GriD-LMIA/install/)
+- [Reference index](https://thebigoranger.github.io/GriD-LMIA/documents/reference-index/)
+- [Version history](https://thebigoranger.github.io/GriD-LMIA/version-history/)
+- [GitHub Releases](https://github.com/TheBigoranger/GriD-LMIA/releases)
 
 The printable manual source is in `doc/`; the Astro/Starlight Web manual is in
 `webpage/`.

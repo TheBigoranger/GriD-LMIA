@@ -4,7 +4,7 @@ import { extname, join, relative, resolve, sep } from "node:path";
 import { chromium } from "playwright";
 
 const root = resolve("dist");
-const base = "/PD-LMI-package";
+const base = "/GriD-LMIA";
 const defaultViewports = [320, 390, 700, 768, 1024, 1280, 1440];
 const defaultThemes = ["light", "dark"];
 const tolerance = 1;
@@ -563,7 +563,7 @@ async function inspect(page) {
       }
     }
 
-    const storageDestination = "/PD-LMI-package/documents/reference/pdmat/storage-and-elevation/";
+    const storageDestination = "/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/";
     const storageAnchors = new Set(["#pdmat-cells", "#pdmat-coeffs", "#pdmat-lbls", "#pdmat-ncoeff"]);
     for (const link of document.querySelectorAll("a.storage-api-link")) {
       const href = link.getAttribute("href") ?? "";

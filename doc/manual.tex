@@ -2,7 +2,7 @@
 
 \input{manual-style}
 
-\title{\pkg\\User Manual} \author{Version v1.2.2} \date{July 30, 2026}
+\title{\pkg\\User Manual} \author{Version v1.2.3} \date{August 2, 2026}
 
 % \includeonly{chapters/workflow-introduction}
 % \includeonly{chapters/installation}
@@ -17,7 +17,7 @@
 \maketitle
 
 \begin{abstract}
-The \pkg{} is a MATLAB/YALMIP package for modelling and certifying parameter-dependent and differentiable parameter-dependent linear matrix inequalities (PD-LMIs and DPD-LMIs) over axis-aligned parameter and rate boxes. It represents coefficient-backed known matrices and continuous decision matrices as cell-local tensor-product Bernstein polynomials on an independently partitioned physical parameter grid. This finite representation supports exact cellwise coefficient algebra and differentiation, while Direct, P\'olya, Putinar, SparseFullBox, and FullBox constructions turn the remaining continuum sign condition into inspectable YALMIP constraints.
+\pkg{} (Gridding-based DPD-LMI Assembler) is a MATLAB/YALMIP package for modelling and certifying parameter-dependent and differentiable parameter-dependent linear matrix inequalities (PD-LMIs and DPD-LMIs) over axis-aligned parameter and rate boxes. It represents coefficient-backed known matrices and continuous decision matrices as cell-local tensor-product Bernstein polynomials on an independently partitioned physical parameter grid. This finite representation supports exact cellwise coefficient algebra and differentiation, while Direct, P\'olya, Putinar, SparseFullBox, and FullBox constructions turn the remaining continuum sign condition into inspectable YALMIP constraints.
 
 The intended workflow is direct: define the tensor grid and coefficient-backed known data with \code{pdmat}; create continuous polynomial decisions with \code{pdvar}; use \code{rhodiff} when scheduling-rate terms are present; form an affine residual comparison; optionally replace the default Direct certificate by one of the four supported alternatives; call \code{toYalmip}; then solve with YALMIP and recover values only after checking the solver status. The manual develops each step from runnable examples through the underlying tensor convolution, degree alignment, rate-row, and Gram-assembly mathematics.
 

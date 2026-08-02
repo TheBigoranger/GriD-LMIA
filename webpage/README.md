@@ -1,6 +1,6 @@
-# PD-LMI Manual Website
+# GriD-LMIA Manual Website
 
-This directory contains the GitHub Pages documentation site for the PD-LMI (parameter-dependent LMI) MATLAB/YALMIP package. The site is built with npm, Astro, and Starlight; Markdown math is rendered at build time through `remark-math` → `rehype-katex`, with KaTeX CSS and fonts bundled locally, so no client-side runtime typesetting or external asset fetch is required.
+This directory contains the GitHub Pages documentation site for GriD-LMIA (Gridding-based DPD-LMI Assembler), a MATLAB/YALMIP package for parameter-dependent linear matrix inequalities. The site is built with npm, Astro, and Starlight. Markdown math is rendered at build time through `remark-math` → `rehype-katex`, with KaTeX CSS and fonts bundled locally, so no client-side runtime typesetting or external asset fetch is required.
 
 ## Structure
 
@@ -18,10 +18,10 @@ Run these from the repository root:
 | `npm --prefix webpage run dev` | Start the local docs server. |
 | `npm --prefix webpage run build` | Generate the reference index and build the static site. |
 | `npm --prefix webpage run preview` | Preview the built site locally. |
-| `npm --prefix webpage run check:links` | Validate built internal links and anchors under `/PD-LMI-package/`. |
+| `npm --prefix webpage run check:links` | Validate built internal links and anchors under `/GriD-LMIA/`. |
 
 ## Publishing
 
 GitHub Actions builds this project from `webpage/` and publishes it to:
 
-`https://thebigoranger.github.io/PD-LMI-package/`
+`https://thebigoranger.github.io/GriD-LMIA/`

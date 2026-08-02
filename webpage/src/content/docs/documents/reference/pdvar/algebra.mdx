@@ -6,7 +6,7 @@ description: Detailed affine-algebra syntax, formulas, examples, outputs, and er
 import ExampleDisclosure from "../../../../../components/ExampleDisclosure.astro";
 import { Aside } from "@astrojs/starlight/components";
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
 
 `pdvar` stores affine YALMIP expressions at cell-local Bernstein labels. The examples use deterministic metadata rather than unstable YALMIP variable names.
 
@@ -37,7 +37,7 @@ R=1-by-1, S=1-by-1, uplus=1-by-1
 ```
 
 The same exact degree alignment applies to symbolic rows and numeric rows. Use
-the [`pdmat` numerical addition explorer](/PD-LMI-package/documents/reference/pdmat/algebra/#numerical-addition-explorer)
+the [`pdmat` numerical addition explorer](/GriD-LMIA/documents/reference/pdmat/algebra/#numerical-addition-explorer)
 to inspect the coefficient transformation; `pdvar` replaces those numeric
 entries with affine YALMIP expressions.
 
@@ -78,7 +78,7 @@ degree rows.
   summary="Show the complete runnable affine-decision example"
 />
 
-The [`pdmat` numerical multiplication explorer](/PD-LMI-package/documents/reference/pdmat/algebra/#numerical-multiplication-explorer)
+The [`pdmat` numerical multiplication explorer](/GriD-LMIA/documents/reference/pdmat/algebra/#numerical-multiplication-explorer)
 shows the same ordered Bernstein convolution with numeric coefficients.
 For `pdvar`, the additional boundary is decision linearity: at most one
 converted operand may carry decision dependence.
@@ -101,4 +101,4 @@ leave the package's affine YALMIP layer.
 
 ## See Also
 
-[`Mathematical notation`](/PD-LMI-package/documents/math/notation/) · [`structural operations`](/PD-LMI-package/documents/reference/pdvar/structural-operations/) · [`comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) · [`pdmat algebra`](/PD-LMI-package/documents/reference/pdmat/algebra/)
+[`Mathematical notation`](/GriD-LMIA/documents/math/notation/) · [`structural operations`](/GriD-LMIA/documents/reference/pdvar/structural-operations/) · [`comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`pdmat algebra`](/GriD-LMIA/documents/reference/pdmat/algebra/)

@@ -86,7 +86,7 @@ ${familiesOf(entries).map(([route, familyEntries]) => family(route, familyEntrie
 
 const body = `---
 title: Reference Lookup
-description: Generated lookup for implemented PD-LMI reference pages and symbols.
+description: Generated lookup for implemented GriD-LMIA reference pages and symbols.
 ---
 
 <p>${wrapCompounds("This generated lookup groups every reference-page family by its package role. A one-symbol family links directly to that symbol; multi-symbol families keep their direct symbol and anchor links in one compact disclosure. The source data lives in ")}<code>src/data/reference-index.js</code>${wrapCompounds("; regenerate this page with ")}<code>{"npm --prefix webpage run generate:index"}</code>.</p>

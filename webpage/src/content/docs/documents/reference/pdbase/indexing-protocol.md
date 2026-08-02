@@ -3,7 +3,7 @@ title: pdbase Indexing Protocol
 description: Shared MATLAB end-index and scalar subscript-dispatch behavior.
 ---
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdbase/">pdbase</a><span>/</span><span>indexing protocol</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdbase/">pdbase</a><span>/</span><span>indexing protocol</span></nav>
 
 ## <span id="pdbase-end"></span>`end`
 
@@ -48,7 +48,7 @@ lastAtOne =
 ## Limitations and See Also
 
 Only two-dimensional matrix-payload indexing is implemented by the derived
-classes. See [`pdmat indexing`](/PD-LMI-package/documents/reference/pdmat/indexing-and-inspection/)
-and [`pdvar indexing`](/PD-LMI-package/documents/reference/pdvar/indexing-and-inspection/)
+classes. See [`pdmat indexing`](/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/)
+and [`pdvar indexing`](/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/)
 for subscript forms, assignments, dynamic error prefixes, and modeling
 boundaries.

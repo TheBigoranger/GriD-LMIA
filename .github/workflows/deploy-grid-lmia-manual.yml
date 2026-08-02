@@ -1,11 +1,11 @@
-name: Deploy PD-LMI Manual
+name: Deploy GriD-LMIA Manual
 
 on:
   push:
     branches: [main]
     paths:
       - "webpage/**"
-      - ".github/workflows/deploy-pd-lmi-manual.yml"
+      - ".github/workflows/deploy-grid-lmia-manual.yml"
   workflow_dispatch:
 
 permissions:

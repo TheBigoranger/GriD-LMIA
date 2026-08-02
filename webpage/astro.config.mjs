@@ -11,7 +11,7 @@ import rehypeKatexStrict from "./src/lib/rehype-katex-strict.js";
 // https://astro.build/config
 export default defineConfig({
   site: "https://thebigoranger.github.io",
-  base: "/PD-LMI-package",
+  base: "/GriD-LMIA",
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath],
@@ -21,15 +21,15 @@ export default defineConfig({
   integrations: [
     react(),
     starlight({
-      title: "PD-LMI Manual",
+      title: "GriD-LMIA Manual",
       description:
-        "Reference-first manual for the PD-LMI MATLAB/YALMIP package.",
+        "Reference-first manual for GriD-LMIA, the Gridding-based DPD-LMI Assembler.",
       customCss: ["katex/dist/katex.min.css", "./src/styles/manual.css"],
       social: [
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/thebigoranger/PD-LMI-package",
+          href: "https://github.com/TheBigoranger/GriD-LMIA",
         },
       ],
       components: {

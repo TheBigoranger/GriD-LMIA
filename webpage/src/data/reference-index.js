@@ -1,4 +1,4 @@
-const page = (path, anchor = "") => `/PD-LMI-package/${path}/${anchor ? `#${anchor}` : ""}`;
+const page = (path, anchor = "") => `/GriD-LMIA/${path}/${anchor ? `#${anchor}` : ""}`;
 
 export const referenceGroups = [
   { id: "pdmat", label: "pdmat", description: "Function-backed known data and coefficient-backed Bernstein operations." },
@@ -209,7 +209,7 @@ export const referenceEntries = [
     name: "pdbase",
     type: "Backend class",
     task: "Understand the common storage and matrix-operation implementation inherited by pdmat and pdvar.",
-    href: "/PD-LMI-package/documents/reference/pdbase/",
+    href: "/GriD-LMIA/documents/reference/pdbase/",
     group: "pdbase-backend",
   },
   entry("pdbase constructor", "pdbase function", "Construct a validated backend object for tests and derived classes.", "documents/reference/pdbase/constructor", "", "pdbase-backend"),
@@ -219,14 +219,14 @@ export const referenceEntries = [
     name: "pdmat",
     type: "Known-data class",
     task: "Represent finite real matrix data on a parameter grid.",
-    href: "/PD-LMI-package/documents/reference/pdmat/",
+    href: "/GriD-LMIA/documents/reference/pdmat/",
     group: "pdmat",
   },
   {
     name: "pdmat constructor",
     type: "pdmat function",
     task: "Create coefficient-backed or function-backed known-data matrices.",
-    href: "/PD-LMI-package/documents/reference/pdmat/constructor/",
+    href: "/GriD-LMIA/documents/reference/pdmat/constructor/",
     group: "pdmat",
   },
   ...pdmatMethods.map(([name, task, dedicated]) => entry(name, "pdmat method", task, dedicated ? `documents/reference/pdmat/${dedicated.toLowerCase()}` : operationRoute("pdmat", name), dedicated ? "" : `pdmat-${name}`, "pdmat")),
@@ -235,14 +235,14 @@ export const referenceEntries = [
     name: "pdvar",
     type: "Decision class",
     task: "Create continuous YALMIP-backed Bernstein decision expressions.",
-    href: "/PD-LMI-package/documents/reference/pdvar/",
+    href: "/GriD-LMIA/documents/reference/pdvar/",
     group: "pdvar",
   },
   {
     name: "pdvar constructor",
     type: "pdvar function",
     task: "Create symmetric or full continuous Bernstein decision variables.",
-    href: "/PD-LMI-package/documents/reference/pdvar/constructor/",
+    href: "/GriD-LMIA/documents/reference/pdvar/constructor/",
     group: "pdvar",
   },
   ...pdvarMethods.map(([name, task, dedicated]) => {
@@ -254,14 +254,14 @@ export const referenceEntries = [
     name: "pdlmi",
     type: "Constraint class",
     task: "Store direct equality or direct, Pólya, Putinar, SparseFullBox, or FullBox inequality constraints.",
-    href: "/PD-LMI-package/documents/reference/pdlmi/",
+    href: "/GriD-LMIA/documents/reference/pdlmi/",
     group: "pdlmi",
   },
   {
     name: "pdlmi constructor",
     type: "pdlmi function",
     task: "Select one of five finite assembly states.",
-    href: "/PD-LMI-package/documents/reference/pdlmi/constructor/",
+    href: "/GriD-LMIA/documents/reference/pdlmi/constructor/",
     group: "pdlmi",
   },
   entry("toYalmip", "pdlmi method", "Concatenate stored constraints for YALMIP optimize calls.", "documents/reference/pdlmi/toyalmip", "", "pdlmi"),

@@ -1,22 +1,22 @@
 ---
 title: Documents
-description: Reference-first entry point for PD-LMI classes, methods, and mathematical background.
+description: Reference-first entry point for GriD-LMIA classes, methods, and mathematical background.
 ---
 
 import ReferenceCategoryHub from "../../../components/ReferenceCategoryHub.astro";
 
-Use this page as the lookup entry for current PD-LMI behavior. The reference
+Use this page as the lookup entry for current GriD-LMIA behavior. The reference
 pages document implemented code only, including Direct, opt-in Pólya,
 fixed-order Putinar, block-band SparseFullBox, and fixed-order FullBox
 assembly. Supported inputs and validation errors appear beside the constructor
 or method they affect.
 
 Start mathematical reading with the
-[global notation dictionary](/PD-LMI-package/documents/math/notation/).
+[global notation dictionary](/GriD-LMIA/documents/math/notation/).
 
 PD-LMI means **parameter-dependent LMI**. The package represents continuous piecewise-polynomial matrix functions on physical grid cells in a cell-local tensor-product Bernstein basis. `pdvar` shares complete face values between adjacent cells; differentiation remains cell-local, so the representation is not a B-spline and does not assert global differentiability. Use **DPD-LMI** only for a differentiable PD-LMI with explicit derivative and rate terms.
 
-## Documentation v1.2.2 Supported Scope
+## Documentation v1.2.3 Supported Scope
 
 Version 1.2.2 documents the implemented package workflow after shared matrix
 protocols, unary transformations, and reductions were centralized in
@@ -31,36 +31,36 @@ functions.
 
 The package remains intentionally bounded to tensor-product box grids and affine decision expressions. Products with decision dependence on both sides, including decision-by-decision and decision-by-rate products, are rejected. Equality assembly is direct-only. Certificate failure does not prove the original continuum inequality infeasible, no assembly mode inserts a positivity margin, and YALMIP continues to own objectives, solver choice, optimization, and diagnostics. General-domain or general-generator SOS hierarchies are mathematical context rather than implemented APIs.
 
-Start with [Install And Download](/PD-LMI-package/install/), verify the checkout with `tests.run_all()`, and use the generated lookup for the accepted forms, returned shapes, validation rules, and limitations of all 179 indexed entries.
+Start with [Install And Download](/GriD-LMIA/install/), verify the checkout with `tests.run_all()`, and use the generated lookup for the accepted forms, returned shapes, validation rules, and limitations of all 179 indexed entries.
 
 ## Reference Index
 
 <ReferenceCategoryHub />
 
-The generated [categorized lookup](/PD-LMI-package/documents/reference-index/) uses the same source inventory and gives every public class, method, backend utility, and shared helper a direct route or stable anchor.
+The generated [categorized lookup](/GriD-LMIA/documents/reference-index/) uses the same source inventory and gives every public class, method, backend utility, and shared helper a direct route or stable anchor.
 
 ## Mathematical Guide
 
 ### Modeling And Analysis
 
-- [DPD-LMI And LPV L2-Gain Model](/PD-LMI-package/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/): plant, induced-$L_2$ objective, bounded-real DPD-LMI, sign normalization, and YALMIP boundary.
-- [Rate-Box Reduction And Interface Analysis](/PD-LMI-package/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/): exact rate vertices, cellwise derivatives, value continuity, and Clarke interface coverage.
+- [DPD-LMI And LPV L2-Gain Model](/GriD-LMIA/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/): plant, induced-$L_2$ objective, bounded-real DPD-LMI, sign normalization, and YALMIP boundary.
+- [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/): exact rate vertices, cellwise derivatives, value continuity, and Clarke interface coverage.
 
 ### Coordinates And Bernstein
 
-- [Gridding And Local Coordinates](/PD-LMI-package/documents/math/gridding-and-degree/): tensor grids, physical cells, widths, and forward pullbacks.
-- [Bernstein Basis, Continuity, And Storage](/PD-LMI-package/documents/math/bernstein-polynomial/): basis geometry, shared faces, and cell-local data.
-- [Coefficient Algebra](/PD-LMI-package/documents/math/coordinates-and-bernstein/coefficient-algebra/): elevation, differentiation, ordered convolution, subdivision, and finite residual assembly.
+- [Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/): tensor grids, physical cells, widths, and forward pullbacks.
+- [Bernstein Basis, Continuity, And Storage](/GriD-LMIA/documents/math/bernstein-polynomial/): basis geometry, shared faces, and cell-local data.
+- [Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/): elevation, differentiation, ordered convolution, subdivision, and finite residual assembly.
 
 ### Finite Certificates
 
-- [Certificate Map And Selection Guide](/PD-LMI-package/documents/math/sos-certificates/): five software states and failure interpretation.
-- [Direct And Pólya](/PD-LMI-package/documents/math/finite-certificates/direct-and-polya/): coefficient tests and exact elevation.
-- [Markov–Lukács And Putinar](/PD-LMI-package/documents/math/finite-certificates/markov-lukacs-and-putinar/): parity interval forms and singleton-generator modules.
-- [SparseFullBox And FullBox](/PD-LMI-package/documents/math/finite-certificates/sparsefullbox-and-fullbox/): symmetric block-band Gram matrices $Q_J^{(w)}$, bandwidth endpoints, and full-box preorderings.
+- [Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/): five software states and failure interpretation.
+- [Direct And Pólya](/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/): coefficient tests and exact elevation.
+- [Markov–Lukács And Putinar](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/): parity interval forms and singleton-generator modules.
+- [SparseFullBox And FullBox](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/): symmetric block-band Gram matrices $Q_J^{(w)}$, bandwidth endpoints, and full-box preorderings.
 
 ## Install And Examples
 
-- [Install And Download](/PD-LMI-package/install/): tagged release, current source/manual snapshots, and the one-call MATLAB installer.
-- [Examples](/PD-LMI-package/examples/): compact workflows.
-- [Solver Smoke Cases](/PD-LMI-package/examples/solver-smoke/): tested YALMIP examples from `+tests/+pdlmi/test_solver_smoke.m`.
+- [Install And Download](/GriD-LMIA/install/): tagged release, current source/manual snapshots, and the one-call MATLAB installer.
+- [Examples](/GriD-LMIA/examples/): compact workflows.
+- [Solver Smoke Cases](/GriD-LMIA/examples/solver-smoke/): tested YALMIP examples from `+tests/+pdlmi/test_solver_smoke.m`.

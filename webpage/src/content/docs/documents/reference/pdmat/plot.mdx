@@ -11,15 +11,15 @@ export const plotSeries = [
 ];
 
 <nav class="manual-trail">
-  <a href="/PD-LMI-package/documents/">Documents</a>
+  <a href="/GriD-LMIA/documents/">Documents</a>
   <span>/</span>
-  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>plot</span>
 </nav>
 
 Parameter and local-coordinate symbols follow the
-[global notation](/PD-LMI-package/documents/math/notation/#grids-cells-and-local-coordinates).
+[global notation](/GriD-LMIA/documents/math/notation/#grids-cells-and-local-coordinates).
 
 <ParameterCurveDiagram series={plotSeries} label="Linear and quadratic pdmat entries plotted across rho" caption="plot samples represented matrix entries over the physical parameter interval; each visible curve remains tied to its matrix index." />
 
@@ -78,7 +78,7 @@ sampleCount =
     81
 ```
 
-![One-dimensional pdmat plot showing rho and rho squared entries](/PD-LMI-package/plots/pdmat-plot-1d.png)
+![One-dimensional pdmat plot showing rho and rho squared entries](/GriD-LMIA/plots/pdmat-plot-1d.png)
 
 The linear and quadratic entries show that one graphics handle is returned for
 each matrix payload entry.
@@ -102,7 +102,7 @@ faceAlpha =
     0.7800
 ```
 
-![Two-dimensional scalar pdmat surface over rho one and rho two](/PD-LMI-package/plots/pdmat-plot-2d.png)
+![Two-dimensional scalar pdmat surface over rho one and rho two](/GriD-LMIA/plots/pdmat-plot-2d.png)
 
 The scalar surface includes both a quadratic term and a mixed term. `plot`
 uses the selected grid axes as the two displayed dimensions.
@@ -140,7 +140,7 @@ handleCount =
      2
 ```
 
-![Two intersecting entry surfaces from a two-by-one two-parameter pdmat object, with an outside legend](/PD-LMI-package/plots/pdmat-plot-2d-matrix.png)
+![Two intersecting entry surfaces from a two-by-one two-parameter pdmat object, with an outside legend](/GriD-LMIA/plots/pdmat-plot-2d-matrix.png)
 
 The two entries are equal for every $\rho_2$ along $\rho_1=0$. Their ordering
 reverses on opposite sides: the first entry is lower for $\rho_1<0$ and higher
@@ -160,6 +160,6 @@ cannot cover either surface.
 
 ## See Also
 
-[`evaluate`](/PD-LMI-package/documents/reference/pdmat/evaluate/) ·
-[`rhodiff`](/PD-LMI-package/documents/reference/pdmat/rhodiff/) ·
-[`bernsteinTable`](/PD-LMI-package/documents/reference/pdmat/bernsteintable/)
+[`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) ·
+[`rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) ·
+[`bernsteinTable`](/GriD-LMIA/documents/reference/pdmat/bernsteintable/)

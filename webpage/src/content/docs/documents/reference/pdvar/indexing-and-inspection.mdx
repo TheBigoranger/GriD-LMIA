@@ -5,7 +5,7 @@ description: Complete symbolic indexing, assignment, shape, equality, display, a
 
 import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
 
-<nav class="manual-trail"><a href="/PD-LMI-package/documents/">Documents</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/PD-LMI-package/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>indexing and inspection</span></nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>indexing and inspection</span></nav>
 
 ## <span id="pdvar-subsref"></span>`subsref` and <span id="pdvar-end"></span>`end`
 
@@ -79,7 +79,7 @@ tf = isequal(P,Q)
 
 Returns a MATLAB logical after comparing normalized grids, shapes, degree,
 metadata, and symbolic coefficient evidence. Overloaded `P == Q` instead
-creates a direct [`pdlmi` equality](/PD-LMI-package/documents/reference/pdvar/comparisons/#pdvar-comparison-eq).
+creates a direct [`pdlmi` equality](/GriD-LMIA/documents/reference/pdvar/comparisons/#pdvar-comparison-eq).
 
 ```matlab
 yalmip('clear')
@@ -106,7 +106,7 @@ P
 
 Display prints a concise object summary. It does not promise workspace-dependent
 YALMIP variable names; use
-[`bernsteinTable`](/PD-LMI-package/documents/reference/pdvar/bernsteintable/)
+[`bernsteinTable`](/GriD-LMIA/documents/reference/pdvar/bernsteintable/)
 for stable row-oriented diagnostics.
 
 ## <span id="pdvar-numArgumentsFromSubscript"></span>`numArgumentsFromSubscript`
@@ -120,6 +120,6 @@ Malformed subscripts and incompatible assignments use `pdvar`-owned errors.
 Indexing never selects cells, labels, or derivative rows and never calls
 `value` or a solver.
 
-[`storage and evaluation`](/PD-LMI-package/documents/reference/pdvar/storage-and-evaluation/) ·
-[`comparisons`](/PD-LMI-package/documents/reference/pdvar/comparisons/) ·
-[`pdbase indexing protocol`](/PD-LMI-package/documents/reference/pdbase/indexing-protocol/)
+[`storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) ·
+[`comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) ·
+[`pdbase indexing protocol`](/GriD-LMIA/documents/reference/pdbase/indexing-protocol/)

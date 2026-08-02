@@ -4,15 +4,15 @@ description: Return a command-line Bernstein coefficient table for pdmat.
 ---
 
 <nav class="manual-trail">
-  <a href="/PD-LMI-package/documents/">Documents</a>
+  <a href="/GriD-LMIA/documents/">Documents</a>
   <span>/</span>
-  <a href="/PD-LMI-package/documents/reference/pdmat/">pdmat</a>
+  <a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
   <span>bernsteinTable</span>
 </nav>
 
 Cell indices, local labels, and degree symbols follow the
-[global notation](/PD-LMI-package/documents/math/notation/#bernstein-labels-and-degrees).
+[global notation](/GriD-LMIA/documents/math/notation/#bernstein-labels-and-degrees).
 
 ## Purpose
 
@@ -168,6 +168,6 @@ expressionCount =
 
 ## See Also
 
-[`pdmat constructor`](/PD-LMI-package/documents/reference/pdmat/constructor/) ·
-[`rhodiff`](/PD-LMI-package/documents/reference/pdmat/rhodiff/) ·
-[`plot`](/PD-LMI-package/documents/reference/pdmat/plot/)
+[`pdmat constructor`](/GriD-LMIA/documents/reference/pdmat/constructor/) ·
+[`rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) ·
+[`plot`](/GriD-LMIA/documents/reference/pdmat/plot/)

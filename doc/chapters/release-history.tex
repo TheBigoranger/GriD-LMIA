@@ -1,11 +1,13 @@
 \chapter*{Version History}
 \addcontentsline{toc}{chapter}{Version History}
 
-The entries below identify the current tagged GitHub Release and retain the final documentation snapshot or latest release from each completed minor line.
+The entries below identify the current source and documentation snapshot, the latest tagged GitHub Release, and the final documentation snapshot or latest release from each completed minor line.
 
 \begin{description}[
   style=nextline, leftmargin=1.5em, labelindent=0pt, labelwidth=1em, labelsep=0.5em, itemindent=0pt, font=\normalfont\bfseries]
-  \item[v1.2.0 --- July 29, 2026 --- current and latest GitHub Release] Adds direction-wise Bernstein degrees to \code{pdbase}, \code{pdmat}, and \code{pdvar}; scalar-or-vector elevation and componentwise degree algebra; exact multivariate \code{rhodiff} alignment with degree-zero-axis support; and scalar-or-vector P\'olya, Putinar, SparseFullBox, and FullBox certificate parameters. Public degrees and orders are stored as row vectors, tensor counts use the product of per-axis cardinalities, and SparseFullBox retains a scalar bandwidth with anisotropic endpoint normalization.
+  \item[v1.2.3 documentation --- August 2, 2026 --- current source and documentation snapshot] Establishes \pkg{} as the formal package name, expands it as Gridding-based DPD-LMI Assembler at first use, and aligns package-facing source comments, the README, the printable manual, and the Web manual with this name. MATLAB classes, functions, options, error identifiers, and benchmark schemas are unchanged. This snapshot is not a tagged GitHub Release.
+
+  \item[v1.2.0 --- July 29, 2026 --- latest tagged GitHub Release] Adds direction-wise Bernstein degrees to \code{pdbase}, \code{pdmat}, and \code{pdvar}. It also adds scalar-or-vector elevation and componentwise degree algebra, exact multivariate \code{rhodiff} alignment with degree-zero-axis support, and scalar-or-vector P\'olya, Putinar, SparseFullBox, and FullBox certificate parameters. Public degrees and orders are stored as row vectors, tensor counts use the product of per-axis cardinalities, and SparseFullBox retains a scalar bandwidth with anisotropic endpoint normalization.
 
   \item[v1.1.6 documentation --- July 28, 2026 --- final v1.1 snapshot] Unifies tensor-grid, cell, Bernstein-degree, residual, target, and Gram notation across the printable and Web manuals; states SparseFullBox directly through the paper notation \(Q_J^{(w)}\) for symmetric block-band Gram matrices of bandwidth \(w\); expands the Bernstein convolution and Gram/SOS foundations; adds the Math Concepts navigation and interactive \code{pdmat} addition, multiplication, and elevation explorers; and fits the Welcome three-dimensional grid at every supported rotation. The MATLAB API is unchanged.
 
