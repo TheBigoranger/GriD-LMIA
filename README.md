@@ -7,15 +7,18 @@ continuous decision matrices (`pdvar`) in cell-local Bernstein bases, forms
 rate-vertex derivatives with `rhodiff`, and exports finite certificates to
 YALMIP through `pdlmi`.
 
-Current source and documentation snapshot: **v1.2.3**. Latest tagged GitHub
+Current source and documentation snapshot: **v1.2.4**. Latest tagged GitHub
 Release: **v1.2.0**.
 
-## Current source snapshot v1.2.3
+## Current source snapshot v1.2.4
 
-- Adopts GriD-LMIA as the package name and synchronizes the printable manual,
-  Web manual, repository, and GitHub Pages project path.
-- Keeps every MATLAB API, certificate selector, option, and error identifier
-  unchanged.
+- Adds `SparsePutinar`, a clique-based, chordal-inspired tensor-window Gram
+  decomposition of the box Putinar certificate.
+- Accumulates every overlapping window contribution into the corresponding
+  target Bernstein coefficient equality.
+- Reduces the maximum PSD-block dimension by trading dense Gram blocks for more
+  independent window blocks. This trade does not guarantee a smaller total SDP
+  or a shorter solve time.
 
 ## Latest tagged release v1.2.0
 
@@ -81,7 +84,8 @@ certificates are explicit and replace the current certificate selection:
 | Direct | `P >= A` | Coefficient-wise Bernstein certificate |
 | Pólya | `constraint.applyPolya([1 2])` | Direction-wise degree elevation before coefficient tests |
 | Putinar | `constraint.applyPutinar([2 3])` | Box quadratic-module Gram certificate |
-| SparseFullBox | `constraint.applySparseFullBoxPreorder(2, [2 3])` | Band-limited tensor-window Gram certificate |
+| SparsePutinar | `constraint.applySparsePutinar(2, [2 3])` | Clique-window decomposition of the Putinar Gram certificate |
+| SparseFullBox | `constraint.applySparseFullBoxPreorder(2, [2 3])` | Band-limited tensor-window decomposition of the full-box preordering |
 | FullBox | `constraint.applyFullBoxPreorder([2 3])` | Dense full-box preordering |
 
 These are sufficient certificates. Failure of one finite certificate does not
@@ -94,8 +98,10 @@ accept solver results or recovered objectives only after checking
 - Grids are tensor products of one-dimensional box partitions.
 - Decision expressions are affine in YALMIP variables; products with decision
   dependence on both sides are rejected.
-- Putinar, SparseFullBox, and FullBox are box-specific fixed-order
+- Putinar, SparsePutinar, SparseFullBox, and FullBox are box-specific fixed-order
   constructions, not a general SOS parser.
+- SparsePutinar uses tensor windows. It does not infer a sparsity graph, compute
+  a chordal completion, or implement structural-matrix chordal decomposition.
 - Function-only `pdmat` data need explicit Bernstein coefficient evidence
   before coefficient algebra or certificate assembly.
 - YALMIP owns objectives, solver selection, optimization, and diagnostics.
@@ -120,3 +126,19 @@ assert(all([results.Passed]))
 
 The printable manual source is in `doc/`; the Astro/Starlight Web manual is in
 `webpage/`.
+
+## Citing GriD-LMIA
+
+If GriD-LMIA supports published work, please cite the software paper:
+
+```bibtex
+@article{xu2026gridlmia,
+  title   = {GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities},
+  author  = {Xu, Yicheng and Jabbari, Faryar},
+  journal = {arXiv preprint arXiv:2608.03175},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2608.03175}
+}
+```
+
+Paper: [arXiv:2608.03175](https://arxiv.org/abs/2608.03175).

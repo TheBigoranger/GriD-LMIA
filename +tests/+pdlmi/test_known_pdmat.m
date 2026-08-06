@@ -141,12 +141,15 @@ function testGramFamiliesAndSparseEndpoints(testCase)
     A = pdmat([0 1], @(rho) 1 + 0 * rho, Degree=4);
     direct = A >= 0;
     putinar = direct.applyPutinar(2);
+    sparsePutinar = direct.applySparsePutinar(2, 2);
     sparse = direct.applySparseFullBoxPreorder(2, 2);
     full = direct.applyFullBoxPreorder(2);
     widthOne = direct.applySparseFullBoxPreorder(1, 2);
     dense = direct.applySparseFullBoxPreorder(3, 2);
+    sparsePutinarDense = direct.applySparsePutinar(3, 2);
 
     verifyGram(testCase, putinar);
+    verifyGram(testCase, sparsePutinar);
     verifyGram(testCase, sparse);
     verifyGram(testCase, full);
     testCase.verifyTrue(islogical(toYalmip(widthOne)));
@@ -154,6 +157,9 @@ function testGramFamiliesAndSparseEndpoints(testCase)
     testCase.verifyTrue(dense.UseFullBoxPreorder);
     testCase.verifyFalse(dense.UseSparseFullBoxPreorder);
     verifyGram(testCase, dense);
+    testCase.verifyTrue(sparsePutinarDense.UsePutinar);
+    testCase.verifyFalse(sparsePutinarDense.UseSparsePutinar);
+    verifyGram(testCase, sparsePutinarDense);
 end
 
 function A = constantPdmat(value)

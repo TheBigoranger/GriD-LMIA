@@ -19,20 +19,7 @@ function cons = mkPutinarCons(expr, relation, order, comparisonMode, validationM
     %   are included. Absolute order r uses basis degree r for S0, r-e_s for
     %   Ss, and matches the elevated target at tensor degree 2r.
 
-    nPar = numel(expr.GridInfo.Vectors);
-    if nPar == 1
-        cons = mkFullBoxCons(expr, relation, order, ...
-            comparisonMode, validationMode);
-        return
-    end
-
-    masks = [zeros(1, nPar); eye(nPar)];
-    specs = cell(size(masks, 1), 2);
-    for k = 1:size(masks, 1)
-        specs{k, 1} = order - masks(k, :);
-        specs{k, 2} = [masks(k, :); masks(k, :)];
-    end
-
-    cons = mkGramCons(expr, relation, 2 .* order, specs, ...
+    [targetDeg, specs] = mkPutinarSpec(expr, order);
+    cons = mkGramCons(expr, relation, targetDeg, specs, ...
         comparisonMode, validationMode);
 end

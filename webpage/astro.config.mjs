@@ -39,6 +39,7 @@ export default defineConfig({
       sidebar: [
         { label: "Welcome", link: "/" },
         { label: "Install", slug: "install" },
+        { label: "Citing GriD-LMIA", slug: "citing" },
         { label: "Version History", slug: "version-history" },
         {
           label: "Documents",
@@ -100,6 +101,7 @@ export default defineConfig({
                   items: [
                     { label: "Pólya", slug: "documents/reference/pdlmi/applypolya" },
                     { label: "Putinar", slug: "documents/reference/pdlmi/applyputinar" },
+                    { label: "SparsePutinar", slug: "documents/reference/pdlmi/applysparseputinar" },
                     { label: "SparseFullBox", slug: "documents/reference/pdlmi/applysparsefullboxpreorder" },
                     { label: "FullBox", slug: "documents/reference/pdlmi/applyfullboxpreorder" },
                   ],
@@ -155,6 +157,7 @@ export default defineConfig({
                 { label: "Certificate Map And Selection Guide", slug: "documents/math/sos-certificates" },
                 { label: "Direct And Pólya", slug: "documents/math/finite-certificates/direct-and-polya" },
                 { label: "Markov–Lukács And Putinar", slug: "documents/math/finite-certificates/markov-lukacs-and-putinar" },
+                { label: "SparsePutinar Clique Windows", slug: "documents/math/finite-certificates/sparseputinar" },
                 { label: "SparseFullBox And FullBox", slug: "documents/math/finite-certificates/sparsefullbox-and-fullbox" },
               ],
             },

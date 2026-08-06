@@ -122,6 +122,13 @@ The [`applySparseFullBoxPreorder` reference](/GriD-LMIA/documents/reference/pdlm
 compares an intermediate band-limited certificate with its exact Direct and
 FullBox endpoints, and records the corresponding read-only state.
 
+## Deterministic SparsePutinar Selection
+
+The [`applySparsePutinar` reference](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/#examples)
+compares an intermediate tensor-window certificate with its Direct and dense
+Putinar endpoints. It also records the two-dimensional size-one behavior and
+the read-only `CliqueSize` state.
+
 ## Solver Smoke Cases
 
 The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/%2Btests/%2Bpdlmi/test_solver_smoke.m) are documented on a dedicated page:
@@ -132,7 +139,7 @@ The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](http
 ## Current Solver Boundary
 
 The package currently assembles direct or Pólya-elevated coefficient-wise
-constraints and the opt-in fixed-order Putinar, SparseFullBox, and FullBox
+constraints and the opt-in fixed-order Putinar, SparsePutinar, SparseFullBox, and FullBox
 Gram certificates. It does not provide a package-owned solver wrapper or
 residual diagnostic layer.
 

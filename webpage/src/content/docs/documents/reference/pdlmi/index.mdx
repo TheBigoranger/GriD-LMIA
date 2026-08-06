@@ -23,21 +23,26 @@ only when every original
 coefficient is square Hermitian; otherwise the whole inequality is entry-wise.
 Equality is direct coefficient equality and may be rectangular. Direct
 coefficient assembly is the default; Pólya degree elevation, fixed-order
-Putinar box assembly, block-band SparseFullBox assembly, and fixed-order
+Putinar box assembly, clique-based SparsePutinar assembly, block-band
+SparseFullBox assembly, and fixed-order
 FullBox Bernstein-Gram preordering are explicit alternatives.
 
 <CertificateNavigation />
 
 <CertificateChooser />
 
-The five paths begin with the same stored residual. **Direct** tests every
+The six paths begin with the same stored residual. **Direct** tests every
 local coefficient and is the default. **Pólya** exactly elevates that residual
 before repeating the direct test. In one parameter, **Putinar** and
 **FullBox** dispatch to the same parity-specific Markov–Lukács form with
 minimum order `floor(M/2)`. In two or more parameters, Putinar uses an
 unweighted Gram term plus one generator-weighted term per axis at minimum
 `ceil(M/2)`, while FullBox includes every generator-subset product.
-**SparseFullBox** retains the FullBox parity/generator-mask terms and exact
+**SparsePutinar** retains the Putinar parity or singleton-generator terms and
+uses overlapping tensor windows over each Bernstein Gram basis. In one
+parameter, clique size one normalizes to Direct. In higher dimensions it
+remains SparsePutinar. A saturated size greater than one normalizes to dense
+Putinar. **SparseFullBox** retains the FullBox parity/generator-mask terms and exact
 coefficient identities while replacing each dense Gram matrix $Q_J$ by a
 symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. Bandwidth one
   canonicalizes to Direct, and bandwidth at least
@@ -52,11 +57,12 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 | Reference | Task |
 | :--- | :--- |
-| [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) | Select Direct, Pólya, Putinar, SparseFullBox, or FullBox assembly. |
+| [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) | Select Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox assembly. |
 | [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) | Create known-data inequalities with `<=`/`>=`; logical `pdmat == pdmat` remains separate. |
 | [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) | Create semidefinite or entry-wise inequalities with `<=`/`>=`, and direct equalities with `==`. |
 | [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) | Rebuild the original residual with a selected Pólya degree increment. |
 | [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) | Rebuild the original residual with the minimum or a selected absolute Putinar order. |
+| [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) | Rebuild the residual with Putinar tensor-window cliques of size `b`, an absolute order, and canonical Direct/Putinar endpoints. |
 | [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) | Rebuild the residual with symmetric block-band Gram matrices of bandwidth `w`, an absolute order, and canonical Direct/FullBox endpoints. |
 | [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
 
@@ -68,14 +74,14 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 ## Implemented Behavior
 
-Documentation v1.2.3 describes `<=`, `>=`, and `==` for affine `pdvar`
+Documentation v1.2.4 describes `<=`, `>=`, and `==` for affine `pdvar`
 residuals and `<=`/`>=` for coefficient-backed known `pdmat` residuals.
 Inequalities select
 one global semidefinite or entry-wise interpretation from all original
 coefficients. Equality is always direct and supports rectangular or
 non-Hermitian residuals. Direct
 coefficient-wise assembly is the default. Pólya assembly performs exact degree
-elevation before applying the coefficient test. Putinar, SparseFullBox, and
+elevation before applying the coefficient test. Putinar, SparsePutinar, SparseFullBox, and
 FullBox assembly create independent positive-semidefinite Gram blocks for
 every physical cell, active rate row, and column-major matrix entry, together
 with exact Bernstein coefficient identities.
@@ -101,6 +107,7 @@ The constructor exposes private-set, read-only properties through dot access:
 | `Relation` | `C.Relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya`, `PolyaDegree` | `C.UsePolya`, `C.PolyaDegree` | Pólya selector and degree increment. |
 | `UsePutinar`, `PutinarOrder` | `C.UsePutinar`, `C.PutinarOrder` | Putinar selector and absolute order. |
+| `UseSparsePutinar`, `SparsePutinarOrder`, `CliqueSize` | `C.UseSparsePutinar`, `C.SparsePutinarOrder`, `C.CliqueSize` | SparsePutinar selector, direction-wise absolute order, and scalar tensor-window clique size `b`. |
 | `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar bandwidth `w` of $Q_J^{(w)}$. Bandwidth one normalizes to Direct; bandwidth at least `max(order + 1)` normalizes to FullBox. |
 | `UseFullBoxPreorder`, `FullBoxOrder` | `C.UseFullBoxPreorder`, `C.FullBoxOrder` | Full-box selector and absolute order. |
 
@@ -113,4 +120,4 @@ higher dimensions.
 
 ## See Also
 
-[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`certificate map`](/GriD-LMIA/documents/math/sos-certificates/) · [`SparseFullBox and FullBox mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`certificate map`](/GriD-LMIA/documents/math/sos-certificates/) · [`SparsePutinar mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) · [`SparseFullBox and FullBox mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)

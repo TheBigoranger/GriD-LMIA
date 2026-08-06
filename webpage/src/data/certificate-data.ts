@@ -1,8 +1,8 @@
-export type CertificateKey = "direct" | "polya" | "putinar" | "sparsefullbox" | "fullbox";
+export type CertificateKey = "direct" | "polya" | "putinar" | "sparseputinar" | "sparsefullbox" | "fullbox";
 
 export interface CertificateSource {
   key: CertificateKey;
-  anchor: "direct" | "polya" | "putinar" | "sparse-full-box" | "full-box";
+  anchor: "direct" | "polya" | "putinar" | "sparse-putinar" | "sparse-full-box" | "full-box";
   label: string;
   description: string;
   command: string;
@@ -33,6 +33,23 @@ export const certificateSources: CertificateSource[] = [
     ],
     cardFormula: "\\begin{gathered}S^{(\\mathbf c)}=S_0+\\sum_{s=1}^{\\ell}g_sS_s\\\\g_s=\\alpha_s(1-\\alpha_s),\\quad S_s\\succeq0\\end{gathered}",
     detailRoute: "documents/math/finite-certificates/markov-lukacs-and-putinar/",
+  },
+  {
+    key: "sparseputinar",
+    anchor: "sparse-putinar",
+    label: "SparsePutinar",
+    description: "SparsePutinar keeps Putinar's parity-specific Markov–Lukács terms in one parameter and its empty plus singleton-generator terms in higher dimensions. It replaces each dense Bernstein Gram basis by overlapping tensor windows of clique size b, and coefficient identities accumulate every overlapping contribution.",
+    command: "L.applySparsePutinar()",
+    exportCommand: "C = L.applySparsePutinar().toYalmip();",
+    constraintCount: "For a scalar one-parameter degree-four target with order two and clique size two: 3 PSD blocks + 5 identities = 8 constraints.",
+    boundaryNote: "Each physical cell, stored rate row, and column-major entrywise copy receives independent clique blocks. Symmetric inequalities use matrix-valued blocks.",
+    formula: [
+      "w_s=\\min(b,d_s+1),\\quad \\dim Q_{\\mathbf u}=n\\prod_s w_s",
+      "N_{\\mathrm{win}}=\\prod_s(d_s-w_s+2)",
+      "C[\\mathbf k]=\\sum_{q}\\sum_{\\mathbf u}\\mathcal A_{q,\\mathbf u}(Q_{q,\\mathbf u})[\\mathbf k]",
+    ],
+    cardFormula: "S^{(\\mathbf c)}=\\sum_{q\\in\\mathcal Q_{\\mathrm P}}g_q\\sum_{\\mathbf u}Z_{q,\\mathbf u}^{\\mathsf T}Q_{q,\\mathbf u}Z_{q,\\mathbf u},\\quad Q_{q,\\mathbf u}\\succeq0",
+    detailRoute: "documents/math/finite-certificates/sparseputinar/",
   },
   {
     key: "sparsefullbox",

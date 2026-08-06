@@ -3,7 +3,7 @@ const page = (path, anchor = "") => `/GriD-LMIA/${path}/${anchor ? `#${anchor}` 
 export const referenceGroups = [
   { id: "pdmat", label: "pdmat", description: "Function-backed known data and coefficient-backed Bernstein operations." },
   { id: "pdvar", label: "pdvar", description: "Continuous arbitrary-degree affine decisions and rate-vertex differentiation." },
-  { id: "pdlmi", label: "pdlmi", description: "Direct constraints and four opt-in finite certificate families." },
+  { id: "pdlmi", label: "pdlmi", description: "Direct constraints and five opt-in finite certificate families." },
   { id: "pdbase-backend", label: "pdbase / backend", description: "Inherited matrix protocols, cell-local storage, and protected Bernstein utilities." },
   { id: "shared-helpers", label: "Shared helpers", description: "Seven implementation helpers shared across the package." },
 ];
@@ -253,20 +253,21 @@ export const referenceEntries = [
   {
     name: "pdlmi",
     type: "Constraint class",
-    task: "Store direct equality or direct, Pólya, Putinar, SparseFullBox, or FullBox inequality constraints.",
+    task: "Store direct equality or direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox inequality constraints.",
     href: "/GriD-LMIA/documents/reference/pdlmi/",
     group: "pdlmi",
   },
   {
     name: "pdlmi constructor",
     type: "pdlmi function",
-    task: "Select one of five finite assembly states.",
+    task: "Select one of six finite assembly states.",
     href: "/GriD-LMIA/documents/reference/pdlmi/constructor/",
     group: "pdlmi",
   },
   entry("toYalmip", "pdlmi method", "Concatenate stored constraints for YALMIP optimize calls.", "documents/reference/pdlmi/toyalmip", "", "pdlmi"),
   entry("applyPolya", "pdlmi method", "Rebuild a residual with a selected Pólya degree increment.", "documents/reference/pdlmi/applypolya", "", "pdlmi"),
   entry("applyPutinar", "pdlmi method", "Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate.", "documents/reference/pdlmi/applyputinar", "", "pdlmi"),
+  entry("applySparsePutinar", "pdlmi method", "Rebuild a residual with overlapping tensor-window Putinar Gram blocks and canonical endpoints.", "documents/reference/pdlmi/applysparseputinar", "", "pdlmi"),
   entry("applySparseFullBoxPreorder", "pdlmi method", "Rebuild a residual with band-limited FullBox Gram support and canonical endpoints.", "documents/reference/pdlmi/applysparsefullboxpreorder", "", "pdlmi"),
   entry("applyFullBoxPreorder", "pdlmi method", "Rebuild a residual with a fixed-order full-box Bernstein-Gram preordering.", "documents/reference/pdlmi/applyfullboxpreorder", "", "pdlmi"),
   entry("helper.cellGet", "shared backend helper", "Read one nested LocalValues leaf by physical-cell subscripts.", "documents/reference/shared-helpers", "helper-cellget"),

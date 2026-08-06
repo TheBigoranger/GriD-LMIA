@@ -1,6 +1,6 @@
 ---
 title: pdlmi Constructor
-description: Select Direct, Pólya, Putinar, SparseFullBox, or FullBox PD-LMI assembly.
+description: Select Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox PD-LMI assembly.
 ---
 
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
@@ -43,6 +43,11 @@ C = pdlmi(expr, relation, PutinarOrder=r)
 C = pdlmi(expr, relation, UsePutinar=true, PutinarOrder=r)
 C = pdlmi(expr, relation, "PutinarOrder", r)
 C = pdlmi(expr, relation, "UsePutinar", true, "PutinarOrder", r)
+C = pdlmi(expr, relation, "UseSparsePutinar")
+C = pdlmi(expr, relation, UseSparsePutinar=true)
+C = pdlmi(expr, relation, CliqueSize=b)
+C = pdlmi(expr, relation, SparsePutinarOrder=r)
+C = pdlmi(expr, relation, CliqueSize=b, SparsePutinarOrder=r)
 C = pdlmi(expr, relation, "UseSparseFullBoxPreorder")
 C = pdlmi(expr, relation, UseSparseFullBoxPreorder=true, BandWidth=w)
 C = pdlmi(expr, relation, BandWidth=w)
@@ -66,9 +71,11 @@ degree elevation before coefficient constraints. In one parameter,
 Markov–Lukács interval form. In two or more parameters, `UsePutinar` selects
 one unweighted Gram term plus one $\alpha_s(1-\alpha_s)$-weighted term per
 axis, while `UseFullBoxPreorder` selects a term for every generator-subset
-product. `UseSparseFullBoxPreorder` retains those FullBox terms and exact
+product. `UseSparsePutinar` retains the Putinar terms and exact identities,
+while replacing each dense Bernstein Gram basis by overlapping tensor windows
+of clique size `b`. `UseSparseFullBoxPreorder` retains the FullBox terms and exact
 identities while replacing each dense Gram matrix $Q_J$ by a symmetric
-block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. All four opt-in selections are
+block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. All five opt-in selections are
 mutually exclusive.
 
 Use the direct default first. Choose Pólya when you want one exact degree
@@ -78,6 +85,10 @@ every generator-subset product or Putinar for the unweighted term plus the
 separate axis generators. Choose SparseFullBox when intermediate band-limited
 support is useful; its exact endpoints return Direct at width
   one and FullBox at width at least `max(order + 1)`.
+Choose SparsePutinar when the Putinar generator family is appropriate but its
+dense Gram blocks are too large. Its one-parameter size-one endpoint returns
+Direct, its multidimensional size-one case remains SparsePutinar, and a
+saturated size greater than one returns dense Putinar.
 For derivations and the difference between representation degree and
 certificate order, see
 [Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/).
@@ -94,6 +105,9 @@ certificate order, see
 | `FullBoxOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables full-box assembly without a warning. |
 | `UsePutinar` | Logical scalar. Default `false`. The bare flag and explicit `true` select Putinar box assembly at the minimum admissible order. |
 | `PutinarOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables Putinar assembly without a warning. |
+| `UseSparsePutinar` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparsePutinar assembly. |
+| `SparsePutinarOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables SparsePutinar assembly. |
+| `CliqueSize` | Finite positive integer scalar clique size `b`. Default `2` when SparsePutinar is enabled. Supplying it alone enables SparsePutinar assembly. |
 | `UseSparseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparseFullBox assembly. |
 | `SparseFullBoxOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables SparseFullBox assembly. |
 | `BandWidth` | Finite positive integer bandwidth `w` for $Q_J^{(w)}$. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
@@ -112,8 +126,14 @@ When Putinar assembly is active, the minimum and default order are
 `ceil(expr.Degree/2)` in two or more parameters. Unlike the full-box metadata
 form, explicitly pairing
 `UsePutinar=false` with any supplied `PutinarOrder` is rejected. Enabling more
-than one of Pólya, Putinar, SparseFullBox, and FullBox assembly is also
+than one of Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox assembly is also
 rejected.
+
+SparsePutinar uses the same dimension-dependent minimum and default order as
+Putinar. `CliqueSize` is one scalar size applied on each tensor axis. In one
+parameter, size one returns Direct after order validation. In two or more
+parameters, size one remains SparsePutinar. A size greater than one and at
+least `max(SparsePutinarOrder + 1)` returns dense Putinar.
 
 SparseFullBox uses the same dimension-dependent minimum and default order.
 `BandWidth` remains one scalar width interpreted on every tensor axis. Width one
@@ -124,7 +144,8 @@ returns actual Direct state after order validation; width at least
 
 `C` is a `pdlmi` object with private-set, inspectable `Constraints`, `Residual`,
 `Relation`, `UsePolya`, `PolyaDegree`, `UseFullBoxPreorder`, `FullBoxOrder`,
-`UsePutinar`, `PutinarOrder`, `UseSparseFullBoxPreorder`,
+`UsePutinar`, `PutinarOrder`, `UseSparsePutinar`, `SparsePutinarOrder`,
+`CliqueSize`, `UseSparseFullBoxPreorder`,
 `SparseFullBoxOrder`, and `BandWidth` properties. `Constraints` contains direct
 coefficient inequalities, Pólya-elevated coefficient inequalities, or the PSD
 blocks and exact identities for the selected Gram mode.
@@ -285,6 +306,30 @@ denseEndpoint.UseFullBoxPreorder
 returned endpoint objects expose their canonical Direct or FullBox state,
 not a sparse selector with a special width.
 
+### SparsePutinar option forms
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, Degree=4);
+bare = pdlmi(P, ">=", "UseSparsePutinar");
+sizeOnly = pdlmi(P, ">=", CliqueSize=2);
+selected = pdlmi(P, ">=", CliqueSize=2, SparsePutinarOrder=2);
+directEndpoint = pdlmi(P, ">=", CliqueSize=1, SparsePutinarOrder=2);
+denseEndpoint = pdlmi(P, ">=", CliqueSize=3, SparsePutinarOrder=2);
+
+bare.UseSparsePutinar
+bare.SparsePutinarOrder
+bare.CliqueSize
+sizeOnly.UseSparsePutinar
+selected.UseSparsePutinar
+directEndpoint.UseSparsePutinar
+denseEndpoint.UsePutinar
+```
+
+`CliqueSize` or `SparsePutinarOrder` alone enables SparsePutinar. The returned
+endpoint objects expose their canonical Direct or Putinar state. In two or
+more parameters, clique size one remains SparsePutinar.
+
 ## Validation And Errors
 
 - Nonsquare or non-Hermitian inequality coefficients select supported entry-wise mode and warn once with `pdlmi:ElementwiseInequality`.
@@ -294,16 +339,17 @@ not a sparse selector with a special width.
   `pdlmi:MissingCoefficientEvidence`; `pdlmi(A,"==")` for `pdmat` raises
   `pdlmi:UnsupportedPdmatEquality`; an unsupported relation raises
   `pdlmi:InvalidRelation`.
-- Nonlogical selectors raise `pdlmi:InvalidUsePolya`, `pdlmi:InvalidUseFullBoxPreorder`, `pdlmi:InvalidUsePutinar`, or `pdlmi:InvalidUseSparseFullBoxPreorder`.
-- Invalid Pólya increments, FullBox orders, Putinar orders, SparseFullBox orders, or widths raise `pdlmi:InvalidPolyaDegree`, `pdlmi:InvalidFullBoxOrder`, `pdlmi:InvalidPutinarOrder`, `pdlmi:InvalidSparseFullBoxOrder`, or `pdlmi:InvalidBandWidth`.
-- When a Gram mode is enabled, a valid integer below its applicable minimum raises `pdlmi:FullBoxOrderTooLow`, `pdlmi:PutinarOrderTooLow`, or `pdlmi:SparseFullBoxOrderTooLow`.
+- Nonlogical selectors raise the matching `pdlmi:InvalidUse...` identifier, including `pdlmi:InvalidUseSparsePutinar`.
+- Invalid Pólya increments, Gram orders, clique sizes, or widths raise their matching validation identifiers, including `pdlmi:InvalidSparsePutinarOrder` and `pdlmi:InvalidCliqueSize`.
+- When a Gram mode is enabled, a valid integer below its applicable minimum raises the matching `...OrderTooLow` identifier, including `pdlmi:SparsePutinarOrderTooLow`.
 - `UsePolya=false` with a positive `PolyaDegree` raises `pdlmi:ConflictingPolyaOptions`.
 - `UsePutinar=false` with an explicit `PutinarOrder` raises `pdlmi:ConflictingPutinarOptions`, even when the order is zero.
+- `UseSparsePutinar=false` with `SparsePutinarOrder` or `CliqueSize` raises `pdlmi:ConflictingSparsePutinarOptions`.
 - `UseSparseFullBoxPreorder=false` with `SparseFullBoxOrder` or `BandWidth` raises `pdlmi:ConflictingSparseFullBoxOptions`.
-- Enabling more than one of Pólya, Putinar, SparseFullBox, and FullBox assembly raises `pdlmi:ConflictingRelaxations`.
+- Enabling more than one of Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox assembly raises `pdlmi:ConflictingRelaxations`.
 - Malformed, duplicate, or unknown options raise `pdlmi:InvalidOptions`, `pdlmi:DuplicateOption`, or `pdlmi:UnknownOption`.
 - Invalid or misplaced validation values raise `pdlmi:InvalidValidationMode`.
-- Any Pólya, Putinar, SparseFullBox, or FullBox option on relation `"=="` raises `pdlmi:UnsupportedEqualityCertificate`.
+- Any Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox option on relation `"=="` raises `pdlmi:UnsupportedEqualityCertificate` before certificate-option validation.
 
 In one parameter, Putinar and full-box assembly share the exact
 parity-specific Markov–Lukács form. In two or more parameters, Putinar is
@@ -314,4 +360,4 @@ mode adds an implicit positivity margin or calls a solver.
 
 ## See Also
 
-[`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)
+[`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)

@@ -1,6 +1,6 @@
 ---
 title: Certificate Map And Selection Guide
-description: Choose among Direct, Pólya, Putinar, SparseFullBox, and FullBox without confusing finite certificates with exact rate reduction.
+description: Choose among Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox without confusing finite certificates with exact rate reduction.
 ---
 
 import CertificateChooser from "../../../../components/CertificateChooser.astro";
@@ -15,8 +15,8 @@ import ConstraintAssemblyDiagram from "../../../../components/ConstraintAssembly
   <span>Certificate Map And Selection Guide</span>
 </nav>
 
-`pdlmi` exposes exactly five certificate states: **Direct**, **Pólya**,
-**Putinar**, **SparseFullBox**, and **FullBox**. One-parameter
+`pdlmi` exposes exactly six certificate states: **Direct**, **Pólya**,
+**Putinar**, **SparsePutinar**, **SparseFullBox**, and **FullBox**. One-parameter
 Markov–Lukács is the interval form used by Putinar and FullBox, not a sixth
 software state.
 
@@ -24,7 +24,7 @@ software state.
 
 <CertificateFlow />
 
-All five paths start from the same cell-local original residual
+All six paths start from the same cell-local original residual
 $\mathcal F^{(\mathbf c)}$. The comparison relation determines
 $S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$ and
 $C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}$.
@@ -94,6 +94,24 @@ In one parameter this selector uses the exact parity-specific
 Markov–Lukács interval form. See
 [Markov–Lukács And Putinar](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/).
 
+## SparsePutinar Clique Windows
+
+SparsePutinar keeps the Putinar parity or singleton-generator terms, but it
+splits each dense Bernstein Gram basis into overlapping tensor windows. For a
+Gram degree vector $\mathbf d$ and clique size $b$, the side length is
+$w_s=\min(b,d_s+1)$. Each window has an independent PSD block, while every
+target coefficient identity accumulates all overlapping contributions.
+
+```matlab
+selected = L.applySparsePutinar();
+selected = L.applySparsePutinar(b);
+selected = L.applySparsePutinar(b, r);
+```
+
+The [SparsePutinar mathematics page](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/)
+defines the window labels, dimensions, counts, endpoints, and strict boundary
+from structural-matrix chordal decomposition.
+
 ## Schmüdgen And Full Preorderings
 
 The full-box preordering uses every square-free product
@@ -127,23 +145,24 @@ The detailed basis-order boundary is documented in
 ## One-Dimensional Markov–Lukács Forms
 
 Even and odd assembled degrees use different endpoint weights. The package
-implements those parity forms through Putinar, SparseFullBox, and FullBox
+implements those parity forms through Putinar, SparsePutinar, SparseFullBox, and FullBox
 selectors in one parameter.
 
-## Four Operations That Are Not Interchangeable
+## Five Operations That Are Not Interchangeable
 
 - Refine $\mathcal G_s$ to change physical cells.
 - Raise decision degree $m$ to enlarge the decision family.
 - Raise Pólya increment $d$ to elevate the representation.
-- Raise absolute Gram order $r$ or SparseFullBox bandwidth $w$ to change
-  a Gram certificate.
+- Raise absolute Gram order $r$ to change a Gram certificate.
+- Change SparsePutinar clique size $b$ or SparseFullBox bandwidth $w$ to
+  change the sparse Gram support.
 
 Assembled residual degree $M$ is determined after algebra and alignment; it
 is not another user-selected certificate knob.
 
 ## Exact Software Boundary
 
-The package implements five finite states only. It does not implement a
+The package implements six finite states only. It does not implement a
 general-domain Putinar parser, an adaptive sparse-pattern search, or a
 solver-owned hierarchy loop. A failed fixed $d$, $r$, or $w$, a nonzero
 `diagnostics.problem`, or an aborted solve is inconclusive for the original
@@ -163,6 +182,7 @@ non-strict software constraints.
 - Putinar, [Positive polynomials on compact semi-algebraic sets](https://www.jstor.org/stable/24897130).
 - Schmüdgen, [The K-moment problem for compact semi-algebraic sets](https://doi.org/10.1007/BF01234651).
 - Scherer and Hol, [Matrix sum-of-squares relaxations for robust semi-definite programs](https://doi.org/10.1007/s10107-005-0684-2).
+- Zheng and Fantuzzi, [Sum-of-squares chordal decomposition of polynomial matrix inequalities](https://arxiv.org/abs/2007.11410), for structural-matrix chordal SOS and its distinct graph-clique setting.
 
 ## See Also
 
@@ -170,4 +190,5 @@ non-strict software constraints.
 [Next: Direct And Pólya](/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/) ·
 [Notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters) ·
 [`pdlmi` overview](/GriD-LMIA/documents/reference/pdlmi/) ·
+[`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) ·
 [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)

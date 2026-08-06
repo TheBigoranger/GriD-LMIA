@@ -120,7 +120,9 @@ Exact subdivision and the full formulas are collected in
 These transformations feed several finite certificates. Direct constrains the
 target coefficients. Pólya first performs an exact degree elevation and then
 applies the same coefficient test. Putinar uses positive-semidefinite Gram
-blocks with an unweighted term and box-generator terms. FullBox uses every
+blocks with an unweighted term and box-generator terms. SparsePutinar retains
+the Putinar terms while splitting dense Gram bases into overlapping tensor
+windows of clique size $b$. FullBox uses every
 square-free generator product; SparseFullBox retains those identities while
 replacing each dense $Q_J$ by a symmetric block-band Gram matrix
 $Q_J^{(w)}$ of scalar bandwidth $w$. The
@@ -131,7 +133,7 @@ states the exact one- and multi-parameter forms.
 
 The refinement knobs are independent: decision degree $\mathbf m$, assembled
 residual degree $\mathbf M$, Pólya increment $\mathbf d$, absolute Gram order
-$\mathbf r$, SparseFullBox bandwidth $w$, and physical-grid refinement do not
+$\mathbf r$, SparsePutinar clique size $b$, SparseFullBox bandwidth $w$, and physical-grid refinement do not
 mean the same thing. Increasing one does not silently increase the others.
 
 <span id="limitations"></span>

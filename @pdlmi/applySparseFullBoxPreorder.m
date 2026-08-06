@@ -31,7 +31,8 @@ function out = applySparseFullBoxPreorder(obj, varargin)
     %   independent scalar certificate per MATLAB column-major matrix entry.
     %   No positivity margin or solver call is inserted. The source wrapper is
     %   unchanged because assembly starts from Residual, so this selection
-    %   replaces any earlier Pólya, Putinar, sparse full-box, or FullBox choice.
+    %   replaces any earlier Pólya, Putinar, SparsePutinar, sparse full-box,
+    %   or FullBox choice.
     %
     %   Invalid widths raise pdlmi:InvalidBandWidth. Invalid orders raise
     %   pdlmi:InvalidSparseFullBoxOrder, and insufficient orders raise

@@ -1,0 +1,218 @@
+---
+title: SparsePutinar Clique Windows
+description: SOS, Putinar, and overlapping tensor-window Gram mathematics used by SparsePutinar.
+---
+
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import { Aside } from "@astrojs/starlight/components";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <a href="/GriD-LMIA/documents/math/sos-certificates/">Finite Certificates</a>
+  <span>/</span>
+  <span>SparsePutinar Clique Windows</span>
+</nav>
+
+<CertificateSpectrum selected="sparseputinar" />
+
+# SparsePutinar Clique Windows
+
+SparsePutinar starts from the same local positive target $S^{(\mathbf c)}(\boldsymbol\alpha)$ as dense Putinar. It keeps the Putinar generator family and exact coefficient identities, but it replaces each dense Bernstein Gram basis by overlapping tensor windows. We first define the SOS and Gram objects, then give the dense Putinar form, the window decomposition, and the resulting dimension tradeoff.
+
+## Scalar And Matrix SOS
+
+A scalar polynomial $s(\boldsymbol\alpha)$ is a sum of squares when there are polynomial functions $h_j$ such that
+
+$$
+s(\boldsymbol\alpha)=\sum_j h_j(\boldsymbol\alpha)^2.
+$$
+
+A symmetric polynomial matrix $S(\boldsymbol\alpha)$ is a matrix SOS when there is a polynomial matrix $H(\boldsymbol\alpha)$ such that $S=H^{\mathsf T}H$. Both definitions admit a Gram representation. If $\mathbf b_{\mathbf d}$ is the tensor Bernstein basis indexed by $\mathcal I_{\mathbf d}=\prod_s\{0,\ldots,d_s\}$, define $Z_{\mathbf d}=\mathbf b_{\mathbf d}\otimes I_n$. Then
+
+$$
+S(\boldsymbol\alpha)=Z_{\mathbf d}(\boldsymbol\alpha)^{\mathsf T}QZ_{\mathbf d}(\boldsymbol\alpha),
+\qquad Q\succeq0.
+$$
+
+The PSD condition makes the represented matrix positive semidefinite at every $\boldsymbol\alpha$. However, the representation equals the target only after coefficient matching. The assembler therefore converts the Gram expression to the normalized Bernstein basis and equates every resulting coefficient matrix with the corresponding target coefficient.
+
+## Dense Putinar Terms
+
+In one parameter, the package uses the parity-specific Markov–Lukács form. For a target degree $2r$, define the two Gram terms
+
+$$
+\begin{aligned}
+G_0(\alpha)&=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha),\\
+G_1(\alpha)&=Z_{r-1}(\alpha)^{\mathsf T}Q_1Z_{r-1}(\alpha).
+\end{aligned}
+$$
+
+Here, $Q_0\succeq0$ and $Q_1\succeq0$. The even-degree representation is
+
+$$
+S(\alpha)=G_0(\alpha)+\alpha(1-\alpha)G_1(\alpha).
+$$
+
+For target degree $2r+1$, define the two Gram terms
+
+$$
+H_0(\alpha)=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha).
+$$
+
+Here, $Q_0\succeq0$.
+
+$$
+H_1(\alpha)=Z_r(\alpha)^{\mathsf T}Q_1Z_r(\alpha).
+$$
+
+Here, $Q_1\succeq0$.
+
+The odd-degree representation is
+
+$$
+S(\alpha)=(1-\alpha)H_0(\alpha)+\alpha H_1(\alpha).
+$$
+
+In two or more parameters, define $g_0=1$ and $g_s=\alpha_s(1-\alpha_s)$ for $s=1,\ldots,\ell$. Let $\mathcal Q_{\mathrm P}\subseteq\{0,1,\ldots,\ell\}$ index the empty and singleton Putinar specifications whose Gram degrees are nonnegative. For each active specification, suppress the common argument $\boldsymbol\alpha$ and define the dense Gram term by
+
+$$
+D_q=Z_{\mathbf d_q}^{\mathsf T}Q_qZ_{\mathbf d_q},
+$$
+
+where $Q_q\succeq0$. Putinar uses only these active terms, so
+
+$$
+S^{(\mathbf c)}=\sum_{q\in\mathcal Q_{\mathrm P}}g_qD_q.
+$$
+
+Here, $\mathbf d_0=\mathbf r$ and $\mathbf d_s=\mathbf r-\mathbf e_s$. Terms with a negative degree component are omitted. This singleton family distinguishes Putinar from FullBox, which includes every square-free product of the axis generators.
+
+## Tensor-Window Label Sets
+
+Fix one active Gram specification with degree vector $\mathbf d$. For clique size $b$, the window side on axis $s$ is
+
+$$
+w_s=\min(b,d_s+1).
+$$
+
+The start index satisfies $u_s\in\{0,\ldots,d_s-w_s+1\}$. For $\mathbf u=(u_1,\ldots,u_\ell)$, define the label set on axis $s$ by
+
+$$
+\mathcal W_s=\{u_s,\ldots,u_s+w_s-1\}.
+$$
+
+The tensor-window label set is the Cartesian product
+
+$$
+\mathcal W(\mathbf d,\mathbf u,b)=\prod_{s=1}^{\ell}\mathcal W_s.
+$$
+
+For the multidimensional empty and singleton family, let $\mathbf b_{\mathbf d,\mathbf u}$ contain only the Bernstein basis functions whose labels lie in $\mathcal W(\mathbf d,\mathbf u,b)$, and define $Z_{q,\mathbf u}=\mathbf b_{\mathbf d_q,\mathbf u}\otimes I_n$. SparsePutinar replaces the dense block $Q_q$ by one independent PSD block $Q_{q,\mathbf u}$ for each start vector. Suppressing the common argument $\boldsymbol\alpha$, define the contribution from one window by
+
+$$
+T_{q,\mathbf u}
+=Z_{q,\mathbf u}^{\mathsf T}Q_{q,\mathbf u}Z_{q,\mathbf u},
+$$
+
+where $Q_{q,\mathbf u}\succeq0$. Accumulating all windows for one active specification gives
+
+$$
+T_q=\sum_{\mathbf u}T_{q,\mathbf u}.
+$$
+
+The complete representation is therefore
+
+$$
+S^{(\mathbf c)}=\sum_{q\in\mathcal Q_{\mathrm P}}g_qT_q.
+$$
+
+In one parameter, the package applies the same tensor-window split to the two Markov–Lukács parity blocks shown above. Their weights are $1$ and $\alpha(1-\alpha)$ for even target degree, or $1-\alpha$ and $\alpha$ for odd target degree. Thus, the multidimensional definition of $g_q$ is not reused for the one-dimensional odd form.
+
+## Overlapping Coefficient Accumulation
+
+Windows overlap, so one target Bernstein coefficient may receive contributions from several blocks. For the displayed multidimensional empty and singleton family, let $\mathcal A_{q,\mathbf u}(Q_{q,\mathbf u})[\mathbf k]$ denote the normalized Bernstein coefficient at target label $\mathbf k$ contributed by one weighted window, and write this quantity as $a_{q,\mathbf u}[\mathbf k]$. First accumulate all windows for one active specification:
+
+$$
+a_q[\mathbf k]=\sum_{\mathbf u}a_{q,\mathbf u}[\mathbf k].
+$$
+
+The exact accumulated equality is then
+
+$$
+C^{(\mathbf c)}[\mathbf k]
+=\sum_{q\in\mathcal Q_{\mathrm P}}a_q[\mathbf k].
+$$
+
+This equality holds for every $\mathbf k\in\mathcal I_{\mathrm{targetDegree}}$.
+
+This is an accumulated equality, not a separate equality for each window. Therefore, each certificate copy keeps exactly
+
+$$
+\prod_{s=1}^{\ell}(\mathrm{targetDegree}_s+1)
+$$
+
+target coefficient identities.
+
+In one parameter, the assembler performs the identical accumulation over the two active Markov–Lukács parity blocks and all of their windows.
+
+<Aside type="note" title="Implementation remark: independent copies">
+The package builds a separate window family for every physical cell and stored rate row. Symmetric inequalities use matrix-valued Gram blocks, while an entrywise inequality creates a scalar certificate for each matrix entry in MATLAB column-major order.
+</Aside>
+
+## Block Dimensions And Counts
+
+For a symmetric $n\times n$ target, one window block has dimension
+
+$$
+n\prod_{s=1}^{\ell}\min(b,d_s+1).
+$$
+
+The number of windows for that Gram specification is
+
+$$
+\prod_{s=1}^{\ell}(d_s-w_s+2).
+$$
+
+Thus, reducing $b$ lowers the maximum PSD-block dimension but usually increases the block count. It does not guarantee a smaller total SDP or shorter solve time. The coefficient-identity count is unchanged because the assembled polynomial must still match the full target tensor.
+
+For example, a scalar two-parameter degree-$[4,4]$ target at order $[2,2]$ has three Putinar specifications. At $b=1$, the specifications contribute $9+6+6=21$ scalar PSD windows and 25 identities. At $b=2$, they contribute $4+2+2=8$ PSD windows of dimension four and the same 25 identities. At $b=3$, every basis saturates and the request normalizes to dense Putinar, whose Gram dimensions are $9$, $6$, and $6$.
+
+For the anisotropic target degree $[2,6]$ at order $[1,3]$ and $b=2$, the window block dimensions are
+
+$$
+4,4,4,2,2,2,4,4.
+$$
+
+The two axes therefore need not have equal degrees or equal numbers of window starts.
+
+## Endpoint Interpretation
+
+In one parameter, clique size one normalizes to Direct after order validation. In two or more parameters, size one remains SparsePutinar because the singleton Putinar generator family still differs from a direct coefficient test. If `b > 1` and `b >= max(r + 1)`, every active window covers its full Gram basis and the state normalizes to dense Putinar.
+
+## Further Reading
+
+The window construction is clique-based and chordal-inspired because it expresses a Gram model as a sum of smaller clique-supported PSD blocks. However, it is not the structural-matrix chordal decomposition of Zheng and Fantuzzi. That method starts from the sparsity graph of a polynomial matrix and its maximal graph cliques. SparsePutinar does not infer such a graph, compute maximal graph cliques, or perform chordal completion. Here, the user selects sliding tensor windows over Bernstein Gram-basis labels.
+
+The distinction matters because the two constructions have different inputs and guarantees. The [Zheng–Fantuzzi paper](https://arxiv.org/abs/2007.11410) supports the structural chordal-SOS background, while the package window map and its coefficient accumulation are defined and tested independently.
+
+## Software Selection
+
+```matlab
+selected = L.applySparsePutinar();
+selected = L.applySparsePutinar(b);
+selected = L.applySparsePutinar(b, r);
+F = selected.toYalmip();
+```
+
+## Limitations
+
+SparsePutinar is a fixed-order sufficient certificate. A failure may reflect the selected order, clique size, grid, or numerical conditioning, so it does not prove that the continuous inequality is infeasible. The package does not search orders, add a strict margin, choose a solver, or promise that sparse blocks solve faster.
+
+## See Also
+
+[Previous: Markov–Lukács And Putinar](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/) ·
+[Next: SparseFullBox And FullBox](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/) ·
+[`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) ·
+[`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) ·
+[Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/)

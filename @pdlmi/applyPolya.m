@@ -13,7 +13,7 @@ function out = applyPolya(obj, varargin)
     %
     %   The no-argument form uses ones(1,ell). A scalar expands uniformly; an
     %   ell-element vector elevates componentwise. Either form replaces any
-    %   prior Pólya, Putinar, sparse full-box, or FullBox
+    %   prior Pólya, Putinar, SparsePutinar, sparse full-box, or FullBox
     %   selection because assembly always starts from the stored original
     %   Residual rather than existing constraints.
     %   This value-class method returns a new pdlmi and leaves obj unchanged;

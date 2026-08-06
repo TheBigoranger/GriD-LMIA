@@ -1,6 +1,6 @@
 import { evaluateBernstein, parseCoefficients, sampleBernstein } from "./bernstein.ts";
 
-export type CertificateSelector = "direct" | "polya" | "putinar" | "sparsefullbox" | "fullbox";
+export type CertificateSelector = "direct" | "polya" | "putinar" | "sparseputinar" | "sparsefullbox" | "fullbox";
 export type CertificateMode = "semidefinite" | "elementwise";
 
 export interface RateVertexModel {
@@ -34,15 +34,16 @@ export interface GramBlockShape {
 
 export interface CertificateShape {
   selector: CertificateSelector;
-  effectiveSelector: "direct" | "polya" | "putinar" | "sparsefullbox" | "fullbox";
-  targetDegree: number;
+  effectiveSelector: CertificateSelector;
+  targetDegree: number | number[];
   coefficientTests: number;
   coefficientIdentities: number;
   psdBlocks: number;
   totalConstraints: number;
   blocks: GramBlockShape[];
   copies: number;
-  minimumOrder: number;
+  minimumOrder: number | number[];
+  cliqueSize: number;
   bandWidth: number;
 }
 
@@ -122,25 +123,48 @@ function masks(nPar: number): number[][] {
   return combinationRows(Array.from({ length: nPar }, () => [0, 1]));
 }
 
+function axisVector(value: number | readonly number[], nPar: number, name: string): number[] {
+  const values = typeof value === "number" ? Array(nPar).fill(value) : [...value];
+  if (values.length !== nPar || values.some((entry) => !Number.isInteger(entry) || entry < 0 || entry > 8)) {
+    throw new RangeError(`${name} must be an integer from 0 to 8 or a ${nPar}-entry vector in that range.`);
+  }
+  return values;
+}
+
+function compactAxis(values: readonly number[]): number | number[] {
+  return values.every((value) => value === values[0]) ? values[0] : [...values];
+}
+
+function tensorCount(values: readonly number[]): number {
+  return values.reduce((product, value) => product * value, 1);
+}
+
 /** Constraint counts mirror mkCoeffCons/mkGramCons, including omitted order-zero blocks. */
 export function buildCertificateShape(input: {
   selector: CertificateSelector;
   cells: number;
   nPar: number;
-  degree: number;
+  degree: number | readonly number[];
   rateRows: number;
-  order: number;
+  order: number | readonly number[];
   matrixSize: number;
   mode: CertificateMode;
+  cliqueSize?: number;
   bandWidth?: number;
 }): CertificateShape {
-  const { selector, cells, nPar, degree, rateRows, order, matrixSize, mode } = input;
+  const { selector, cells, nPar, rateRows, matrixSize, mode } = input;
+  const cliqueSize = input.cliqueSize ?? 2;
   const bandWidth = input.bandWidth ?? 2;
   for (const [name, value, min, max] of [
-    ["cells", cells, 1, 12], ["parameter dimension", nPar, 1, 3], ["degree", degree, 0, 8],
-    ["rate rows", rateRows, 1, 8], ["order", order, 0, 8], ["matrix size", matrixSize, 1, 4],
+    ["cells", cells, 1, 12], ["parameter dimension", nPar, 1, 3],
+    ["rate rows", rateRows, 1, 8], ["matrix size", matrixSize, 1, 4],
   ] as const) {
     if (!Number.isInteger(value) || value < min || value > max) throw new RangeError(`${name} must be an integer from ${min} to ${max}.`);
+  }
+  const degree = axisVector(input.degree, nPar, "degree");
+  const order = axisVector(input.order, nPar, "order");
+  if (!Number.isInteger(cliqueSize) || cliqueSize < 1 || cliqueSize > 9) {
+    throw new RangeError("clique size b must be an integer from 1 to 9.");
   }
   if (!Number.isInteger(bandWidth) || bandWidth < 1 || bandWidth > 9) {
     throw new RangeError("bandwidth w must be an integer from 1 to 9.");
@@ -149,60 +173,72 @@ export function buildCertificateShape(input: {
     throw new RangeError(`Active rate rows must be 1 for an ordinary residual or ${2 ** nPar} for rhodiff in ${nPar} dimensions.`);
   }
   const physicalCopies = cells * rateRows;
-  const minimumOrder = nPar === 1 ? Math.floor(degree / 2) : Math.ceil(degree / 2);
-  if ((selector === "putinar" || selector === "sparsefullbox" || selector === "fullbox") && order < minimumOrder) {
-    throw new RangeError(`Order must be at least ${minimumOrder} for this degree and dimension.`);
+  const minimumOrder = degree.map((value) => nPar === 1 ? Math.floor(value / 2) : Math.ceil(value / 2));
+  const gramSelector = ["putinar", "sparseputinar", "sparsefullbox", "fullbox"].includes(selector);
+  if (gramSelector && order.some((value, axis) => value < minimumOrder[axis])) {
+    const minimumText = minimumOrder.every((value) => value === minimumOrder[0])
+      ? String(minimumOrder[0])
+      : `[${minimumOrder.join(", ")}]`;
+    throw new RangeError(`Order must be at least ${minimumText} for this degree and dimension.`);
+  }
+  const targetCount = tensorCount(degree.map((value) => value + 1));
+  if (selector === "sparseputinar" && nPar === 1 && cliqueSize === 1) {
+    const coefficientTests = physicalCopies * targetCount;
+    return { selector, effectiveSelector: "direct", targetDegree: compactAxis(degree), coefficientTests,
+      coefficientIdentities: 0, psdBlocks: 0, totalConstraints: coefficientTests,
+      blocks: [], copies: physicalCopies, minimumOrder: compactAxis(minimumOrder), cliqueSize, bandWidth };
   }
   if (selector === "sparsefullbox" && bandWidth === 1) {
-    const coefficientTests = physicalCopies * (degree + 1) ** nPar;
-    return { selector, effectiveSelector: "direct", targetDegree: degree, coefficientTests,
+    const coefficientTests = physicalCopies * targetCount;
+    return { selector, effectiveSelector: "direct", targetDegree: compactAxis(degree), coefficientTests,
       coefficientIdentities: 0, psdBlocks: 0, totalConstraints: coefficientTests,
-      blocks: [], copies: physicalCopies, minimumOrder, bandWidth };
+      blocks: [], copies: physicalCopies, minimumOrder: compactAxis(minimumOrder), cliqueSize, bandWidth };
   }
   if (selector === "direct" || selector === "polya") {
-    const targetDegree = degree + (selector === "polya" ? order : 0);
+    const targetDegrees = degree.map((value, axis) => value + (selector === "polya" ? order[axis] : 0));
     // mkCoeffCons stores one vectorized YALMIP constraint per coefficient,
     // including rectangular/elementwise residuals; matrix entries are metadata.
-    const coefficientTests = physicalCopies * (targetDegree + 1) ** nPar;
-    return { selector, effectiveSelector: selector, targetDegree, coefficientTests,
+    const coefficientTests = physicalCopies * tensorCount(targetDegrees.map((value) => value + 1));
+    return { selector, effectiveSelector: selector, targetDegree: compactAxis(targetDegrees), coefficientTests,
       coefficientIdentities: 0, psdBlocks: 0, totalConstraints: coefficientTests,
-      blocks: [], copies: physicalCopies, minimumOrder, bandWidth };
+      blocks: [], copies: physicalCopies, minimumOrder: compactAxis(minimumOrder), cliqueSize, bandWidth };
   }
 
-  let targetDegree: number;
+  let targetDegrees: number[];
   let specs: { label: string; gramDegree: number[] }[];
-  if (nPar === 1 && degree % 2 === 1) {
-    targetDegree = 2 * order + 1;
-    specs = ["(1−α) S₀", "α S₁"].map((label) => ({ label, gramDegree: [order] }));
+  if (nPar === 1 && degree[0] % 2 === 1) {
+    targetDegrees = [2 * order[0] + 1];
+    specs = ["(1−α) S₀", "α S₁"].map((label) => ({ label, gramDegree: [order[0]] }));
   } else if (nPar === 1) {
-    targetDegree = 2 * order;
-    specs = [{ label: "S₀", gramDegree: [order] }];
-    if (order > 0) specs.push({ label: "α(1−α) S₁", gramDegree: [order - 1] });
+    targetDegrees = [2 * order[0]];
+    specs = [{ label: "S₀", gramDegree: [order[0]] }];
+    if (order[0] > 0) specs.push({ label: "α(1−α) S₁", gramDegree: [order[0] - 1] });
   } else {
-    targetDegree = 2 * order;
-    const selectedMasks = selector === "putinar"
+    targetDegrees = order.map((value) => 2 * value);
+    const selectedMasks = selector === "putinar" || selector === "sparseputinar"
       ? [Array(nPar).fill(0), ...Array.from({ length: nPar }, (_, axis) => Array.from({ length: nPar }, (__, index) => Number(index === axis)))]
       : masks(nPar);
     specs = selectedMasks
-      .map((mask) => ({ label: mask.every((value) => value === 0) ? "S∅" : `S{${mask.map((value, axis) => value ? axis + 1 : null).filter(Boolean).join(",")}}`, gramDegree: mask.map((value) => order - value) }))
+      .map((mask) => ({ label: mask.every((value) => value === 0) ? "S∅" : `S{${mask.map((value, axis) => value ? axis + 1 : null).filter(Boolean).join(",")}}`, gramDegree: mask.map((value, axis) => order[axis] - value) }))
       .filter((spec) => spec.gramDegree.every((value) => value >= 0));
   }
   const copies = physicalCopies * (mode === "elementwise" ? matrixSize ** 2 : 1);
   const denseBlocks = specs.map((spec) => ({ ...spec,
     dimension: (mode === "semidefinite" ? matrixSize : 1) * spec.gramDegree.reduce((product, value) => product * (value + 1), 1),
   }));
-  const denseEndpoint = selector === "sparsefullbox" && bandWidth >= order + 1;
+  const denseEndpoint = (selector === "sparseputinar" && cliqueSize > 1 && cliqueSize >= Math.max(...order.map((value) => value + 1)))
+    || (selector === "sparsefullbox" && bandWidth >= Math.max(...order.map((value) => value + 1)));
   let blocks = denseBlocks;
-  if (selector === "sparsefullbox" && !denseEndpoint) {
+  if ((selector === "sparseputinar" || selector === "sparsefullbox") && !denseEndpoint) {
     // Sparse support is a tensor window, not a flattened band. Enumerating
     // every start tuple mirrors mkGramCons and preserves asymmetric corners.
     blocks = specs.flatMap((spec) => {
       const axisStarts = spec.gramDegree.map((axisDegree) => {
-        const window = Math.min(bandWidth, axisDegree + 1);
+        const window = Math.min(selector === "sparseputinar" ? cliqueSize : bandWidth, axisDegree + 1);
         return Array.from({ length: axisDegree - window + 2 }, (_, index) => index);
       });
       return combinationRows(axisStarts).map((start, index) => {
-        const windowSize = spec.gramDegree.map((axisDegree) => Math.min(bandWidth, axisDegree + 1));
+        const windowSize = spec.gramDegree.map((axisDegree) => Math.min(selector === "sparseputinar" ? cliqueSize : bandWidth, axisDegree + 1));
         return {
           label: `${spec.label} Gram block ${index + 1}`,
           gramDegree: windowSize.map((size) => size - 1),
@@ -212,11 +248,11 @@ export function buildCertificateShape(input: {
       });
     });
   }
-  const identitiesPerCopy = (targetDegree + 1) ** nPar;
+  const identitiesPerCopy = tensorCount(targetDegrees.map((value) => value + 1));
   const coefficientIdentities = copies * identitiesPerCopy;
   const psdBlocks = copies * blocks.length;
-  const effectiveSelector = denseEndpoint ? "fullbox" : selector;
-  return { selector, effectiveSelector, targetDegree, coefficientTests: 0,
+  const effectiveSelector = denseEndpoint ? (selector === "sparseputinar" ? "putinar" : "fullbox") : selector;
+  return { selector, effectiveSelector, targetDegree: compactAxis(targetDegrees), coefficientTests: 0,
     coefficientIdentities, psdBlocks, totalConstraints: coefficientIdentities + psdBlocks,
-    blocks, copies, minimumOrder, bandWidth };
+    blocks, copies, minimumOrder: compactAxis(minimumOrder), cliqueSize, bandWidth };
 }

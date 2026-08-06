@@ -40,7 +40,7 @@ const { selected, showSections = true } = Astro.props;
 )}
 
 <style>
-  .certificate-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 0.65rem; margin-block: 1rem 2rem; }
+  .certificate-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 0.65rem; margin-block: 1rem 2rem; }
   .certificate-nav a { display: grid; align-content: start; gap: 0.4rem; min-width: 0; min-block-size: 6.25rem; border: 1px solid var(--diagram-border); border-radius: 10px; padding: 0.8rem; color: var(--sl-color-text); background: var(--diagram-surface); text-decoration: none; }
   .certificate-nav a:hover, .certificate-nav a:focus-visible { border-color: var(--sl-color-accent); color: var(--sl-color-text-accent); box-shadow: 0 8px 20px rgb(15 23 42 / 0.08); }
   .certificate-nav a.selected { border-color: var(--diagram-result); color: var(--diagram-result); background: color-mix(in srgb, var(--diagram-result) 9%, var(--diagram-surface)); box-shadow: inset 0 3px var(--diagram-result); }
@@ -49,6 +49,6 @@ const { selected, showSections = true } = Astro.props;
   .certificate-sections section { scroll-margin-top: calc(var(--sl-nav-height) + 1rem); border-block-start: 1px solid var(--diagram-border); padding-block-start: 1rem; }
   .certificate-sections h2, .certificate-sections p { margin-block: 0 0.55rem; }
   .certificate-command { display: inline-block; margin-block-end: 0.55rem; border-radius: 6px; padding: 0.35rem 0.5rem; background: var(--sl-color-gray-6); }
-  @media (max-width: 720px) { .certificate-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) { .certificate-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 390px) { .certificate-nav { grid-template-columns: 1fr; } }
 </style>

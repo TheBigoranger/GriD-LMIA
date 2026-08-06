@@ -41,20 +41,33 @@ function testApplyMethodsAcceptTrailingModeAndReplaceFamily(testCase)
 
     polya = direct.applyPolya(0, ValidationMode='FAST');
     putinar = direct.applyPutinar(0, ValidationMode="Strict");
+    sparsePutinarEndpoint = direct.applySparsePutinar(1, 0, ...
+        ValidationMode="fast");
     full = direct.applyFullBoxPreorder(0, ValidationMode='fast');
     sparseEndpoint = direct.applySparseFullBoxPreorder(1, 0, ...
+        ValidationMode="STRICT");
+    activeP = pdvar(1, [0 1], Degree=4);
+    activeDirect = activeP >= 0;
+    sparsePutinar = activeDirect.applySparsePutinar(2, 2, ...
         ValidationMode="STRICT");
 
     testCase.verifyTrue(polya.UsePolya);
     testCase.verifyEqual(polya.PolyaDegree, 0);
     testCase.verifyTrue(putinar.UsePutinar);
     testCase.verifyEqual(putinar.PutinarOrder, 0);
+    testCase.verifyFalse(sparsePutinarEndpoint.UseSparsePutinar);
+    testCase.verifyEqual(numel(sparsePutinarEndpoint.Constraints), ...
+        numel(direct.Constraints));
     testCase.verifyTrue(full.UseFullBoxPreorder);
     testCase.verifyEqual(full.FullBoxOrder, 0);
     testCase.verifyFalse(sparseEndpoint.UseSparseFullBoxPreorder);
     testCase.verifyFalse(sparseEndpoint.UseFullBoxPreorder);
     testCase.verifyEqual(numel(sparseEndpoint.Constraints), ...
         numel(direct.Constraints));
+    testCase.verifyTrue(sparsePutinar.UseSparsePutinar);
+    testCase.verifyEqual(sparsePutinar.SparsePutinarOrder, 2);
+    testCase.verifyEqual(sparsePutinar.CliqueSize, 2);
+    testCase.verifyEqual(numel(sparsePutinar.Constraints), 8);
 end
 
 function testApplyMethodsOwnMalformedModeErrors(testCase)
@@ -65,6 +78,8 @@ function testApplyMethodsOwnMalformedModeErrors(testCase)
     testCase.verifyError(@() direct.applyPolya( ...
         ValidationMode="bad"), "pdlmi:InvalidValidationMode");
     testCase.verifyError(@() direct.applyPutinar( ...
+        ValidationMode=42), "pdlmi:InvalidValidationMode");
+    testCase.verifyError(@() direct.applySparsePutinar( ...
         ValidationMode=42), "pdlmi:InvalidValidationMode");
     testCase.verifyError(@() direct.applySparseFullBoxPreorder( ...
         ValidationMode=["fast", "strict"]), ...
@@ -123,6 +138,7 @@ function verifySamePublicAssembly(testCase, lhs, rhs)
     testCase.verifyEqual(numel(lhs.Constraints), numel(rhs.Constraints));
     testCase.verifyEqual(lhs.UsePolya, rhs.UsePolya);
     testCase.verifyEqual(lhs.UsePutinar, rhs.UsePutinar);
+    testCase.verifyEqual(lhs.UseSparsePutinar, rhs.UseSparsePutinar);
     testCase.verifyEqual(lhs.UseFullBoxPreorder, rhs.UseFullBoxPreorder);
     testCase.verifyEqual(getvariables(toYalmip(lhs)), ...
         getvariables(toYalmip(rhs)));

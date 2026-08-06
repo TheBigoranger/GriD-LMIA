@@ -76,6 +76,17 @@ function testAnisotropicSparseWindows(testCase)
     verifyLegacyCertificate(testCase, actual, targetDegree, specs, 2);
 end
 
+function testSparsePutinarTensorWindows(testCase)
+    % SparsePutinar uses singleton masks with the legacy tensor-window map.
+    grid = {[0 1], [-1 1]};
+    residual = pdvar(1, grid, Degree=[2 6]);
+    direct = residual >= 0;
+    actual = direct.applySparsePutinar(2, [1 3]);
+    specs = putinarSpecs(2, [1 3]);
+
+    verifyLegacyCertificate(testCase, actual, [2 6], specs, 2);
+end
+
 function verifyLegacyCertificate(testCase, wrapper, targetDegree, specs, bandWidth)
     % Rebuild one local certificate from the actual Gram variables.
     nPar = numel(wrapper.Residual.GridInfo.Vectors);

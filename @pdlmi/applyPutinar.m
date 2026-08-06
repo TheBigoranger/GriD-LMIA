@@ -18,7 +18,7 @@ function out = applyPutinar(obj, varargin)
     %   ceil(Residual.Degree/2), the target degree is 2.*order, and the
     %   quadratic-module form is used.
     %   Reapplication rebuilds from Residual and replaces any Pólya, Putinar,
-    %   sparse full-box, or FullBox selection.
+    %   SparsePutinar, sparse full-box, or FullBox selection.
     %
     %   In every physical cell and active rate row, the sign-normalized target
     %   is represented by the Markov-Lukacs parity form in one parameter, and

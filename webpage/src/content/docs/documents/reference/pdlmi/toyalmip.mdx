@@ -46,7 +46,7 @@ logical.
 
 `pdlmi` stores constraints in package-owned cell-local form. Direct and Pólya
 objects store one sign condition per physical cell, Bernstein coefficient, and
-rate vertex. Putinar, SparseFullBox, and FullBox objects instead store PSD Gram-block
+rate vertex. Putinar, SparsePutinar, SparseFullBox, and FullBox objects instead store PSD Gram-block
 conditions followed by exact coefficient identities for every cell and rate
 row. `toYalmip` is the
 boundary where the stored entries become a regular YALMIP constraint array:
@@ -57,7 +57,7 @@ $$
 
 For direct and Pólya inequalities, $N$ is the number of physical cells times the
 number of active rate rows times the number of assembled Bernstein
-coefficients. For Putinar, SparseFullBox, and FullBox objects, $N$ instead counts every stored
+coefficients. For Putinar, SparsePutinar, SparseFullBox, and FullBox objects, $N$ instead counts every stored
 PSD Gram condition and exact coefficient identity across those cells and rows.
 
 The known-data logical test uses the wrapper’s single global inequality
@@ -67,7 +67,7 @@ entry-wise mode tests individual scalar entries. A false result warns with
 `pdlmi:InconclusiveCertificate` because failure of this sufficient coefficient
 test does not prove a continuous violation or matrix indefiniteness.
 
-Known-data Putinar, SparseFullBox, and FullBox wrappers still export YALMIP
+Known-data Putinar, SparsePutinar, SparseFullBox, and FullBox wrappers still export YALMIP
 constraints and may contain auxiliary Gram variables. `toYalmip` does not
 choose a solver, create an objective, apply relaxation margins, or run
 `optimize`.
@@ -163,4 +163,4 @@ polyaCertificate = logical
 
 ## See Also
 
-[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)

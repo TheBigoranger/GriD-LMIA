@@ -14,8 +14,8 @@ function out = applyFullBoxPreorder(obj, varargin)
     %   Scalar input expands uniformly; FullBoxOrder is stored as a 1-by-ell
     %   row vector. The no-argument form chooses the smallest admissible order.
     %   Reapplication starts from Residual, so it replaces any Pólya, Putinar,
-    %   sparse full-box, or earlier FullBox selection rather than compounding
-    %   it.
+    %   SparsePutinar, sparse full-box, or earlier FullBox selection rather
+    %   than compounding it.
     %
     %   The default/minimum is floor(m/2) for one parameter and componentwise
     %   ceil(Residual.Degree/2) otherwise; the multidimensional target degree is

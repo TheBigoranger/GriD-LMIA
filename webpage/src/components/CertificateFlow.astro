@@ -9,6 +9,7 @@ const cardNotation = {
   direct: "\\begin{gathered}C^{(\\mathbf c)}[\\mathbf i]:\\text{ target coefficient matrix}\\\\\\mathbf i\\in\\mathcal I_M=\\{0,\\ldots,M\\}^{\\ell}:\\text{ local label}\\end{gathered}",
   polya: "\\begin{gathered}\\tilde C^{(\\mathbf c)}[\\mathbf i]\\succeq0,\\quad\\mathbf i\\in\\mathcal I_{M+d}\\\\\\mathcal I_{M+d}=\\{0,\\ldots,M+d\\}^{\\ell}\\end{gathered}",
   putinar: "\\begin{gathered}S_0,S_s\\succeq0:\\text{ PSD Gram/SOS polynomial matrices}\\\\g_s=\\alpha_s(1-\\alpha_s):\\text{ box generator};\\quad r:\\text{ absolute Gram order}\\end{gathered}",
+  sparseputinar: "\\begin{gathered}\\mathcal Q_{\\mathrm P}:\\text{ active Putinar specifications, including the 1D parity blocks}\\\\w_s=\\min(b,d_s+1):\\text{ tensor-window side}\\\\Q_{q,\\mathbf u}\\succeq0:\\text{ independent clique block};\\quad b:\\text{ clique size}\\end{gathered}",
   sparsefullbox: "Z_J=\\mathbf b_{\\mathbf r-\\boldsymbol\\chi_J}\\otimes I_n;\\quad Q_J^{(w)}:\\text{ symmetric block-band Gram};\\quad w:\\text{ scalar bandwidth};\\quad w=1:\\text{ Direct};\\quad w\\ge\\max_s(r_s+1):\\text{ FullBox}",
   fullbox: "Z_J=\\mathbf b_{r\\mathbf 1-\\boldsymbol\\chi_J}\\otimes I_n;\\quad Q_J:\\text{ dense PSD Gram};\\quad J\\subseteq[\\ell];\\quad r:\\text{ absolute Gram order}",
 } as const;
