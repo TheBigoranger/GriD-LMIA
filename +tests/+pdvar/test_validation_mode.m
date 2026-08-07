@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testModesPreservePublicConstruction(testCase)
+function testModPrePubCon(testCase)
     % Every mode builds the same shape, grid, degree, and affine structure.
     implicit = pdvar(2, [0 1 2], "full", Degree=2);
     fast = pdvar(2, [0 1 2], "full", Degree=2, ...
@@ -28,7 +28,7 @@ function testModesPreservePublicConstruction(testCase)
     end
 end
 
-function testInvalidModesUseOwnerIdentifier(testCase)
+function testInvModUseOwnIde(testCase)
     % pdvar owns missing and malformed ValidationMode diagnostics.
     make = @(mode) pdvar(1, [0 1], ValidationMode=mode);
     bad = {42, ["fast", "strict"], string(missing), '', "sample"};
@@ -40,7 +40,7 @@ function testInvalidModesUseOwnerIdentifier(testCase)
         "ValidationMode"), "pdvar:InvalidValidationMode");
 end
 
-function testSymbolicSliceCanRestoreContinuity(testCase)
+function testSymSliCanResCon(testCase)
     % Exact recomputation recognizes a continuous slice of a forged jump.
     shared = sdpvar(1);
     jumpLeft = sdpvar(1);
@@ -65,7 +65,6 @@ function obj = internalPdvar(vals)
     init.LocalValues = vals;
     init.IsContinuous = false;
     init.ContainsDecision = true;
-    init.HasRateDependence = false;
     init.RateBounds = [];
     init.SourceSummary = "test-validation-mode";
     init.ValidationMode = "strict";

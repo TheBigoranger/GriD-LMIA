@@ -4,6 +4,9 @@ function n = width(obj)
     %   Syntax:
     %     n = width(obj)
     %
+    %   Output:
+    %     n - Number of stored matrix columns.
+    %
     %   Example:
     %     obj = pdbase({[0 1]}, [2 3], 0);
     %     n = width(obj);

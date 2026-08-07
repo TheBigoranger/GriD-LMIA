@@ -10,7 +10,7 @@ function setupOnce(testCase)
     fprintf("GriD-LMIA solver smoke policy selected: %s\n", testCase.TestData.Solver);
 end
 
-function testParameterDependentPBeatsConstantP(testCase)
+function testParDepPbeConP(testCase)
     % This example is feasible only after P is allowed to depend on rho.
     grid = {[0 1]};
     A = pdmat(grid, @(x) (1 - x) * [-1 -1; 1 -1] ...
@@ -39,7 +39,7 @@ function testParameterDependentPBeatsConstantP(testCase)
     testCase.verifyEqual(numel(h), 4);
 end
 
-function testUserBlockLmiSolverExample(testCase)
+function testUseBloLmiSolExa(testCase)
     % Absorbed from root test.m as a solver-facing block-PD-LMI example.
     yalmip("clear");
 
@@ -73,19 +73,19 @@ function testUserBlockLmiSolverExample(testCase)
     fprintf("Optimal H-infinity gamma: %.6g\n", gammaValue);
 end
 
-function testRectangularResidualAcrossAllCertificates(testCase)
+function testRecResAcrAllCer(testCase)
     % Every public inequality certificate must reach the selected SDP solver.
     yalmip("clear");
     P = pdvar(2, 1, {[0 1]}, "full", Degree=0);
     R = P - ones(2, 1);
-    direct = constructEntrywiseSilently(@() R >= 0);
+    direct = consEntSil(@() R >= 0);
     wrappers = {direct, ...
-        constructEntrywiseSilently(@() direct.applyPolya(1)), ...
-        constructEntrywiseSilently(@() direct.applyPutinar(0)), ...
-        constructEntrywiseSilently(@() direct.applySparsePutinar(2, 0)), ...
-        constructEntrywiseSilently(@() ...
-            direct.applySparseFullBoxPreorder(2, 2)), ...
-        constructEntrywiseSilently(@() direct.applyFullBoxPreorder(0))};
+        consEntSil(@() direct.usePolya(1)), ...
+        consEntSil(@() direct.usePutinar(0)), ...
+        consEntSil(@() direct.useSpPut(2, 0)), ...
+        consEntSil(@() ...
+            direct.useSpBox(2, 2)), ...
+        consEntSil(@() direct.useFullBox(0))};
 
     solver = testCase.TestData.Solver;
     opts = sdpsettings('solver', solver, 'verbose', 0);
@@ -96,16 +96,16 @@ function testRectangularResidualAcrossAllCertificates(testCase)
     end
 end
 
-function testKnownPdmatGramCertificatesSolve(testCase)
+function testKnoPdmGraCerSol(testCase)
     % Every auxiliary-Gram family for a known residual must be solver feasible.
     yalmip("clear");
     A = pdmat([0 1], @(rho) 1 + 0 * rho, Degree=4);
     direct = A >= 0;
     wrappers = {
-        direct.applyPutinar(2), ...
-        direct.applySparsePutinar(2, 2), ...
-        direct.applySparseFullBoxPreorder(2, 2), ...
-        direct.applyFullBoxPreorder(2)
+        direct.usePutinar(2), ...
+        direct.useSpPut(2, 2), ...
+        direct.useSpBox(2, 2), ...
+        direct.useFullBox(2)
         };
 
     solver = testCase.TestData.Solver;
@@ -120,7 +120,7 @@ function testKnownPdmatGramCertificatesSolve(testCase)
     end
 end
 
-function out = constructEntrywiseSilently(fun)
+function out = consEntSil(fun)
     % Solver smoke output should not repeat dispatch warnings covered elsewhere.
     warnId = "pdlmi:ElementwiseInequality";
     state = warning("query", warnId);

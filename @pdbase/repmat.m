@@ -4,10 +4,18 @@ function out = repmat(obj, varargin)
     %   Syntax:
     %     B = repmat(A, m, n)
     %     B = repmat(A, [m n])
+    %
+    %   Output:
+    %     B - Same dynamic class with each coefficient repeated in the
+    %         requested two-dimensional pattern.
+    %
+    %   Example:
+    %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
+    %     B = repmat(A, 2, 3);
 
     prefix = string(class(obj));
     reps = parseRep(varargin, prefix);
-    out = unOp(obj, @(a) repmat(a, reps), obj.MatrixSize .* reps);
+    out = mapUnary(obj, @(a) repmat(a, reps), obj.MatrixSize .* reps);
 end
 
 function reps = parseRep(args, prefix)
@@ -21,7 +29,7 @@ function reps = parseRep(args, prefix)
         reps = zeros(1, 2);
         for k = 1:2
             reps(k) = helper.chk(args{k}, prefix + ":InvalidRepmat", ...
-                "Repetition counts must be positive integer scalars.", ...
+                "repetition count", ...
                 "numeric", "real", "scalar", "finite", "integer", "positive");
         end
         return
@@ -37,7 +45,7 @@ function reps = parseRep(args, prefix)
     end
     for k = 1:2
         reps(k) = helper.chk(reps(k), prefix + ":InvalidRepmat", ...
-            "Repetition counts must be positive integer scalars.", ...
+            "repetition count", ...
             "numeric", "real", "scalar", "finite", "integer", "positive");
     end
 end

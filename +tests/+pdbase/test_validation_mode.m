@@ -3,7 +3,7 @@ function tests = test_validation_mode
     tests = functiontests(localfunctions);
 end
 
-function testDefaultEqualsExplicitFastAndStrictForValidData(testCase)
+function testDefEquExpFasAnd(testCase)
     % Valid normalized storage has identical public state in every mode.
     grid = {[0 1 2]};
     vals = {{1, 2}, {2, 3}};
@@ -18,7 +18,7 @@ function testDefaultEqualsExplicitFastAndStrictForValidData(testCase)
     testCase.verifyFalse(isprop(implicit, "ValidationMode"));
 end
 
-function testFastSamplesFirstCellAndStrictChecksWholeTree(testCase)
+function testFasSamFirCelAnd(testCase)
     % Fast trusts later generated cells; strict remains the diagnostic mode.
     grid = {[0 1 2]};
 
@@ -43,7 +43,7 @@ function testFastSamplesFirstCellAndStrictChecksWholeTree(testCase)
         "pdbase:InvalidCoefficientRows");
 end
 
-function testInvalidModesUseOwnerIdentifier(testCase)
+function testInvModUseOwnIde(testCase)
     % Missing, nonscalar, nontext, empty, and unsupported modes are rejected.
     make = @(mode) pdbase({[0 1]}, [1 1], 0, {{1}}, ...
         ValidationMode=mode);
@@ -56,7 +56,7 @@ function testInvalidModesUseOwnerIdentifier(testCase)
         "ValidationMode"), "pdbase:InvalidValidationMode");
 end
 
-function testStrictAnisotropicElevationChecksLaterCells(testCase)
+function testStrAniEleCheLat(testCase)
     % Fast construction may trust generated later cells; strict elevation must not.
     grid = {[0 1 2], [10 20]};
     degree = [1 0];
@@ -67,20 +67,20 @@ function testStrictAnisotropicElevationChecksLaterCells(testCase)
     wrongCount{2}{1} = {3};
     countSource = pdbase(grid, [1 1], degree, wrongCount, ...
         ValidationMode="fast");
-    testCase.verifyError(@() countSource.elevVals([0 1], "strict"), ...
+    testCase.verifyError(@() countSource.elevate([0 1], "strict"), ...
         "pdbase:InvalidCoefficientCell");
 
     wrongPayload = valid;
     wrongPayload{2}{1} = {3, "bad"};
     payloadSource = pdbase(grid, [1 1], degree, wrongPayload, ...
         ValidationMode="fast");
-    testCase.verifyError(@() payloadSource.elevVals([0 1], "strict"), ...
+    testCase.verifyError(@() payloadSource.elevate([0 1], "strict"), ...
         "pdbase:InvalidCoefficientPayload");
 
     wrongSize = valid;
     wrongSize{2}{1} = {3, [4 5]};
     sizeSource = pdbase(grid, [1 1], degree, wrongSize, ...
         ValidationMode="fast");
-    testCase.verifyError(@() sizeSource.elevVals([0 1], "strict"), ...
+    testCase.verifyError(@() sizeSource.elevate([0 1], "strict"), ...
         "pdbase:InvalidCoefficientPayload");
 end

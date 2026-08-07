@@ -4,6 +4,9 @@ function out = horzcat(varargin)
     %   Syntax:
     %     C = [A, B]
     %
+    %   Output:
+    %     C - Concatenated derived object returned by the class-owned cat.
+    %
     %   Direct pdbase operands are rejected because pdbase represents one
     %   scalar payload container rather than a MATLAB object array.
     %

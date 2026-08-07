@@ -4,6 +4,9 @@ function tf = isequal(varargin)
     %   Syntax:
     %     tf = isequal(A, B)
     %
+    %   Output:
+    %     tf - True when normalized coefficient evidence is exactly equal.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, @(rho) rho, Degree=1);
     %     B = pdmat({[0 1]}, {0, 1}, Degree=1);
@@ -35,7 +38,7 @@ function tf = sameOne(a, b)
     if ~(builtin("isequal", a.MatrixSize, b.MatrixSize) && ...
             builtin("isequal", a.IsContinuous, b.IsContinuous) && ...
             builtin("isequal", a.ContainsDecision, b.ContainsDecision) && ...
-            builtin("isequal", a.HasRateDependence, b.HasRateDependence) && ...
+            builtin("isequal", a.NumRateRows, b.NumRateRows) && ...
             builtin("isequal", a.RateBounds, b.RateBounds))
         tf = false;
         return
@@ -48,9 +51,9 @@ function tf = sameOne(a, b)
         try
             grid = a.mergeGrid("pdmat:InvalidEquality", a, b);
             rb = a.pickRateBounds("pdmat:InvalidEquality", a, b);
-            ad = asData(grid, a, a.MatrixSize, rb, ...
+            ad = normOperand(grid, a, a.MatrixSize, rb, ...
                 "pdmat:InvalidEquality");
-            bd = asData(grid, b, a.MatrixSize, rb, ...
+            bd = normOperand(grid, b, a.MatrixSize, rb, ...
                 "pdmat:InvalidEquality");
         catch
             tf = false;
@@ -58,7 +61,7 @@ function tf = sameOne(a, b)
         end
 
         deg = max(ad.Degree, bd.Degree);
-        aligned = pdbase.alignLocalDegrees([ad, bd], deg, grid);
+        aligned = pdbase.elevData([ad, bd], deg, grid, "fast");
         tf = valsEqual(aligned(1).LocalValues, aligned(2).LocalValues);
         return
     end

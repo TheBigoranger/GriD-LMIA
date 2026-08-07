@@ -7,12 +7,16 @@ function out = sum(obj, varargin)
     %     S = sum(A, vecdim)
     %     S = sum(A, "all")
     %
+    %   Output:
+    %     S - Same dynamic class with each coefficient replaced by the
+    %         requested matrix sum.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {[1 2; 3 4], [2 4; 6 8]}, Degree=1);
     %     S = sum(A, [1 2]);
 
     if isempty(varargin)
-        out = unOp(obj, @(a) sum(a));
+        out = mapUnary(obj, @(a) sum(a));
         return
     end
 
@@ -25,27 +29,15 @@ function out = sum(obj, varargin)
     arg = varargin{1};
     if ischar(arg) || (isstring(arg) && isscalar(arg))
         if strcmpi(string(arg), "all")
-            out = unOp(obj, @(a) sum(a, "all"), [1 1]);
+            out = mapUnary(obj, @(a) sum(a, "all"), [1 1]);
             return
         end
         error(prefix + ":InvalidSum", ...
             "Sum dimension must be a unique positive integer vector or ""all"".");
     end
 
-    dims = parseDims(arg, prefix + ":InvalidSum", "Sum");
-    out = unOp(obj, @(a) reduce(a, dims));
-end
-
-function dims = parseDims(dims, errId, name)
-    %PARSEDIMS Normalize a nonempty unique positive-integer dimension vector.
-    dims = helper.chk(dims, errId, ...
-        name + " dimensions must be a nonempty unique positive integer vector.", ...
-        "numeric", "real", "vector", "nonempty", "finite", "integer", "positive");
-    dims = reshape(double(dims), 1, []);
-    if numel(unique(dims)) ~= numel(dims)
-        error(errId, ...
-            "%s dimensions must be a nonempty unique positive integer vector.", name);
-    end
+    dims = pdbase.normRedDims(arg, prefix + ":InvalidSum", "Sum");
+    out = mapUnary(obj, @(a) reduce(a, dims));
 end
 
 function val = reduce(val, dims)

@@ -4,6 +4,9 @@ function n = height(obj)
     %   Syntax:
     %     n = height(obj)
     %
+    %   Output:
+    %     n - Number of stored matrix rows.
+    %
     %   Example:
     %     obj = pdbase({[0 1]}, [2 3], 0);
     %     n = height(obj);

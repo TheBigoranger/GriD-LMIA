@@ -5,6 +5,9 @@ function out = le(lhs, rhs)
     %     C = A <= B
     %     C = A <= M
     %
+    %   Output:
+    %     C - pdlmi wrapper for the known-data residual A - B <= 0.
+    %
     %   Numeric and pdmat operands form a known residual. The returned pdlmi
     %   uses Direct by default; failed numeric certificates are inconclusive.
     %

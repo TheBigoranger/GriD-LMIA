@@ -1,12 +1,27 @@
 function out = diag(obj, k)
     %DIAG Extract or construct a diagonal in every coefficient matrix.
+    %
+    %   Syntax:
+    %     out = diag(obj)
+    %     out = diag(obj, k)
+    %
+    %   Arguments:
+    %     k - Optional integer diagonal offset. The default is zero.
+    %
+    %   Output:
+    %     out - Same dynamic class with diag applied to every coefficient
+    %           matrix.
+    %
+    %   Example:
+    %     A = pdmat({[0 1]}, {eye(2), 2*eye(2)}, Degree=1);
+    %     d = diag(A);
 
     if nargin < 2
         k = 0;
     end
     prefix = string(class(obj));
     k = helper.chk(k, prefix + ":InvalidDiag", ...
-        "Diagonal offset must be a finite real integer scalar.", ...
+        "diagonal offset", ...
         "numeric", "real", "scalar", "finite", "integer");
     k = double(k);
 
@@ -26,5 +41,5 @@ function out = diag(obj, k)
         end
     end
 
-    out = unOp(obj, @(a) diag(a, k));
+    out = mapUnary(obj, @(a) diag(a, k));
 end

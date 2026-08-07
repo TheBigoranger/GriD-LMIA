@@ -64,7 +64,7 @@ testCase.verifyEqual(obj.GridInfo.Bounds, [0 1; 10 30]);
 testCase.verifyEqual(obj.GridInfo.NumNodes, [2 3]);
 end
 
-function testGridInfoPointOrder(testCase)
+function testGriInfPoiOrd(testCase)
 % Tensor grid points should follow MATLAB row-order enumeration.
 obj = pdbase({[0 1], [10 20 30]}, [1 1], 0);
 

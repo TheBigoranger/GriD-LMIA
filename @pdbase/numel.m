@@ -4,6 +4,9 @@ function n = numel(obj, varargin)
     %   Syntax:
     %     n = numel(obj)
     %
+    %   Output:
+    %     n - Number of scalar entries in the stored matrix payload.
+    %
     %   Example:
     %     obj = pdbase({[0 1]}, [2 3], 0);
     %     n = numel(obj);

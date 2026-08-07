@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testAssignedHighDegreeMatrixConversion(testCase)
+function testAssHigDegMatCon(testCase)
     % Ordinary assigned decisions retain their complete Bernstein contract.
     grid = {[0 2]};
     P = pdvar(2, grid, "full", Degree=2);
@@ -28,7 +28,6 @@ function testAssignedHighDegreeMatrixConversion(testCase)
     testCase.verifyEqual(A.Degree, 2);
     testCase.verifyTrue(A.IsContinuous);
     testCase.verifyFalse(A.ContainsDecision);
-    testCase.verifyFalse(A.HasRateDependence);
     testCase.verifyEmpty(A.RateBounds);
     testCase.verifyEqual(A.SourceSummary, "coefficient-backed");
     testCase.verifyEmpty(A.FunctionHandle);
@@ -40,7 +39,7 @@ function testAssignedHighDegreeMatrixConversion(testCase)
     testCase.verifyEqual(A.evaluate(2), expected{3}, AbsTol=1e-12);
 end
 
-function testNumericAndProvenZeroConversion(testCase)
+function testNumAndProZerCon(testCase)
     % Proven symbolic cancellations become ordinary numeric coefficient data.
     P = pdvar(2, {[0 1]}, "full", Degree=3);
     Z = P - P;
@@ -53,14 +52,14 @@ function testNumericAndProvenZeroConversion(testCase)
     testCase.verifyEqual(A.evaluate(0.37), zeros(2));
 end
 
-function testUnassignedCoefficientFailsClearly(testCase)
+function testUnaCoeFaiCle(testCase)
     % Unsolved YALMIP decisions must not leak NaN payloads into pdmat.
     P = pdvar(1, {[0 1]}, Degree=2);
 
     testCase.verifyError(@() value(P), "pdvar:UnassignedValue");
 end
 
-function testOrdinaryRateMetadataStillReturnsOnePdmat(testCase)
+function testOrdRatMetStiRet(testCase)
     % RateBounds metadata alone does not make ordinary coefficients rate rows.
     P = pdvar(1, {[0 1]}, Degree=2, RateBounds=[-1 2]);
     cp = P.coeffs(1);
@@ -70,11 +69,10 @@ function testOrdinaryRateMetadataStillReturnsOnePdmat(testCase)
 
     testCase.verifyClass(A, "pdmat");
     testCase.verifyEqual(A.coeffs(1), {1, 2, 4});
-    testCase.verifyFalse(A.HasRateDependence);
     testCase.verifyEmpty(A.RateBounds);
 end
 
-function testScalarDerivativeReturnsOrderedPdmatCells(testCase)
+function testScaDerRetOrdPdm(testCase)
     % Scalar rate rows split into lower/upper pdmat outputs without warnings.
     P = pdvar(1, {[0 2]}, Degree=2);
     assignCoeffs(P.coeffs(1), {1, 4, 9});
@@ -90,7 +88,19 @@ function testScalarDerivativeReturnsOrderedPdmatCells(testCase)
     verifyRatePdmat(testCase, rows{2}, 1, [9, 15]);
 end
 
-function testTensorDerivativeReturnsCombRowsOrder(testCase)
+function testFixRatRetOnePdm(testCase)
+    % A fixed rate exports one pdmat while preserving the derivative row kind.
+    P = pdvar(1, {[0 2]}, Degree=2);
+    assignCoeffs(P.coeffs(1), {1, 4, 9});
+    D = rhodiff(P, [3 3]);
+
+    rows = value(D);
+
+    testCase.verifySize(rows, [1 1]);
+    verifyRatePdmat(testCase, rows{1}, 1, [9, 15]);
+end
+
+function testTenDerRetComRow(testCase)
     % Tensor rate cells retain helper.combRows lower/upper vertex order.
     grid = {[0 2], [10 14]};
     rb = [-1 2; -3 5];
@@ -117,7 +127,7 @@ function testTensorDerivativeReturnsCombRowsOrder(testCase)
     end
 end
 
-function testAssignedAnisotropicMulticellContinuityIsReclassified(testCase)
+function testAssAniMulConIs(testCase)
     % Assigned values, not stale source metadata, determine exported continuity.
     degree = [0 2];
     grid = {[0 1 2], [10 20]};
@@ -135,6 +145,44 @@ function testAssignedAnisotropicMulticellContinuityIsReclassified(testCase)
     testCase.verifyFalse(B.IsContinuous);
     secondCell = B.coeffs([2 1]);
     testCase.verifyEqual(secondCell{1}, 20);
+end
+
+function testAssCanRecComFacCon(testCase)
+    % Assigned cancellation can recover continuity from symbolic face mismatch.
+    x = sdpvar(1, 1);
+    y = sdpvar(1, 1);
+    vals = {{0, x - y}, {0, 1}};
+    P = internalNumericPdvar({[0 1 2]}, 1, vals);
+    assign(x, 3);
+    assign(y, 3);
+
+    A = value(P);
+
+    testCase.verifyFalse(P.IsContinuous);
+    testCase.verifyTrue(A.IsContinuous);
+    testCase.verifyTrue(helper.chkCont(A.LocalValues, [2], 1));
+end
+
+function testAssTenFacAndTolMatHel(testCase)
+    % value uses the shared full-tensor, scale-aware continuity classifier.
+    grid = {[0 1 2], [10 20 30]};
+    degree = [1 1];
+    vals = helper.mkNest([2 2], @continuousTensorLeaf);
+
+    within = vals;
+    within{2}{2}{1} = within{2}{2}{1} + 5e-4;
+    outside = vals;
+    outside{2}{2}{1} = outside{2}{2}{1} + 2e-3;
+
+    expectedWithin = helper.chkCont(within, [2 2], degree);
+    expectedOutside = helper.chkCont(outside, [2 2], degree);
+    A = value(internalNumericPdvar(grid, degree, within));
+    B = value(internalNumericPdvar(grid, degree, outside));
+
+    testCase.verifyTrue(expectedWithin);
+    testCase.verifyFalse(expectedOutside);
+    testCase.verifyEqual(A.IsContinuous, expectedWithin);
+    testCase.verifyEqual(B.IsContinuous, expectedOutside);
 end
 
 function assignCoeffs(coeffs, vals)
@@ -158,7 +206,6 @@ function verifyRatePdmat(testCase, obj, degree, expected)
     testCase.verifyEqual(obj.Degree, degree);
     testCase.verifyFalse(obj.IsContinuous);
     testCase.verifyFalse(obj.ContainsDecision);
-    testCase.verifyFalse(obj.HasRateDependence);
     testCase.verifyEmpty(obj.RateBounds);
     testCase.verifyEqual(obj.SourceSummary, "coefficient-backed");
     testCase.verifyEmpty(obj.FunctionHandle);
@@ -176,9 +223,18 @@ function obj = internalNumericPdvar(grid, degree, vals)
         "LocalValues", {vals}, ...
         "IsContinuous", false, ...
         "ContainsDecision", false, ...
-        "HasRateDependence", false, ...
         "RateBounds", [], ...
         "SourceSummary", "test-assigned-continuity", ...
         "ValidationMode", "strict");
     obj = pdvar(init);
+end
+
+function leaf = continuousTensorLeaf(subs)
+    % Global tensor labels make every shared face agree at a large scale.
+    labels = helper.combRows({0:1, 0:1});
+    leaf = cell(1, size(labels, 1));
+    for k = 1:size(labels, 1)
+        globalLabel = subs - 1 + labels(k, :);
+        leaf{k} = 1e6 + 100 * globalLabel(1) + globalLabel(2);
+    end
 end

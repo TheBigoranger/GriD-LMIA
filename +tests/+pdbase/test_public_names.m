@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testPublicClassIdentities(testCase)
+function testPubClaIde(testCase)
     % Every public type should use the pd* name and shared pdbase parent.
     base = pdbase({[0 1]}, [1 1], 0);
     known = pdmat({[0 1]}, {1, 2}, Degree=1);
@@ -21,9 +21,12 @@ function testPublicClassIdentities(testCase)
     testCase.verifyClass(comparison, "pdlmi");
     testCase.verifyTrue(isa(known, "pdbase"));
     testCase.verifyTrue(isa(decision, "pdbase"));
+    testCase.verifyEqual(base.NumRateRows, 0);
+    testCase.verifyEqual(known.NumRateRows, 0);
+    testCase.verifyEqual(decision.NumRateRows, 0);
 end
 
-function testLegacyClassNamesAreAbsent(testCase)
+function testLegClaNamAreAbs(testCase)
     % The breaking rename intentionally provides no compatibility aliases.
     legacyNames = ["dpbase", "dpmat", "dpvar", "dplmi"];
     for name = legacyNames
@@ -32,7 +35,7 @@ function testLegacyClassNamesAreAbsent(testCase)
     end
 end
 
-function testPublicErrorsUsePdPrefixes(testCase)
+function testPubErrUsePdPre(testCase)
     % Representative failures should expose the renamed public namespaces.
     P = pdvar(1, {[0 1]}, Degree=0);
 
@@ -44,4 +47,38 @@ function testPublicErrorsUsePdPrefixes(testCase)
         "pdvar:InvalidDegree");
     testCase.verifyError(@() pdlmi(P, "="), ...
         "pdlmi:InvalidRelation");
+end
+
+function testApiRenames(testCase)
+    % Breaking replacements exist while every superseded method stays absent.
+    base = pdbase({[0 1]}, [1 1], 0, {{1}});
+    known = pdmat({[0 1]}, {1}, Degree=0);
+    decision = pdvar(1, {[0 1]}, Degree=0);
+    wrapper = decision >= 0;
+
+    testCase.verifyTrue(ismethod(base, "elevate"));
+    testCase.verifyFalse(ismethod(base, "elevVals"));
+    testCase.verifyFalse(ismethod(base, "hasRateRows"));
+    testCase.verifyTrue(isprop(base, "NumRateRows"));
+    testCase.verifyFalse(isprop(base, "HasRateRows"));
+    testCase.verifyTrue(ismethod(known, "bernTable"));
+    testCase.verifyTrue(ismethod(decision, "bernTable"));
+    testCase.verifyFalse(ismethod(known, "bernsteinTable"));
+    testCase.verifyFalse(ismethod(decision, "bernsteinTable"));
+
+    current = ["usePolya", "usePutinar", "useFullBox", ...
+        "useSpPut", "useSpBox"];
+    removed = ["applyPolya", "applyPutinar", "applyFullBoxPreorder", ...
+        "applySparsePutinar", "applySparseFullBoxPreorder"];
+    for name = current
+        testCase.verifyTrue(ismethod(wrapper, name), ...
+            "Missing replacement pdlmi method: " + name);
+    end
+    for name = removed
+        testCase.verifyFalse(ismethod(wrapper, name), ...
+            "Removed pdlmi method remains available: " + name);
+    end
+
+    testCase.verifyNotEmpty(which("helper.normDeg"));
+    testCase.verifyEmpty(which("helper.normalizeDegree"));
 end

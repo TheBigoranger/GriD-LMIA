@@ -5,6 +5,10 @@ function obj = subsasgn(obj, S, rhs)
     %     P(rows, cols) = Q
     %     P(rows, cols) = M
     %
+    %   Output:
+    %     P - Updated pdvar expression with the selected matrix block replaced
+    %         in every aligned coefficient.
+    %
     %   Example:
     %     P = pdvar(2, {[0 1]}, "full");
     %     P(1, :) = [1 2];
@@ -26,48 +30,26 @@ function obj = subsasgn(obj, S, rhs)
         "pdvar:InvalidAssignment");
     grid = obj.mergeGrid("pdvar:MixedGrid", rhs);
     rb = obj.pickRateBounds("pdvar:InvalidAssignment", rhs);
-    lhsData = asData(grid, obj, [], rb, ...
+    lhsData = normOperand(grid, obj, [], rb, ...
         "pdvar:InvalidAssignment");
-    rhsData = asData(grid, rhs, [numel(rows), numel(cols)], ...
+    rhsData = normOperand(grid, rhs, [numel(rows), numel(cols)], ...
         rb, "pdvar:InvalidAssignment");
 
     deg = max(lhsData.Degree, rhsData.Degree);
-    [lhsPlan, rhsPlan] = elevationPlans( ...
-        lhsData.Degree, rhsData.Degree, deg, numel(grid));
-    lhsVals = pdbase.elevLocalValues(lhsData.LocalValues, ...
-        lhsData.Degree, deg, grid, lhsPlan, "fast");
-    rhsVals = pdbase.elevLocalValues(rhsData.LocalValues, ...
-        rhsData.Degree, deg, grid, rhsPlan, "fast");
+    data = pdbase.elevData([lhsData, rhsData], deg, grid, "fast");
+    lhsVals = data(1).LocalValues;
+    rhsVals = data(2).LocalValues;
     vals = obj.zipRateRows(lhsVals, rhsVals, ...
-        @(lhs, rhs) assignBlock(lhs, rhs, rows, cols), grid, ...
+        @(lhs, rhs) setBlock(lhs, rhs, rows, cols), grid, ...
         "pdvar:InvalidCoefficientRows");
 
     hasDec = lhsData.ContainsDecision || rhsData.ContainsDecision;
-    hasRate = lhsData.HasRateDependence || rhsData.HasRateDependence;
-    if ~hasRate
-        rb = [];
-    end
-    obj = pdvar(mkInit(grid, obj.MatrixSize, deg, vals, hasDec, hasRate, rb, ...
-        "expression", []));
+    numRateRows = max(lhsData.NumRateRows, rhsData.NumRateRows);
+    obj = pdvar(mkCtorState(grid, obj.MatrixSize, deg, vals, hasDec, rb, ...
+        "expression", [], "fast", numRateRows));
 end
 
-function [lhsPlan, rhsPlan] = elevationPlans(lhsDegree, rhsDegree, targetDegree, nPar)
-    %ELEVATIONPLANS Reuse one map when both operands share a source degree.
-    lhsPlan = [];
-    rhsPlan = [];
-    if any(lhsDegree < targetDegree)
-        lhsPlan = pdbase.elevationPlan(lhsDegree, targetDegree, nPar);
-    end
-    if any(rhsDegree < targetDegree)
-        if isequal(rhsDegree, lhsDegree)
-            rhsPlan = lhsPlan;
-        else
-            rhsPlan = pdbase.elevationPlan(rhsDegree, targetDegree, nPar);
-        end
-    end
-end
-
-function out = assignBlock(lhs, rhs, rows, cols)
+function out = setBlock(lhs, rhs, rows, cols)
     out = lhs;
     out(rows, cols) = rhs;
 end

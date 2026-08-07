@@ -36,26 +36,26 @@ function out = eq(lhs, rhs)
 end
 
 function kind = rowKind(val)
-    %ROWKIND Require one consistent ordinary or derivative row kind.
+    %ROWKIND Validate each leaf against the authoritative rate-row metadata.
 
     kind = "ordinary";
     if ~isa(val, "pdvar")
         return
     end
 
-    kind = "";
+    if val.NumRateRows == 0
+        expectedRows = 1;
+    else
+        kind = "derivative";
+        expectedRows = val.NumRateRows;
+    end
+
     cells = val.cells();
     for k = 1:size(cells, 1)
         coeffs = val.coeffs(cells(k, :));
-        cellKind = "ordinary";
-        if size(coeffs, 1) > 1
-            cellKind = "derivative";
-        end
-        if kind == ""
-            kind = cellKind;
-        elseif kind ~= cellKind
+        if size(coeffs, 1) ~= expectedRows
             error("pdvar:InvalidEqualityRows", ...
-                "A pdvar equality operand cannot mix ordinary and derivative rows across cells.");
+                "Each pdvar equality cell must match the operand's NumRateRows metadata.");
         end
     end
 end

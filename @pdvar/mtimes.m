@@ -29,7 +29,7 @@ function out = mtimes(lhs, rhs)
         case "scalar"
             out = scalarProd(lhs, rhs);
         case "general"
-            out = generalProd(lhs, rhs);
+            out = genProd(lhs, rhs);
     end
 end
 
@@ -78,9 +78,9 @@ function out = zeroProd(lhs, rhs)
         if isa(rhs, "pdbase")
             rb = lhs.pickRateBounds("pdvar:InvalidMultiplication", rhs);
             grid = lhs.mergeGrid("pdvar:MixedGrid", lhs, rhs);
-            if lhs.hasRateRows() || rhs.hasRateRows()
-                asData(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
-                asData(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
+            if lhs.NumRateRows ~= 0 || rhs.NumRateRows ~= 0
+                normOperand(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
+                normOperand(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
             end
         end
         if isa(rhs, "pdvar") || isa(rhs, "pdmat")
@@ -99,9 +99,9 @@ function out = zeroProd(lhs, rhs)
         if isa(lhs, "pdbase")
             rb = rhs.pickRateBounds("pdvar:InvalidMultiplication", lhs);
             grid = rhs.mergeGrid("pdvar:MixedGrid", lhs, rhs);
-            if lhs.hasRateRows() || rhs.hasRateRows()
-                asData(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
-                asData(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
+            if lhs.NumRateRows ~= 0 || rhs.NumRateRows ~= 0
+                normOperand(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
+                normOperand(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
             end
         end
         if isa(lhs, "pdvar") || isa(lhs, "pdmat")
@@ -131,20 +131,20 @@ function out = scalarProd(lhs, rhs)
         leftScale = true;
     end
 
-    if obj.HasRateDependence && ~obj.hasRateRows()
+    if ~isempty(obj.RateBounds) && obj.NumRateRows == 0
         error("pdvar:InvalidMultiplication", ...
             "Products involving metadata-only rate-dependent pdvar expressions are unsupported in this slice.");
     end
     if helper.isZero(obj, "obj")
         out = zeroObj(obj.GridInfo.Vectors, obj.MatrixSize);
     elseif leftScale
-        out = unOp(obj, @(a) scale * a);
+        out = mapUnary(obj, @(a) scale * a);
     else
-        out = unOp(obj, @(a) a * scale);
+        out = mapUnary(obj, @(a) a * scale);
     end
 end
 
-function out = generalProd(lhs, rhs)
+function out = genProd(lhs, rhs)
     %GENERALPROD Align operands and multiply local Bernstein rows.
     if isa(lhs, "pdvar")
         anchor = lhs;
@@ -157,8 +157,8 @@ function out = generalProd(lhs, rhs)
     % Align rate bounds, grids, and coefficient payloads before multiplication.
     rb = anchor.pickRateBounds("pdvar:InvalidMultiplication", lhs, rhs);
     grid = anchor.mergeGrid("pdvar:MixedGrid", lhs, rhs);
-    ld = asData(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
-    rd = asData(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
+    ld = normOperand(grid, lhs, [], rb, "pdvar:InvalidMultiplication");
+    rd = normOperand(grid, rhs, [], rb, "pdvar:InvalidMultiplication");
 
     % Keep the product inside the affine decision layer.
     if ld.ContainsDecision && rd.ContainsDecision
@@ -166,27 +166,22 @@ function out = generalProd(lhs, rhs)
             "Products may contain decision variables on at most one side.");
     end
     % Allow rate-vertex rows from only one operand.
-    if (ld.HasRateDependence || rd.HasRateDependence) && ...
-            ~xor(ld.HasRateRows, rd.HasRateRows)
+    if ~isempty(rb) && ...
+            ~xor(ld.NumRateRows ~= 0, rd.NumRateRows ~= 0)
         error("pdvar:InvalidMultiplication", ...
             "Products may contain derivative rate vertices on exactly one known-data side.");
     end
 
     sz = prodSz(ld.MatrixSize, rd.MatrixSize);
     % Multiply local rows while broadcasting ordinary rows as needed.
-    plan = anchor.productPlan(ld.Degree, rd.Degree);
-    vals = anchor.prodLocalValues(ld.LocalValues, ld.Degree, ...
+    vals = anchor.prodVals(ld.LocalValues, ld.Degree, ...
         rd.LocalValues, rd.Degree, grid, ...
-        "pdvar:InvalidMultiplication", plan, "fast");
+        "pdvar:InvalidMultiplication", "fast", ...
+        ld.NumRateRows, rd.NumRateRows);
 
-    hasRate = ld.HasRateDependence || rd.HasRateDependence;
-    if ~hasRate
-        % Ordinary products do not retain rate bounds.
-        rb = [];
-    end
-    out = pdvar(mkInit(grid, sz, ld.Degree + rd.Degree, vals, ...
-        ld.ContainsDecision || rd.ContainsDecision, hasRate, rb, ...
-        "expression", []));
+    out = pdvar(mkCtorState(grid, sz, ld.Degree + rd.Degree, vals, ...
+        ld.ContainsDecision || rd.ContainsDecision, rb, ...
+        "expression", [], "fast", max(ld.NumRateRows, rd.NumRateRows)));
 end
 
 function sz = prodSz(lhs, rhs)

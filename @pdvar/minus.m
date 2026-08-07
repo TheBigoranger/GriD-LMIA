@@ -6,13 +6,17 @@ function out = minus(lhs, rhs)
     %     C = P - M
     %     C = M - P
     %
+    %   Output:
+    %     C - pdvar affine expression after grid, degree, and rate-row
+    %         alignment.
+    %
     %   Example:
     %     P = pdvar(2, {[0 1]});
     %     C = eye(2) - P;
 
     if isa(lhs, "pdvar") && (isa(rhs, "pdvar") || isa(rhs, "pdmat")) && ...
             helper.isZero(rhs, "obj") && ...
-            ~lhs.HasRateDependence && ~rhs.HasRateDependence
+            isempty(lhs.RateBounds) && isempty(rhs.RateBounds)
         % The identity fast path must still enforce ordinary subtraction compatibility.
         if ~isequal(rhs.MatrixSize, lhs.MatrixSize)
             error("pdvar:InvalidSubtraction", ...
@@ -31,5 +35,5 @@ function out = minus(lhs, rhs)
         return
     end
 
-    out = binOp(lhs, rhs, @(a, b) a - b, "pdvar:InvalidSubtraction");
+    out = affineBinOp(lhs, rhs, @(a, b) a - b, "pdvar:InvalidSubtraction");
 end

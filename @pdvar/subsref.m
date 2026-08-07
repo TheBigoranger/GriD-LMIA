@@ -5,6 +5,10 @@ function varargout = subsref(obj, S)
     %     Q = P(rows, cols)
     %     c = P.coeffs(cellSubs)
     %
+    %   Output:
+    %     Q - pdvar block selected from every coefficient expression.
+    %     c - Result of ordinary dot access forwarded to MATLAB dispatch.
+    %
     %   Example:
     %     P = pdvar(2, 3, {[0 1]}, "full");
     %     q = P(:, 1);
@@ -14,9 +18,9 @@ function varargout = subsref(obj, S)
             "pdvar:InvalidSubscript");
         vals = pdbase.mapVals(obj.LocalValues, @(a) a(rows, cols), ...
             obj.GridInfo.Vectors);
-        out = pdvar(mkInit(obj.GridInfo.Vectors, [numel(rows), numel(cols)], ...
-            obj.Degree, vals, obj.ContainsDecision, obj.HasRateDependence, ...
-            obj.RateBounds, "expression", []));
+        out = pdvar(mkCtorState(obj.GridInfo.Vectors, [numel(rows), numel(cols)], ...
+            obj.Degree, vals, obj.ContainsDecision, obj.RateBounds, ...
+            "expression", [], "fast", obj.NumRateRows));
 
         if numel(S) == 1
             varargout{1} = out;

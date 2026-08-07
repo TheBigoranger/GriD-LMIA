@@ -1,8 +1,8 @@
-function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
+function [sz, deg, vals] = gridToLocal(src, vecs, optDeg, owner)
     %GRIDTOLOCAL Convert a global Bernstein coefficient grid to local cells.
     %
     %   Syntax:
-    %     [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
+    %     [sz, deg, vals] = gridToLocal(src, vecs, optDeg, owner)
     %
     %   Arguments:
     %     src    - Global tensor cell grid of numeric coefficients.
@@ -14,8 +14,9 @@ function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
     %     sz       - Common coefficient-matrix size.
     %     deg      - Inferred or validated Bernstein degree.
     %     vals     - Nested physical-cell LocalValues tree.
-    %     flat     - One flat coefficient leaf per cell row.
-    %     cellSubs - Physical-cell subscripts matching flat.
+    %
+    %   Example (via the public constructor):
+    %     A = pdmat([0 1 2], {0, 1, 2}, Degree=1);
 
     if nargin < 4
         owner = "pdmat";
@@ -23,11 +24,11 @@ function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
     owner = string(owner);
 
     helper.chk(src, owner + ":InvalidData", ...
-        "Global coefficient data must be a nonempty cell array.", ...
+        "global coefficient data", ...
         "cell", "nonempty");
 
     if ~isempty(optDeg)
-        optDeg = helper.normalizeDegree(optDeg, numel(vecs), ...
+        optDeg = helper.normDeg(optDeg, numel(vecs), ...
             owner + ":InvalidDegree", "Degree");
     end
 
@@ -38,13 +39,7 @@ function [sz, deg, vals, flat, cellSubs] = gridToLocal(src, vecs, optDeg, owner)
 
     sz = scanMats(src(:), owner + ":InvalidData", ...
         "Each coefficient payload must be a nonempty finite real numeric matrix.");
-    cellSubs = helper.combRows(arrayfun(@(n) 1:n, nCell, "UniformOutput", false));
-    flat = cell(size(cellSubs, 1), 1);
-    for r = 1:size(cellSubs, 1)
-        flat{r} = coeffsFromGrid(src, cellSubs(r, :), deg);
-    end
-
-    vals = helper.mkNest(nCell, @(subs) coeffsFromGrid(src, subs, deg));
+    vals = helper.mkNest(nCell, @(subs) gridCoeffs(src, subs, deg));
 end
 
 function dims = gridDims(src, nPar, owner)
@@ -84,8 +79,8 @@ function deg = gridDeg(dims, nCell, optDeg, owner)
     end
 end
 
-function coeffs = coeffsFromGrid(src, cellSubs, deg)
-    %COEFFSFROMGRID Extract one local leaf, retaining shared boundaries.
+function coeffs = gridCoeffs(src, cellSubs, deg)
+    %GRIDCOEFFS Extract one local leaf, retaining shared boundaries.
     lbls = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, deg, ...
         "UniformOutput", false));
     coeffs = cell(1, size(lbls, 1));

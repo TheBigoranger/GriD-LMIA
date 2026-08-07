@@ -3,7 +3,7 @@ function tests = test_algebra
     tests = functiontests(localfunctions);
 end
 
-function testAdditionElevatesDegree(testCase)
+function testAddEleDeg(testCase)
     % Addition should elevate lower-degree operands before summing coefficients.
     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
@@ -17,7 +17,7 @@ function testAdditionElevatesDegree(testCase)
     verifyCoeff(testCase, C, 1, {11, 21.5, 32});
 end
 
-function testSubtractionAndUnaryMinus(testCase)
+function testSubAndUnaMin(testCase)
     % Subtraction and unary minus should operate coefficient-wise.
     A = pdmat({[0 1]}, {1, 3}, Degree=1);
     B = pdmat({[0 1]}, {4, 8}, Degree=1);
@@ -26,7 +26,7 @@ function testSubtractionAndUnaryMinus(testCase)
     verifyCoeff(testCase, -A, 1, {-1, -3});
 end
 
-function testEqualityUsesZeroDifference(testCase)
+function testEquUseZerDif(testCase)
     % Equality returns one logical from the coefficient-backed difference.
     A = pdmat({[0 1]}, {1, 3}, Degree=1);
     same = pdmat({[0 0.5 1]}, {1, 2, 3}, Degree=1);
@@ -38,7 +38,7 @@ function testEqualityUsesZeroDifference(testCase)
     testCase.verifySize(A == same, [1 1]);
 end
 
-function testEqualitySupportsSubtractionCompatibleNumericOperands(testCase)
+function testEquSupSubComNum(testCase)
     % Numeric equality should reuse scalar expansion and matrix subtraction.
     Z = pdmat({[0 1]}, {zeros(2), zeros(2)}, Degree=1);
     I = pdmat({[0 1]}, {eye(2), eye(2)}, Degree=1);
@@ -58,7 +58,7 @@ function testEqualitySupportsSubtractionCompatibleNumericOperands(testCase)
     testCase.verifySize(Z == 0, [1 1]);
 end
 
-function testEqualityRejectsInvalidNumericAndUnsupportedOperands(testCase)
+function testEquRejInvNumAnd(testCase)
     % Equality keeps subtraction-owned numeric validation and API errors.
     A = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     notFinite = str2double("NaN");
@@ -71,7 +71,7 @@ function testEqualityRejectsInvalidNumericAndUnsupportedOperands(testCase)
     testCase.verifyError(@() A == "zero", "pdmat:InvalidEquality");
 end
 
-function testMatrixMultiplicationDegreeGrowth(testCase)
+function testMatMulDegGro(testCase)
     % Matrix multiplication should convolve Bernstein coefficients and grow degree.
     A = pdmat({[0 1]}, {[1 2], [3 4]}, Degree=1);
     B = pdmat({[0 1]}, {[5; 6], [7; 8]}, Degree=1);
@@ -83,7 +83,7 @@ function testMatrixMultiplicationDegreeGrowth(testCase)
     verifyCoeff(testCase, C, 1, {17, 31, 53});
 end
 
-function testChainedScalarMultiplicationCubicCoefficients(testCase)
+function testChaScaMulCubCoe(testCase)
     % Chained scalar products should retain cubic Bernstein coefficients.
     A = pdmat({[0 1]}, {2, 5}, Degree=1);
     B = pdmat({[0 1]}, {7, 11}, Degree=1);
@@ -95,11 +95,11 @@ function testChainedScalarMultiplicationCubicCoefficients(testCase)
     verifyCoeff(testCase, L, 1, {42, 227 / 3, 131, 220});
 end
 
-function testTensorGridCoefficientProduct(testCase)
+function testTenGriCoePro(testCase)
     % Tensor-grid products should preserve tensor coefficient ordering.
     grid = {[0 1], [10 20]};
-    A = pdmat(grid, {1 2; 3 4}, Degree=1);
-    B = pdmat(grid, {5 6; 7 8}, Degree=1);
+    A = pdmat(grid, {1 2; 3 4}, Degree=[1 1]);
+    B = pdmat(grid, {5 6; 7 8}, Degree=[1 1]);
 
     K = A * B;
     coeffs = K.coeffs([1 1]);
@@ -112,7 +112,7 @@ function testTensorGridCoefficientProduct(testCase)
     testCase.verifyEqual(coeffs{9}, 32);
 end
 
-function testTensorHighDegreeProduct(testCase)
+function testTenHigDegPro(testCase)
     % A 2-D degree-2 by degree-1 product should use tensor binomial scaling.
     grid = {[0 1], [10 20]};
     Adata = cell(3, 3);
@@ -127,8 +127,8 @@ function testTensorHighDegreeProduct(testCase)
             Bdata{i + 1, j + 1} = 100 + i + 10 * j;
         end
     end
-    A = pdmat(grid, Adata, Degree=2);
-    B = pdmat(grid, Bdata, Degree=1);
+    A = pdmat(grid, Adata, Degree=[2 2]);
+    B = pdmat(grid, Bdata, Degree=[1 1]);
 
     C = A * B;
 
@@ -137,7 +137,7 @@ function testTensorHighDegreeProduct(testCase)
         bernProdExpected(A.coeffs([1 1]), 2, B.coeffs([1 1]), 1, 2));
 end
 
-function testMixedScalarGridUsesCommonRefinement(testCase)
+function testMixScaGriUseCom(testCase)
     % Same-bound mixed scalar grids should align on a common refinement.
     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     B = pdmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
@@ -153,10 +153,10 @@ function testMixedScalarGridUsesCommonRefinement(testCase)
     verifyCoeff(testCase, P, 2, {30, 42.5, 60});
 end
 
-function testMixedTensorGridUsesCommonRefinement(testCase)
+function testMixTenGriUseCom(testCase)
     % Same-bound tensor grids should refine each affected physical axis.
-    A = pdmat({[0 1], [0 1]}, {1 2; 3 4}, Degree=1);
-    B = pdmat({[0 0.5 1], [0 1]}, {10 20; 30 40; 50 60}, Degree=1);
+    A = pdmat({[0 1], [0 1]}, {1 2; 3 4}, Degree=[1 1]);
+    B = pdmat({[0 0.5 1], [0 1]}, {10 20; 30 40; 50 60}, Degree=[1 1]);
 
     S = A + B;
 
@@ -175,7 +175,7 @@ function testNumericPromotion(testCase)
     verifyCoeff(testCase, A * 3, 1, {3, 6});
 end
 
-function testAdditionZeroFastPathsRetainCompatibilityChecks(testCase)
+function testAddZerFasPatRet(testCase)
     % Proven and numeric zeros are identities only after size and grid checks.
     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     Z = A - A;
@@ -192,9 +192,13 @@ function testAdditionZeroFastPathsRetainCompatibilityChecks(testCase)
 
     otherGrid = pdmat({[0 2]}, {1, 2}, Degree=1);
     testCase.verifyError(@() Z + otherGrid, "pdmat:MixedGrid");
+
+    matrixZero = pdmat({[0 1]}, {zeros(2), zeros(2)}, Degree=1);
+    testCase.verifyError(@() A - matrixZero, ...
+        "pdmat:InvalidSubtraction");
 end
 
-function testRateRowZeroAdditionUsesGeneralPath(testCase)
+function testRatRowZerAddUse(testCase)
     % A zero rate table must broadcast its rows instead of losing rate metadata.
     rb = [-1 2];
     Z = pdmat([0 1], {{0, 0; 0, 0}}, Degree=1, RateBounds=rb);
@@ -202,12 +206,25 @@ function testRateRowZeroAdditionUsesGeneralPath(testCase)
 
     S = Z + A;
 
-    testCase.verifyTrue(S.HasRateDependence);
     testCase.verifyEqual(S.RateBounds, rb);
     testCase.verifyEqual(S.coeffs(1), {3, 5; 3, 5});
 end
 
-function testNumericMatrixMultiplication(testCase)
+function testRatRowZerProNor(testCase)
+    % Zero rate-row products still normalize both operands before collapse.
+    Z = pdmat([0 1], {{0, 0; 0, 0}}, Degree=1, RateBounds=[-1 2]);
+    A = pdmat([0 1], {3, 5}, Degree=1);
+
+    left = Z * A;
+    right = A * Z;
+
+    testCase.verifyTrue(helper.isZero(left, "obj"));
+    testCase.verifyTrue(helper.isZero(right, "obj"));
+    testCase.verifyEqual(size(left), [1 1]);
+    testCase.verifyEqual(size(right), [1 1]);
+end
+
+function testNumMatMul(testCase)
     % Numeric matrices should multiply pdmat operands on either side.
     A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
 
@@ -220,7 +237,7 @@ function testNumericMatrixMultiplication(testCase)
     verifyCoeff(testCase, R, 1, {[5; 11], [17; 23]});
 end
 
-function testAnisotropicAdditionSubtractionAndMultiplication(testCase)
+function testAniAddSubAndMul(testCase)
     % Degree alignment is componentwise while product degrees add by axis.
     grid = {[0 1], [10 20]};
     addLeft = cell(2, 4);
@@ -275,7 +292,7 @@ function testAnisotropicAdditionSubtractionAndMultiplication(testCase)
     verifyCoeff(testCase, product, [1 1], expectedProduct);
 end
 
-function testZeroDegreeAxisAndNumericOperandOrders(testCase)
+function testZerDegAxiAndNum(testCase)
     % Numeric promotion must preserve a direction that is exactly constant.
     grid = {[0 1], [10 20]};
     A = pdmat(grid, {1, 2, 3}, Degree=[0 2]);
@@ -294,7 +311,7 @@ function testZeroDegreeAxisAndNumericOperandOrders(testCase)
     verifyCoeff(testCase, timesLeft, [1 1], {2, 4, 6});
 end
 
-function testScalarPdmatScalesNumericAndPdmatMatrices(testCase)
+function testScaPdmScaNumAnd(testCase)
     % A 1-by-1 pdmat should scale matrices in either operand order.
     S = pdmat({[0 1]}, {2, 4}, Degree=1);
     M = [1 2; 3 4];
@@ -334,7 +351,7 @@ function testScalarPdmatScalesNumericAndPdmatMatrices(testCase)
     verifyCoeff(testCase, M * F, 1, {M, 2 * M});
 end
 
-function testAlgebraRejectsIncompatibleInputs(testCase)
+function testAlgRejIncInp(testCase)
     % Algebra should reject size, grid-bound, and function-only incompatibilities.
     A = pdmat({[0 1]}, {ones(1, 2), 2 * ones(1, 2)}, Degree=1);
     B = pdmat({[0 1]}, {1, 2}, Degree=1);
@@ -349,7 +366,7 @@ function testAlgebraRejectsIncompatibleInputs(testCase)
     testCase.verifyError(@() eye(2) * F, "pdmat:FunctionOnlyAlgebra");
 end
 
-function testFunctionBernsteinCanEnterAlgebra(testCase)
+function testFunBerCanEntAlg(testCase)
     % Function handles with Bernstein evidence should enter coefficient algebra.
     A = pdmat({[0 1]}, @(rho) rho, Degree=1);
 
@@ -359,7 +376,7 @@ function testFunctionBernsteinCanEnterAlgebra(testCase)
     verifyCoeff(testCase, C, 1, {1, 2});
 end
 
-function testAnisotropicFunctionBernsteinCanEnterAlgebra(testCase)
+function testAniFunBerCanEnt(testCase)
     % A linear-by-quadratic handle should preserve its tensor degree in algebra.
     A = pdmat({[0 2], [10 14]}, @(rho, eta) rho + eta.^2, ...
         Degree=[1 2]);
@@ -372,7 +389,7 @@ function testAnisotropicFunctionBernsteinCanEnterAlgebra(testCase)
     testCase.verifyEqual(C.evaluate([0.5 11]), 122.5, AbsTol=1e-10);
 end
 
-function testDiscontinuousInputRewrapStaysSilent(testCase)
+function testDisInpRewStaSil(testCase)
     % Algebra should preserve discontinuity without repeating constructor warnings.
     localValues = {{1, 2}, {3, 4}};
     A = constructWithWarning(testCase, ...
@@ -387,7 +404,7 @@ function testDiscontinuousInputRewrapStaysSilent(testCase)
     verifyCoeff(testCase, C, 2, {4, 5});
 end
 
-function testZeroFastPathsCollapseDegree(testCase)
+function testZerFasPatColDeg(testCase)
     % Provably zero arithmetic should return compact degree-zero data.
     A = pdmat({[0 1]}, {1, 3}, Degree=1);
     F = pdmat({[0 1]}, @(rho) rho * ones(2));
@@ -418,7 +435,7 @@ function testZeroFastPathsCollapseDegree(testCase)
     testCase.verifyError(@() F + 1, "pdmat:FunctionOnlyAlgebra");
 end
 
-function testZeroMatrixMultiplicationSizes(testCase)
+function testZerMatMulSiz(testCase)
     % Zero numeric matrices should still enforce matrix-product dimensions.
     A = pdmat({[0 1]}, {ones(2, 3), 2 * ones(2, 3)}, Degree=1);
 

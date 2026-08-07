@@ -19,7 +19,7 @@ classdef pdbase
     %   Example:
     %     obj = pdbase({[0 1 2]}, [2 2], 1);
     %     c = obj.coeffs(1);
-    %     elevated = obj.elevVals(1);
+    %     elevated = obj.elevate(1);
 
     properties (SetAccess = private)
         GridInfo
@@ -28,43 +28,42 @@ classdef pdbase
         LocalValues
         IsContinuous
         ContainsDecision
-        HasRateDependence
+        NumRateRows
         RateBounds
         SourceSummary
     end
 
     methods
         function obj = pdbase(gridVectors, matrixSize, degree, varargin)
-            if ~isempty(varargin) && isValidationModeName(varargin{end})
-                error("pdbase:InvalidValidationMode", ...
-                    "ValidationMode requires the scalar text 'fast' or 'strict'.");
-            end
-            [localValues, options] = parseConstructorOptions(varargin{:});
-
-            validationMode = normalizeValidationMode( ...
-                options.ValidationMode, "pdbase");
+            [localValues, options] = argParser(varargin);
+            validationMode = options.ValidationMode;
 
             % Normalize once at the parent layer so pdmat/pdvar/pdlmi can
             % share the same tensor-grid contract and label ordering.
             info = helper.mkGrid(gridVectors, "pdbase");
             sz = double(helper.chk(matrixSize, "pdbase:InvalidMatrixSize", ...
-                "matrixSize must be a 1x2 positive integer vector.", ...
+                "matrixSize", ...
                 "numeric", "real", "finite", "integer", "positive", "Size", [1, 2]));
 
             nPar = numel(info.Vectors);
-            deg = helper.normalizeDegree(degree, nPar, ...
+            deg = helper.normDeg(degree, nPar, ...
                 "pdbase:InvalidDegree", "degree");
             rb = options.RateBounds;
             if isempty(rb)
                 rb = [];
             else
                 rb = double(helper.chk(rb, "pdbase:InvalidRateBounds", ...
-                    "RateBounds must be empty or a finite ell-by-2 matrix with lower <= upper.", ...
+                    "RateBounds", ...
                     "numeric", "real", "finite", "rowbounds", "Size", [nPar, 2]));
             end
-            if options.HasRateDependence && isempty(rb)
+            nRateRows = size(helper.rateVerts(rb), 1);
+            if options.NumRateRows ~= 0 && isempty(rb)
                 error("pdbase:InvalidRateBounds", ...
-                    "Rate-dependent objects must provide nonempty RateBounds.");
+                    "Explicit rate rows must provide nonempty RateBounds.");
+            end
+            if options.NumRateRows ~= 0 && options.NumRateRows ~= nRateRows
+                error("pdbase:InvalidRateBounds", ...
+                    "NumRateRows must match the distinct RateBounds vertices.");
             end
 
             nCell = info.NumNodes - 1;
@@ -77,8 +76,8 @@ classdef pdbase
                 hasRate = false;
             else
                 vals = localValues;
-                hasRate = chkVals(vals, nCell, nCoeff, sz, nPar, ...
-                    validationMode);
+                [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, ...
+                    nPar, nRateRows, options.NumRateRows ~= 0, validationMode);
             end
             if hasRate && isempty(rb)
                 error("pdbase:InvalidRateBounds", ...
@@ -93,77 +92,125 @@ classdef pdbase
             % boundary coefficient sharing needed to make it true.
             obj.IsContinuous = options.IsContinuous;
             obj.ContainsDecision = options.ContainsDecision;
-            % rho_dot metadata is intentionally separate from LocalValues;
-            % pdlmi is the layer that will enumerate finite rate vertices.
-            obj.HasRateDependence = options.HasRateDependence || ~isempty(rb);
+            % RateBounds stores the rho_dot domain independently of LocalValues.
+            if isempty(localValues)
+                obj.NumRateRows = 0;
+            else
+                if rowKind == "rate"
+                    obj.NumRateRows = nRateRows;
+                else
+                    obj.NumRateRows = 0;
+                end
+            end
             obj.RateBounds = rb;
             obj.SourceSummary = options.SourceSummary;
         end
     end
 
     methods
-        vals = elevVals(obj, degreeIncrement, validationMode)
-        out = elevate(obj, degreeIncrement)
+        out = elevate(obj, degreeIncrement, validationMode)
         out = rhodiff(obj, rb)
     end
 
     methods (Access = protected)
-        out = bernProd(obj, lhs, lhsDeg, rhs, rhsDeg, varargin)
         tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
-        tf = hasRateRows(obj)
         rb = pickRateBounds(obj, errId, varargin)
         coeffs = joinRateRows(obj, leaves, fcn, errId)
         vals = zipRateRows(obj, lhsVals, rhsVals, fcn, grid, errId)
-        coeffs = prodRateRows(obj, lhs, lhsDeg, rhs, rhsDeg, errId, varargin)
-        vals = prodLocalValues(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
-            grid, errId, plan, varargin)
-        plan = productPlan(obj, lhsDeg, rhsDeg)
+        vals = prodVals(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
+            grid, errId, validationMode, lhsNumRateRows, rhsNumRateRows)
         grid = mergeGrid(obj, errId, varargin)
-        out = unOp(obj, fcn, sz)
+        out = mapUnary(obj, fcn, sz)
         out = mkUnOp(obj, vals, sz)
-        out = mkRhodiff(obj, deg, vals, rb, hasDec)
+        out = mkRhodiff(obj, deg, vals, rb, hasDec, numRateRows)
     end
 
     methods (Static, Access = protected)
-        out = bernElev(coeffs, fromDeg, toDeg, nPar, varargin)
-        plan = elevationPlan(fromDeg, toDeg, nPar)
-        data = alignLocalDegrees(data, targetDegree, grid, validationMode)
-        vals = elevLocalValues(vals, fromDeg, toDeg, grid, varargin)
+        data = elevData(data, targetDegree, grid, validationMode)
+        [out, plan] = elevRow(coeffs, fromDeg, toDeg, plan)
         vals = mapVals(vals, fcn, grid)
         [rows, cols] = matSubs(subs, sz, errId)
+        dims = normRedDims(dims, errId, name)
     end
 
 end
 
-function [localValues, options] = parseConstructorOptions(localValues, options)
-            arguments
-                localValues = []
-                options.IsContinuous (1, 1) logical = false
-                options.ContainsDecision (1, 1) logical = false
-                options.HasRateDependence (1, 1) logical = false
-                options.RateBounds = []
-                options.SourceSummary = "coefficient-backed"
-                options.ValidationMode = "fast"
-            end
-end
-
-function tf = isValidationModeName(value)
-    %ISVALIDATIONMODENAME Detect a dangling public ValidationMode name.
-    tf = (ischar(value) && isrow(value) && strcmp(value, "ValidationMode")) || ...
-        (isstring(value) && isscalar(value) && ~ismissing(value) && ...
-        value == "ValidationMode");
-end
-
-function mode = normalizeValidationMode(value, owner)
-    %NORMALIZEVALIDATIONMODE Validate the transient structural-check policy.
-    if ~((ischar(value) && isrow(value) && ~isempty(value)) || ...
-            (isstring(value) && isscalar(value) && ~ismissing(value)))
-        error(owner + ":InvalidValidationMode", ...
-            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+function [localValues, options] = argParser(args)
+    %ARGPARSER Parse optional coefficient storage and pdbase metadata.
+    options = struct( ...
+        "IsContinuous", false, ...
+        "ContainsDecision", false, ...
+        "NumRateRows", 0, ...
+        "RateBounds", [], ...
+        "SourceSummary", "coefficient-backed", ...
+        "ValidationMode", "fast");
+    localValues = [];
+    if isempty(args)
+        return
     end
-    mode = lower(string(value));
-    if ~any(mode == ["fast", "strict"])
-        error(owner + ":InvalidValidationMode", ...
-            "ValidationMode must be the scalar text 'fast' or 'strict'.");
+
+    % Report an unpaired ValidationMode before treating the first value as
+    % optional LocalValues, so callers retain the dedicated mode error.
+    lastArg = args{end};
+    if (ischar(lastArg) && isrow(lastArg) && ...
+            strcmp(lastArg, "ValidationMode")) || ...
+            (isstring(lastArg) && isscalar(lastArg) && ...
+            ~ismissing(lastArg) && lastArg == "ValidationMode")
+        error("pdbase:InvalidValidationMode", ...
+            "ValidationMode requires the scalar text 'fast' or 'strict'.");
+    end
+
+    names = ["IsContinuous", "ContainsDecision", "NumRateRows", ...
+        "RateBounds", "SourceSummary", "ValidationMode"];
+    first = args{1};
+    firstName = "";
+    if (ischar(first) && isrow(first)) || ...
+            (isstring(first) && isscalar(first) && ~ismissing(first))
+        firstName = string(first);
+    end
+    if numel(args) > 1 && any(firstName == names)
+        optArgs = args;
+    else
+        localValues = first;
+        optArgs = args(2:end);
+    end
+    if mod(numel(optArgs), 2) ~= 0
+        error("pdbase:InvalidOptions", "pdbase options must be Name=Value pairs.");
+    end
+
+    for k = 1:2:numel(optArgs)
+        name = optArgs{k};
+        if ~((ischar(name) && isrow(name)) || ...
+                (isstring(name) && isscalar(name) && ~ismissing(name)))
+            error("pdbase:InvalidOptions", ...
+                "pdbase option names must be strings or character vectors.");
+        end
+        name = string(name);
+        value = optArgs{k + 1};
+        switch name
+            case {"IsContinuous", "ContainsDecision"}
+                value = logical(value);
+                if ~isscalar(value)
+                    error("pdbase:InvalidOptions", "%s must be a scalar logical.", name);
+                end
+                options.(char(name)) = value;
+            case "NumRateRows"
+                if ~(isnumeric(value) && isreal(value) && isscalar(value))
+                    error("pdbase:InvalidOptions", ...
+                        "NumRateRows must be a scalar numeric value.");
+                end
+                value = double(value);
+                mustBeInteger(value)
+                mustBeNonnegative(value)
+                options.NumRateRows = value;
+            case "RateBounds"
+                options.RateBounds = value;
+            case "SourceSummary"
+                options.SourceSummary = value;
+            case "ValidationMode"
+                options.ValidationMode = helper.normMode(value, "pdbase");
+            otherwise
+                error("pdbase:UnknownOption", "Unsupported pdbase option: %s.", name);
+        end
     end
 end

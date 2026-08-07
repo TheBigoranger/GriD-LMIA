@@ -71,7 +71,7 @@ function testBadPlainPayload(testCase)
     end
 end
 
-function testSymbolicPayloadOk(testCase)
+function testSymPayOk(testCase)
     % pdbase storage accepts real 2-D YALMIP payloads for pdvar subclasses.
     X = sdpvar(2, 2, 'full');
 
@@ -93,7 +93,6 @@ function testRatePayloadOk(testCase)
         RateBounds=rb);
 
     coeffs = obj.coeffs([1 1]);
-    testCase.verifyTrue(obj.HasRateDependence);
     testCase.verifyEqual(obj.RateBounds, rb);
     testCase.verifyEqual(coeffs{1}.Constant, payload.Constant);
     testCase.verifyEqual(coeffs{1}.Rate, payload.Rate);
@@ -138,17 +137,10 @@ function testRateNeedsBounds(testCase)
         RateBounds=[]), "pdbase:InvalidRateBounds");
 end
 
-function testFlagNeedsBounds(testCase)
-    % Explicit HasRateDependence should also require RateBounds.
-    testCase.verifyError(@() pdbase({[0 1]}, [1 1], 0, [], HasRateDependence=true), ...
-        "pdbase:InvalidRateBounds");
-end
-
-function testBoundsSetRateFlag(testCase)
-    % Supplying RateBounds should mark the object as rate-dependent.
+function testBouSetRatMet(testCase)
+    % Supplying RateBounds should retain the rate domain metadata.
     obj = pdbase({[0 1]}, [1 1], 0, [], RateBounds=[-1 1]);
 
-    testCase.verifyTrue(obj.HasRateDependence);
     testCase.verifyEqual(obj.RateBounds, [-1 1]);
 end
 

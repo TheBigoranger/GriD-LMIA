@@ -5,6 +5,15 @@ function out = cat(dim, varargin)
     %     C = cat(1, A, B)
     %     C = cat(2, A, B)
     %
+    %   Output:
+    %     C - Coefficient-backed pdmat block concatenation.
+    %
+    %   Output:
+    %     C - Coefficient-backed pdmat block concatenation.
+    %
+    %   Output:
+    %     C - Coefficient-backed pdmat block concatenation.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     C = cat(2, A, A);
@@ -17,14 +26,12 @@ function out = cat(dim, varargin)
     [data, sz] = catData(dim, varargin, grid, rb);
     deg = max(vertcat(data.Degree), [], 1);
 
-    data = pdbase.alignLocalDegrees(data, deg, grid);
+    data = pdbase.elevData(data, deg, grid, "fast");
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) catCell(anchor, dim, data, subs));
-    if ~any(arrayfun(@(d) d.HasRateDependence, data))
-        rb = [];
-    end
-    out = mkObj(grid, vals, deg, rb);
+    out = mkCoeffObj(grid, vals, deg, rb, [], [], [], "fast", ...
+        max(arrayfun(@(d) d.NumRateRows, data)));
 
     if ~isequal(size(out), sz)
         error("pdmat:InvalidConcatenation", "Internal pdmat concatenation size mismatch.");
@@ -60,8 +67,7 @@ function [data, outSize] = catData(dim, args, grid, rb)
         "Degree", [], ...
         "LocalValues", [], ...
         "IsContinuous", [], ...
-        "HasRateDependence", [], ...
-        "HasRateRows", []), 1, numel(args));
+        "NumRateRows", []), 1, numel(args));
     raw = cell(1, numel(args));
     sz = zeros(numel(args), 2);
     isScalar = false(1, numel(args));
@@ -69,12 +75,12 @@ function [data, outSize] = catData(dim, args, grid, rb)
     for k = 1:numel(args)
         val = args{k};
         if isa(val, "pdmat")
-            data(k) = asData(grid, val, [], rb, ...
+            data(k) = normOperand(grid, val, [], rb, ...
                 "pdmat:InvalidConcatenation");
             sz(k, :) = data(k).MatrixSize;
         else
             helper.chk(val, "pdmat:InvalidConcatenation", ...
-                "Numeric concatenation operands must be nonempty finite real matrices.", ...
+                "numeric concatenation operand", ...
                 "numeric", "real", "finite", "matrix", "nonempty");
             raw{k} = val;
             sz(k, :) = size(val);
@@ -129,8 +135,7 @@ function [data, outSize] = catData(dim, args, grid, rb)
             nCell = cellfun(@numel, grid) - 1;
             data(k).LocalValues = helper.mkNest(nCell, @(~) {mat});
             data(k).IsContinuous = true;
-            data(k).HasRateDependence = false;
-            data(k).HasRateRows = false;
+            data(k).NumRateRows = 0;
         end
     end
 end

@@ -4,10 +4,17 @@ function out = reshape(obj, varargin)
     %   Syntax:
     %     B = reshape(A, m, n)
     %     B = reshape(A, [m n])
+    %
+    %   Output:
+    %     B - Same dynamic class with each coefficient reshaped to [m n].
+    %
+    %   Example:
+    %     A = pdmat({[0 1]}, {[1 2; 3 4], [2 4; 6 8]}, Degree=1);
+    %     B = reshape(A, 4, 1);
 
     prefix = string(class(obj));
     sz = parseSz(varargin, prod(obj.MatrixSize), prefix);
-    out = unOp(obj, @(a) reshape(a, sz), sz);
+    out = mapUnary(obj, @(a) reshape(a, sz), sz);
 end
 
 function sz = parseSz(args, total, prefix)
@@ -34,7 +41,7 @@ function sz = parseSz(args, total, prefix)
             continue
         end
         sz(k) = helper.chk(raw{k}, prefix + ":InvalidReshape", ...
-            "Reshape dimensions must be positive integer scalars.", ...
+            "reshape dimension", ...
             "numeric", "real", "scalar", "finite", "integer", "positive");
     end
 

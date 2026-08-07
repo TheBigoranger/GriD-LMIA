@@ -1,8 +1,10 @@
-function [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, nPar, mode)
+function [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, nPar, ...
+        nRateRows, forceRateRows, mode)
     %CHKVALS Validate normalized cell-local Bernstein storage.
     %
     %   Syntax:
-    %     hasRate = chkVals(vals, nCell, nCoeff, sz, nPar)
+    %     [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, ...
+    %         nPar, nRateRows, forceRateRows, mode)
     %
     %   Arguments:
     %     vals    - Nested LocalValues cell array, one level per parameter.
@@ -10,22 +12,22 @@ function [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, nPar, mode)
     %     nCoeff  - Number of Bernstein coefficients in each physical cell.
     %     sz      - Required [rows, columns] size of each coefficient matrix.
     %     nPar    - Number of scheduling parameters.
+    %     nRateRows - Number of distinct vertices implied by RateBounds.
+    %     forceRateRows - True when a one-row table is explicitly rate data.
+    %     mode    - "fast" or "strict" structural validation.
     %
     %   Output:
     %     hasRate - True when vals contains rate-vertex or rate-affine data.
-    %
-    %   Example:
-    %     vals = {{1, 2}}; % One cell with two scalar coefficients.
-    %     hasRate = chkVals(vals, 1, 2, [1 1], 1);
+    %     rowKind - Uniform "ordinary" or "rate" leaf classification.
     %
     %   Malformed nesting, coefficient counts, payloads, or sizes raise a
     %   pdbase validation error.
 
     helper.chk(vals, "pdbase:InvalidLocalValues", ...
-        "LocalValues must match the physical nested-cell grid shape.", ...
+        "LocalValues", ...
         "cell", "Numel", nCell(1));
 
-    if nargin < 6
+    if nargin < 8
         mode = "strict";
     end
     hasRate = false;
@@ -41,11 +43,13 @@ function [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, nPar, mode)
     for k = indices
         if isscalar(nCell)
             coeffs = vals{k};
-            [oneRate, oneKind] = chkCoeffRow(coeffs, nCoeff, sz, nPar);
+            [oneRate, oneKind] = chkRow(coeffs, nCoeff, sz, nPar, ...
+                nRateRows, forceRateRows);
         else
             % Recurse through one physical-grid dimension at a time.
             [oneRate, oneKind] = chkVals(vals{k}, ...
-                nCell(2:end), nCoeff, sz, nPar, mode);
+                nCell(2:end), nCoeff, sz, nPar, nRateRows, ...
+                forceRateRows, mode);
         end
         hasRate = oneRate || hasRate;
         if rowKind == ""
@@ -57,20 +61,25 @@ function [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, nPar, mode)
     end
 end
 
-function [hasRate, rowKind] = chkCoeffRow(coeffs, nCoeff, sz, nPar)
-    %CHKCOEFFROW Validate one physical-cell leaf and classify rate storage.
-    % A leaf is flat or has one row per corner of the parameter-rate box.
+function [hasRate, rowKind] = chkRow(coeffs, nCoeff, sz, nPar, ...
+        nRateRows, forceRateRows)
+    %CHKROW Validate one physical-cell coefficient table and classify its rows.
+    % A leaf is flat or has one row per distinct parameter-rate-box vertex.
 
     helper.chk(coeffs, "pdbase:InvalidCoefficientCell", ...
-        "Each physical coefficient row must be a flat coefficient cell or a rate-vertex coefficient table.", ...
+        "physical coefficient row", ...
         "cell");
 
-    isRateTable = size(coeffs, 1) == 2 ^ nPar && ...
-        size(coeffs, 2) == nCoeff;
+    isRateTable = nRateRows > 0 && size(coeffs, 1) == nRateRows && ...
+        size(coeffs, 2) == nCoeff && (nRateRows > 1 || forceRateRows);
     if ~isRateTable
         helper.chk(coeffs, "pdbase:InvalidCoefficientCell", ...
-            "Each ordinary physical coefficient row must have the expected coefficient count.", ...
+            "ordinary physical coefficient row", ...
             "Size", [1, nCoeff]);
+    end
+    if forceRateRows && ~isRateTable
+        error("pdbase:InvalidCoefficientCell", ...
+            "Rate-row coefficient tables must match the distinct RateBounds vertices.");
     end
 
     hasRate = isRateTable;
@@ -84,10 +93,10 @@ function [hasRate, rowKind] = chkCoeffRow(coeffs, nCoeff, sz, nPar)
             val = coeffs{row, c};
             if isstruct(val) && isfield(val, "Constant") && isfield(val, "Rate")
                 helper.chk(val, "pdbase:InvalidCoefficientPayload", ...
-                    "Rate-affine coefficient payload must be a scalar struct.", ...
+                    "rate-affine coefficient payload", ...
                     "struct", "scalar");
                 helper.chk(val.Rate, "pdbase:InvalidCoefficientPayload", ...
-                    "Rate-affine coefficient payload Rate field must be a cell array with one entry per parameter.", ...
+                    "rate-affine coefficient Rate field", ...
                     "cell", "Numel", nPar);
                 % Rate vertices stay outside ordinary payloads; this only
                 % checks that every affine term has the same matrix shape.
@@ -114,6 +123,6 @@ function chkMat(val, sz)
     end
 
     helper.chk(val, "pdbase:InvalidCoefficientPayload", ...
-        "Each ordinary local coefficient payload must be a finite real numeric or real 2-D sdpvar matrix matching matrixSize.", ...
+        "ordinary local coefficient payload", ...
         "numeric", "real", "finite", "Size", sz);
 end

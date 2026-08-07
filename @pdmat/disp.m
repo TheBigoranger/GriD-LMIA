@@ -4,11 +4,14 @@ function disp(obj)
     %   Syntax:
     %     disp(A)
     %
+    %   Output:
+    %     This method prints to the command window and returns no value.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     disp(A);
 
     fprintf("pdmat %s over %d-D grid, degree %s, source %s, rate rows %s\n", ...
         mat2str(obj.MatrixSize), obj.npar(), mat2str(obj.Degree), ...
-        obj.SourceSummary, string(obj.hasRateRows()));
+        obj.SourceSummary, string(obj.NumRateRows ~= 0));
 end

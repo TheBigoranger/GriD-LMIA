@@ -27,8 +27,8 @@ classdef pdmat < pdbase
     %   scalar Degree expands uniformly and warns once; omitted inference and
     %   one-dimensional construction remain warning-free.
     %   RateBounds alone is metadata. Explicit nested leaves may instead use
-    %   one row per vertex, ordered by combRows(RateBounds); every physical
-    %   cell must uniformly use either one row or all 2^ell vertex rows.
+    %   one row per distinct vertex, ordered by combRows(RateBounds); fixed
+    %   directions contribute one value instead of duplicate endpoints.
     %
     %   Example:
     %     data = {1, 2, 3};
@@ -52,10 +52,10 @@ classdef pdmat < pdbase
                 isCont = init.IsContinuous;
                 summary = init.SourceSummary;
                 fh = init.FunctionHandle;
-                if isfield(init, "HasRateDependence")
-                    hasRate = init.HasRateDependence;
+                if isfield(init, "NumRateRows")
+                    numRateRows = init.NumRateRows;
                 else
-                    hasRate = false;
+                    numRateRows = 0;
                 end
                 if isfield(init, "RateBounds")
                     rb = init.RateBounds;
@@ -63,8 +63,8 @@ classdef pdmat < pdbase
                     rb = [];
                 end
                 if isfield(init, "ValidationMode")
-                    validationMode = normalizeValidationMode( ...
-                        init.ValidationMode);
+                    validationMode = helper.normMode( ...
+                        init.ValidationMode, "pdmat");
                 else
                     validationMode = "fast";
                 end
@@ -80,8 +80,8 @@ classdef pdmat < pdbase
 
                 grid = gridVectors;
                 [sz, deg, vals, isCont, summary, fh, rb] = ...
-                    mkData(grid, source, degOpt, degreeSpecified, rbOpt);
-                hasRate = ~isempty(rb);
+                    normSource(grid, source, degOpt, degreeSpecified, rbOpt);
+                numRateRows = 0;
                 warnCont = ~isCont;
             end
 
@@ -90,7 +90,7 @@ classdef pdmat < pdbase
             obj@pdbase(grid, sz, deg, vals, ...
                 IsContinuous=isCont, ...
                 ContainsDecision= false, ...
-                HasRateDependence=hasRate, ...
+                NumRateRows=numRateRows, ...
                 RateBounds=rb, ...
                 SourceSummary=summary, ...
                 ValidationMode=validationMode);
@@ -105,7 +105,7 @@ classdef pdmat < pdbase
 
     methods (Access = protected)
         out = mkUnOp(obj, vals, sz)
-        out = mkRhodiff(obj, deg, vals, rb, hasDec)
+        out = mkRhodiff(obj, deg, vals, rb, hasDec, numRateRows)
     end
 
 end
@@ -157,27 +157,13 @@ function [degOpt, degreeSpecified, rbOpt, validationMode] = parseOpts(varargin)
                     error("pdmat:InvalidValidationMode", ...
                         "ValidationMode may be supplied only once.");
                 end
-                validationMode = normalizeValidationMode(varargin{k + 1});
+                validationMode = helper.normMode(varargin{k + 1}, "pdmat");
                 seenValidation = true;
-            case {"IsContinuous", "ContainsDecision", "HasRateDependence"}
+            case {"IsContinuous", "ContainsDecision"}
                 error("pdmat:UnsupportedOption", ...
                     "%s is fixed internally for pdmat and is not a constructor option.", name);
             otherwise
                 error("pdmat:UnknownOption", "Unsupported pdmat option: %s.", name);
         end
-    end
-end
-
-function mode = normalizeValidationMode(value)
-    %NORMALIZEVALIDATIONMODE Validate transient post-normalization checks.
-    if ~((ischar(value) && isrow(value) && ~isempty(value)) || ...
-            (isstring(value) && isscalar(value) && ~ismissing(value)))
-        error("pdmat:InvalidValidationMode", ...
-            "ValidationMode must be the scalar text 'fast' or 'strict'.");
-    end
-    mode = lower(string(value));
-    if ~any(mode == ["fast", "strict"])
-        error("pdmat:InvalidValidationMode", ...
-            "ValidationMode must be the scalar text 'fast' or 'strict'.");
     end
 end

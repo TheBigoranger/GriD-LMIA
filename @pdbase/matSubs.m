@@ -1,6 +1,9 @@
 function [rows, cols] = matSubs(subs, sz, errId)
     %MATSUBS Normalize shared two-dimensional matrix payload subscripts.
     %
+    %   Syntax:
+    %     [rows, cols] = obj.matSubs(subs, sz, errId)
+    %
     %   Arguments:
     %     subs - Two-element cell array of row and column subscripts.
     %     sz   - Available [rows, columns] matrix size.
@@ -11,6 +14,10 @@ function [rows, cols] = matSubs(subs, sz, errId)
     %
     %   pdmat and pdvar use this protected parser so slicing and assignment
     %   accept the same numeric, logical, and colon-index forms.
+    %
+    %   Example:
+    %     [rows, cols] = obj.matSubs({1:2, ":"}, obj.MatrixSize, ...
+    %         "pdmat:InvalidSubscript");
 
     if numel(subs) ~= 2
         error(errId, "Matrix indexing requires row and column subscripts.");

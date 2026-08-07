@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testNumericThreeParameterUnequalDegreeMatrixProduct(testCase)
+function testNumThrParUneDeg(testCase)
     % A multi-cell 3-D matrix product must match the direct Bernstein sum.
     grid = {[0 0.5 1], [10 20], [-2 3]};
     leftDegree = [2 1 0];
@@ -32,7 +32,7 @@ function testNumericThreeParameterUnequalDegreeMatrixProduct(testCase)
     end
 end
 
-function testKnownAffineBlockContractionBothOrientations(testCase)
+function testKnoAffBloConBot(testCase)
     % Planned contractions retain exact affine bases and multiplication order.
     grid = {[0 1], [10 20]};
     knownData = cell(3, 3);
@@ -41,8 +41,8 @@ function testKnownAffineBlockContractionBothOrientations(testCase)
             knownData{row, col} = [row, col; row + col, row - col];
         end
     end
-    A = pdmat(grid, knownData, Degree=2);
-    P = pdvar(2, grid, "full", Degree=1);
+    A = pdmat(grid, knownData, Degree=[2 2]);
+    P = pdvar(2, grid, "full", Degree=[1 1]);
     knownCoeffs = A.coeffs([1 1]);
     affineCoeffs = P.coeffs([1 1]);
 
@@ -59,7 +59,7 @@ function testKnownAffineBlockContractionBothOrientations(testCase)
     testCase.verifyEqual(objectVariables(rightActual), objectVariables(P));
 end
 
-function testNumericAndSymbolicTensorElevationAgainstFormula(testCase)
+function testNumAndSymTenEle(testCase)
     % Sparse elevation operators must equal the independent incidence formula.
     numericGrid = {[0 1], [10 20], [-1 1]};
     sourceMatrix = [1 2; 3 5];
@@ -71,7 +71,7 @@ function testNumericAndSymbolicTensorElevationAgainstFormula(testCase)
     verifyCoefficientRow(testCase, ...
         numericElevated.coeffs([1 1 1]), numericExpected, 1e-13);
 
-    symbolic = pdvar(2, {[0 1], [10 20]}, "full", Degree=1);
+    symbolic = pdvar(2, {[0 1], [10 20]}, "full", Degree=[1 1]);
     symbolicVars = objectVariables(symbolic);
     symbolicElevated = symbolic.elevate(2);
     symbolicExpected = legacyElevate(symbolic.coeffs([1 1]), 1, 3, 2);
@@ -81,7 +81,7 @@ function testNumericAndSymbolicTensorElevationAgainstFormula(testCase)
     testCase.verifyEqual(objectVariables(symbolicElevated), symbolicVars);
 end
 
-function testTensorRateRowsElevateIndependently(testCase)
+function testTenRatRowEleInd(testCase)
     % Every rate vertex uses the same map without mixing coefficient rows.
     nParameters = 2;
     sourceDegree = 1;
@@ -95,7 +95,7 @@ function testTensorRateRowsElevateIndependently(testCase)
     end
     values = helper.mkNest([1 1], @(~) leaf);
     obj = pdbase({[0 1], [10 20]}, [1 1], sourceDegree, values, ...
-        HasRateDependence=true, RateBounds=[-1 1; -2 3]);
+        RateBounds=[-1 1; -2 3]);
 
     elevated = obj.elevate(targetDegree - sourceDegree);
     actual = elevated.coeffs([1 1]);
@@ -108,7 +108,7 @@ function testTensorRateRowsElevateIndependently(testCase)
     end
 end
 
-function testNumericElevationKeepsDenseCoefficientPayloads(testCase)
+function testNumEleKeeDenCoe(testCase)
     % A sparse plan is internal metadata; numeric payloads remain dense.
     source = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
 
@@ -117,6 +117,23 @@ function testNumericElevationKeepsDenseCoefficientPayloads(testCase)
 
     testCase.verifyTrue(all(cellfun(@isnumeric, coefficients)));
     testCase.verifyFalse(any(cellfun(@issparse, coefficients)));
+end
+
+function testHighDegreeConstantKernels(testCase)
+    % Degree 1030 must remain finite after product and elevation planning.
+    coeffs = repmat({1}, 1, 516);
+    factor = pdmat({[0 1]}, coeffs, Degree=515);
+
+    product = factor * factor;
+    productValues = cell2mat(product.coeffs(1));
+    testCase.verifyTrue(all(isfinite(productValues)));
+    testCase.verifyLessThanOrEqual(max(abs(productValues - 1)), 1e-10);
+
+    constant = pdmat({[0 1]}, {1}, Degree=0);
+    elevated = constant.elevate(1030);
+    elevatedValues = cell2mat(elevated.coeffs(1));
+    testCase.verifyTrue(all(isfinite(elevatedValues)));
+    testCase.verifyLessThanOrEqual(max(abs(elevatedValues - 1)), 1e-10);
 end
 
 function values = numericTree(grid, degree, matrixSize, offset)
@@ -130,7 +147,8 @@ function values = numericTree(grid, degree, matrixSize, offset)
     function leaf = makeLeaf(subs)
         leaf = cell(1, size(labels, 1));
         for coefficient = 1:numel(leaf)
-            base = offset + 100 * sum(subs) + 10 * coefficient;
+            globalLabel = (subs - 1) .* degree + labels(coefficient, :);
+            base = offset + 10 * sum(globalLabel .* 10 .^ (0:numel(degree) - 1));
             leaf{coefficient} = reshape( ...
                 base + (1:prod(matrixSize)), matrixSize);
         end

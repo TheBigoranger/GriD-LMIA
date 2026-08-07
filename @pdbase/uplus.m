@@ -4,6 +4,9 @@ function out = uplus(obj)
     %   Syntax:
     %     out = +obj
     %
+    %   Output:
+    %     out - The input object unchanged.
+    %
     %   Example:
     %     obj = pdbase({[0 1]}, [1 1], 0);
     %     out = +obj;

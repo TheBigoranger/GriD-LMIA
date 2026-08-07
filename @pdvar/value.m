@@ -13,10 +13,12 @@ function out = value(obj)
     %     rows - One pdmat per derivative rate vertex, in combRows order.
     %
     %   An ordinary pdvar returns one coefficient-backed pdmat.  A pdvar
-    %   with derivative rate rows returns a 1-by-2^ell cell array of pdmat
-    %   objects in helper.combRows(RateBounds) vertex order.  Outputs preserve
-    %   the grid, matrix size, degree, local coefficient order, and continuity
-    %   metadata; rate bounds are not stored on the returned pdmat objects.
+    %   with derivative rate rows returns one pdmat per distinct RateBounds
+    %   vertex in helper.combRows order. Outputs preserve the grid, matrix size,
+    %   degree, and local coefficient order. Ordinary numeric outputs recompute
+    %   complete-face continuity and may recover continuity after cancellation.
+    %   Derivative row exports remain deliberately discontinuous; rate bounds
+    %   are not stored on the returned pdmat objects.
     %
     %   Every symbolic coefficient must have an assigned finite numeric
     %   YALMIP value.  Otherwise value throws pdvar:UnassignedValue.
@@ -29,17 +31,16 @@ function out = value(obj)
 
     grid = obj.GridInfo.Vectors;
     vals = pdbase.mapVals(obj.LocalValues, @evalCoeff, grid);
-    if ~obj.hasRateRows()
+    if obj.NumRateRows == 0
         out = mkPdmat(obj, vals);
         return
     end
 
     % rhodiff stores rows in the same lower/upper Cartesian order used by
     % helper.combRows; retain that order while removing rate metadata.
-    nVert = 2 ^ obj.npar();
     nCell = obj.GridInfo.NumNodes - 1;
-    out = cell(1, nVert);
-    for row = 1:nVert
+    out = cell(1, obj.NumRateRows);
+    for row = 1:obj.NumRateRows
         rowVals = helper.mkNest(nCell, @(subs) pickRow(vals, subs, row));
         out{row} = mkPdmat(obj, rowVals);
     end
@@ -82,51 +83,15 @@ function out = mkPdmat(obj, vals)
     init.MatrixSize = obj.MatrixSize;
     init.Degree = obj.Degree;
     init.LocalValues = vals;
-    if obj.hasRateRows()
+    if obj.NumRateRows ~= 0
         % Each exported derivative vertex retains the source's deliberate
         % cell-local semantics after rate metadata is removed.
         init.IsContinuous = false;
     else
-        init.IsContinuous = assignedContinuity(vals, ...
+        init.IsContinuous = helper.chkCont(vals, ...
             obj.GridInfo.NumNodes - 1, obj.Degree);
     end
     init.SourceSummary = "coefficient-backed";
     init.FunctionHandle = [];
     out = pdmat(init);
-end
-
-function tf = assignedContinuity(vals, nCell, degree)
-    %ASSIGNEDCONTINUITY Reclassify faces after symbolic values are assigned.
-    nPar = numel(nCell);
-    cells = helper.combRows(arrayfun(@(n) 1:n, nCell, ...
-        "UniformOutput", false));
-    labels = helper.combRows(arrayfun(@(oneDeg) 0:oneDeg, degree, ...
-        "UniformOutput", false));
-    tf = true;
-    for dim = 1:nPar
-        upper = find(labels(:, dim) == degree(dim));
-        lower = find(labels(:, dim) == 0);
-        step = zeros(1, nPar);
-        step(dim) = 1;
-        for k = 1:size(cells, 1)
-            subs = cells(k, :);
-            if subs(dim) == nCell(dim)
-                continue
-            end
-            lhs = helper.cellGet(vals, subs);
-            rhs = helper.cellGet(vals, subs + step);
-            for row = 1:size(lhs, 1)
-                for q = 1:numel(upper)
-                    left = lhs{row, upper(q)};
-                    right = rhs{row, lower(q)};
-                    tolerance = 1e-9 * max([1, norm(left, "fro"), ...
-                        norm(right, "fro")]);
-                    if norm(left - right, "fro") > tolerance
-                        tf = false;
-                        return
-                    end
-                end
-            end
-        end
-    end
 end

@@ -8,7 +8,7 @@ function setup(~)
     yalmip("clear");
 end
 
-function testConstructorApplyDefaultsAndImmutableSource(testCase)
+function testConAppDefAndImm(testCase)
     P = pdvar(1, {[0 1]}, Degree=4);
     direct = P >= 0;
     bare = pdlmi(P, ">=", "UseSparsePutinar");
@@ -16,7 +16,7 @@ function testConstructorApplyDefaultsAndImmutableSource(testCase)
     paired = pdlmi(P, ">=", CliqueSize=2, SparsePutinarOrder=3);
     sizeOnly = pdlmi(P, ">=", CliqueSize=2);
     orderOnly = pdlmi(P, ">=", SparsePutinarOrder=3);
-    applied = direct.applySparsePutinar();
+    applied = direct.useSpPut();
 
     verifySparse(testCase, bare, 2, 2, [2 2 2], 5);
     verifySparse(testCase, named, 2, 2, [2 2 2], 5);
@@ -33,12 +33,12 @@ function testConstructorApplyDefaultsAndImmutableSource(testCase)
     testCase.verifyEqual(tensorDefault.CliqueSize, 2);
 end
 
-function testCanonicalEndpointsAndOneDimensionalParity(testCase)
+function testCanEndAndOneDim(testCase)
     evenP = pdvar(1, {[0 1]}, Degree=4);
     evenDirect = evenP >= 0;
-    sizeOne = evenDirect.applySparsePutinar(1, 2);
-    dense = evenDirect.applySparsePutinar(3, 2);
-    denseReference = evenDirect.applyPutinar(2);
+    sizeOne = evenDirect.useSpPut(1, 2);
+    dense = evenDirect.useSpPut(3, 2);
+    denseReference = evenDirect.usePutinar(2);
 
     verifyAllInactive(testCase, sizeOne);
     testCase.verifyEqual(numel(sizeOne.Constraints), ...
@@ -49,25 +49,25 @@ function testCanonicalEndpointsAndOneDimensionalParity(testCase)
 
     oddP = pdvar(1, {[0 1]}, Degree=3);
     oddDirect = oddP >= 0;
-    oddSparse = oddDirect.applySparsePutinar(2, 2);
+    oddSparse = oddDirect.useSpPut(2, 2);
     verifySparse(testCase, oddSparse, 2, 2, 2 * ones(1, 4), 6);
 
     % Endpoint normalization must not bypass explicit-order validation.
-    testCase.verifyError(@() evenDirect.applySparsePutinar(1, 1), ...
+    testCase.verifyError(@() evenDirect.useSpPut(1, 1), ...
         "pdlmi:SparsePutinarOrderTooLow");
 end
 
-function testMultidimensionalSizeOneAndTensorWindows(testCase)
+function testMulSizOneAndTen(testCase)
     P = pdvar(1, {[0 1], [0 1]}, Degree=[4 4]);
     direct = P >= 0;
-    sizeOne = direct.applySparsePutinar(1, [2 2]);
-    sparse = direct.applySparsePutinar(2, [2 2]);
-    dense = direct.applySparsePutinar(3, [2 2]);
+    sizeOne = direct.useSpPut(1, [2 2]);
+    sparse = direct.useSpPut(2, [2 2]);
+    dense = direct.useSpPut(3, [2 2]);
 
     verifySparse(testCase, sizeOne, [2 2], 1, ones(1, 21), 25);
     verifySparse(testCase, sparse, [2 2], 2, 4 * ones(1, 8), 25);
     verifyDense(testCase, dense, [2 2], [9 6 6], 25);
-    verifyDisjointGramVariables(testCase, sparse, 1:8);
+    veriDisGraVar(testCase, sparse, 1:8);
 
     gramVariables = constraintVariables(sparse, 1:8);
     cornerLabels = [1 5 21 25];
@@ -81,12 +81,12 @@ function testMultidimensionalSizeOneAndTensorWindows(testCase)
     end
 end
 
-function testAnisotropicOrdersAndZeroDegreeAxes(testCase)
+function testAniOrdAndZerDeg(testCase)
     grid = {[0 1], [10 20]};
     P = pdvar(1, grid, Degree=[0 4]);
     direct = P >= 0;
-    sparse = direct.applySparsePutinar(2, [0 2]);
-    dense = direct.applySparsePutinar(3, [0 2]);
+    sparse = direct.useSpPut(2, [0 2]);
+    dense = direct.useSpPut(3, [0 2]);
 
     verifySparse(testCase, sparse, [0 2], 2, [2 2 2], 5);
     verifyDense(testCase, dense, [0 2], [3 2], 5);
@@ -102,26 +102,26 @@ function testAnisotropicOrdersAndZeroDegreeAxes(testCase)
         [4 4 4 2 2 2 4 4]);
 end
 
-function testValidationConflictsAndParserPrecedence(testCase)
+function testValConAndParPre(testCase)
     P = pdvar(1, {[0 1]}, Degree=4);
     direct = P >= 0;
     malformedSize = {0, -1, 1.5, Inf, NaN, "two", [1 2], true};
     malformedOrder = {-1, 0.5, Inf, NaN, "two", [1 2], true};
 
     for k = 1:numel(malformedSize)
-        testCase.verifyError(@() direct.applySparsePutinar( ...
+        testCase.verifyError(@() direct.useSpPut( ...
             malformedSize{k}), "pdlmi:InvalidCliqueSize");
         testCase.verifyError(@() pdlmi(P, ">=", ...
             CliqueSize=malformedSize{k}), "pdlmi:InvalidCliqueSize");
     end
     for k = 1:numel(malformedOrder)
-        testCase.verifyError(@() direct.applySparsePutinar( ...
+        testCase.verifyError(@() direct.useSpPut( ...
             2, malformedOrder{k}), "pdlmi:InvalidSparsePutinarOrder");
         testCase.verifyError(@() pdlmi(P, ">=", ...
             SparsePutinarOrder=malformedOrder{k}), ...
             "pdlmi:InvalidSparsePutinarOrder");
     end
-    testCase.verifyError(@() direct.applySparsePutinar(2, 1), ...
+    testCase.verifyError(@() direct.useSpPut(2, 1), ...
         "pdlmi:SparsePutinarOrderTooLow");
     testCase.verifyError(@() pdlmi(P, ">=", ...
         UseSparsePutinar=false, CliqueSize=2), ...
@@ -145,22 +145,22 @@ function testValidationConflictsAndParserPrecedence(testCase)
     end
 end
 
-function testApplyReplacesEveryFamilyAndPreservesResidual(testCase)
+function testAppRepEveFamAnd(testCase)
     P = pdvar(1, {[0 1]}, Degree=4);
     direct = P >= 0;
-    sources = {direct.applyPolya(1), direct.applyPutinar(2), ...
-        direct.applySparseFullBoxPreorder(2, 2), ...
-        direct.applyFullBoxPreorder(2)};
+    sources = {direct.usePolya(1), direct.usePutinar(2), ...
+        direct.useSpBox(2, 2), ...
+        direct.useFullBox(2)};
     for k = 1:numel(sources)
-        sparse = sources{k}.applySparsePutinar(2, 2);
+        sparse = sources{k}.useSpPut(2, 2);
         verifySparse(testCase, sparse, 2, 2, [2 2 2], 5);
         testCase.verifyTrue(isequal(sparse.Residual, P));
     end
 
-    sparse = direct.applySparsePutinar(2, 2);
-    replacements = {sparse.applyPolya(1), sparse.applyPutinar(2), ...
-        sparse.applySparseFullBoxPreorder(2, 2), ...
-        sparse.applyFullBoxPreorder(2)};
+    sparse = direct.useSpPut(2, 2);
+    replacements = {sparse.usePolya(1), sparse.usePutinar(2), ...
+        sparse.useSpBox(2, 2), ...
+        sparse.useFullBox(2)};
     for k = 1:numel(replacements)
         testCase.verifyFalse(replacements{k}.UseSparsePutinar);
         testCase.verifyEqual(replacements{k}.SparsePutinarOrder, 0);
@@ -168,40 +168,40 @@ function testApplyReplacesEveryFamilyAndPreservesResidual(testCase)
     end
 end
 
-function testSignsMatrixEntryCellAndRateCertificates(testCase)
+function testSigMatEntCelAnd(testCase)
     P = pdvar(1, {[0 1]}, Degree=4);
     lowerDirect = P >= 0;
     upperDirect = P <= 0;
-    lower = lowerDirect.applySparsePutinar(2, 2);
-    upper = upperDirect.applySparsePutinar(2, 2);
+    lower = lowerDirect.useSpPut(2, 2);
+    upper = upperDirect.useSpPut(2, 2);
     coeffIds = getvariables(P.coeffs(1));
-    lowerTarget = equalityTargetCoefficients(lower, 4:8, coeffIds);
-    upperTarget = equalityTargetCoefficients(upper, 4:8, coeffIds);
+    lowerTarget = equaTarCoe(lower, 4:8, coeffIds);
+    upperTarget = equaTarCoe(upper, 4:8, coeffIds);
     testCase.verifyEqual(lowerTarget, -upperTarget, AbsTol=0);
 
     matrixP = pdvar(2, {[0 1]}, "symmetric", Degree=4);
     matrixDirect = matrixP >= 0;
-    matrixC = matrixDirect.applySparsePutinar(2, 2);
+    matrixC = matrixDirect.useSpPut(2, 2);
     verifySparse(testCase, matrixC, 2, 2, [4 4 4], 5);
 
     fullP = pdvar(2, {[0 1]}, "full", Degree=4);
     entrywise = constructWithWarning(testCase, ...
-        @() applySparsePutinar(fullP >= 0, 2, 2));
+        @() useSpPut(fullP >= 0, 2, 2));
     testCase.verifyEqual(numel(entrywise.Constraints), 4 * 8);
     psdIndices = reshape(((0:3)' * 8 + [1 2 3]).', 1, []);
-    verifyDisjointGramVariables(testCase, entrywise, psdIndices);
+    veriDisGraVar(testCase, entrywise, psdIndices);
 
     rateP = pdvar(2, 1, {[0 1 2]}, "full", Degree=5, ...
         RateBounds=[-1 1]);
     derivative = rhodiff(rateP);
     rateC = constructWithWarning(testCase, ...
-        @() applySparsePutinar(derivative <= 0, 2, 2));
+        @() useSpPut(derivative <= 0, 2, 2));
     % Differentiation lowers the degree: 8 local certificates, each 3+5.
     testCase.verifyEqual(numel(rateC.Constraints), 64);
     psdIndices = reshape(((0:7)' * 8 + [1 2 3]).', 1, []);
     testCase.verifyEqual(psdDimensionsAt(rateC, psdIndices), ...
         2 * ones(size(psdIndices)));
-    verifyDisjointGramVariables(testCase, rateC, psdIndices);
+    veriDisGraVar(testCase, rateC, psdIndices);
 end
 
 function verifySparse(testCase, C, order, cliqueSize, gramSizes, equalityCount)
@@ -273,7 +273,7 @@ function vars = constraintVariables(C, indices)
     end
 end
 
-function verifyDisjointGramVariables(testCase, C, indices)
+function veriDisGraVar(testCase, C, indices)
     vars = constraintVariables(C, indices);
     for a = 1:numel(vars)
         for b = (a + 1):numel(vars)
@@ -282,7 +282,7 @@ function verifyDisjointGramVariables(testCase, C, indices)
     end
 end
 
-function coefficients = equalityTargetCoefficients(C, indices, variableIds)
+function coefficients = equaTarCoe(C, indices, variableIds)
     coefficients = zeros(numel(indices), numel(variableIds));
     for k = 1:numel(indices)
         metadata = struct(C.Constraints{indices(k)});

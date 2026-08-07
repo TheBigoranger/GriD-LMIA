@@ -5,6 +5,15 @@ function out = blkdiag(varargin)
     %     B = blkdiag(A, C)
     %     B = blkdiag(A, M)
     %
+    %   Output:
+    %     B - Coefficient-backed pdmat block-diagonal concatenation.
+    %
+    %   Output:
+    %     B - Coefficient-backed pdmat block-diagonal concatenation.
+    %
+    %   Output:
+    %     B - Coefficient-backed pdmat block-diagonal concatenation.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     B = blkdiag(A, A);
@@ -25,21 +34,19 @@ function out = blkdiag(varargin)
     grid = anchor.mergeGrid("pdmat:MixedGrid", varargin{:});
     data = repmat(struct("MatrixSize", [], "Degree", [], ...
         "LocalValues", [], "IsContinuous", [], ...
-        "HasRateDependence", [], "HasRateRows", []), 1, numel(varargin));
+        "NumRateRows", []), 1, numel(varargin));
     for k = 1:numel(varargin)
-        data(k) = asData(grid, varargin{k}, [], rb, ...
+        data(k) = normOperand(grid, varargin{k}, [], rb, ...
             "pdmat:InvalidBlkdiag");
     end
 
     deg = max(vertcat(data.Degree), [], 1);
-    data = pdbase.alignLocalDegrees(data, deg, grid);
+    data = pdbase.elevData(data, deg, grid, "fast");
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) blkCell(anchor, data, subs));
-    if ~any(arrayfun(@(d) d.HasRateDependence, data))
-        rb = [];
-    end
-    out = mkObj(grid, vals, deg, rb);
+    out = mkCoeffObj(grid, vals, deg, rb, [], [], [], "fast", ...
+        max(arrayfun(@(d) d.NumRateRows, data)));
 end
 
 function coeffs = blkCell(anchor, data, subs)

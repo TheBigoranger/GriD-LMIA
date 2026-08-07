@@ -14,7 +14,7 @@ function setupOnce(testCase)
     setMock("fallback", 0);
 end
 
-function testFallbackReportAndRepeatRun(testCase)
+function testFalRepAndRepRun(testCase)
     setMock("fallback", 0);
     first = install_pd_lmi();
     second = install_pd_lmi();
@@ -32,7 +32,7 @@ function testFallbackReportAndRepeatRun(testCase)
     testCase.verifyEmpty(state.SaveCalls{2});
 end
 
-function testFailedProbeRollsBackPath(testCase)
+function testFaiProRolBacPat(testCase)
     setMock("no-solver", 0);
     before = path;
 
@@ -40,7 +40,7 @@ function testFailedProbeRollsBackPath(testCase)
     testCase.verifyEqual(path, before);
 end
 
-function testNonzeroPrimarySaveUsesUserPathFallback(testCase)
+function testNonPriSavUseUse(testCase)
     setMock("fallback", [1 0]);
     report = install_pd_lmi();
     state = getMock();
@@ -52,7 +52,7 @@ function testNonzeroPrimarySaveUsesUserPathFallback(testCase)
         {fullfile(state.UserPath, "pathdef.m")});
 end
 
-function testPrimarySaveExceptionUsesUserPathFallback(testCase)
+function testPriSavExcUseUse(testCase)
     setMock("fallback", [0 0], 1);
     report = install_pd_lmi();
     state = getMock();
@@ -64,7 +64,7 @@ function testPrimarySaveExceptionUsesUserPathFallback(testCase)
         {fullfile(state.UserPath, "pathdef.m")});
 end
 
-function testPersistenceFailureRollsBackPath(testCase)
+function testPerFaiRolBacPat(testCase)
     setMock("fallback", [1 1]);
     before = path;
 
@@ -72,7 +72,7 @@ function testPersistenceFailureRollsBackPath(testCase)
     testCase.verifyEqual(path, before);
 end
 
-function testShadowedClassRollsBackPath(testCase)
+function testShaClaRolBacPat(testCase)
     setMock("fallback", 0);
     originalFolder = pwd;
     cd(tempdir);
@@ -90,20 +90,20 @@ function testShadowedClassRollsBackPath(testCase)
 end
 
 function testMissingYalmip(testCase)
-    temporarilyHideYalmip(testCase.TestData.MockDir);
+    tempHidYal(testCase.TestData.MockDir);
     cleanup = onCleanup(@() restoreMockYalmip(testCase.TestData.MockDir)); %#ok<NASGU>
 
     testCase.verifyError(@() install_pd_lmi(), "install_pd_lmi:MissingYALMIP");
 end
 
 function testIncompleteYalmip(testCase)
-    temporarilyHideYalmip(testCase.TestData.MockDir);
+    tempHidYal(testCase.TestData.MockDir);
     incompleteDir = tempname;
     mkdir(incompleteDir);
     writelines(["function varargout = yalmip(varargin)", "varargout = cell(1,nargout);", "end"], ...
         fullfile(incompleteDir, "yalmip.m"));
     addpath(incompleteDir, "-begin");
-    cleanup = onCleanup(@() restoreIncompleteMock(incompleteDir, testCase.TestData.MockDir)); %#ok<NASGU>
+    cleanup = onCleanup(@() restIncMoc(incompleteDir, testCase.TestData.MockDir)); %#ok<NASGU>
 
     testCase.verifyError(@() install_pd_lmi(), "install_pd_lmi:IncompleteYALMIP");
 end
@@ -128,7 +128,7 @@ function state = getMock()
     state = pd_lmi_install_mock;
 end
 
-function temporarilyHideYalmip(mockDir)
+function tempHidYal(mockDir)
 %TEMPORARILYHIDEYALMIP Remove both the mock and the real YALMIP path.
     rmpath(mockDir);
     entry = which('sdpvar');
@@ -152,7 +152,7 @@ function restoreMockYalmip(mockDir)
     rehash;
 end
 
-function restoreIncompleteMock(incompleteDir, mockDir)
+function restIncMoc(incompleteDir, mockDir)
 %RESTOREINCOMPLETEMOCK Restore both path priority and the shared mock state.
     rmpath(incompleteDir);
     restoreMockYalmip(mockDir);

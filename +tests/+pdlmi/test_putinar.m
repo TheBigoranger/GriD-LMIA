@@ -8,7 +8,7 @@ function setup(~)
     yalmip("clear");
 end
 
-function testConstructorFormsAndInactiveDefaults(testCase)
+function testConForAndInaDef(testCase)
     P = pdvar(1, {[0 1]}, Degree=2);
     direct = P >= 0;
     bare = pdlmi(P, ">=", "UsePutinar");
@@ -25,19 +25,19 @@ function testConstructorFormsAndInactiveDefaults(testCase)
     verifyPutinar(testCase, orderPaired, 2, [3 2], 5);
 end
 
-function testDefaultOrderAcrossResidualDegrees(testCase)
+function testDefOrdAcrResDeg(testCase)
     expected = [0 0 1 1 2 2 3];
     for degree = 0:6
         P = pdvar(1, {[0 1]}, Degree=degree);
         constructor = pdlmi(P, ">=", UsePutinar=true);
         direct = P >= 0;
-        applied = direct.applyPutinar();
+        applied = direct.usePutinar();
         testCase.verifyEqual(constructor.PutinarOrder, expected(degree + 1));
         testCase.verifyEqual(applied.PutinarOrder, expected(degree + 1));
     end
 end
 
-function testOneDimensionalPutinarMatchesFullBoxParityForm(testCase)
+function testOneDimPutMatFul(testCase)
     % The interval selector intentionally shares FullBox's exact parity form.
     for degree = 0:5
         P = pdvar(2, {[0 1]}, Degree=degree);
@@ -53,18 +53,18 @@ function testOneDimensionalPutinarMatchesFullBoxParityForm(testCase)
     end
 end
 
-function testOrderValidationAndExplicitFalseConflict(testCase)
+function testOrdValAndExpFal(testCase)
     P = pdvar(1, {[0 1]}, Degree=4);
     direct = P >= 0;
     malformed = {-1, 0.5, Inf, NaN, "one", [1 2], true};
 
     for k = 1:numel(malformed)
-        testCase.verifyError(@() direct.applyPutinar(malformed{k}), ...
+        testCase.verifyError(@() direct.usePutinar(malformed{k}), ...
             "pdlmi:InvalidPutinarOrder");
         testCase.verifyError(@() pdlmi(P, ">=", ...
             PutinarOrder=malformed{k}), "pdlmi:InvalidPutinarOrder");
     end
-    testCase.verifyError(@() direct.applyPutinar(1), ...
+    testCase.verifyError(@() direct.usePutinar(1), ...
         "pdlmi:PutinarOrderTooLow");
     testCase.verifyError(@() pdlmi(P, ">=", PutinarOrder=1), ...
         "pdlmi:PutinarOrderTooLow");
@@ -76,7 +76,7 @@ function testOrderValidationAndExplicitFalseConflict(testCase)
         "pdlmi:ConflictingPutinarOptions");
 end
 
-function testMalformedAndConflictingOptions(testCase)
+function testMalAndConOpt(testCase)
     P = pdvar(1, {[0 1]}, Degree=2);
 
     testCase.verifyError(@() pdlmi(P, ">=", ...
@@ -96,15 +96,15 @@ function testMalformedAndConflictingOptions(testCase)
         PutinarOrder=1, UsePolya=true), "pdlmi:ConflictingRelaxations");
 end
 
-function testApplyRebuildsAndReplacesOtherFamilies(testCase)
+function testAppRebAndRepOth(testCase)
     P = pdvar(1, {[0 1]}, Degree=2);
     direct = P >= 0;
-    putinar1 = direct.applyPutinar();
-    putinar2 = putinar1.applyPutinar(2);
-    polya = putinar2.applyPolya(2);
-    full = putinar2.applyFullBoxPreorder(1);
-    fromPolya = polya.applyPutinar(1);
-    fromFull = full.applyPutinar(1);
+    putinar1 = direct.usePutinar();
+    putinar2 = putinar1.usePutinar(2);
+    polya = putinar2.usePolya(2);
+    full = putinar2.useFullBox(1);
+    fromPolya = polya.usePutinar(1);
+    fromFull = full.usePutinar(1);
 
     verifyInactive(testCase, direct);
     verifyPutinar(testCase, putinar1, 1, [2 1], 3);
@@ -119,7 +119,7 @@ function testApplyRebuildsAndReplacesOtherFamilies(testCase)
     verifyPutinar(testCase, fromFull, 1, [2 1], 3);
 end
 
-function testDegreeZeroOddAndTensorBlockDimensions(testCase)
+function testDegZerOddAndTen(testCase)
     constant = pdlmi(pdvar(2, {[0 1]}, Degree=0), ">=", UsePutinar=true);
     odd = pdlmi(pdvar(2, {[0 1]}, Degree=3), ">=", UsePutinar=true);
     tensor = pdlmi(pdvar(2, {[0 1], [0 1]}, Degree=[2 2]), ...
@@ -132,7 +132,7 @@ function testDegreeZeroOddAndTensorBlockDimensions(testCase)
     verifyPutinar(testCase, tensor, 1, [8 4 4], 9);
 end
 
-function testAnisotropicOrdersAndGramDimensions(testCase)
+function testAniOrdAndGraDim(testCase)
     % Putinar keeps only empty and admissible singleton masks per direction.
     grid = {[0 1], [10 20]};
     P = pdvar(2, grid, "symmetric", Degree=[1 4]);
@@ -143,16 +143,16 @@ function testAnisotropicOrdersAndGramDimensions(testCase)
     verifyPutinar(testCase, explicit, [2 3], [24 16 18], 35);
 
     direct = P >= 0;
-    testCase.verifyError(@() direct.applyPutinar([0 2]), ...
+    testCase.verifyError(@() direct.usePutinar([0 2]), ...
         "pdlmi:PutinarOrderTooLow");
     bad = {[], [1 2 3], [1 2; 3 4], -1, 0.5, Inf, NaN};
     for k = 1:numel(bad)
-        testCase.verifyError(@() direct.applyPutinar(bad{k}), ...
+        testCase.verifyError(@() direct.usePutinar(bad{k}), ...
             "pdlmi:InvalidPutinarOrder");
     end
 end
 
-function testZeroOrderAxisOmitsUnavailableSingleton(testCase)
+function testZerOrdAxiOmiUna(testCase)
     % A singleton multiplier is absent when its axis order is exactly zero.
     grid = {[0 1], [10 20]};
     firstConstant = pdlmi(pdvar(1, grid, Degree=[0 4]), ...
@@ -164,12 +164,12 @@ function testZeroOrderAxisOmitsUnavailableSingleton(testCase)
     verifyPutinar(testCase, secondConstant, [2 0], [3 2], 5);
 end
 
-function testSignsEveryCellAndRateRow(testCase)
+function testSigEveCelAndRat(testCase)
     P = pdvar(1, {[0 1]}, Degree=2);
     lower = P >= 0;
     upper = P <= 0;
-    lower = lower.applyPutinar(2);
-    upper = upper.applyPutinar(2);
+    lower = lower.usePutinar(2);
+    upper = upper.usePutinar(2);
 
     verifyPutinar(testCase, lower, 2, [3 2], 5);
     verifyPutinar(testCase, upper, 2, [3 2], 5);
@@ -179,7 +179,7 @@ function testSignsEveryCellAndRateRow(testCase)
     rateP = pdvar(1, {[0 1 2]}, Degree=2, RateBounds=[-1 1]);
     derivative = rhodiff(rateP);
     rate = derivative >= 0;
-    rate = rate.applyPutinar();
+    rate = rate.usePutinar();
     testCase.verifyEqual(size(derivative.coeffs(1)), [2 2]);
     % Degree-one interval targets use two endpoint PSD blocks plus two equalities.
     testCase.verifyEqual(numel(rate.Constraints), 2 * 2 * 4);
@@ -187,7 +187,7 @@ function testSignsEveryCellAndRateRow(testCase)
     testCase.verifyEqual(psdDimensionsAt(rate, psdIdx), repmat([1 1], 1, 4));
 end
 
-function testEntrywiseScalarBlocksAndColumnMajorTargets(testCase)
+function testEntScaBloAndCol(testCase)
     % One independent scalar certificate follows each MATLAB matrix entry.
     P = pdvar(2, {[0 1]}, "full", Degree=0);
     C = constructWithWarning(testCase, @() pdlmi(P, ">=", ...
@@ -197,7 +197,7 @@ function testEntrywiseScalarBlocksAndColumnMajorTargets(testCase)
 
     testCase.verifyEqual(numel(C.Constraints), 4 * 2);
     testCase.verifyEqual(psdDimensionsAt(C, 1:2:8), ones(1, 4));
-    verifyDisjointGramVariables(testCase, C, 1:2:8);
+    veriDisGraVar(testCase, C, 1:2:8);
     for entry = 1:4
         metadata = struct(C.Constraints{2 * entry});
         matchedTargets = intersect(getvariables(metadata.List{1}), targetIds);
@@ -206,7 +206,7 @@ function testEntrywiseScalarBlocksAndColumnMajorTargets(testCase)
     end
 end
 
-function testEntrywiseEveryCellAndRateRow(testCase)
+function testEntEveCelAndRat(testCase)
     % Rectangular derivative rows receive independent scalar certificates.
     P = pdvar(2, 1, {[0 1 2]}, "full", RateBounds=[-1 1]);
     D = rhodiff(P);
@@ -218,7 +218,7 @@ function testEntrywiseEveryCellAndRateRow(testCase)
     testCase.verifyEqual(numel(C.Constraints), 16);
     psdIdx = 1:2:16;
     testCase.verifyEqual(psdDimensionsAt(C, psdIdx), ones(1, 8));
-    verifyDisjointGramVariables(testCase, C, psdIdx);
+    veriDisGraVar(testCase, C, psdIdx);
 end
 
 function verifyInactive(testCase, C)
@@ -265,7 +265,7 @@ function dims = psdDimensionsAt(C, indices)
     end
 end
 
-function verifyDisjointGramVariables(testCase, C, indices)
+function veriDisGraVar(testCase, C, indices)
     % Independent scalar certificates cannot share Gram decision handles.
     vars = cell(size(indices));
     for k = 1:numel(indices)

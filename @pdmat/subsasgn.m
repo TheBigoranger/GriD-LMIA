@@ -5,6 +5,10 @@ function obj = subsasgn(obj, S, rhs)
     %     A(rows, cols) = B
     %     A(rows, cols) = M
     %
+    %   Output:
+    %     A - Updated pdmat with the selected matrix block replaced in every
+    %         aligned coefficient.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {zeros(2), eye(2)}, Degree=1);
     %     A(1, :) = [3 4];
@@ -17,42 +21,20 @@ function obj = subsasgn(obj, S, rhs)
     [rows, cols] = sanChk(obj, S, rhs);
     rb = obj.pickRateBounds("pdmat:InvalidAssignment", rhs);
     grid = obj.mergeGrid("pdmat:MixedGrid", rhs);
-    lhsData = asData(grid, obj, [], rb, "pdmat:InvalidAssignment");
-    rhsData = asData(grid, rhs, [numel(rows), numel(cols)], rb, ...
+    lhsData = normOperand(grid, obj, [], rb, "pdmat:InvalidAssignment");
+    rhsData = normOperand(grid, rhs, [numel(rows), numel(cols)], rb, ...
         "pdmat:InvalidAssignment");
 
     deg = max(lhsData.Degree, rhsData.Degree);
-    [lhsPlan, rhsPlan] = elevationPlans( ...
-        lhsData.Degree, rhsData.Degree, deg, numel(grid));
-    lhsVals = pdbase.elevLocalValues(lhsData.LocalValues, ...
-        lhsData.Degree, deg, grid, lhsPlan, "fast");
-    rhsVals = pdbase.elevLocalValues(rhsData.LocalValues, ...
-        rhsData.Degree, deg, grid, rhsPlan, "fast");
+    data = pdbase.elevData([lhsData, rhsData], deg, grid, "fast");
+    lhsVals = data(1).LocalValues;
+    rhsVals = data(2).LocalValues;
     vals = obj.zipRateRows(lhsVals, rhsVals, ...
-        @(lhs, rhs) assignBlock(lhs, rhs, rows, cols), grid, ...
+        @(lhs, rhs) setBlock(lhs, rhs, rows, cols), grid, ...
         "pdmat:InvalidCoefficientRows");
 
-    hasRate = lhsData.HasRateDependence || rhsData.HasRateDependence;
-    if ~hasRate
-        rb = [];
-    end
-    obj = mkObj(grid, vals, deg, rb);
-end
-
-function [lhsPlan, rhsPlan] = elevationPlans(lhsDegree, rhsDegree, targetDegree, nPar)
-    %ELEVATIONPLANS Reuse one map when both operands share a source degree.
-    lhsPlan = [];
-    rhsPlan = [];
-    if any(lhsDegree < targetDegree)
-        lhsPlan = pdbase.elevationPlan(lhsDegree, targetDegree, nPar);
-    end
-    if any(rhsDegree < targetDegree)
-        if isequal(rhsDegree, lhsDegree)
-            rhsPlan = lhsPlan;
-        else
-            rhsPlan = pdbase.elevationPlan(rhsDegree, targetDegree, nPar);
-        end
-    end
+    obj = mkCoeffObj(grid, vals, deg, rb, [], [], [], "fast", ...
+        max(lhsData.NumRateRows, rhsData.NumRateRows));
 end
 
 function [rows, cols] = sanChk(obj, S, rhs)
@@ -74,7 +56,7 @@ function [rows, cols] = sanChk(obj, S, rhs)
         "pdmat:InvalidAssignment");
 end
 
-function out = assignBlock(lhs, rhs, rows, cols)
+function out = setBlock(lhs, rhs, rows, cols)
     %ASSIGNBLOCK Replace one aligned matrix coefficient block.
     out = lhs;
     out(rows, cols) = rhs;

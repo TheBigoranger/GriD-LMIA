@@ -8,11 +8,13 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testShapeInspectionAndUnaryPlus(testCase)
+function testShaInsAndUnaPlu(testCase)
     % Matrix-like shape methods should report the pdvar payload dimensions.
     P = pdvar(2, 3, {[0 1]}, "full");
 
     testCase.verifyTrue(isequal(+P, P));
+    testCase.verifyTrue(isequal(P));
+    testCase.verifyFalse(isequal(1, P));
     testCase.verifyEqual(length(P), 3);
     testCase.verifyEqual(height(P), 2);
     testCase.verifyEqual(width(P), 3);
@@ -21,7 +23,7 @@ function testShapeInspectionAndUnaryPlus(testCase)
     testCase.verifyTrue(isequal(squeeze(P), P));
 end
 
-function testTransposeCtransposeAndTrace(testCase)
+function testTraCtrAndTra(testCase)
     % Size-changing unary operations should map every coefficient payload.
     P = pdvar(2, 3, {[0 1]}, "full");
     Q = pdvar(2, {[0 1]}, "full");
@@ -40,7 +42,7 @@ function testTransposeCtransposeAndTrace(testCase)
     verifyCoeffExpr(testCase, Tr.coeffs(1), {trace(cq{1}), trace(cq{2})});
 end
 
-function testCommonStructuralMethods(testCase)
+function testComStrMet(testCase)
     % Common MATLAB structural transforms should map every coefficient payload.
     P = pdvar(2, {[0 1]}, "full");
     cp = P.coeffs(1);
@@ -90,7 +92,7 @@ function testCommonStructuralMethods(testCase)
     testCase.verifyFalse(isequal(P, D));
 end
 
-function testConstructorHighDegreeStructuralMapping(testCase)
+function testConHigDegStrMap(testCase)
     % Structural methods map every constructor-created high-degree payload.
     P = pdvar(2, 3, {[0 1]}, "full", Degree=3);
     cp = P.coeffs(1);
@@ -108,7 +110,7 @@ function testConstructorHighDegreeStructuralMapping(testCase)
         cellfun(@(x) x(:), cp, UniformOutput=false));
 end
 
-function testDerivativeStructuralMethodsPreserveRateRows(testCase)
+function testDerStrMetPreRat(testCase)
     % Unary structural transforms should keep derivative row tables intact.
     P = pdvar(2, {[0 1]}, "full");
     D = rhodiff(P, [-1 2]);
@@ -161,14 +163,13 @@ function testDerivativeStructuralMethodsPreserveRateRows(testCase)
     testCase.verifyEqual(size(R), [1 4]);
     testCase.verifyEqual(size(Rp), [2 4]);
     for k = 1:numel(outs)
-        testCase.verifyTrue(outs{k}.HasRateDependence);
         testCase.verifyEqual(outs{k}.RateBounds, [-1 2]);
         testCase.verifyEqual(size(outs{k}.coeffs(1)), [2 1]);
         verifyCoeffExpr(testCase, outs{k}.coeffs(1), exp{k});
     end
 end
 
-function testDerivativeMultirowMultiCoeffInheritedOps(testCase)
+function testDerMulMulCoeInh(testCase)
     % Degree-two derivatives keep every rate row and both coefficient columns.
     P = pdvar(2, {[0 1]}, "full", Degree=2);
     D = rhodiff(P, [-1 2]);
@@ -200,14 +201,13 @@ function testDerivativeMultirowMultiCoeffInheritedOps(testCase)
         UniformOutput=false));
 
     for out = {N, S, M, C}
-        testCase.verifyTrue(out{1}.HasRateDependence);
         testCase.verifyEqual(out{1}.RateBounds, [-1 2]);
         testCase.verifyEqual(out{1}.Degree, 1);
         testCase.verifyFalse(out{1}.IsContinuous);
     end
 end
 
-function testDiagConstructionAndReshapeInference(testCase)
+function testDiaConAndResInf(testCase)
     % Vector diag and one empty reshape dimension should follow MATLAB usage.
     P = pdvar(3, 1, {[0 1]}, "full");
     cp = P.coeffs(1);
@@ -221,7 +221,7 @@ function testDiagConstructionAndReshapeInference(testCase)
     verifyCoeffExpr(testCase, R.coeffs(1), {cp{1}, cp{2}});
 end
 
-function testConcatenationWithKnownAndNumericBlocks(testCase)
+function testConWitKnoAndNum(testCase)
     % cat/horzcat/vertcat should combine compatible coefficient blocks.
     P = pdvar(2, 1, {[0 1]}, "full");
     A = pdmat({[0 1]}, {[10; 20], [30; 40]}, Degree=1);
@@ -234,6 +234,9 @@ function testConcatenationWithKnownAndNumericBlocks(testCase)
     N = cat(2, P, 5);
     Nl = [zeros(2, 1), P];
     Nt = [0; P];
+    scalar = pdvar(1, {[0 1]});
+    scalarRow = [scalar, 3, 4];
+    scalarCol = [scalar; 3; 4];
 
     testCase.verifyEqual(size(H), [2 2]);
     testCase.verifyEqual(size(Hr), [2 2]);
@@ -242,6 +245,8 @@ function testConcatenationWithKnownAndNumericBlocks(testCase)
     testCase.verifyEqual(size(N), [2 2]);
     testCase.verifyEqual(size(Nl), [2 2]);
     testCase.verifyEqual(size(Nt), [3 1]);
+    testCase.verifyEqual(size(scalarRow), [1 3]);
+    testCase.verifyEqual(size(scalarCol), [3 1]);
     verifyCoeffExpr(testCase, H.coeffs(1), {[cp{1}, [10; 20]], [cp{2}, [30; 40]]});
     verifyCoeffExpr(testCase, Hr.coeffs(1), {[[10; 20], cp{1}], [[30; 40], cp{2}]});
     verifyCoeffExpr(testCase, V.coeffs(1), {[cp{1}; cp{1}], [cp{2}; cp{2}]});
@@ -251,7 +256,7 @@ function testConcatenationWithKnownAndNumericBlocks(testCase)
     verifyCoeffExpr(testCase, Nt.coeffs(1), {[0; cp{1}], [0; cp{2}]});
 end
 
-function testCatDegreeElevation(testCase)
+function testCatDegEle(testCase)
     % Lower-degree blocks are elevated before coefficient-wise concatenation.
     P = pdvar(1, {[0 1]});
     B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
@@ -279,7 +284,7 @@ function testCatSdpvarBlocks(testCase)
     verifyCoeffExpr(testCase, C.coeffs(1), {[cp{1}, X], [cp{2}, X]});
 end
 
-function testCatBroadcastsDerivativeRateRows(testCase)
+function testCatBroDerRatRow(testCase)
     % Ordinary coefficient rows should broadcast across derivative rate vertices.
     P = pdvar(2, 1, {[0 1]}, "full");
     D = rhodiff(P, [-1 2]);
@@ -292,14 +297,13 @@ function testCatBroadcastsDerivativeRateRows(testCase)
     testCase.verifyEqual(size(C), [2 2]);
     testCase.verifyEqual(C.Degree, 1);
     testCase.verifyFalse(C.IsContinuous);
-    testCase.verifyTrue(C.HasRateDependence);
     testCase.verifyEqual(C.RateBounds, [-1 2]);
     testCase.verifyEqual(size(cc), [2 2]);
     verifyCoeffExpr(testCase, cc(1, :), {[cd{1, 1}, cp{1}], [cd{1, 1}, cp{2}]});
     verifyCoeffExpr(testCase, cc(2, :), {[cd{2, 1}, cp{1}], [cd{2, 1}, cp{2}]});
 end
 
-function testBlkdiagCommonGridAndNumeric(testCase)
+function testBlkComGriAndNum(testCase)
     % blkdiag should align grids, elevate degree, and accept numeric blocks.
     P = pdvar(1, {[0 1]});
     B = pdmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
@@ -318,7 +322,7 @@ function testBlkdiagCommonGridAndNumeric(testCase)
         diag([cp{2}, 5, 30])});
 end
 
-function testBlkdiagBroadcastsDerivativeRateRows(testCase)
+function testBlkBroDerRatRow(testCase)
     % blkdiag should preserve derivative rate rows and broadcast ordinary rows.
     P = pdvar(1, {[0 1]});
     D = rhodiff(P, [-1 2]);
@@ -331,13 +335,12 @@ function testBlkdiagBroadcastsDerivativeRateRows(testCase)
     testCase.verifyEqual(size(B), [2 2]);
     testCase.verifyEqual(B.Degree, 1);
     testCase.verifyFalse(B.IsContinuous);
-    testCase.verifyTrue(B.HasRateDependence);
     testCase.verifyEqual(size(cb), [2 2]);
     verifyCoeffExpr(testCase, cb(1, :), {blkdiag(cd{1, 1}, cp{1}), blkdiag(cd{1, 1}, cp{2})});
     verifyCoeffExpr(testCase, cb(2, :), {blkdiag(cd{2, 1}, cp{1}), blkdiag(cd{2, 1}, cp{2})});
 end
 
-function testMatrixSlicingAndDotAccess(testCase)
+function testMatSliAndDotAcc(testCase)
     % Matrix indexing should slice payloads while dot access stays available.
     P = pdvar(2, 3, {[0 1]}, "full");
     cp = P.coeffs(1);
@@ -346,17 +349,19 @@ function testMatrixSlicingAndDotAccess(testCase)
     topTail = P(1, 2:3);
     firstRow = P([true false], :);
     coeffs = P.coeffs(1);
+    nestedDegree = P(:, 1).Degree;
 
     testCase.verifyEqual(size(lastCol), [2 1]);
     testCase.verifyEqual(size(topTail), [1 2]);
     testCase.verifyEqual(size(firstRow), [1 3]);
+    testCase.verifyEqual(nestedDegree, 1);
     verifyCoeffExpr(testCase, coeffs, cp);
     verifyCoeffExpr(testCase, lastCol.coeffs(1), {cp{1}(:, 3), cp{2}(:, 3)});
     verifyCoeffExpr(testCase, topTail.coeffs(1), {cp{1}(1, 2:3), cp{2}(1, 2:3)});
     verifyCoeffExpr(testCase, firstRow.coeffs(1), {cp{1}(1, :), cp{2}(1, :)});
 end
 
-function testSubsasgnNumericAndPdvarBlocks(testCase)
+function testSubNumAndPdvBlo(testCase)
     % Subscript assignment should accept numeric constants and pdvar blocks.
     P = pdvar(2, {[0 1]}, "full");
     cp = P.coeffs(1);
@@ -376,7 +381,7 @@ function testSubsasgnNumericAndPdvarBlocks(testCase)
         [50 60; cp{2}(2, 1), 5]});
 end
 
-function testAnisotropicCatBlkdiagAndAssignment(testCase)
+function testAniCatBlkAndAss(testCase)
     % Composition and assignment use componentwise maximum degree.
     grid = {[0 1], [10 20]};
     P = pdvar(2, 1, grid, "full", Degree=[1 3]);
@@ -404,7 +409,7 @@ function testAnisotropicCatBlkdiagAndAssignment(testCase)
         cellfun(@(x) [30; x(2, 1)], ep, UniformOutput=false));
 end
 
-function testSubsasgnBroadcastsDerivativeRateRows(testCase)
+function testSubBroDerRatRow(testCase)
     % Assignment should use the same ordinary/rate-row broadcast as affine ops.
     P = pdvar(2, {[0 1]}, "full");
     D = rhodiff(pdvar(1, {[0 1]}), [-1 2]);
@@ -416,7 +421,6 @@ function testSubsasgnBroadcastsDerivativeRateRows(testCase)
 
     testCase.verifyEqual(P.Degree, 1);
     testCase.verifyFalse(P.IsContinuous);
-    testCase.verifyTrue(P.HasRateDependence);
     testCase.verifyEqual(size(cc), [2 2]);
     verifyCoeffExpr(testCase, cc(1, :), { ...
         [cd{1, 1}, cp{1}(1, 2); cp{1}(2, 1), cp{1}(2, 2)], ...
@@ -426,7 +430,7 @@ function testSubsasgnBroadcastsDerivativeRateRows(testCase)
         [cd{2, 1}, cp{2}(1, 2); cp{2}(2, 1), cp{2}(2, 2)]});
 end
 
-function testSubsasgnIntoDerivativeRateRows(testCase)
+function testSubIntDerRatRow(testCase)
     % Assigning ordinary blocks into derivative rows should broadcast by row.
     P = pdvar(2, {[0 1]}, "full");
     D = rhodiff(P, [-1 2]);
@@ -438,7 +442,6 @@ function testSubsasgnIntoDerivativeRateRows(testCase)
 
     testCase.verifyEqual(D.Degree, 1);
     testCase.verifyFalse(D.IsContinuous);
-    testCase.verifyTrue(D.HasRateDependence);
     testCase.verifyEqual(size(cc), [2 2]);
     verifyCoeffExpr(testCase, cc(1, :), { ...
         [cp{1}(2, 2), cd{1, 1}(1, 2); cd{1, 1}(2, 1), cd{1, 1}(2, 2)], ...
@@ -448,7 +451,7 @@ function testSubsasgnIntoDerivativeRateRows(testCase)
         [cp{2}(2, 2), cd{2, 1}(1, 2); cd{2, 1}(2, 1), cd{2, 1}(2, 2)]});
 end
 
-function testHigherDimensionalGridStructuralOps(testCase)
+function testHigDimGriStrOps(testCase)
     % Three-parameter grids should preserve nested LocalValues traversal.
     grid = {[0 1 2], [10 20], [100 200 300]};
     P = pdvar(2, grid, "full");
@@ -469,7 +472,7 @@ function testHigherDimensionalGridStructuralOps(testCase)
         cellfun(@(a) a(1, :), cp, UniformOutput=false));
 end
 
-function testStructuralOpsPreserveRateMetadata(testCase)
+function testStrOpsPreRatMet(testCase)
     % Structural transforms should keep RateBounds outside LocalValues.
     rb = [-1 1];
     P = pdvar(2, {[0 1]}, "full", RateBounds=rb);
@@ -484,12 +487,6 @@ function testStructuralOpsPreserveRateMetadata(testCase)
     G = blkdiag(Q(1, 1), R(1, 1));
     A = rateAssign(P, R);
 
-    testCase.verifyTrue(U.HasRateDependence);
-    testCase.verifyTrue(S.HasRateDependence);
-    testCase.verifyTrue(B.HasRateDependence);
-    testCase.verifyTrue(H.HasRateDependence);
-    testCase.verifyTrue(G.HasRateDependence);
-    testCase.verifyTrue(A.HasRateDependence);
     testCase.verifyEqual(U.RateBounds, rb);
     testCase.verifyEqual(S.RateBounds, rb);
     testCase.verifyEqual(B.RateBounds, rb);
@@ -501,7 +498,7 @@ function testStructuralOpsPreserveRateMetadata(testCase)
     testCase.verifyError(@() rateAssign(R, Bad), "pdvar:InvalidAssignment");
 end
 
-function testRejectsInvalidConcatenation(testCase)
+function testRejInvCon(testCase)
     % Unsupported dimensions, source modes, and nonlinear blocks should fail.
     P = pdvar(2, 1, {[0 1]}, "full");
     F = pdmat({[0 1]}, @(rho) [rho; rho]);
@@ -511,9 +508,17 @@ function testRejectsInvalidConcatenation(testCase)
     testCase.verifyError(@() [P, ones(3, 1)], "pdvar:InvalidConcatenation");
     testCase.verifyError(@() [P, F], "pdvar:FunctionOnlyAlgebra");
     testCase.verifyError(@() [P, x * x], "pdvar:InvalidConcatenation");
+    testCase.verifyError(@() cat("bad", P, P), ...
+        "pdvar:InvalidConcatenation");
+
+    Q = pdvar(3, 1, {[0 1]}, "full");
+    R = pdvar(1, 2, {[0 1]}, "full");
+    S = pdvar(1, 3, {[0 1]}, "full");
+    testCase.verifyError(@() [P, Q], "pdvar:InvalidConcatenation");
+    testCase.verifyError(@() [R; S], "pdvar:InvalidConcatenation");
 end
 
-function testIndexingAndAssignmentRejections(testCase)
+function testIndAndAssRej(testCase)
     % Unsupported indexing and assignment forms should fail with stable IDs.
     P = pdvar(2, {[0 1]}, "full");
     R = pdvar(2, {[0 1]}, "full", RateBounds=[-1 1]);
@@ -524,10 +529,23 @@ function testIndexingAndAssignmentRejections(testCase)
     testCase.verifyError(@() growAssign(P), "pdvar:InvalidAssignment");
     testCase.verifyError(@() badSizeAssign(P), "pdvar:InvalidAssignment");
     testCase.verifyError(@() nonlinearAssign(P, x), "pdvar:InvalidAssignment");
+    testCase.verifyError(@() nestedAssign(P), "pdvar:UnsupportedAssignment");
+    testCase.verifyError(@() setSummary(P), "MATLAB:class:SetProhibited");
     testCase.verifyEqual(rateAssign(P, R).RateBounds, [-1 1]);
 end
 
-function testStructuralRejections(testCase)
+function nestedAssign(P)
+    % Nested assignment is outside the pdvar coefficient-block contract.
+    S = substruct("()", {1, 1}, ".", "field");
+    subsasgn(P, S, 1);
+end
+
+function setSummary(P)
+    % Dot assignment reaches MATLAB's private-set property guard.
+    P.SourceSummary = "changed";
+end
+
+function testStrRej(testCase)
     % Structural methods should reject malformed dimensions and source modes.
     P = pdvar(2, {[0 1]}, "full");
     F = pdmat({[0 1]}, @(rho) rho * eye(2));

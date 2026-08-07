@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testNumericModeRejectsNonfiniteAndEmptyInputs(testCase)
+function testNumModRejNonAnd(testCase)
     % Numeric zero evidence must be finite, real, nonempty, and identically zero.
     testCase.verifyTrue(helper.isZero(zeros(2), "num"));
     testCase.verifyFalse(helper.isZero([], "num"));
@@ -16,14 +16,14 @@ function testNumericModeRejectsNonfiniteAndEmptyInputs(testCase)
     testCase.verifyFalse(helper.isZero(1, "num"));
 end
 
-function testAdditiveModePreservesScalarExpansionAndShapeCheck(testCase)
+function testAddModPreScaExp(testCase)
     % Scalar zero expands, while an incompatible zero matrix must not bypass algebra checks.
     testCase.verifyTrue(helper.isZero(0, "add", [2 3]));
     testCase.verifyTrue(helper.isZero(zeros(2, 3), "add", [2 3]));
     testCase.verifyFalse(helper.isZero(zeros(2, 2), "add", [2 3]));
 end
 
-function testValuesModeHandlesNestedAndRateAffinePayloads(testCase)
+function testValModHanNesAnd(testCase)
     % Nested cells and Constant/Rate payloads share the same recursive evidence rule.
     zeroRate = struct("Constant", 0, "Rate", {{0}});
     nonzeroRate = struct("Constant", 0, "Rate", {{1}});
@@ -34,7 +34,7 @@ function testValuesModeHandlesNestedAndRateAffinePayloads(testCase)
     testCase.verifyFalse(helper.isZero({0, 1}, "vals"));
 end
 
-function testObjectModeDistinguishesExplicitAndPlaceholderEvidence(testCase)
+function testObjModDisExpAnd(testCase)
     % Function-only pdmat placeholder zeros are not algebra evidence.
     A = pdmat({[0 1]}, {0, 0}, Degree=1);
     F = pdmat({[0 1]}, @(rho) 0);
@@ -45,9 +45,10 @@ function testObjectModeDistinguishesExplicitAndPlaceholderEvidence(testCase)
     testCase.verifyFalse(helper.isZero(F, "obj"));
     testCase.verifyFalse(helper.isZero(P, "obj"));
     testCase.verifyTrue(helper.isZero(Z, "obj"));
+    testCase.verifyFalse(helper.isZero(struct(), "obj"));
 end
 
-function testInvalidModesAndArityFailClearly(testCase)
+function testInvModAndAriFai(testCase)
     % Helper misuse should fail as a helper-contract error, not as algebra input.
     testCase.verifyError(@() helper.isZero(0, "unknown"), "helper:InvalidZeroMode");
     testCase.verifyError(@() helper.isZero(0, "add"), "helper:InvalidZeroCall");

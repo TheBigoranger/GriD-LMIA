@@ -4,6 +4,9 @@ function n = length(obj)
     %   Syntax:
     %     n = length(obj)
     %
+    %   Output:
+    %     n - Larger of the stored row and column counts.
+    %
     %   Example:
     %     obj = pdbase({[0 1]}, [2 3], 0);
     %     n = length(obj);

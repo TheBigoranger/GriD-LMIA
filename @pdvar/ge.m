@@ -5,6 +5,9 @@ function out = ge(lhs, rhs)
     %     C = P >= Q
     %     C = P >= 0
     %
+    %   Output:
+    %     C - pdlmi wrapper for the residual P - Q >= 0.
+    %
     %   A square residual whose coefficients are all Hermitian across every
     %   physical cell and rate row uses semidefinite comparison. Numeric
     %   symmetry uses tolerance 1e-10. Otherwise the entire original residual

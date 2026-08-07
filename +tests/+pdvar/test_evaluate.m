@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testOrdinaryExpressionIgnoresAssignmentState(testCase)
+function testOrdExpIgnAssSta(testCase)
     % Evaluation assembles one affine expression and never calls value.
     P = pdvar(2, {[0 2]}, "full", Degree=2);
     coeffs = P.coeffs(1);
@@ -29,9 +29,9 @@ function testOrdinaryExpressionIgnoresAssignmentState(testCase)
     testCase.verifyEqual(value(after), [5 6; 7 8], AbsTol=1e-12);
 end
 
-function testTensorInterpolationAndOrdinaryRateMetadata(testCase)
+function testTenIntAndOrdRat(testCase)
     % Tensor weights follow combRows order; metadata alone adds no output rows.
-    P = pdvar(1, {[0 1], [10 14]}, Degree=1, ...
+    P = pdvar(1, {[0 1], [10 14]}, Degree=[1 1], ...
         RateBounds=[-1 2; -3 5]);
     coeffs = P.coeffs([1 1]);
     assignCoeffs(coeffs, {1, 3, 5, 7});
@@ -43,7 +43,7 @@ function testTensorInterpolationAndOrdinaryRateMetadata(testCase)
     testCase.verifyEqual(value(expr), 2.5, AbsTol=1e-12);
 end
 
-function testScalarDerivativeReturnsOrderedAffineRows(testCase)
+function testScaDerRetOrdAff(testCase)
     % Each stored rate row becomes one matrix-valued affine expression.
     P = pdvar(1, {[0 2]}, Degree=2);
     coeffs = P.coeffs(1);
@@ -59,11 +59,11 @@ function testScalarDerivativeReturnsOrderedAffineRows(testCase)
     testCase.verifyEqual(value(rows{2}), 12, AbsTol=1e-12);
 end
 
-function testTensorDerivativePreservesCombRowsOrder(testCase)
+function testTenDerPreComRow(testCase)
     % Four rate vertices retain the package-wide lower/upper Cartesian order.
     grid = {[0 2], [10 14]};
     rb = [-1 2; -3 5];
-    P = pdvar(1, grid, Degree=2);
+    P = pdvar(1, grid, Degree=[2 2]);
     coeffs = P.coeffs([1 1]);
     lbls = helper.combRows({0:2, 0:2});
     vals = arrayfun(@(k) 5 + 2 * lbls(k, 1) + 3 * lbls(k, 2), ...
@@ -81,7 +81,7 @@ function testTensorDerivativePreservesCombRowsOrder(testCase)
     end
 end
 
-function testDerivativeBoundaryUsesRightCell(testCase)
+function testDerBouUseRigCel(testCase)
     % A discontinuous derivative makes the shared-boundary owner observable.
     P = pdvar(1, {[0 1 2]}, Degree=2);
     left = P.coeffs(1);

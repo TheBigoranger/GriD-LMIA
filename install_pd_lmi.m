@@ -1,10 +1,20 @@
 function report = install_pd_lmi()
-%INSTALL_PD_LMI Validate and persist a usable GriD-LMIA MATLAB installation.
-%   INSTALL_PD_LMI() adds the repository root to the end of the current
-%   MATLAB path, verifies the existing YALMIP installation and a working SDP
-%   solver, then persists the path with a user-level fallback. REPORT =
-%   INSTALL_PD_LMI() additionally
-%   returns the selected solver and the paths added during this call.
+    %INSTALL_PD_LMI Validate and persist a usable GriD-LMIA MATLAB installation.
+    %
+    %   Syntax:
+    %     install_pd_lmi()
+    %     report = install_pd_lmi()
+    %
+    %   Output:
+    %     report - Struct with PackageRoot, YALMIPRoot, Solver, AddedPaths,
+    %              and Persisted fields.
+    %
+    %   Example:
+    %     report = install_pd_lmi();
+    %
+    %   The installer adds the repository root to the end of the current
+    %   MATLAB path, verifies the existing YALMIP installation and a working
+    %   SDP solver, then persists the path with a user-level fallback.
 
     originalPath = path;
     report = emptyReport();

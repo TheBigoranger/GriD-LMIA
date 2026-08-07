@@ -61,7 +61,7 @@ function [dims, args, spc, rateVertex] = parseArgs(obj, args)
 
     if ~isempty(args) && isnumeric(args{1})
         dims = helper.chk(args{1}, "pdmat:InvalidPlotDimensions", ...
-            "Plot dimensions must be one or two valid parameter indices.", ...
+            "plot dimensions", ...
             "numeric", "real", "vector", "finite", "integer", "positive");
         dims = reshape(double(dims), 1, []);
         if isempty(dims) || numel(dims) > 2 || any(dims > obj.npar()) || ...
@@ -73,7 +73,7 @@ function [dims, args, spc, rateVertex] = parseArgs(obj, args)
     end
 
     spc = 15;
-    hasRows = obj.hasRateRows();
+    hasRows = obj.NumRateRows ~= 0;
     rateVertex = 1;
     seenRate = false;
     k = 1;
@@ -85,7 +85,7 @@ function [dims, args, spc, rateVertex] = parseArgs(obj, args)
                     "SamplesPerCell requires a positive integer scalar value.");
             end
             spc = helper.chk(args{k + 1}, "pdmat:InvalidPlotOptions", ...
-                "SamplesPerCell must be a positive integer scalar.", ...
+                "SamplesPerCell", ...
                 "numeric", "real", "scalar", "finite", "integer", "positive");
             spc = double(spc);
             args(k:(k + 1)) = [];
@@ -98,7 +98,7 @@ function [dims, args, spc, rateVertex] = parseArgs(obj, args)
             end
             rateVertex = helper.chk(args{k + 1}, ...
                 "pdmat:InvalidRateVertex", ...
-                "RateVertex must be a valid one-based rate-row index.", ...
+                "RateVertex", ...
                 "numeric", "real", "scalar", "finite", "integer", "positive");
             rateVertex = double(rateVertex);
             seenRate = true;
@@ -111,7 +111,7 @@ function [dims, args, spc, rateVertex] = parseArgs(obj, args)
         error("pdmat:InvalidRateVertex", ...
             "RateVertex is supported only for pdmat objects with explicit rate rows.");
     end
-    if hasRows && rateVertex > 2 ^ obj.npar()
+    if hasRows && rateVertex > obj.NumRateRows
         error("pdmat:InvalidRateVertex", ...
             "RateVertex exceeds the number of stored RateBounds vertices.");
     end

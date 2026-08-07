@@ -5,6 +5,9 @@ function out = cat(dim, varargin)
     %     C = cat(1, P, Q)
     %     C = cat(2, P, A)
     %
+    %   Output:
+    %     C - pdvar expression formed by coefficient-wise block concatenation.
+    %
     %   Example:
     %     P = pdvar(2, 1, {[0 1]});
     %     C = cat(2, P, ones(2, 1));
@@ -24,18 +27,16 @@ function out = cat(dim, varargin)
     [data, sz] = catData(dim, varargin, grid, rb);
     deg = max(vertcat(data.Degree), [], 1);
 
-    data = pdbase.alignLocalDegrees(data, deg, grid);
+    data = pdbase.elevData(data, deg, grid, "fast");
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) catCell(anchor, dim, data, subs));
     hasDec = any(arrayfun(@(d) d.ContainsDecision, data));
-    hasRate = any(arrayfun(@(d) d.HasRateDependence, data));
-    if ~hasRate
-        rb = [];
-    end
+    numRateRows = max(arrayfun(@(d) d.NumRateRows, data));
 
-    out = pdvar(mkInit(grid, sz, deg, vals, hasDec, hasRate, rb, ...
-        "expression", all(arrayfun(@(d) d.IsContinuous, data))));
+    out = pdvar(mkCtorState(grid, sz, deg, vals, hasDec, rb, ...
+        "expression", all(arrayfun(@(d) d.IsContinuous, data)), "fast", ...
+        numRateRows));
     if ~isequal(size(out), sz)
         error("pdvar:InvalidConcatenation", ...
             "Internal pdvar concatenation size mismatch.");
@@ -49,15 +50,14 @@ function [data, outSize] = catData(dim, args, grid, rb)
         "Degree", [], ...
         "LocalValues", [], ...
         "ContainsDecision", [], ...
-        "HasRateDependence", [], ...
         "IsContinuous", [], ...
-        "HasRateRows", []), 1, numel(args));
+        "NumRateRows", []), 1, numel(args));
     sz = zeros(numel(args), 2);
     isScalar = false(1, numel(args));
 
     for k = 1:numel(args)
         val = args{k};
-        data(k) = asData(grid, val, [], rb, ...
+        data(k) = normOperand(grid, val, [], rb, ...
             "pdvar:InvalidConcatenation");
         sz(k, :) = data(k).MatrixSize;
         isScalar(k) = ~isa(val, "pdbase") && ...

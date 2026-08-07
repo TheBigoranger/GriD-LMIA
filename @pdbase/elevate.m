@@ -1,4 +1,4 @@
-function out = elevate(obj, degreeIncrement)
+function out = elevate(obj, degreeIncrement, validationMode)
     %ELEVATE Return the same object in an elevated Bernstein basis.
     %
     %   Syntax:
@@ -13,19 +13,30 @@ function out = elevate(obj, degreeIncrement)
     %   elevate preserves the represented polynomial, object metadata, YALMIP
     %   variables, physical cells, and rate-row order. The source object is
     %   unchanged. Function-only pdmat data has no coefficient evidence and is
-    %   rejected by the same validation used by elevVals.
+    %   rejected when no coefficient evidence is stored.
     %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 3}, Degree=1);
     %     B = A.elevate(1);
 
-    vals = obj.elevVals(degreeIncrement);
-
-    % pdbase owns these private-set properties, so updating a value-class copy
-    % preserves every subclass-specific property without reconstruction.
-    out = obj;
-    inc = helper.normalizeDegree(degreeIncrement, obj.npar(), ...
+    if nargin < 3
+        validationMode = "fast";
+    end
+    inc = helper.normDeg(degreeIncrement, obj.npar(), ...
         "pdbase:InvalidDegreeIncrement", "degreeIncrement");
+    if obj.SourceSummary == "function"
+        error("pdbase:MissingCoefficientEvidence", ...
+            "Degree elevation requires stored Bernstein coefficient evidence.");
+    end
+
+    data = struct("Degree", obj.Degree, ...
+        "LocalValues", {obj.LocalValues}, ...
+        "NumRateRows", obj.NumRateRows);
+    data = pdbase.elevData(data, obj.Degree + inc, ...
+        obj.GridInfo.Vectors, validationMode);
+
+    % Updating a value-class copy preserves subclass metadata and decisions.
+    out = obj;
     out.Degree = obj.Degree + inc;
-    out.LocalValues = vals;
+    out.LocalValues = data.LocalValues;
 end

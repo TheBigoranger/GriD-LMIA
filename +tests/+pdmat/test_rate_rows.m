@@ -3,7 +3,7 @@ function tests = test_rate_rows
     tests = functiontests(localfunctions);
 end
 
-function testRateBoundsMetadataEverySourceFamily(testCase)
+function testRatBouMetEveSou(testCase)
     % RateBounds alone is metadata for every existing public source family.
     rb = [-2 3];
     values = {
@@ -16,12 +16,11 @@ function testRateBoundsMetadataEverySourceFamily(testCase)
     for k = 1:numel(values)
         A = values{k};
         testCase.verifyEqual(A.RateBounds, rb);
-        testCase.verifyTrue(A.HasRateDependence);
         testCase.verifyEqual(size(A.coeffs(1), 1), 1);
     end
 end
 
-function testExplicitRowsAndContinuityScansEveryRow(testCase)
+function testExpRowAndConSca(testCase)
     % A mismatch confined to the second rate row must mark the object discontinuous.
     rb = [-1 2];
     aligned = pdmat([0 1], {{1, 3; 10, 14}}, ...
@@ -42,7 +41,7 @@ function testExplicitRowsAndContinuityScansEveryRow(testCase)
         AbsTol=1e-12);
 end
 
-function testInheritedRhodiffNumericStateAndRestrictions(testCase)
+function testInhRhoNumStaAnd(testCase)
     % pdmat differentiation remains numeric and clears exact function state.
     rb = [-2 3];
     A = pdmat([0 2], @(rho) rho.^2, Degree=2, RateBounds=rb);
@@ -54,10 +53,20 @@ function testInheritedRhodiffNumericStateAndRestrictions(testCase)
     testCase.verifyEqual(D.coeffs(1), {0, -8; 0, 12}, AbsTol=1e-10);
     testCase.verifyFalse(D.ContainsDecision);
     testCase.verifyFalse(D.IsContinuous);
-    testCase.verifyTrue(D.HasRateDependence);
     testCase.verifyEqual(D.RateBounds, rb);
     testCase.verifyEqual(D.SourceSummary, "derivative");
     testCase.verifyEmpty(D.FunctionHandle);
+
+    fixed = pdmat([0 2], {1, 5}, Degree=1, RateBounds=[3 3]);
+    fixedD = rhodiff(fixed);
+    testCase.verifyEqual(fixedD.coeffs(1), {6});
+    testCase.verifyEqual(fixedD.NumRateRows, 1);
+    fixedTbl = fixedD.bernTable();
+    testCase.verifyEqual(vertcat(fixedTbl.RateVertex{:}), 3);
+    testCase.verifyError(@() rhodiff(fixedD), "pdmat:InvalidDiff");
+    shifted = fixedD + 1;
+    testCase.verifyEqual(shifted.NumRateRows, 1);
+    testCase.verifyEqual(fixedD(1, 1).NumRateRows, 1);
 
     exactOnly = pdmat([0 1], @(rho) rho, RateBounds=rb);
     rows = pdmat([0 1], {{1, 2; 3, 4}}, ...
@@ -67,7 +76,7 @@ function testInheritedRhodiffNumericStateAndRestrictions(testCase)
     testCase.verifyError(@() rhodiff(rows), "pdmat:InvalidDiff");
 end
 
-function testAdditionSubtractionAndProductsPreserveRows(testCase)
+function testAddSubAndProPre(testCase)
     % Ordinary operands broadcast; products allow explicit rows on one side.
     R = rateScalar();
     A = pdmat([0 1], {2, 4}, Degree=1, RateBounds=[-1 2]);
@@ -80,7 +89,7 @@ function testAdditionSubtractionAndProductsPreserveRows(testCase)
     testCase.verifyError(@() R * R, "pdmat:InvalidMultiplication");
 end
 
-function testScalarMatrixProductsAllowOneRhodiffSide(testCase)
+function testScaMatProAllOne(testCase)
     % Scalar scaling should preserve one complete derivative rate-row table.
     rb = [-1 2];
     scalarData = pdmat([0 1], {1, 3}, Degree=1, RateBounds=rb);
@@ -114,7 +123,7 @@ function testScalarMatrixProductsAllowOneRhodiffSide(testCase)
         "pdmat:InvalidMultiplication");
 end
 
-function testGridBoundsAndZeroFastPathContracts(testCase)
+function testGriBouAndZerFas(testCase)
     % Explicit rows require exact grids and matching nonempty rate bounds.
     R = rateScalar();
     otherGrid = pdmat([0 0.5 1], {1, 2, 3}, ...
@@ -128,11 +137,10 @@ function testGridBoundsAndZeroFastPathContracts(testCase)
     Z = R - R;
     testCase.verifyEqual(Z.Degree, 0);
     testCase.verifyEqual(Z.coeffs(1), {0});
-    testCase.verifyFalse(Z.HasRateDependence);
     testCase.verifyEmpty(Z.RateBounds);
 end
 
-function testStructuralCompositionIndexingAndAssignment(testCase)
+function testStrComIndAndAss(testCase)
     % Leaf-touching operations must retain both rows and their metadata.
     leaf = {
         [1 2; 3 4], [5 6; 7 8]
@@ -171,11 +179,11 @@ function testStructuralCompositionIndexingAndAssignment(testCase)
     testCase.verifyEqual(rCoeff{2, 2}, [3 2; 70 80]);
 end
 
-function testElevationTableDisplayAndPlotRateVertex(testCase)
+function testEleTabDisAndPlo(testCase)
     % Inspection and plotting preserve deterministic rate-row order.
     R = rateScalar();
     elevated = R.elevate(1);
-    tbl = bernsteinTable(R);
+    tbl = bernTable(R);
     short = evalc("disp(R)");
     detail = evalc("display(R)");
 
@@ -201,10 +209,65 @@ function testElevationTableDisplayAndPlotRateVertex(testCase)
         "pdmat:InvalidRateVertex");
 end
 
+function testFixTenRatRowEle(testCase)
+    % A fixed tensor direction reduces the active rows before elevation.
+    [D, ~] = fixedTensorRateData();
+
+    E = D.elevate([1 0]);
+
+    testCase.verifyEqual(E.Degree, D.Degree + [1 0]);
+    testCase.verifyEqual(E.NumRateRows, 2);
+    testCase.verifyEqual(size(E.coeffs([1 1]), 1), 2);
+    testCase.verifyEqual(E.RateBounds, D.RateBounds);
+end
+
+function testFixTenRatRowPro(testCase)
+    % Product validation must use distinct rate vertices, not 2^npar rows.
+    [D, A] = fixedTensorRateData();
+
+    C = D * A;
+
+    testCase.verifyEqual(C.NumRateRows, 2);
+    testCase.verifyEqual(size(C.coeffs([1 1]), 1), 2);
+    testCase.verifyEqual(C.RateBounds, D.RateBounds);
+end
+
+function testFixOneRatRowDouPro(testCase)
+    % A fixed rate box still represents rate rows on both product sides.
+    source = pdmat([0 2], {1, 5}, Degree=1, RateBounds=[3 3]);
+    D = rhodiff(source);
+
+    testCase.verifyEqual(D.NumRateRows, 1);
+    testCase.verifyError(@() D * D, "pdmat:InvalidMultiplication");
+end
+
+function testFixRatRowPloBou(testCase)
+    % Plot selection rejects indices beyond the distinct stored vertices.
+    fixed = pdmat([0 2], {1, 5}, Degree=1, RateBounds=[3 3]);
+    fixedD = rhodiff(fixed);
+    [tensorD, ~] = fixedTensorRateData();
+
+    testCase.verifyError(@() plot(fixedD, RateVertex=2), ...
+        "pdmat:InvalidRateVertex");
+    testCase.verifyError(@() plot(tensorD, [1 2], RateVertex=3), ...
+        "pdmat:InvalidRateVertex");
+end
+
 function R = rateScalar()
     % A two-row scalar fixture with one physical cell.
     R = pdmat([0 1], {{1, 3; 10, 14}}, ...
         Degree=1, RateBounds=[-1 2]);
+end
+
+function [D, A] = fixedTensorRateData()
+    % Build two stored rate rows from one fixed and one varying direction.
+    grid = {[0 1], [10 12]};
+    rb = [1 1; -3 5];
+    source = pdmat(grid, @(rho, eta) rho + eta, ...
+        Degree=[1 1], RateBounds=rb);
+    D = rhodiff(source);
+    A = pdmat(grid, @(rho, eta) 1 + rho, ...
+        Degree=[1 0], RateBounds=rb);
 end
 
 function verifyRows(testCase, obj, expected)
@@ -216,7 +279,6 @@ end
 function verifyRateMeta(testCase, obj, sz)
     % Explicit rows remain rate-dependent and preserve their matrix shape.
     testCase.verifyEqual(size(obj), sz);
-    testCase.verifyTrue(obj.HasRateDependence);
     testCase.verifyEqual(obj.RateBounds, [-1 2]);
     testCase.verifyEqual(size(obj.coeffs(1), 1), 2);
 end

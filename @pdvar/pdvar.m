@@ -41,7 +41,11 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
                 deg = init.Degree;
                 vals = init.LocalValues;
                 hasDec = init.ContainsDecision;
-                hasRate = init.HasRateDependence;
+                if isfield(init, "NumRateRows")
+                    numRateRows = init.NumRateRows;
+                else
+                    numRateRows = 0;
+                end
                 rb = init.RateBounds;
                 summary = init.SourceSummary;
                 if isfield(init, "IsContinuous")
@@ -50,15 +54,16 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
                     isCont = true;
                 end
                 if isfield(init, "ValidationMode")
-                    validationMode = normalizeValidationMode( ...
-                        init.ValidationMode);
+                    validationMode = helper.normMode( ...
+                        init.ValidationMode, "pdvar");
                 else
                     validationMode = "fast";
                 end
             else
-                [grid, sz, deg, vals, hasRate, rb, validationMode] = ...
+                [grid, sz, deg, vals, rb, validationMode] = ...
                     ctorArgs(varargin{:});
                 hasDec = true;
+                numRateRows = 0;
                 summary = "decision";
                 isCont = true;
             end
@@ -66,7 +71,7 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
             obj@pdbase(grid, sz, deg, vals, ...
                 IsContinuous=isCont, ...
                 ContainsDecision=hasDec, ...
-                HasRateDependence=hasRate, ...
+                NumRateRows=numRateRows, ...
                 RateBounds=rb, ...
                 SourceSummary=summary, ...
                 ValidationMode=validationMode);
@@ -75,12 +80,12 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
 
     methods (Access = protected)
         out = mkUnOp(obj, vals, sz)
-        out = mkRhodiff(obj, deg, vals, rb, hasDec)
+        out = mkRhodiff(obj, deg, vals, rb, hasDec, numRateRows)
     end
 
 end
 
-function [grid, sz, deg, vals, hasRate, rb, validationMode] = ctorArgs(varargin)
+function [grid, sz, deg, vals, rb, validationMode] = ctorArgs(varargin)
     %CTORARGS Parse public inputs and allocate shared continuous coefficients.
     [sz, grid, info, typ, deg, rb, validationMode] = ...
         parseArgs(varargin{:});
@@ -103,7 +108,6 @@ function [grid, sz, deg, vals, hasRate, rb, validationMode] = ctorArgs(varargin)
         % makes continuity a shared-handle property rather than an equality LMI.
         vals = helper.mkNest(nCell, @(subs) cellVals(nodes, subs, lbls, deg));
     end
-    hasRate = ~isempty(rb);
 end
 
 function [sz, grid, info, typ, deg, rb, validationMode] = parseArgs(varargin)
@@ -149,7 +153,7 @@ function [sz, grid, info, typ, deg, rb, validationMode] = parseArgs(varargin)
     end
 
     sz = double(helper.chk(dims, "pdvar:InvalidMatrixSize", ...
-        "pdvar matrix dimensions must be positive integer scalars.", ...
+        "pdvar matrix dimensions", ...
         "numeric", "real", "finite", "integer", "positive", "Size", [1, 2]));
     if sz(1) == sz(2)
         typ = "symmetric";
@@ -199,9 +203,9 @@ function [sz, grid, info, typ, deg, rb, validationMode] = parseArgs(varargin)
                     error("pdvar:InvalidValidationMode", ...
                         "ValidationMode may be supplied only once.");
                 end
-                validationMode = normalizeValidationMode(val);
+                validationMode = helper.normMode(val, "pdvar");
                 seenValidation = true;
-            case {"IsContinuous", "ContainsDecision", "HasRateDependence"}
+            case {"IsContinuous", "ContainsDecision"}
                 error("pdvar:UnsupportedOption", ...
                     "%s is fixed internally for pdvar and is not a constructor option.", name);
             otherwise
@@ -217,25 +221,11 @@ function [sz, grid, info, typ, deg, rb, validationMode] = parseArgs(varargin)
     end
     info = helper.mkGrid(grid, "pdvar");
     scalarDegree = isnumeric(deg) && isscalar(deg);
-    deg = helper.normalizeDegree(deg, numel(info.Vectors), ...
+    deg = helper.normDeg(deg, numel(info.Vectors), ...
         "pdvar:InvalidDegree", "Degree");
     if degreeSpecified && scalarDegree && numel(info.Vectors) > 1
         warning("pdvar:ScalarDegreeExpansion", ...
             "Scalar Degree expands uniformly across all parameter directions.");
-    end
-end
-
-function mode = normalizeValidationMode(value)
-    %NORMALIZEVALIDATIONMODE Validate transient post-normalization checks.
-    if ~((ischar(value) && isrow(value) && ~isempty(value)) || ...
-            (isstring(value) && isscalar(value) && ~ismissing(value)))
-        error("pdvar:InvalidValidationMode", ...
-            "ValidationMode must be the scalar text 'fast' or 'strict'.");
-    end
-    mode = lower(string(value));
-    if ~any(mode == ["fast", "strict"])
-        error("pdvar:InvalidValidationMode", ...
-            "ValidationMode must be the scalar text 'fast' or 'strict'.");
     end
 end
 

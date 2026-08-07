@@ -7,12 +7,16 @@ function out = mean(obj, varargin)
     %     M = mean(A, vecdim)
     %     M = mean(A, "all")
     %
+    %   Output:
+    %     M - Same dynamic class with each coefficient replaced by the
+    %         requested matrix average.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {[1 2; 3 4], [2 4; 6 8]}, Degree=1);
     %     M = mean(A, [1 2]);
 
     if isempty(varargin)
-        out = unOp(obj, @(a) mean(a));
+        out = mapUnary(obj, @(a) mean(a));
         return
     end
 
@@ -25,27 +29,15 @@ function out = mean(obj, varargin)
     arg = varargin{1};
     if ischar(arg) || (isstring(arg) && isscalar(arg))
         if strcmpi(string(arg), "all")
-            out = unOp(obj, @(a) mean(a, "all"), [1 1]);
+            out = mapUnary(obj, @(a) mean(a, "all"), [1 1]);
             return
         end
         error(prefix + ":InvalidMean", ...
             "Mean dimension must be a unique positive integer vector or ""all"".");
     end
 
-    dims = parseDims(arg, prefix + ":InvalidMean", "Mean");
-    out = unOp(obj, @(a) reduce(a, dims));
-end
-
-function dims = parseDims(dims, errId, name)
-    %PARSEDIMS Normalize a nonempty unique positive-integer dimension vector.
-    dims = helper.chk(dims, errId, ...
-        name + " dimensions must be a nonempty unique positive integer vector.", ...
-        "numeric", "real", "vector", "nonempty", "finite", "integer", "positive");
-    dims = reshape(double(dims), 1, []);
-    if numel(unique(dims)) ~= numel(dims)
-        error(errId, ...
-            "%s dimensions must be a nonempty unique positive integer vector.", name);
-    end
+    dims = pdbase.normRedDims(arg, prefix + ":InvalidMean", "Mean");
+    out = mapUnary(obj, @(a) reduce(a, dims));
 end
 
 function val = reduce(val, dims)

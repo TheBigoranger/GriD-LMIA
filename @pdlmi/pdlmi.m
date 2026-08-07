@@ -96,12 +96,12 @@ classdef pdlmi
     %     P = pdvar(2, {[0 1]}, "symmetric");
     %     direct = pdlmi(P, "<=");
     %     polya1 = pdlmi(P, "<=", "UsePolya");
-    %     polya2 = direct.applyPolya(2);
+    %     polya2 = direct.usePolya(2);
     %     directPos = P >= 0;
-    %     putinar = directPos.applyPutinar(1);
-    %     sparsePutinar = directPos.applySparsePutinar(2, 2);
-    %     preorder = directPos.applyFullBoxPreorder();
-    %     sparse = directPos.applySparseFullBoxPreorder(2);
+    %     putinar = directPos.usePutinar(1);
+    %     sparsePutinar = directPos.useSpPut(2, 2);
+    %     preorder = directPos.useFullBox();
+    %     sparse = directPos.useSpBox(2);
     %     entrywise = pdvar(3, 2, {[0 1]}) >= 0;
     %     equality = P == eye(2);
 
@@ -150,7 +150,7 @@ classdef pdlmi
 
             nPar = expr.npar();
             opts = parseOpts(relation == "==", nPar, varargin{:});
-            comparisonMode = classifyComparison(expr, relation);
+            comparisonMode = cmpMode(expr, relation);
             obj.Residual = expr;
             obj.Relation = relation;
             obj.UsePolya = opts.UsePolya;
@@ -167,82 +167,84 @@ classdef pdlmi
             obj.BandWidth = 0;
             if opts.UseFullBoxPreorder
                 if opts.FullBoxOrderSpecified
-                    opts.FullBoxOrder = chkFullBoxOrder(expr, ...
+                    opts.FullBoxOrder = chkOrder(expr, "box", ...
                         opts.FullBoxOrder);
                 else
-                    opts.FullBoxOrder = chkFullBoxOrder(expr);
+                    opts.FullBoxOrder = chkOrder(expr, "box");
                 end
                 obj.FullBoxOrder = opts.FullBoxOrder;
-                obj.Constraints = mkFullBoxCons(expr, ...
-                    relation, opts.FullBoxOrder, comparisonMode, ...
-                    opts.ValidationMode);
+                [targetDeg, specs] = boxSpec(expr, opts.FullBoxOrder);
+                obj.Constraints = gramCons(expr, relation, targetDeg, ...
+                    specs, comparisonMode, opts.ValidationMode);
             elseif opts.UsePutinar
                 if opts.PutinarOrderSpecified
-                    opts.PutinarOrder = chkPutinarOrder(expr, ...
+                    opts.PutinarOrder = chkOrder(expr, "put", ...
                         opts.PutinarOrder);
                 else
-                    opts.PutinarOrder = chkPutinarOrder(expr);
+                    opts.PutinarOrder = chkOrder(expr, "put");
                 end
                 obj.PutinarOrder = opts.PutinarOrder;
-                obj.Constraints = mkPutinarCons(expr, relation, ...
-                    opts.PutinarOrder, comparisonMode, ...
-                    opts.ValidationMode);
+                [targetDeg, specs] = putSpec(expr, opts.PutinarOrder);
+                obj.Constraints = gramCons(expr, relation, targetDeg, ...
+                    specs, comparisonMode, opts.ValidationMode);
             elseif opts.UseSparsePutinar
                 if opts.SparsePutinarOrderSpecified
-                    order = chkSparsePutinarOrder(expr, ...
+                    order = chkOrder(expr, "spPut", ...
                         opts.SparsePutinarOrder);
                 else
-                    order = chkSparsePutinarOrder(expr);
+                    order = chkOrder(expr, "spPut");
                 end
-                cliqueSize = chkCliqueSize(opts.CliqueSize);
+                cliqueSize = chkClique(opts.CliqueSize);
 
                 % Size one has a family-specific lower endpoint; larger
                 % saturated windows recover the authoritative dense Putinar.
                 if cliqueSize == 1 && nPar == 1
-                    obj.Constraints = mkCoeffCons(expr, relation, ...
+                    obj.Constraints = coeffCons(expr, relation, ...
                         false, 0, comparisonMode, opts.ValidationMode);
                 elseif cliqueSize > 1 && all(cliqueSize >= order + 1)
                     obj.UsePutinar = true;
                     obj.PutinarOrder = order;
-                    obj.Constraints = mkPutinarCons(expr, relation, ...
-                        order, comparisonMode, opts.ValidationMode);
+                    [targetDeg, specs] = putSpec(expr, order);
+                    obj.Constraints = gramCons(expr, relation, targetDeg, ...
+                        specs, comparisonMode, opts.ValidationMode);
                 else
                     obj.UseSparsePutinar = true;
                     obj.SparsePutinarOrder = order;
                     obj.CliqueSize = cliqueSize;
-                    obj.Constraints = mkSparsePutinarCons(expr, relation, ...
-                        order, cliqueSize, comparisonMode, ...
-                        opts.ValidationMode);
+                    [targetDeg, specs] = putSpec(expr, order);
+                    obj.Constraints = gramCons(expr, relation, targetDeg, ...
+                        specs, comparisonMode, opts.ValidationMode, cliqueSize);
                 end
             elseif opts.UseSparseFullBoxPreorder
                 if opts.SparseFullBoxOrderSpecified
-                    order = chkSparseFullBoxOrder(expr, ...
+                    order = chkOrder(expr, "spBox", ...
                         opts.SparseFullBoxOrder);
                 else
-                    order = chkSparseFullBoxOrder(expr);
+                    order = chkOrder(expr, "spBox");
                 end
-                bandWidth = chkBandWidth(opts.BandWidth);
+                bandWidth = chkBand(opts.BandWidth);
 
                 % Canonical endpoints preserve the established public states
                 % and avoid auxiliary Gram variables when they add no freedom.
                 if bandWidth == 1
-                    obj.Constraints = mkCoeffCons(expr, relation, ...
+                    obj.Constraints = coeffCons(expr, relation, ...
                         false, 0, comparisonMode, opts.ValidationMode);
                 elseif all(bandWidth >= order + 1)
                     obj.UseFullBoxPreorder = true;
                     obj.FullBoxOrder = order;
-                    obj.Constraints = mkFullBoxCons(expr, relation, ...
-                        order, comparisonMode, opts.ValidationMode);
+                    [targetDeg, specs] = boxSpec(expr, order);
+                    obj.Constraints = gramCons(expr, relation, targetDeg, ...
+                        specs, comparisonMode, opts.ValidationMode);
                 else
                     obj.UseSparseFullBoxPreorder = true;
                     obj.SparseFullBoxOrder = order;
                     obj.BandWidth = bandWidth;
-                    obj.Constraints = mkSparseFullBoxCons(expr, relation, ...
-                        order, bandWidth, comparisonMode, ...
-                        opts.ValidationMode);
+                    [targetDeg, specs] = boxSpec(expr, order);
+                    obj.Constraints = gramCons(expr, relation, targetDeg, ...
+                        specs, comparisonMode, opts.ValidationMode, bandWidth);
                 end
             else
-                obj.Constraints = mkCoeffCons(expr, relation, ...
+                obj.Constraints = coeffCons(expr, relation, ...
                     opts.UsePolya, opts.PolyaDegree, comparisonMode, ...
                     opts.ValidationMode);
             end
@@ -252,15 +254,15 @@ classdef pdlmi
             end
         end
 
-        out = applyPolya(obj, varargin)
-        out = applyFullBoxPreorder(obj, varargin)
-        out = applyPutinar(obj, varargin)
-        out = applySparsePutinar(obj, varargin)
-        out = applySparseFullBoxPreorder(obj, varargin)
+        out = usePolya(obj, varargin)
+        out = useFullBox(obj, varargin)
+        out = usePutinar(obj, varargin)
+        out = useSpPut(obj, varargin)
+        out = useSpBox(obj, varargin)
     end
 end
 
-function mode = classifyComparison(expr, relation)
+function mode = cmpMode(expr, relation)
     %CLASSIFYCOMPARISON Select one global mode from original coefficients.
     %   Scan every cell, rate row, and coefficient; one fallback classifies the
     %   complete original residual as entry-wise.
@@ -399,7 +401,7 @@ function opts = parseOpts(isEquality, nPar, varargin)
                 end
                 opts.UsePolya = val;
             case "PolyaDegree"
-                opts.PolyaDegree = helper.normalizeDegree(val, nPar, ...
+                opts.PolyaDegree = helper.normDeg(val, nPar, ...
                     "pdlmi:InvalidPolyaDegree", "PolyaDegree");
             case "UseFullBoxPreorder"
                 if ~islogical(val) || ~isscalar(val)
@@ -408,7 +410,7 @@ function opts = parseOpts(isEquality, nPar, varargin)
                 end
                 opts.UseFullBoxPreorder = val;
             case "FullBoxOrder"
-                opts.FullBoxOrder = helper.normalizeDegree(val, nPar, ...
+                opts.FullBoxOrder = helper.normDeg(val, nPar, ...
                     "pdlmi:InvalidFullBoxOrder", "FullBoxOrder");
                 opts.FullBoxOrderSpecified = true;
             case "UsePutinar"
@@ -418,7 +420,7 @@ function opts = parseOpts(isEquality, nPar, varargin)
                 end
                 opts.UsePutinar = val;
             case "PutinarOrder"
-                opts.PutinarOrder = helper.normalizeDegree(val, nPar, ...
+                opts.PutinarOrder = helper.normDeg(val, nPar, ...
                     "pdlmi:InvalidPutinarOrder", "PutinarOrder");
                 opts.PutinarOrderSpecified = true;
             case "UseSparsePutinar"
@@ -428,12 +430,12 @@ function opts = parseOpts(isEquality, nPar, varargin)
                 end
                 opts.UseSparsePutinar = val;
             case "SparsePutinarOrder"
-                opts.SparsePutinarOrder = helper.normalizeDegree(val, nPar, ...
+                opts.SparsePutinarOrder = helper.normDeg(val, nPar, ...
                     "pdlmi:InvalidSparsePutinarOrder", ...
                     "SparsePutinarOrder");
                 opts.SparsePutinarOrderSpecified = true;
             case "CliqueSize"
-                opts.CliqueSize = chkCliqueSize(val);
+                opts.CliqueSize = chkClique(val);
             case "UseSparseFullBoxPreorder"
                 if ~islogical(val) || ~isscalar(val)
                     error("pdlmi:InvalidUseSparseFullBoxPreorder", ...
@@ -441,14 +443,14 @@ function opts = parseOpts(isEquality, nPar, varargin)
                 end
                 opts.UseSparseFullBoxPreorder = val;
             case "SparseFullBoxOrder"
-                opts.SparseFullBoxOrder = helper.normalizeDegree(val, nPar, ...
+                opts.SparseFullBoxOrder = helper.normDeg(val, nPar, ...
                     "pdlmi:InvalidSparseFullBoxOrder", ...
                     "SparseFullBoxOrder");
                 opts.SparseFullBoxOrderSpecified = true;
             case "BandWidth"
-                opts.BandWidth = chkBandWidth(val);
+                opts.BandWidth = chkBand(val);
             case "ValidationMode"
-                opts.ValidationMode = normalizeValidationMode(val);
+                opts.ValidationMode = helper.normMode(val, "pdlmi");
         end
         k = k + 2;
     end
@@ -504,19 +506,5 @@ function opts = parseOpts(isEquality, nPar, varargin)
             opts.UseSparseFullBoxPreorder]) > 1
         error("pdlmi:ConflictingRelaxations", ...
             "Pólya, Putinar, SparsePutinar, sparse full box, and full box preordering cannot be enabled together.");
-    end
-end
-
-function mode = normalizeValidationMode(value)
-    %NORMALIZEVALIDATIONMODE Validate transient assembly-plan checking.
-    if ~((ischar(value) && isrow(value) && ~isempty(value)) || ...
-            (isstring(value) && isscalar(value) && ~ismissing(value)))
-        error("pdlmi:InvalidValidationMode", ...
-            "ValidationMode must be the scalar text 'fast' or 'strict'.");
-    end
-    mode = lower(string(value));
-    if ~any(mode == ["fast", "strict"])
-        error("pdlmi:InvalidValidationMode", ...
-            "ValidationMode must be the scalar text 'fast' or 'strict'.");
     end
 end

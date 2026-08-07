@@ -1,6 +1,20 @@
 function rb = pickRateBounds(obj, errId, varargin)
     %PICKRATEBOUNDS Reconcile rate metadata for one gridded operation.
     %
+    %   Syntax:
+    %     rb = obj.pickRateBounds(errId, other1, other2, ...)
+    %
+    %   Arguments:
+    %     errId - Error identifier owned by the public operation.
+    %     other - Optional peer operands participating in the operation.
+    %
+    %   Output:
+    %     rb - Empty when no operand needs rate bounds, or the unique
+    %          nonempty RateBounds shared by all rate-aware operands.
+    %
+    %   Example:
+    %     rb = obj.pickRateBounds("pdvar:IncompatibleOperands", rhs);
+    %
     %   Empty metadata inherits a peer's bounds. Distinct nonempty bounds are
     %   rejected, and explicit rate-row data always requires selected bounds.
 
@@ -12,7 +26,7 @@ function rb = pickRateBounds(obj, errId, varargin)
         if ~isa(val, "pdbase")
             continue
         end
-        needRb = needRb || val.hasRateRows();
+        needRb = needRb || val.NumRateRows ~= 0;
         if isempty(val.RateBounds)
             continue
         end

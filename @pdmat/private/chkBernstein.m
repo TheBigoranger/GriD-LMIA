@@ -19,7 +19,8 @@ function vals = chkBernstein(fh, info, deg, sz)
 
     nPar = numel(info.Vectors);
     nCell = info.NumNodes - 1;
-    [vals, lbls] = fitVals(info, deg, sz, @(pt) evalFcn(fh, pt, sz));
+    [vals, lbls] = helper.fitVals(info, deg, sz, ...
+        @(pt) evalFcn(fh, pt, sz), "pdmat");
     nCoeff = size(lbls, 1);
 
     symOk = false;
@@ -30,17 +31,13 @@ function vals = chkBernstein(fh, info, deg, sz)
             raw = fh(args{:});
             if isequal(size(raw), sz)
                 raw = sym(raw);
-                for r = 1:sz(1)
-                    for c = 1:sz(2)
-                        entry = raw(r, c);
-                        for p = 1:nPar
-                            high = simplify(diff(entry, xs(p), deg(p) + 1));
-                            tf = isAlways(high == 0);
-                            if isempty(tf) || ~all(tf(:))
-                                error("pdmat:NonBernsteinPolynomial", ...
-                                    "Function handle is not representable by the requested Bernstein degree.");
-                            end
-                        end
+                % Symbolic differentiation and truth checks preserve matrix shape.
+                for p = 1:nPar
+                    high = simplify(diff(raw, xs(p), deg(p) + 1));
+                    tf = isAlways(high == 0);
+                    if isempty(tf) || ~all(tf(:))
+                        error("pdmat:NonBernsteinPolynomial", ...
+                            "Function handle is not representable by the requested Bernstein degree.");
                     end
                 end
                 symOk = true;
@@ -58,18 +55,22 @@ function vals = chkBernstein(fh, info, deg, sz)
 
     % Probe away from interpolation nodes so accidental fits are rejected.
     mid = 0.5 * ones(1, nPar);
-    probes = mid;
-    probes(end + 1, :) = (1 / 3) * ones(1, nPar);
-    probes(end + 1, :) = (2 / 3) * ones(1, nPar);
+    probes = repmat(mid, 3 + 2 * nPar, 1);
+    probes(2, :) = 1 / 3;
+    probes(3, :) = 2 / 3;
     for q = 1:nPar
-        lo = mid;
-        lo(q) = 1 / 3;
-        hi = mid;
-        hi(q) = 2 / 3;
-        probes(end + 1, :) = lo;
-        probes(end + 1, :) = hi;
+        probes(2 * q + 2, q) = 1 / 3;
+        probes(2 * q + 3, q) = 2 / 3;
     end
     probes = unique(probes, "rows", "stable");
+
+    % Probe weights depend on local coordinates and degree, not physical cells.
+    probeWeights = ones(size(probes, 1), size(lbls, 1));
+    for q = 1:nPar
+        labels = lbls(:, q).';
+        axisWeights = probeWeightsAt(deg(q), probes(:, q));
+        probeWeights = probeWeights .* axisWeights(:, labels + 1);
+    end
 
     cells = helper.combRows(arrayfun(@(n) 1:n, nCell, "UniformOutput", false));
     for cellIdx = 1:size(cells, 1)
@@ -90,14 +91,7 @@ function vals = chkBernstein(fh, info, deg, sz)
             % Reconstruct with the fitted Bernstein coefficients at the probe.
             recon = zeros(sz);
             for k = 1:nCoeff
-                w = 1;
-                for q = 1:nPar
-                    j = lbls(k, q);
-                    oneDeg = deg(q);
-                    w = w * nchoosek(oneDeg, j) * ...
-                        (1 - alpha(q))^(oneDeg - j) * alpha(q)^j;
-                end
-                recon = recon + coeffs{k} .* w;
+                recon = recon + coeffs{k} .* probeWeights(p, k);
             end
 
             tol = 1e-9 * max([1, norm(actual, "fro"), norm(recon, "fro")]);
@@ -106,6 +100,34 @@ function vals = chkBernstein(fh, info, deg, sz)
                     "Function handle is not representable by the requested Bernstein degree.");
             end
         end
+    end
+end
+
+function weights = probeWeightsAt(degree, alpha)
+    %PROBEWEIGHTSAT Evaluate one Bernstein basis through modal recurrences.
+    weights = zeros(numel(alpha), degree + 1);
+    for row = 1:numel(alpha)
+        point = alpha(row);
+        if point == 0
+            weights(row, 1) = 1;
+            continue
+        elseif point == 1
+            weights(row, end) = 1;
+            continue
+        end
+
+        mode = min(degree, floor((degree + 1) * point));
+        values = zeros(1, degree + 1);
+        values(mode + 1) = 1;
+        for label = mode:-1:1
+            values(label) = values(label + 1) * label ...
+                * (1 - point) / ((degree - label + 1) * point);
+        end
+        for label = mode:degree - 1
+            values(label + 2) = values(label + 1) * (degree - label) ...
+                * point / ((label + 1) * (1 - point));
+        end
+        weights(row, :) = values ./ sum(values);
     end
 end
 

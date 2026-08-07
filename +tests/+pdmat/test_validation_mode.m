@@ -3,7 +3,7 @@ function tests = test_validation_mode
     tests = functiontests(localfunctions);
 end
 
-function testModesPreserveValidKnownData(testCase)
+function testModPreValKnoDat(testCase)
     % Mode selection is transient and leaves the represented data unchanged.
     grid = [0 1 2];
     vals = {{1, 2}, {2, 3}};
@@ -17,7 +17,7 @@ function testModesPreserveValidKnownData(testCase)
     testCase.verifyFalse(isprop(implicit, "ValidationMode"));
 end
 
-function testFastStillValidatesEveryPublicSourceCell(testCase)
+function testFasStiValEvePub(testCase)
     % Source normalization must reject malformed later cells in both modes.
     grid = [0 1 2];
     badPayload = {{1, 2}, {3, "bad"}};
@@ -30,7 +30,7 @@ function testFastStillValidatesEveryPublicSourceCell(testCase)
     end
 end
 
-function testInvalidModesUseOwnerIdentifier(testCase)
+function testInvModUseOwnIde(testCase)
     % pdmat owns all ValidationMode diagnostics at its public boundary.
     make = @(mode) pdmat([0 1], {1}, Degree=0, ...
         ValidationMode=mode);
@@ -43,12 +43,12 @@ function testInvalidModesUseOwnerIdentifier(testCase)
         "ValidationMode"), "pdmat:InvalidValidationMode");
 end
 
-function testContinuityIsRecomputedWhenAlgebraCanRemoveJump(testCase)
+function testConIsRecWheAlg(testCase)
     % Slicing away the only discontinuous entry restores exact continuity.
     vals = { ...
         {[1 0; 0 0], [1 0; 0 0]}, ...
         {[1 0; 1 0], [1 0; 1 0]}};
-    A = suppressDiscontinuityWarning(@() pdmat([0 1 2], vals, Degree=1));
+    A = suppDisWar(@() pdmat([0 1 2], vals, Degree=1));
     slice = A(1, :);
     cancelled = A - A;
 
@@ -57,7 +57,7 @@ function testContinuityIsRecomputedWhenAlgebraCanRemoveJump(testCase)
     testCase.verifyTrue(cancelled.IsContinuous);
 end
 
-function out = suppressDiscontinuityWarning(fun)
+function out = suppDisWar(fun)
     % Build the intended discontinuous fixture without polluting test output.
     id = "pdmat:DiscontinuousLocalValues";
     state = warning("query", id);

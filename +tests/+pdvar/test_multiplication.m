@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testPdmatPdvarProducts(testCase)
+function testPdmPdvPro(testCase)
     % Known coefficient data may multiply a pdvar on either side.
     P = pdvar(1, {[0 1]});
     A = pdmat({[0 1]}, {10, 20}, Degree=1);
@@ -24,7 +24,7 @@ function testPdmatPdvarProducts(testCase)
     verifyCoeffExpr(testCase, R.coeffs(1), exp);
 end
 
-function testNumericScalarAndMatrixProducts(testCase)
+function testNumScaAndMatPro(testCase)
     % Numeric products should preserve affine YALMIP structure.
     P = pdvar(2, 1, {[0 1]}, "full");
     cp = P.coeffs(1);
@@ -41,7 +41,7 @@ function testNumericScalarAndMatrixProducts(testCase)
     verifyCoeffExpr(testCase, R.coeffs(1), {cp{1} * [4 5], cp{2} * [4 5]});
 end
 
-function testConstructorDegreeTwoTimesKnownDegreeOne(testCase)
+function testConDegTwoTimKno(testCase)
     % Known multiplication keeps arbitrary-degree decisions affine.
     P = pdvar(1, {[0 1]}, Degree=2);
     A = pdmat({[0 1]}, {2, 5}, Degree=1);
@@ -60,7 +60,7 @@ function testConstructorDegreeTwoTimesKnownDegreeOne(testCase)
         "pdvar:InvalidMultiplication");
 end
 
-function testScalarPdvarScalesKnownMatrices(testCase)
+function testScaPdvScaKnoMat(testCase)
     % A scalar pdvar should scale numeric and pdmat matrices in either order.
     G = pdvar(1, [0 1], Degree=0);
     cg = G.coeffs(1);
@@ -87,7 +87,7 @@ function testScalarPdvarScalesKnownMatrices(testCase)
         {eye(2) * cg{1}, 2 * eye(2) * cg{1}});
 end
 
-function testAnisotropicKnownDecisionProducts(testCase)
+function testAniKnoDecPro(testCase)
     % Unequal direction-wise degrees add while both operand orders stay affine.
     grid = {[0 1], [10 20]};
     P = pdvar(1, grid, Degree=[1 2]);
@@ -121,7 +121,7 @@ function testAnisotropicKnownDecisionProducts(testCase)
         AbsTol=1e-10);
 end
 
-function testScalarPdmatScalesDecisionMatrices(testCase)
+function testScaPdmScaDecMat(testCase)
     % A scalar pdmat should scale matrix-valued decisions on either side.
     S = pdmat([0 1], {2, 4}, Degree=1);
     P = pdvar(2, 2, [0 1], "full");
@@ -143,7 +143,7 @@ function testScalarPdmatScalesDecisionMatrices(testCase)
     verifyCoeffExpr(testCase, knownRight.coeffs(1), expected);
 end
 
-function testDerivativeProductsPreserveRateRows(testCase)
+function testDerProPreRatRow(testCase)
     % Known-data products should preserve one output row per rate vertex.
     P = pdvar(1, {[0 1]});
     D = rhodiff(P, [-1 2]);
@@ -156,7 +156,6 @@ function testDerivativeProductsPreserveRateRows(testCase)
     T = D * 4;
 
     testCase.verifyEqual(L.Degree, 1);
-    testCase.verifyTrue(L.HasRateDependence);
     testCase.verifyEqual(L.RateBounds, [-1 2]);
     verifyCoeffExpr(testCase, L.coeffs(1), {
         10 * cd{1, 1}, 20 * cd{1, 1}
@@ -170,7 +169,7 @@ function testDerivativeProductsPreserveRateRows(testCase)
     verifyCoeffExpr(testCase, T.coeffs(1), {cd{1, 1} * 4; cd{2, 1} * 4});
 end
 
-function testExplicitPdmatRateRowsMultiplyOrdinaryDecision(testCase)
+function testExpPdmRatRowMul(testCase)
     % One known rate-row factor is affine-safe on either side of pdvar.
     rb = [-1 2];
     P = pdvar(1, [0 1]);
@@ -193,7 +192,7 @@ function testExplicitPdmatRateRowsMultiplyOrdinaryDecision(testCase)
     verifyCoeffExpr(testCase, U.coeffs(1), expected);
 end
 
-function testDerivativeNumericMatrixProducts(testCase)
+function testDerNumMatPro(testCase)
     % Numeric matrices may multiply a rate-row vector on either side.
     V = pdvar(2, 1, {[0 1]}, "full");
     D = rhodiff(V, [-1 1]);
@@ -208,7 +207,7 @@ function testDerivativeNumericMatrixProducts(testCase)
     verifyCoeffExpr(testCase, R.coeffs(1), {cd{1, 1} * [4 5]; cd{2, 1} * [4 5]});
 end
 
-function testScalarMixedProductsAllowOneRhodiffSide(testCase)
+function testScaMixProAllOne(testCase)
     % Every scalar/matrix placement should preserve one derivative row table.
     rb = [-1 2];
     scalarData = pdmat([0 1], {1, 3}, Degree=1, RateBounds=rb);
@@ -276,7 +275,7 @@ function testScalarMixedProductsAllowOneRhodiffSide(testCase)
         "pdvar:InvalidMultiplication");
 end
 
-function testZeroProductsClearMetadataAndAvoidQuadraticGuard(testCase)
+function testZerProCleMetAnd(testCase)
     % Zero products should not carry decision/rate metadata or form BMIs.
     P = pdvar(2, 1, {[0 1]}, "full");
     D = rhodiff(P, [-1 1]);
@@ -306,7 +305,21 @@ function testZeroProductsClearMetadataAndAvoidQuadraticGuard(testCase)
     testCase.verifyError(@() complex(0, 1) * Z, "pdvar:InvalidMultiplication");
 end
 
-function testMixedScalarGridUsesCommonRefinement(testCase)
+function testRatRowZerProNor(testCase)
+    % Zero derivative products validate both rate-aware operand orders.
+    P = pdvar(1, {[0 1]}, Degree=1);
+    D = rhodiff(P, [-1 1]);
+    Z = D - D;
+    A = pdmat([0 1], {2, 3}, Degree=1);
+
+    left = Z * A;
+    right = A * Z;
+
+    verifyZeroPdvar(testCase, left, [1 1]);
+    verifyZeroPdvar(testCase, right, [1 1]);
+end
+
+function testMixScaGriUseCom(testCase)
     % Products on same-bound mixed grids are recomputed cell-locally.
     P = pdvar(1, {[0 1]});
     A = pdmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
@@ -327,7 +340,7 @@ function testMixedScalarGridUsesCommonRefinement(testCase)
         cp{2} * 30});
 end
 
-function testComposedKnownDecisionExpression(testCase)
+function testComKnoDecExp(testCase)
     % Chained affine products should preserve degree growth and coefficients.
     P = pdvar(1, {[0 1]});
     A = pdmat({[0 1]}, {10, 20}, Degree=1);
@@ -349,7 +362,7 @@ function testComposedKnownDecisionExpression(testCase)
         s2 * 5 - 10});
 end
 
-function testRejectsUnsupportedProducts(testCase)
+function testRejUnsPro(testCase)
     % Products that leave the affine SDP layer should fail clearly.
     P = pdvar(1, {[0 1]});
     Q = pdvar(1, {[0 1]});
@@ -374,7 +387,7 @@ function testRejectsUnsupportedProducts(testCase)
     testCase.verifyError(@() B * R, "pdvar:InvalidMultiplication");
 end
 
-function testRejectsUnsupportedDerivativeProducts(testCase)
+function testRejUnsDerPro(testCase)
     % Rate-row products require a matching-grid known-data partner.
     P = pdvar(1, {[0 1]});
     D = rhodiff(P, [-1 1]);
@@ -411,7 +424,6 @@ function verifyRateProduct(testCase, obj, expected)
     testCase.verifyClass(obj, "pdvar");
     testCase.verifyEqual(size(obj), [2 2]);
     testCase.verifyEqual(obj.Degree, 1);
-    testCase.verifyTrue(obj.HasRateDependence);
     testCase.verifyEqual(obj.RateBounds, [-1 2]);
     testCase.verifyEqual(size(obj.coeffs(1)), [2 2]);
     verifyCoeffExpr(testCase, obj.coeffs(1), expected);
@@ -422,7 +434,6 @@ function verifyZeroPdvar(testCase, obj, sz)
     testCase.verifyEqual(size(obj), sz);
     testCase.verifyEqual(obj.Degree, zeros(1, obj.npar()));
     testCase.verifyFalse(obj.ContainsDecision);
-    testCase.verifyFalse(obj.HasRateDependence);
     testCase.verifyEmpty(obj.RateBounds);
     coeffs = obj.coeffs(ones(1, obj.npar()));
     testCase.verifyEqual(numel(coeffs), 1);

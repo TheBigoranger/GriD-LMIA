@@ -3,7 +3,7 @@ function tests = test_matrix_ops
     tests = functiontests(localfunctions);
 end
 
-function testAllUnaryMatrixMapsTraverseRateRowsAndCoefficients(testCase)
+function testAllUnaMatMapTra(testCase)
     % Every unary family must preserve rate-row and Bernstein order.
     vals = {
         [1 2 3; 4 5 6], [11 12 13; 14 15 16]; ...
@@ -24,7 +24,7 @@ function testAllUnaryMatrixMapsTraverseRateRowsAndCoefficients(testCase)
     verifyMapped(testCase, obj, vec(obj), @(a) a(:), [6 1]);
 end
 
-function testLegacyAffineStructMapsConstantAndRateTerms(testCase)
+function testLegAffStrMapCon(testCase)
     % Legacy affine payloads retain their fields and parameter-rate order.
     first = struct( ...
         Constant=[1 2 3; 4 5 6], ...
@@ -48,7 +48,7 @@ function testLegacyAffineStructMapsConstantAndRateTerms(testCase)
     verifyMetadata(testCase, obj, actual);
 end
 
-function testSumAndMeanVectorDimensionsAndValidation(testCase)
+function testSumAndMeaVecDim(testCase)
     % Vecdim reductions map each rate row and reject malformed dimensions.
     vals = {
         [1 2 3; 4 5 6], [10 20 30; 40 50 60]; ...
@@ -65,9 +65,10 @@ function testSumAndMeanVectorDimensionsAndValidation(testCase)
     testCase.verifyError(@() sum(obj, []), "pdbase:InvalidSum");
     testCase.verifyError(@() mean(obj, [2 2]), "pdbase:InvalidMean");
     testCase.verifyError(@() mean(obj, 0), "pdbase:InvalidMean");
+    testCase.verifyError(@() mean(obj, "rows"), "pdbase:InvalidMean");
 end
 
-function testCumsumReverseAndHigherDimensionNoOp(testCase)
+function testCumRevAndHigDim(testCase)
     % Reverse accumulation is coefficient-local; dim > 2 is a matrix no-op.
     vals = {
         [1 2 3; 4 5 6], [10 20 30; 40 50 60]; ...
@@ -78,20 +79,26 @@ function testCumsumReverseAndHigherDimensionNoOp(testCase)
     reversed = cumsum(obj, 2, "reverse");
     defaultReverse = cumsum(obj, "reverse");
     higherDim = cumsum(obj, 4, "reverse");
+    defaultForward = cumsum(obj);
+    scalarReverse = cumsum(pdbase({[0 1]}, [1 1], 0), "reverse");
     verifyMapped(testCase, obj, reversed, ...
         @(a) flip(cumsum(flip(a, 2), 2), 2), [2 3]);
     verifyMapped(testCase, obj, defaultReverse, ...
         @(a) flip(cumsum(flip(a, 1), 1), 1), [2 3]);
     verifyMapped(testCase, obj, higherDim, @(a) a, [2 3]);
+    verifyMapped(testCase, obj, defaultForward, @cumsum, [2 3]);
+    testCase.verifyEqual(scalarReverse.coeffs(1), {0});
 
     testCase.verifyError(@() cumsum(obj, 0), "pdbase:InvalidCumsum");
     testCase.verifyError(@() cumsum(obj, 1, "backward"), ...
         "pdbase:InvalidCumsum");
     testCase.verifyError(@() cumsum(obj, 1, "reverse", "omitmissing"), ...
         "pdbase:InvalidCumsum");
+    testCase.verifyError(@() cumsum(obj, 1, struct()), ...
+        "pdbase:InvalidCumsum");
 end
 
-function testReshapeAndRepmatMapPayloadsAndRejectNDForms(testCase)
+function testResAndRepMapPay(testCase)
     % Valid 2-D transforms preserve order; N-D requests remain unsupported.
     vals = {
         [1 2 3; 4 5 6], [10 20 30; 40 50 60]; ...
@@ -101,12 +108,20 @@ function testReshapeAndRepmatMapPayloadsAndRejectNDForms(testCase)
 
     reshaped = reshape(obj, 3, []);
     repeated = repmat(obj, [2 1]);
+    repeatedScalar = repmat(obj, 2);
+    flippedDefault = flip(obj);
     verifyMapped(testCase, obj, reshaped, @(a) reshape(a, 3, 2), [3 2]);
     verifyMapped(testCase, obj, repeated, @(a) repmat(a, 2, 1), [4 3]);
+    verifyMapped(testCase, obj, repeatedScalar, @(a) repmat(a, 2), [4 6]);
+    verifyMapped(testCase, obj, flippedDefault, @flip, [2 3]);
 
     testCase.verifyError(@() reshape(obj, 1, 2, 3), ...
         "pdbase:InvalidReshape");
     testCase.verifyError(@() reshape(obj, [1 2 3]), ...
+        "pdbase:InvalidReshape");
+    testCase.verifyError(@() reshape(obj, [], []), ...
+        "pdbase:InvalidReshape");
+    testCase.verifyError(@() reshape(obj, 4, []), ...
         "pdbase:InvalidReshape");
     testCase.verifyError(@() repmat(obj, 1, 1, 1), ...
         "pdbase:InvalidRepmat");
@@ -114,7 +129,29 @@ function testReshapeAndRepmatMapPayloadsAndRejectNDForms(testCase)
         "pdbase:InvalidRepmat");
 end
 
-function testDiagMapsEveryPayloadAndRejectsEmptyDiagonal(testCase)
+function testIndEndLogAndGriDim(testCase)
+    % MATLAB end contexts and logical shapes reach the shared index guards.
+    A = pdmat({[0 1]}, {reshape(1:6, 2, 3), zeros(2, 3)}, Degree=1);
+    B = pdmat({[0 1], [10 20]}, @(x, y) x + 0 * y, Degree=[1 1]);
+
+    testCase.verifyError(@() linearEnd(A), "pdmat:InvalidSubscript");
+    testCase.verifyError(@() higherEnd(A), "pdmat:InvalidSubscript");
+    testCase.verifyError(@() A([true false; false true], :), ...
+        "pdmat:InvalidSubscript");
+    testCase.verifyError(@() A + B, "pdmat:MixedGrid");
+end
+
+function linearEnd(A)
+    % One-subscript syntax evaluates end before pdmat rejects linear indexing.
+    A(end);
+end
+
+function higherEnd(A)
+    % A trailing subscript evaluates the singleton higher-dimensional end.
+    A(1, 1, end);
+end
+
+function testDiaMapEvePayAnd(testCase)
     % Matrix diagonals map directly, while empty results are unrepresentable.
     vals = {
         [1 2 3; 4 5 6], [10 20 30; 40 50 60]; ...
@@ -130,7 +167,7 @@ function testDiagMapsEveryPayloadAndRejectsEmptyDiagonal(testCase)
     testCase.verifyError(@() diag(obj, 0.5), "pdbase:InvalidDiag");
 end
 
-function testTraceVectorIsScalarAndReductionFlagsAreRejected(testCase)
+function testTraVecIsScaAnd(testCase)
     % Shared trace is scalar for vectors; unsupported reduction flags fail.
     obj = pdbase({[0 1]}, [1 3], 1, {{[1 2 3], [4 5 6]}});
 
@@ -173,7 +210,6 @@ function verifyMetadata(testCase, source, actual)
     testCase.verifyEqual(actual.Degree, source.Degree);
     testCase.verifyEqual(actual.IsContinuous, source.IsContinuous);
     testCase.verifyEqual(actual.ContainsDecision, source.ContainsDecision);
-    testCase.verifyEqual(actual.HasRateDependence, source.HasRateDependence);
     testCase.verifyEqual(actual.RateBounds, source.RateBounds);
     testCase.verifyEqual(actual.SourceSummary, source.SourceSummary);
 end

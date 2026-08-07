@@ -6,6 +6,10 @@ function out = plus(lhs, rhs)
     %     C = P + M
     %     C = M + P
     %
+    %   Output:
+    %     C - pdvar affine expression after grid, degree, and rate-row
+    %         alignment.
+    %
     %   Example:
     %     P = pdvar(2, {[0 1]});
     %     C = P + eye(2);
@@ -29,7 +33,7 @@ function out = plus(lhs, rhs)
 
     % The identity fast path must still enforce ordinary addition compatibility.
     if ~isempty(zeroVal)
-        if zeroVal.HasRateDependence || out.HasRateDependence
+        if ~isempty(zeroVal.RateBounds) || ~isempty(out.RateBounds)
             zeroVal = [];
         end
     end
@@ -50,5 +54,5 @@ function out = plus(lhs, rhs)
         return
     end
 
-    out = binOp(lhs, rhs, @(a, b) a + b, "pdvar:InvalidAddition");
+    out = affineBinOp(lhs, rhs, @(a, b) a + b, "pdvar:InvalidAddition");
 end

@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testPlusMinusAndUnary(testCase)
+function testPluMinAndUna(testCase)
     % Binary and unary operations should act coefficient-wise.
     P = pdvar(1, {[0 1]});
     Q = pdvar(1, {[0 1]});
@@ -37,7 +37,7 @@ function testNumericPromotion(testCase)
     verifyCoeffExpr(testCase, D.coeffs(1), {eye(2) - cp{1}, eye(2) - cp{2}});
 end
 
-function testAdditionZeroFastPathsRetainCompatibilityChecks(testCase)
+function testAddZerFasPatRet(testCase)
     % Zero pdvar/pdmat/numeric operands preserve identity without skipping checks.
     P = pdvar(1, {[0 1]});
     Z = P - P;
@@ -55,9 +55,13 @@ function testAdditionZeroFastPathsRetainCompatibilityChecks(testCase)
 
     otherGridZero = pdmat({[0 2]}, {0}, Degree=0);
     testCase.verifyError(@() P + otherGridZero, "pdvar:MixedGrid");
+
+    matrixZeroForMinus = pdmat({[0 1]}, {zeros(2)}, Degree=0);
+    testCase.verifyError(@() P - matrixZeroForMinus, ...
+        "pdvar:InvalidSubtraction");
 end
 
-function testRateRowZeroAdditionRetainsRows(testCase)
+function testRatRowZerAddRet(testCase)
     % A known zero rate table cannot take the metadata-free identity shortcut.
     rb = [-1 2];
     P = pdvar(1, [0 1]);
@@ -66,7 +70,6 @@ function testRateRowZeroAdditionRetainsRows(testCase)
 
     S = P + Z;
 
-    testCase.verifyTrue(S.HasRateDependence);
     testCase.verifyEqual(S.RateBounds, rb);
     verifyCoeffExpr(testCase, S.coeffs(1), {
         cp{1}, cp{2}
@@ -96,7 +99,7 @@ function testPdmatPromotion(testCase)
     verifyCoeffExpr(testCase, C.coeffs(1), {cp{1} + 10, cp{2} + 20});
 end
 
-function testConstructorHighDegreeAlignment(testCase)
+function testConHigDegAli(testCase)
     % Arbitrary-degree constructor values participate in exact elevation.
     P = pdvar(1, {[0 1]}, Degree=2);
     Q = pdvar(1, {[0 1]}, Degree=3);
@@ -117,7 +120,7 @@ function testConstructorHighDegreeAlignment(testCase)
         cp{3} - cq{4}});
 end
 
-function testDerivativeAffineOperandOrders(testCase)
+function testDerAffOpeOrd(testCase)
     % Rate rows should work on either side of supported affine operands.
     P = pdvar(1, {[0 1]});
     Q = pdvar(1, {[0 1]});
@@ -135,7 +138,6 @@ function testDerivativeAffineOperandOrders(testCase)
     K = A - D;
 
     testCase.verifyEqual(L.Degree, 1);
-    testCase.verifyTrue(L.HasRateDependence);
     testCase.verifyEqual(L.RateBounds, [-1 2]);
     verifyCoeffExpr(testCase, L.coeffs(1), {
         cd{1, 1} + cq{1}, cd{1, 1} + cq{2}
@@ -154,7 +156,7 @@ function testDerivativeAffineOperandOrders(testCase)
     });
 end
 
-function testMixedScalarGridUsesCommonRefinement(testCase)
+function testMixScaGriUseCom(testCase)
     % Same-bound mixed scalar grids should align on a common refinement.
     P = pdvar(1, {[0 1]});
     Q = pdvar(1, {[0 0.5 1]});
@@ -174,7 +176,7 @@ function testMixedScalarGridUsesCommonRefinement(testCase)
         cp{2} + cq2{2}});
 end
 
-function testAnisotropicPdvarAlignmentAndZeroAxisPromotion(testCase)
+function testAniPdvAliAndZer(testCase)
     % Affine sums align unequal degrees by componentwise maximum.
     grid = {[0 1], [10 20]};
     P = pdvar(1, grid, Degree=[1 3]);
@@ -204,7 +206,7 @@ function testAnisotropicPdvarAlignmentAndZeroAxisPromotion(testCase)
         cellfun(@(x) 2 - x, Z.coeffs([1 1]), UniformOutput=false));
 end
 
-function testExplicitPdmatRateRowsDispatchAndPreservation(testCase)
+function testExpPdmRatRowDis(testCase)
     % A known rate-row table should broadcast an ordinary decision on either side.
     rb = [-1 2];
     P = pdvar(1, [0 1], RateBounds=rb);
@@ -217,7 +219,6 @@ function testExplicitPdmatRateRowsDispatchAndPreservation(testCase)
 
     testCase.verifyClass(S, "pdvar");
     testCase.verifyClass(D, "pdvar");
-    testCase.verifyTrue(S.HasRateDependence);
     testCase.verifyEqual(S.RateBounds, rb);
     testCase.verifyEqual(size(S.coeffs(1)), [2 2]);
     verifyCoeffExpr(testCase, S.coeffs(1), {
@@ -234,7 +235,7 @@ function testExplicitPdmatRateRowsDispatchAndPreservation(testCase)
     testCase.verifyError(@() P + mismatch, "pdvar:InvalidAddition");
 end
 
-function testNonuniformQuadraticRefinementUsesForwardAlpha(testCase)
+function testNonQuaRefUseFor(testCase)
     % Restrict a coarse quadratic at alpha=5/12 onto two unequal cells.
     P = pdvar(1, {[-2 4]}, Degree=2);
     Q = pdvar(1, {[-2 0.5 4]}, Degree=2);
@@ -257,7 +258,7 @@ function testNonuniformQuadraticRefinementUsesForwardAlpha(testCase)
         cp{3} + cq2{3}});
 end
 
-function testRejectsUnsupportedOperands(testCase)
+function testRejUnsOpe(testCase)
     % This slice rejects mixed bounds, bad sizes, function-only pdmat, and nonlinear sdpvar inputs.
     P = pdvar(1, {[0 1]});
     Q = pdvar(1, {[0 2]});
@@ -271,7 +272,7 @@ function testRejectsUnsupportedOperands(testCase)
     testCase.verifyError(@() P + x * x, "pdvar:InvalidAddition");
 end
 
-function testRejectsUnsupportedDerivativeAffineOperands(testCase)
+function testRejUnsDerAffOpe(testCase)
     % Rate-row expressions cannot be resampled or mixed with bad operands.
     P = pdvar(1, {[0 1]}, RateBounds=[-1 1]);
     D = rhodiff(P);
@@ -288,7 +289,7 @@ function testRejectsUnsupportedDerivativeAffineOperands(testCase)
     testCase.verifyError(@() D + x * x, "pdvar:InvalidAddition");
 end
 
-function testRateMetadataPropagatesAndChecksMismatch(testCase)
+function testRatMetProAndChe(testCase)
     % Missing RateBounds should inherit the operation-level metadata.
     rb = [-1 1];
     P = pdvar(1, {[0 1]}, RateBounds=rb);
@@ -300,8 +301,6 @@ function testRateMetadataPropagatesAndChecksMismatch(testCase)
     S = P + Q;
     D = Q - P;
 
-    testCase.verifyTrue(S.HasRateDependence);
-    testCase.verifyTrue(D.HasRateDependence);
     testCase.verifyEqual(S.RateBounds, rb);
     testCase.verifyEqual(D.RateBounds, rb);
     verifyCoeffExpr(testCase, S.coeffs(1), {cp{1} + cq{1}, cp{2} + cq{2}});
@@ -309,7 +308,7 @@ function testRateMetadataPropagatesAndChecksMismatch(testCase)
     testCase.verifyError(@() P + R, "pdvar:InvalidAddition");
 end
 
-function testZeroAffineCancellationsClearMetadata(testCase)
+function testZerAffCanCleMet(testCase)
     % Cancelled affine expressions should become compact nondecision zeros.
     P = pdvar(1, {[0 1]});
     D = rhodiff(P, [-1 1]);
@@ -339,7 +338,6 @@ function verifyZeroPdvar(testCase, obj, sz)
     testCase.verifyEqual(size(obj), sz);
     testCase.verifyEqual(obj.Degree, 0);
     testCase.verifyFalse(obj.ContainsDecision);
-    testCase.verifyFalse(obj.HasRateDependence);
     testCase.verifyEmpty(obj.RateBounds);
     coeffs = obj.coeffs(ones(1, obj.npar()));
     testCase.verifyEqual(numel(coeffs), 1);

@@ -1,6 +1,9 @@
 function vals = mapVals(vals, fcn, grid)
     %MAPVALS Apply a coefficient mapping over shared LocalValues storage.
     %
+    %   Syntax:
+    %     vals = obj.mapVals(vals, fcn, grid)
+    %
     %   Arguments:
     %     vals - Nested LocalValues tree.
     %     fcn  - Mapping applied to every payload in each leaf.
@@ -11,6 +14,9 @@ function vals = mapVals(vals, fcn, grid)
     %
     %   This protected utility keeps physical-cell traversal in pdbase while
     %   allowing subclasses to define the mapping applied within each leaf.
+    %
+    %   Example:
+    %     vals = obj.mapVals(obj.LocalValues, @(a) -a, obj.GridInfo.Vectors);
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) cellfun(fcn, ...

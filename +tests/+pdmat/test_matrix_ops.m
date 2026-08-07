@@ -3,7 +3,7 @@ function tests = test_matrix_ops
     tests = functiontests(localfunctions);
 end
 
-function testTransposeAndCtranspose(testCase)
+function testTraAndCtr(testCase)
     % Transpose variants should transpose every local matrix coefficient.
     A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
 
@@ -15,7 +15,7 @@ function testTransposeAndCtranspose(testCase)
     verifyCoeff(testCase, H, 1, {[1 3; 2 4], [5 7; 6 8]});
 end
 
-function testInheritedOperationClearsExactFunctionHandle(testCase)
+function testInhOpeCleExaFun(testCase)
     % A coefficient operation must not retain the untransformed exact handle.
     A = pdmat([0 1], @(rho) [rho, 2 * rho], Degree=1);
 
@@ -28,7 +28,7 @@ function testInheritedOperationClearsExactFunctionHandle(testCase)
     testCase.verifyEqual(evaluate(T, 0.25), [0.25; 0.5], AbsTol=1e-12);
 end
 
-function testShapeInspectionAndUnaryPlus(testCase)
+function testShaInsAndUnaPlu(testCase)
     % Matrix-like shape methods should report the pdmat payload dimensions.
     A = pdmat({[0 1]}, {zeros(2, 3), ones(2, 3)}, Degree=1);
 
@@ -41,7 +41,7 @@ function testShapeInspectionAndUnaryPlus(testCase)
     testCase.verifyEqual(squeeze(A), A);
 end
 
-function testCommonStructuralMethods(testCase)
+function testComStrMet(testCase)
     % Common MATLAB structural transforms should map every coefficient payload.
     A = pdmat({[0 1]}, {
         [1 2; 3 4], ...
@@ -106,7 +106,7 @@ function testCommonStructuralMethods(testCase)
     testCase.verifyFalse(isequal(A, D));
 end
 
-function testIsequalComparesNormalizedBernsteinEvidence(testCase)
+function testIseComNorBerEvi(testCase)
     % Equality should compare coefficient evidence after grid/degree alignment.
     grid = [0 1];
     A = pdmat([0, 1], @(x) [-1, 0.5; -1, -2] + ...
@@ -126,9 +126,18 @@ function testIsequalComparesNormalizedBernsteinEvidence(testCase)
     testCase.verifyFalse(isequal(D, E));
     testCase.verifyFalse(isequal(D, F));
     testCase.verifyFalse(isequal(D, G));
+
+    testCase.verifyTrue(isequal(A));
+    testCase.verifyFalse(isequal(1, A));
+    fh = @(x) x;
+    exactA = pdmat([0 1], fh);
+    exactB = pdmat([0 1], fh);
+    exactC = pdmat([0 1], @(x) x);
+    testCase.verifyTrue(isequal(exactA, exactB));
+    testCase.verifyFalse(isequal(exactA, exactC));
 end
 
-function testDiagConstructionAndReshapeInference(testCase)
+function testDiaConAndResInf(testCase)
     % Vector diag and one empty reshape dimension should follow MATLAB usage.
     A = pdmat({[0 1]}, {[1; 2; 3], [4; 5; 6]}, Degree=1);
 
@@ -153,11 +162,16 @@ function testConcatenation(testCase)
     V = [A; A];
     Nleft = [zeros(2, 1), A];
     Ntop = [0; A];
+    scalar = pdmat({[0 1]}, {1, 2}, Degree=1);
+    scalarRow = [scalar, 3, 4];
+    scalarCol = [scalar; 3; 4];
 
     testCase.verifyEqual(size(H), [2 3]);
     testCase.verifyEqual(size(V), [4 1]);
     testCase.verifyEqual(size(Nleft), [2 2]);
     testCase.verifyEqual(size(Ntop), [3 1]);
+    testCase.verifyEqual(size(scalarRow), [1 3]);
+    testCase.verifyEqual(size(scalarCol), [3 1]);
     verifyCoeff(testCase, H, 1, {
         [1 10 20; 2 30 40], ...
         [3 50 60; 4 70 80]
@@ -176,7 +190,7 @@ function testConcatenation(testCase)
         });
 end
 
-function testCatDegreeElevationAndDimRejection(testCase)
+function testCatDegEleAndDim(testCase)
     % cat should elevate degrees for dim 1/2 and reject unsupported dimensions.
     A = pdmat({[0 1]}, {[1; 3], [2; 4]}, Degree=1);
     B = pdmat({[0 1]}, {[10; 10], [20; 20], [30; 30]}, Degree=2);
@@ -192,7 +206,7 @@ function testCatDegreeElevationAndDimRejection(testCase)
     testCase.verifyError(@() cat(3, A, A), "pdmat:UnsupportedCatDimension");
 end
 
-function testBlkdiagCommonGridAndNumeric(testCase)
+function testBlkComGriAndNum(testCase)
     % blkdiag should align grids, elevate degree, and accept numeric blocks.
     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     B = pdmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
@@ -211,7 +225,7 @@ function testBlkdiagCommonGridAndNumeric(testCase)
         });
 end
 
-function testMatrixSlicingAndDotAccess(testCase)
+function testMatSliAndDotAcc(testCase)
     % Matrix indexing should slice payloads while dot access stays available.
     A = pdmat({[0 1]}, {
         [1 2 3; 4 5 6], ...
@@ -222,17 +236,19 @@ function testMatrixSlicingAndDotAccess(testCase)
     topTail = A(1, 2:3);
     firstRow = A([true false], :);
     coeffs = A.coeffs(1);
+    nestedDegree = A(:, 1).Degree;
 
     testCase.verifyEqual(size(lastCol), [2 1]);
     testCase.verifyEqual(size(topTail), [1 2]);
     testCase.verifyEqual(size(firstRow), [1 3]);
     testCase.verifyEqual(coeffs{1}, [1 2 3; 4 5 6]);
+    testCase.verifyEqual(nestedDegree, 1);
     verifyCoeff(testCase, lastCol, 1, {[3; 6], [30; 60]});
     verifyCoeff(testCase, topTail, 1, {[2 3], [20 30]});
     verifyCoeff(testCase, firstRow, 1, {[1 2 3], [10 20 30]});
 end
 
-function testSubsasgnNumericAndPdmatBlocks(testCase)
+function testSubNumAndPdmBlo(testCase)
     % Subscript assignment should accept numeric constants and pdmat blocks.
     A = pdmat({[0 1]}, {zeros(2), 2 * ones(2)}, Degree=1);
     A(:, 2) = 5;
@@ -253,7 +269,7 @@ function testSubsasgnNumericAndPdmatBlocks(testCase)
         });
 end
 
-function testAnisotropicCatBlkdiagAssignmentAndRefinement(testCase)
+function testAniCatBlkAssAnd(testCase)
     % Structural composition aligns each degree axis on a common refinement.
     gridA = {[0 1], [10 20]};
     gridB = {[0 0.5 1], [10 20]};
@@ -279,7 +295,7 @@ function testAnisotropicCatBlkdiagAssignmentAndRefinement(testCase)
         repmat({[3; 4]}, 1, 12));
 end
 
-function testIndexingAndAssignmentRejections(testCase)
+function testIndAndAssRej(testCase)
     % Unsupported indexing and assignment forms should fail with stable IDs.
     A = pdmat({[0 1]}, {zeros(2), ones(2)}, Degree=1);
     F = pdmat({[0 1]}, @(rho) rho * eye(2));
@@ -289,9 +305,25 @@ function testIndexingAndAssignmentRejections(testCase)
     testCase.verifyError(@() deleteAssign(A), "pdmat:UnsupportedAssignment");
     testCase.verifyError(@() growAssign(A), "pdmat:InvalidAssignment");
     testCase.verifyError(@() badSizeAssign(A), "pdmat:InvalidAssignment");
+    testCase.verifyError(@() nestedAssign(A), "pdmat:UnsupportedAssignment");
+    testCase.verifyError(@() assignFunction(F), "pdmat:FunctionOnlyAlgebra");
+    testCase.verifyError(@() setSummary(A), "MATLAB:class:SetProhibited");
 end
 
-function testStructuralRejections(testCase)
+function testCatInvDimAndBloSha(testCase)
+    % Concatenation validates its dimension and non-scalar block extents.
+    A = pdmat({[0 1]}, {zeros(2, 1), ones(2, 1)}, Degree=1);
+    B = pdmat({[0 1]}, {zeros(3, 1), ones(3, 1)}, Degree=1);
+    C = pdmat({[0 1]}, {zeros(1, 2), ones(1, 2)}, Degree=1);
+    D = pdmat({[0 1]}, {zeros(1, 3), ones(1, 3)}, Degree=1);
+
+    testCase.verifyError(@() cat("bad", A, A), ...
+        "pdmat:InvalidConcatenation");
+    testCase.verifyError(@() [A, B], "pdmat:InvalidConcatenation");
+    testCase.verifyError(@() [C; D], "pdmat:InvalidConcatenation");
+end
+
+function testStrRej(testCase)
     % Coefficient-structural methods should reject unsupported source shapes.
     A = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     F = pdmat({[0 1]}, @(rho) rho * eye(2));
@@ -326,6 +358,22 @@ end
 function badSizeAssign(A)
     % Exercise block-size mismatch rejection through a local function handle.
     A(1, :) = ones(2);
+end
+
+function nestedAssign(A)
+    % Nested assignment is outside the coefficient-block contract.
+    S = substruct("()", {1, 1}, ".", "field");
+    subsasgn(A, S, 1);
+end
+
+function assignFunction(F)
+    % Function-only data cannot acquire coefficient blocks by assignment.
+    F(1, 1) = 0;
+end
+
+function setSummary(A)
+    % Dot assignment reaches MATLAB's private-set property guard.
+    A.SourceSummary = "changed";
 end
 
 function verifyCoeff(testCase, obj, cellSubs, expected)

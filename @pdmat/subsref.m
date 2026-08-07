@@ -5,6 +5,10 @@ function varargout = subsref(obj, S)
     %     B = A(rows, cols)
     %     c = A.coeffs(cellSubs)
     %
+    %   Output:
+    %     B - Coefficient-backed pdmat block selected from every coefficient.
+    %     c - Result of ordinary dot access forwarded to MATLAB dispatch.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
     %     B = A(:, 1);
@@ -19,9 +23,9 @@ function varargout = subsref(obj, S)
         nCell = obj.GridInfo.NumNodes - 1;
         vals = helper.mkNest(nCell, @(subs) cellfun(@(a) a(rows, cols), ...
             helper.cellGet(obj.LocalValues, subs), UniformOutput=false));
-        out = mkObj(obj.GridInfo.Vectors, vals, obj.Degree, ...
+        out = mkCoeffObj(obj.GridInfo.Vectors, vals, obj.Degree, ...
             obj.RateBounds, "coefficient-backed", [], ...
-            [numel(rows), numel(cols)]);
+            [numel(rows), numel(cols)], "fast", obj.NumRateRows);
 
         if numel(S) == 1
             varargout{1} = out;

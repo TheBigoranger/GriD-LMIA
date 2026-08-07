@@ -9,12 +9,16 @@ function out = cumsum(obj, varargin)
     %
     %   direction is "forward" or "reverse", case-insensitively.
     %
+    %   Output:
+    %     C - Same dynamic class with cumulative sums applied to each stored
+    %         coefficient matrix.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {[1 2; 3 4], [2 4; 6 8]}, Degree=1);
     %     C = cumsum(A, 2, "reverse");
 
     if isempty(varargin)
-        out = unOp(obj, @(a) cumsum(a));
+        out = mapUnary(obj, @(a) cumsum(a));
         return
     end
 
@@ -38,7 +42,7 @@ function out = cumsum(obj, varargin)
         direction = arg;
     else
         dim = helper.chk(arg, errId, ...
-            "Cumulative-sum dimension must be a positive integer scalar.", ...
+            "cumulative-sum dimension", ...
             "numeric", "real", "scalar", "finite", "integer", "positive");
         dim = double(dim);
         direction = "forward";
@@ -61,11 +65,11 @@ function out = cumsum(obj, varargin)
     % Matrix payloads are singleton beyond dimension two. Short-circuiting
     % also avoids asking YALMIP to flip an sdpvar along an unsupported axis.
     if dim > 2
-        out = unOp(obj, @(a) a, obj.MatrixSize);
+        out = mapUnary(obj, @(a) a, obj.MatrixSize);
     elseif direction == "forward"
-        out = unOp(obj, @(a) cumsum(a, dim), obj.MatrixSize);
+        out = mapUnary(obj, @(a) cumsum(a, dim), obj.MatrixSize);
     else
-        out = unOp(obj, ...
+        out = mapUnary(obj, ...
             @(a) flip(cumsum(flip(a, dim), dim), dim), obj.MatrixSize);
     end
 end

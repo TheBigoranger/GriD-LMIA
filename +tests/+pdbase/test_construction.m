@@ -11,7 +11,6 @@ function testScalarDefaults(testCase)
     testCase.verifyEqual(obj.Degree, 1);
     testCase.verifyFalse(obj.IsContinuous);
     testCase.verifyFalse(obj.ContainsDecision);
-    testCase.verifyFalse(obj.HasRateDependence);
     testCase.verifyEmpty(obj.RateBounds);
 
     % Default objects are coefficient-backed zeros, not sampled grid data.
@@ -24,7 +23,7 @@ function testScalarDefaults(testCase)
     testCase.verifyEqual(size(obj, 3), 1);
 end
 
-function testSharedMatrixProtocol(testCase)
+function testShaMatPro(testCase)
     % Shared matrix protocol methods should report the stored payload shape.
     obj = pdbase({[0 1]}, [2 3], 0);
 
@@ -35,9 +34,13 @@ function testSharedMatrixProtocol(testCase)
     testCase.verifyEqual(ndims(obj), 2);
     testCase.verifyEqual(+obj, obj);
     testCase.verifyEqual(squeeze(obj), obj);
+
+    [m, n, trailing] = size(obj);
+    testCase.verifyEqual([m n trailing], [2 3 1]);
+    testCase.verifyEqual(numel(obj, 1), 1);
 end
 
-function testDirectBaseConcatenationIsRejected(testCase)
+function testDirBasConIsRej(testCase)
     % Direct pdbase operands must not create ambiguous MATLAB object arrays.
     obj = pdbase({[0 1]}, [1 1], 0);
     known = pdmat({[0 1]}, {1, 2}, Degree=1);
@@ -65,12 +68,40 @@ function testTensorOptions(testCase)
     testCase.verifyEqual(obj.GridInfo.NumNodes, [3 2]);
     testCase.verifyTrue(obj.IsContinuous);
     testCase.verifyTrue(obj.ContainsDecision);
-    testCase.verifyTrue(obj.HasRateDependence);
     testCase.verifyEqual(obj.RateBounds, [-1 1; -2 2]);
     testCase.verifyEqual(obj.SourceSummary, "test-coefficients");
     testCase.verifyEqual(obj.npar(), 2);
     testCase.verifyEqual(obj.ncell(), 2);
     testCase.verifyEqual(obj.ncoeff(), 9);
+end
+
+function testOptionsWithoutLocalValues(testCase)
+    % Named metadata may omit the optional LocalValues position.
+    obj = pdbase({[0 1]}, [1 1], 0, ...
+        IsContinuous=1, ContainsDecision=true, SourceSummary="option-parser");
+
+    testCase.verifyTrue(obj.IsContinuous);
+    testCase.verifyTrue(obj.ContainsDecision);
+    testCase.verifyEqual(obj.SourceSummary, "option-parser");
+end
+
+function testRateStateUsesBoundsOnly(testCase)
+    % RateBounds should be the only stored rate-metadata state.
+    ordinary = pdbase({[0 1]}, [1 1], 0);
+    bounded = pdbase({[0 1]}, [1 1], 0, [], RateBounds=[-1 1]);
+
+    testCase.verifyFalse(isprop(ordinary, "HasRateDependence"));
+    testCase.verifyEmpty(ordinary.RateBounds);
+    testCase.verifyEqual(bounded.RateBounds, [-1 1]);
+end
+
+function testNumRatRowMetVal(testCase)
+    % Explicit internal row counts require matching distinct rate vertices.
+    testCase.verifyError(@() pdbase({[0 1]}, [1 1], 0, [], ...
+        NumRateRows=1), "pdbase:InvalidRateBounds");
+    testCase.verifyError(@() pdbase({[0 1]}, [1 1], 0, [], ...
+        RateBounds=[-1 1], NumRateRows=1), ...
+        "pdbase:InvalidRateBounds");
 end
 
 

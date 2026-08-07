@@ -10,6 +10,10 @@ function coeffs = cellGet(vals, subs)
     %
     %   Output:
     %     coeffs - Selected flat coefficient leaf or rate-row table.
+    %
+    %   Example:
+    %     vals = helper.mkNest([2 1], @(subs) {subs});
+    %     coeffs = helper.cellGet(vals, [2 1]);
 
     coeffs = vals;
     for k = 1:numel(subs)

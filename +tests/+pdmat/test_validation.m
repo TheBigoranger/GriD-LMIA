@@ -3,12 +3,12 @@ function tests = test_validation
     tests = functiontests(localfunctions);
 end
 
-function testInvalidSourceType(testCase)
+function testInvSouTyp(testCase)
     % Constructor should reject unsupported source payload types.
     testCase.verifyError(@() pdmat({[0 1]}, eye(2)), "pdmat:InvalidSource");
 end
 
-function testGlobalDegreeMismatch(testCase)
+function testGloDegMis(testCase)
     % Global coefficient grids should imply a degree compatible with grid size.
     data = {1, 2, 3, 4};
 
@@ -16,14 +16,14 @@ function testGlobalDegreeMismatch(testCase)
     testCase.verifyError(@() pdmat({[0 1 2]}, data, Degree=2), "pdmat:InvalidDegree");
 end
 
-function testGlobalPayloadsMustHaveSameFiniteRealSize(testCase)
+function testGloPayMusHavSam(testCase)
     % Global payloads should share one finite real matrix size.
     testCase.verifyError(@() pdmat({[0 1]}, {1, [1 2]}), "pdmat:InvalidData");
     testCase.verifyError(@() pdmat({[0 1]}, {1, Inf}), "pdmat:InvalidData");
     testCase.verifyError(@() pdmat({[0 1]}, {1, 1i}), "pdmat:InvalidData");
 end
 
-function testMalformedNestedLocalValues(testCase)
+function testMalNesLocVal(testCase)
     % Explicit LocalValues should validate nesting, degree, and payload shape.
     testCase.verifyError(@() pdmat({[0 1 2]}, {{1, 2}}), ...
         "pdmat:InvalidLocalValues");
@@ -33,7 +33,7 @@ function testMalformedNestedLocalValues(testCase)
         "pdmat:InvalidCoefficientPayload");
 end
 
-function testFunctionArityAndOutputs(testCase)
+function testFunAriAndOut(testCase)
     % Function handles should match parameter arity and return real matrices.
     testCase.verifyError(@() pdmat({[0 1]}, @(rho, eta) rho + eta), ...
         "pdmat:InvalidFunctionHandle");
@@ -43,25 +43,32 @@ function testFunctionArityAndOutputs(testCase)
         "pdmat:InvalidFunctionOutput");
 end
 
-function testFunctionDegreeMustBeBernsteinRepresentable(testCase)
+function testFunDegMusBeBer(testCase)
     % Explicit-degree function data should reject nonrepresentable polynomials.
     testCase.verifyError(@() pdmat({[0 1]}, @(rho) rho.^2, Degree=1), ...
         "pdmat:NonBernsteinPolynomial");
 end
 
-function testNumericFallbackRejectsNonPolynomialHandle(testCase)
+function testFunMatDegMusBeBer(testCase)
+    % One over-degree matrix entry should reject the complete function.
+    testCase.verifyError(@() pdmat({[0 1]}, ...
+        @(rho) [rho, rho.^2; 0, 1], Degree=1), ...
+        "pdmat:NonBernsteinPolynomial");
+end
+
+function testNumFalRejNonPol(testCase)
     % Numeric probing fallback should still reject non-polynomial handles.
     testCase.verifyError(@() pdmat({[0 1]}, @numericOnlyNonpoly, Degree=1), ...
         "pdmat:NonBernsteinPolynomial");
 end
 
-function testMalformedFunctionDuringBernsteinProbe(testCase)
+function testMalFunDurBerPro(testCase)
     % Bernstein probing should reject handles with inconsistent output shape.
     testCase.verifyError(@() pdmat({[0 1]}, @badProbeShape, Degree=1), ...
         "pdmat:InvalidFunctionValue");
 end
 
-function testFixedOptionsAndMalformedRateBounds(testCase)
+function testFixOptAndMalRat(testCase)
     % Fixed representation flags stay unavailable while RateBounds is public.
     data = {1, 2};
 
@@ -69,12 +76,39 @@ function testFixedOptionsAndMalformedRateBounds(testCase)
         "pdmat:UnsupportedOption");
     testCase.verifyError(@() pdmat({[0 1]}, data, ContainsDecision=true), ...
         "pdmat:UnsupportedOption");
-    testCase.verifyError(@() pdmat({[0 1]}, data, HasRateDependence=true), ...
-        "pdmat:UnsupportedOption");
     testCase.verifyError(@() pdmat({[0 1]}, data, RateBounds=[1 -1]), ...
         "pdmat:InvalidRateBounds");
     testCase.verifyError(@() pdmat({[0 1]}, data, RateBounds=[-1 1; -1 1]), ...
         "pdmat:InvalidRateBounds");
+end
+
+function testConOptParBou(testCase)
+    % Constructor option syntax rejects missing, nontext, duplicate, and unknown names.
+    grid = {[0 1]};
+    data = {1, 2};
+
+    testCase.verifyError(@() pdmat(grid, data, "Degree"), ...
+        "pdmat:InvalidOptions");
+    testCase.verifyError(@() pdmat(grid, data, 7, 1), ...
+        "pdmat:InvalidOptions");
+    testCase.verifyError(@() pdmat(grid, data, ...
+        "Degree", 1, "Degree", 1), "pdmat:DuplicateOption");
+    testCase.verifyError(@() pdmat(grid, data, ...
+        "RateBounds", [-1 1], "RateBounds", [-1 1]), ...
+        "pdmat:DuplicateOption");
+    testCase.verifyError(@() pdmat(grid, data, ...
+        "ValidationMode", "fast", "ValidationMode", "strict"), ...
+        "pdmat:InvalidValidationMode");
+    testCase.verifyError(@() pdmat(grid, data, "Unknown", 1), ...
+        "pdmat:UnknownOption");
+end
+
+function testFunCalFaiOwnSta(testCase)
+    % Callback failures are normalized at the lower-bound and validation seams.
+    testCase.verifyError(@() pdmat({[0 1]}, @alwaysFail), ...
+        "pdmat:InvalidFunctionHandle");
+    testCase.verifyError(@() pdmat({[0 1]}, @failAwayFromNodes, Degree=1), ...
+        "pdmat:InvalidFunctionValue");
 end
 
 function testDegreeValidation(testCase)
@@ -88,8 +122,13 @@ function testDegreeValidation(testCase)
     end
 end
 
-function testMalformedAndMixedExplicitRateRows(testCase)
-    % Explicit leaves use uniformly one row or exactly 2^ell rows.
+function testMalAndMixExpRat(testCase)
+    % Explicit leaves use one row or one row per distinct rate vertex.
+    collapsed = pdmat({[0 1], [0 1]}, {{{1; 2}}}, ...
+        Degree=[0 0], RateBounds=[1 1; -2 3]);
+    testCase.verifyEqual(collapsed.NumRateRows, 2);
+    testCase.verifyEqual(collapsed.coeffs([1 1]), {1; 2});
+
     testCase.verifyError(@() pdmat([0 1], {{1, 2; 3, Inf}}, ...
         Degree=1, RateBounds=[-1 1]), ...
         "pdmat:InvalidCoefficientPayload");
@@ -121,4 +160,19 @@ function out = badProbeShape(rho)
     else
         out = [1 2];
     end
+end
+
+function out = alwaysFail(~)
+    % Fail at the constructor's lower-bound probe.
+    error("tests:CallbackFailure", "intentional lower-bound failure");
+    out = []; %#ok<UNRCH>
+end
+
+function out = failAwayFromNodes(rho)
+    % Interpolation nodes succeed while off-node validation probes fail.
+    if isnumeric(rho) && isscalar(rho) && any(rho == [0 1])
+        out = rho;
+        return
+    end
+    error("tests:CallbackFailure", "intentional validation failure");
 end

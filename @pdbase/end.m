@@ -4,6 +4,9 @@ function idx = end(obj, k, n)
     %   Syntax:
     %     B = A(1:end, end)
     %
+    %   Output:
+    %     idx - Last valid matrix-payload subscript for the requested context.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     %     B = A(:, end);

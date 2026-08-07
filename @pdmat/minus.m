@@ -6,13 +6,17 @@ function out = minus(lhs, rhs)
     %     C = A - M
     %     C = M - A
     %
+    %   Output:
+    %     C - Coefficient-backed pdmat difference after grid and degree
+    %         alignment.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     C = 5 - A;
 
     if isa(lhs, "pdmat") && isa(rhs, "pdmat") && ...
             helper.isZero(rhs, "obj") && ...
-            ~lhs.hasRateRows() && ~rhs.hasRateRows()
+            lhs.NumRateRows == 0 && rhs.NumRateRows == 0
         if ~isequal(rhs.MatrixSize, lhs.MatrixSize)
             error("pdmat:InvalidSubtraction", ...
                 "pdmat matrix sizes are incompatible for this operation.");
@@ -34,5 +38,5 @@ function out = minus(lhs, rhs)
         return
     end
 
-    out = binOp(lhs, rhs, @(a, b) a - b, "pdmat:InvalidSubtraction");
+    out = knownBinOp(lhs, rhs, @(a, b) a - b, "pdmat:InvalidSubtraction");
 end

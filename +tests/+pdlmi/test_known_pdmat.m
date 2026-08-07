@@ -9,7 +9,7 @@ function setup(~)
     lastwarn("");
 end
 
-function testComparisonsAndUnsupportedKnownForms(testCase)
+function testComAndUnsKnoFor(testCase)
     % Numeric and pdmat comparisons return wrappers; equality remains excluded.
     A = pdmat([0 1], {1, 2}, Degree=1);
     testCase.verifyClass(A >= 0, "pdlmi");
@@ -23,7 +23,7 @@ function testComparisonsAndUnsupportedKnownForms(testCase)
         "pdlmi:MissingCoefficientEvidence");
 end
 
-function testDirectPolyaBothRelationsAndRateRows(testCase)
+function testDirPolBotRelAnd(testCase)
     % Direct and Pólya reduce all known coefficients and rate rows to one logical.
     positive = pdmat([0 1], {{1, 2; 3, 4}}, ...
         Degree=1, RateBounds=[-1 2]);
@@ -33,11 +33,11 @@ function testDirectPolyaBothRelationsAndRateRows(testCase)
     testCase.verifyTrue(toYalmip(negative <= 0));
     positiveLmi = positive >= 0;
     negativeLmi = negative <= 0;
-    testCase.verifyTrue(toYalmip(positiveLmi.applyPolya(2)));
-    testCase.verifyTrue(toYalmip(negativeLmi.applyPolya(1)));
+    testCase.verifyTrue(toYalmip(positiveLmi.usePolya(2)));
+    testCase.verifyTrue(toYalmip(negativeLmi.usePolya(1)));
 end
 
-function testTensorCellsAndRateRowsAllEnterKnownCertificate(testCase)
+function testTenCelAndRatRow(testCase)
     % A single false tensor/rate coefficient must fail the reduced certificate.
     rb = [-1 2; -3 4];
     leaf = repmat({eye(2)}, 4, 4);
@@ -51,7 +51,7 @@ function testTensorCellsAndRateRowsAllEnterKnownCertificate(testCase)
     verifyInconclusive(testCase, @() toYalmip(B >= 0));
 end
 
-function testInconclusiveWarningIgnoresAmbientWarningState(testCase)
+function testIncWarIgnAmbWar(testCase)
     % The helper should observe the deferred warning even if callers mute it.
     warnId = "pdlmi:InconclusiveCertificate";
     state = warning("query", warnId);
@@ -63,14 +63,14 @@ function testInconclusiveWarningIgnoresAmbientWarningState(testCase)
     testCase.verifyEqual(string(warning("query", warnId).state), "off");
 end
 
-function testAnisotropicKnownDirectAndPolya(testCase)
+function testAniKnoDirAndPol(testCase)
     % Known tensor coefficients retain vector degree state through Pólya.
     grid = {[0 1], [10 20]};
     values = repmat({eye(2)}, 2, 4);
     A = pdmat(grid, values, Degree=[1 3]);
 
     direct = A >= 0;
-    polya = direct.applyPolya([1 0]);
+    polya = direct.usePolya([1 0]);
 
     testCase.verifyTrue(toYalmip(direct));
     testCase.verifyTrue(toYalmip(polya));
@@ -79,7 +79,7 @@ function testAnisotropicKnownDirectAndPolya(testCase)
     testCase.verifyTrue(isequal(polya.Residual, A));
 end
 
-function testToleranceEntrywiseAndHermitianSymmetrization(testCase)
+function testTolEntAndHerSym(testCase)
     % The absolute 1e-10 boundary is inclusive in both scalar directions.
     testCase.verifyTrue(toYalmip(constantPdmat(-1e-10) >= 0));
     testCase.verifyTrue(toYalmip(constantPdmat(1e-10) <= 0));
@@ -105,7 +105,19 @@ function testToleranceEntrywiseAndHermitianSymmetrization(testCase)
     verifyInconclusive(testCase, @() toYalmip(outsideCert));
 end
 
-function testFalseWarningTimingCountAndConservativeMeaning(testCase)
+function testKnoEntLowTru(testCase)
+    % A rectangular known residual exercises the successful entry-wise <= path.
+    A = pdmat([0 1], {{[-1 -2]}}, Degree=0);
+    warnId = "pdlmi:ElementwiseInequality";
+
+    testCase.verifyWarning(@() A <= 0, char(warnId));
+    state = warning("query", warnId);
+    cleanup = onCleanup(@() warning(state.state, warnId)); %#ok<NASGU>
+    warning("off", warnId);
+    testCase.verifyTrue(toYalmip(A <= 0));
+end
+
+function testFalWarTimCouAnd(testCase)
     % The polynomial stays positive although its middle Bernstein coefficient fails.
     A = pdmat([0 1], {1, -0.1, 1}, Degree=2);
     testCase.verifyWarningFree(@() A >= 0);
@@ -113,14 +125,14 @@ function testFalseWarningTimingCountAndConservativeMeaning(testCase)
     testCase.verifyGreaterThan(A.evaluate(0.5), 0);
 
     verifyInconclusive(testCase, @() toYalmip(direct));
-    testCase.verifyTrue(toYalmip(direct.applyPolya(1)));
+    testCase.verifyTrue(toYalmip(direct.usePolya(1)));
 
     trueCert = constantPdmat(1) >= 0;
     testCase.verifyWarningFree(@() toYalmip(trueCert));
     testCase.verifyTrue(toYalmip(trueCert));
 end
 
-function testDecisionFreePdvarDoesNotReceiveKnownWarning(testCase)
+function testDecFrePdvDoeNot(testCase)
     % Scalar and matrix logical coefficients remain class-gated as pdvar.
     values = {1, eye(2)};
     for k = 1:numel(values)
@@ -136,17 +148,17 @@ function testDecisionFreePdvarDoesNotReceiveKnownWarning(testCase)
     end
 end
 
-function testGramFamiliesAndSparseEndpoints(testCase)
+function testGraFamAndSpaEnd(testCase)
     % Known Gram routes produce YALMIP constraints with auxiliary decisions.
     A = pdmat([0 1], @(rho) 1 + 0 * rho, Degree=4);
     direct = A >= 0;
-    putinar = direct.applyPutinar(2);
-    sparsePutinar = direct.applySparsePutinar(2, 2);
-    sparse = direct.applySparseFullBoxPreorder(2, 2);
-    full = direct.applyFullBoxPreorder(2);
-    widthOne = direct.applySparseFullBoxPreorder(1, 2);
-    dense = direct.applySparseFullBoxPreorder(3, 2);
-    sparsePutinarDense = direct.applySparsePutinar(3, 2);
+    putinar = direct.usePutinar(2);
+    sparsePutinar = direct.useSpPut(2, 2);
+    sparse = direct.useSpBox(2, 2);
+    full = direct.useFullBox(2);
+    widthOne = direct.useSpBox(1, 2);
+    dense = direct.useSpBox(3, 2);
+    sparsePutinarDense = direct.useSpPut(3, 2);
 
     verifyGram(testCase, putinar);
     verifyGram(testCase, sparsePutinar);
@@ -194,7 +206,6 @@ function P = internalNumericPdvar(value)
         "LocalValues", {{{value}}}, ...
         "IsContinuous", true, ...
         "ContainsDecision", false, ...
-        "HasRateDependence", false, ...
         "RateBounds", [], ...
         "SourceSummary", "numeric-regression");
     P = pdvar(init);

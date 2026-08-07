@@ -6,6 +6,11 @@ function varargout = size(obj, dim)
     %     n = size(obj, dim)
     %     [m, n] = size(obj)
     %
+    %   Output:
+    %     sz - 1-by-2 stored matrix payload size.
+    %     n  - Size along one requested dimension; dimensions above two are 1.
+    %     m  - Row count when size is called with multiple outputs.
+    %
     %   Example:
     %     obj = pdbase({[0 1]}, [2 3], 0);
     %     sz = size(obj);

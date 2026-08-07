@@ -4,6 +4,9 @@ function display(obj)
     %   Syntax:
     %     A
     %
+    %   Output:
+    %     This method prints to the command window and returns no value.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1)
 
@@ -25,8 +28,8 @@ function display(obj)
     fprintf("  Physical cells: %d\n", obj.ncell());
     fprintf("  Coefficients per cell: %d\n", obj.ncoeff());
     fprintf("  Continuous: %s\n", string(obj.IsContinuous));
-    fprintf("  Rate metadata: %s\n", string(obj.HasRateDependence));
-    fprintf("  Explicit rate rows: %s\n", string(obj.hasRateRows()));
+    fprintf("  Rate metadata: %s\n", string(~isempty(obj.RateBounds)));
+    fprintf("  Explicit rate rows: %s\n", string(obj.NumRateRows ~= 0));
     fprintf("  Source: %s\n", obj.SourceSummary);
     fprintf("  Function handle: %s\n", string(~isempty(obj.FunctionHandle)));
 end

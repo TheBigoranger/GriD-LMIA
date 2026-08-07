@@ -1,6 +1,11 @@
 function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
     %BERNTBL Build a shared Bernstein coefficient inspection table.
     %
+    %   Syntax:
+    %     tbl = obj.bernTbl(errId, valFcn, exprFcn, rateVerts)
+    %     tbl = obj.bernTbl(errId, valFcn, exprFcn, rateVerts, cellSub)
+    %     tbl = obj.bernTbl(errId, valFcn, exprFcn, rateVerts, "oneLine")
+    %
     %   Arguments:
     %     obj       - pdbase-derived object providing cells, labels, and coeffs.
     %     errId     - Identifier for selector or rate-row errors.
@@ -15,8 +20,11 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
     %   Basis text uses alpha=(rho-lo)/(hi-lo). Local labels count powers of
     %   alpha, so label 0 is the lower/left endpoint in every cell. pdmat and
     %   pdvar supply their own coefficient-formatting callbacks.
+    %
+    %   Example:
+    %     tbl = obj.bernTbl("pdmat:InvalidBernTable", @num2str, @string, []);
 
-    [cells, oneLine] = parseArgs(obj, errId, varargin{:});
+    [cells, isOneLine] = parseArgs(obj, errId, varargin{:});
     lbls = obj.lbls();
     basis = strings(size(lbls, 1), 1);
     for k = 1:size(lbls, 1)
@@ -30,9 +38,9 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
         parts = strings(1, nPar);
         for p = 1:nPar
             if nPar == 1
-                name = "alpha";
+                name = "α";
             else
-                name = "alpha" + string(p);
+                name = "α" + string(p);
             end
             parts(p) = oneBasis(name, obj.Degree(p), loc(p));
         end
@@ -40,19 +48,19 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
     end
     hasRate = ~isempty(rateVerts);
 
-    if oneLine
-        tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errId);
+    if isOneLine
+        tbl = oneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errId);
         return
     end
 
     if hasRate
         tbl = rateTbl(obj, cells, lbls, basis, valFcn, rateVerts, errId);
     else
-        tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn);
+        tbl = ordTbl(obj, cells, lbls, basis, valFcn);
     end
 end
 
-function tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn)
+function tbl = ordTbl(obj, cells, lbls, basis, valFcn)
     %ORDINARYTBL Emit every matrix row without hiding complete coefficients.
     nMatRow = obj.MatrixSize(1);
     nTerm = size(cells, 1) * size(lbls, 1);
@@ -87,12 +95,12 @@ function tbl = ordinaryTbl(obj, cells, lbls, basis, valFcn)
     end
 
     if nMatRow > 1
-        termIdx = centeredMetadata(num2cell(termIdx), nMatRow, "number");
-        cellSubs = centeredMetadata(cellSubs, nMatRow, "subscript");
-        coeffSubs = centeredMetadata(coeffSubs, nMatRow, "subscript");
-        locIdx = centeredMetadata(locIdx, nMatRow, "subscript");
-        basisCol = centeredMetadata(num2cell(basisCol), nMatRow, "quoted");
-        isNode = centeredMetadata(num2cell(isNode), nMatRow, "logical");
+        termIdx = ctrMeta(num2cell(termIdx), nMatRow, "number");
+        cellSubs = ctrMeta(cellSubs, nMatRow, "subscript");
+        coeffSubs = ctrMeta(coeffSubs, nMatRow, "subscript");
+        locIdx = ctrMeta(locIdx, nMatRow, "subscript");
+        basisCol = ctrMeta(num2cell(basisCol), nMatRow, "quoted");
+        isNode = ctrMeta(num2cell(isNode), nMatRow, "logical");
     end
 
     % Use MATLAB's ordinary table constructor; no pdmat/pdvar operands are passed.
@@ -148,14 +156,14 @@ function tbl = rateTbl(obj, cells, lbls, basis, valFcn, rateVerts, errId)
     end
 
     if nMatRow > 1
-        termIdx = centeredMetadata(num2cell(termIdx), nMatRow, "number");
-        cellSubs = centeredMetadata(cellSubs, nMatRow, "subscript");
-        rateIdx = centeredMetadata(num2cell(rateIdx), nMatRow, "number");
-        rateCol = centeredMetadata(rateCol, nMatRow, "subscript");
-        coeffSubs = centeredMetadata(coeffSubs, nMatRow, "subscript");
-        locIdx = centeredMetadata(locIdx, nMatRow, "subscript");
-        basisCol = centeredMetadata(num2cell(basisCol), nMatRow, "quoted");
-        isNode = centeredMetadata(num2cell(isNode), nMatRow, "logical");
+        termIdx = ctrMeta(num2cell(termIdx), nMatRow, "number");
+        cellSubs = ctrMeta(cellSubs, nMatRow, "subscript");
+        rateIdx = ctrMeta(num2cell(rateIdx), nMatRow, "number");
+        rateCol = ctrMeta(rateCol, nMatRow, "subscript");
+        coeffSubs = ctrMeta(coeffSubs, nMatRow, "subscript");
+        locIdx = ctrMeta(locIdx, nMatRow, "subscript");
+        basisCol = ctrMeta(num2cell(basisCol), nMatRow, "quoted");
+        isNode = ctrMeta(num2cell(isNode), nMatRow, "logical");
     end
 
     tbl = table(termIdx, cellSubs, rateIdx, rateCol, coeffSubs, ...
@@ -165,7 +173,7 @@ function tbl = rateTbl(obj, cells, lbls, basis, valFcn, rateVerts, errId)
         'LocalIndex', 'Basis', 'IsPhysicalNode', 'Value'});
 end
 
-function tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errId)
+function tbl = oneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errId)
     %PRINTONELINE Build one expression row per cell and active rate vertex.
     nMatRow = obj.MatrixSize(1);
     if hasRate
@@ -197,9 +205,9 @@ function tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errI
         end
 
         if nMatRow > 1
-            cellSubs = centeredMetadata(cellSubs, nMatRow, "subscript");
-            rateIdx = centeredMetadata(num2cell(rateIdx), nMatRow, "number");
-            rateCol = centeredMetadata(rateCol, nMatRow, "subscript");
+            cellSubs = ctrMeta(cellSubs, nMatRow, "subscript");
+            rateIdx = ctrMeta(num2cell(rateIdx), nMatRow, "number");
+            rateCol = ctrMeta(rateCol, nMatRow, "subscript");
         end
 
         tbl = table(cellSubs, rateIdx, rateCol, exprs, ...
@@ -223,7 +231,7 @@ function tbl = printOneLine(obj, cells, basis, exprFcn, rateVerts, hasRate, errI
     end
 
     if nMatRow > 1
-        cellSubs = centeredMetadata(cellSubs, nMatRow, "subscript");
+        cellSubs = ctrMeta(cellSubs, nMatRow, "subscript");
     end
 
     tbl = table(cellSubs, exprs, ...
@@ -258,7 +266,7 @@ function [coeffSub, nodeFlag] = coeffInfo(obj, cellSub, loc)
     end
 end
 
-function col = centeredMetadata(values, nMatRow, kind)
+function col = ctrMeta(values, nMatRow, kind)
     %CENTEREDMETADATA Show group metadata once beside expanded matrix rows.
     nRow = numel(values);
     text = strings(nRow, 1);
@@ -286,20 +294,20 @@ function col = centeredMetadata(values, nMatRow, kind)
     col = char(text);
 end
 
-function [cells, oneLine] = parseArgs(obj, errId, varargin)
+function [cells, isOneLine] = parseArgs(obj, errId, varargin)
     %PARSEARGS Normalize the optional cell selector and oneLine flag.
     cells = obj.cells();
-    oneLine = false;
+    isOneLine = false;
     hasCell = false;
 
     for k = 1:numel(varargin)
         arg = varargin{k};
         if (isstring(arg) && isscalar(arg)) || (ischar(arg) && isrow(arg))
             if strcmpi(string(arg), "oneLine")
-                oneLine = true;
+                isOneLine = true;
             else
                 error(errId, ...
-                    "The only text option supported by bernsteinTable is ""oneLine"".");
+                    "The only text option supported by bernTable is ""oneLine"".");
             end
         elseif ~hasCell
             if iscell(arg)
@@ -315,7 +323,7 @@ function [cells, oneLine] = parseArgs(obj, errId, varargin)
             hasCell = true;
         else
             error(errId, ...
-                "bernsteinTable accepts at most one physical-cell selector and the optional ""oneLine"" mode.");
+                "bernTable accepts at most one physical-cell selector and the optional ""oneLine"" mode.");
         end
     end
 end

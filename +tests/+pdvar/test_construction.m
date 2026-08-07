@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testSdpvarSizeConvention(testCase)
+function testSdpSizCon(testCase)
     % Square forms follow sdpvar's symmetric default; rectangular is full.
     Ps = pdvar(2, {[0 1]});
     Pss = pdvar(2, 2, {[0 1]});
@@ -22,7 +22,7 @@ function testSdpvarSizeConvention(testCase)
     testCase.verifyEqual(numel(getvariables(firstCoeff(Pf))), 6);
 end
 
-function testExplicitStructureFlags(testCase)
+function testExpStrFla(testCase)
     % Explicit flags let square matrices choose full or symmetric payloads.
     Pf = pdvar(2, 2, {[0 1]}, "full");
     Ps = pdvar(2, 2, {[0 1]}, "symmetric");
@@ -45,7 +45,7 @@ function testDefaultDegreeOne(testCase)
     testCase.verifyEqual(P.SourceSummary, "decision");
 end
 
-function testDegreeZeroSharesOneDecisionAcrossGrid(testCase)
+function testDegZerShaOneDec(testCase)
     % Degree-zero variables are parameter-independent on the stored grid.
     P = pdvar(1, {[0 1 2 3]}, Degree=0);
     c1 = P.coeffs(1);
@@ -58,7 +58,7 @@ function testDegreeZeroSharesOneDecisionAcrossGrid(testCase)
     verifySameVars(testCase, c1{1}, c3{1});
 end
 
-function testArbitraryScalarDegrees(testCase)
+function testArbScaDeg(testCase)
     % Constructor-created decisions support every nonnegative scalar degree.
     P2 = pdvar(1, {[0 1]}, Degree=2);
     P4 = pdvar(1, {[0 1]}, Degree=4);
@@ -71,7 +71,7 @@ function testArbitraryScalarDegrees(testCase)
     testCase.verifyEqual(numel(P4.coeffs(1)), 5);
 end
 
-function testScalarGridVectorShorthand(testCase)
+function testScaGriVecSho(testCase)
     % A plain numeric vector is accepted as the one-parameter grid.
     P = pdvar(2, [0 1], Degree=0);
 
@@ -81,7 +81,7 @@ function testScalarGridVectorShorthand(testCase)
 end
 
 function testDegreeValidation(testCase)
-    % Degree accepts row/column ell-vectors and rejects all other shapes.
+    % Degree accepts ell-vectors and reports owner-specific shape failures.
     grid = {[0 1], [10 20]};
     row = pdvar(1, grid, Degree=[0 2]);
     column = pdvar(1, grid, Degree=[0; 2]);
@@ -93,9 +93,18 @@ function testDegreeValidation(testCase)
         testCase.verifyError(@() pdvar(2, grid, Degree=bad{k}), ...
             "pdvar:InvalidDegree");
     end
+
+    try
+        pdvar(2, grid, Degree=[1 2 3]);
+        error("tests:ExpectedError", "The invalid degree did not fail.");
+    catch err
+    end
+    testCase.verifyEqual(string(err.identifier), "pdvar:InvalidDegree");
+    testCase.verifyEqual(string(err.message), ...
+        "Degree must be a finite nonnegative integer scalar or an ell-element vector.");
 end
 
-function testScalarDegreeWarningAndSilentDefaults(testCase)
+function testScaDegWarAndSil(testCase)
     % Explicit multidimensional scalar shorthand warns; defaults and 1-D do not.
     grid = {[0 1], [10 20]};
     explicit = constructWithWarning(testCase, ...
@@ -119,7 +128,7 @@ function testBoundarySharing(testCase)
     verifySameVars(testCase, left{2}, right{1});
 end
 
-function testScalarDegreeTwoUsesFiveGlobalControls(testCase)
+function testScaDegTwoUseFiv(testCase)
     % Two quadratic cells share only their common endpoint control handle.
     P = pdvar(1, {[0 1 2]}, Degree=2);
     left = P.coeffs(1);
@@ -136,7 +145,7 @@ function testScalarDegreeTwoUsesFiveGlobalControls(testCase)
     testCase.verifyEmpty(intersect(leftIds(1:2), rightIds(2:3)));
 end
 
-function testTensorCoefficientOrdering(testCase)
+function testTenCoeOrd(testCase)
     % Tensor labels use combRows order: [0 0], [0 1], [1 0], [1 1].
     P = pdvar(1, {[0 1 2], [10 20]});
     c11 = P.coeffs([1 1]);
@@ -147,7 +156,7 @@ function testTensorCoefficientOrdering(testCase)
     verifySameVars(testCase, c11{4}, c21{2});
 end
 
-function testTensorDegreeTwoSharesCompleteFaces(testCase)
+function testTenDegTwoShaCom(testCase)
     % Adjacent quadratic tensor cells reuse every control on their full face.
     P = pdvar(1, {[0 1 2], [10 20 30]}, Degree=[2 2]);
     c11 = P.coeffs([1 1]);
@@ -169,7 +178,7 @@ function testTensorDegreeTwoSharesCompleteFaces(testCase)
     testCase.verifyNotEqual(center, getvariables(c12{labelIndex(lbls, [1 1])}));
 end
 
-function testPartiallyConstantAxisUsesExpectedGlobalControls(testCase)
+function testParConAxiUseExp(testCase)
     % Degree [0 2] shares the complete constant axis and quadratic faces.
     P = pdvar(1, {[0 1 2], [10 20 30]}, Degree=[0 2]);
     c11 = P.coeffs([1 1]);
@@ -194,7 +203,6 @@ function testRateBounds(testCase)
     rb = [-1 2; -3 4];
     P = pdvar(1, {[0 1], [10 20]}, RateBounds=rb);
 
-    testCase.verifyTrue(P.HasRateDependence);
     testCase.verifyEqual(P.RateBounds, rb);
     testCase.verifyError(@() pdvar(1, {[0 1]}, RateBounds=[0 1; -1 1]), ...
         "pdbase:InvalidRateBounds");
@@ -216,6 +224,24 @@ end
 function idx = labelIndex(lbls, label)
     % Locate one tensor Bernstein label in the package-wide combRows order.
     idx = find(all(lbls == label, 2), 1);
+end
+
+function testConInpAndOptParBou(testCase)
+    % Public parsing rejects missing grids and malformed option sequences.
+    testCase.verifyError(@() pdvar(1), "pdvar:InvalidInput");
+    testCase.verifyError(@() pdvar(1, 2), "pdvar:InvalidInput");
+    testCase.verifyError(@() pdvar(1, 2, 3), "pdvar:InvalidInput");
+    testCase.verifyError(@() pdvar(1, [0 1], 7), ...
+        "pdvar:InvalidOptions");
+    testCase.verifyError(@() pdvar(1, [0 1], "Degree"), ...
+        "pdvar:InvalidOptions");
+    testCase.verifyError(@() pdvar(1, [0 1], ...
+        "ValidationMode", "fast", "ValidationMode", "strict"), ...
+        "pdvar:InvalidValidationMode");
+    testCase.verifyError(@() pdvar(1, [0 1], ...
+        "IsContinuous", true), "pdvar:UnsupportedOption");
+    testCase.verifyError(@() pdvar(1, [0 1], "Unknown", 1), ...
+        "pdvar:UnknownOption");
 end
 
 function obj = constructWithWarning(testCase, fcn, warningId)

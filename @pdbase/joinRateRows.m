@@ -1,6 +1,24 @@
 function coeffs = joinRateRows(~, leaves, fcn, errId)
     %JOINRATEROWS Assemble aligned coefficient tables from several operands.
     %
+    %   Syntax:
+    %     coeffs = obj.joinRateRows(leaves, fcn, errId)
+    %
+    %   Arguments:
+    %     leaves - Cell array of flat coefficient tables from aligned operands.
+    %              Each table has either one ordinary row or the active
+    %              derivative-rate vertex rows.
+    %     fcn    - Function handle applied to one aligned coefficient tuple.
+    %     errId  - Error identifier owned by the public caller.
+    %
+    %   Output:
+    %     coeffs - Flat coefficient table with the active row count and the
+    %              shared coefficient-column count.
+    %
+    %   Example:
+    %     coeffs = obj.joinRateRows({lhsLeaf, rhsLeaf}, ...
+    %         @(parts) parts{1} + parts{2}, "pdvar:IncompatibleOperands");
+    %
     %   Ordinary one-row leaves broadcast to the active rate-row count. Any
     %   other row or coefficient-column mismatch is rejected.
 

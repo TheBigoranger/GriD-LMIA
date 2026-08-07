@@ -3,12 +3,13 @@ function tests = test_display_plot
     tests = functiontests(localfunctions);
 end
 
-function testDispAndDisplayText(testCase)
+function testDisAndDisTex(testCase)
     % disp should stay compact while display prints useful metadata.
     A = pdmat({[0 1]}, {1, 2}, Degree=1);
 
     short = evalc("disp(A)");
     detail = evalc("display(A)");
+    unnamed = evalc("display(pdmat({[0 1]}, {1, 2}, Degree=1))");
 
     testCase.verifyTrue(contains(short, "pdmat [1 1] over 1-D grid"));
     testCase.verifyTrue(contains(short, "source coefficient-backed"));
@@ -16,9 +17,10 @@ function testDispAndDisplayText(testCase)
     testCase.verifyTrue(contains(detail, "pdmat with 1-by-1 matrix values"));
     testCase.verifyTrue(contains(detail, "rho_1: [0, 1], 2 nodes"));
     testCase.verifyTrue(contains(detail, "Coefficients per cell: 2"));
+    testCase.verifyTrue(contains(unnamed, "pdmat with 1-by-1 matrix values"));
 end
 
-function testPlotOneDimensionalFunctionBacked(testCase)
+function testPloOneDimFunBac(testCase)
     % 1-D plotting should sample through evaluate and label each matrix entry.
     fig = figure("Visible", "off");
     cleaner = onCleanup(@() close(fig));
@@ -44,20 +46,22 @@ function testPlotOneDimensionalFunctionBacked(testCase)
     clear cleaner
 end
 
-function testPlotTwoDimensionalSurfaceDefaults(testCase)
+function testPloTwoDimSurDef(testCase)
     % 2-D plotting should create one transparent surface per matrix entry.
     fig = figure("Visible", "off");
     cleaner = onCleanup(@() close(fig));
     A = pdmat({[0 1], [10 20]}, @(rho, eta) [rho + eta, rho - eta]);
 
-    h = plot(A, [1 2], SamplesPerCell=2, EdgeColor="none");
+    hDefault = plot(A, [1 2], SamplesPerCell=1);
+    testCase.verifyEqual(hDefault(1).FaceAlpha, 0.5);
+    h = plot(A, [1 2], SamplesPerCell=2, EdgeColor="none", FaceAlpha=0.7);
     lgd = findobj(fig, "Type", "legend");
     ax = gca;
     colors = lines(2);
 
     testCase.verifyEqual(numel(h), 2);
     testCase.verifyEqual(size(h(1).XData), [3 3]);
-    testCase.verifyEqual(h(1).FaceAlpha, 0.5);
+    testCase.verifyEqual(h(1).FaceAlpha, 0.7);
     testCase.verifyEqual(h(1).FaceColor, colors(1, :), AbsTol=1e-12);
     testCase.verifyEqual(h(2).FaceColor, colors(2, :), AbsTol=1e-12);
     testCase.verifyEqual(string(h(1).EdgeColor), "none");
@@ -72,7 +76,20 @@ function testPlotTwoDimensionalSurfaceDefaults(testCase)
     clear cleaner
 end
 
-function testPlotHigherDimensionalSlices(testCase)
+function testPloExpUseDefNam(testCase)
+    % An unnamed expression should use the documented fallback legend name.
+    fig = figure("Visible", "off");
+    cleaner = onCleanup(@() close(fig));
+    A = pdmat([0 1], @(rho) rho);
+
+    plot(A + 0, SamplesPerCell=1);
+    lgd = findobj(fig, "Type", "legend");
+
+    testCase.verifyEqual(string(lgd.String{1}), "$A_{1,1}$");
+    clear cleaner
+end
+
+function testPloHigDimSli(testCase)
     % Higher-dimensional objects should fix unselected dimensions at lower bounds.
     fig = figure("Visible", "off");
     cleaner = onCleanup(@() close(fig));
@@ -87,11 +104,30 @@ function testPlotHigherDimensionalSlices(testCase)
     clear cleaner
 end
 
-function testPlotOptionValidation(testCase)
+function testPloOptVal(testCase)
     % Invalid plot dimensions and sample counts should fail clearly.
     A = pdmat({[0 1], [10 20]}, @(rho, eta) rho + eta);
 
     testCase.verifyError(@() plot(A, [1 2 3]), "pdmat:InvalidPlotDimensions");
     testCase.verifyError(@() plot(A, [1 1]), "pdmat:InvalidPlotDimensions");
     testCase.verifyError(@() plot(A, SamplesPerCell=0), "pdmat:InvalidPlotOptions");
+    testCase.verifyError(@() plot(A, "SamplesPerCell"), ...
+        "pdmat:InvalidPlotOptions");
+
+    R = pdmat([0 1], {{1, 2; 3, 4}}, Degree=1, RateBounds=[-1 1]);
+    testCase.verifyError(@() plot(R, RateVertex=1, RateVertex=2), ...
+        "pdmat:InvalidRateVertex");
+end
+
+function testPloMulCelNoDup(testCase)
+    % Adjacent cells should contribute their shared sample only once.
+    fig = figure("Visible", "off");
+    cleaner = onCleanup(@() close(fig));
+    A = pdmat([0 0.5 1], @(rho) rho);
+
+    h = plot(A, SamplesPerCell=2);
+
+    testCase.verifyEqual(h.XData, [0 0.25 0.5 0.75 1], AbsTol=1e-12);
+    testCase.verifyEqual(h.YData, h.XData, AbsTol=1e-12);
+    clear cleaner
 end

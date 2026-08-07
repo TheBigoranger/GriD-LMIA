@@ -5,6 +5,9 @@ function n = ncoeff(obj)
     %     n = ncoeff(obj)
     %     n = obj.ncoeff()
     %
+    %   Output:
+    %     n - Number of local Bernstein coefficients per physical cell.
+    %
     %   Example:
     %     obj = pdbase({[0 1], [10 20]}, [1 1], 2);
     %     n = obj.ncoeff();

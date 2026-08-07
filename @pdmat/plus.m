@@ -6,6 +6,9 @@ function out = plus(lhs, rhs)
     %     C = A + M
     %     C = M + A
     %
+    %   Output:
+    %     C - Coefficient-backed pdmat sum after grid and degree alignment.
+    %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     C = A + 3;
@@ -22,7 +25,7 @@ function out = plus(lhs, rhs)
 
         % The identity fast path must still enforce ordinary addition compatibility.
         if ~isempty(zeroVal)
-            if zeroVal.hasRateRows() || out.hasRateRows()
+            if zeroVal.NumRateRows ~= 0 || out.NumRateRows ~= 0
                 zeroVal = [];
             end
         end
@@ -45,5 +48,5 @@ function out = plus(lhs, rhs)
         return
     end
 
-    out = binOp(lhs, rhs, @(a, b) a + b, "pdmat:InvalidAddition");
+    out = knownBinOp(lhs, rhs, @(a, b) a + b, "pdmat:InvalidAddition");
 end

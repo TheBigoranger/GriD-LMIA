@@ -3,7 +3,7 @@ function tests = test_evaluate
     tests = functiontests(localfunctions);
 end
 
-function testOrdinaryCoefficientInterpolation(testCase)
+function testOrdCoeInt(testCase)
     % One stored coefficient row should reconstruct one matrix value.
     obj = pdbase({[0 2]}, [1 1], 2, {{1, 3, 9}});
 
@@ -12,11 +12,11 @@ function testOrdinaryCoefficientInterpolation(testCase)
     testCase.verifyEqual(val, 4, AbsTol=1e-12);
 end
 
-function testRateRowsEvaluateIndependently(testCase)
+function testRatRowEvaInd(testCase)
     % Multiple stored rows should remain a row cell array in storage order.
     vals = {{1, 3; 10, 14}};
     obj = pdbase({[0 2]}, [1 1], 1, vals, ...
-        HasRateDependence=true, RateBounds=[-1 1]);
+        RateBounds=[-1 1]);
 
     rows = obj.evaluate(0.5);
 
@@ -25,7 +25,7 @@ function testRateRowsEvaluateIndependently(testCase)
     testCase.verifyEqual(rows{2}, 11, AbsTol=1e-12);
 end
 
-function testRejectsBadPointsWithBaseErrors(testCase)
+function testRejBadPoiWitBas(testCase)
     % Direct pdbase calls should own malformed and out-of-domain errors.
     obj = pdbase({[0 1], [10 20]}, [1 1], 1);
 

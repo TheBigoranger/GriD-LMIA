@@ -5,6 +5,9 @@ function n = ncell(obj)
     %     n = ncell(obj)
     %     n = obj.ncell()
     %
+    %   Output:
+    %     n - Total number of physical tensor-grid cells.
+    %
     %   Example:
     %     obj = pdbase({[0 1 2], [10 20]}, [1 1], 0);
     %     n = obj.ncell();

@@ -3,7 +3,7 @@ function tests = test_construction
     tests = functiontests(localfunctions);
 end
 
-function testFunctionDefaultDegree(testCase)
+function testFunDefDeg(testCase)
     % Function-backed construction should keep the exact handle and
     % placeholders.
     A = pdmat({[0 1 2]}, @(rho) [rho, rho + 1]);
@@ -14,7 +14,6 @@ function testFunctionDefaultDegree(testCase)
     testCase.verifyEqual(size(A), [1 2]);
     testCase.verifyTrue(A.IsContinuous);
     testCase.verifyFalse(A.ContainsDecision);
-    testCase.verifyFalse(A.HasRateDependence);
     testCase.verifyEmpty(A.RateBounds);
     testCase.verifyEqual(A.SourceSummary, "function");
     testCase.verifyEqual(A.FunctionHandle(2), [2 3]);
@@ -23,7 +22,7 @@ function testFunctionDefaultDegree(testCase)
     testCase.verifyEqual(A.coeffs(2), {zeros(1, 2), zeros(1, 2)});
 end
 
-function testFunctionNonuniformDegreeTensor(testCase)
+function testFunNonDegTen(testCase)
     % Explicit-degree tensor functions should populate Bernstein
     % coefficients.
     A = pdmat({[0 2], [10 14]}, ...
@@ -43,7 +42,7 @@ function testFunctionNonuniformDegreeTensor(testCase)
     testCase.verifyEqual(A.evaluate([0.5 11]), [121.5; -120.5], AbsTol=1e-10);
 end
 
-function testFunctionDegreePopulatesPolynomialCoefficients(testCase)
+function testFunDegPopPolCoe(testCase)
     % Polynomial handles should become coefficient-backed when Degree is
     % explicit.
     A = pdmat({[0 2]}, @(rho) rho.^2, Degree=2);
@@ -56,7 +55,7 @@ function testFunctionDegreePopulatesPolynomialCoefficients(testCase)
     testCase.verifyEqual(coeffs{3}, 4, AbsTol=1e-10);
 end
 
-function testFunctionDegreeUsesForwardAlphaOnNonuniformCells(testCase)
+function testFunDegUseForAlp(testCase)
     % Each cell should order fitted controls from its physical lower to
     % upper face.
     A = pdmat({[-2 0.5 4]}, @(rho) rho.^2, Degree=2);
@@ -68,7 +67,25 @@ function testFunctionDegreeUsesForwardAlphaOnNonuniformCells(testCase)
     testCase.verifyEqual([second{:}], [0.25, 2, 16], AbsTol=1e-10);
 end
 
-function testScalarGridVectorShorthand(testCase)
+function testNumFalMatPol(testCase)
+    % Numeric fallback should certify matrix polynomials on every cell.
+    A = pdmat({[0 0.4 1]}, @numericOnlyMatrixPolynomial, Degree=2);
+
+    first = A.coeffs(1);
+    second = A.coeffs(2);
+    testCase.verifyEqual(first, {
+        [0, 0; 1, 2], ...
+        [0, 0.2; 1, 2], ...
+        [0.16, 0.4; 1, 2]
+        }, AbsTol=1e-10);
+    testCase.verifyEqual(second, {
+        [0.16, 0.4; 1, 2], ...
+        [0.4, 0.7; 1, 2], ...
+        [1, 1; 1, 2]
+        }, AbsTol=1e-10);
+end
+
+function testScaGriVecSho(testCase)
     % A plain numeric vector is accepted as the one-parameter grid.
     A = pdmat([0 1 2], {10, 20, 30}, Degree=1);
 
@@ -77,7 +94,7 @@ function testScalarGridVectorShorthand(testCase)
     testCase.verifyEqual(A.coeffs(2), {20, 30});
 end
 
-function testFunctionDoesNotSampleWholeGrid(testCase)
+function testFunDoeNotSamWho(testCase)
     % Function-only construction should probe size without sampling every
     % node.
     A = pdmat({[0 1 2]}, @lowerOnly);
@@ -88,7 +105,7 @@ function testFunctionDoesNotSampleWholeGrid(testCase)
     testCase.verifyEqual(A.coeffs(2), {zeros(1, 2), zeros(1, 2)});
 end
 
-function testGlobalDegreeTwoScalar(testCase)
+function testGloDegTwoSca(testCase)
     % Scalar global Bernstein data should form overlapping local cells.
     data = {10, 11, 12, 13, 14};
     A = pdmat({[0 1 2]}, data, Degree=2);
@@ -101,7 +118,7 @@ function testGlobalDegreeTwoScalar(testCase)
     testCase.verifyEqual(A.coeffs(2), {12, 13, 14});
 end
 
-function testTensorGlobalCellGrid(testCase)
+function testTenGloCelGri(testCase)
     % Tensor global cell data should preserve grid metadata and local
     % order.
     data = cell(3, 2);
@@ -128,7 +145,31 @@ function testTensorGlobalCellGrid(testCase)
     testCase.verifyEqual(coeffs, {[2 1], [2 2], [3 1], [3 2]});
 end
 
-function testExplicitNestedLocalValues(testCase)
+function testAniMulCelMatGri(testCase)
+    % Public global-grid construction must retain every anisotropic matrix
+    % coefficient and every shared physical face in two and three parameters.
+    cases = {
+        {[0 1 3], [-2 0 4]}, [2 1], [2 3]
+        {[0 1 3], [-2 0 4], [10 15]}, [1 2 1], [2 2]
+        };
+
+    for k = 1:size(cases, 1)
+        grid = cases{k, 1};
+        deg = cases{k, 2};
+        sz = cases{k, 3};
+        data = makeGridMats(grid, deg, sz);
+        A = constructWarningFree(testCase, ...
+            @() pdmat(grid, data, Degree=deg));
+
+        testCase.verifyEqual(A.Degree, deg);
+        testCase.verifyEqual(A.MatrixSize, sz);
+        testCase.verifyTrue(A.IsContinuous);
+        verifyGridMap(testCase, A, data);
+        verifySharedFaces(testCase, A);
+    end
+end
+
+function testExpNesLocVal(testCase)
     % Misaligned nested LocalValues should warn without changing their
     % data.
     localValues = {
@@ -148,7 +189,7 @@ function testExplicitNestedLocalValues(testCase)
     testCase.verifyEqual(A.coeffs([1 1]), mkCoeff(100));
 end
 
-function testTwoDimensionalGlobalBernsteinData(testCase)
+function testTwoDimGloBerDat(testCase)
     % A 3-by-3 global degree-one grid should share faces in both
     % directions.
     grid = {[0 1 2], [10 20 30]};
@@ -171,11 +212,11 @@ function testTwoDimensionalGlobalBernsteinData(testCase)
     testCase.verifyEqual(c11([2 4]), c12([1 3]));
 end
 
-function testTwoDimensionalAlignedNestedLocalValues(testCase)
+function testTwoDimAliNesLoc(testCase)
     % Explicit tensor local values remain continuous when every face
     % agrees.
     grid = {[0 1 2], [10 20 30]};
-    localValues = mkAligned2DLocalValues();
+    localValues = mkAliDloVal();
 
     A = constructWarningFree(testCase, ...
         @() pdmat(grid, localValues, Degree=[1 1]));
@@ -186,7 +227,7 @@ function testTwoDimensionalAlignedNestedLocalValues(testCase)
     testCase.verifyEqual(A.coeffs([1 1]), {11, 12, 21, 22});
 end
 
-function testNestedLocalValuesContinuityTolerance(testCase)
+function testNesLocValConTol(testCase)
     % Shared faces use the package's scale-aware numerical tolerance.
     grid = {[0 1 2]};
     withinTol = {{1, 2}, {2 + 1e-10, 3}};
@@ -200,7 +241,7 @@ function testNestedLocalValuesContinuityTolerance(testCase)
     testCase.verifyFalse(B.IsContinuous);
 end
 
-function testScalarDegreeWarningAndSilentOmittedForms(testCase)
+function testScaDegWarAndSil(testCase)
     % Only explicit multidimensional scalar Degree uses the expansion
     % warning.
     grid = {[0 1], [10 20]};
@@ -221,7 +262,7 @@ function testScalarDegreeWarningAndSilentOmittedForms(testCase)
     testCase.verifyEqual(oneDimensional.Degree, 1);
 end
 
-function testAnisotropicGlobalInferenceAndNestedExplicitDegree(testCase)
+function testAniGloInfAndNes(testCase)
     % Global shape infers each axis; flat nested leaves need explicit
     % vectors.
     grid = {[0 0.5 1], [10 20]};
@@ -248,6 +289,19 @@ function testAnisotropicGlobalInferenceAndNestedExplicitDegree(testCase)
         "pdmat:InvalidDegree");
 end
 
+function testGloHigDimAndExtDimVal(testCase)
+    % Global grids accept implicit singleton axes and reject extra data axes.
+    grid = {[0 1], [10 20], [100 200]};
+    A = pdmat(grid, {1, 2; 3, 4}, Degree=[1 1 0]);
+
+    testCase.verifyEqual(A.Degree, [1 1 0]);
+    testCase.verifyEqual(A.coeffs([1 1 1]), {1, 2, 3, 4});
+
+    bad = reshape(num2cell(1:8), [2 2 2]);
+    testCase.verifyError(@() pdmat({[0 1], [10 20]}, bad), ...
+        "pdmat:InvalidData");
+end
+
 function c = mkCoeff(offset)
     % Keep matrix payloads distinct while preserving flat coefficient
     % order.
@@ -259,12 +313,74 @@ function c = mkCoeff(offset)
         };
 end
 
-function vals = mkAligned2DLocalValues()
+function vals = mkAliDloVal()
     % Keep tensor labels ordered as [0 0], [0 1], [1 0], [1 1].
     vals = {
         {{11, 12, 21, 22}, {12, 13, 22, 23}}, ...
         {{21, 22, 31, 32}, {22, 23, 32, 33}}
         };
+end
+
+function data = makeGridMats(grid, deg, sz)
+    % Give every global tensor label a distinct rectangular/square payload.
+    dims = (cellfun(@numel, grid) - 1) .* deg + 1;
+    data = cell(dims);
+    nPar = numel(grid);
+    for k = 1:numel(data)
+        subs = cell(1, nPar);
+        [subs{:}] = ind2sub(dims, k);
+        key = sum((cell2mat(subs) - 1) .* 10 .^ (0:(nPar - 1)));
+        data{k} = reshape(key + (1:prod(sz)), sz);
+    end
+end
+
+function verifyGridMap(testCase, A, data)
+    % Compare every local coefficient label with its global-grid source entry.
+    labels = labelRowsExpected(A.Degree);
+    cells = A.cells();
+    for c = 1:size(cells, 1)
+        leaf = A.coeffs(cells(c, :));
+        for k = 1:size(labels, 1)
+            idx = (cells(c, :) - 1) .* A.Degree + labels(k, :) + 1;
+            subs = num2cell(idx);
+            testCase.verifyEqual(leaf{k}, data{subs{:}}, AbsTol=0);
+        end
+    end
+end
+
+function verifySharedFaces(testCase, A)
+    % Adjacent cells must expose the same complete matrix face in every axis.
+    labels = labelRowsExpected(A.Degree);
+    cells = A.cells();
+    nCell = A.GridInfo.NumNodes - 1;
+    for c = 1:size(cells, 1)
+        for dim = 1:numel(A.Degree)
+            if cells(c, dim) >= nCell(dim) || A.Degree(dim) == 0
+                continue
+            end
+            next = cells(c, :);
+            next(dim) = next(dim) + 1;
+            left = A.coeffs(cells(c, :));
+            right = A.coeffs(next);
+            face = find(labels(:, dim) == A.Degree(dim));
+            for k = reshape(face, 1, [])
+                other = labels(k, :);
+                other(dim) = 0;
+                j = find(all(labels == other, 2), 1);
+                testCase.verifyEqual(left{k}, right{j}, AbsTol=0);
+            end
+        end
+    end
+end
+
+function rows = labelRowsExpected(deg)
+    % Enumerate tensor labels independently with the last axis varying fastest.
+    rows = (0:deg(1)).';
+    for dim = 2:numel(deg)
+        next = (0:deg(dim)).';
+        rows = [repelem(rows, numel(next), 1), ...
+            repmat(next, size(rows, 1), 1)]; %#ok<AGROW>
+    end
 end
 
 function obj = constructWithWarning(testCase, fcn, warningId)
@@ -294,4 +410,12 @@ function out = lowerOnly(rho)
         error("test:UnexpectedSample", "Constructor should only probe the lower point.");
     end
     out = [1 2];
+end
+
+function out = numericOnlyMatrixPolynomial(rho)
+    % Force numeric fallback while retaining exact matrix-polynomial data.
+    if ~isnumeric(rho)
+        error("test:NoSymbolicPath", "Use numeric fallback.");
+    end
+    out = [rho.^2, rho; 1, 2];
 end

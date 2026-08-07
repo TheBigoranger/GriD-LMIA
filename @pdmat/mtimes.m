@@ -29,11 +29,11 @@ function out = mtimes(lhs, rhs)
             (helper.isZero(lhs, "obj") || helper.isZero(rhs, "obj"))
         rb = lhs.pickRateBounds("pdmat:InvalidMultiplication", lhs, rhs);
         grid = lhs.mergeGrid("pdmat:MixedGrid", lhs, rhs);
-        if lhs.hasRateRows() || rhs.hasRateRows()
+        if lhs.NumRateRows ~= 0 || rhs.NumRateRows ~= 0
             % Even a proven-zero product must not bypass the exact-grid
             % contract attached to explicit rate-vertex coefficient tables.
-            asData(grid, lhs, [], rb, "pdmat:InvalidMultiplication");
-            asData(grid, rhs, [], rb, "pdmat:InvalidMultiplication");
+            normOperand(grid, lhs, [], rb, "pdmat:InvalidMultiplication");
+            normOperand(grid, rhs, [], rb, "pdmat:InvalidMultiplication");
         end
         out = zeroObj(grid, prodSz(lhs.MatrixSize, rhs.MatrixSize, ...
         "pdmat:InvalidMultiplication"));
@@ -60,7 +60,7 @@ function out = mtimes(lhs, rhs)
         if helper.isZero(lhs, "obj")
             out = zeroObj(lhs.GridInfo.Vectors, lhs.MatrixSize);
         else
-            out = unOp(lhs, @(a) a * rhs);
+            out = mapUnary(lhs, @(a) a * rhs);
         end
 
         return
@@ -72,7 +72,7 @@ function out = mtimes(lhs, rhs)
         if helper.isZero(rhs, "obj")
             out = zeroObj(rhs.GridInfo.Vectors, rhs.MatrixSize);
         else
-            out = unOp(rhs, @(a) lhs * a);
+            out = mapUnary(rhs, @(a) lhs * a);
         end
 
         return
@@ -81,8 +81,8 @@ function out = mtimes(lhs, rhs)
     % Align both operands on the common refinement grid before multiplication.
     rb = anchor.pickRateBounds("pdmat:InvalidMultiplication", lhs, rhs);
     grid = anchor.mergeGrid("pdmat:MixedGrid", lhs, rhs);
-    ld = asData(grid, lhs, [], rb, "pdmat:InvalidMultiplication");
-    rd = asData(grid, rhs, [], rb, "pdmat:InvalidMultiplication");
+    ld = normOperand(grid, lhs, [], rb, "pdmat:InvalidMultiplication");
+    rd = normOperand(grid, rhs, [], rb, "pdmat:InvalidMultiplication");
 
     % A 1-by-1 coefficient payload scales the other matrix; non-scalars
     % retain MATLAB's ordinary inner-dimension requirement.
@@ -90,10 +90,10 @@ function out = mtimes(lhs, rhs)
         "pdmat:InvalidMultiplication");
 
     % Multiply local Bernstein coefficients cell by cell.
-    plan = anchor.productPlan(ld.Degree, rd.Degree);
-    vals = anchor.prodLocalValues(ld.LocalValues, ld.Degree, ...
+    vals = anchor.prodVals(ld.LocalValues, ld.Degree, ...
         rd.LocalValues, rd.Degree, grid, ...
-        "pdmat:InvalidMultiplication", plan, "fast");
+        "pdmat:InvalidMultiplication", "fast", ...
+        ld.NumRateRows, rd.NumRateRows);
 
     % Compact products that cancel to an all-zero coefficient payload.
     if helper.isZero(vals, "vals")
@@ -101,11 +101,8 @@ function out = mtimes(lhs, rhs)
         return
     end
 
-    hasRate = ld.HasRateDependence || rd.HasRateDependence;
-    if ~hasRate
-        rb = [];
-    end
-    out = mkObj(grid, vals, ld.Degree + rd.Degree, rb);
+    out = mkCoeffObj(grid, vals, ld.Degree + rd.Degree, rb, [], [], [], ...
+        "fast", max(ld.NumRateRows, rd.NumRateRows));
 end
 
 function sz = prodSz(lhs, rhs, errId)

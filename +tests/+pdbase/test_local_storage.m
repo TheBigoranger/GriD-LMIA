@@ -35,7 +35,6 @@ function testRateOutside(testCase)
         RateBounds=[-1 1; -2 2]);
 
     coeffs = obj.coeffs([1 1]);
-    testCase.verifyTrue(obj.HasRateDependence);
     testCase.verifyEqual(obj.RateBounds, [-1 1; -2 2]);
     testCase.verifyEqual(numel(coeffs), 1);
     testCase.verifyEqual(coeffs{1}, 0);

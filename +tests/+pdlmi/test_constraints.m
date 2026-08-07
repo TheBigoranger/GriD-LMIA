@@ -8,7 +8,7 @@ function setupOnce(~)
     yalmip("clear");
 end
 
-function testComparisonDefaults(testCase)
+function testComDef(testCase)
     % pdvar comparisons should return inspectable pdlmi wrappers.
     P = pdvar(2, {[0 0.5 1]}, "symmetric");
 
@@ -25,11 +25,11 @@ function testComparisonDefaults(testCase)
     testCase.verifyTrue(isequal(Cpos.Residual, P));
     testCase.verifyEqual(Cneg.Relation, "<=");
     testCase.verifyEqual(Cpos.Relation, ">=");
-    verifyConstraintCells(testCase, Cneg);
-    verifyConstraintCells(testCase, Cpos);
+    veriConCel(testCase, Cneg);
+    veriConCel(testCase, Cpos);
 end
 
-function testRateRowsAllConstrained(testCase)
+function testRatRowAllCon(testCase)
     % rhodiff stores one row per rate vertex; pdlmi constrains every row.
     P = pdvar(2, {[0 1 2]}, "symmetric", RateBounds=[-1 1]);
     D = rhodiff(P);
@@ -38,10 +38,23 @@ function testRateRowsAllConstrained(testCase)
 
     testCase.verifyClass(C, "pdlmi");
     testCase.verifyEqual(numel(C.Constraints), 4);
-    verifyConstraintCells(testCase, C);
+    veriConCel(testCase, C);
 end
 
-function testTensorRateRowsAllConstrained(testCase)
+function testFixRatBouConOneRow(testCase)
+    % A fixed rate contributes one direct constraint without duplicate rows.
+    P = pdvar(2, {[0 1]}, "symmetric", RateBounds=[2 2]);
+    D = rhodiff(P);
+
+    C = D <= 0;
+
+    testCase.verifyEqual(size(D.coeffs(1)), [1 1]);
+    testCase.verifyEqual(D.NumRateRows, 1);
+    testCase.verifyEqual(numel(C.Constraints), 1);
+    veriConCel(testCase, C);
+end
+
+function testTenRatRowAllCon(testCase)
     % Tensor rate bounds create one constraint per rate vertex and coefficient.
     rb = [-1 1; -2 2];
     P = pdvar(2, {[0 1], [0 1]}, "symmetric", RateBounds=rb);
@@ -49,12 +62,28 @@ function testTensorRateRowsAllConstrained(testCase)
 
     C = D <= 0;
 
+    testCase.verifyEqual(D.NumRateRows, 4);
     testCase.verifyEqual(size(D.coeffs([1 1])), [4 4]);
     testCase.verifyEqual(numel(C.Constraints), 16);
-    verifyConstraintCells(testCase, C);
+    veriConCel(testCase, C);
 end
 
-function testComposedResidualWithRhodiff(testCase)
+function testFixTenRatRowAllCon(testCase)
+    % One fixed tensor direction contributes two distinct assembly rows.
+    rb = [1 1; -3 5];
+    P = pdvar(2, {[0 1], [10 12]}, "symmetric", ...
+        Degree=[1 1], RateBounds=rb);
+    D = rhodiff(P);
+
+    C = D <= 0;
+
+    testCase.verifyEqual(D.NumRateRows, 2);
+    testCase.verifyEqual(size(D.coeffs([1 1])), [2 4]);
+    testCase.verifyEqual(numel(C.Constraints), 8);
+    veriConCel(testCase, C);
+end
+
+function testComResWitRho(testCase)
     % Residual assembly should constrain every elevated derivative rate row.
     P = pdvar(2, {[0 1]}, "symmetric");
     A = pdmat({[0 1]}, {[-1 0; 0 -2], [-2 0; 0 -3]}, Degree=1);
@@ -62,15 +91,14 @@ function testComposedResidualWithRhodiff(testCase)
 
     C = R <= 0;
 
-    testCase.verifyTrue(R.HasRateDependence);
     testCase.verifyEqual(R.RateBounds, [-1 1]);
     testCase.verifyEqual(R.Degree, 2);
     testCase.verifyEqual(size(R.coeffs(1)), [2 3]);
     testCase.verifyEqual(numel(C.Constraints), 6);
-    verifyConstraintCells(testCase, C);
+    veriConCel(testCase, C);
 end
 
-function testHighDegreeResidualConstraintCount(testCase)
+function testHigDegResConCou(testCase)
     % Direct assembly constrains every rate row of a cubic residual.
     P = pdvar(2, {[0 1]}, "symmetric", Degree=2);
     A = pdmat({[0 1]}, {[-1 0; 0 -2], [-2 0; 0 -3]}, Degree=1);
@@ -81,22 +109,22 @@ function testHighDegreeResidualConstraintCount(testCase)
     testCase.verifyEqual(R.Degree, 3);
     testCase.verifyEqual(size(R.coeffs(1)), [2 4]);
     testCase.verifyEqual(numel(C.Constraints), 8);
-    verifyConstraintCells(testCase, C);
+    veriConCel(testCase, C);
 end
 
-function testEntrywiseDispatchAndTolerance(testCase)
+function testEntDisAndTol(testCase)
     % Rectangular and structurally full square residuals use vector inequalities.
     rectangular = pdvar(3, 2, {[0 1]}, "full", Degree=0);
-    rect = constructWithSingleWarning(testCase, @() rectangular >= 0);
+    rect = consWitSinWar(testCase, @() rectangular >= 0);
     testCase.verifyEqual(numel(rect.Constraints), 1);
-    verifyVectorConstraints(testCase, rect, 6);
+    veriVecCon(testCase, rect, 6);
 
     fullSquare = pdvar(2, {[0 1]}, "full", Degree=0);
-    square = constructWithSingleWarning(testCase, @() fullSquare <= 0);
+    square = consWitSinWar(testCase, @() fullSquare <= 0);
     fullCoeffs = fullSquare.coeffs(1);
     assign(fullCoeffs{1}, [-1 -2; -3 -4]);
     testCase.verifyGreaterThan(check(square.Constraints{1}), 0);
-    verifyVectorConstraints(testCase, square, 4);
+    veriVecCon(testCase, square, 4);
 
     symmetric = pdvar(2, {[0 1]}, "symmetric");
     testCase.verifyWarningFree(@() symmetric >= 0);
@@ -106,59 +134,59 @@ function testEntrywiseDispatchAndTolerance(testCase)
 
     % The numeric tolerance is inclusive at exactly 1e-10.
     atTol = internalPdvar({[0 1]}, [2 2], 0, ...
-        {{[0 1e-10; 0 0]}}, false, [], "test-at-tolerance");
+        {{[0 1e-10; 0 0]}}, [], "test-at-tolerance");
     aboveTol = internalPdvar({[0 1]}, [2 2], 0, ...
-        {{[0 1.0001e-10; 0 0]}}, false, [], "test-above-tolerance");
+        {{[0 1.0001e-10; 0 0]}}, [], "test-above-tolerance");
     testCase.verifyWarningFree(@() pdlmi(atTol, ">="));
-    constructWithSingleWarning(testCase, @() pdlmi(aboveTol, ">="));
+    consWitSinWar(testCase, @() pdlmi(aboveTol, ">="));
 end
 
-function testGlobalEntrywiseScanAcrossCellsAndRateRows(testCase)
+function testGloEntScaAcrCel(testCase)
     % A later offending coefficient changes every constraint in the wrapper.
     first = sdpvar(2, 2, 'symmetric');
     later = sdpvar(2, 2, 'full');
     acrossCells = internalPdvar({[0 1 2]}, [2 2], 0, ...
-        {{first}, {later}}, false, [], "test-later-cell");
-    cellwise = constructWithSingleWarning(testCase, @() acrossCells >= 0);
+        {{first}, {later}}, [], "test-later-cell");
+    cellwise = consWitSinWar(testCase, @() acrossCells >= 0);
     assign(first, [1 2; 2 1]);
     assign(later, [1 2; 3 4]);
 
     testCase.verifyEqual(numel(cellwise.Constraints), 2);
     testCase.verifyGreaterThan(check(cellwise.Constraints{1}), 0, ...
         "The earlier indefinite coefficient must be constrained entry-wise.");
-    verifyVectorConstraints(testCase, cellwise, 4);
+    veriVecCon(testCase, cellwise, 4);
 
     earlyRow = sdpvar(2, 2, 'symmetric');
     lateRow = sdpvar(2, 2, 'full');
     acrossRows = internalPdvar({[0 1]}, [2 2], 0, ...
-        {{earlyRow; lateRow}}, true, [-1 1], "test-later-rate-row");
-    ratewise = constructWithSingleWarning(testCase, @() acrossRows >= 0);
+        {{earlyRow; lateRow}}, [-1 1], "test-later-rate-row");
+    ratewise = consWitSinWar(testCase, @() acrossRows >= 0);
     assign(earlyRow, [1 2; 2 1]);
     assign(lateRow, [1 2; 3 4]);
 
     testCase.verifyEqual(numel(ratewise.Constraints), 2);
     testCase.verifyGreaterThan(check(ratewise.Constraints{1}), 0);
-    verifyVectorConstraints(testCase, ratewise, 4);
+    veriVecCon(testCase, ratewise, 4);
 end
 
-function testEntrywiseDirectPolyaAndFailureOrdering(testCase)
+function testEntDirPolAndFai(testCase)
     % Direct and elevated paths retain every cell, entry, and derivative row.
     V = pdvar(3, 2, {[0 1 2]}, "full", Degree=1);
-    direct = constructWithSingleWarning(testCase, @() V >= 0);
-    polya = constructWithSingleWarning(testCase, @() direct.applyPolya(2));
+    direct = consWitSinWar(testCase, @() V >= 0);
+    polya = consWitSinWar(testCase, @() direct.usePolya(2));
     D = rhodiff(V, [-1 1]);
-    rate = constructWithSingleWarning(testCase, @() D <= 0);
-    ratePolya = constructWithSingleWarning(testCase, @() rate.applyPolya());
+    rate = consWitSinWar(testCase, @() D <= 0);
+    ratePolya = consWitSinWar(testCase, @() rate.usePolya());
 
     testCase.verifyEqual(numel(direct.Constraints), 2 * 2);
     testCase.verifyEqual(numel(polya.Constraints), 2 * 4);
     testCase.verifyEqual(size(D.coeffs(1)), [2 1]);
     testCase.verifyEqual(numel(rate.Constraints), 2 * 2);
     testCase.verifyEqual(numel(ratePolya.Constraints), 2 * 2 * 2);
-    verifyVectorConstraints(testCase, direct, 6);
-    verifyVectorConstraints(testCase, polya, 6);
-    verifyVectorConstraints(testCase, rate, 6);
-    verifyVectorConstraints(testCase, ratePolya, 6);
+    veriVecCon(testCase, direct, 6);
+    veriVecCon(testCase, polya, 6);
+    veriVecCon(testCase, rate, 6);
+    veriVecCon(testCase, ratePolya, 6);
 
     % Option validation precedes classification, so failed construction is silent.
     lastwarn("");
@@ -168,7 +196,7 @@ function testEntrywiseDirectPolyaAndFailureOrdering(testCase)
     testCase.verifyEmpty(warnId);
 end
 
-function testAllowsSymmetricExpression(testCase)
+function testAllSymExp(testCase)
     % A full variable can still form an LMI after explicit symmetrization.
     P = pdvar(2, {[0 1]}, "full");
 
@@ -176,10 +204,10 @@ function testAllowsSymmetricExpression(testCase)
 
     testCase.verifyClass(C, "pdlmi");
     testCase.verifyEqual(numel(C.Constraints), 2);
-    verifyConstraintCells(testCase, C);
+    veriConCel(testCase, C);
 end
 
-function testPolyaConstructorForms(testCase)
+function testPolConFor(testCase)
     % Bare flags and Name=Value forms select the same elevation semantics.
     P = pdvar(2, {[0 1]}, "symmetric");
 
@@ -197,7 +225,7 @@ function testPolyaConstructorForms(testCase)
     testCase.verifyWarningFree(@() pdlmi(P, "<=", UsePolya=true));
 end
 
-function testImplicitPolyaWarnings(testCase)
+function testImpPolWar(testCase)
     % Supplying only the degree is accepted but must make the implicit mode visible.
     P = pdvar(1, {[0 1]});
     warnId = "pdlmi:ImplicitUsePolya";
@@ -214,7 +242,7 @@ function testImplicitPolyaWarnings(testCase)
     verifyPolya(testCase, zero, 0, 2);
 end
 
-function testPolyaOptionInteractions(testCase)
+function testPolOptInt(testCase)
     P = pdvar(2, {[0 1]}, "symmetric");
 
     direct = pdlmi(P, "<=", UsePolya=false, PolyaDegree=0);
@@ -226,7 +254,7 @@ function testPolyaOptionInteractions(testCase)
         "pdlmi:ConflictingPolyaOptions");
 end
 
-function testRemovedApiIsUnavailable(testCase)
+function testRemApiIsUna(testCase)
     % Keep the retired names out of source text while guarding the API boundary.
     P = pdvar(1, {[0 1]}, Degree=1);
     C = P >= 0;
@@ -240,7 +268,7 @@ function testRemovedApiIsUnavailable(testCase)
 end
 
 
-function testPolyaTensorAndRateConstraintCounts(testCase)
+function testPolTenAndRatCon(testCase)
     % Counts include every cell, elevated tensor label, and derivative rate row.
     grid = {[0 1 2], [10 20]};
     P = pdvar(1, grid, Degree=[1 1], RateBounds=[-1 1; -2 2]);
@@ -253,18 +281,18 @@ function testPolyaTensorAndRateConstraintCounts(testCase)
     testCase.verifyEqual(numel(tensor.Constraints), 2 * 1 * 4 ^ 2);
     testCase.verifyEqual(size(D.coeffs([1 1])), [4 4]);
     testCase.verifyEqual(numel(rate.Constraints), 2 * 4 * 3 ^ 2);
-    verifyConstraintCells(testCase, tensor);
-    verifyConstraintCells(testCase, rate);
+    veriConCel(testCase, tensor);
+    veriConCel(testCase, rate);
 end
 
-function testApplyPolyaRebuildsFromStoredResidual(testCase)
+function testAppPolRebFroSto(testCase)
     % Reapplying a degree replaces the selection rather than compounding it.
     P = pdvar(1, {[0 1]}, Degree=1);
     direct = P >= 0;
 
-    one = direct.applyPolya();
-    two = one.applyPolya(2);
-    zero = two.applyPolya(0);
+    one = direct.usePolya();
+    two = one.usePolya(2);
+    zero = two.usePolya(0);
 
     verifyDefaults(testCase, direct);
     verifyPolya(testCase, one, 1, 3);
@@ -276,7 +304,7 @@ function testApplyPolyaRebuildsFromStoredResidual(testCase)
 end
 
 
-function testPolyaCertificateAfterAssignment(testCase)
+function testPolCerAftAss(testCase)
     % Elevation can certify a positive polynomial whose original middle coefficient is negative.
     P = pdvar(1, {[0 1]}, Degree=2);
     coeffs = P.coeffs(1);
@@ -286,9 +314,9 @@ function testPolyaCertificateAfterAssignment(testCase)
     end
 
     direct = P >= 0;
-    polya = direct.applyPolya(1);
-    elevatedVals = P.elevVals(1);
-    elevated = cellfun(@value, elevatedVals{1});
+    polya = direct.usePolya(1);
+    elevatedObj = P.elevate(1);
+    elevated = cellfun(@value, elevatedObj.LocalValues{1});
     directCheck = check(toYalmip(direct));
     polyaCheck = check(toYalmip(polya));
 
@@ -298,7 +326,7 @@ function testPolyaCertificateAfterAssignment(testCase)
     testCase.verifyGreaterThan(min(polyaCheck), 0);
 end
 
-function testRelationValidation(testCase)
+function testRelVal(testCase)
     P = pdvar(1, {[0 1]});
 
     lower = pdlmi(P, '<=');
@@ -311,7 +339,7 @@ function testRelationValidation(testCase)
     testCase.verifyError(@() pdlmi(P, "="), "pdlmi:InvalidRelation");
 end
 
-function testMalformedConstructorOptions(testCase)
+function testMalConOpt(testCase)
     % Parser errors distinguish malformed syntax, duplicates, and unknown names.
     P = pdvar(1, {[0 1]});
     charMatrix = char('UsePolya', 'Unknown');
@@ -328,14 +356,14 @@ function testMalformedConstructorOptions(testCase)
         "PolyaDegree", "UsePolya"), "pdlmi:InvalidOptions");
 end
 
-function testPolyaDegreeValidation(testCase)
+function testPolDegVal(testCase)
     P = pdvar(1, {[0 1]});
     C = P >= 0;
     badMethod = {-1, 0.5, Inf, NaN, "one", [1 2]};
     badConstructor = {-1, 0.5, Inf, NaN, [1 2]};
 
     for k = 1:numel(badMethod)
-        testCase.verifyError(@() C.applyPolya(badMethod{k}), ...
+        testCase.verifyError(@() C.usePolya(badMethod{k}), ...
             "pdlmi:InvalidPolyaDegree");
     end
     for k = 1:numel(badConstructor)
@@ -356,14 +384,14 @@ function testToYalmip(testCase)
     testCase.verifyTrue(isa(F, "lmi") || isa(F, "constraint"));
 end
 
-function testAnisotropicDirectPolyaCountsAndReplacement(testCase)
+function testAniDirPolCouAnd(testCase)
     % Direction-wise increments use tensor counts and replace prior levels.
     grid = {[0 1], [10 20]};
     P = pdvar(1, grid, Degree=[1 3], RateBounds=[-1 2; -3 5]);
     direct = P >= 0;
-    vector = direct.applyPolya([1 0]);
-    bare = direct.applyPolya();
-    replaced = vector.applyPolya([0 2]);
+    vector = direct.usePolya([1 0]);
+    bare = direct.usePolya();
+    replaced = vector.usePolya([0 2]);
 
     verifyDefaults(testCase, direct);
     verifyPolya(testCase, vector, [1 0], prod([2 3] + 1));
@@ -373,57 +401,57 @@ function testAnisotropicDirectPolyaCountsAndReplacement(testCase)
 
     D = rhodiff(P);
     rateDirect = D <= 0;
-    ratePolya = rateDirect.applyPolya([0 1]);
+    ratePolya = rateDirect.usePolya([0 1]);
     testCase.verifyEqual(D.Degree, [1 3]);
     testCase.verifySize(D.coeffs([1 1]), [4 8]);
     testCase.verifyEqual(numel(rateDirect.Constraints), 4 * 8);
     testCase.verifyEqual(numel(ratePolya.Constraints), 4 * 2 * 5);
 end
 
-function testTensorPolyaDegreeValidation(testCase)
+function testTenPolDegVal(testCase)
     % Tensor Pólya accepts ell-vectors and rejects every other shape.
     P = pdvar(1, {[0 1], [10 20]}, Degree=[1 2]);
     direct = P >= 0;
-    accepted = direct.applyPolya([0; 2]);
+    accepted = direct.usePolya([0; 2]);
     testCase.verifyEqual(accepted.PolyaDegree, [0 2]);
 
     bad = {[], [1 2 3], [1 2; 3 4], -1, 0.5, Inf, NaN};
     for k = 1:numel(bad)
-        testCase.verifyError(@() direct.applyPolya(bad{k}), ...
+        testCase.verifyError(@() direct.usePolya(bad{k}), ...
             "pdlmi:InvalidPolyaDegree");
         testCase.verifyError(@() pdlmi(P, ">=", ...
             UsePolya=true, PolyaDegree=bad{k}), ...
             "pdlmi:InvalidPolyaDegree");
     end
-    testCase.verifyError(@() direct.applyPolya("one"), ...
+    testCase.verifyError(@() direct.usePolya("one"), ...
         "pdlmi:InvalidPolyaDegree");
     testCase.verifyError(@() pdlmi(P, ">=", ...
         UsePolya=true, PolyaDegree="one"), "pdlmi:UnknownOption");
 end
 
-function testToYalmipOneShotMatchesSequential(testCase)
+function testToYalOneShoMat(testCase)
     % Solver-facing one-shot concatenation must match the previous loop.
     P = pdvar(2, {[0 1]}, "symmetric");
     direct = P >= 0;
-    polya = direct.applyPolya(1);
+    polya = direct.usePolya(1);
     equality = pdvar(2, {[0 1]}, "full") == 0;
     rectangular = pdvar(2, 1, {[0 1]}, "full");
-    entrywise = constructWithSingleWarning(testCase, @() rectangular >= 0);
+    entrywise = consWitSinWar(testCase, @() rectangular >= 0);
 
     X = sdpvar(2);
     mixedExpr = internalPdvar({[0 1]}, [2 2], 1, ...
-        {{zeros(2), X}}, false, [], "test-mixed-export");
+        {{zeros(2), X}}, [], "test-mixed-export");
     mixed = mixedExpr >= 0;
 
     wrappers = {direct, polya, equality, entrywise, mixed};
     for k = 1:numel(wrappers)
         actual = toYalmip(wrappers{k});
-        reference = sequentialConstraints(wrappers{k}.Constraints);
-        verifyConstraintCollection(testCase, actual, reference);
+        reference = sequCon(wrappers{k}.Constraints);
+        veriConCol(testCase, actual, reference);
     end
 end
 
-function out = sequentialConstraints(entries)
+function out = sequCon(entries)
     % Reproduce the pre-optimization export loop as an independent oracle.
     state = warning;
     cleanup = onCleanup(@() warning(state)); %#ok<NASGU>
@@ -434,7 +462,7 @@ function out = sequentialConstraints(entries)
     end
 end
 
-function verifyConstraintCollection(testCase, actual, reference)
+function veriConCol(testCase, actual, reference)
     % Compare ordering, cone/equality type, variables, bases, and PSD blocks.
     testCase.verifyEqual(length(actual), length(reference));
     for k = 1:length(actual)
@@ -495,7 +523,7 @@ function verifyPolya(testCase, C, degree, count)
     testCase.verifyFalse(C.UsePutinar);
     testCase.verifyEqual(C.PutinarOrder, zero);
     testCase.verifyEqual(numel(C.Constraints), count);
-    verifyConstraintCells(testCase, C);
+    veriConCel(testCase, C);
 end
 
 function out = callWarningOff(fun, warnId)
@@ -515,7 +543,7 @@ function value = expandExpected(value, nPar)
     end
 end
 
-function out = constructWithSingleWarning(testCase, fun)
+function out = consWitSinWar(testCase, fun)
     % Capture the successful wrapper and assert one emitted dispatch warning.
     lastwarn("");
     txt = evalc('out = fun();');
@@ -525,7 +553,7 @@ function out = constructWithSingleWarning(testCase, fun)
         "The residual is non-square or has a non-Hermitian coefficient"), 1);
 end
 
-function verifyVectorConstraints(testCase, C, nEntry)
+function veriVecCon(testCase, C, nEntry)
     % Entry-wise assembly stores one column-vector inequality per coefficient.
     for k = 1:numel(C.Constraints)
         metadata = struct(C.Constraints{k});
@@ -533,7 +561,7 @@ function verifyVectorConstraints(testCase, C, nEntry)
     end
 end
 
-function obj = internalPdvar(grid, matrixSize, degree, vals, hasRate, rb, summary)
+function obj = internalPdvar(grid, matrixSize, degree, vals, rb, summary)
     % Build targeted coefficient trees that public continuous allocation cannot express.
     init = struct( ...
         "PdvarInternal", true, ...
@@ -543,7 +571,6 @@ function obj = internalPdvar(grid, matrixSize, degree, vals, hasRate, rb, summar
         "LocalValues", {vals}, ...
         "IsContinuous", false, ...
         "ContainsDecision", any(cellfun(@(x) isa(x, "sdpvar"), flatten(vals))), ...
-        "HasRateDependence", hasRate, ...
         "RateBounds", rb, ...
         "SourceSummary", summary);
     obj = pdvar(init);
@@ -561,7 +588,7 @@ function out = flatten(vals)
     end
 end
 
-function verifyConstraintCells(testCase, C)
+function veriConCel(testCase, C)
     testCase.verifyTrue(iscell(C.Constraints));
     testCase.verifySize(C.Constraints, [numel(C.Constraints), 1]);
     for k = 1:numel(C.Constraints)
