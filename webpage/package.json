@@ -3,7 +3,8 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "prebuild": "node scripts/sync-version.mjs && node scripts/generate-reference-index.mjs && node scripts/copy-manual.mjs",
+    "prebuild": "node scripts/sync-version.mjs && node scripts/generate-reference-index.mjs && node scripts/generate-call-graphs.mjs && node scripts/copy-manual.mjs",
+    "generate:call-graphs": "node scripts/generate-call-graphs.mjs",
     "generate:index": "node scripts/generate-reference-index.mjs",
     "sync:version": "node scripts/sync-version.mjs",
     "dev": "astro dev",
@@ -28,6 +29,7 @@
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "@mermaid-js/mermaid-cli": "11.15.0",
     "playwright": "^1.62.0"
   }
 }

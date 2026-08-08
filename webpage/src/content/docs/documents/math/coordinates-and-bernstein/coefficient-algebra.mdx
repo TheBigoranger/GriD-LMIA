@@ -6,10 +6,23 @@ description: Exact sparse elevation, three product kernels, differentiation, and
 import ElevationPlanExplorer from "../../../../../components/ElevationPlanExplorer.tsx";
 import ProductPlanExplorer from "../../../../../components/ProductPlanExplorer.tsx";
 import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
+import CallGraph from "../../../../../components/CallGraph.astro";
 
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><span>Coordinates And Bernstein</span><span>/</span><span>Coefficient Algebra And Assembly Plans</span></nav>
 
 The package performs polynomial algebra on each physical cell in the tensor Bernstein basis. Elevation and multiplication change coefficient representations, but they preserve the represented function. The numeric plans described below may be reused across compatible cells and rate rows.
+
+## Shared Grid And Degree Alignment
+
+Binary algebra first forms a common physical grid, resolves rate bounds, and
+elevates both coefficient rows to the componentwise maximum degree vector.
+Only then does it assemble the cell result.
+
+<CallGraph family="alignment" caption="Shared grid, rate-box, and componentwise degree alignment." links={[
+  { href: "/GriD-LMIA/documents/math/gridding-and-degree/", label: "Grid and degree mathematics" },
+  { href: "/GriD-LMIA/documents/reference/pdmat/algebra/", label: "pdmat algebra API" },
+  { href: "/GriD-LMIA/documents/reference/pdvar/algebra/", label: "pdvar algebra API" },
+]} />
 
 ## Sparse Tensor Elevation
 
@@ -37,6 +50,12 @@ $$
 $$
 
 `elevRow` builds this operator for one source and target degree pair. `elevData` reuses the plan for every coefficient row with the same source degree, including repeated physical cells and rate rows. The public [`elevate`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-elevate) method rebuilds the same dynamic class with the elevated data.
+
+<CallGraph family="elevation" caption="Exact tensor-degree elevation keeps the represented function and dynamic value class." links={[
+  { href: "#sparse-tensor-elevation", label: "Elevation derivation" },
+  { href: "/GriD-LMIA/documents/reference/pdmat/elevate/", label: "elevate API" },
+  { href: "/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/", label: "pdbase elevation ownership" },
+]} />
 
 <ElevationPlanExplorer client:visible />
 
@@ -95,6 +114,12 @@ The known blocks multiply the affine blocks directly, so the result remains affi
 
 YALMIP `sdpvar` data must not enter `convn` because MATLAB convolution expects numeric arrays and cannot preserve affine symbolic block structure. `prodVals` therefore dispatches numeric data to tensor convolution and keeps symbolic data on the planned contraction paths.
 
+<CallGraph family="multiplication" caption="Multiplication selects one of three coefficient kernels after shared alignment." links={[
+  { href: "#normalized-product-identity", label: "Product derivation" },
+  { href: "/GriD-LMIA/documents/reference/pdmat/algebra/#pdmat-mtimes", label: "pdmat mtimes" },
+  { href: "/GriD-LMIA/documents/reference/pdvar/algebra/#pdvar-mtimes", label: "pdvar mtimes" },
+]} />
+
 <ProductPlanExplorer client:visible />
 
 ## Differentiation And Rate Rows
@@ -114,6 +139,12 @@ $$
 $$
 
 Each nonzero partial is elevated to a common tensor degree before rate weighting. A zero-degree axis contributes zero. The resulting lower and upper rate combinations are stored as separate rate rows in deterministic tensor order.
+
+<CallGraph family="differentiation" caption="Cellwise partials are re-elevated before rate-vertex rows are assembled." links={[
+  { href: "#differentiation-and-rate-rows", label: "Differentiation derivation" },
+  { href: "/GriD-LMIA/documents/reference/pdmat/rhodiff/", label: "pdmat rhodiff" },
+  { href: "/GriD-LMIA/documents/reference/pdvar/rhodiff/", label: "pdvar rhodiff" },
+]} />
 
 <RhodiffDiagram />
 

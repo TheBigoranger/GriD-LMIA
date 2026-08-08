@@ -39,12 +39,14 @@ The PSD condition makes the represented matrix positive semidefinite at every $\
 
 ## Dense Putinar Terms
 
-In one parameter, the package uses the parity-specific Markov–Lukács form. For a target degree $2r$, define the two Gram terms
+In one parameter, the package keeps the parity-specific Markov–Lukács form.
+Write $\mathbf M=(M_1)$ and $\mathbf r=(r_1)$. For
+$M_1=2r_1$, define the two Gram terms
 
 $$
 \begin{aligned}
 G_0(\alpha)&=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha),\\
-G_1(\alpha)&=Z_{r-1}(\alpha)^{\mathsf T}Q_1Z_{r-1}(\alpha).
+G_1(\alpha)&=Z_{r_1-1}(\alpha)^{\mathsf T}Q_1Z_{r_1-1}(\alpha).
 \end{aligned}
 $$
 
@@ -54,7 +56,7 @@ $$
 S(\alpha)=G_0(\alpha)+\alpha(1-\alpha)G_1(\alpha).
 $$
 
-For target degree $2r+1$, define the two Gram terms
+For target component $M_1=2r_1+1$, define the two Gram terms
 
 $$
 H_0(\alpha)=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha).

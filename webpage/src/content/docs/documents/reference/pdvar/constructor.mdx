@@ -3,6 +3,8 @@ title: pdvar Constructor
 description: Construct continuous YALMIP-backed Bernstein decision expressions.
 ---
 
+import CallGraph from "../../../../../components/CallGraph.astro";
+
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
   <span>/</span>
@@ -11,7 +13,7 @@ description: Construct continuous YALMIP-backed Bernstein decision expressions.
   <span>constructor</span>
 </nav>
 
-Cell indices, local coordinates, and modeled degree $m$ follow the
+Cell indices, local coordinates, and modeled degree $\mathbf m$ follow the
 [global notation](/GriD-LMIA/documents/math/notation/#bernstein-labels-and-degrees).
 
 The geometry and tensor Bernstein basis are identical to
@@ -60,6 +62,14 @@ than a separately assembled equality constraint.
 ## Purpose
 
 Create a continuous cell-local Bernstein decision expression backed by YALMIP coefficients.
+
+## Implementation Call Path
+
+<CallGraph family="constructors" caption="pdvar creates the direction-wise control lattice before common pdbase storage." links={[
+  { href: "/GriD-LMIA/documents/math/gridding-and-degree/", label: "Degree and grid mathematics" },
+  { href: "/GriD-LMIA/documents/reference/pdbase/constructor/", label: "pdbase storage API" },
+  { href: "/GriD-LMIA/documents/reference/pdmat/constructor/", label: "pdmat constructor" },
+]} />
 
 ## Syntax
 
@@ -119,11 +129,10 @@ physical cells while still carrying grid metadata. A zero component on one
 axis makes the decision constant in that direction; positive-degree axes
 retain their control lattice and shared faces.
 
-This is the standard forward-coordinate convention: `alpha=0` at the left
-endpoint, so local label `0` selects $P^{(c)}[0]$; `alpha=1` at the right
-endpoint, so local label `m` selects $P^{(c)}[m]$. At general degree $m$,
-label $i$ selects $P^{(c)}[i]$ and uses
-$B_i^m(\alpha)=\binom{m}{i}(1-\alpha)^{m-i}\alpha^i$.
+This is the standard forward-coordinate convention. In one parameter, write
+$\mathbf m=(m_1)$. Then `alpha=0` selects $P^{(c)}[0]$, while `alpha=1`
+selects $P^{(c)}[m_1]$. Label $i_1$ uses
+$B_{i_1}^{m_1}(\alpha)=\binom{m_1}{i_1}(1-\alpha)^{m_1-i_1}\alpha^{i_1}$.
 
 In the stored object, each labeled endpoint is a YALMIP matrix coefficient.
 For degree one, the stored leaves are
@@ -235,20 +244,22 @@ ans =
 ```matlab
 yalmip('clear')
 P = pdvar(1, {[0 1], [10 20]}, Degree=[2 0]);
-P.Degree
-P.ncoeff()
+T = bernTable(P, [1 1], "oneLine");
+disp(T)
 ```
 
 ```text
-ans =
-     2     0
+    CellSubscript                                        Expression
+    _____________    ___________________________________________________________________________________
 
-ans =
-     3
+       {[1 1]}       "(1-α1)^2 * 1*[internal(1)] + 2(1-α1)α1 * 1*[internal(2)] + α1^2 * 1*[internal(3)]"
 ```
 
 The second zero component makes `P` constant along that parameter direction
 while the first direction retains a quadratic control lattice.
+The `internal(1)`, `internal(2)`, and `internal(3)` identifiers are
+session-local YALMIP names from this clean session. The stable output is the
+three-term tensor expression and its constant factor along the second axis.
 
 ## Validation And Errors
 

@@ -13,7 +13,7 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>useFullBox</span>
 </nav>
 
-Gram bases, absolute order $r$, and target coefficients follow the
+Gram bases, absolute order $\mathbf r$, and target coefficients follow the
 [global certificate notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters).
 
 <CertificateNavigation selected="fullbox" showSections={false} />
@@ -39,8 +39,8 @@ Both forms rebuild from `C.Residual` and `C.Relation`, return a new object, and
 leave `C` unchanged. Reapplication therefore replaces an earlier full-box
 order, a Pólya selection, or a Putinar selection instead of compounding it.
 
-For a one-parameter residual of assembled degree $M$, the minimum is
-$\lfloor M/2\rfloor$. Even-degree residuals use an unweighted Gram block plus
+For a one-parameter residual of assembled degree $\mathbf M=(M_1)$, the minimum is
+$\lfloor M_1/2\rfloor$. Even-degree residuals use an unweighted Gram block plus
 an $\alpha(1-\alpha)$-weighted block when that block has a nonempty basis.
 Odd-degree residuals use separate $\alpha$- and
 $(1-\alpha)$-weighted blocks.
@@ -71,7 +71,7 @@ develops the Gram and Markov–Lukács background step by step.
 
 For one cell and one active rate row, let the sign-normalized residual have
 Bernstein coefficients $C^{(\mathbf c)}[(i,k)]$ at tensor degree $(3,3)$. The default order
-is $r=2$, so the residual is exactly elevated to degree $(4,4)$. The returned
+is $\mathbf r=(2,2)$, so the residual is exactly elevated to degree $(4,4)$. The returned
 constraint list has four PSD Gram constraints, followed by 25 exact affine
 matrix equalities:
 
@@ -157,6 +157,14 @@ it does not use the already elevated constraints.
 
 `ValidationMode` is transient, accepts case-insensitive `"fast"` or
 `"strict"`, applies only to this rebuild, and is neither stored nor inherited.
+
+## Anisotropic Assembly Output
+
+For $\mathbf M=(1,3)$ and $\mathbf r=(1,2)$, exact elevation first gives
+target degree $(2,4)$. The four full-box generator subsets use Gram basis
+degrees $(1,2)$, $(0,2)$, $(1,1)$, and $(0,1)$, with PSD dimensions
+$6$, $3$, $4$, and $2$. Their sum is matched to the $3\times5$ tensor of 15
+target coefficients.
 
 ## Validation And Errors
 

@@ -57,7 +57,11 @@ Public formulas use the forward coordinate
 $\alpha=(\rho-\rho_1^{(c)})/(\rho_1^{(c+1)}-\rho_1^{(c)})$ and the normalized factors
 
 $$
-B_j^m(\alpha)=\binom{m}{j}(1-\alpha)^{m-j}\alpha^j.
+\mathbf m=(m_1).
+$$
+
+$$
+B_{i_1}^{m_1}(\alpha)=\binom{m_1}{i_1}(1-\alpha)^{m_1-i_1}\alpha^{i_1}.
 $$
 
 The diagnostic uses the same public `alpha` name. Its rows are

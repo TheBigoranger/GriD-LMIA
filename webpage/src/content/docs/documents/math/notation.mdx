@@ -94,6 +94,23 @@ The public MATLAB properties store these degree and order vectors as
 $1\times\ell$ rows. Scalar inputs are uniform shorthand. These quantities are
 independent of the number of physical grid cells.
 
+The direction-wise label set, tensor basis, and coefficient count are
+
+$$
+\mathcal I_{\mathbf m}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}.
+$$
+
+$$
+B_{\mathbf i}^{\mathbf m}(\boldsymbol\alpha)=\prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
+$$
+
+$$
+|\mathcal I_{\mathbf m}|=\prod_{s=1}^{\ell}(m_s+1).
+$$
+
+Even when $\ell=1$, the degree is written $\mathbf m=(m_1)$. Parity,
+differentiation, and endpoint statements then refer to the component $m_1$.
+
 <span id="residual-and-positive-target"></span>
 
 ## <span id="residual-target"></span>Residual And Positive Target
@@ -103,8 +120,8 @@ On one physical cell,
 $$
 \begin{aligned}
 \mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
-&=\sum_{\mathbf i\in\{0,\ldots,M\}^{\ell}}
-B_{\mathbf i}^{M}(\boldsymbol\alpha)\\
+&=\sum_{\mathbf i\in\mathcal I_{\mathbf M}}
+B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)\\
 &\qquad{}\cdot\mathcal C^{(\mathbf c)}[\mathbf i].
 \end{aligned}
 $$

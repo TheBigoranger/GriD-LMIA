@@ -283,19 +283,19 @@ For P\'olya, the sparse elevation operator first produces degree $\mathbf H=\mat
 
 \ideastep{Basic idea} On one interval, endpoint factors can encode the domain exactly.  Even and odd target degrees require different weighted Gram patterns, so parity is a structural choice rather than a cosmetic one.
 
-\ideastep{Formula} In one variable, interval nonnegativity has exact parity-specific descriptions \cite{lukacs1918,deklerkhesslaurent2017}.  If \(\deg p\le2r\),
+\ideastep{Formula} In one variable, write the Gram order as $\mathbf r=(r_1)$. Interval nonnegativity has exact parity-specific descriptions \cite{lukacs1918,deklerkhesslaurent2017}. If $\deg p\le2r_1$,
 \[
 p\ge0\text{ on }[0,1]
   \Longleftrightarrow
   p=s_0+\alpha(1-\alpha)s_1,
 \]
-where \(s_0,s_1\) are SOS of degrees at most \(2r\) and \(2r-2\).  If \(\deg p\le2r+1\),
+where $s_0,s_1$ are SOS of degrees at most $2r_1$ and $2r_1-2$. If $\deg p\le2r_1+1$,
 \[
 p\ge0\text{ on }[0,1]
   \Longleftrightarrow
   p=(1-\alpha)s_L+\alpha s_U,
 \]
-where \(s_L,s_U\) are SOS of degree at most \(2r\).
+where $s_L,s_U$ are SOS of degree at most $2r_1$.
 
 For polynomial matrices, with
 \[
@@ -304,28 +304,28 @@ For polynomial matrices, with
 \]
 the even and odd forms are
 \[
-  S^{(c)}=Z_r^{\mathsf T}Q_0Z_r
-   +\alpha(1-\alpha)Z_{r-1}^{\mathsf T}Q_1Z_{r-1},
+  S^{(c)}=Z_{r_1}^{\mathsf T}Q_0Z_{r_1}
+   +\alpha(1-\alpha)Z_{r_1-1}^{\mathsf T}Q_1Z_{r_1-1},
   \qquad Q_0,Q_1\succeq0,
 \]
 and
 \[
-  S^{(c)}=(1-\alpha)Z_r^{\mathsf T}Q_LZ_r
-    +\alpha Z_r^{\mathsf T}Q_UZ_r,
+  S^{(c)}=(1-\alpha)Z_{r_1}^{\mathsf T}Q_LZ_{r_1}
+    +\alpha Z_{r_1}^{\mathsf T}Q_UZ_{r_1},
   \qquad Q_L,Q_U\succeq0.
 \]
-The second even block is absent at \(r=0\).  See \cite{aylwarditaniparrilo2007,schererhol2006} for polynomial-matrix context.
+The second even block is absent at $r_1=0$. See \cite{aylwarditaniparrilo2007,schererhol2006} for polynomial-matrix context.
 
-\ideastep{Worked example} A cubic residual has degree \(2r+1\) with \(r=1\).  It therefore uses two degree-one Gram bases: one multiplied by \(1-\alpha\) and one by \(\alpha\). This is the generic one-dimensional odd-degree full-box pattern.
+\ideastep{Worked example} A cubic residual has component degree $2r_1+1$ with $\mathbf r=(1)$. It therefore uses two degree-one Gram bases, one multiplied by $1-\alpha$ and one by $\alpha$. This is the generic one-dimensional odd-degree full-box pattern.
 
 \ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=9mm,
   box/.style={dp/result,
     font=\scriptsize,align=center,minimum width=57mm,minimum height=15mm}]
-  \node[box] (even) {even \(2r\)\\unweighted Gram \(+\)
+  \node[box] (even) {even $2r_1$\\unweighted Gram $+$
     \(\alpha(1-\alpha)\)-weighted Gram};
-  \node[box,right=of even] (odd) {odd \(2r+1\)\\
+  \node[box,right=of even] (odd) {odd $2r_1+1$\\
     \((1-\alpha)\) lower-face Gram \(+\)
     \(\alpha\) upper-face Gram};
 \end{tikzpicture}
@@ -338,7 +338,7 @@ Partition \(Q\) into \(n\)-by-\(n\) blocks \(Q_{ij}\). The Bernstein coefficient
   \sum_{\substack{0\le i,j\le d\\i+j=k-a}}
   \binom di\binom dj\,Q_{ij}.
 \]
-Equating this affine map to each target coefficient gives exact linear identities, while $Q\succeq0$ supplies the LMIs. For one parameter, \code{usePutinar} and \code{useFullBox} implement these exact parity forms. \code{useSpPut} and \code{useSpBox} apply their respective sliding tensor-window constructions to the active Putinar or FullBox terms. Their minimum absolute order is $\lfloor M/2\rfloor$, where $M$ is the assembled residual degree.
+Equating this affine map to each target coefficient gives exact linear identities, while $Q\succeq0$ supplies the LMIs. For one parameter, \code{usePutinar} and \code{useFullBox} implement these exact parity forms. \code{useSpPut} and \code{useSpBox} apply their respective sliding tensor-window constructions to the active Putinar or FullBox terms. With assembled degree $\mathbf M=(M_1)$, their minimum absolute order vector is $\mathbf r=(\lfloor M_1/2\rfloor)$.
 
 \section{Putinar Modules And Schm\"udgen Preorderings}
 \label{sec:certificate-putinar-schmudgen}
@@ -354,7 +354,7 @@ a Putinar quadratic module has the form
 \]
 Under the Archimedean hypothesis, every polynomial strictly positive on \(K\) has such a representation at some degree \cite{putinar1993}.  Compactness alone is not that theorem statement.  The package implements one box-specific, fixed-order selector, not a general-domain or general-generator parser.
 
-For one parameter, \code{usePutinar(r)} dispatches to the same exact even/odd Markov--Luk\'acs forms as \code{useFullBox(r)}. Its absolute default and minimum are $r=\lfloor M/2\rfloor$. Even targets use the unweighted and $\alpha(1-\alpha)$-weighted Gram blocks and match at degree $2r$, while odd targets use the two endpoint-weighted Gram blocks and match at degree $2r+1$.
+For one parameter, \code{usePutinar(r)} dispatches to the same exact even/odd Markov--Luk\'acs forms as \code{useFullBox(r)}. Write the assembled degree and absolute order as $\mathbf M=(M_1)$ and $\mathbf r=(r_1)$. The default and minimum satisfy $r_1=\lfloor M_1/2\rfloor$. Even targets use the unweighted and $\alpha(1-\alpha)$-weighted Gram blocks and match at component degree $2r_1$, while odd targets use the two endpoint-weighted Gram blocks and match at component degree $2r_1+1$.
 
 For \(\ell\ge2\), use the local box generators
 \[
@@ -425,7 +425,7 @@ Let $t$ index the active Putinar terms and let $\widetilde C^{(\mathbf c)}[\math
 \]
 The sum is literal. If two windows contain the same ordered pair $(\boldsymbol\eta,\boldsymbol\zeta)$, their independent Gram blocks both contribute to the same target coefficient. For a symmetric scalar Gram matrix, an off-diagonal entry represents both ordered pairs. For a polynomial matrix, the two ordered block terms $Q[\boldsymbol\eta,\boldsymbol\zeta]$ and $Q[\boldsymbol\zeta,\boldsymbol\eta]$ provide the corresponding symmetry accounting. The implementation assembles every local PSD block first and then creates exactly $\prod_s(h_s+1)$ coefficient identities.
 
-\ideastep{Worked example} Consider one scalar parameter, even target degree four, absolute order $r=2$, and clique size $b=2$. The unweighted Putinar term has Gram degree $d=2$, window size two, and the two windows $\{0,1\}$ and $\{1,2\}$. The weighted term has Gram degree $d=1$ and one window $\{0,1\}$. SparsePutinar therefore has three PSD blocks of dimension two and five exact coefficient identities. The label pair $(1,1)$ belongs to both unweighted windows, so both independent blocks contribute to target label two.
+\ideastep{Worked example} Consider one scalar parameter, target degree $\mathbf M=(4)$, absolute order $\mathbf r=(2)$, and clique size $b=2$. The unweighted Putinar term has component Gram degree $d_1=2$, window size two, and the two windows $\{0,1\}$ and $\{1,2\}$. The weighted term has component Gram degree $d_1=1$ and one window $\{0,1\}$. SparsePutinar therefore has three PSD blocks of dimension two and five exact coefficient identities. The label pair $(1,1)$ belongs to both unweighted windows, so both independent blocks contribute to target label two.
 
 \begin{center}
 \begin{tikzpicture}[node distance=6mm and 7mm,
@@ -572,7 +572,7 @@ Q_{J,\mathbf u}
 \]
 The one-parameter parity terms use the same window rule. A window for an $n$-by-$n$ semidefinite target has PSD dimension $n\prod_s q_{J,s}$, and term $J$ contains $\prod_s(a_{J,s}-q_{J,s}+2)$ independent windows. The reusable Bernstein--Gram map in \cref{sec:certificate-gram-map} expands each window through its diagonal and paired off-diagonal label contributions, then all active terms and windows are summed into the common target coefficients.
 
-\ideastep{Worked example} For one parameter, even assembled residual degree $M=4$, and absolute order $r=2$, the unweighted term has basis labels $\{0,1,2\}$ and the weighted term has labels $\{0,1\}$. At $w=2$, the unweighted windows are $\{0,1\}$ and $\{1,2\}$, while the weighted term has one window $\{0,1\}$. The certificate therefore has three independent PSD blocks of dimension two and five exact coefficient identities. The pair $(1,1)$ appears in both unweighted windows, so both diagonal Gram entries contribute to target label two.
+\ideastep{Worked example} For one parameter, take the even assembled residual degree $\mathbf M=(4)$ and absolute order $\mathbf r=(2)$. The unweighted term has basis labels $\{0,1,2\}$ and the weighted term has labels $\{0,1\}$. At $w=2$, the unweighted windows are $\{0,1\}$ and $\{1,2\}$, while the weighted term has one window $\{0,1\}$. The certificate therefore has three independent PSD blocks of dimension two and five exact coefficient identities. The pair $(1,1)$ appears in both unweighted windows, so both diagonal Gram entries contribute to target label two.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -589,7 +589,7 @@ The one-parameter parity terms use the same window rule. A window for an $n$-by-
 \textit{The side length changes the number and size of independent tensor-window blocks, while the target coefficient identities remain exact.}
 \end{center}
 
-\code{useSpBox(w,r)} uses one scalar window side length $w$, default two, and the same dimension-dependent absolute-order minimum as FullBox: $\lfloor M/2\rfloor$ in one parameter and componentwise $\lceil\mathbf M/2\rceil$ otherwise. The selected-state property remains \code{BandWidth}, but it stores the tensor-window side length. Width one canonicalizes to actual Direct state after order validation. A width that spans every order axis canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, stored rate row, matrix entry in entry-wise mode, active term, and window owns fresh Gram variables. The method adds no hidden margin and makes no solver call.
+\code{useSpBox(w,r)} uses one scalar window side length $w$, default two, and the same dimension-dependent absolute-order minimum as FullBox. The minimum is $\mathbf r=(\lfloor M_1/2\rfloor)$ when $\mathbf M=(M_1)$ and componentwise $\lceil\mathbf M/2\rceil$ otherwise. The selected-state property remains \code{BandWidth}, but it stores the tensor-window side length. Width one canonicalizes to actual Direct state after order validation. A width that spans every order axis canonicalizes to actual FullBox state. Intermediate widths retain SparseFullBox state. Every physical cell, stored rate row, matrix entry in entry-wise mode, active term, and window owns fresh Gram variables. The method adds no hidden margin and makes no solver call.
 
 \section{Seven Different Modeling Choices}
 \label{sec:certificate-modeling-choices}

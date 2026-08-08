@@ -5,6 +5,7 @@ description: Cell-local YALMIP constraints for PD-LMI expressions.
 
 import CertificateChooser from "../../../../../components/CertificateChooser.astro";
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+import CallGraph from "../../../../../components/CallGraph.astro";
 
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
@@ -13,7 +14,7 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
 </nav>
 
 Throughout this reference,
-$S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$ and $M$ is the assembled
+$S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$ and $\mathbf M$ is the assembled
 residual degree; see the
 [global notation](/GriD-LMIA/documents/math/notation/#residual-and-positive-target).
 
@@ -27,6 +28,12 @@ Putinar box assembly, tensor-window SparsePutinar assembly, tensor-window
 SparseFullBox assembly, and fixed-order
 FullBox Bernstein-Gram preordering are explicit alternatives.
 
+<CallGraph family="certificates" caption="Certificate selectors rebuild the pdlmi from the original residual and store finite constraints for toYalmip." links={[
+  { href: "/GriD-LMIA/documents/math/sos-certificates/#implementation-call-path", label: "Certificate assembly mathematics" },
+  { href: "/GriD-LMIA/documents/reference/pdlmi/toyalmip/", label: "toYalmip API" },
+  { href: "/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/", label: "Direct and Pólya" },
+]} />
+
 <CertificateNavigation />
 
 <CertificateChooser />
@@ -35,9 +42,9 @@ The six paths begin with the same stored residual. **Direct** tests every
 local coefficient and is the default. **Pólya** exactly elevates that residual
 before repeating the direct test. In one parameter, **Putinar** and
 **FullBox** dispatch to the same parity-specific Markov–Lukács form with
-minimum order `floor(M/2)`. In two or more parameters, Putinar uses an
+minimum order `floor(M1/2)` for $\mathbf M=(M_1)$. In two or more parameters, Putinar uses an
 unweighted Gram term plus one generator-weighted term per axis at minimum
-`ceil(M/2)`, while FullBox includes every generator-subset product.
+componentwise `ceil(Degree/2)`, while FullBox includes every generator-subset product.
 **SparsePutinar** retains the Putinar parity or singleton-generator terms and
 uses overlapping tensor windows over each Bernstein Gram basis. In one
 parameter, `CliqueSize=1` normalizes to Direct. In higher dimensions it

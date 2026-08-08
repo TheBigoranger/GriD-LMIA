@@ -1,0 +1,10 @@
+flowchart LR
+  A["mtimes"] --> B["shared alignment"]
+  B --> C["prodVals"]
+  C --> D{"payload class"}
+  D --> E["numeric convolution"]
+  D --> F["known-affine contraction"]
+  D --> G["generic planned product"]
+  E --> H["reconstructed result"]
+  F --> H
+  G --> H

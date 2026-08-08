@@ -1,10 +1,17 @@
 export const versionHistory = [
   {
+    version: "v1.3.1",
+    date: "2026-08-08",
+    status: "current documentation",
+    summary:
+      "Uses vector degree notation throughout, adds independent anisotropic examples and direct selected-cell bernTable outputs, and connects six complex operation families to their implementation call paths and mathematical derivations.",
+  },
+  {
     version: "v1.3.0",
     date: "2026-08-08",
-    status: "current documentation and latest tagged GitHub Release",
+    status: "latest tagged GitHub Release",
     summary:
-      "Consolidates the public API around bernTable, elevate, usePolya, usePutinar, useSpPut, useSpBox, and useFullBox. It documents sparse elevation, the numeric, known-affine, and generic product kernels, reusable Bernstein–Gram maps, sliding tensor-window certificates, and three interactive assembly-plan explorers.",
+      "Introduced the v1.3 public API documentation, sparse elevation and product-kernel explanations, reusable Bernstein–Gram maps, sliding tensor-window certificates, and three interactive assembly-plan explorers.",
   },
   {
     version: "v1.2.4",

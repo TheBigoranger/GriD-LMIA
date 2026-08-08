@@ -63,10 +63,10 @@ obj = pdbase(..., ValidationMode=mode)
 \end{itemize}
 
 \examplehead
-This backend example constructs a two-parameter parent object.  The object has two physical cells because the first parameter has two intervals and the second parameter has one interval.
+This backend example constructs a three-parameter parent object with the anisotropic degree $\mathbf m=(1,3,0)$. The first direction has two physical intervals, the other directions have one interval, and the zero third component makes every local polynomial constant along the third parameter.
 
 \begin{lstlisting}[style=dpmatlab]
-obj = pdbase({[0 1 2], [10 20]}, [2 2], 1);
+obj = pdbase({[0 1 2], [10 20], [5 9]}, [2 2], [1 3 0]);
 objectClass = class(obj)
 matrixSize = obj.MatrixSize
 degree = obj.Degree
@@ -81,16 +81,16 @@ objectClass = 'pdbase'
 matrixSize = 1×2 double
      2     2
 
-degree = 1×2 double
-     1     1
+degree = 1×3 double
+     1     3     0
 cellCount = 2
-coefficientCount = 4
-parameterCount = 2
+coefficientCount = 8
+parameterCount = 3
 objectSize = 1×2 double
      2     2
 \end{lstlisting}
 
-The printed \code{ncoeff} value is \(\prod_s(m_s+1)=(1+1)(1+1)=4\), one local Bernstein coefficient for each tensor-product label in the two parameter directions.
+The printed \code{ncoeff} value is $\prod_s(m_s+1)=(1+1)(3+1)(0+1)=8$, one local Bernstein coefficient for each label in $\mathcal I_{\mathbf m}$. This count is part of the backend inspection contract, so it is shown directly here rather than used as a proxy for an operation result.
 
 \remarkshead
 \begin{itemize}[leftmargin=*]
@@ -262,7 +262,7 @@ D = rhodiff(A, rateBounds)
 \left(A^{(\mathbf c)}[\mathbf i+\mathbf e_s]-A^{(\mathbf c)}[\mathbf i]\right),
 \qquad i_s=0,\ldots,m_s-1.
 \]
-For one parameter, an input of degree $m>0$ returns degree $m-1$, while degree zero remains degree zero. For more than one parameter, a nonzero-axis partial first has degree $\mathbf m-\mathbf e_s$, then is elevated exactly to the common tensor degree $\mathbf m=\code{A.Degree}$ before the rate-weighted partials are added, so \code{D.Degree=A.Degree}. A zero-degree axis contributes the zero partial and still remains part of that common degree vector. Each physical-cell leaf has \code{D.NumRateRows} rows, one per distinct rate-box vertex in \code{helper.rateVerts(D.RateBounds)} order. The result has \code{IsContinuous=false} and derivative source metadata. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the degree reduction, common-degree restoration, and row ordering.
+For one parameter, an input degree $\mathbf m=(m_1)$ with $m_1>0$ returns $(m_1-1)$, while $(0)$ remains $(0)$. For more than one parameter, a nonzero-axis partial first has degree $\mathbf m-\mathbf e_s$, then is elevated exactly to the common tensor degree $\mathbf m=\code{A.Degree}$ before the rate-weighted partials are added, so \code{D.Degree=A.Degree}. A zero-degree axis contributes the zero partial and still remains part of that common degree vector. Each physical-cell leaf has \code{D.NumRateRows} rows, one per distinct rate-box vertex in \code{helper.rateVerts(D.RateBounds)} order. The result has \code{IsContinuous=false} and derivative source metadata. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the degree reduction, common-degree restoration, and row ordering.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]

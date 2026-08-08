@@ -67,6 +67,32 @@ A = pdmat(..., ValidationMode=mode)
   \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It controls only repeated post-normalization structural checks and is not stored. Public source validation remains complete in both modes.
 \end{itemize}
 
+The two public constructors share the same normalization boundary. A \code{pdmat} validates known source data, while a \code{pdvar} creates and shares YALMIP control matrices. Both paths store a normalized grid and vector degree in \code{pdbase}. The basis and storage mathematics are given in \cref{sec:bernstein-tensor-grids}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=7mm and 7mm,
+  choice/.style={dp/call-branch,diamond,aspect=2,text width=15mm,
+    minimum height=9mm,inner sep=1pt}]
+  \node[dp/call-entry] (entry) {\hyperref[sec:pdmat-construction]{\code{pdmat}} or\\\hyperref[sec:pdvar-construction]{\code{pdvar}}};
+  \node[dp/call-step,right=of entry] (parse) {parse dimensions, source,\\and options};
+  \node[dp/call-step,right=of parse] (normal) {\code{mkGrid} and \code{normDeg}\\normalize $\mathcal G$ and $\mathbf m$};
+  \node[choice,below=of normal] (fork) {constructor\\kind};
+  \node[dp/call-branch,below left=9mm and 18mm of fork] (source) {\code{pdmat}: source conversion\\or function validation};
+  \node[dp/call-branch,below right=9mm and 18mm of fork] (control) {\code{pdvar}: control lattice\\and shared-face handles};
+  \node[dp/call-result,below=25mm of fork] (store) {\hyperref[sec:pdbase-constructor]{\code{pdbase}}\\cell-local storage};
+  \draw[dp/call-arrow] (entry) -- (parse);
+  \draw[dp/call-arrow] (parse) -- (normal);
+  \draw[dp/call-arrow] (normal) -- (fork);
+  \draw[dp/call-arrow] (fork) -- (source);
+  \draw[dp/call-arrow] (fork) -- (control);
+  \draw[dp/call-arrow] (source) -- (store.west);
+  \draw[dp/call-arrow] (control) -- (store.east);
+\end{tikzpicture}
+\caption{Constructor call path. The public parser chooses known-source conversion or decision-control construction after the common grid and vector-degree normalization.}
+\label{fig:constructor-call-path}
+\end{figure}
+
 \examplehead
 The scalar-grid shorthand is the shortest coefficient-backed form.  The three numeric cells below are the global Bernstein coefficients for two physical cells with degree one.
 
@@ -88,26 +114,26 @@ degree = 1
 sourceSummary = "coefficient-backed"
 \end{lstlisting}
 
-For tensor grids, pass one grid vector per parameter.  The source cell array matches the global coefficient grid implied by the two parameter directions.
+For tensor grids, pass one grid vector per parameter. This independent example uses $\mathbf m=(2,1)$, so the first parameter has quadratic Bernstein variation and the second has linear variation. The selected-cell \code{oneLine} table prints the represented expression directly.
 
 \begin{lstlisting}[style=dpmatlab]
-B = pdmat({[0 1], [10 20]}, {1 2; 3 4}, Degree=[1 1]);
-disp(B)
-secondGridVector = B.GridInfo.Vectors{2}
-labels = B.lbls()
+B = pdmat({[0 1], [0 1]}, ...
+    @(rho1, rho2) rho1.^2 + 2*rho2, Degree=[2 1]);
+T = bernTable(B, [1 1], "oneLine");
+disp(T)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-pdmat [1 1] over 2-D grid, degree [1 1], source coefficient-backed, rate rows false
+    CellSubscript
+    _____________
 
-secondGridVector = 1×2 double
-    10    20
+       {[1 1]}
+\end{lstlisting}
+\begin{lstlisting}[style=dpwideoutput]
+    Expression
+    _________________________________________________________________________________________________________________
 
-labels = 4×2 double
-     0     0
-     0     1
-     1     0
-     1     1
+    "(1-α1)^2 * (1-α2)*0 + (1-α1)^2 * α2*2 + 2(1-α1)α1 * (1-α2)*0 + 2(1-α1)α1 * α2*2 + α1^2 * (1-α2)*1 + α1^2 * α2*3"
 \end{lstlisting}
 
 Use explicit nested \code{LocalValues} when each physical cell must be written directly.  Here each cell stores two \(1\times2\) row-vector coefficients.
@@ -228,16 +254,37 @@ B = A.elevate(degreeIncrement, validationMode)
 \descriptionhead
 The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row, \code{lbls} returns the zero-based tensor labels $\mathbf i\in\prod_s\{0,\ldots,m_s\}$, and \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, $\prod_s(m_s+1)$ coefficients per cell, and parameter directions. \code{elevate} accepts a scalar shorthand or direction-wise increment and returns a new \code{pdmat} at the componentwise degree sum while preserving the represented known function, metadata, physical cells, and stored rate-row order. The optional positional validation mode and its errors follow the canonical contract in \cref{sec:pdbase-elevate}. The sparse elevation map and its reuse are derived in \cref{sec:bernstein-degree-elevation}.
 
+For a source degree $\mathbf m$ and increment $\mathbf d$, \code{elevate} forms the target $\mathbf M=\mathbf m+\mathbf d$. The numeric ratios in \code{bernConvRatios} define a sparse exact change of Bernstein basis, so the returned coefficients represent the same function and introduce no new decision freedom. See \cref{sec:bernstein-degree-elevation} for the operator formula.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm]
+  \node[dp/call-entry] (entry) {\code{elevate}};
+  \node[dp/call-step,right=of entry] (norm) {\code{normDeg}};
+  \node[dp/call-step,right=of norm] (data) {\code{elevData}};
+  \node[dp/call-step,right=of data] (row) {\code{elevRow}};
+  \node[dp/call-step,right=of row] (ratio) {\code{bernConvRatios}};
+  \node[dp/call-result,below=of row] (result) {value-class copy\\with $\mathbf M$};
+  \draw[dp/call-arrow] (entry) -- (norm);
+  \draw[dp/call-arrow] (norm) -- (data);
+  \draw[dp/call-arrow] (data) -- (row);
+  \draw[dp/call-arrow] (row) -- (ratio);
+  \draw[dp/call-arrow] (ratio.south) |- (result.east);
+\end{tikzpicture}
+\caption{Elevation call path. The row kernel reuses exact binomial ratios for every matching source-target degree pair.}
+\label{fig:elevation-call-path}
+\end{figure}
+
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
-A = pdmat({[0 1]}, {1, 3}, Degree=1);
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
 physicalCells = A.cells()
 labels = A.lbls()
 sourceCoefficients = cell2mat(A.coeffs(1))
 counts = [A.ncell(), A.ncoeff(), A.npar()]
 B = A.elevate(1);
-elevatedObjectCoefficients = cell2mat(B.coeffs(1))
-degrees = [A.Degree, B.Degree]
+T = bernTable(B, 1, "oneLine");
+disp(T)
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
 physicalCells = 1
@@ -245,13 +292,14 @@ labels = 2×1 double
      0
      1
 sourceCoefficients = 1×2 double
-     1     3
+     1     2
 counts = 1×3 double
      1     2     1
-elevatedObjectCoefficients = 1×3 double
-     1     2     3
-degrees = 1×2 double
-     1     2
+
+    CellSubscript                 Expression
+    _____________    ____________________________________
+
+        {[1]}        "(1-α)^2*1 + 2(1-α)α*1.5000 + α^2*2"
 \end{lstlisting}
 
 A direction-wise increment changes only the requested axes. This two-parameter example elevates the first axis while retaining the second.
@@ -260,25 +308,23 @@ A direction-wise increment changes only the requested axes. This two-parameter e
 A = pdmat({[0 1], [0 1]}, ...
     @(rho1, rho2) rho1 + 2*rho2, Degree=[1 1]);
 B = A.elevate([1 0]);
-sourceDegree = A.Degree
-elevatedDegree = B.Degree
-coefficientCounts = [A.ncoeff(), B.ncoeff()]
-sameValue = [A.evaluate([0.25 0.75]), ...
-    B.evaluate([0.25 0.75])]
+T = bernTable(B, [1 1], "oneLine");
+disp(T)
 \end{lstlisting}
 
+The exact output table is split at its column boundary so the expression can wrap without changing its text.
+
 \begin{lstlisting}[style=dpoutput]
-sourceDegree = 1×2 double
-     1     1
+    CellSubscript
+    _____________
 
-elevatedDegree = 1×2 double
-     2     1
+       {[1 1]}
+\end{lstlisting}
+\begin{lstlisting}[style=dpwideoutput]
+    Expression
+    __________________________________________________________________________________________________________________
 
-coefficientCounts = 1×2 double
-     4     6
-
-sameValue = 1×2 double
-    1.7500    1.7500
+    "(1-α1)^2 * (1-α2)*0 + (1-α1)^2 * α2*2 + 2(1-α1)α1 * (1-α2)*0.5000 + 2(1-α1)α1 * α2*2.5000 + α1^2 * (1-α2)*1 + α1^2 * α2*3"
 \end{lstlisting}
 
 \remarkshead
@@ -381,29 +427,43 @@ D = rhodiff(A)
 D = rhodiff(A, rateBounds)
 \end{lstlisting}
 
-\arghead \code{rhodiff} differentiates coefficient-backed \code{pdmat} data cell by cell and returns a \code{pdmat} with numeric rate-vertex rows. Explicit \code{rateBounds} supplies missing metadata; when \code{A.RateBounds} is already stored, the explicit bounds must match it exactly. Without either source of bounds, the call raises \codeerr{pdmat}{MissingRateBounds}. Along axis \(s\), the local derivative coefficients are \(\frac{m_s}{h_s^{\mathbf c}}\bigl(A^{(\mathbf c)}[\mathbf i+\mathbf e_s]-A^{(\mathbf c)}[\mathbf i]\bigr)\). For one parameter, degree \(m>0\) therefore returns degree \(m-1\), while degree zero remains degree zero. For more than one parameter, each nonzero-axis partial is elevated exactly from \(\mathbf m-\mathbf e_s\) back to the common tensor degree \(\mathbf m=\code{A.Degree}\) before summation; a zero-degree axis contributes zero, and an all-zero tensor degree produces complete zero rate rows. The result is rate-dependent and generally discontinuous across cell faces. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the reduction, re-elevation, and deterministic rate-row order. A function-only source raises \codeerr{pdmat}{FunctionOnlyDiff}; malformed or inconsistent bounds raise \codeerr{pdmat}{InvalidRateBounds} or \codeerr{pdmat}{RateBoundsMismatch}; data that already contain explicit rate rows, including a previous derivative, raise \codeerr{pdmat}{InvalidDiff}.
+\arghead \code{rhodiff} differentiates coefficient-backed \code{pdmat} data cell by cell and returns a \code{pdmat} with numeric rate-vertex rows. Explicit \code{rateBounds} supplies missing metadata, and when \code{A.RateBounds} is already stored, the explicit bounds must match it exactly. Without either source of bounds, the call raises \codeerr{pdmat}{MissingRateBounds}. Along axis $s$, the local derivative coefficients are $\frac{m_s}{h_s^{\mathbf c}}\bigl(A^{(\mathbf c)}[\mathbf i+\mathbf e_s]-A^{(\mathbf c)}[\mathbf i]\bigr)$. For one parameter, the input degree is still the vector $\mathbf m=(m_1)$. If $m_1>0$, the result degree is $(m_1-1)$, while $\mathbf m=(0)$ remains $(0)$. For more than one parameter, each nonzero-axis partial is elevated exactly from $\mathbf m-\mathbf e_s$ back to the common tensor degree $\mathbf m=\code{A.Degree}$ before summation. A zero-degree axis contributes zero, and an all-zero tensor degree produces complete zero rate rows. The result is rate-dependent and generally discontinuous across cell faces. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the reduction, re-elevation, and deterministic rate-row order. A function-only source raises \codeerr{pdmat}{FunctionOnlyDiff}. Malformed or inconsistent bounds raise \codeerr{pdmat}{InvalidRateBounds} or \codeerr{pdmat}{RateBoundsMismatch}, and data that already contain explicit rate rows, including a previous derivative, raise \codeerr{pdmat}{InvalidDiff}.
+
+The implementation constructs the distinct rate vertices first. It then forms each cell partial, re-elevates multivariate partials exactly to the common degree, combines them with each rate vertex, and returns the owning value class through its \code{mkRhodiff} method. The derivative formula and rate-row layout are given in \cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=5.5mm]
+  \node[dp/call-entry] (entry) {\code{rhodiff}};
+  \node[dp/call-step,right=of entry] (verts) {\code{rateVerts}};
+  \node[dp/call-step,right=of verts] (partial) {cell partials};
+  \node[dp/call-step,right=of partial] (elev) {exact\\re-elevation};
+  \node[dp/call-step,right=of elev] (combine) {rate-weighted\\combination};
+  \node[dp/call-result,below=of elev] (result) {class-specific\\\code{mkRhodiff}};
+  \draw[dp/call-arrow] (entry) -- (verts);
+  \draw[dp/call-arrow] (verts) -- (partial);
+  \draw[dp/call-arrow] (partial) -- (elev);
+  \draw[dp/call-arrow] (elev) -- (combine);
+  \draw[dp/call-arrow] (combine.south) |- (result.east);
+\end{tikzpicture}
+\caption{Differentiation call path. Cell partials are combined only after their tensor degrees and the rate-vertex order are fixed.}
+\label{fig:rhodiff-call-path}
+\end{figure}
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat([0 1], {0, 2}, Degree=1, RateBounds=[-1 2]);
 D = rhodiff(A);
-disp("derivativeClass =")
-disp(class(D))
-disp("derivativeDegree =")
-disp(D.Degree)
-disp("derivativeRowValues =")
-disp(cell2mat(D.coeffs(1)))
+T = bernTable(D, 1, "oneLine");
+disp(T)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-derivativeClass =
-pdmat
-derivativeDegree =
-     0
+    CellSubscript    RateVertexIndex    RateVertex    Expression
+    _____________    _______________    __________    __________
 
-derivativeRowValues =
-    -2
-     4
+        {[1]}               1              {[-1]}       "1*-2"
+        {[1]}               2              {[ 2]}       "1*4"
 \end{lstlisting}
 
 In several parameters, each partial is restored to the common tensor degree before the rate-weighted sum. Here the four rate rows are constant over all four local labels, but the stored degree remains \([1,1]\).
@@ -413,19 +473,18 @@ A = pdmat({[0 1], [0 1]}, ...
     @(rho1, rho2) rho1 + 2*rho2, ...
     Degree=[1 1], RateBounds=[-1 1; -2 3]);
 D = rhodiff(A);
-derivativeDegree = D.Degree
-derivativeRows = cell2mat(D.coeffs([1 1]))
+T = bernTable(D, [1 1], "oneLine");
+disp(T)
 \end{lstlisting}
 
-\begin{lstlisting}[style=dpoutput]
-derivativeDegree = 1×2 double
-     1     1
+\begin{lstlisting}[style=dpwideoutput]
+    CellSubscript    RateVertexIndex    RateVertex                                                          Expression
+    _____________    _______________    __________    _______________________________________________________________________________________________________________________
 
-derivativeRows = 4×4 double
-    -5    -5    -5    -5
-     5     5     5     5
-    -3    -3    -3    -3
-     7     7     7     7
+       {[1 1]}              1           {[-1 -2]}     "(1-α1)^2 * (1-α2)*-4 + (1-α1)^2 * α2*-4 + 2(1-α1)α1 * (1-α2)*-5 + 2(1-α1)α1 * α2*-5 + α1^2 * (1-α2)*-6 + α1^2 * α2*-6"
+       {[1 1]}              2           {[ -1 3]}     "(1-α1)^2 * (1-α2)*6 + (1-α1)^2 * α2*6 + 2(1-α1)α1 * (1-α2)*5 + 2(1-α1)α1 * α2*5 + α1^2 * (1-α2)*4 + α1^2 * α2*4"
+       {[1 1]}              3           {[ 1 -2]}     "(1-α1)^2 * (1-α2)*-4 + (1-α1)^2 * α2*-4 + 2(1-α1)α1 * (1-α2)*-3 + 2(1-α1)α1 * α2*-3 + α1^2 * (1-α2)*-2 + α1^2 * α2*-2"
+       {[1 1]}              4           {[  1 3]}     "(1-α1)^2 * (1-α2)*6 + (1-α1)^2 * α2*6 + 2(1-α1)α1 * (1-α2)*7 + 2(1-α1)α1 * α2*7 + α1^2 * (1-α2)*8 + α1^2 * α2*8"
 \end{lstlisting}
 
 \section{Inspect Coefficients and Plot Values}
@@ -448,9 +507,9 @@ T = bernTable(A, cellSubs, "oneLine")
   \item \code{cellSubs} selects one physical cell. \item \code{"oneLine"} returns one row per selected physical cell and rate vertex with a compact Bernstein expression. \item Without \code{"oneLine"}, an ordinary object uses seven metadata columns; an explicit-rate-row object additionally includes \code{RateVertexIndex} and \code{RateVertex}. Their deterministic distinct-vertex order is \code{helper.rateVerts(A.RateBounds)} order.
 \end{itemize}
 
-For one parameter, the \code{Basis} column reports
+For one parameter, write the stored degree vector as $\mathbf m=(m_1)$. The \code{Basis} column reports
 \[
-  \binom{m}{j}(1-\alpha)^{m-j}\alpha^j.
+  \binom{m_1}{j}(1-\alpha)^{m_1-j}\alpha^j.
 \]
 For multiple parameters, the basis is the tensor product of that expression in each local coordinate, using \code{alpha1}, \code{alpha2}, and so on. \code{LocalIndex} is the local Bernstein label. \code{CoeffSubscript} maps the local label back to the global coefficient subscript on the physical grid.  \code{IsPhysicalNode} is true when that coefficient lies on a physical grid node.
 
@@ -687,6 +746,25 @@ The two entries are equal for every \(\rho_2\) along \(\rho_1=0\).  Their orderi
 
 A \code{pdmat} operation acts on complete matrix coefficients while the physical grid remains attached to the result.  The blocks below deliberately show one operation family at a time: purpose, supported syntax, input, immediate output, and---when the result is spatial---a before/after picture.
 
+Addition, subtraction, concatenation, block assembly, indexing assignment, and related binary operations use the same alignment path. The path exactly refines both operands to the union grid and elevates them to the componentwise maximum degree before it assembles the requested coefficient rows. The grid and elevation mathematics are given in \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm]
+  \node[dp/call-entry] (entry) {algebra or\\concatenation};
+  \node[dp/call-step,right=of entry] (grid) {\hyperref[sec:pdbase-mergegrid]{\code{mergeGrid}} and\\\code{pickRateBounds}};
+  \node[dp/call-step,right=of grid] (norm) {\code{normOperand}};
+  \node[dp/call-step,right=of norm] (elev) {\code{elevData} and\\\code{elevRow}};
+  \node[dp/call-result,right=of elev] (result) {aligned cell-row\\assembly};
+  \draw[dp/call-arrow] (entry) -- (grid);
+  \draw[dp/call-arrow] (grid) -- (norm);
+  \draw[dp/call-arrow] (norm) -- (elev);
+  \draw[dp/call-arrow] (elev) -- (result);
+\end{tikzpicture}
+\caption{Shared alignment call path. Every parameter direction is refined and elevated independently before the public operation combines coefficients.}
+\label{fig:alignment-call-path}
+\end{figure}
+
 \subsection{Signs, Addition, And Subtraction}
 
 Use signs, sums, and differences to build known matrix expressions. For two parameter-dependent operands, the backend first checks matching outer bounds, forms the sorted union of the interior nodes on every axis, and exactly subdivides/re-expresses both coefficient trees on that common grid. It then elevates both operands componentwise to \(\max(\mathbf m_A,\mathbf m_B)\) and combines matching coefficients. Numeric and affine constant operands are promoted on the active grid before the same coefficientwise operation. The corresponding MATLAB overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}; \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation} document the exact grid and degree mechanisms.
@@ -710,14 +788,15 @@ Here \code{M} is a finite real scalar or size-compatible matrix.  A scalar broad
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
 B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
 S = A + B;
-sumDegree = S.Degree
-sumCoefficients = cell2mat(S.coeffs(1))
+T = bernTable(S, 1, "oneLine");
+disp(T)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-sumDegree = 2
-sumCoefficients = 1×3 double
-     11.0000   21.5000   32.0000
+    CellSubscript                  Expression
+    _____________    _______________________________________
+
+        {[1]}        "(1-α)^2*11 + 2(1-α)α*21.5000 + α^2*32"
 \end{lstlisting}
 
 The middle coefficient of the elevated \(A\) is \((1+2)/2=1.5\), so the middle sum is \(1.5+20=21.5\). Subtraction and unary signs act immediately on the same local coefficients.
@@ -760,22 +839,25 @@ A = pdmat({[0 1]}, @(rho) rho, Degree=1);
 B = pdmat({[0 0.5 1]}, @(rho) 2*rho, Degree=2);
 S = A + B;
 mergedGrid = S.GridInfo.Vectors{1}
-resultDegree = S.Degree
-cell1Coefficients = cell2mat(S.coeffs(1))
-cell2Coefficients = cell2mat(S.coeffs(2))
+T1 = bernTable(S, 1, "oneLine");
+T2 = bernTable(S, 2, "oneLine");
+disp(T1)
+disp(T2)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
 mergedGrid = 1×3 double
          0    0.5000    1.0000
 
-resultDegree = 2
+    CellSubscript                  Expression
+    _____________    _______________________________________
 
-cell1Coefficients = 1×3 double
-         0    0.7500    1.5000
+        {[1]}        "(1-α)^2*0 + 2(1-α)α*0.7500 + α^2*1.5000"
 
-cell2Coefficients = 1×3 double
-    1.5000    2.2500    3.0000
+    CellSubscript                    Expression
+    _____________    ___________________________________________
+
+        {[2]}        "(1-α)^2*1.5000 + 2(1-α)α*2.2500 + α^2*3"
 \end{lstlisting}
 
 \subsection{Ordered Matrix Multiplication}
@@ -793,19 +875,39 @@ K = M * A
 
 The result preserves the common physical grid and has componentwise degree \code{A.Degree + B.Degree}. Payload matrices multiply in the written order. \Cref{sec:bernstein-product-math} derives the numeric, known--affine, and generic planned kernels.
 
+The multiplication backend first uses the shared alignment path in \cref{fig:alignment-call-path}. It then enumerates the ordered coefficient pairs whose labels sum to each output label and applies the matching numeric, known-affine, or generic kernel from \cref{sec:bernstein-product-math}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm]
+  \node[dp/call-entry] (entry) {\code{mtimes}};
+  \node[dp/call-step,right=of entry] (align) {shared grid and\\degree alignment};
+  \node[dp/call-step,right=of align] (prod) {\code{prodVals}};
+  \node[dp/call-branch,right=of prod] (kernel) {numeric, known-affine,\\or generic product kernel};
+  \node[dp/call-result,right=of kernel] (result) {reconstructed\\result};
+  \draw[dp/call-arrow] (entry) -- (align);
+  \draw[dp/call-arrow] (align) -- (prod);
+  \draw[dp/call-arrow] (prod) -- (kernel);
+  \draw[dp/call-arrow] (kernel) -- (result);
+\end{tikzpicture}
+\caption{Multiplication call path. The kernel computes the ordered binomial-weighted convolution without changing matrix multiplication order.}
+\label{fig:multiplication-call-path}
+\end{figure}
+
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
 B = pdmat({[0 1]}, {10, 20, 30}, Degree=2);
 K = A * B;
-productDegree = K.Degree
-productCoefficients = cell2mat(K.coeffs(1))
+T = bernTable(K, 1, "oneLine");
+disp(T)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-productDegree = 3
-productCoefficients = 1×4 double
-   10.0000   20.0000   36.6667   60.0000
+    CellSubscript                           Expression
+    _____________    ________________________________________________________
+
+        {[1]}        "(1-α)^3*10 + 3(1-α)^2α*20 + 3(1-α)α^2*36.6667 + α^3*60"
 \end{lstlisting}
 
 For tensor data, degrees add independently in each parameter direction. Two degree-one factors in two parameters therefore produce degree $[2,2]$ and nine coefficients per physical cell.

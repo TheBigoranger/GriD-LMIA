@@ -6,6 +6,7 @@ description: Choose among Direct, Pólya, Putinar, SparsePutinar, SparseFullBox,
 import CertificateChooser from "../../../../components/CertificateChooser.astro";
 import CertificateFlow from "../../../../components/CertificateFlow.astro";
 import ConstraintAssemblyDiagram from "../../../../components/ConstraintAssemblyDiagram.astro";
+import CallGraph from "../../../../components/CallGraph.astro";
 
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
@@ -31,6 +32,19 @@ $C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}$.
 Alternative selectors rebuild from $\mathcal F$; they do not compound.
 
 <CertificateChooser />
+
+## Implementation Call Path
+
+Each `use*` selector validates its order or window, rebuilds the `pdlmi` from
+the original residual, and stores coefficient or Gram constraints. `toYalmip`
+returns those stored constraints without rebuilding the certificate.
+
+<CallGraph family="certificates" caption="Certificate selection and finite-constraint assembly." links={[
+  { href: "/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/", label: "Direct and Pólya mathematics" },
+  { href: "/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/", label: "Putinar mathematics" },
+  { href: "/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/", label: "Box-certificate mathematics" },
+  { href: "/GriD-LMIA/documents/reference/pdlmi/toyalmip/", label: "toYalmip API" },
+]} />
 
 Exact rate-box vertex reduction occurs before this map. Each certificate is a
 finite sufficient condition over the remaining parameter cell. These are
@@ -77,8 +91,8 @@ for the formula and selection boundary.
 
 ## Putinar Quadratic Modules
 
-For one parameter, the minimum absolute order is
-$r=\lfloor M/2\rfloor$. For two or more parameters
+For one parameter, write $\mathbf M=(M_1)$ and $\mathbf r=(r_1)$; the minimum
+component is $r_1=\lfloor M_1/2\rfloor$. For two or more parameters
 $(\ell\ge2)$, Putinar uses an unweighted Gram/SOS term plus the singleton
 generators $g_s=\alpha_s(1-\alpha_s)$, with componentwise minimum
 $\mathbf r=\lceil\mathbf M/2\rceil$.
@@ -128,7 +142,7 @@ The software state is `SparseFullBox`. Each dense tensor Bernstein basis is repl
 
 <span id="worked-full-box-example-two-parameters-degree-three"></span>
 
-For a two-parameter target with assembled degree $M=3$, FullBox introduces
+For a two-parameter target with assembled degree $\mathbf M=(3,1)$, FullBox introduces
 Gram terms for the empty subset, both singleton generator subsets, and their
 two-axis product. Each term is mapped into the Bernstein basis and the sum is
 matched exactly to every $C^{(\mathbf c)}[\mathbf i]$. SparseFullBox retains
@@ -146,20 +160,20 @@ selectors in one parameter.
 ## Five Operations That Are Not Interchangeable
 
 - Refine $\mathcal G_s$ to change physical cells.
-- Raise decision degree $m$ to enlarge the decision family.
-- Raise Pólya increment $d$ to elevate the representation.
-- Raise absolute Gram order $r$ to change a Gram certificate.
+- Raise decision degree $\mathbf m$ to enlarge the decision family.
+- Raise Pólya increment $\mathbf d$ to elevate the representation.
+- Raise absolute Gram order $\mathbf r$ to change a Gram certificate.
 - Change SparsePutinar `CliqueSize` value $b$ or SparseFullBox window side $w$ to
   change the sparse Gram support.
 
-Assembled residual degree $M$ is determined after algebra and alignment; it
+Assembled residual degree $\mathbf M$ is determined after algebra and alignment; it
 is not another user-selected certificate knob.
 
 ## Exact Software Boundary
 
 The package implements six finite states only. It does not implement a
 general-domain Putinar parser, an adaptive sparse-pattern search, or a
-solver-owned hierarchy loop. A failed fixed $d$, $r$, or $w$, a nonzero
+solver-owned hierarchy loop. A failed fixed $\mathbf d$, $\mathbf r$, or $w$, a nonzero
 `diagnostics.problem`, or an aborted solve is inconclusive for the original
 continuous feasibility question.
 

@@ -124,7 +124,7 @@ $S^{(\mathbf c)}-\varepsilon I\succeq0$ margin required for strictness.
 ```matlab
 yalmip('clear')
 
-P = pdvar(n, grid, "symmetric", Degree=m);
+P = pdvar(n, grid, "symmetric", Degree=mVector);
 Pdot = rhodiff(P, rateBounds);
 
 residual = [ ...

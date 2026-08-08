@@ -4,6 +4,7 @@ description: Construct known finite real matrix data on a parameter grid.
 ---
 
 import CellBernsteinExpressionExplorer from "../../../../../components/CellBernsteinExpressionExplorer.astro";
+import CallGraph from "../../../../../components/CallGraph.astro";
 
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
@@ -25,6 +26,18 @@ in local coordinates $\boldsymbol\alpha\in[0,1]^2$:
 ## Purpose
 
 Create a known-data `pdmat` object over one or more parameter-grid dimensions.
+
+## Implementation Call Path
+
+The constructor normalizes the grid and the complete degree vector before it
+builds known coefficients or a decision-control lattice. Both routes finish
+in the common `pdbase` storage contract.
+
+<CallGraph family="constructors" caption="Constructor parsing, vector-degree normalization, and common storage." links={[
+  { href: "/GriD-LMIA/documents/math/gridding-and-degree/", label: "Degree and grid mathematics" },
+  { href: "/GriD-LMIA/documents/reference/pdbase/constructor/", label: "pdbase storage API" },
+  { href: "/GriD-LMIA/documents/reference/pdvar/constructor/", label: "pdvar constructor" },
+]} />
 
 ## Syntax
 
@@ -208,24 +221,23 @@ ans =
 Adding `Degree=2` tells the constructor to validate and store Bernstein
 coefficient evidence while retaining the exact function handle for evaluation.
 
-### Direction-wise degree
+### Anisotropic two-parameter degree
 
 ```matlab
-A = pdmat({[0 1], [10 20]}, @(rho,eta) rho.^2, Degree=[2 0]);
-A.Degree
-A.ncoeff()
+A = pdmat({[0 1], [10 20]}, {1 2; 3 4; 5 6}, Degree=[2 1]);
+T = bernTable(A, [1 1], "oneLine");
+disp(T)
 ```
 
 ```text
-ans =
-     2     0
+    CellSubscript                                                       Expression
+    _____________    _________________________________________________________________________________________________________________
 
-ans =
-     3
+       {[1 1]}       "(1-α1)^2 * (1-α2)*1 + (1-α1)^2 * α2*2 + 2(1-α1)α1 * (1-α2)*3 + 2(1-α1)α1 * α2*4 + α1^2 * (1-α2)*5 + α1^2 * α2*6"
 ```
 
-The zero second component records that the coefficient-backed polynomial is
-constant along the second parameter axis.
+The degree vector is quadratic along the first parameter and linear along the
+second. The selected-cell output exposes all six tensor labels directly.
 
 ### Explicit rate-vertex rows
 

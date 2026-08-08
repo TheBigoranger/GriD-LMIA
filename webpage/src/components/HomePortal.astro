@@ -119,7 +119,7 @@ const storageAxisTex = {
 };
 const storageMathMarkup = {
   formula: renderMath(lmiSteps[2].storageMath),
-  basis: renderMath("B_{\\mathbf i}^{m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m-i_s}"),
+  basis: renderMath("B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s}"),
   axis: {
     x: storageAxisTex.x.map((tex) => renderMath(tex)),
     y: storageAxisTex.y.map((tex) => renderMath(tex)),

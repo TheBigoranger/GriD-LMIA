@@ -52,28 +52,35 @@ operations return new values without mutating the source.
 ## Example
 
 ```matlab
-obj = pdbase({[0 1 2]}, [2 2], 1);
+obj = pdbase({[0 1], [10 20], [-2 2]}, [1 1], [1 3 0]);
 objectClass = class(obj)
-matrixSize = obj.MatrixSize
 degree = obj.Degree
-cellCount = obj.ncell()
+labels = obj.lbls()
 coefficientCount = obj.ncoeff()
-parameterCount = obj.npar()
-objectSize = size(obj)
 ```
 
 ```text
 objectClass = 'pdbase'
-matrixSize = 1×2 double
-     2     2
+degree =
+     1     3     0
 
-degree = 1
-cellCount = 2
-coefficientCount = 2
-parameterCount = 1
-objectSize = 1×2 double
-     2     2
+labels =
+     0     0     0
+     0     1     0
+     0     2     0
+     0     3     0
+     1     0     0
+     1     1     0
+     1     2     0
+     1     3     0
+
+coefficientCount =
+     8
 ```
+
+The backend stores the full vector. It is linear along the first parameter,
+cubic along the second, and constant along the third. The eight labels are
+$\prod_s(m_s+1)=2\cdot4\cdot1$.
 
 ## Validation and limitations
 

@@ -25,7 +25,7 @@
 \crefname{equation}{}{}
 \crefname{figure}{Fig}{Figs}
 \crefname{chapter}{Chapter}{Chapters}
-\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,
+\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,shapes.geometric,
   decorations.pathreplacing,plotmarks}
 
 \hypersetup{
@@ -78,7 +78,17 @@
     minimum width=12mm,minimum height=7mm,inner sep=3pt},
   dp/elevated-node/.style={dp/result,font=\scriptsize,align=center,
     minimum width=14mm,minimum height=7mm,inner sep=3pt},
-  dp/figure-panel/.style={font=\scriptsize,align=left,inner sep=5pt}
+  dp/figure-panel/.style={font=\scriptsize,align=left,inner sep=5pt},
+  dp/call-entry/.style={dp/neutral,font=\scriptsize\bfseries,align=center,
+    minimum height=8mm,text width=23mm,inner sep=3pt},
+  dp/call-step/.style={dp/neutral,font=\scriptsize,align=center,
+    minimum height=8mm,text width=25mm,inner sep=3pt},
+  dp/call-branch/.style={dp/contribution,font=\scriptsize,align=center,
+    minimum height=8mm,text width=29mm,inner sep=3pt},
+  dp/call-result/.style={dp/result,font=\scriptsize,align=center,
+    minimum height=8mm,text width=25mm,inner sep=3pt},
+  dp/call-arrow/.style={dp/arrow,shorten >=1pt,shorten <=1pt},
+  dp/call-link/.style={font=\scriptsize,text=blue!55!black,align=center}
 }
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.3em}
@@ -133,7 +143,7 @@
   breaklines=true,
   columns=fullflexible,
   keepspaces=true,
-  literate={×}{{$\times$}}1,
+  literate={×}{{$\times$}}1 {α}{{$\alpha$}}1,
   frame=none,
   backgroundcolor=\color{white},
   aboveskip=0.25\baselineskip,
@@ -146,7 +156,7 @@
   breaklines=true,
   columns=fullflexible,
   keepspaces=true,
-  literate={×}{{$\times$}}1,
+  literate={×}{{$\times$}}1 {α}{{$\alpha$}}1,
   frame=none,
   backgroundcolor=\color{white},
   aboveskip=0.25\baselineskip,

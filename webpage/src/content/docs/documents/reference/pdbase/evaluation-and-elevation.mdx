@@ -100,8 +100,9 @@ D = rhodiff(A, rateBounds)
 
 `rhodiff` differentiates coefficient-backed storage cell by cell and returns
 the same dynamic class. Explicit bounds supply missing metadata but must match
-stored bounds when both are present. One-parameter degree `m > 0` becomes
-`m-1`, while degree zero stays zero. With several parameters, the partial along
+stored bounds when both are present. For $\mathbf m=(m_1)$ with $m_1>0$,
+the one-parameter derivative degree is $(m_1-1)$, while degree $(0)$ stays
+zero. With several parameters, the partial along
 axis `s` has degree `Degree-e_s` when `Degree(s)>0`, then is elevated exactly
 to the common vector `Degree` before rate weighting. A zero-degree axis
 contributes the zero partial. Every physical cell stores one row per rate-box

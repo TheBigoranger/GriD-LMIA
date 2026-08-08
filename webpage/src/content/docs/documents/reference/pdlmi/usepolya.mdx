@@ -64,6 +64,23 @@ ans =
 `ValidationMode` is transient, accepts case-insensitive `"fast"` or
 `"strict"`, applies only to this rebuild, and is neither stored nor inherited.
 
+## Anisotropic Assembly Output
+
+For an assembled target degree $\mathbf M=(2,1)$ and increment
+$\mathbf d=(1,2)$, exact elevation gives
+
+$$
+\mathbf M+\mathbf d=(3,3).
+$$
+
+$$
+\mathcal I_{(3,3)}=\{0,\ldots,3\}\times\{0,\ldots,3\}.
+$$
+
+The finite output is therefore a $4\times4$ tensor diagram of 16 elevated
+coefficient tests for each physical cell and stored rate row. The two
+parameter directions are elevated independently.
+
 ## Validation And Errors
 
 The increment must be a finite nonnegative integer scalar shorthand or an

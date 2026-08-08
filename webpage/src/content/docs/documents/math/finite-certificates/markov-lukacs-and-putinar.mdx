@@ -20,18 +20,19 @@ The software state is `Putinar`. In one parameter its implementation uses the
 parity-specific Markov–Lukács interval form. Markov–Lukács is not a separate
 selector. The Gram notation below uses
 $Z_a=\mathbf b_a\otimes I_n$ for matrix size $n$, where $\mathbf b_a$ is the
-degree-$a$ Bernstein basis vector and every Gram matrix $Q$ satisfies
+degree-$\mathbf a=(a_1)$ Bernstein basis vector and every Gram matrix $Q$ satisfies
 $Q\succeq0$.
 
 ## One-Parameter Even Degree
 
-For assembled degree $M=2r$, represent the target as
+For assembled degree $\mathbf M=(M_1)$ with $M_1=2r_1$, where
+$\mathbf r=(r_1)$, represent the target as
 
 $$
 \begin{aligned}
 G_0(\alpha)&:=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha),\\
-G_1(\alpha)&:=Z_{r-1}(\alpha)^{\mathsf T}
-Q_1Z_{r-1}(\alpha).
+G_1(\alpha)&:=Z_{r_1-1}(\alpha)^{\mathsf T}
+Q_1Z_{r_1-1}(\alpha).
 \end{aligned}
 $$
 
@@ -52,7 +53,7 @@ $C^{(\mathbf c)}[i]$.
 
 ## One-Parameter Odd Degree
 
-For $M=2r+1$, use endpoint weights:
+For $M_1=2r_1+1$, use endpoint weights:
 
 $$
 \begin{aligned}
@@ -63,7 +64,8 @@ Q_0&\succeq0,\qquad Q_1\succeq0.
 \end{aligned}
 $$
 
-The minimum absolute order is $r=\lfloor M/2\rfloor$ in one parameter.
+The minimum absolute order is $\mathbf r=(r_1)$ with
+$r_1=\lfloor M_1/2\rfloor$ in one parameter.
 
 ## Multivariate Putinar Module
 

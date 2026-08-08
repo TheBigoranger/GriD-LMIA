@@ -48,6 +48,14 @@ F = sparse.toYalmip();
 
 The selector creates fresh Gram variables for every entrywise copy when applicable, physical cell, rate row, and tensor window. Numeric coefficient maps may be reused.
 
+## Anisotropic Assembly Output
+
+For $\mathbf M=(4,2)$, $\mathbf r=(2,1)$, and `BandWidth=2`, the four
+full-box generator subsets have basis degrees $(2,1)$, $(1,1)$, $(2,0)$,
+and $(1,0)$. Their sliding-window diagrams contain $2+1+2+1=6$ independent
+PSD blocks. The blocks contribute to one $5\times3$ tensor of 15 exact target
+coefficient identities.
+
 ## Validation And Limitations
 
 - Equality residuals reject every non-Direct selector.

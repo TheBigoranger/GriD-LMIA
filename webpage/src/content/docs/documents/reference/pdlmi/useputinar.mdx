@@ -13,7 +13,7 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>usePutinar</span>
 </nav>
 
-Gram bases, absolute order $r$, and target coefficients follow the
+Gram bases, absolute order $\mathbf r$, and target coefficients follow the
 [global certificate notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters).
 
 <CertificateNavigation selected="putinar" showSections={false} />
@@ -37,7 +37,7 @@ The no-argument form selects the smallest admissible absolute order
 
 $$
 \mathbf r=\begin{cases}
-\left\lfloor M/2\right\rfloor,&\ell=1,\\
+\left(\left\lfloor M_1/2\right\rfloor\right),&\ell=1,\\
 \left\lceil \mathbf M/2\right\rceil,&\ell\ge2,
 \end{cases}
 $$
@@ -87,7 +87,7 @@ margin in the residual.
 | Input | Description |
 | :--- | :--- |
 | `C` | Any `pdlmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
-| `order` | Optional finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute Gram order. It must satisfy $r\ge\lfloor M/2\rfloor$ in one parameter or $\mathbf r\ge\lceil\mathbf M/2\rceil$ componentwise in two or more parameters. |
+| `order` | Optional finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute Gram order. For $\ell=1$, it must satisfy $r_1\ge\lfloor M_1/2\rfloor$ with $\mathbf r=(r_1)$ and $\mathbf M=(M_1)$. For $\ell\ge2$, it must satisfy $\mathbf r\ge\lceil\mathbf M/2\rceil$ componentwise. |
 
 ## Returned Object
 
@@ -130,6 +130,27 @@ stored degree-two residual. It does not use the already elevated constraints.
 
 `ValidationMode` is transient, accepts case-insensitive `"fast"` or
 `"strict"`, applies only to this rebuild, and is neither stored nor inherited.
+
+## Anisotropic Assembly Output
+
+For $\mathbf M=(2,4)$ and $\mathbf r=(1,2)$, the multivariate Putinar terms
+use Gram basis degrees
+
+$$
+\mathbf r=(1,2).
+$$
+
+$$
+\mathbf r-\mathbf e_1=(0,2).
+$$
+
+$$
+\mathbf r-\mathbf e_2=(1,1).
+$$
+
+Their contributions are matched to the $3\times5$ tensor of 15 target
+coefficients. This assembly diagram makes the unequal parameter orders
+explicit without exposing session-dependent YALMIP variable names.
 
 ## Validation And Errors
 

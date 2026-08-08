@@ -3,6 +3,8 @@ title: pdmat rhodiff
 description: Differentiate coefficient-backed known data into deterministic rate-vertex rows.
 ---
 
+import CallGraph from "../../../../../components/CallGraph.astro";
+
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
   <span>/</span>
@@ -15,6 +17,12 @@ description: Differentiate coefficient-backed known data into deterministic rate
 
 Differentiate coefficient-backed `pdmat` data cell by cell and store the
 rate-weighted derivative at every vertex of a scheduling-rate box.
+
+<CallGraph family="differentiation" caption="rhodiff differentiates cell rows, re-elevates active partials, and assembles rate-vertex outputs." links={[
+  { href: "/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-rows", label: "Differentiation mathematics" },
+  { href: "/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/", label: "Rate-box mathematics" },
+  { href: "/GriD-LMIA/documents/reference/pdvar/rhodiff/", label: "pdvar rhodiff" },
+]} />
 
 ## Syntax
 
@@ -29,8 +37,8 @@ D = rhodiff(A, rateBounds)
 `A.RateBounds`; explicit `rateBounds` supplies missing metadata, but must match
 stored bounds when both are present.
 
-For one parameter, degree `m > 0` returns degree `m - 1`; degree zero remains
-zero. For several parameters, the partial along axis `s` has degree
+For one parameter, $\mathbf m=(m_1)$ with $m_1>0$ returns degree
+$(m_1-1)$; degree $(0)$ remains zero. For several parameters, the partial along axis `s` has degree
 `A.Degree-e_s` when `A.Degree(s)>0`, then is elevated exactly back to the common
 vector `A.Degree` before the rate-weighted sum is formed. A zero-degree axis
 contributes the zero partial, so multivariate `rhodiff` preserves the complete
@@ -44,23 +52,15 @@ exact stored-row count. A fixed axis contributes one value rather than two.
 ```matlab
 A = pdmat([0 1], {0, 2}, Degree=1, RateBounds=[-1 2]);
 D = rhodiff(A);
-disp("derivativeClass =")
-disp(class(D))
-disp("derivativeDegree =")
-disp(D.Degree)
-disp("derivativeRowValues =")
-disp(cell2mat(D.coeffs(1)))
+disp(bernTable(D, 1, "oneLine"))
 ```
 
 ```text
-derivativeClass =
-pdmat
-derivativeDegree =
-     0
+    CellSubscript    RateVertexIndex    RateVertex    Expression
+    _____________    _______________    __________    __________
 
-derivativeRowValues =
-    -2
-     4
+        {[1]}               1             {[-1]}         "-2"
+        {[1]}               2             {[ 2]}         "4"
 ```
 
 The two rows evaluate the constant physical derivative `2` at rates `-1` and

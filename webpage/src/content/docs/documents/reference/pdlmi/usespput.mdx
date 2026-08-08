@@ -167,6 +167,14 @@ numel(C.Constraints)
 
 `CliqueSize=1` remains SparsePutinar in two dimensions. This fixture has 21 scalar PSD windows and 25 coefficient identities, so `numel(C.Constraints)` is 46.
 
+## Anisotropic Assembly Output
+
+For $\mathbf M=(2,6)$, $\mathbf r=(1,3)$, and `CliqueSize=2`, the three
+active Putinar basis degrees are $(1,3)$, $(0,3)$, and $(1,2)$. Their window
+diagrams contain respectively $3$, $3$, and $2$ PSD blocks, with block
+dimensions $4$, $2$, and $4$. All eight windows contribute to the same
+$3\times7$ tensor of 21 exact coefficient identities.
+
 ## Validation And Errors
 
 - A malformed clique size raises `pdlmi:InvalidCliqueSize`.

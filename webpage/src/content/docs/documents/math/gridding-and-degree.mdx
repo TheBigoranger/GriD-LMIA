@@ -49,9 +49,10 @@ h_s^{\mathbf c}
 \end{aligned}
 $$
 
-The grid determines where cells begin and end. The decision degree $m$
+The grid determines where cells begin and end. The decision degree $\mathbf m$
 determines how many Bernstein labels live inside each cell. Refining
-$\mathcal G_s$ does not raise $m$, and raising $m$ does not add physical
+$\mathcal G_s$ does not raise $\mathbf m$, and raising one component of
+$\mathbf m$ does not add physical
 cells.
 
 ## One-Dimensional Input
@@ -81,7 +82,8 @@ $$
 \frac{\partial}{\partial\alpha_s}.
 $$
 
-For degree $m=2$, each cell has labels $i=0,1,2$, but a continuous
+For one-parameter degree $\mathbf m=(2)$, each cell has labels
+$i_1=0,1,2$, but a continuous
 `pdvar` shares the endpoint handle across the interface.
 
 ## Two-Dimensional Input
@@ -91,14 +93,16 @@ An anisotropic grid is valid and often useful:
 ```matlab
 grid = {[0 0.25 1], [-1 1]};
 A = pdmat(grid, @(rho1,rho2) [1+rho1 rho1*rho2; rho1*rho2 2+rho2^2], ...
-    Degree=[2 2]);
+    Degree=[3 1]);
 ```
 
 The first axis has two physical intervals and the second has one. Every cell
 still uses local coordinates
 $\boldsymbol\alpha=(\alpha_1,\alpha_2)\in[0,1]^2$.
-For direction-wise degree $\mathbf m=(2,2)$, each local coefficient array has
-$\prod_s(m_s+1)=9$ labels $\mathbf i=(i_1,i_2)$.
+For direction-wise degree $\mathbf m=(3,1)$, each local coefficient array has
+$\prod_s(m_s+1)=8$ labels $\mathbf i=(i_1,i_2)$. This anisotropic choice
+allows a cubic first-parameter dependence and only a linear second-parameter
+dependence inside each cell.
 
 <CellStorageDiagram />
 

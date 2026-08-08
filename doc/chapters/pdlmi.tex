@@ -129,13 +129,13 @@ C = lhs == rhs
   \item \code{UsePolya} is a logical scalar option with default \code{false}. Its bare form, \code{"UsePolya"}, and \code{UsePolya=true} without a degree select increment one.
   \item \code{PolyaDegree=d} accepts one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector and is stored as a \(1\)-by-\(\ell\) row. It elevates the residual componentwise by \(\mathbf d\) before assembling constraints. Supplying it without \code{UsePolya} enables P\'olya and issues \codeerr{pdlmi}{ImplicitUsePolya}; \code{UsePolya=false} with any positive component raises \codeerr{pdlmi}{ConflictingPolyaOptions}.
   \item \code{UsePutinar} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select the dimension-appropriate Putinar certificate at the smallest admissible order.
-  \item \code{PutinarOrder=r} accepts one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector and is stored as a \(1\)-by-\(\ell\) absolute Bernstein Gram order, not a degree increment. For assembled residual degree \(M\) in one parameter, its default and minimum are \(\lfloor M/2\rfloor\). For tensor degree \(\mathbf M\) in two or more parameters, the default and componentwise minimum are \(\lceil\mathbf M/2\rceil\). Supplying the order without \code{UsePutinar} enables Putinar assembly. Pairing \code{UsePutinar=false} with any explicit order, including zero, raises \codeerr{pdlmi}{ConflictingPutinarOptions}.
+  \item \code{PutinarOrder=r} accepts one finite nonnegative integer scalar shorthand or an $\ell$-element vector and is stored as the $1$-by-$\ell$ absolute Bernstein Gram order $\mathbf r$, not a degree increment. For one parameter, $\mathbf M=(M_1)$ and the default and minimum are $\mathbf r=(\lfloor M_1/2\rfloor)$. For two or more parameters, the default and componentwise minimum are $\lceil\mathbf M/2\rceil$. Supplying the order without \code{UsePutinar} enables Putinar assembly. Pairing \code{UsePutinar=false} with any explicit order, including zero, raises \codeerr{pdlmi}{ConflictingPutinarOptions}.
   \item \code{UseSparsePutinar} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select SparsePutinar with default \code{CliqueSize=2}. Supplying \code{CliqueSize} or \code{SparsePutinarOrder} alone also enables this family. Explicit \code{UseSparsePutinar=false} conflicts with either parameter.
-  \item \code{CliqueSize=b} is one finite positive integer tensor-window side length. \code{SparsePutinarOrder=r} accepts scalar shorthand or an $\ell$-element vector and is stored as a $1$-by-$\ell$ absolute Putinar Gram order. Its default and minimum are $\lfloor M/2\rfloor$ in one parameter and componentwise $\lceil\mathbf M/2\rceil$ otherwise. Endpoint normalization occurs only after order validation. In one parameter, \code{b=1} returns actual Direct state. In several parameters, \code{b=1} retains SparsePutinar state. Any \code{b>1} satisfying $b\ge r_s+1$ for every direction returns actual dense Putinar state, while all other valid sizes retain SparsePutinar state.
+  \item \code{CliqueSize=b} is one finite positive integer tensor-window side length. \code{SparsePutinarOrder=r} accepts scalar shorthand or an $\ell$-element vector and is stored as the $1$-by-$\ell$ absolute Putinar Gram order $\mathbf r$. Its default and minimum are $(\lfloor M_1/2\rfloor)$ when $\mathbf M=(M_1)$ and componentwise $\lceil\mathbf M/2\rceil$ otherwise. Endpoint normalization occurs only after order validation. In one parameter, \code{b=1} returns actual Direct state. In several parameters, \code{b=1} retains SparsePutinar state. Any \code{b>1} satisfying $b\ge r_s+1$ for every direction returns actual dense Putinar state, while all other valid sizes retain SparsePutinar state.
   \item \code{UseSparseFullBox}\allowbreak\code{Preorder} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select SparseFullBox with default \code{BandWidth=2}; \code{BandWidth} or \code{SparseFullBoxOrder} alone also enables this family. Explicit \code{UseSparseFullBox}\allowbreak\code{Preorder=false} conflicts with either sparse parameter.
-  \item \code{BandWidth=w} remains the selected-state property name, but $w$ is implemented as one finite positive tensor-window side length rather than a flattened matrix bandwidth. \code{SparseFullBoxOrder=r} accepts scalar shorthand or an $\ell$-element vector and is stored as a $1$-by-$\ell$ absolute Gram order. Its default and minimum are $\lfloor M/2\rfloor$ in one parameter and componentwise $\lceil\mathbf M/2\rceil$ otherwise, where $\mathbf M=\code{C.Residual.Degree}$. Width one canonicalizes to actual Direct state after order validation, a width that spans every order axis canonicalizes to actual FullBox state, and intermediate widths select SparseFullBox state.
+  \item \code{BandWidth=w} remains the selected-state property name, but $w$ is implemented as one finite positive tensor-window side length rather than a flattened matrix bandwidth. \code{SparseFullBoxOrder=r} accepts scalar shorthand or an $\ell$-element vector and is stored as the $1$-by-$\ell$ absolute Gram order $\mathbf r$. Its default and minimum are $(\lfloor M_1/2\rfloor)$ when $\mathbf M=(M_1)$ and componentwise $\lceil\mathbf M/2\rceil$ otherwise, where $\mathbf M=\code{C.Residual.Degree}$. Width one canonicalizes to actual Direct state after order validation, a width that spans every order axis canonicalizes to actual FullBox state, and intermediate widths select SparseFullBox state.
   \item \code{UseFullBoxPreorder} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select full-box assembly at the smallest admissible order.
-  \item \code{FullBoxOrder=r} accepts scalar shorthand or an \(\ell\)-element vector and is stored as a \(1\)-by-\(\ell\) absolute order, not a degree increment. Supplying it without \code{UseFullBoxPreorder} enables full-box assembly. When FullBox is enabled, the minimum is \(\lfloor M/2\rfloor\) for a one-parameter residual of degree \(M\), and componentwise \(\lceil\mathbf M/2\rceil\) for two or more parameters. Explicitly pairing \code{UseFullBoxPreorder=false} with \code{FullBoxOrder=r} suppresses that automatic selection: \code{C} remains direct and records the normalized row only as inspectable metadata; the order is not applied to assembly.
+  \item \code{FullBoxOrder=r} accepts scalar shorthand or an $\ell$-element vector and is stored as the $1$-by-$\ell$ absolute order $\mathbf r$, not a degree increment. Supplying it without \code{UseFullBoxPreorder} enables full-box assembly. When FullBox is enabled, the minimum is $\mathbf r=(\lfloor M_1/2\rfloor)$ for a one-parameter residual with $\mathbf M=(M_1)$, and componentwise $\lceil\mathbf M/2\rceil$ for two or more parameters. Explicitly pairing \code{UseFullBoxPreorder=false} with \code{FullBoxOrder=r} suppresses that automatic selection: \code{C} remains direct and records the normalized row only as inspectable metadata, so the order is not applied to assembly.
   \item P\'olya, Putinar, SparsePutinar, SparseFullBox, and FullBox selection are mutually exclusive and apply only to inequalities. Any recognized certificate option on an equality raises \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before clique, width, or order validation. Enabling more than one inequality family raises \codeerr{pdlmi}{Conflicting}\allowbreak\code{Relaxations}.
   \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It is transient and not stored. Every certificate selector accepts its own trailing \code{ValidationMode}, and a constructor selection is not inherited by later calls.
   \item \code{C} is direct coefficient-wise assembly unless one opt-in inequality mode is selected. Comparisons such as \code{lhs >= rhs} are the ordinary user-facing entry point and accept compatible numeric, \code{pdmat}, affine \code{sdpvar}, and \code{pdvar} right-hand sides.
@@ -203,6 +203,28 @@ bandWidth = 0
   \item An inequality with any nonsquare or non-Hermitian original coefficient is assembled entry-wise and emits \codeerr{pdlmi}{ElementwiseInequality}. Numeric Hermitian testing accepts equality at the inclusive $10^{-10}$ infinity-norm tolerance.
   \item Equality is direct-only. Every certificate selector raises\newline \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before validating its supplied increment, clique size, width, or order.
 \end{enumerate}
+
+Every certificate selector rebuilds the wrapper from its original residual and relation, so selecting a family replaces the previous family. Direct and P\'olya terminate in coefficient constraints. The four Gram families first create a certificate specification, expand its Gram contributions, and then store the PSD constraints before the exact coefficient identities. The detailed coefficient maps are given in \cref{sec:certificate-direct,sec:certificate-polya,sec:certificate-gram-map,sec:certificate-putinar-schmudgen,sec:certificate-sparse-putinar,sec:certificate-sparse-full-box,sec:certificate-full-box}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=5.5mm]
+  \node[dp/call-entry] (entry) {\code{use*}};
+  \node[dp/call-step,right=of entry] (valid) {order or window\\validation};
+  \node[dp/call-step,right=of valid] (rebuild) {rebuilt \code{pdlmi}};
+  \node[dp/call-branch,right=of rebuild] (spec) {\code{coeffCons}, or\\\code{putSpec}/\code{boxSpec}};
+  \node[dp/call-step,right=of spec] (gram) {optional\\\code{gramCons}};
+  \node[dp/call-result,below=of spec] (result) {stored constraints\\and \hyperref[sec:pdlmi-toyalmip]{\code{toYalmip}}};
+  \draw[dp/call-arrow] (entry) -- (valid);
+  \draw[dp/call-arrow] (valid) -- (rebuild);
+  \draw[dp/call-arrow] (rebuild) -- (spec);
+  \draw[dp/call-arrow] (spec) -- (gram);
+  \draw[dp/call-arrow] (gram.south) |- (result.east);
+  \draw[dp/call-arrow] (spec.south) -- (result.north);
+\end{tikzpicture}
+\caption{Certificate assembly call path. The direct branch stores coefficient constraints immediately, while Gram families store PSD blocks and exact coefficient identities from a validated specification.}
+\label{fig:certificate-call-path}
+\end{figure}
 
 \section{Assemble Direct Coefficient Constraints}\index{direct assembly}\index{direct coefficient assembly}
 \label{sec:pdlmi-direct}
@@ -323,13 +345,23 @@ constraintCount = 4
 
 \code{PolyaDegree} is a direction-wise representation increment rather than a decision degree, grid refinement, or Gram order. \Cref{sec:certificate-polya} gives the mathematical interpretation and fixed-increment limitations.
 
+\ideastep{Anisotropic assembly output} For an independent two-parameter target with $\mathbf M=(2,1)$, choose $\mathbf d=(1,2)$. The selector elevates the unchanged target to $\mathbf H=\mathbf M+\mathbf d=(3,3)$ and sends all $16=(3+1)(3+1)$ elevated labels to Direct coefficient constraints.
+\begin{center}
+\begin{tikzpicture}[node distance=8mm]
+  \node[dp/call-entry] (a) {$\mathbf M=(2,1)$};
+  \node[dp/call-step,right=of a] (b) {$+\,\mathbf d=(1,2)$\\exact elevation};
+  \node[dp/call-result,right=of b] (c) {$\mathbf H=(3,3)$\\$16$ coefficient LMIs};
+  \draw[dp/call-arrow] (a) -- (b); \draw[dp/call-arrow] (b) -- (c);
+\end{tikzpicture}
+\end{center}
+
 \section{Select Putinar Assembly with
 \texorpdfstring{\code{usePutinar}}{usePutinar}}
 \index{Putinar}\index{usePutinar@\texttt{usePutinar}}
 \index{Putinar certificate}\index{Putinar order}
 \label{sec:pdlmi-putinar}
 
-Putinar is dimension-aware. One parameter uses the exact parity-specific interval form, while two or more parameters use the fixed-order box-specific singleton-generator module. The one-parameter default and minimum are $\lfloor M/2\rfloor$ for residual degree $M$, and the multivariate default and minimum are componentwise $\lceil\mathbf M/2\rceil$. Equality wrappers reject Putinar selection.
+Putinar is dimension-aware. One parameter uses the exact parity-specific interval form, while two or more parameters use the fixed-order box-specific singleton-generator module. In one parameter, $\mathbf M=(M_1)$ and the default and minimum order vector is $\mathbf r=(\lfloor M_1/2\rfloor)$. In several parameters, the default and minimum are componentwise $\lceil\mathbf M/2\rceil$. Equality wrappers reject Putinar selection.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -369,11 +401,21 @@ selectedConstraintCount = 5
 
 For this one-parameter scalar degree-two cell, order one uses the exact even Markov--Luk\'acs form: an unweighted Gram block of dimension two and one generator-weighted block of dimension one, followed by three exact coefficient identities.  The result is identical to \code{direct.useFullBox()}.  Each physical cell and each active rate-vertex row receives independent copies of these PSD blocks and identities.
 
+\ideastep{Anisotropic assembly output} Consider a separate two-parameter target with $\mathbf M=(3,1)$ and absolute order $\mathbf r=(2,1)$. The Putinar specification uses the empty mask and the two singleton generators $g_s=\alpha_s(1-\alpha_s)$, omits no nonnegative basis degree, and matches the elevated target at $2\mathbf r=(4,2)$.
+\begin{center}
+\begin{tikzpicture}[node distance=7mm]
+  \node[dp/call-entry] (a) {$\mathbf M=(3,1)$\\$\mathbf r=(2,1)$};
+  \node[dp/call-branch,right=of a] (b) {$Z_{(2,1)}^{\mathsf T}Q_0Z_{(2,1)}$\\$+\,g_1Z_{(1,1)}^{\mathsf T}Q_1Z_{(1,1)}$\\$+\,g_2Z_{(2,0)}^{\mathsf T}Q_2Z_{(2,0)}$};
+  \node[dp/call-result,right=of b] (c) {$Q_0,Q_1,Q_2\succeq0$\\exact match at $(4,2)$};
+  \draw[dp/call-arrow] (a) -- (b); \draw[dp/call-arrow] (b) -- (c);
+\end{tikzpicture}
+\end{center}
+
 \code{usePutinar} is value-semantic. It rebuilds from the original \code{Residual} and \code{Relation}, replaces any previous family, adds no implicit margin, and makes no solver call.
 
 \remarkshead
 \begin{enumerate}[leftmargin=*]
-  \item Malformed scalar or vector orders raise \codeerr{pdlmi}{InvalidPutinarOrder}; an order below \(\lfloor M/2\rfloor\) in one parameter, or below componentwise \(\lceil\mathbf M/2\rceil\) in two or more parameters, raises \codeerr{pdlmi}{PutinarOrderTooLow}. \item A malformed selector raises \codeerr{pdlmi}{InvalidUsePutinar}; explicit false plus any supplied order raises \codeerr{pdlmi}{ConflictingPutinarOptions}. \item Simultaneous relaxation families raise \codeerr{pdlmi}{ConflictingRelaxations}; expression, relation, and option validation in \cref{sec:pdlmi-construction} still applies. Global inequality classification is unchanged: the family is semidefinite only when every original coefficient across all cells and rate rows is square Hermitian. Otherwise the complete family uses independent entry-wise scalar Putinar certificates in MATLAB column-major order.
+  \item Malformed scalar or vector orders raise \codeerr{pdlmi}{InvalidPutinarOrder}. An order below $(\lfloor M_1/2\rfloor)$ for $\mathbf M=(M_1)$, or below componentwise $\lceil\mathbf M/2\rceil$ in two or more parameters, raises \codeerr{pdlmi}{PutinarOrderTooLow}. \item A malformed selector raises \codeerr{pdlmi}{InvalidUsePutinar}. Explicit false plus any supplied order raises \codeerr{pdlmi}{ConflictingPutinarOptions}. \item Simultaneous relaxation families raise \codeerr{pdlmi}{ConflictingRelaxations}. Expression, relation, and option validation in \cref{sec:pdlmi-construction} still applies. Global inequality classification is unchanged: the family is semidefinite only when every original coefficient across all cells and rate rows is square Hermitian. Otherwise the complete family uses independent entry-wise scalar Putinar certificates in MATLAB column-major order.
 \end{enumerate}
 
 \section[Select SparsePutinar with \texorpdfstring{\code{useSpPut}}{useSpPut}]{%
@@ -394,7 +436,7 @@ Csp = C.useSpPut(..., ValidationMode=mode)
 \arghead
 \begin{itemize}[leftmargin=*]
   \item \code{b} is one finite positive integer clique size and defaults to two. It is the common requested side length of every tensor window, not a graph clique inferred from matrix sparsity.
-  \item \code{r} is scalar shorthand or an $\ell$-element direction-wise absolute Putinar Gram order. It defaults to $\lfloor M/2\rfloor$ in one parameter and componentwise $\lceil\mathbf M/2\rceil$ in two or more parameters. An explicit order must satisfy the same minimum before endpoint normalization.
+  \item \code{r} is scalar shorthand or an $\ell$-element direction-wise absolute Putinar Gram order $\mathbf r$. It defaults to $(\lfloor M_1/2\rfloor)$ when $\mathbf M=(M_1)$ and componentwise $\lceil\mathbf M/2\rceil$ in two or more parameters. An explicit order must satisfy the same minimum before endpoint normalization.
   \item \code{mode} is the optional transient \code{"fast"} or \code{"strict"} validation mode. It is case-insensitive and is not stored in the returned object.
   \item \code{Csp} is a new \code{pdlmi}. An intermediate result sets \code{UseSparsePutinar} to true, stores $r$ in \code{SparsePutinarOrder}, and stores $b$ in \code{CliqueSize}. The source wrapper remains unchanged.
 \end{itemize}
@@ -433,6 +475,17 @@ denseEndpointState = 1×4 double
 
 The intermediate result has three independent clique-size-two PSD blocks of dimension two followed by five exact coefficient identities. The size-one request returns actual Direct state with five coefficient constraints. The size-three request covers every active Gram basis and returns dense Putinar state with PSD-block dimensions three and two followed by the same five identities.
 
+\ideastep{Anisotropic assembly output} For an independent target with $\mathbf M=(2,4)$, order $\mathbf r=(1,2)$, and clique size $b=2$, each active empty or singleton Putinar term is split into its own overlapping tensor windows. Every window receives an independent PSD block, and the accumulated contributions match the same anisotropic target degree $2\mathbf r=(2,4)$.
+\begin{center}
+\begin{tikzpicture}[node distance=7mm]
+  \node[dp/call-entry] (a) {$\mathbf M=(2,4)$\\$\mathbf r=(1,2)$};
+  \node[dp/call-step,right=of a] (b) {\code{putSpec}\\active masks};
+  \node[dp/call-branch,right=of b] (c) {$b=2$ tensor windows\\independent $Q_{q,\boldsymbol\tau}\succeq0$};
+  \node[dp/call-result,right=of c] (d) {overlap sum\\exact match at $(2,4)$};
+  \draw[dp/call-arrow] (a) -- (b); \draw[dp/call-arrow] (b) -- (c); \draw[dp/call-arrow] (c) -- (d);
+\end{tikzpicture}
+\end{center}
+
 \remarkshead
 \begin{enumerate}[leftmargin=*]
   \item \code{useSpPut} rebuilds from the stored \code{Residual} and \code{Relation}. It replaces any earlier P\'olya, Putinar, SparsePutinar, SparseFullBox, or FullBox selection, adds no margin, and makes no solver call.
@@ -461,7 +514,7 @@ Csp = C.useSpBox(..., ValidationMode=mode)
 \end{lstlisting}
 
 \arghead
-\code{w} is one finite positive integer tensor-window side length and defaults to two. The selected state retains the property name \code{BandWidth}, but $w$ does not select entries through flattened matrix indices. \code{r} is scalar shorthand or an optional direction-wise absolute SparseFullBox Gram order. It defaults to $\lfloor M/2\rfloor$ for a one-parameter residual of degree $M$, or componentwise $\lceil\mathbf M/2\rceil$ for two or more parameters. Every explicit order is validated against that same componentwise minimum before endpoint normalization.
+\code{w} is one finite positive integer tensor-window side length and defaults to two. The selected state retains the property name \code{BandWidth}, but $w$ does not select entries through flattened matrix indices. \code{r} is scalar shorthand for the optional direction-wise absolute SparseFullBox Gram order $\mathbf r$. It defaults to $(\lfloor M_1/2\rfloor)$ when $\mathbf M=(M_1)$, or componentwise $\lceil\mathbf M/2\rceil$ for two or more parameters. Every explicit order is validated against that same componentwise minimum before endpoint normalization.
 
 \descriptionhead
 Width one canonicalizes to actual Direct state. A width that spans every order axis canonicalizes to actual FullBox state, while intermediate widths retain SparseFullBox state. Every cell, rate row, and entry-wise matrix entry receives fresh window variables, with PSD blocks stored before coefficient identities. \Cref{sec:certificate-sparse-full-box} derives the window construction, block dimensions, accumulated identities, and endpoints.
@@ -495,6 +548,17 @@ denseEndpointState = 1×4 double
 
 The intermediate result retains SparseFullBox state with $r=2$ and $w=2$. Its three overlapping size-two windows own independent PSD blocks, and all five target coefficients are matched exactly. Width one returns actual Direct state with no sparse metadata or Gram variables. Since $w=3=r+1$, the dense endpoint returns actual FullBox state with two dense PSD blocks followed by the same five identities. These are canonical public states rather than equivalent constraint lists under a different selector flag.
 
+\ideastep{Anisotropic assembly output} For a separate target with $\mathbf M=(3,1)$, choose $\mathbf r=(2,1)$ and window side length $w=2$. The FullBox subset terms use different direction-wise Gram degrees, each term is split into its own tensor windows, and the accumulated window contributions match the elevated target at $(4,2)$.
+\begin{center}
+\begin{tikzpicture}[node distance=7mm]
+  \node[dp/call-entry] (a) {$\mathbf M=(3,1)$\\$\mathbf r=(2,1)$};
+  \node[dp/call-step,right=of a] (b) {\code{boxSpec}\\all subset masks};
+  \node[dp/call-branch,right=of b] (c) {$w=2$ windows\\$Q_{J,\boldsymbol\tau}\succeq0$};
+  \node[dp/call-result,right=of c] (d) {overlap sum\\exact match at $(4,2)$};
+  \draw[dp/call-arrow] (a) -- (b); \draw[dp/call-arrow] (b) -- (c); \draw[dp/call-arrow] (c) -- (d);
+\end{tikzpicture}
+\end{center}
+
 \remarkshead
 \begin{enumerate}[leftmargin=*]
   \item \code{useSpBox} is a value-class method: it returns a new wrapper, leaves the source unchanged, and rebuilds from \code{Residual} and \code{Relation}, replacing any earlier P\'olya, Putinar, SparsePutinar, SparseFullBox, or FullBox selection. It adds no positivity margin and makes no solver call.
@@ -520,7 +584,7 @@ Cbox = C.useFullBox(..., ValidationMode=mode)
 
 The no-argument form selects the smallest admissible absolute order. The explicit form accepts scalar shorthand or a direction-wise \code{r}, which is not added to the residual degree. Both forms are value-class selectors that return a new \code{pdlmi}, leave \code{C} unchanged, and rebuild from \code{C.Residual}. Reapplication therefore replaces an earlier FullBox order or a P\'olya, Putinar, SparsePutinar, or SparseFullBox selection rather than compounding it.
 
-In one parameter, the minimum absolute order is $\lfloor M/2\rfloor$ for residual degree $M$. In two or more parameters, the componentwise minimum is $\lceil\mathbf M/2\rceil$. The selected order fixes dense Gram bases and is not added to the residual degree. \Cref{sec:certificate-markov-lukacs,sec:certificate-full-box} gives the parity and multivariate generator constructions.
+In one parameter, $\mathbf M=(M_1)$ and the minimum absolute order vector is $\mathbf r=(\lfloor M_1/2\rfloor)$. In two or more parameters, the componentwise minimum is $\lceil\mathbf M/2\rceil$. The selected order fixes dense Gram bases and is not added to the residual degree. \Cref{sec:certificate-markov-lukacs,sec:certificate-full-box} gives the parity and multivariate generator constructions.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -544,6 +608,16 @@ fullBoxConstraintCount = 5
 \end{lstlisting}
 
 At this order the scalar degree-two cell has two PSD Gram constraints followed by three exact Bernstein coefficient identities.
+
+\ideastep{Anisotropic assembly output} For an independent target with $\mathbf M=(1,3)$ and absolute order $\mathbf r=(1,2)$, FullBox uses the four masks $\varnothing$, $\{1\}$, $\{2\}$, and $\{1,2\}$. Each active mask has its own PSD Gram block, and their weighted coefficient maps match the target after exact elevation to $2\mathbf r=(2,4)$.
+\begin{center}
+\begin{tikzpicture}[node distance=7mm]
+  \node[dp/call-entry] (a) {$\mathbf M=(1,3)$\\$\mathbf r=(1,2)$};
+  \node[dp/call-branch,right=of a] (b) {$J=\varnothing,\{1\},\{2\},\{1,2\}$\\$g_JZ_J^{\mathsf T}Q_JZ_J$};
+  \node[dp/call-result,right=of b] (c) {$Q_J\succeq0$\\exact match at $(2,4)$};
+  \draw[dp/call-arrow] (a) -- (b); \draw[dp/call-arrow] (b) -- (c);
+\end{tikzpicture}
+\end{center}
 
 \remarkshead
 FullBox retains all box-generator products, which distinguishes it from the multivariate singleton-generator Putinar family. Assembly is independent for every cell, active rate row, and entry-wise matrix entry. For \code{>=}, it represents the residual, while for \code{<=}, it represents the negated target. All PSD blocks precede exact coefficient identities in stored order.

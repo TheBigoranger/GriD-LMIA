@@ -9,7 +9,7 @@ Each main construction follows the same reading path: \emph{Basic idea}, \emph{F
 
 \ideastep{Basic idea} A convex combination of numbers or matrices has the form
 \[
-X=\sum_{i=0}^{m}w_iX_i,\qquad w_i\ge0,\qquad \sum_{i=0}^{m}w_i=1.
+X=\sum_{i=0}^{q}w_iX_i,\qquad w_i\ge0,\qquad \sum_{i=0}^{q}w_i=1.
 \]
 For scalars, \(X\) lies between the smallest and largest \(X_i\).  For symmetric matrices, if every \(X_i\succeq0\), then \(X\succeq0\), because
 \[
@@ -88,19 +88,19 @@ At the lower physical face, \(\alpha=0\) and the value is \(C^{(c)}[0]\); at the
 
 \ideastep{Basic idea} Higher degree adds interior shape controls while keeping the same physical cell.  It does not add physical grid nodes.
 
-\ideastep{Formula} For degree \(m\), define
+\ideastep{Formula} In one parameter, write the degree vector as $\mathbf m=(m_1)$ and define
 \[
-  B_i^m(\alpha)=\binom mi(1-\alpha)^{m-i}\alpha^i,
-  \qquad i=0,\ldots,m.
+  B_i^{m_1}(\alpha)=\binom{m_1}{i}(1-\alpha)^{m_1-i}\alpha^i,
+  \qquad i=0,\ldots,m_1.
 \]
 Each basis function is nonnegative on \([0,1]\).  The binomial theorem gives
 \[
-  \sum_{i=0}^{m}B_i^m(\alpha)
-=((1-\alpha)+\alpha)^m=1.
+  \sum_{i=0}^{m_1}B_i^{m_1}(\alpha)
+=((1-\alpha)+\alpha)^{m_1}=1.
 \]
 Thus
 \[
-  C^{(c)}(\alpha)=\sum_{i=0}^{m}B_i^m(\alpha)C^{(c)}[i]
+  C^{(c)}(\alpha)=\sum_{i=0}^{m_1}B_i^{m_1}(\alpha)C^{(c)}[i]
 \]
 is a convex combination of its local coefficient matrices.
 
@@ -205,13 +205,16 @@ These are changes of basis inside the same degree-\(n\) polynomial space. For ma
 \label{sec:bernstein-degree-elevation}
 \index{degree elevation}
 
-In one parameter, a polynomial on physical cell \(c\) with degree \(m\) has a Bernstein representation of every higher degree.  One elevation step gives
+In one parameter, a polynomial on physical cell $c$ with degree vector $\mathbf m=(m_1)$ has a Bernstein representation of every higher degree. One elevation step gives
 \[
-  \widehat C^{(c)}[0]=C^{(c)}[0],\qquad
-  \widehat C^{(c)}[k]=
-    \frac{k}{m+1}C^{(c)}[k-1]
-+\left(1-\frac{k}{m+1}\right)C^{(c)}[k],\qquad
-  \widehat C^{(c)}[m+1]=C^{(c)}[m].
+\begin{aligned}
+  \widehat C^{(c)}[0]&=C^{(c)}[0],
+  &\widehat C^{(c)}[m_1+1]&=C^{(c)}[m_1],\\
+  \widehat C^{(c)}[k]&=
+    \frac{k}{m_1+1}C^{(c)}[k-1]
+    +\left(1-\frac{k}{m_1+1}\right)C^{(c)}[k],
+  &k&=1,\ldots,m_1.
+\end{aligned}
 \]
 For the worked coefficients \([1,2,6]\), elevation from degree two to degree three produces
 \[
@@ -235,28 +238,28 @@ For the worked coefficients \([1,2,6]\), elevation from degree two to degree thr
 \end{tikzpicture}
 \end{center}
 
-Direct elevation from \(m\) to \(M\ge m\) is
+Direct elevation from $\mathbf m=(m_1)$ to $\mathbf M=(M_1)\ge\mathbf m$ is
 \[
   \widehat C^{(c)}[k]=
-  \sum_{i=\max(0,k-M+m)}^{\min(m,k)}
-C^{(c)}[i]\frac{\binom mi\binom{M-m}{k-i}}{\binom Mk}.
+  \sum_{i=\max(0,k-M_1+m_1)}^{\min(m_1,k)}
+C^{(c)}[i]\frac{\binom{m_1}{i}\binom{M_1-m_1}{k-i}}{\binom{M_1}{k}}.
 \]
 This formula is a binomially normalized discrete convolution. Define
 \[
-  U_m^{(c)}[i]=\binom mi C^{(c)}[i],
+  U_{m_1}^{(c)}[i]=\binom{m_1}{i} C^{(c)}[i],
   \qquad
-  E_{M-m}[j]=\binom{M-m}{j},
+  E_{M_1-m_1}[j]=\binom{M_1-m_1}{j},
   \qquad
-  \widehat U_M^{(c)}[k]=\binom Mk\widehat C^{(c)}[k].
+  \widehat U_{M_1}^{(c)}[k]=\binom{M_1}{k}\widehat C^{(c)}[k].
 \]
 Then
 \[
-  \widehat U_M^{(c)}=U_m^{(c)}*E_{M-m},
+  \widehat U_{M_1}^{(c)}=U_{m_1}^{(c)}*E_{M_1-m_1},
   \qquad
   \widehat C^{(c)}[k]
-  =\frac{(U_m^{(c)}*E_{M-m})[k]}{\binom Mk},
+  =\frac{(U_{m_1}^{(c)}*E_{M_1-m_1})[k]}{\binom{M_1}{k}},
 \]
-where \(*\) is ordinary one-dimensional discrete convolution and out-of-range entries are zero. Thus elevation first binomially scales the coefficient row, convolves it with the fixed binomial kernel of degree \(M-m\), and divides by the degree-\(M\) binomial weight. The new coefficients are fixed convex combinations of the old ones. Elevation therefore changes representation but adds no decision freedom. Constructing a new higher-degree \code{pdvar} does enlarge the decision parameterization.
+where $*$ is ordinary one-dimensional discrete convolution and out-of-range entries are zero. Thus elevation first binomially scales the coefficient row, convolves it with the fixed binomial kernel of component gap $M_1-m_1$, and divides by the degree-component $M_1$ binomial weight. The new coefficients are fixed convex combinations of the old ones. Elevation therefore changes representation but adds no decision freedom. Constructing a new higher-degree \code{pdvar} does enlarge the decision parameterization.
 
 For a tensor coefficient array of degree $\mathbf m=(m_1,\ldots,m_\ell)$, elevate independently to any componentwise target $\mathbf M\ge\mathbf m$. With
 \[
@@ -290,9 +293,9 @@ If each coefficient is an $a$-by-$b$ matrix, pack one cell and rate row horizont
 \]
 This right multiplication preserves the $a$ rows and separates the $b$ columns of each target coefficient. It also applies to affine \code{sdpvar} payloads because the operator and Kronecker factor are numeric sparse matrices. Public \code{elevate} delegates complete tree alignment to the protected \code{elevData} kernel and packed row application to \code{elevRow}. These kernels group temporary operands by source degree, build one operator for each pair $(\mathbf m,\mathbf M)$, and reuse it across every physical cell and stored rate row with that shape. The returned object keeps the same represented function, existing YALMIP variables, metadata, physical-cell order, and rate-row order.
 
-For example, elevation from $m=1$ to $M=3$ gives
+For example, take the one-component vectors $\mathbf m=(m_1)=(1)$ and $\mathbf M=(M_1)=(3)$. The corresponding operator is
 \[
-E_{3\leftarrow1}=
+E_{\mathbf M\leftarrow\mathbf m}=E_{(3)\leftarrow(1)}=
 \begin{bmatrix}
 1&0\\
 2/3&1/3\\
@@ -300,7 +303,7 @@ E_{3\leftarrow1}=
 0&1
 \end{bmatrix},
 \qquad
-E_{3\leftarrow1}
+E_{(3)\leftarrow(1)}
 \begin{bmatrix}c_0\\c_1\end{bmatrix}
 =
 \begin{bmatrix}c_0\\(2c_0+c_1)/3\\(c_0+2c_1)/3\\c_1\end{bmatrix}.
@@ -341,7 +344,7 @@ B_{\mathbf i}^{\mathbf m}(\boldsymbol\alpha)
 B_{\mathbf i}^{\mathbf m}=
   \prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
 \]
-There are \(\prod_s(k_s-1)\) physical hypercubes and \(\prod_s(m_s+1)\) zero-based local Bernstein labels per hypercube. A zero component \(m_s=0\) leaves only label \(i_s=0\), so the polynomial is constant in direction \(s\). Physical node and hypercube indices remain one-based. The familiar \((m+1)^\ell\) count is the uniform-degree specialization \(\mathbf m=m\boldsymbol1\).
+There are $\prod_s(k_s-1)$ physical hypercubes and $\prod_s(m_s+1)$ zero-based local Bernstein labels per hypercube. A zero component $m_s=0$ leaves only label $i_s=0$, so the polynomial is constant in direction $s$. Physical node and hypercube indices remain one-based. If every component is the common scalar $\bar m$, then $\mathbf m=\bar m\boldsymbol1$ and the label count specializes to $(\bar m+1)^\ell$.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20 30 40]}, [1 1], 1);
@@ -386,29 +389,29 @@ The nested tree \code{LocalValues{c1}{c2}...{cell}} follows physical-cell coordi
 
 \ideastep{Basic idea} Multiplying two Bernstein polynomials creates every ordered pair of input coefficients.  Pairs with the same label sum contribute to the same output. For matrix payloads, ``ordered'' matters: the left factor stays on the left.
 
-\ideastep{Formula} First consider one parameter and fix the one-based physical cell \(c\).  Let
+\ideastep{Formula} First consider one parameter, write the two degree vectors as $\mathbf m=(m_1)$ and $\mathbf n=(n_1)$, and fix the one-based physical cell $c$. Let
 \[
-P=\sum_{i=0}^{m}B_i^mP^{(c)}[i],\qquad Q=\sum_{j=0}^{n}B_j^nQ^{(c)}[j].
+P=\sum_{i=0}^{m_1}B_i^{m_1}P^{(c)}[i],\qquad Q=\sum_{j=0}^{n_1}B_j^{n_1}Q^{(c)}[j].
 \]
 The basis-product identity
 \[
-B_i^mB_j^n=
-  \frac{\binom mi\binom nj}{\binom{m+n}{i+j}}B_{i+j}^{m+n}
+B_i^{m_1}B_j^{n_1}=
+  \frac{\binom{m_1}{i}\binom{n_1}{j}}{\binom{m_1+n_1}{i+j}}B_{i+j}^{m_1+n_1}
 \]
 gives
 \[
 (PQ)^{(c)}[k]=\sum_{i+j=k}P^{(c)}[i]Q^{(c)}[j]
-  \frac{\binom mi\binom nj}{\binom{m+n}{k}}.
+  \frac{\binom{m_1}{i}\binom{n_1}{j}}{\binom{m_1+n_1}{k}}.
 \]
 This is an ordered matrix convolution.  In general \(P^{(c)}[i]Q^{(c)}[j]\ne Q^{(c)}[j]P^{(c)}[i]\).
 
 Equivalently, define the binomially scaled rows
 \[
-  \widetilde P^{(c)}[i]=\binom miP^{(c)}[i],
+  \widetilde P^{(c)}[i]=\binom{m_1}{i}P^{(c)}[i],
   \qquad
-  \widetilde Q^{(c)}[j]=\binom njQ^{(c)}[j],
+  \widetilde Q^{(c)}[j]=\binom{n_1}{j}Q^{(c)}[j],
   \qquad
-  \widetilde R^{(c)}[k]=\binom{m+n}{k}(PQ)^{(c)}[k].
+  \widetilde R^{(c)}[k]=\binom{m_1+n_1}{k}(PQ)^{(c)}[k].
 \]
 Then
 \[
@@ -612,13 +615,13 @@ The protected \code{prodVals} kernel owns the three routes and reuses their nume
 
 \ideastep{Basic idea} Differentiate inside each physical cell.  Adjacent control differences produce the derivative coefficients; multiplying by a bounded rate then creates one stored row per rate-box vertex.  Value continuity of \(P\) does not force the cell-local derivatives to match across a face.
 
-\ideastep{Formula} For one parameter, on physical cell \(c\) of width \(h_1^c\),
+\ideastep{Formula} For one parameter, write $\mathbf m=(m_1)$ and consider physical cell $c$ of width $h_1^c$:
 \[
   \frac{\partial P}{\partial\rho}
-=\frac{m}{h_1^c}\sum_{i=0}^{m-1}
-    \bigl(C^{(c)}[i+1]-C^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
+=\frac{m_1}{h_1^c}\sum_{i=0}^{m_1-1}
+    \bigl(C^{(c)}[i+1]-C^{(c)}[i]\bigr)B_i^{m_1-1}(\alpha).
 \]
-\ideastep{Worked example} For the worked polynomial \([1,2,6]\) on \([0,2]\), \(m=2\) and \(h=2\), so the derivative coefficients are
+\ideastep{Worked example} For the worked polynomial $[1,2,6]$ on $[0,2]$, $\mathbf m=(2)$ and $h_1^c=2$, so the derivative coefficients are
 \[
   \left[\frac{2}{2}(2-1),\frac{2}{2}(6-2)\right]=[1,4].
 \]
@@ -687,13 +690,13 @@ The last parameter direction changes fastest.  This is the same tensor ordering 
 \section{de Casteljau Evaluation And Exact Subdivision}
 \index{de Casteljau evaluation}\index{subdivision}
 
-de Casteljau recursion evaluates a Bernstein polynomial using only affine combinations.  For one parameter, on a fixed physical cell \(c\), begin with \(C^{(c,0)}[i]=C^{(c)}[i]\) and define
+de Casteljau recursion evaluates a Bernstein polynomial using only affine combinations. For one parameter, write the degree as $\mathbf m=(m_1)$. On a fixed physical cell $c$, begin with $C^{(c,0)}[i]=C^{(c)}[i]$ and define
 \[
 C^{(c,r)}[i]=(1-\tau)C^{(c,r-1)}[i]
     +\tau C^{(c,r-1)}[i+1],
-  \qquad r=1,\ldots,m.
+  \qquad r=1,\ldots,m_1.
 \]
-The value at \(\alpha=\tau\) is \(C^{(c,m)}[0]\).
+The value at $\alpha=\tau$ is $C^{(c,m_1)}[0]$.
 
 For \([1,2,6]\) and \(\tau=1/2\), the recursion is
 \[

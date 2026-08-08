@@ -15,8 +15,8 @@ export interface CertificateSource {
 }
 
 export const certificateSources: CertificateSource[] = [
-  { key: "direct", anchor: "direct", label: "Direct", description: "The default tests every sign-normalized residual coefficient in every physical cell and stored rate row.", command: "L", exportCommand: "C = L.toYalmip();", constraintCount: "Coefficient count follows the assembled residual degree M.", boundaryNote: "The finite test is sufficient on the parameter cell; exact rate-box vertex reduction has already occurred.", formula: ["C^{(\\mathbf c)}[\\mathbf i]\\succeq0"], cardFormula: "C^{(\\mathbf c)}[\\mathbf i]\\succeq0,\\quad\\mathbf i\\in\\mathcal I_M", detailRoute: "documents/math/finite-certificates/direct-and-polya/" },
-  { key: "polya", anchor: "polya", label: "Pólya", description: "Pólya elevation by increment d changes the Bernstein representation degree, not the residual polynomial.", command: "L.usePolya(d)", exportCommand: "C = L.usePolya(d).toYalmip();", constraintCount: "Coefficient count depends on the assembled degree M and increment d.", boundaryNote: "A failed fixed increment is inconclusive for the continuous inequality.", formula: ["\\tilde C^{(\\mathbf c)}[\\mathbf i]\\succeq0"], cardFormula: "\\tilde S^{(\\mathbf c)}(\\boldsymbol\\alpha)=S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\prod_{s=1}^{\\ell}[\\alpha_s+(1-\\alpha_s)]^d", detailRoute: "documents/math/finite-certificates/direct-and-polya/" },
+  { key: "direct", anchor: "direct", label: "Direct", description: "The default tests every sign-normalized residual coefficient in every physical cell and stored rate row.", command: "L", exportCommand: "C = L.toYalmip();", constraintCount: "Coefficient count follows the assembled residual degree vector M.", boundaryNote: "The finite test is sufficient on the parameter cell; exact rate-box vertex reduction has already occurred.", formula: ["C^{(\\mathbf c)}[\\mathbf i]\\succeq0"], cardFormula: "C^{(\\mathbf c)}[\\mathbf i]\\succeq0,\\quad\\mathbf i\\in\\mathcal I_{\\mathbf M}", detailRoute: "documents/math/finite-certificates/direct-and-polya/" },
+  { key: "polya", anchor: "polya", label: "Pólya", description: "Pólya elevation by increment vector d changes the Bernstein representation degree, not the residual polynomial.", command: "L.usePolya(d)", exportCommand: "C = L.usePolya(d).toYalmip();", constraintCount: "Coefficient count depends on the assembled degree vector M and increment vector d.", boundaryNote: "A failed fixed increment is inconclusive for the continuous inequality.", formula: ["\\tilde C^{(\\mathbf c)}[\\mathbf i]\\succeq0"], cardFormula: "\\tilde S^{(\\mathbf c)}(\\boldsymbol\\alpha)=S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\prod_{s=1}^{\\ell}[\\alpha_s+(1-\\alpha_s)]^{d_s}", detailRoute: "documents/math/finite-certificates/direct-and-polya/" },
   {
     key: "putinar",
     anchor: "putinar",
@@ -27,8 +27,8 @@ export const certificateSources: CertificateSource[] = [
     constraintCount: "10 constraints: 2 cells × (2 PSD blocks + 3 identities).",
     boundaryNote: "Residual boundary handles stay shared, while each physical cell receives independent Gram blocks.",
     formula: [
-      "\\ell=1:\\;\\text{Markov--Lukács},\\quad r_{\\min}=\\lfloor M/2\\rfloor",
-      "\\ell\\ge2:\\;S=S_0+\\sum_s g_sS_s,\\quad r_{\\min}=\\lceil M/2\\rceil",
+      "\\ell=1:\\;\\mathbf M=(M_1),\\;\\mathbf r=(r_1),\\quad r_{1,\\min}=\\lfloor M_1/2\\rfloor",
+      "\\ell\\ge2:\\;S=S_0+\\sum_s g_sS_s,\\quad \\mathbf r_{\\min}=\\lceil \\mathbf M/2\\rceil",
       "g_s=\\alpha_s(1-\\alpha_s)",
     ],
     cardFormula: "\\begin{gathered}S^{(\\mathbf c)}=S_0+\\sum_{s=1}^{\\ell}g_sS_s\\\\g_s=\\alpha_s(1-\\alpha_s),\\quad S_s\\succeq0\\end{gathered}",
@@ -68,5 +68,5 @@ export const certificateSources: CertificateSource[] = [
     cardFormula: "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{J\\subseteq[\\ell]}g_J(\\boldsymbol\\alpha)\\sum_{\\mathbf u}Z_{J,\\mathbf u}^{\\mathsf T}Q_{J,\\mathbf u}Z_{J,\\mathbf u},\\quad Q_{J,\\mathbf u}\\succeq0",
     detailRoute: "documents/math/finite-certificates/sparsefullbox-and-fullbox/",
   },
-  { key: "fullbox", anchor: "full-box", label: "FullBox", description: "FullBox uses every square-free product of the box generators; in one parameter it coincides with the Markov–Lukács form.", command: "L.useFullBox()", exportCommand: "C = L.useFullBox().toYalmip();", constraintCount: "Constraint count depends on dimension, assembled degree M, and absolute order r.", boundaryNote: "Putinar and FullBox coincide in one parameter; their multivariate generator families differ.", formula: ["\\ell=1:\\;S=S_0+\\alpha(1-\\alpha)S_1"], cardFormula: "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{J\\subseteq[\\ell]}g_J(\\boldsymbol\\alpha)Z_J(\\boldsymbol\\alpha)^{\\mathsf T}Q_JZ_J(\\boldsymbol\\alpha),\\quad Q_J\\succeq0", detailRoute: "documents/math/finite-certificates/sparsefullbox-and-fullbox/" },
+  { key: "fullbox", anchor: "full-box", label: "FullBox", description: "FullBox uses every square-free product of the box generators; in one parameter it coincides with the Markov–Lukács form.", command: "L.useFullBox()", exportCommand: "C = L.useFullBox().toYalmip();", constraintCount: "Constraint count depends on dimension, assembled degree vector M, and absolute order vector r.", boundaryNote: "Putinar and FullBox coincide in one parameter; their multivariate generator families differ.", formula: ["\\ell=1:\\;S=S_0+\\alpha(1-\\alpha)S_1"], cardFormula: "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{J\\subseteq[\\ell]}g_J(\\boldsymbol\\alpha)Z_J(\\boldsymbol\\alpha)^{\\mathsf T}Q_JZ_J(\\boldsymbol\\alpha),\\quad Q_J\\succeq0", detailRoute: "documents/math/finite-certificates/sparsefullbox-and-fullbox/" },
 ];
