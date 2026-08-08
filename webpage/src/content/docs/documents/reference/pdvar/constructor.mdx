@@ -86,7 +86,7 @@ P = pdvar(..., ValidationMode=mode)
 | `RateBounds` | Finite $\ell\times2$ lower/upper rate-bound table stored as metadata, such as `RateBounds=[-1 1]` or `RateBounds=[-1 2; -3 4]`. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`; default `"fast"`, transient, and not stored. |
 
-Unsupported public options: `IsContinuous`, `ContainsDecision`, and `HasRateDependence`.
+Unsupported public options: `IsContinuous` and `ContainsDecision`.
 
 ## Returned Object
 
@@ -142,7 +142,7 @@ access:
 | `LocalValues` | `P.LocalValues{1}` or `P.coeffs(1)` | Cell-local YALMIP coefficient payloads. |
 | `IsContinuous` | `P.IsContinuous` | `true` for constructor-created variables; `rhodiff` outputs are discontinuous. |
 | `ContainsDecision` | `P.ContainsDecision` | `true` unless algebra proves a zero/nondecision result. |
-| `HasRateDependence` | `P.HasRateDependence` | `true` when rate metadata or rate rows are present. |
+| `NumRateRows` | `P.NumRateRows` | Exact explicit stored-row count. A constructor-created decision with only `RateBounds` reports `0`. |
 | `RateBounds` | `P.RateBounds` | Empty or the $\ell\times2$ rate-bound table. |
 | `SourceSummary` | `P.SourceSummary` | Source label such as `decision` or `derivative`. |
 
@@ -217,14 +217,13 @@ ans =
 ```matlab
 yalmip('clear')
 P = pdvar(1, {[0 1], [10 20]}, RateBounds=[-1 2; -3 4]);
-P.HasRateDependence
+P.NumRateRows
 P.RateBounds
 ```
 
 ```text
 ans =
-  logical
-   1
+     0
 
 ans =
     -1     2

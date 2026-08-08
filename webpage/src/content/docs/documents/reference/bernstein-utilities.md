@@ -1,128 +1,59 @@
 ---
 title: Protected pdbase Backend Utilities
-description: Protected Bernstein plans, storage, indexing, and reconstruction methods owned by pdbase.
+description: Current protected elevation, product, storage, rate-row, indexing, and reconstruction methods.
 ---
 
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdbase/">pdbase</a><span>/</span><span>protected backend utilities</span></nav>
 
-These inventoried methods are `protected` `pdbase` implementation utilities. They are
-documented for maintainers and API ownership clarity, but they are not callable
-public modeling API. Use the linked `pdmat`, `pdvar`, and `pdlmi` paths instead.
+These methods are protected implementation utilities, not public modeling APIs. The current implementation consolidates elevation in `elevData` and `elevRow`, multiplication in `prodVals`, and shared unary reconstruction in `mapUnary` and `mkUnOp`.
 
-## <span id="pdbase-bernelev"></span>`bernElev`
+## <span id="pdbase-elevrow"></span>`elevRow`
 
-**Backend syntax:** `out = pdbase.bernElev(coeffs,fromDeg,toDeg,nPar)`.
-Elevates a compatible coefficient family exactly. Degrees must be finite
-nonnegative integers, `toDegree >= fromDegree`, and the cell width must match
-the tensor label count. Errors use `pdbase:InvalidDegree`,
-`pdbase:InvalidDegreeElevation`, or `pdbase:InvalidCoefficientCell`.
+Builds the sparse numeric operator for one source and target tensor degree, then applies it to one packed coefficient row. It preserves numeric and affine payload order.
 
-## <span id="pdbase-bernprod"></span>`bernProd`
+## <span id="pdbase-elevdata"></span>`elevData`
 
-**Backend syntax:** `out = bernProd(obj,lhs,lhsDegree,rhs,rhsDegree)`.
-Forms the normalized tensor Bernstein convolution while preserving written
-matrix-product order. Public `pdmat` and `pdvar` `mtimes` own operand and
-affinity validation.
+Groups compatible source degrees and reuses each `elevRow` plan across physical cells and active rate rows. Public [`elevate`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-elevate) owns validation and class-preserving reconstruction.
 
-## <span id="pdbase-elevationplan"></span>`elevationPlan`
+## <span id="pdbase-prodvals"></span>`prodVals`
 
-**Backend syntax:** `plan = pdbase.elevationPlan(fromDeg,toDeg,nPar)`.
-Builds an operation-local numeric source-to-target incidence and weight plan.
-Compatible cells and rate rows reuse the plan; public coefficients remain
-dense numeric or affine payloads.
-
-## <span id="pdbase-productplan"></span>`productPlan`
-
-**Backend syntax:** `plan = productPlan(obj,lhsDegree,rhsDegree)`.
-Precomputes ordered Bernstein label pairs and normalized binomial weights for
-one compatible product shape. Applying it preserves written matrix order.
-
-## <span id="pdbase-alignlocaldegrees"></span>`alignLocalDegrees`
-
-**Backend syntax:** `data = pdbase.alignLocalDegrees(data,targetDegree,grid,mode)`.
-Aligns normalized cell-local data to one target degree, reusing elevation
-plans and the selected transient validation policy.
-
-## <span id="pdbase-prodlocalvalues"></span>`prodLocalValues`
-
-**Backend syntax:** `vals = prodLocalValues(obj,...,plan,mode)`.
-Applies one product plan across compatible physical cells and active rate rows
-without changing the established traversal order.
+Selects numeric scaled tensor convolution, known–affine block contraction, or generic planned pair accumulation. Public `pdmat` and `pdvar` multiplication own dimension and affinity validation.
 
 ## <span id="pdbase-berntbl"></span>`bernTbl`
 
-**Backend syntax:** `tbl = bernTbl(obj,errId,valFcn,exprFcn,rateVerts,...)`.
-Builds detailed coefficient rows or a one-line Bernstein expression for the
-public `bernsteinTable` methods. Optional cell selectors and `"oneLine"` are
-validated with the caller-owned error identifier.
-
-## <span id="pdbase-elevlocalvalues"></span>`elevLocalValues`
-
-**Backend syntax:** `vals = pdbase.elevLocalValues(vals,fromDeg,toDeg,grid)`.
-Traverses every physical cell and independently elevates every ordinary or
-rate-dependent coefficient row. It preserves the nested tree and rate-row
-ordering.
+Builds detailed or one-line coefficient diagnostics for the public [`bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/) methods.
 
 ## <span id="pdbase-mapvals"></span>`mapVals`
 
-**Backend syntax:** `vals = pdbase.mapVals(vals,fcn,grid)`.
-Returns a new nested tree after applying one function to every coefficient
-payload. Callback errors propagate. Public structural operations reach this
-utility through `unOp`.
+Maps one function over every coefficient payload in the nested storage tree.
 
 ## <span id="pdbase-matsubs"></span>`matSubs`
 
-**Backend syntax:** `[rows,cols] = pdbase.matSubs(subs,sz,errId)`.
-Normalizes exactly two `:`, logical, or finite in-range positive-integer matrix
-subscripts. The caller-owned identifier keeps `pdmat` and `pdvar` validation
-class-specific.
+Normalizes two-dimensional numeric, logical, colon, and `end` matrix subscripts with caller-owned errors.
 
 ## <span id="pdbase-mergegrid"></span>`mergeGrid`
 
-**Backend syntax:** `grid = mergeGrid(obj,errorId,otherGrid1,otherGrid2,...)`.
-Requires the same parameter dimension and exact endpoint bounds on every axis,
-then returns the sorted union of interior nodes. Public coefficient algebra
-re-expresses each operand on this common refinement.
+Checks compatible parameter bounds and constructs the sorted union of interior grid nodes before cell-local algebra.
 
-## <span id="pdbase-mkunop"></span>`mkUnOp`
+## <span id="pdbase-mapunary"></span>`mapUnary` And <span id="pdbase-mkunop"></span>`mkUnOp`
 
-**Backend syntax:** `out = mkUnOp(obj,values,matrixSize)`.
-Rebuilds the transformed value as the same dynamic class. The reconstruction
-preserves derived properties and metadata rather than collapsing a `pdmat` or
-`pdvar` to `pdbase`.
+`mapUnary` applies a matrix operation to every cell, label, and rate row. `mkUnOp` rebuilds the same dynamic class with the transformed payload shape.
 
-## <span id="pdbase-unop"></span>`unOp`
+## <span id="pdbase-joinraterows"></span>`joinRateRows` And <span id="pdbase-zipraterows"></span>`zipRateRows`
 
-**Backend syntax:** `out = unOp(obj,functionHandle)` or
-`out = unOp(obj,functionHandle,matrixSize)`. Maps the operation over every
-cell, coefficient, and rate row, then delegates class-preserving
-reconstruction to `mkUnOp`. Function-only `pdmat` data raises the dynamic
-`pdmat:FunctionOnlyAlgebra` boundary.
+These methods align ordinary and rate-dependent payloads without changing the deterministic rate-row order.
 
-## Public-path example
+## Public-Path Example
 
 ```matlab
 A = pdmat({[0 1]}, {1, 2}, Degree=1);
 B = pdmat({[0 0.5 1]}, {10, 20, 30}, Degree=1);
 C = A + B;
-commonGrid = C.GridInfo.Vectors{1}
-productDegree = (A * A).Degree
+D = A * A;
 ```
 
-```text
-commonGrid =
-         0    0.5000    1.0000
-
-productDegree =
-     2
-```
-
-The example exercises `mergeGrid`, degree alignment, `bernProd`, and
-class-preserving reconstruction without calling protected methods directly.
+The example reaches grid merging, elevation alignment, planned multiplication, and class-preserving reconstruction without calling a protected method.
 
 ## See Also
 
-[`pdbase matrix operations`](/GriD-LMIA/documents/reference/pdbase/matrix-operations/) ·
-[`pdmat algebra`](/GriD-LMIA/documents/reference/pdmat/algebra/) ·
-[`pdvar algebra`](/GriD-LMIA/documents/reference/pdvar/algebra/) ·
-[`seven shared helpers`](/GriD-LMIA/documents/reference/shared-helpers/)
+[Coefficient Algebra And Assembly Plans](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/) · [`pdbase` matrix operations](/GriD-LMIA/documents/reference/pdbase/matrix-operations/) · [`pdmat` algebra](/GriD-LMIA/documents/reference/pdmat/algebra/) · [`pdvar` algebra](/GriD-LMIA/documents/reference/pdvar/algebra/)

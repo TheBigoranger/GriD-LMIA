@@ -1,5 +1,5 @@
 ---
-title: SparsePutinar Clique Windows
+title: SparsePutinar Tensor Windows
 description: SOS, Putinar, and overlapping tensor-window Gram mathematics used by SparsePutinar.
 ---
 
@@ -11,12 +11,12 @@ import { Aside } from "@astrojs/starlight/components";
   <span>/</span>
   <a href="/GriD-LMIA/documents/math/sos-certificates/">Finite Certificates</a>
   <span>/</span>
-  <span>SparsePutinar Clique Windows</span>
+  <span>SparsePutinar Tensor Windows</span>
 </nav>
 
 <CertificateSpectrum selected="sparseputinar" />
 
-# SparsePutinar Clique Windows
+# SparsePutinar Tensor Windows
 
 SparsePutinar starts from the same local positive target $S^{(\mathbf c)}(\boldsymbol\alpha)$ as dense Putinar. It keeps the Putinar generator family and exact coefficient identities, but it replaces each dense Bernstein Gram basis by overlapping tensor windows. We first define the SOS and Gram objects, then give the dense Putinar form, the window decomposition, and the resulting dimension tradeoff.
 
@@ -90,7 +90,8 @@ Here, $\mathbf d_0=\mathbf r$ and $\mathbf d_s=\mathbf r-\mathbf e_s$. Terms wit
 
 ## Tensor-Window Label Sets
 
-Fix one active Gram specification with degree vector $\mathbf d$. For clique size $b$, the window side on axis $s$ is
+Fix one active Gram specification with degree vector $\mathbf d$. For the
+implemented `CliqueSize` value $b$, the window side on axis $s$ is
 
 $$
 w_s=\min(b,d_s+1).
@@ -188,31 +189,33 @@ The two axes therefore need not have equal degrees or equal numbers of window st
 
 ## Endpoint Interpretation
 
-In one parameter, clique size one normalizes to Direct after order validation. In two or more parameters, size one remains SparsePutinar because the singleton Putinar generator family still differs from a direct coefficient test. If `b > 1` and `b >= max(r + 1)`, every active window covers its full Gram basis and the state normalizes to dense Putinar.
+In one parameter, `CliqueSize=1` normalizes to Direct after order validation. In two or more parameters, size one remains SparsePutinar because the singleton Putinar generator family still differs from a direct coefficient test. If `b > 1` and `b >= max(r + 1)`, every active window covers its full Gram basis and the state normalizes to dense Putinar.
 
 ## Further Reading
 
-The window construction is clique-based and chordal-inspired because it expresses a Gram model as a sum of smaller clique-supported PSD blocks. However, it is not the structural-matrix chordal decomposition of Zheng and Fantuzzi. That method starts from the sparsity graph of a polynomial matrix and its maximal graph cliques. SparsePutinar does not infer such a graph, compute maximal graph cliques, or perform chordal completion. Here, the user selects sliding tensor windows over Bernstein Gram-basis labels.
-
-The distinction matters because the two constructions have different inputs and guarantees. The [Zheng–Fantuzzi paper](https://arxiv.org/abs/2007.11410) supports the structural chordal-SOS background, while the package window map and its coefficient accumulation are defined and tested independently.
+This tensor-window construction is distinct from the graph-chordal method of
+[Zheng and Fantuzzi](https://arxiv.org/abs/2007.11410). Their method starts
+from a polynomial-matrix sparsity graph. SparsePutinar instead uses
+user-selected sliding windows over Bernstein Gram-basis labels and does not
+infer a graph, compute graph cliques, or perform chordal completion.
 
 ## Software Selection
 
 ```matlab
-selected = L.applySparsePutinar();
-selected = L.applySparsePutinar(b);
-selected = L.applySparsePutinar(b, r);
+selected = L.useSpPut();
+selected = L.useSpPut(b);
+selected = L.useSpPut(b, r);
 F = selected.toYalmip();
 ```
 
 ## Limitations
 
-SparsePutinar is a fixed-order sufficient certificate. A failure may reflect the selected order, clique size, grid, or numerical conditioning, so it does not prove that the continuous inequality is infeasible. The package does not search orders, add a strict margin, choose a solver, or promise that sparse blocks solve faster.
+SparsePutinar is a fixed-order sufficient certificate. A failure may reflect the selected order, `CliqueSize` value, grid, or numerical conditioning, so it does not prove that the continuous inequality is infeasible. The package does not search orders, add a strict margin, choose a solver, or promise that sparse blocks solve faster.
 
 ## See Also
 
 [Previous: Markov–Lukács And Putinar](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/) ·
 [Next: SparseFullBox And FullBox](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/) ·
-[`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) ·
-[`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) ·
+[`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) ·
+[`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) ·
 [Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/)

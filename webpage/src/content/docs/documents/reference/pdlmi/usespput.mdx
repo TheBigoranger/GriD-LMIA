@@ -1,6 +1,6 @@
 ---
-title: pdlmi applySparsePutinar
-description: Rebuild a PD-LMI residual with clique-based tensor-window Putinar Gram blocks.
+title: pdlmi useSpPut
+description: Rebuild a PD-LMI residual with sliding tensor-window Putinar Gram blocks.
 ---
 
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
@@ -11,24 +11,29 @@ import { Aside } from "@astrojs/starlight/components";
   <span>/</span>
   <a href="/GriD-LMIA/documents/reference/pdlmi/">pdlmi</a>
   <span>/</span>
-  <span>applySparsePutinar</span>
+  <span>useSpPut</span>
 </nav>
 
 <CertificateNavigation selected="sparseputinar" showSections={false} />
 
-# `applySparsePutinar`
+# `useSpPut`
 
 ## Purpose
 
-`applySparsePutinar` rebuilds an inequality from its stored `Residual` with a clique-based, chordal-inspired tensor-window Gram decomposition. In one parameter it keeps Putinar's parity-specific Markov–Lukács terms. In two or more parameters it keeps the Putinar empty term and singleton generators. It then splits each dense Bernstein Gram basis into overlapping windows of user-selected clique size `b`.
+`useSpPut` rebuilds an inequality from its stored `Residual` with a sliding
+tensor-window Gram decomposition. In one parameter it keeps Putinar's
+parity-specific Markov–Lukács terms. In two or more parameters it keeps the
+Putinar empty term and singleton generators. It then splits each dense
+Bernstein Gram basis into overlapping windows whose side is the user-selected
+`CliqueSize` value `b`.
 
 ## Syntax
 
 ```matlab
-Csparse = C.applySparsePutinar()
-Csparse = C.applySparsePutinar(b)
-Csparse = C.applySparsePutinar(b, r)
-Csparse = C.applySparsePutinar(..., ValidationMode=mode)
+Csparse = C.useSpPut()
+Csparse = C.useSpPut(b)
+Csparse = C.useSpPut(b, r)
+Csparse = C.useSpPut(..., ValidationMode=mode)
 ```
 
 The same family is available during construction:
@@ -46,7 +51,7 @@ Csparse = pdlmi(expr, relation, CliqueSize=b, SparsePutinarOrder=r)
 | Input | Contract |
 | :--- | :--- |
 | `C` | Any `pdlmi` object. The method rebuilds from `C.Residual` and replaces the currently selected family. |
-| `b` | Finite positive integer scalar clique size. Default `2`. The same size is used on each tensor axis, with automatic saturation on shorter axes. |
+| `b` | Finite positive integer scalar passed as `CliqueSize`. Default `2`. The same tensor-window side is used on each axis, with automatic saturation on shorter axes. |
 | `r` | Finite nonnegative integer scalar shorthand or an $\ell$-entry direction-wise absolute Gram order. It is not an increment. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. It applies only to this rebuild and is not stored. |
 
@@ -104,10 +109,10 @@ yalmip('clear')
 P = pdvar(1, {[0 1]}, Degree=4);
 L = P >= 0;
 
-sparse = L.applySparsePutinar();
-selected = L.applySparsePutinar(2, 2);
-directEndpoint = L.applySparsePutinar(1, 2);
-denseEndpoint = L.applySparsePutinar(3, 2);
+sparse = L.useSpPut();
+selected = L.useSpPut(2, 2);
+directEndpoint = L.useSpPut(1, 2);
+denseEndpoint = L.useSpPut(3, 2);
 
 sparse.UseSparsePutinar
 sparse.SparsePutinarOrder
@@ -145,7 +150,7 @@ ans =
      8
 ```
 
-At order two and clique size two, the degree-four fixture has three PSD blocks of dimension two and five exact coefficient identities. Clique size one returns five Direct coefficient tests, while clique size three returns the two dense Putinar PSD blocks and five identities.
+At order two and `CliqueSize=2`, the degree-four fixture has three PSD blocks of dimension two and five exact coefficient identities. `CliqueSize=1` returns five Direct coefficient tests, while `CliqueSize=3` returns the two dense Putinar PSD blocks and five identities.
 
 ### Two-parameter scalar windows
 
@@ -153,14 +158,14 @@ At order two and clique size two, the degree-four fixture has three PSD blocks o
 yalmip('clear')
 P = pdvar(1, {[0 1], [0 1]}, Degree=[4 4]);
 L = P >= 0;
-C = L.applySparsePutinar(1, [2 2]);
+C = L.useSpPut(1, [2 2]);
 
 C.UseSparsePutinar
 C.CliqueSize
 numel(C.Constraints)
 ```
 
-Clique size one remains SparsePutinar in two dimensions. This fixture has 21 scalar PSD windows and 25 coefficient identities, so `numel(C.Constraints)` is 46.
+`CliqueSize=1` remains SparsePutinar in two dimensions. This fixture has 21 scalar PSD windows and 25 coefficient identities, so `numel(C.Constraints)` is 46.
 
 ## Validation And Errors
 
@@ -174,15 +179,18 @@ Clique size one remains SparsePutinar in two dimensions. This fixture has 21 sca
 
 ## Limitations
 
-SparsePutinar is not the Zheng–Fantuzzi structural-matrix chordal decomposition. It does not infer a polynomial matrix sparsity graph, compute maximal graph cliques, or perform chordal completion. Its cliques are user-selected sliding windows over Bernstein Gram-basis labels.
+SparsePutinar is not the Zheng–Fantuzzi structural-matrix graph-chordal
+decomposition. It does not infer a polynomial-matrix sparsity graph, compute
+graph cliques, or perform chordal completion. It uses user-selected sliding
+tensor windows over Bernstein Gram-basis labels.
 
 Smaller maximum PSD blocks trade against a larger block count. Therefore, this fixed-order sufficient certificate does not guarantee a smaller total SDP or shorter solve time. Failure is inconclusive for the continuous inequality, and the method does not add a positivity margin or select a solver.
 
 ## See Also
 
 [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) ·
-[`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) ·
-[`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
-[`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) ·
+[`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) ·
+[`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) ·
+[`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) ·
 [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) ·
 [`SparsePutinar mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/)

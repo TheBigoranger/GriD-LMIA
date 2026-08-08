@@ -86,31 +86,31 @@ $\mathbf r=\lceil\mathbf M/2\rceil$.
 ### Implemented Putinar selector
 
 ```matlab
-selected = L.applyPutinar();   % default absolute order
-selected = L.applyPutinar(r);  % explicit absolute order
+selected = L.usePutinar();   % default absolute order
+selected = L.usePutinar(r);  % explicit absolute order
 ```
 
 In one parameter this selector uses the exact parity-specific
 Markov–Lukács interval form. See
 [Markov–Lukács And Putinar](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/).
 
-## SparsePutinar Clique Windows
+## SparsePutinar Tensor Windows
 
 SparsePutinar keeps the Putinar parity or singleton-generator terms, but it
 splits each dense Bernstein Gram basis into overlapping tensor windows. For a
-Gram degree vector $\mathbf d$ and clique size $b$, the side length is
+Gram degree vector $\mathbf d$ and `CliqueSize` value $b$, the side length is
 $w_s=\min(b,d_s+1)$. Each window has an independent PSD block, while every
 target coefficient identity accumulates all overlapping contributions.
 
 ```matlab
-selected = L.applySparsePutinar();
-selected = L.applySparsePutinar(b);
-selected = L.applySparsePutinar(b, r);
+selected = L.useSpPut();
+selected = L.useSpPut(b);
+selected = L.useSpPut(b, r);
 ```
 
 The [SparsePutinar mathematics page](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/)
-defines the window labels, dimensions, counts, endpoints, and strict boundary
-from structural-matrix chordal decomposition.
+defines the window labels, dimensions, counts, endpoints, and its distinction
+from structural-matrix graph-chordal decomposition.
 
 ## Schmüdgen And Full Preorderings
 
@@ -120,14 +120,9 @@ $g_J=\prod_{s\in J}\alpha_s(1-\alpha_s)$. The software state is
 
 <span id="sparse-full-box-tensor-windows"></span>
 
-## SparseFullBox Band-Limited Certificate
+## SparseFullBox Tensor-Window Certificate
 
-The mathematical construction is FullBox with **band-limited Gram support**.
-The software state is `SparseFullBox`: each dense Gram matrix $Q_J$ is replaced
-by a symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. Bandwidth
-one canonicalizes to Direct after order validation; bandwidth at least
-$\max_s(r_s+1)$
-canonicalizes to FullBox.
+The software state is `SparseFullBox`. Each dense tensor Bernstein basis is replaced by overlapping sliding windows with side length $w$, and each window receives an independent PSD Gram block. Side length one canonicalizes to Direct after order validation. A side that spans every active basis axis canonicalizes to FullBox.
 
 ### Worked full-box example: two parameters, degree three
 
@@ -137,8 +132,8 @@ For a two-parameter target with assembled degree $M=3$, FullBox introduces
 Gram terms for the empty subset, both singleton generator subsets, and their
 two-axis product. Each term is mapped into the Bernstein basis and the sum is
 matched exactly to every $C^{(\mathbf c)}[\mathbf i]$. SparseFullBox retains
-those term families and exact identities but replaces each dense $Q_J$ by
-$Q_J^{(w)}$, symmetric block-band with bandwidth $w$.
+those term families and exact identities but replaces each dense basis by
+overlapping tensor-window blocks of side length $w$.
 The detailed basis-order boundary is documented in
 [SparseFullBox And FullBox](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/).
 
@@ -154,7 +149,7 @@ selectors in one parameter.
 - Raise decision degree $m$ to enlarge the decision family.
 - Raise Pólya increment $d$ to elevate the representation.
 - Raise absolute Gram order $r$ to change a Gram certificate.
-- Change SparsePutinar clique size $b$ or SparseFullBox bandwidth $w$ to
+- Change SparsePutinar `CliqueSize` value $b$ or SparseFullBox window side $w$ to
   change the sparse Gram support.
 
 Assembled residual degree $M$ is determined after algebra and alignment; it
@@ -190,5 +185,5 @@ non-strict software constraints.
 [Next: Direct And Pólya](/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/) ·
 [Notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters) ·
 [`pdlmi` overview](/GriD-LMIA/documents/reference/pdlmi/) ·
-[`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) ·
+[`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) ·
 [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)

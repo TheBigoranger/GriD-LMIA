@@ -18,7 +18,7 @@ below make the common implementation and direct-backend behavior discoverable.
 | :--- | :--- |
 | [`Constructor`](/GriD-LMIA/documents/reference/pdbase/constructor/) | Direct backend construction, private-set metadata, validation, and limitations. |
 | [`Storage and inspection`](/GriD-LMIA/documents/reference/pdbase/storage-inspection/) | Properties, cells, coefficients, labels, cell/label/parameter counts, and payload shape. |
-| [`Evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/) | Numeric/symbolic evaluation, right-cell ownership, `elevVals`, and class-preserving `elevate`. |
+| [`Evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/) | Numeric/symbolic evaluation, right-cell ownership, `elevate`, and class-preserving `elevate`. |
 | [`Matrix operations`](/GriD-LMIA/documents/reference/pdbase/matrix-operations/) | Unary sign, transpose, reshape, reductions, triangular transforms, repeat/reorder, and direct-base concatenation rejection. |
 | [`Indexing protocol`](/GriD-LMIA/documents/reference/pdbase/indexing-protocol/) | `end` and `numArgumentsFromSubscript` infrastructure inherited by both derived classes. |
 | [`Protected backend utilities`](/GriD-LMIA/documents/reference/bernstein-utilities/) | All nine protected methods; not callable public API. |

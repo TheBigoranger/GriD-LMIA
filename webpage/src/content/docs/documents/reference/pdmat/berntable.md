@@ -1,5 +1,5 @@
 ---
-title: pdmat bernsteinTable
+title: pdmat bernTable
 description: Return a command-line Bernstein coefficient table for pdmat.
 ---
 
@@ -8,7 +8,7 @@ description: Return a command-line Bernstein coefficient table for pdmat.
   <span>/</span>
   <a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a>
   <span>/</span>
-  <span>bernsteinTable</span>
+  <span>bernTable</span>
 </nav>
 
 Cell indices, local labels, and degree symbols follow the
@@ -21,10 +21,10 @@ Inspect coefficient-backed `pdmat` local Bernstein data as a MATLAB table.
 ## Syntax
 
 ```matlab
-T = bernsteinTable(A)
-T = bernsteinTable(A, cellSubs)
-T = bernsteinTable(A, "oneLine")
-T = bernsteinTable(A, cellSubs, "oneLine")
+T = bernTable(A)
+T = bernTable(A, cellSubs)
+T = bernTable(A, "oneLine")
+T = bernTable(A, cellSubs, "oneLine")
 ```
 
 ## Arguments
@@ -74,7 +74,7 @@ the full metadata table.
 
 ```matlab
 A = pdmat({[0 0.2 1]}, {[0 1], [1 1], [1 2]}, Degree=1);
-T = bernsteinTable(A, "oneLine");
+T = bernTable(A, "oneLine");
 disp(T)
 ```
 
@@ -93,7 +93,7 @@ Command Window and reads directly in the public forward coordinate.
 
 ```matlab
 A = pdmat({[0 1]}, {1, 2, 3}, Degree=2);
-T = bernsteinTable(A);
+T = bernTable(A);
 disp(T)
 ```
 
@@ -106,14 +106,14 @@ disp(T)
         3            {[1]}            {[3]}           {[2]}       "alpha^2"                true          {[3]}
 ```
 
-The middle row is not a physical grid node for degree two; it is the middle
+The middle row is not a physical grid node for degree two. It is the middle
 Bernstein coefficient for the single physical cell.
 
 ### Tensor-grid label order
 
 ```matlab
 A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=[1 1]);
-T = bernsteinTable(A, [1 1]);
+T = bernTable(A, [1 1]);
 T(:, ["TermIndex", "LocalIndex", "Value"])
 ```
 
@@ -138,7 +138,7 @@ coefficient algebra and `pdlmi` assembly.
 ```matlab
 A = pdmat([0 1], {{1, 3; 10, 14}}, ...
     Degree=1, RateBounds=[-1 2]);
-T = bernsteinTable(A, "oneLine");
+T = bernTable(A, "oneLine");
 disp("vertexIndices =")
 disp(T.RateVertexIndex)
 disp("rateVertices =")
@@ -162,7 +162,7 @@ expressionCount =
 
 ## Validation And Errors
 
-- Function-only objects without Bernstein coefficient evidence raise `pdmat:FunctionOnlyBernsteinTable` when calling `bernsteinTable`; backend degree elevation instead raises `pdbase:MissingCoefficientEvidence`.
+- Function-only objects without Bernstein coefficient evidence raise `pdmat:FunctionOnlyBernsteinTable` when calling `bernTable`. Backend degree elevation instead raises `pdbase:MissingCoefficientEvidence`.
 - Invalid cell subscripts raise `pdbase:InvalidCellSubs`.
 - Unknown display modes, such as `"wide"`, raise `pdmat:InvalidBernsteinTableInput`.
 

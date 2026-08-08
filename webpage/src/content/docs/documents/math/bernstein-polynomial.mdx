@@ -105,7 +105,7 @@ to a common tensor degree, combines them with rate-box vertices in a
 deterministic order, and stores one row per vertex. The interface interpretation
 is developed in [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/);
 the exact coefficient formulas are in
-[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-row-storage).
+[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-rows).
 
 ## Exact Algebra, Finite Certificates, And Independent Refinements
 
@@ -122,10 +122,10 @@ target coefficients. Pólya first performs an exact degree elevation and then
 applies the same coefficient test. Putinar uses positive-semidefinite Gram
 blocks with an unweighted term and box-generator terms. SparsePutinar retains
 the Putinar terms while splitting dense Gram bases into overlapping tensor
-windows of clique size $b$. FullBox uses every
+windows whose side is the `CliqueSize` value $b$. FullBox uses every
 square-free generator product; SparseFullBox retains those identities while
-replacing each dense $Q_J$ by a symmetric block-band Gram matrix
-$Q_J^{(w)}$ of scalar bandwidth $w$. The
+replacing each dense tensor basis by overlapping sliding-window Gram blocks
+$Q_J^{(w)}$ over sliding tensor windows of scalar side $w$. The
 [Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/)
 states the exact one- and multi-parameter forms.
 
@@ -133,7 +133,7 @@ states the exact one- and multi-parameter forms.
 
 The refinement knobs are independent: decision degree $\mathbf m$, assembled
 residual degree $\mathbf M$, Pólya increment $\mathbf d$, absolute Gram order
-$\mathbf r$, SparsePutinar clique size $b$, SparseFullBox bandwidth $w$, and physical-grid refinement do not
+$\mathbf r$, SparsePutinar `CliqueSize` value $b$, SparseFullBox window side $w$, and physical-grid refinement do not
 mean the same thing. Increasing one does not silently increase the others.
 
 <span id="limitations"></span>

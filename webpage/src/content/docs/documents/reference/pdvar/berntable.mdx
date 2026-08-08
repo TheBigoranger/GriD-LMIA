@@ -1,5 +1,5 @@
 ---
-title: pdvar bernsteinTable
+title: pdvar bernTable
 description: Inspect symbolic Bernstein coefficients and rate-vertex rows.
 ---
 
@@ -10,7 +10,7 @@ import DiagramFrame from "../../../../../components/DiagramFrame.astro";
   <span>/</span>
   <a href="/GriD-LMIA/documents/reference/pdvar/">pdvar</a>
   <span>/</span>
-  <span>bernsteinTable</span>
+  <span>bernTable</span>
 </nav>
 
 ## Purpose
@@ -23,11 +23,11 @@ change the decision expression or send anything to YALMIP's optimizer.
 ## Syntax
 
 ```matlab
-T = bernsteinTable(P)
-T = bernsteinTable(P, "oneLine")
-T = bernsteinTable(P, cellSubscript)
-T = bernsteinTable(P, cellSubscript, "oneLine")
-T = P.bernsteinTable(...)
+T = bernTable(P)
+T = bernTable(P, "oneLine")
+T = bernTable(P, cellSubscript)
+T = bernTable(P, cellSubscript, "oneLine")
+T = P.bernTable(...)
 ```
 
 ## Description
@@ -58,7 +58,7 @@ rejected by the current validation path.
 
 `T` is a MATLAB `table`. Use `disp(T)` for a stable command-window view, or
 select the metadata columns when comparing adjacent cells. The table is a
-snapshot of the object state; editing it does not edit `P`.
+snapshot of the object state. Editing it does not edit `P`.
 
 <span id="example"></span>
 
@@ -71,7 +71,7 @@ format loose
 grid = {[0 0.4 1], [0 0.25 1]};
 P = pdvar(1, grid, Degree=[1 1]);
 P.LocalValues{2}{1}
-T = bernsteinTable(P, [2 1])
+T = bernTable(P, [2 1])
 ```
 
 ```text
@@ -98,11 +98,11 @@ T =
 
 These blocks reproduce one clean MATLAB session without editorial
 reformatting. The `internal(4)`, `internal(5)`, `internal(7)`, and
-`internal(8)` identifiers are session-local YALMIP names; the stable contract
+`internal(8)` identifiers are session-local YALMIP names. The stable contract
 is the four-slot storage order and its table metadata, not those identifier
 numbers.
 
-<DiagramFrame caption="The four LocalValues slots and the four table rows use the same last-axis-fastest tensor order." label="LocalValues slots compared with bernsteinTable rows">
+<DiagramFrame caption="The four LocalValues slots and the four table rows use the same last-axis-fastest tensor order." label="LocalValues slots compared with bernTable rows">
   <div class="coefficient-row-map" role="img" aria-label="Four LocalValues slots map in order to local labels zero zero, zero one, one zero, and one one in table rows one through four">
     <code>LocalValues&#123;2&#125;&#123;1&#125;&#123;1&#125;</code><span>→</span><strong>row 1 · LocalIndex [0 0]</strong>
     <code>LocalValues&#123;2&#125;&#123;1&#125;&#123;2&#125;</code><span>→</span><strong>row 2 · LocalIndex [0 1]</strong>
@@ -117,7 +117,7 @@ numbers.
 yalmip('clear')
 P = pdvar(1, {[0 1]}, RateBounds=[-1 2]);
 D = rhodiff(P);
-T = bernsteinTable(D);
+T = bernTable(D);
 T(:, ["RateVertexIndex", "RateVertex", "LocalIndex"])
 ```
 
@@ -142,11 +142,11 @@ promising the workspace-dependent YALMIP text in `Value`.
 - A requested cell must exist in the tensor grid.
 - Rate-row inspection requires the derivative object's rate metadata to be
   present and internally consistent.
-- The table helper is diagnostic; it does not enable unsupported products or
+- The table helper is diagnostic. It does not enable unsupported products or
   relaxation modes.
 
 `pdvar` accepts any nonnegative constructor degree, and products may elevate
-coefficient degree further. `bernsteinTable` reports the resulting stored rows;
+coefficient degree further. `bernTable` reports the resulting stored rows.
 it is an inspection aid, not a serialization format for the internal
 coefficient tree.
 
@@ -154,4 +154,4 @@ coefficient tree.
 
 [`pdvar constructor`](/GriD-LMIA/documents/reference/pdvar/constructor/) ·
 [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) ·
-[`pdmat bernsteinTable`](/GriD-LMIA/documents/reference/pdmat/bernsteintable/)
+[`pdmat bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/)

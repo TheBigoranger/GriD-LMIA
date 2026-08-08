@@ -1,0 +1,192 @@
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{needspace}
+\usepackage{etoolbox}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage[numbered,framed]{matlab-prettifier}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{makeidx}
+\makeindex
+
+\crefname{equation}{}{}
+\crefname{figure}{Fig}{Figs}
+\crefname{chapter}{Chapter}{Chapters}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,
+  decorations.pathreplacing,plotmarks}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!55!black,
+  pdftitle={GriD-LMIA User Manual},
+  pdfauthor={GriD-LMIA}
+}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\definecolor{dpblue}{RGB}{35,86,125}
+\definecolor{dpbluewash}{RGB}{239,245,250}
+% Shared semantic drawing vocabulary.  The single blue accent is decorative;
+% semantic roles remain legible in grayscale through borders, line patterns,
+% labels, and type weight.  Dense relations use panels instead of crossing
+% arrow fans.
+\tikzset{
+  every picture/.append style={>=Latex},
+  dp/known/.style={draw=black!70,fill=white,rounded corners=2pt},
+  dp/decision/.style={draw=black!80,fill=black!3,rounded corners=2pt,double},
+  dp/contribution/.style={draw=black!70,fill=black!3,rounded corners=2pt,dashed},
+  dp/result/.style={draw=black!90,fill=black!7,rounded corners=2pt,very thick},
+  dp/certificate/.style={draw=black!80,fill=white,rounded corners=2pt,densely dotted},
+  dp/neutral/.style={draw=black!55,fill=white,rounded corners=2pt},
+  dp/arrow/.style={->,semithick,draw=black!65},
+  dp/curve-primary/.style={very thick,draw=black!90,solid},
+  dp/curve-secondary/.style={very thick,draw=black!75,dashed},
+  dp/curve-tertiary/.style={very thick,draw=black!60,dotted},
+  dp/marker-primary/.style={mark=*,mark repeat=15,mark size=1.7pt,
+    mark options={fill=white,draw=black!90}},
+  dp/marker-secondary/.style={mark=square*,mark repeat=15,mark size=1.7pt,
+    mark options={fill=white,draw=black!75}},
+  dp/marker-tertiary/.style={mark=triangle*,mark repeat=15,mark size=1.9pt,
+    mark options={fill=white,draw=black!60}},
+  dp/axis/.style={->,semithick,draw=black!60},
+  dp/grid-line/.style={semithick,draw=black!55},
+  dp/grid-point/.style={circle,draw=black!70,fill=white,inner sep=1.4pt},
+  dp/bus/.style={semithick,draw=black!65},
+  dp/panel/.style={draw=black!18,rounded corners=3pt,inner sep=6pt},
+  dp/card/.style={dp/certificate,align=center,font=\scriptsize,
+    text width=31mm,minimum height=17mm,inner sep=4pt},
+  dp/stage/.style={dp/neutral,align=center,font=\scriptsize,
+    minimum width=29mm,minimum height=12mm,inner sep=4pt},
+  dp/label/.style={font=\scriptsize,align=center,text=black!80},
+  dp/direct-label/.style={font=\scriptsize,align=center,text=black!90,
+    fill=white,fill opacity=0.88,text opacity=1,inner sep=1.5pt},
+  dp/coeff-node/.style={dp/known,font=\scriptsize,align=center,
+    minimum width=12mm,minimum height=7mm,inner sep=3pt},
+  dp/elevated-node/.style={dp/result,font=\scriptsize,align=center,
+    minimum width=14mm,minimum height=7mm,inner sep=3pt},
+  dp/figure-panel/.style={font=\scriptsize,align=left,inner sep=5pt}
+}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.3em}
+\setlength{\emergencystretch}{3em}
+\hbadness=10000
+\titleformat{\chapter}[display]
+  {\normalfont\Huge\bfseries}
+  {\chaptertitlename\ \thechapter}
+  {0.6em}
+  {}
+\titlespacing*{\chapter}{0pt}{-1.5\baselineskip}{1.2\baselineskip}
+\titlespacing*{\section}{0pt}{1.25\baselineskip}{0.55\baselineskip}
+\titlespacing*{\subsection}{0pt}{1.05\baselineskip}{0.4\baselineskip}
+\pretocmd{\section}{\needspace{5\baselineskip}}{}{}
+\pretocmd{\subsection}{\needspace{4\baselineskip}}{}{}
+
+\lstdefinestyle{dpmatlab}{
+  style=Matlab-editor,
+  basicstyle=\mlttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  rulecolor=\color{dpblue!35},
+  backgroundcolor=\color{black!2},
+  framesep=4pt,
+  framerule=0.45pt,
+  aboveskip=0.45\baselineskip,
+  belowskip=0.85\baselineskip,
+  numbers=none
+}
+
+\lstdefinestyle{dpsyntax}{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  rulecolor=\color{dpblue!45},
+  backgroundcolor=\color{dpbluewash},
+  framesep=4pt,
+  framerule=0.55pt,
+  aboveskip=0.45\baselineskip,
+  belowskip=0.85\baselineskip,
+  numbers=none
+}
+
+\lstdefinestyle{dpoutput}{
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  literate={×}{{$\times$}}1,
+  frame=none,
+  backgroundcolor=\color{white},
+  aboveskip=0.25\baselineskip,
+  belowskip=0.8\baselineskip,
+  numbers=none
+}
+
+\lstdefinestyle{dpwideoutput}{
+  basicstyle=\ttfamily\tiny,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  literate={×}{{$\times$}}1,
+  frame=none,
+  backgroundcolor=\color{white},
+  aboveskip=0.25\baselineskip,
+  belowskip=0.8\baselineskip,
+  numbers=none
+}
+
+% Listings may break naturally.  Reference headings provide their own modest
+% keep-with-next space; avoiding a global listing reservation prevents the
+% large blank areas that short Syntax blocks previously created.
+
+\newcommand{\pkg}{GriD-LMIA}
+\newcommand{\matlab}{MATLAB}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\codeerr}[2]{\code{#1:}\allowbreak\code{#2}}
+\newcommand{\refhead}[1]{%
+  \noindent\textcolor{black!75}{\sffamily\bfseries\normalsize #1}\par
+  \nopagebreak
+  \noindent\textcolor{black!55}{\rule{\linewidth}{0.45pt}}\par
+  \vspace{0.25\baselineskip}\nopagebreak}
+  \newcommand{\syntaxhead}{\needspace{5\baselineskip}\refhead{Syntax}}
+\newcommand{\arghead}{\refhead{Arguments}}
+\newcommand{\descriptionhead}{\refhead{Description}}
+\newcommand{\examplehead}{\needspace{8\baselineskip}\refhead{Examples and output}}
+\newcommand{\remarkshead}{\needspace{4\baselineskip}\refhead{Remarks}}
+\newcommand{\seealsohead}{\refhead{See Also}}
+\newcommand{\ideastep}[1]{%
+  \par\addvspace{0.65\baselineskip}%
+  \needspace{3\baselineskip}%
+  \noindent\textcolor{dpblue}{\sffamily\bfseries #1.}\enspace}
+\newcommand{\shortpairspace}{\needspace{12\baselineskip}}
+% A high-contrast, grayscale-safe callout for the central mathematical form.
+% The frame, title weight, and pale fill remain distinct when printed without
+% color, so the box does not encode meaning through color alone.
+\newcommand{\keyequation}[2]{%
+  \par\addvspace{0.7\baselineskip}%
+  \begin{center}
+  \fcolorbox{black!65}{dpbluewash}{%
+    \begin{minipage}{0.94\linewidth}%
+    \textbf{#1}\centering #2\end{minipage}}%
+    \par\addvspace{0.7\baselineskip}
+    \end{center}
+    }

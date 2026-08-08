@@ -1,5 +1,5 @@
 ---
-title: pdlmi applyFullBoxPreorder
+title: pdlmi useFullBox
 description: Rebuild a PD-LMI residual with a fixed-order full-box Bernstein-Gram preordering.
 ---
 
@@ -10,7 +10,7 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>/</span>
   <a href="/GriD-LMIA/documents/reference/pdlmi/">pdlmi</a>
   <span>/</span>
-  <span>applyFullBoxPreorder</span>
+  <span>useFullBox</span>
 </nav>
 
 Gram bases, absolute order $r$, and target coefficients follow the
@@ -26,15 +26,15 @@ cell-local full-box Bernstein-Gram preordering.
 ## Syntax
 
 ```matlab
-Cbox = C.applyFullBoxPreorder()
-Cbox = C.applyFullBoxPreorder(order)
-Cbox = C.applyFullBoxPreorder(..., ValidationMode=mode)
+Cbox = C.useFullBox()
+Cbox = C.useFullBox(order)
+Cbox = C.useFullBox(..., ValidationMode=mode)
 ```
 
 ## Description
 
 The no-argument form selects the smallest admissible absolute order. The
-explicit form selects `order`; it does not add `order` to the residual degree.
+explicit form selects `order`. It does not add `order` to the residual degree.
 Both forms rebuild from `C.Residual` and `C.Relation`, return a new object, and
 leave `C` unchanged. Reapplication therefore replaces an earlier full-box
 order, a Pólya selection, or a Putinar selection instead of compounding it.
@@ -56,9 +56,9 @@ an independent scalar certificate. Assembly creates independent Gram variables f
 active rate-vertex row. Each present Gram matrix is constrained positive
 semidefinite, then exact identities match every Bernstein coefficient. For a
 `<=` relation, the target coefficients are negated before positive-
-semidefinite matching; for `>=`, the residual is matched directly. No implicit
+semidefinite matching. For `>=`, the residual is matched directly. No implicit
 positivity margin is added. The theoretical target is
-$S^{(\mathbf c)}\succ0$; encode strictness in the residual with an explicit
+$S^{(\mathbf c)}\succ0$. Encode strictness in the residual with an explicit
 $\varepsilon I$ margin before selecting this non-strict certificate.
 
 For two parameters the four illustrated blocks correspond to the empty
@@ -130,10 +130,10 @@ those stored constraints in the same order.
 yalmip('clear')
 P = pdvar(1, {[0 1]}, Degree=2);
 direct = P >= 0;
-boxDefault = direct.applyFullBoxPreorder();
-boxHigher = boxDefault.applyFullBoxPreorder(2);
-polya = direct.applyPolya(1);
-boxFromPolya = polya.applyFullBoxPreorder();
+boxDefault = direct.useFullBox();
+boxHigher = boxDefault.useFullBox(2);
+polya = direct.usePolya(1);
+boxFromPolya = polya.useFullBox();
 Fbox = toYalmip(boxDefault);
 
 direct.UseFullBoxPreorder
@@ -152,7 +152,7 @@ length(Fbox)
 
 For the degree-two scalar residual, order one stores two PSD blocks followed by
 three exact coefficient identities. Order two stores two PSD blocks followed
-by five identities. The selection made from `polya` replaces Pólya assembly;
+by five identities. The selection made from `polya` replaces Pólya assembly.
 it does not use the already elevated constraints.
 
 `ValidationMode` is transient, accepts case-insensitive `"fast"` or
@@ -163,7 +163,7 @@ it does not use the already elevated constraints.
 - A malformed `order` raises `pdlmi:InvalidFullBoxOrder`.
 - A valid integer below the applicable minimum raises `pdlmi:FullBoxOrderTooLow`.
 - Semidefinite and entry-wise inequalities retain their original global mode.
-- Equality is direct-only; this method raises `pdlmi:UnsupportedEqualityCertificate` before validating `order`.
+- Equality is direct-only. This method raises `pdlmi:UnsupportedEqualityCertificate` before validating `order`.
 - Constructor selection errors are documented on the
   [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/)
   page, including `pdlmi:InvalidUseFullBoxPreorder` and
@@ -172,7 +172,7 @@ it does not use the already elevated constraints.
 This method implements the fixed-order full-box preordering on each local
 parameter box. In one parameter it shares the parity-specific Markov–Lukács
 assembly with
-[`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/).
+[`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/).
 For two or more parameters it is distinct because the full-box preordering includes every
 generator-subset product. It is not a general-domain SOS interface, a
 full-space SOS representation, or an automatic hierarchy selector.
@@ -180,10 +180,10 @@ full-space SOS representation, or an automatic hierarchy selector.
 ## See Also
 
 [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) ·
-[`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) ·
-[`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) ·
-[`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) ·
-[`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
+[`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) ·
+[`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) ·
+[`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) ·
+[`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) ·
 [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) ·
 [`Bernstein Polynomial`](/GriD-LMIA/documents/math/bernstein-polynomial/) ·
 [`SOS Certificates`](/GriD-LMIA/documents/math/sos-certificates/)

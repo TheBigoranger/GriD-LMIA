@@ -23,7 +23,7 @@ only when every original
 coefficient is square Hermitian; otherwise the whole inequality is entry-wise.
 Equality is direct coefficient equality and may be rectangular. Direct
 coefficient assembly is the default; Pólya degree elevation, fixed-order
-Putinar box assembly, clique-based SparsePutinar assembly, block-band
+Putinar box assembly, tensor-window SparsePutinar assembly, tensor-window
 SparseFullBox assembly, and fixed-order
 FullBox Bernstein-Gram preordering are explicit alternatives.
 
@@ -40,12 +40,12 @@ unweighted Gram term plus one generator-weighted term per axis at minimum
 `ceil(M/2)`, while FullBox includes every generator-subset product.
 **SparsePutinar** retains the Putinar parity or singleton-generator terms and
 uses overlapping tensor windows over each Bernstein Gram basis. In one
-parameter, clique size one normalizes to Direct. In higher dimensions it
+parameter, `CliqueSize=1` normalizes to Direct. In higher dimensions it
 remains SparsePutinar. A saturated size greater than one normalizes to dense
 Putinar. **SparseFullBox** retains the FullBox parity/generator-mask terms and exact
-coefficient identities while replacing each dense Gram matrix $Q_J$ by a
-symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. Bandwidth one
-  canonicalizes to Direct, and bandwidth at least
+coefficient identities while replacing each dense tensor basis by
+overlapping tensor windows of side length $w$. Side length one
+canonicalizes to Direct, and a side at least
   `max(order + 1)` canonicalizes to FullBox. Every Gram path matches exact
 box-polynomial identities. The
 [SOS certificate chapter](/GriD-LMIA/documents/math/sos-certificates/)
@@ -60,11 +60,11 @@ derives these ideas; the API pages below stay focused on callable syntax.
 | [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) | Select Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox assembly. |
 | [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) | Create known-data inequalities with `<=`/`>=`; logical `pdmat == pdmat` remains separate. |
 | [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) | Create semidefinite or entry-wise inequalities with `<=`/`>=`, and direct equalities with `==`. |
-| [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) | Rebuild the original residual with a selected Pólya degree increment. |
-| [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) | Rebuild the original residual with the minimum or a selected absolute Putinar order. |
-| [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) | Rebuild the residual with Putinar tensor-window cliques of size `b`, an absolute order, and canonical Direct/Putinar endpoints. |
-| [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) | Rebuild the residual with symmetric block-band Gram matrices of bandwidth `w`, an absolute order, and canonical Direct/FullBox endpoints. |
-| [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
+| [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) | Rebuild the original residual with a selected Pólya degree increment. |
+| [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) | Rebuild the original residual with the minimum or a selected absolute Putinar order. |
+| [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) | Rebuild the residual with sliding tensor windows of side length `b` (the `CliqueSize` option), an absolute order, and canonical Direct/Putinar endpoints. |
+| [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) | Rebuild the residual with sliding tensor-window Gram blocks of side length `w`, an absolute order, and canonical Direct/FullBox endpoints. |
+| [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
 
 ### YALMIP export and solver use
 
@@ -74,7 +74,7 @@ derives these ideas; the API pages below stay focused on callable syntax.
 
 ## Implemented Behavior
 
-Documentation v1.2.4 describes `<=`, `>=`, and `==` for affine `pdvar`
+Documentation v1.3.0 describes `<=`, `>=`, and `==` for affine `pdvar`
 residuals and `<=`/`>=` for coefficient-backed known `pdmat` residuals.
 Inequalities select
 one global semidefinite or entry-wise interpretation from all original
@@ -107,8 +107,8 @@ The constructor exposes private-set, read-only properties through dot access:
 | `Relation` | `C.Relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya`, `PolyaDegree` | `C.UsePolya`, `C.PolyaDegree` | Pólya selector and degree increment. |
 | `UsePutinar`, `PutinarOrder` | `C.UsePutinar`, `C.PutinarOrder` | Putinar selector and absolute order. |
-| `UseSparsePutinar`, `SparsePutinarOrder`, `CliqueSize` | `C.UseSparsePutinar`, `C.SparsePutinarOrder`, `C.CliqueSize` | SparsePutinar selector, direction-wise absolute order, and scalar tensor-window clique size `b`. |
-| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar bandwidth `w` of $Q_J^{(w)}$. Bandwidth one normalizes to Direct; bandwidth at least `max(order + 1)` normalizes to FullBox. |
+| `UseSparsePutinar`, `SparsePutinarOrder`, `CliqueSize` | `C.UseSparsePutinar`, `C.SparsePutinarOrder`, `C.CliqueSize` | SparsePutinar selector, direction-wise absolute order, and scalar tensor-window side `b`. |
+| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar tensor-window side `w`. Side one normalizes to Direct; a side at least `max(order + 1)` normalizes to FullBox. |
 | `UseFullBoxPreorder`, `FullBoxOrder` | `C.UseFullBoxPreorder`, `C.FullBoxOrder` | Full-box selector and absolute order. |
 
 Certificate selectors apply only to inequalities. Any selector on equality raises `pdlmi:UnsupportedEqualityCertificate`.
@@ -120,4 +120,4 @@ higher dimensions.
 
 ## See Also
 
-[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`certificate map`](/GriD-LMIA/documents/math/sos-certificates/) · [`SparsePutinar mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) · [`SparseFullBox and FullBox mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`certificate map`](/GriD-LMIA/documents/math/sos-certificates/) · [`SparsePutinar mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) · [`SparseFullBox and FullBox mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)

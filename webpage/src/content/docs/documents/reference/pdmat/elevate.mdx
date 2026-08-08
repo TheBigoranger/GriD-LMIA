@@ -90,17 +90,6 @@ Degree elevation is therefore useful when two Bernstein operands need a common
 degree or when a finite certificate requests additional coefficient evidence.
 It is not grid refinement, interpolation, or an approximation step.
 
-## <span id="pdmat-elevVals"></span>`elevVals`
-
-```matlab
-elevatedTree = elevVals(A,degreeIncrement)
-```
-
-Returns numeric `LocalValues` elevated by a finite nonnegative integer scalar
-shorthand or an `npar(A)`-element vector. The increment is added
-componentwise; a scalar expands uniformly. In the Storage figure, this is the
-larger tensor lattice inside each existing cell branch. `A` remains unchanged.
-
 ## <span id="pdmat-elevate"></span>`elevate`
 
 ```matlab

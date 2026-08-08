@@ -35,8 +35,9 @@ zero. For several parameters, the partial along axis `s` has degree
 vector `A.Degree` before the rate-weighted sum is formed. A zero-degree axis
 contributes the zero partial, so multivariate `rhodiff` preserves the complete
 direction-wise degree row.
-`D` is a `pdmat` with `IsContinuous=false`, `HasRateDependence=true`, and one
-numeric coefficient row per rate-box vertex in `helper.combRows` order.
+`D` is a `pdmat` with `IsContinuous=false` and one numeric coefficient row per
+distinct rate-box vertex in `helper.combRows` order. `D.NumRateRows` is the
+exact stored-row count. A fixed axis contributes one value rather than two.
 
 ## MATLAB Transcript
 
@@ -78,7 +79,7 @@ The two rows evaluate the constant physical derivative `2` at rates `-1` and
 ## See Also
 
 [`pdmat constructor`](/GriD-LMIA/documents/reference/pdmat/constructor/) ·
-[`bernsteinTable`](/GriD-LMIA/documents/reference/pdmat/bernsteintable/) ·
+[`bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/) ·
 [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/) ·
 [`pdvar rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) ·
 [`pdbase evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/)

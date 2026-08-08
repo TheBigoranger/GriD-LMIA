@@ -23,7 +23,7 @@ metadata and coefficients consistent.
 | `LocalValues` | Nested physical-cell tree; each leaf is an ordinary coefficient row or a derivative rate-row table. |
 | `IsContinuous` | Whether adjacent physical cells represent continuous data. |
 | `ContainsDecision` | Whether payloads contain YALMIP decision dependence. |
-| `HasRateDependence` | Whether leaves contain independent rate-vertex rows. |
+| `NumRateRows` | Exact number of explicit stored rate rows. Ordinary data, including `RateBounds`-only metadata, reports `0`. |
 | `RateBounds` | Empty or `npar × 2` lower/upper rate bounds. |
 | `SourceSummary` | Concise evidence label, such as `function`, `coefficient-backed`, `decision`, or derivative metadata. |
 
@@ -49,7 +49,9 @@ coefficientRow = coeffs(obj,cellSubscript)
 
 `cellSubscript` supplies one finite positive integer per parameter axis.
 Ordinary storage returns a `1 × ncoeff(obj)` cell row. Derivative storage
-returns a `2^npar(obj) × ncoeff(obj)` cell array in rate-vertex order.
+returns a `NumRateRows × ncoeff(obj)` cell array in rate-vertex order. Fixed
+rate axes collapse to one distinct value, so `NumRateRows` is `2^npar(obj)`
+only when every lower and upper bound differs.
 Malformed, wrong-length, or out-of-range selectors raise
 `pdbase:InvalidCellSubs`.
 

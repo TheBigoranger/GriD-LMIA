@@ -44,11 +44,10 @@ A = pdmat(..., ValidationMode=mode)
 | `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of strictly increasing vectors, such as `{[0 1], [10 20]}`. |
 | `source` | Function handle, global cell grid of numeric Bernstein coefficients such as `{1, 2, 3}`, or explicit nested `LocalValues` such as `{{[1 0], [0 1]}, {[2 0], [0 2]}}`. |
 | `Degree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector, such as `Degree=[1 3]`. The accepted value is stored as a $1\times\ell$ row. Required when a function handle should be validated as Bernstein coefficient evidence. |
-| `RateBounds` | Finite $\ell\times2$ lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`; explicit nested leaves may instead contain all $2^\ell$ rate-vertex rows. |
+| `RateBounds` | Finite $\ell\times2$ lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`; explicit nested leaves may instead contain one row per distinct rate-box vertex. Fixed axes contribute one value. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient and not stored. Public source validation remains complete in both modes. |
 
-Unsupported metadata options: `IsContinuous`, `ContainsDecision`, and
-`HasRateDependence`.
+Unsupported metadata options: `IsContinuous` and `ContainsDecision`.
 
 For diagrams of one- and two-parameter grid inputs, the global
 coefficient-grid shape, and the separate role of Bernstein `Degree`, see
@@ -67,7 +66,7 @@ readable through dot syntax and have private set access:
 | `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | Cell-local numeric Bernstein coefficients. |
 | `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces; otherwise the constructor warns and returns `false`. |
 | `ContainsDecision` | `A.ContainsDecision` | Always `false`; no YALMIP decisions are stored. |
-| `HasRateDependence` | `A.HasRateDependence` | `true` when rate metadata or explicit rate rows are present. |
+| `NumRateRows` | `A.NumRateRows` | Exact explicit stored-row count. Ordinary data and `RateBounds`-only metadata report `0`. |
 | `RateBounds` | `A.RateBounds` | Empty or the stored scheduling-rate box used by `rhodiff`, rate-row inspection, and `pdlmi`. |
 | `SourceSummary` | `A.SourceSummary` | Source label such as `coefficient-backed`, `function`, or `function-bernstein`. |
 | `FunctionHandle` | `A.FunctionHandle` | Exact evaluator for function-backed objects; empty for coefficient-backed data. |
@@ -86,7 +85,7 @@ A.MatrixSize
 A.Degree
 A.SourceSummary
 A.FunctionHandle
-T = bernsteinTable(A);
+T = bernTable(A);
 T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
 ```
 
@@ -124,7 +123,7 @@ A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=[1 1]);
 A.GridInfo.Vectors{2}
 A.coeffs([1 1])
 A.lbls()
-T = bernsteinTable(A);
+T = bernTable(A);
 T(:, ["TermIndex", "CellSubscript", "LocalIndex", "Value"])
 ```
 
@@ -248,9 +247,10 @@ rateRowValues =
     10    14
 ```
 
-Each physical cell must use either one ordinary row or every rate-box vertex
-row, uniformly. Vertex order is
-`helper.combRows(num2cell(A.RateBounds,2).')`.
+Each physical cell must use either one ordinary row or every distinct rate-box
+vertex row, uniformly. Vertex order is last-axis-fastest after fixed
+lower-equals-upper axes are collapsed. This example has
+`A.NumRateRows == 2`.
 
 ## Validation And Errors
 
@@ -283,6 +283,6 @@ row, uniformly. Vertex order is
 
 [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) ·
 [`rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) ·
-[`bernsteinTable`](/GriD-LMIA/documents/reference/pdmat/bernsteintable/) ·
+[`bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/) ·
 [`comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) ·
 [`pdbase`](/GriD-LMIA/documents/reference/pdbase/)

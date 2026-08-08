@@ -4,6 +4,7 @@ description: Parity-specific interval Gram forms and the implemented singleton-g
 ---
 
 import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import GramAssemblyExplorer from "../../../../../components/GramAssemblyExplorer.tsx";
 
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
@@ -16,7 +17,7 @@ import CertificateSpectrum from "../../../../../components/CertificateSpectrum.a
 <CertificateSpectrum selected="putinar" />
 
 The software state is `Putinar`. In one parameter its implementation uses the
-parity-specific Markov–Lukács interval form; Markov–Lukács is not a separate
+parity-specific Markov–Lukács interval form. Markov–Lukács is not a separate
 selector. The Gram notation below uses
 $Z_a=\mathbf b_a\otimes I_n$ for matrix size $n$, where $\mathbf b_a$ is the
 degree-$a$ Bernstein basis vector and every Gram matrix $Q$ satisfies
@@ -79,8 +80,8 @@ sum matches every target coefficient exactly. The minimum absolute order is
 $\mathbf r=\lceil\mathbf M/2\rceil$ componentwise.
 
 ```matlab
-selected = L.applyPutinar();
-selected = L.applyPutinar(r);
+selected = L.usePutinar();
+selected = L.usePutinar(r);
 constraints = selected.toYalmip();
 ```
 
@@ -89,6 +90,37 @@ Gram blocks.
 These are non-strict software constraints. The theoretical
 $S^{(\mathbf c)}\succ0$ condition requires an explicit
 $S^{(\mathbf c)}-\varepsilon I\succeq0$ margin in the modeled residual.
+
+## Reusable Bernstein–Gram Map
+
+Let $\mathbf b_{\mathbf r}$ collect the tensor Bernstein basis labels of degree $\mathbf r$, and set $Z_{\mathbf r}=\mathbf b_{\mathbf r}\otimes I_n$. For two basis labels $\mathbf a$ and $\mathbf b$, their product is
+
+$$
+B_{\mathbf a}^{\mathbf r}B_{\mathbf b}^{\mathbf r}
+=\left[
+\prod_{s=1}^{\ell}
+\frac{\binom{r_s}{a_s}\binom{r_s}{b_s}}
+{\binom{2r_s}{a_s+b_s}}
+\right]
+B_{\mathbf a+\mathbf b}^{2\mathbf r}.
+$$
+
+The bracketed factor is numeric. For a symmetric Gram matrix $Q$, a diagonal term $Q_{\mathbf a,\mathbf a}$ contributes once, while an off-diagonal pair contributes $Q_{\mathbf a,\mathbf b}+Q_{\mathbf b,\mathbf a}=2Q_{\mathbf a,\mathbf b}$. The coefficient at target label $\mathbf k$ is therefore the sum of all diagonal and paired off-diagonal contributions whose labels satisfy $\mathbf a+\mathbf b=\mathbf k$. Generator multiplication adds a second numeric Bernstein product map before the exact coefficient identity is stored.
+
+For the small scalar basis $z=[B_0^1,B_1^1]^{\mathsf T}$ and $Q=Q^{\mathsf T}$,
+
+$$
+z^{\mathsf T}Qz
+=Q_{00}B_0^2+Q_{01}B_1^2+Q_{11}B_2^2.
+$$
+
+The middle identity follows because $B_0^1B_1^1=\tfrac12B_1^2$ and the two symmetric off-diagonal entries contribute together.
+
+`gramCons` builds the target-label groups, diagonal groups, paired off-diagonal groups, generator maps, and tensor-window incidence once as numeric plan data. It then allocates fresh Gram variables for every matrix entry when the inequality is entrywise, every physical cell, every rate row, and every certificate block. Reusing a numeric map is valid because it contains no YALMIP decision variable. Reusing a Gram matrix would couple independent certificates and is not allowed.
+
+<GramAssemblyExplorer client:visible />
+
+The optimized assembly preserves represented functions, existing YALMIP variables, certificate families, constraint order, PSD block dimensions, and cone partition, apart from ordinary floating-point summation differences.
 
 ## Relation To FullBox
 
@@ -118,8 +150,8 @@ limited.
 ## See Also
 
 [Previous: Direct And Pólya](/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/) ·
-[Next: SparsePutinar Clique Windows](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) ·
+[Next: SparsePutinar Tensor Windows](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) ·
 [Notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters) ·
-[`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) ·
-[`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) ·
-[`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/)
+[`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) ·
+[`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) ·
+[`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/)

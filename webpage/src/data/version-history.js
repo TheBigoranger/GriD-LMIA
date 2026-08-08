@@ -1,17 +1,24 @@
 export const versionHistory = [
   {
-    version: "v1.2.0",
-    date: "2026-07-29",
-    status: "latest tagged GitHub Release",
+    version: "v1.3.0",
+    date: "2026-08-08",
+    status: "current documentation and latest tagged GitHub Release",
     summary:
-      "Adds direction-wise Bernstein degrees to pdbase, pdmat, and pdvar; scalar-or-vector elevation and componentwise degree algebra; exact multivariate rhodiff alignment with zero-degree-axis support; and scalar-or-vector Pólya, Putinar, SparseFullBox, and FullBox certificate parameters. Degrees and orders are stored as row vectors, tensor counts use the product of per-axis cardinalities, and SparseFullBox retains a scalar bandwidth with anisotropic endpoint normalization.",
+      "Consolidates the public API around bernTable, elevate, usePolya, usePutinar, useSpPut, useSpBox, and useFullBox. It documents sparse elevation, the numeric, known-affine, and generic product kernels, reusable Bernstein–Gram maps, sliding tensor-window certificates, and three interactive assembly-plan explorers.",
+  },
+  {
+    version: "v1.2.4",
+    date: "2026-08-05",
+    status: "final v1.2 documentation snapshot",
+    summary:
+      "Retains the final v1.2 manual snapshot before the v1.3 public API cutover.",
   },
   {
     version: "v1.1.6",
     date: "2026-07-28",
     status: "final v1.1 documentation snapshot",
     summary:
-      "Unifies tensor-grid, cell, Bernstein-degree, residual, target, and Gram notation across both manuals; states SparseFullBox through Q_J^(w) for symmetric block-band Gram matrices of bandwidth w; expands the Bernstein convolution and Gram/SOS foundations; adds Math Concepts navigation plus pdmat addition, multiplication, and elevation explorers; and keeps the three-dimensional Welcome grid visible at every supported rotation. The MATLAB API is unchanged.",
+      "Unifies tensor-grid, cell, Bernstein-degree, residual, target, and Gram notation across both manuals, expands the Bernstein convolution and Gram foundations, and adds the first coefficient-algebra explorers.",
   },
   {
     version: "v1.0.0",

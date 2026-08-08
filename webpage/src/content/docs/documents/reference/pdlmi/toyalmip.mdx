@@ -149,7 +149,7 @@ A = pdmat([0 1], {{1, 2; 3, 4}}, ...
     Degree=1, RateBounds=[-1 2]);
 direct = A >= 0;
 directCertificate = toYalmip(direct)
-polya = direct.applyPolya(1);
+polya = direct.usePolya(1);
 polyaCertificate = toYalmip(polya)
 ```
 
@@ -163,4 +163,4 @@ polyaCertificate = logical
 
 ## See Also
 
-[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)

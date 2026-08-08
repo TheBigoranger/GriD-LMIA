@@ -29,8 +29,12 @@ $$
 
 Because $\mathcal R$ is a box and the residual is affine in
 $\boldsymbol\nu$, requiring the matrix inequality at every vertex of
-$\mathcal R$ is equivalent to requiring it throughout $\mathcal R$. This
-step introduces $2^\ell$ rate rows, ordered by lower/upper Cartesian-product choices.
+$\mathcal R$ is equivalent to requiring it throughout $\mathcal R$. The
+runtime stores one row per distinct vertex, ordered by lower/upper
+Cartesian-product choices with the last axis varying fastest. An axis whose
+bounds are equal contributes one value. Therefore, the row count is $2^\ell$
+only when all axes vary. For example, `[3 3]` gives one row and
+`[1 1; -3 5]` gives two.
 
 <RhodiffDiagram />
 
@@ -119,4 +123,4 @@ dependence would need a different treatment.
 [Next: Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/) ·
 [Notation](/GriD-LMIA/documents/math/notation/#domains-and-rate-vertices) ·
 [`pdvar` storage and evaluation](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) ·
-[`bernsteinTable`](/GriD-LMIA/documents/reference/pdvar/bernsteintable/)
+[`bernTable`](/GriD-LMIA/documents/reference/pdvar/berntable/)

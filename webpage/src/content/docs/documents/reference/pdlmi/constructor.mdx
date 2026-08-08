@@ -73,18 +73,18 @@ one unweighted Gram term plus one $\alpha_s(1-\alpha_s)$-weighted term per
 axis, while `UseFullBoxPreorder` selects a term for every generator-subset
 product. `UseSparsePutinar` retains the Putinar terms and exact identities,
 while replacing each dense Bernstein Gram basis by overlapping tensor windows
-of clique size `b`. `UseSparseFullBoxPreorder` retains the FullBox terms and exact
-identities while replacing each dense Gram matrix $Q_J$ by a symmetric
-block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. All five opt-in selections are
+whose side is the `CliqueSize` value `b`. `UseSparseFullBoxPreorder` retains the
+FullBox terms and exact identities while replacing each dense tensor basis by
+sliding tensor windows of side length $w$. All five opt-in selections are
 mutually exclusive.
 
 Use the direct default first. Choose Pólya when you want one exact degree
 elevation followed by the same coefficient test. In one parameter the two
 Gram selectors are equivalent. In two or more parameters, choose FullBox for
 every generator-subset product or Putinar for the unweighted term plus the
-separate axis generators. Choose SparseFullBox when intermediate band-limited
-support is useful; its exact endpoints return Direct at width
-  one and FullBox at width at least `max(order + 1)`.
+separate axis generators. Choose SparseFullBox when an intermediate
+tensor-window side is useful. Its exact endpoints return Direct at width one
+and FullBox at width at least `max(order + 1)`.
 Choose SparsePutinar when the Putinar generator family is appropriate but its
 dense Gram blocks are too large. Its one-parameter size-one endpoint returns
 Direct, its multidimensional size-one case remains SparsePutinar, and a
@@ -107,10 +107,10 @@ certificate order, see
 | `PutinarOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables Putinar assembly without a warning. |
 | `UseSparsePutinar` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparsePutinar assembly. |
 | `SparsePutinarOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables SparsePutinar assembly. |
-| `CliqueSize` | Finite positive integer scalar clique size `b`. Default `2` when SparsePutinar is enabled. Supplying it alone enables SparsePutinar assembly. |
+| `CliqueSize` | Finite positive integer scalar `b` used as the tensor-window side on each axis. Default `2` when SparsePutinar is enabled. Supplying it alone enables SparsePutinar assembly. |
 | `UseSparseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparseFullBox assembly. |
 | `SparseFullBoxOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables SparseFullBox assembly. |
-| `BandWidth` | Finite positive integer bandwidth `w` for $Q_J^{(w)}$. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
+| `BandWidth` | Finite positive integer `w` used as the SparseFullBox tensor-window side on each axis. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient, not stored, and not inherited by later selection calls. |
 
 When full-box assembly is active, the minimum order is
@@ -211,7 +211,7 @@ implicit = pdlmi(P, "<=", PolyaDegree=2);
 and emits `pdlmi:ImplicitUsePolya`. Pólya assembly rebuilds the stored residual
 at the selected degree, constraining every elevated coefficient and active
 rate-vertex row. It does not mutate the input expression or source `pdlmi`:
-`one = direct.applyPolya()` leaves `direct.UsePolya` false and returns
+`one = direct.usePolya()` leaves `direct.UsePolya` false and returns
 `one.UsePolya` true. Reapplying another selector likewise rebuilds a new
 object from `Residual`; it never accumulates certificate constraints in the
 existing object.
@@ -328,7 +328,7 @@ denseEndpoint.UsePutinar
 
 `CliqueSize` or `SparsePutinarOrder` alone enables SparsePutinar. The returned
 endpoint objects expose their canonical Direct or Putinar state. In two or
-more parameters, clique size one remains SparsePutinar.
+more parameters, `CliqueSize=1` remains SparsePutinar.
 
 ## Validation And Errors
 
@@ -360,4 +360,4 @@ mode adds an implicit positivity margin or calls a solver.
 
 ## See Also
 
-[`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)
+[`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)

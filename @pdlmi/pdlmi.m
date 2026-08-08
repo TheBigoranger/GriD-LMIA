@@ -82,9 +82,9 @@ classdef pdlmi
     %   state; equivalently BandWidth >= max(SparseFullBoxOrder+1).
     %   Intermediate widths use free PSD blocks on every axis-aligned
     %   tensor-basis window and exact Bernstein coefficient matching. In one
-    %   parameter, widths two and three give block-tridiagonal and
-    %   block-pentadiagonal Gram support. Larger widths form a nested sufficient
-    %   hierarchy, but strict improvement is not guaranteed.
+    %   parameter, widths two and three use windows of two or three consecutive
+    %   Bernstein basis labels. Larger widths form a nested sufficient hierarchy,
+    %   but strict improvement is not guaranteed.
     %
     %   BandWidth or SparseFullBoxOrder alone enables sparse full-box.
     %   Explicit UseSparseFullBoxPreorder=false conflicts with either parameter.

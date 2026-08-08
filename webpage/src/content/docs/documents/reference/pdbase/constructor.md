@@ -32,21 +32,21 @@ obj = pdbase(..., ValidationMode=mode)
 | `localValues` | Optional nested physical-cell tree. An ordinary leaf is a `1 × prod(degree+1)` coefficient cell; a rate-dependent leaf is a rate-row-by-coefficient cell array. |
 | `IsContinuous` | Logical scalar metadata; default `false`. |
 | `ContainsDecision` | Logical scalar metadata; default `false`. |
-| `HasRateDependence` | Logical scalar metadata; default `false`. |
 | `RateBounds` | Empty or finite `npar × 2` lower/upper bounds with lower not exceeding upper. |
 | `SourceSummary` | Source label; default `"coefficient-backed"`. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`; default `"fast"`, transient, and not stored. |
 
 When `localValues` is omitted or empty, each physical cell receives a
-coefficient-backed zero payload with the requested matrix size. Rate-dependent
-payloads require nonempty `RateBounds`.
+coefficient-backed zero payload with the requested matrix size. Explicit
+rate-row payloads require nonempty `RateBounds`. `RateBounds` alone is metadata
+and leaves `NumRateRows=0`.
 
 ## Returned object
 
 The returned value has private-set `GridInfo`, `MatrixSize`, direction-wise
 row-vector `Degree`,
-`LocalValues`, `IsContinuous`, `ContainsDecision`, `HasRateDependence`,
-`RateBounds`, and `SourceSummary` properties. It is a value object: later
+`LocalValues`, `IsContinuous`, `ContainsDecision`, `NumRateRows`, `RateBounds`,
+and `SourceSummary` properties. It is a value object: later
 operations return new values without mutating the source.
 
 ## Example

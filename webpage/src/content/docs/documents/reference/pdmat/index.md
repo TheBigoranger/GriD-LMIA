@@ -25,7 +25,7 @@ diagnostics, known-data certificates, and coefficient-wise matrix operations.
 | [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) | Evaluate known data at one parameter point. |
 | [`rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) | Differentiate coefficient-backed data into numeric rate-vertex rows. |
 | [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/) | Sample one- or two-dimensional diagnostic plots. |
-| [`bernsteinTable`](/GriD-LMIA/documents/reference/pdmat/bernsteintable/) | Inspect local Bernstein coefficients in tabular form. |
+| [`bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/) | Inspect local Bernstein coefficients in tabular form. |
 
 ### Algebra and matrix operations
 
@@ -55,7 +55,7 @@ and behavior.
   operands require matching grids and rate boxes. Multiplication supports
   rate rows on at most one side.
 - `pdmat` stores known numeric data only; decision variables belong to [`pdvar`](/GriD-LMIA/documents/reference/pdvar/).
-- Plotting and `bernsteinTable` output are diagnostics, not solver-facing behavior.
+- Plotting and `bernTable` output are diagnostics, not solver-facing behavior.
 
 ## See Also
 
@@ -65,5 +65,5 @@ and behavior.
 [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) ·
 [`rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) ·
 [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/) ·
-[`bernsteinTable`](/GriD-LMIA/documents/reference/pdmat/bernsteintable/) ·
+[`bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/) ·
 [`comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/)

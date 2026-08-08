@@ -67,14 +67,13 @@ yalmip('clear')
 P = pdvar(1, {[0 1 2]}, RateBounds=[-1 1]);
 D = rhodiff(P);
 
-D.HasRateDependence
+D.NumRateRows
 D.RateBounds
 ```
 
 ```text
 ans =
-  logical
-   1
+     2
 
 ans =
     -1     1
@@ -104,27 +103,27 @@ ans =
 
 ## Deterministic Full-Box Selection
 
-The [`applyFullBoxPreorder` reference](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/#deterministic-transcript-example)
+The [`useFullBox` reference](/GriD-LMIA/documents/reference/pdlmi/usefullbox/#deterministic-transcript-example)
 contains a solver-independent transcript that compares direct assembly, the
 minimum full-box order, an explicit higher order, replacement of a Pólya
 selection, and `toYalmip` export counts.
 
 ## Deterministic Putinar Selection
 
-The [`applyPutinar` reference](/GriD-LMIA/documents/reference/pdlmi/applyputinar/#deterministic-transcript-example)
+The [`usePutinar` reference](/GriD-LMIA/documents/reference/pdlmi/useputinar/#deterministic-transcript-example)
 contains a solver-independent transcript that compares direct assembly, the
 minimum Putinar order, an explicit higher order, replacement of a Pólya
 selection, and `toYalmip` export counts.
 
 ## Deterministic SparseFullBox Selection
 
-The [`applySparseFullBoxPreorder` reference](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/#deterministic-transcript)
-compares an intermediate band-limited certificate with its exact Direct and
+The [`useSpBox` reference](/GriD-LMIA/documents/reference/pdlmi/usespbox/#deterministic-transcript)
+compares an intermediate sliding tensor-window certificate with its exact Direct and
 FullBox endpoints, and records the corresponding read-only state.
 
 ## Deterministic SparsePutinar Selection
 
-The [`applySparsePutinar` reference](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/#examples)
+The [`useSpPut` reference](/GriD-LMIA/documents/reference/pdlmi/usespput/#examples)
 compares an intermediate tensor-window certificate with its Direct and dense
 Putinar endpoints. It also records the two-dimensional size-one behavior and
 the read-only `CliqueSize` state.

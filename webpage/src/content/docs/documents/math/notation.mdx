@@ -30,9 +30,10 @@ $$
 - $\boldsymbol\rho\in\mathcal P$ is the scheduling parameter and
   $\boldsymbol\nu=\dot{\boldsymbol\rho}\in\mathcal R$ is its admissible rate.
 - $\ell$ is the number of parameter axes.
-- $\mathcal V_{\mathcal R}$ is the set of the $2^\ell$ lower/upper rate
-  vertices. Reduction to these vertices is exact when the residual is affine
-  in $\boldsymbol\nu$.
+- $\mathcal V_{\mathcal R}$ is the set of distinct lower/upper rate vertices.
+  Its size is $\prod_s(1+\mathbb 1_{\underline\nu_s<\overline\nu_s})$, which
+  equals $2^\ell$ when every axis varies. Reduction to these vertices is exact
+  when the residual is affine in $\boldsymbol\nu$.
 
 <span id="grids-cells-and-local-coordinates"></span>
 
@@ -86,8 +87,8 @@ $\mathbf i=(i_1,\ldots,i_\ell)$ is zero-based.
 | $\mathbf M$ | Direction-wise assembled Bernstein degree of the residual or sign-normalized target. |
 | $\mathbf d$ | Direction-wise Pólya degree-elevation increment. |
 | $\mathbf r$ | Direction-wise absolute Gram order; it is not an increment from $\mathbf M$. |
-| $b$ | Scalar SparsePutinar tensor-window clique size. |
-| $w$ | Scalar SparseFullBox bandwidth. |
+| $b$ | Scalar SparsePutinar tensor-window side stored by `CliqueSize`. |
+| $w$ | Scalar SparseFullBox tensor-window side stored by `BandWidth`. |
 
 The public MATLAB properties store these degree and order vectors as
 $1\times\ell$ rows. Scalar inputs are uniform shorthand. These quantities are

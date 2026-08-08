@@ -1,0 +1,744 @@
+\chapter{Bernstein Representation and Exact Operations}
+\label{app:bernstein-math}
+
+This appendix develops the representation used by the package from the one-dimensional degree-one case to cell-local tensor polynomials.  The reader needs only scalar polynomials, matrices, and elementary calculus.  Every conversion, elevation, product, derivative, and subdivision below is exact; none is a sampling approximation.  Farouki gives a broader historical and numerical account \cite{farouki2012}.
+
+Each main construction follows the same reading path: \emph{Basic idea}, \emph{Formula}, \emph{Worked example}, and \emph{Visual conclusion}.  The extra staging is intentional: first identify what the operation means, then read its indices, and only afterward connect it to package storage.
+
+\section{Convex Combinations Before Polynomials}
+
+\ideastep{Basic idea} A convex combination of numbers or matrices has the form
+\[
+X=\sum_{i=0}^{m}w_iX_i,\qquad w_i\ge0,\qquad \sum_{i=0}^{m}w_i=1.
+\]
+For scalars, \(X\) lies between the smallest and largest \(X_i\).  For symmetric matrices, if every \(X_i\succeq0\), then \(X\succeq0\), because
+\[
+  u^{\mathsf T}Xu=\sum_iw_i\,u^{\mathsf T}X_i u\ge0
+  \quad\text{for every }u.
+\]
+\ideastep{Formula} Bernstein bases are useful because their basis values are precisely such weights at every point of a cell.
+
+\ideastep{Worked example} Take \(X_0=1\), \(X_1=4\), and weights \(0.75\) and \(0.25\).  Their combination is \(1.75\), which remains between the two inputs.
+
+\ideastep{Visual conclusion}
+
+\begin{center}
+\begin{tikzpicture}[x=1.25cm,y=1cm,>=Latex,
+  p/.style={dp/result,circle,inner sep=1.7pt}]
+  \draw[very thick,black!55] (0,0) -- (6,0);
+  \node[p,label=above:{\(X_0=1\)}] at (0,0) {};
+  \node[p,label=above:{\(X_1=4\)}] at (6,0) {};
+  \node[p] at (1.5,0) {};
+  \node[font=\scriptsize,anchor=south] at (3,0.75)
+    {\(0.75X_0+0.25X_1=1.75\)};
+  \draw[->,dpblue,thick] (0.15,-0.45) -- (1.35,-0.1);
+  \draw[->,dpblue,thick] (5.85,-0.45) -- (1.65,-0.1);
+  \node[font=\scriptsize] at (3,-0.82)
+    {nonnegative weights keep the result inside the coefficient hull};
+\end{tikzpicture}
+\end{center}
+
+The implication is one-way.  A polynomial may be positive everywhere while one Bernstein coefficient is negative; Appendix~\ref{app:certificates} uses that fact to motivate stronger certificates.
+
+\section{Degree-One Interpolation On One Physical Cell}
+
+\ideastep{Basic idea} Let \(\mathcal H_c=[\rho_1^{(c)},\rho_1^{(c+1)}]\), with width \(h_1^{c}=\rho_1^{(c+1)}-\rho_1^{(c)}>0\). Its forward map and inverse coordinate are
+\[
+  \phi_c(\alpha)=\rho_1^{(c)}+h_1^c\alpha,
+  \qquad
+  \alpha=\phi_c^{-1}(\rho_1)
+  =\frac{\rho_1-\rho_1^{(c)}}{h_1^c}\in[0,1].
+\]
+\ideastep{Formula} The degree-one Bernstein basis is
+\[
+B_0^1(\alpha)=1-\alpha,\qquad B_1^1(\alpha)=\alpha.
+\]
+Therefore
+\[
+C^{(c)}(\alpha)=(1-\alpha)C^{(c)}[0]+\alpha C^{(c)}[1].
+\]
+At the lower physical face, \(\alpha=0\) and the value is \(C^{(c)}[0]\); at the upper face, \(\alpha=1\) and the value is \(C^{(c)}[1]\).  Between them the matrix follows the straight segment joining those two coefficient matrices.
+
+\ideastep{Worked example} For example, \(C^{(c)}[0]=2\) and \(C^{(c)}[1]=4\) give \(C^{(c)}(0.25)=0.75(2)+0.25(4)=2.5\), exactly as in \cref{sec:pdmat-evaluate}.
+
+\ideastep{Visual conclusion}
+\begin{center}
+\begin{tikzpicture}[x=5.3cm,y=1.1cm]
+  \draw[dp/axis] (-0.05,0) -- (1.08,0) node[right,font=\scriptsize]{\(\alpha\)};
+  \draw[dp/axis] (0,-0.05) -- (0,1.08) node[above,font=\scriptsize]{basis weight};
+  \draw[dp/curve-primary,dp/marker-primary]
+    plot[domain=0:1,samples=61] (\x,{1-\x});
+  \draw[dp/curve-secondary,dp/marker-secondary]
+    plot[domain=0:1,samples=61] (\x,{\x});
+  \foreach \x in {0,1}{\draw (\x,0.03)--(\x,-0.03)
+    node[below,font=\scriptsize]{\(\x\)};}
+  \node[font=\scriptsize\bfseries,anchor=east] at (-0.03,-0.38) {Legend};
+  \draw[dp/curve-primary] (0.04,-0.38)--(0.16,-0.38);
+  \node[font=\scriptsize,anchor=west] at (0.18,-0.38)
+    {\(B_0^1=1-\alpha\)};
+  \draw[dp/curve-secondary] (0.56,-0.38)--(0.68,-0.38);
+  \node[font=\scriptsize,anchor=west] at (0.70,-0.38)
+    {\(B_1^1=\alpha\)};
+\end{tikzpicture}
+\end{center}
+
+\section{Higher Degree And The Partition Of Unity}
+\label{sec:bernstein-higher-degree}
+\index{Bernstein basis}\index{Bernstein coefficient}\index{degree reduction}
+
+\ideastep{Basic idea} Higher degree adds interior shape controls while keeping the same physical cell.  It does not add physical grid nodes.
+
+\ideastep{Formula} For degree \(m\), define
+\[
+  B_i^m(\alpha)=\binom mi(1-\alpha)^{m-i}\alpha^i,
+  \qquad i=0,\ldots,m.
+\]
+Each basis function is nonnegative on \([0,1]\).  The binomial theorem gives
+\[
+  \sum_{i=0}^{m}B_i^m(\alpha)
+=((1-\alpha)+\alpha)^m=1.
+\]
+Thus
+\[
+  C^{(c)}(\alpha)=\sum_{i=0}^{m}B_i^m(\alpha)C^{(c)}[i]
+\]
+is a convex combination of its local coefficient matrices.
+
+\ideastep{Worked example} For degree two,
+\[
+B_0^2=(1-\alpha)^2,\qquad B_1^2=2(1-\alpha)\alpha,\qquad B_2^2=\alpha^2.
+\]
+
+\ideastep{Visual conclusion}
+\begin{center}
+\begin{tikzpicture}[x=5.3cm,y=2.0cm]
+  \draw[dp/axis] (-0.05,0) -- (1.08,0) node[right,font=\scriptsize]{\(\alpha\)};
+  \draw[dp/axis] (0,-0.03) -- (0,1.08) node[above,font=\scriptsize]{\(B_i^2\)};
+  \draw[dp/curve-primary,dp/marker-primary]
+    plot[domain=0:1,samples=61] (\x,{(1-\x)^2});
+  \draw[dp/curve-secondary,dp/marker-secondary]
+    plot[domain=0:1,samples=61]
+    (\x,{2*(1-\x)*\x});
+  \draw[dp/curve-tertiary,dp/marker-tertiary]
+    plot[domain=0:1,samples=61] (\x,{\x^2});
+  \foreach \x in {0,0.5,1}{\draw (\x,0.02)--(\x,-0.02)
+    node[below,font=\scriptsize]{\(\x\)};}
+  \node[font=\scriptsize\bfseries,anchor=east] at (-0.03,-0.28) {Legend};
+  \draw[dp/curve-primary] (0.04,-0.28)--(0.16,-0.28);
+  \node[font=\scriptsize,anchor=west] at (0.18,-0.28)
+    {\(B_0^2=(1-\alpha)^2\)};
+  \draw[dp/curve-secondary] (0.04,-0.48)--(0.16,-0.48);
+  \node[font=\scriptsize,anchor=west] at (0.18,-0.48)
+    {\(B_1^2=2(1-\alpha)\alpha\)};
+  \draw[dp/curve-tertiary] (0.04,-0.68)--(0.16,-0.68);
+  \node[font=\scriptsize,anchor=west] at (0.18,-0.68)
+    {\(B_2^2=\alpha^2\)};
+\end{tikzpicture}
+
+\textit{At every \(\alpha\), the three plotted heights are nonnegative and sum to one.}
+\end{center}
+
+The label \(i\) identifies a basis position inside the selected physical cell. It is not a physical grid-node subscript.
+
+\section{Worked Conversion: \texorpdfstring{\(1+2\alpha+3\alpha^2\)}
+{1+2 alpha+3 alpha squared}}
+\label{sec:bernstein-power-conversion}
+
+Consider
+\[
+p(\alpha)=1+2\alpha+3\alpha^2.
+\]
+Seek degree-two Bernstein coefficients \(b_0,b_1,b_2\):
+\[
+p=b_0(1-\alpha)^2+2b_1(1-\alpha)\alpha+b_2\alpha^2.
+\]
+Matching powers of \(\alpha\) gives
+\[
+b_0=1,\qquad b_1=2,\qquad b_2=6.
+\]
+Indeed,
+\[
+1B_0^2+2B_1^2+6B_2^2 =(1-2\alpha+\alpha^2)+(4\alpha-4\alpha^2)+6\alpha^2 =1+2\alpha+3\alpha^2.
+\]
+The three values \(1,2,6\) are coefficients of basis functions, not samples at three equally spaced physical points.  Only the two endpoint coefficients are endpoint values.  At \(\alpha=1/2\),
+\[
+p(1/2)=\tfrac14(1)+\tfrac12(2)+\tfrac14(6)=2.75.
+\]
+
+\shortpairspace
+\begin{lstlisting}[style=dpmatlab]
+p = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
+valueAtHalf = p.evaluate(0.5)
+T = bernTable(p, "oneLine");
+disp(T)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+valueAtHalf = 2.7500
+    CellSubscript                      Expression
+    _____________    _______________________________________________
+
+        {[1]}        "(1-alpha)^2*1 + 2(1-alpha)alpha*2 + alpha^2*6"
+\end{lstlisting}
+
+\section{Exact Power--Bernstein Conversion}
+
+More generally, use brackets for algebraic coefficient labels as well:
+\[
+p(\alpha)=\sum_{j=0}^{n}a[j]\alpha^j =\sum_{k=0}^{n}b[k]B_k^n(\alpha).
+\]
+Power coefficients convert to Bernstein coefficients by
+\[
+b[k]=\sum_{j=0}^{k}
+  \frac{\binom{k}{j}}{\binom{n}{j}}a[j],
+  \qquad k=0,\ldots,n.
+\]
+The inverse map is
+\[
+a[j]=\binom{n}{j}\sum_{i=0}^{j}
+  (-1)^{j-i}\binom{j}{i}b[i],
+  \qquad j=0,\ldots,n.
+\]
+These are changes of basis inside the same degree-\(n\) polynomial space. For matrix polynomials they act entrywise.  For tensor polynomials they act along one coordinate axis at a time.
+
+\section{Lossless Degree Elevation}
+\label{sec:bernstein-degree-elevation}
+\index{degree elevation}
+
+In one parameter, a polynomial on physical cell \(c\) with degree \(m\) has a Bernstein representation of every higher degree.  One elevation step gives
+\[
+  \widehat C^{(c)}[0]=C^{(c)}[0],\qquad
+  \widehat C^{(c)}[k]=
+    \frac{k}{m+1}C^{(c)}[k-1]
++\left(1-\frac{k}{m+1}\right)C^{(c)}[k],\qquad
+  \widehat C^{(c)}[m+1]=C^{(c)}[m].
+\]
+For the worked coefficients \([1,2,6]\), elevation from degree two to degree three produces
+\[
+  \left[1,\frac53,\frac{10}{3},6\right].
+\]
+
+\begin{center}
+\begin{tikzpicture}[node distance=6mm and 8mm]
+  \node[dp/coeff-node] (c0) {\(1\)};
+  \node[dp/coeff-node,right=of c0] (c1) {\(2\)};
+  \node[dp/coeff-node,right=of c1] (c2) {\(6\)};
+  \node[dp/elevated-node,below=10mm of c0] (e0) {\(1\)};
+  \node[dp/elevated-node,right=of e0] (e1) {\(5/3\)};
+  \node[dp/elevated-node,right=of e1] (e2) {\(10/3\)};
+  \node[dp/elevated-node,right=of e2] (e3) {\(6\)};
+  \draw[dp/arrow] (c0)--(e0); \draw[dp/arrow] (c0)--(e1);
+  \draw[dp/arrow] (c1)--(e1); \draw[dp/arrow] (c1)--(e2);
+  \draw[dp/arrow] (c2)--(e2); \draw[dp/arrow] (c2)--(e3);
+  \node[above=4pt of c1,font=\scriptsize]{degree 2};
+  \node[below=4pt of e1,font=\scriptsize]{degree 3, same polynomial};
+\end{tikzpicture}
+\end{center}
+
+Direct elevation from \(m\) to \(M\ge m\) is
+\[
+  \widehat C^{(c)}[k]=
+  \sum_{i=\max(0,k-M+m)}^{\min(m,k)}
+C^{(c)}[i]\frac{\binom mi\binom{M-m}{k-i}}{\binom Mk}.
+\]
+This formula is a binomially normalized discrete convolution. Define
+\[
+  U_m^{(c)}[i]=\binom mi C^{(c)}[i],
+  \qquad
+  E_{M-m}[j]=\binom{M-m}{j},
+  \qquad
+  \widehat U_M^{(c)}[k]=\binom Mk\widehat C^{(c)}[k].
+\]
+Then
+\[
+  \widehat U_M^{(c)}=U_m^{(c)}*E_{M-m},
+  \qquad
+  \widehat C^{(c)}[k]
+  =\frac{(U_m^{(c)}*E_{M-m})[k]}{\binom Mk},
+\]
+where \(*\) is ordinary one-dimensional discrete convolution and out-of-range entries are zero. Thus elevation first binomially scales the coefficient row, convolves it with the fixed binomial kernel of degree \(M-m\), and divides by the degree-\(M\) binomial weight. The new coefficients are fixed convex combinations of the old ones. Elevation therefore changes representation but adds no decision freedom. Constructing a new higher-degree \code{pdvar} does enlarge the decision parameterization.
+
+For a tensor coefficient array of degree $\mathbf m=(m_1,\ldots,m_\ell)$, elevate independently to any componentwise target $\mathbf M\ge\mathbf m$. With
+\[
+  U_{\mathbf m}^{(\mathbf c)}[\mathbf i]
+  =\left(\prod_{s=1}^{\ell}\binom {m_s}{i_s}\right)
+  C^{(\mathbf c)}[\mathbf i],
+  \qquad
+  E_{\mathbf M-\mathbf m}[\mathbf j]
+  =\prod_{s=1}^{\ell}\binom{M_s-m_s}{j_s},
+\]
+the elevated array satisfies
+\[
+  \left(\prod_{s=1}^{\ell}\binom {M_s}{k_s}\right)
+  \widehat C^{(\mathbf c)}[\mathbf k]
+  =
+  \bigl(U_{\mathbf m}^{(\mathbf c)}*_{\ell}E_{\mathbf M-\mathbf m}\bigr)[\mathbf k],
+\]
+where $*_{\ell}$ denotes $\ell$-dimensional discrete convolution. The same identity defines a sparse linear operator without materializing zeros. Enumerate source labels $\mathbf i$ and target labels $\mathbf k$ in repository order, and define $E_{\mathbf M\leftarrow\mathbf m}\in\mathbb R^{N_{\mathbf M}\times N_{\mathbf m}}$ by
+\[
+\left[E_{\mathbf M\leftarrow\mathbf m}\right]_{\mathbf k,\mathbf i}=
+\begin{cases}
+\displaystyle\prod_{s=1}^{\ell}\frac{\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}}{\binom{M_s}{k_s}}, & 0\le k_s-i_s\le M_s-m_s\text{ for every }s,\\[8pt]
+0, & \text{otherwise}.
+\end{cases}
+\]
+Here $N_{\mathbf d}=\prod_s(d_s+1)$. Each source label contributes to the target labels in the translated gap box $\mathbf i+\prod_s\{0,\ldots,M_s-m_s\}$, so the operator has exactly $N_{\mathbf m}\prod_s(M_s-m_s+1)$ positive entries. All remaining entries are zero.
+
+If each coefficient is an $a$-by-$b$ matrix, pack one cell and rate row horizontally as $C_{\mathrm{pack}}=[C[\mathbf i_1]\ \cdots\ C[\mathbf i_{N_{\mathbf m}}]]$. The elevated payload is then
+\[
+\widehat C_{\mathrm{pack}}=C_{\mathrm{pack}}\left(E_{\mathbf M\leftarrow\mathbf m}^{\mathsf T}\otimes I_b\right).
+\]
+This right multiplication preserves the $a$ rows and separates the $b$ columns of each target coefficient. It also applies to affine \code{sdpvar} payloads because the operator and Kronecker factor are numeric sparse matrices. Public \code{elevate} delegates complete tree alignment to the protected \code{elevData} kernel and packed row application to \code{elevRow}. These kernels group temporary operands by source degree, build one operator for each pair $(\mathbf m,\mathbf M)$, and reuse it across every physical cell and stored rate row with that shape. The returned object keeps the same represented function, existing YALMIP variables, metadata, physical-cell order, and rate-row order.
+
+For example, elevation from $m=1$ to $M=3$ gives
+\[
+E_{3\leftarrow1}=
+\begin{bmatrix}
+1&0\\
+2/3&1/3\\
+1/3&2/3\\
+0&1
+\end{bmatrix},
+\qquad
+E_{3\leftarrow1}
+\begin{bmatrix}c_0\\c_1\end{bmatrix}
+=
+\begin{bmatrix}c_0\\(2c_0+c_1)/3\\(c_0+2c_1)/3\\c_1\end{bmatrix}.
+\]
+The sparse operator is a different application form of the same Bernstein identity, so it changes neither the represented polynomial nor the decision freedom.
+
+\section[Physical Tensor Grids And Local Tensor Labels]{%
+  \texorpdfstring{Physical Tensor Grids And\\Local Tensor Labels}%
+  {Physical Tensor Grids And Local Tensor Labels}}
+\label{sec:bernstein-tensor-grids}
+
+Suppose direction \(s\) has the axis grid
+\[
+  \mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},
+  \qquad
+  \rho_s^{(1)}<\rho_s^{(2)}<\cdots<\rho_s^{(k_s)}.
+\]
+The counts \(k_s\) may differ. Thus \(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\) has \(\prod_s k_s\) physical nodes. A physical hypercube is identified separately by the one-based multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\), with \(\mathcal H_{\mathbf c}=\prod_s[\rho_s^{(c_s)},\rho_s^{(c_s+1)}]\). Define its directional width and forward affine map by
+\[
+\begin{aligned}
+  h_s^{\mathbf c}
+    &=\rho_s^{(c_s+1)}-\rho_s^{(c_s)},\\
+  \phi_{\mathbf c}&:[0,1]^\ell\longrightarrow\mathcal H_{\mathbf c},\\
+  \phi_{\mathbf c,s}(\alpha_s)
+    &=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,\\
+  \boldsymbol\alpha
+    &=\phi_{\mathbf c}^{-1}(\boldsymbol\rho),
+    \qquad s=1,\ldots,\ell.
+\end{aligned}
+\]
+For any cellwise quantity \(C\), write \(C^{(\mathbf c)}=C\circ\phi_{\mathbf c}\) for its pullback to the unit box. For direction-wise degree \(\mathbf m=(m_1,\ldots,m_\ell)\),
+\[
+C^{(\mathbf c)}(\boldsymbol\alpha)=
+  \sum_{\mathbf i\in\prod_s\{0,\ldots,m_s\}}
+B_{\mathbf i}^{\mathbf m}(\boldsymbol\alpha)
+  C^{(\mathbf c)}[\mathbf i],
+  \qquad
+B_{\mathbf i}^{\mathbf m}=
+  \prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
+\]
+There are \(\prod_s(k_s-1)\) physical hypercubes and \(\prod_s(m_s+1)\) zero-based local Bernstein labels per hypercube. A zero component \(m_s=0\) leaves only label \(i_s=0\), so the polynomial is constant in direction \(s\). Physical node and hypercube indices remain one-based. The familiar \((m+1)^\ell\) count is the uniform-degree specialization \(\mathbf m=m\boldsymbol1\).
+
+\begin{lstlisting}[style=dpmatlab]
+obj = pdbase({[0 1 2], [10 20 30 40]}, [1 1], 1);
+physicalCellCount = obj.ncell()
+coefficientsPerCell = obj.ncoeff()
+localLabels = obj.lbls()
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+physicalCellCount = 6
+coefficientsPerCell = 4
+localLabels = 4×2 double
+     0     0
+     0     1
+     1     0
+     1     1
+\end{lstlisting}
+
+The nested tree \code{LocalValues{c1}{c2}...{cell}} follows physical-cell coordinates. Only after reaching a leaf does the flat coefficient cell follow the \code{lbls} order.  Earlier dimensions vary more slowly in both \code{cells} and \code{lbls}.
+
+\needspace{16\baselineskip}
+\begin{center}
+\begin{tikzpicture}[node distance=11mm,
+  box/.style={dp/neutral,font=\scriptsize,align=center,
+    minimum width=52mm,minimum height=12mm,inner sep=5pt},
+  result/.style={dp/result,font=\scriptsize,align=center,
+    minimum width=82mm,minimum height=15mm,inner sep=5pt}]
+  \node[box] (tree) {physical cell \((2,3)\)\\
+    \code{LocalValues{2}{3}}};
+  \node[result,below=of tree] (leaf) {local coefficient labels\\[2pt]
+    \(C^{(2,3)}[0,0]\), \(C^{(2,3)}[0,1]\),
+    \(C^{(2,3)}[1,0]\), \(C^{(2,3)}[1,1]\)};
+  \draw[dp/arrow] (tree) -- (leaf);
+\end{tikzpicture}
+
+\textit{Select the physical-cell leaf first; only then read the flat local coefficient labels in \code{lbls} order.}
+\end{center}
+
+\needspace{14\baselineskip}
+\section{Products As Ordered Weighted Convolution}
+\label{sec:bernstein-product-math}
+
+\ideastep{Basic idea} Multiplying two Bernstein polynomials creates every ordered pair of input coefficients.  Pairs with the same label sum contribute to the same output. For matrix payloads, ``ordered'' matters: the left factor stays on the left.
+
+\ideastep{Formula} First consider one parameter and fix the one-based physical cell \(c\).  Let
+\[
+P=\sum_{i=0}^{m}B_i^mP^{(c)}[i],\qquad Q=\sum_{j=0}^{n}B_j^nQ^{(c)}[j].
+\]
+The basis-product identity
+\[
+B_i^mB_j^n=
+  \frac{\binom mi\binom nj}{\binom{m+n}{i+j}}B_{i+j}^{m+n}
+\]
+gives
+\[
+(PQ)^{(c)}[k]=\sum_{i+j=k}P^{(c)}[i]Q^{(c)}[j]
+  \frac{\binom mi\binom nj}{\binom{m+n}{k}}.
+\]
+This is an ordered matrix convolution.  In general \(P^{(c)}[i]Q^{(c)}[j]\ne Q^{(c)}[j]P^{(c)}[i]\).
+
+Equivalently, define the binomially scaled rows
+\[
+  \widetilde P^{(c)}[i]=\binom miP^{(c)}[i],
+  \qquad
+  \widetilde Q^{(c)}[j]=\binom njQ^{(c)}[j],
+  \qquad
+  \widetilde R^{(c)}[k]=\binom{m+n}{k}(PQ)^{(c)}[k].
+\]
+Then
+\[
+  \widetilde R^{(c)}
+  =\widetilde P^{(c)}*\widetilde Q^{(c)}.
+\]
+The convolution remains ordered for matrix payloads: each summand is \(\widetilde P^{(c)}[i]\widetilde Q^{(c)}[j]\), never the reversed product.
+
+\newpage
+\ideastep{Worked example} Take quadratic coefficients \(P=[1,2,6]\) and affine coefficients \(Q=[2,4]\).  The anti-diagonals give
+\[
+\begin{aligned}
+  R[0]&=1(2)=2,\\
+  R[1]&=\bigl(1(4)+2\,2(2)\bigr)/3=4,\\
+  R[2]&=\bigl(2\,2(4)+6(2)\bigr)/3=28/3,\\
+  R[3]&=6(4)=24.
+\end{aligned}
+\]
+
+\needspace{22\baselineskip}
+\begin{lstlisting}[style=dpmatlab]
+P = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
+Q = pdmat({[0 1]}, {2, 4}, Degree=1);
+R = P * Q;
+productDegree = R.Degree
+productCoefficients = cell2mat(R.coeffs(1))
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+productDegree = 3
+productCoefficients = 1×4 double
+    2.0000    4.0000    9.3333   24.0000
+\end{lstlisting}
+
+The product degree in the transcript is three: degrees add, so \(2+1=3\).  The four outputs are coefficients in that cubic Bernstein basis, not values sampled at four points.
+
+The same calculation can be checked as a function identity.  On \(\alpha\in[0,1]\),
+\[
+P(\alpha)=1+2\alpha+3\alpha^2,\qquad
+  Q(\alpha)=2+2\alpha,
+\]
+and
+\[
+P(\alpha)Q(\alpha) =2+6\alpha+10\alpha^2+6\alpha^3.
+\]
+
+\begin{center}
+\begin{tikzpicture}[x=2.15cm,y=1.85cm]
+  % Each panel has its own vertical normalization so all three shapes remain
+  % readable; the formulas and endpoint labels state the physical values.
+  \begin{scope}
+    \draw[dp/axis] (0,0)--(1.08,0) node[right,font=\tiny]{\(\alpha\)};
+    \draw[dp/axis] (0,0)--(0,1.08);
+    \draw[dp/curve-primary,dp/marker-primary]
+      plot[domain=0:1,samples=61]
+      (\x,{(1+2*\x+3*\x*\x)/6});
+    \node[font=\footnotesize\bfseries,align=center,text width=34mm]
+      at (0.5,1.38) {Input \(P\)\\degree 2};
+    \node[font=\tiny,anchor=east] at (-0.03,0.17) {1};
+    \node[font=\tiny,anchor=east] at (-0.03,1) {6};
+    \node[font=\tiny,anchor=west] at (0.10,-0.22)
+      {\(P=1+2\alpha+3\alpha^2\)\quad\(\bullet\)};
+  \end{scope}
+  \begin{scope}[xshift=4.3cm]
+    \draw[dp/axis] (0,0)--(1.08,0) node[right,font=\tiny]{\(\alpha\)};
+    \draw[dp/axis] (0,0)--(0,1.08);
+    \draw[dp/curve-secondary,dp/marker-secondary]
+      plot[domain=0:1,samples=61]
+      (\x,{(2+2*\x)/4});
+    \node[font=\footnotesize\bfseries,align=center,text width=34mm]
+      at (0.5,1.38) {Input \(Q\)\\degree 1};
+    \node[font=\tiny,anchor=east] at (-0.03,0.5) {2};
+    \node[font=\tiny,anchor=east] at (-0.03,1) {4};
+    \node[font=\tiny,anchor=west] at (0.10,-0.22)
+      {\(Q=2+2\alpha\)\quad\(\square\)};
+  \end{scope}
+  \begin{scope}[xshift=2.15cm,yshift=-3.55cm]
+    \draw[dp/axis] (0,0)--(1.08,0) node[right,font=\tiny]{\(\alpha\)};
+    \draw[dp/axis] (0,0)--(0,1.08);
+    \draw[dp/curve-tertiary,dp/marker-tertiary]
+      plot[domain=0:1,samples=61]
+      (\x,{(2+6*\x+10*\x*\x+6*\x*\x*\x)/24});
+    \node[font=\footnotesize\bfseries,align=center,text width=40mm]
+      at (0.5,1.38) {Product \(PQ\)\\degree 3};
+    \node[font=\tiny,anchor=east] at (-0.03,0.083) {2};
+    \node[font=\tiny,anchor=east] at (-0.03,1) {24};
+    \node[font=\tiny,anchor=west] at (0.03,-0.22)
+      {\(PQ=2+6\alpha+10\alpha^2+6\alpha^3\)\quad\(\triangle\)};
+  \end{scope}
+\end{tikzpicture}
+
+\textit{Direct formula labels sit outside the plot regions.  Solid/circle, dashed/square, and dotted/triangle treatments distinguish the three functions without relying on color.}
+\end{center}
+
+\newpage
+\ideastep{Visual conclusion}
+\begin{center}
+\begin{tikzpicture}[node distance=11mm]
+  \node[dp/figure-panel,dp/neutral,minimum width=42mm,minimum height=34mm]
+    (input) {\textbf{1. Input coefficients}\\[2pt]
+    \(P:[1,2,6]\) (degree 2)\\
+    \(Q:[2,4]\) (degree 1)};
+  \node[dp/figure-panel,dp/contribution,right=of input,
+    minimum width=42mm,minimum height=34mm] (groups) {
+    \textbf{2. Group \(i+j=k\)}\\[2pt]
+    \(k=0:(0,0)\)\\
+    \(k=1:(0,1),(1,0)\)\\
+    \(k=2:(1,1),(2,0)\)\\
+    \(k=3:(2,1)\)};
+  \node[dp/figure-panel,dp/result,right=of groups,
+    minimum width=42mm,minimum height=34mm] (output) {
+    \textbf{3. Normalize}\\[2pt]
+    \(R:[2,4,28/3,24]\)\\
+    degree \(3\)};
+  \draw[dp/arrow] (input)--node[above,font=\tiny]{enumerate}(groups);
+  \draw[dp/arrow] (groups)--node[above,font=\tiny]{binomial weights}(output);
+\end{tikzpicture}
+
+\textit{Only the panel-to-panel arrows encode flow.  Contributions are listed inside their anti-diagonal group, so no edges cross labels or equations.}
+\end{center}
+
+\needspace{14\baselineskip} For tensor degrees $\mathbf m$ and $\mathbf n$, labels add componentwise and the product has degree $\mathbf m+\mathbf n$:
+\[
+(PQ)^{(\mathbf c)}[\mathbf k]=
+  \sum_{\mathbf i+\mathbf j=\mathbf k}
+P^{(\mathbf c)}[\mathbf i] Q^{(\mathbf c)}[\mathbf j]
+  \prod_{s=1}^{\ell}
+  \frac{\binom {m_s}{i_s}\binom {n_s}{j_s}}
+       {\binom{m_s+n_s}{k_s}}.
+\]
+In binomially scaled form, the tensor rule is the \(\ell\)-dimensional discrete convolution
+\[
+  \left(\prod_{s=1}^{\ell}\binom{m_s+n_s}{k_s}\right)
+  (PQ)^{(\mathbf c)}[\mathbf k]
+  =
+  \left(
+  \left\{\left(\prod_{s=1}^{\ell}\binom {m_s}{i_s}\right)
+  P^{(\mathbf c)}[\mathbf i]\right\}_{\mathbf i}
+  *_{\ell}
+  \left\{\left(\prod_{s=1}^{\ell}\binom {n_s}{j_s}\right)
+  Q^{(\mathbf c)}[\mathbf j]\right\}_{\mathbf j}
+  \right)[\mathbf k].
+\]
+Labels add componentwise, physical-cell identity does not change, and every matrix product retains the written left-to-right factor order. The implementation uses this identity through three payload-specific kernels that share the same planned degrees, output labels, and coefficient weights.
+
+\subsection{Numeric Tensor Convolution}
+
+When both operands are numeric, each matrix entry is packed into a tensor whose coefficient at label $\mathbf i$ is multiplied by the normalized weight $w_{\mathbf m}(\mathbf i)=2^{-\sum_s m_s}\prod_s\binom{m_s}{i_s}$. For output entry $(a,b)$, the matrix inner index $q$ gives
+\[
+\widetilde R_{ab}=\sum_q \widetilde P_{aq}*_{\ell}\widetilde Q_{qb}.
+\]
+The planned tensor shapes map repository label order to MATLAB tensor indices, and division by $w_{\mathbf m+\mathbf n}(\mathbf k)$ returns the Bernstein coefficients because the powers of two cancel. The normalized tables are generated without first forming large raw binomial coefficients. MATLAB \code{conv} handles one parameter and \code{convn} handles two or more parameters. This route is used only when every payload is numeric. An affine \code{sdpvar} must not enter \code{convn} because \code{convn} does not implement YALMIP's affine symbolic payload semantics, and treating symbolic data as a numeric tensor would either fail dispatch or lose the required linear expression structure.
+
+\subsection{Known--Affine Block Contraction}
+
+Suppose the left coefficients $A[\mathbf i]$ are numeric matrices and the right coefficients $X[\mathbf j]$ are affine \code{sdpvar} matrices. For each output label $\mathbf k$, precompute the pair table
+\[
+\mathcal P_{\mathbf k}=\{(\mathbf i,\mathbf j):\mathbf i+\mathbf j=\mathbf k\}
+\]
+and its numeric weights $\omega_{\mathbf i,\mathbf j}$. Stack the affine blocks vertically in repository order. The output can then be evaluated as one ordinary matrix product
+\[
+R[\mathbf k]=
+\begin{bmatrix}
+\omega_1 A[\mathbf i_1]&\cdots&\omega_t A[\mathbf i_t]
+\end{bmatrix}
+\begin{bmatrix}
+X[\mathbf j_1]\\ \vdots\\ X[\mathbf j_t]
+\end{bmatrix},
+\qquad t=|\mathcal P_{\mathbf k}|.
+\]
+The symmetric implementation for an affine left operand and known right operand stacks the affine blocks horizontally and the weighted known blocks vertically, which preserves the written order $X[\mathbf i]A[\mathbf j]$. The pair labels and weights are numeric plan data and are reused across physical cells and rate rows.
+
+For a one-parameter degree-one known factor $A$ and degree-one affine factor $X$, the middle coefficient is
+\[
+(AX)[1]=\frac12\left(A[0]X[1]+A[1]X[0]\right)
+=\frac12
+\begin{bmatrix}A[1]&A[0]\end{bmatrix}
+\begin{bmatrix}X[0]\\X[1]\end{bmatrix}.
+\]
+For example, with
+\[
+A[0]=\begin{bmatrix}1&0\\0&2\end{bmatrix},
+\qquad
+A[1]=\begin{bmatrix}2&1\\0&1\end{bmatrix},
+\]
+the contraction multiplies one stacked affine vector of matrix blocks by the fixed numeric block row $\tfrac12[A[1]\ A[0]]$. It creates the same affine YALMIP expression as the two-term sum and introduces no new decision variable.
+
+\subsection{Planned Generic Fallback}
+
+Scalar broadcasting and other supported payload shapes use the same precomputed pair table without a block contraction. For every output label, the generic route accumulates
+\[
+R[\mathbf k]=\sum_{r=1}^{|\mathcal P_{\mathbf k}|}\omega_r P[\mathbf i_r]Q[\mathbf j_r]
+\]
+in deterministic pair order. This fallback keeps MATLAB scalar and matrix multiplication rules visible, while avoiding repeated label enumeration and repeated binomial-ratio construction. Ordinary coefficient rows may broadcast over one rate-row operand, but two actual rate-row operands are rejected because their product would be quadratic in the scheduling rates.
+
+The protected \code{prodVals} kernel owns the three routes and reuses their numeric plans across the complete cell-local trees. All routes preserve the same product polynomial and output degree. Numeric tensor shapes, pair tables, and weights may be reused because they contain no YALMIP variables. The input coefficient payloads and their existing decision variables remain attached to their own physical cells and rate rows.
+
+\needspace{14\baselineskip}
+\section{Differentiation And Rate Vertices}
+\label{sec:bernstein-differentiation}
+
+\ideastep{Basic idea} Differentiate inside each physical cell.  Adjacent control differences produce the derivative coefficients; multiplying by a bounded rate then creates one stored row per rate-box vertex.  Value continuity of \(P\) does not force the cell-local derivatives to match across a face.
+
+\ideastep{Formula} For one parameter, on physical cell \(c\) of width \(h_1^c\),
+\[
+  \frac{\partial P}{\partial\rho}
+=\frac{m}{h_1^c}\sum_{i=0}^{m-1}
+    \bigl(C^{(c)}[i+1]-C^{(c)}[i]\bigr)B_i^{m-1}(\alpha).
+\]
+\ideastep{Worked example} For the worked polynomial \([1,2,6]\) on \([0,2]\), \(m=2\) and \(h=2\), so the derivative coefficients are
+\[
+  \left[\frac{2}{2}(2-1),\frac{2}{2}(6-2)\right]=[1,4].
+\]
+This represents \(dp/d\rho=1+3\alpha\).
+
+In \(\ell\) dimensions with tensor degree \(\mathbf m\), differentiation with respect to \(\rho_s\) replaces each coefficient by
+\[
+  \frac{m_s}{h_s^{\mathbf c}}
+  \left(C^{(\mathbf c)}[\mathbf i+\mathbf e_s]
+       -C^{(\mathbf c)}[\mathbf i]\right),
+\]
+when \(m_s>0\), reduces only that component to \(m_s-1\), and leaves the other label components unchanged. A zero-degree axis has identically zero partial derivative. For two or more parameters, the implementation elevates every nonzero partial exactly from \(\mathbf m-\mathbf e_s\) back to the common tensor degree \(\mathbf m\) before adding them; in one parameter it retains the established reduced-degree result. If every component is zero, \code{rhodiff} stores a complete zero coefficient row for every rate vertex.
+
+Finally,
+\[
+  \dot P=\sum_{s=1}^{\ell}
+  \nu_s\frac{\partial P}{\partial\rho_s},
+  \qquad \boldsymbol\nu=\dot{\boldsymbol\rho}.
+\]
+This matrix expression is affine in \(\boldsymbol\nu\). Every value inside the rate box \(\mathcal R\) is therefore a convex combination of the distinct vertex matrices in \(\mathcal V_{\mathcal R}\). Because the positive- and negative-semidefinite cones are convex, the requested semidefinite sign holds on all of \(\mathcal R\) whenever it holds at every distinct vertex. \code{rhodiff} stores one row for each of these vertices.
+
+\ideastep{Visual conclusion}
+\begin{center}
+\begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
+  box/.style={dp/result,
+    font=\scriptsize,align=center,minimum width=28mm,minimum height=9mm}]
+  \node[box] (p1) {\(\partial P/\partial\rho_1\)};
+  \node[box,below=of p1] (p2) {\(\partial P/\partial\rho_2\)};
+  \node[box,right=of p1,yshift=-7mm] (sum) {
+    \(\nu_1P_{\rho_1}+\nu_2P_{\rho_2}\)};
+  \node[box,right=of sum,yshift=13mm] (v1) {\((\underline\nu_1,\underline\nu_2)\)};
+  \node[box,right=of sum,yshift=4mm] (v2) {\((\underline\nu_1,\overline\nu_2)\)};
+  \node[box,right=of sum,yshift=-5mm] (v3) {\((\overline\nu_1,\underline\nu_2)\)};
+  \node[box,right=of sum,yshift=-14mm] (v4) {\((\overline\nu_1,\overline\nu_2)\)};
+\draw[->,dpblue] (p1)--(sum); \draw[->,dpblue] (p2)--(sum);
+\foreach \v in {v1,v2,v3,v4}\draw[->,dpblue] (sum)--(\v);
+\end{tikzpicture}
+\end{center}
+
+\subsection{Rate-Vertex Row Storage}
+\label{sec:bernstein-rate-vertex-storage}
+
+Let \(\code{RateBounds}(s,:)=[\underline\nu_s\ \overline\nu_s]\). The rate box \(\mathcal R=\prod_s[\underline\nu_s,\overline\nu_s]\) has the finite vertex set
+\[
+  \mathcal V_{\mathcal R}
+  =\prod_{s=1}^{\ell}\{\underline\nu_s,\overline\nu_s\},
+  \qquad N_v:=|\mathcal V_{\mathcal R}|
+  =\prod_{s=1}^{\ell}\left(1+\mathbf 1_{\{\underline\nu_s<\overline\nu_s\}}\right)
+  \le 2^\ell.
+\]
+Here a varying direction contributes its lower and upper values, while a fixed direction contributes its single value. For a derivative object \(D=\code{rhodiff}(P,\code{RateBounds})\) and one physical hypercube \(\mathbf c=(c_1,\ldots,c_\ell)\), the leaf \(\code{D.LocalValues}\{c_1\}\cdots\{c_\ell\}\) is an \(N_v\)-by-\(\prod_s(\code{D.Degree}(s)+1)\) cell array. Its rows enumerate vertices \(\boldsymbol\nu^{(q)}\in\mathcal V_{\mathcal R}\); its columns enumerate local Bernstein labels in \code{combRows} order. Each entry already contains \(\sum_s\nu_s^{(q)}\,\partial P^{(\mathbf c)}/\partial\rho_s\). The rows add rate alternatives inside one existing hypercube; they do not add physical cells.
+
+For \(\ell=2\) when both rate directions vary, the lower/upper tensor order is
+\[
+\begin{array}{c|cc}
+\text{row} & \nu_1 & \nu_2\\
+\hline
+1 & \underline\nu_1 & \underline\nu_2\\
+2 & \underline\nu_1 & \overline\nu_2\\
+3 & \overline\nu_1 & \underline\nu_2\\
+4 & \overline\nu_1 & \overline\nu_2
+\end{array}
+\]
+The last parameter direction changes fastest.  This is the same tensor ordering used by the package's coefficient and cell traversal, so \code{pdlmi} can constrain every rate row without reconstructing the rate box.
+
+\section{de Casteljau Evaluation And Exact Subdivision}
+\index{de Casteljau evaluation}\index{subdivision}
+
+de Casteljau recursion evaluates a Bernstein polynomial using only affine combinations.  For one parameter, on a fixed physical cell \(c\), begin with \(C^{(c,0)}[i]=C^{(c)}[i]\) and define
+\[
+C^{(c,r)}[i]=(1-\tau)C^{(c,r-1)}[i]
+    +\tau C^{(c,r-1)}[i+1],
+  \qquad r=1,\ldots,m.
+\]
+The value at \(\alpha=\tau\) is \(C^{(c,m)}[0]\).
+
+For \([1,2,6]\) and \(\tau=1/2\), the recursion is
+\[
+[1,2,6]\ \longrightarrow\ [1.5,4]\ \longrightarrow\ [2.75].
+\]
+The left edge of this triangle gives exact coefficients \([1,1.5,2.75]\) on the left subinterval; the right edge gives \([2.75,4,6]\) on the right.
+
+\begin{center}
+\begin{tikzpicture}[>=Latex,node distance=7mm and 11mm,
+  c/.style={dp/neutral,circle,font=\scriptsize,minimum size=8mm},
+  e/.style={dp/result,circle,font=\scriptsize,
+    minimum size=8mm}]
+  \node[c] (a0) {\(1\)}; \node[c,below=of a0] (a1) {\(2\)};
+  \node[c,below=of a1] (a2) {\(6\)};
+  \node[e,right=of a0,yshift=-7mm] (b0) {\(1.5\)};
+  \node[e,right=of a1,yshift=-7mm] (b1) {\(4\)};
+  \node[e,right=of b0,yshift=-7mm] (v) {\(2.75\)};
+  \draw[->,dpblue] (a0)--(b0); \draw[->,dpblue] (a1)--(b0);
+  \draw[->,dpblue] (a1)--(b1); \draw[->,dpblue] (a2)--(b1);
+  \draw[->,dpblue] (b0)--(v); \draw[->,dpblue] (b1)--(v);
+\end{tikzpicture}
+
+\medskip \textit{One recursion triangle supplies both the evaluation and the two child-cell coefficient lists.}
+\end{center}
+
+Tensor evaluation or subdivision applies the same recursion along one parameter direction at a time.  Subdivision changes the physical-cell partition and can tighten coefficient hulls while preserving the polynomial.  The package uses exact coefficient transformations internally where documented, but it does not currently expose a public de Casteljau, subdivision, or adaptive-refinement API.
+
+\section{What Changes, And What Does Not}
+
+The following distinctions prevent several common modeling mistakes.
+
+\begin{tabularx}{\textwidth}{@{}p{0.26\textwidth}Y Y@{}}
+\toprule
+Operation & Changes & Preserves \\
+\midrule
+Basis conversion & coefficient coordinates & polynomial, degree, physical cell \\
+Degree elevation & Bernstein degree and coefficient list & polynomial, physical grid, decision freedom \\
+Grid subdivision & physical-cell partition and local coefficients & polynomial on the original domain \\
+Higher-degree \code{pdvar} & number of decision coefficients & grid and matrix size \\
+Multiplication & polynomial degree and coefficients & physical-cell identity \\
+Differentiation & degree and coefficient values & physical-cell partition before rate rows \\
+\bottomrule
+\end{tabularx}
+
+These representation facts support the finite certificates in the next appendix.  They do not by themselves select a solver or prove that one certificate is necessary.
+
+\section{Further Reading}
+For a concise orientation before the primary paper by Farouki \cite{farouki2012}, see the \href{https://en.wikipedia.org/wiki/Bernstein_polynomial}{Bernstein polynomial overview} and the \href{https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm}{de Casteljau overview}. They are background references for the basis and recursion; the package's cell-local storage and certificate behavior are defined by this manual and the source implementation.

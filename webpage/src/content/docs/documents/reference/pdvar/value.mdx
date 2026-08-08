@@ -35,10 +35,10 @@ rows = value(rhodiff(P))
 
 For an ordinary expression, `A` is one `pdmat` that preserves the parameter
 grid, matrix size, Bernstein degree, local coefficient order, and continuity
-metadata. For a derivative expression with rate rows, `rows` is a $1\times2^\ell$
-cell array of `pdmat` objects, in the lower/upper Cartesian vertex order of
-`helper.combRows(RateBounds)`; returned `pdmat` objects do not retain rate
-metadata.
+metadata. For a derivative expression with rate rows, `rows` is a
+`1 × P.NumRateRows` cell array of `pdmat` objects, in distinct lower/upper
+Cartesian vertex order after fixed axes collapse. Returned `pdmat` objects do
+not retain rate metadata.
 
 ## Example
 
@@ -69,4 +69,4 @@ conversion when an exact point evaluation is needed.
 
 ## See Also
 
-[`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) · [`pdmat`](/GriD-LMIA/documents/reference/pdmat/) · [`bernsteinTable`](/GriD-LMIA/documents/reference/pdvar/bernsteintable/)
+[`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) · [`pdmat`](/GriD-LMIA/documents/reference/pdmat/) · [`bernTable`](/GriD-LMIA/documents/reference/pdvar/berntable/)

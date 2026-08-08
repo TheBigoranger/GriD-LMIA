@@ -5,7 +5,7 @@ export const referenceGroups = [
   { id: "pdvar", label: "pdvar", description: "Continuous arbitrary-degree affine decisions and rate-vertex differentiation." },
   { id: "pdlmi", label: "pdlmi", description: "Direct constraints and five opt-in finite certificate families." },
   { id: "pdbase-backend", label: "pdbase / backend", description: "Inherited matrix protocols, cell-local storage, and protected Bernstein utilities." },
-  { id: "shared-helpers", label: "Shared helpers", description: "Seven implementation helpers shared across the package." },
+  { id: "shared-helpers", label: "Shared helpers", description: "Current validation, grid, degree, rate-row, and Bernstein-convolution helpers." },
 ];
 
 const entry = (name, type, task, path, anchor = "", group = "shared-helpers") => ({
@@ -31,7 +31,6 @@ const pdbasePublic = [
   ["width", "Report the second payload dimension.", "storage-inspection"],
   ["evaluate", "Evaluate one cell-local coefficient family at a physical point.", "evaluation-and-elevation"],
   ["rhodiff", "Differentiate coefficient-backed storage into deterministic rate-vertex rows.", "evaluation-and-elevation"],
-  ["elevVals", "Return an elevated LocalValues tree without changing the object.", "evaluation-and-elevation"],
   ["elevate", "Return an elevated object of the same dynamic class.", "evaluation-and-elevation"],
   ["uplus", "Return a value-semantic copy with the same payloads.", "matrix-operations"],
   ["uminus", "Negate every stored payload.", "matrix-operations"],
@@ -60,23 +59,21 @@ const pdbasePublic = [
 ];
 
 const pdbaseProtected = [
-  ["bernElev", "Elevate one compatible Bernstein coefficient family."],
-  ["bernProd", "Multiply coefficient families by normalized label convolution."],
-  ["elevationPlan", "Build an operation-local numeric elevation plan."],
-  ["productPlan", "Build an operation-local normalized product plan."],
-  ["alignLocalDegrees", "Align normalized cell-local data to a common degree."],
-  ["prodLocalValues", "Apply a product plan across compatible cells and rate rows."],
+  ["elevRow", "Build and apply one sparse numeric tensor-elevation operator."],
+  ["elevData", "Reuse elevation plans across compatible physical cells and rate rows."],
+  ["prodVals", "Dispatch numeric convolution, known-affine contraction, or planned pair accumulation."],
   ["bernTbl", "Build detailed or one-line Bernstein diagnostic tables."],
-  ["elevLocalValues", "Elevate every cell and active rate row in a LocalValues tree."],
   ["mapVals", "Map a function over every coefficient payload."],
   ["matSubs", "Normalize two-dimensional matrix subscripts."],
   ["mergeGrid", "Build a common physical grid for compatible operands."],
   ["mkUnOp", "Rebuild the same dynamic class from transformed payloads."],
-  ["unOp", "Apply one matrix operation across cells, labels, and rate rows."],
+  ["mapUnary", "Apply one matrix operation across cells, labels, and rate rows."],
+  ["joinRateRows", "Join compatible ordinary and rate-row payloads."],
+  ["zipRateRows", "Pair compatible rate rows in repository order."],
 ];
 
 const pdmatMethods = [
-  ["bernsteinTable", "Inspect coefficient rows and optional one-line expressions.", "bernsteinTable"],
+  ["bernTable", "Inspect coefficient rows and optional one-line expressions.", "bernTable"],
   ["evaluate", "Evaluate known data at a parameter point.", "evaluate"],
   ["rhodiff", "Differentiate coefficient-backed known data into numeric rate-vertex rows.", "rhodiff"],
   ["plot", "Plot one- or two-parameter known data.", "plot"],
@@ -125,7 +122,7 @@ const pdmatMethods = [
 ];
 
 const pdvarMethods = [
-  ["bernsteinTable", "Inspect symbolic coefficient rows and rate vertices.", "bernsteinTable"],
+  ["bernTable", "Inspect symbolic coefficient rows and rate vertices.", "bernTable"],
   ["rhodiff", "Build rate-vertex derivative expressions.", "rhodiff"],
   ["value", "Convert assigned symbolic coefficients to known pdmat data.", "value"],
   ["plus", "Add affine decision expressions and compatible constants."],
@@ -177,7 +174,6 @@ const inheritedPdmat = [
   ["ncell", "Count pdmat physical cells."],
   ["ncoeff", "Count pdmat coefficient columns per cell."],
   ["npar", "Count pdmat parameter dimensions."],
-  ["elevVals", "Return elevated known-data LocalValues without changing the source.", "elevate"],
   ["elevate", "Return an elevated pdmat with the same source evidence.", "elevate"],
 ];
 
@@ -188,7 +184,6 @@ const inheritedPdvar = [
   ["ncell", "Count pdvar physical cells."],
   ["ncoeff", "Count pdvar coefficient columns per cell."],
   ["npar", "Count pdvar parameter dimensions."],
-  ["elevVals", "Return elevated symbolic LocalValues without changing the source."],
   ["elevate", "Return an elevated pdvar with the same variables and metadata."],
   ["evaluate", "Interpolate symbolic coefficients and independent derivative rows."],
 ];
@@ -265,16 +260,22 @@ export const referenceEntries = [
     group: "pdlmi",
   },
   entry("toYalmip", "pdlmi method", "Concatenate stored constraints for YALMIP optimize calls.", "documents/reference/pdlmi/toyalmip", "", "pdlmi"),
-  entry("applyPolya", "pdlmi method", "Rebuild a residual with a selected Pólya degree increment.", "documents/reference/pdlmi/applypolya", "", "pdlmi"),
-  entry("applyPutinar", "pdlmi method", "Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate.", "documents/reference/pdlmi/applyputinar", "", "pdlmi"),
-  entry("applySparsePutinar", "pdlmi method", "Rebuild a residual with overlapping tensor-window Putinar Gram blocks and canonical endpoints.", "documents/reference/pdlmi/applysparseputinar", "", "pdlmi"),
-  entry("applySparseFullBoxPreorder", "pdlmi method", "Rebuild a residual with band-limited FullBox Gram support and canonical endpoints.", "documents/reference/pdlmi/applysparsefullboxpreorder", "", "pdlmi"),
-  entry("applyFullBoxPreorder", "pdlmi method", "Rebuild a residual with a fixed-order full-box Bernstein-Gram preordering.", "documents/reference/pdlmi/applyfullboxpreorder", "", "pdlmi"),
+  entry("usePolya", "pdlmi method", "Rebuild a residual with a selected Pólya degree increment.", "documents/reference/pdlmi/usepolya", "", "pdlmi"),
+  entry("usePutinar", "pdlmi method", "Rebuild a residual with a fixed-order Putinar box Bernstein-Gram certificate.", "documents/reference/pdlmi/useputinar", "", "pdlmi"),
+  entry("useSpPut", "pdlmi method", "Rebuild a residual with overlapping tensor-window Putinar Gram blocks and canonical endpoints.", "documents/reference/pdlmi/usespput", "", "pdlmi"),
+  entry("useSpBox", "pdlmi method", "Rebuild a residual with sliding tensor-window FullBox Gram blocks and canonical endpoints.", "documents/reference/pdlmi/usespbox", "", "pdlmi"),
+  entry("useFullBox", "pdlmi method", "Rebuild a residual with a fixed-order full-box Bernstein-Gram preordering.", "documents/reference/pdlmi/usefullbox", "", "pdlmi"),
   entry("helper.cellGet", "shared backend helper", "Read one nested LocalValues leaf by physical-cell subscripts.", "documents/reference/shared-helpers", "helper-cellget"),
   entry("helper.chk", "shared backend helper", "Apply common validation predicates with caller-owned errors.", "documents/reference/shared-helpers", "helper-chk"),
   entry("helper.combRows", "shared backend helper", "Build Cartesian rows in the package tensor order.", "documents/reference/shared-helpers", "helper-combrows"),
   entry("helper.isZero", "shared backend helper", "Classify numeric, additive, coefficient-tree, or object zero evidence.", "documents/reference/shared-helpers", "helper-iszero"),
   entry("helper.mkGrid", "shared backend helper", "Validate grid vectors and construct GridInfo.", "documents/reference/shared-helpers", "helper-mkgrid"),
   entry("helper.mkNest", "shared backend helper", "Construct nested physical-cell storage.", "documents/reference/shared-helpers", "helper-mknest"),
-  entry("helper.normalizeDegree", "shared backend helper", "Normalize scalar shorthand or direction-wise degrees to a row vector.", "documents/reference/shared-helpers", "helper-normalizedegree"),
+  entry("helper.normDeg", "shared backend helper", "Normalize scalar shorthand or direction-wise degrees to a row vector.", "documents/reference/shared-helpers", "helper-normdeg"),
+  entry("helper.normMode", "shared backend helper", "Return lowercase fast or strict transient validation mode.", "documents/reference/shared-helpers", "helper-normmode"),
+  entry("helper.rateVerts", "shared backend helper", "Enumerate distinct normalized rate-box vertices, collapsing fixed axes.", "documents/reference/shared-helpers", "helper-rateverts"),
+  entry("helper.bernConvRatios", "shared backend helper", "Return N-by-1 stable ratios for four- or six-input row-aligned Bernstein tables.", "documents/reference/shared-helpers", "helper-bernconvratios"),
+  entry("helper.bernConvWeights", "shared backend helper", "Map N-by-ell labels and a 1-by-ell degree to N-by-1 normalized product weights.", "documents/reference/shared-helpers", "helper-bernconvweights"),
+  entry("helper.chkCont", "shared backend helper", "Classify shared-face continuity without repairing numeric or symbolic storage.", "documents/reference/shared-helpers", "helper-chkcont"),
+  entry("helper.fitVals", "shared backend helper", "Sample tensor Bernstein nodes into a nested cell tree and optional label table.", "documents/reference/shared-helpers", "helper-fitvals"),
 ];

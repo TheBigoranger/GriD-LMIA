@@ -1,0 +1,32 @@
+# build output
+dist/
+public/manual.pdf
+# generated types
+.astro/
+.vite/
+.vscode/
+
+# dependencies
+node_modules/
+
+# browser testing
+.playwright/
+blob-report/
+playwright-report/
+test-results/
+playwright.config.*
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+preview.*.log
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store

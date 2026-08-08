@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 
 import type { CertificateKey } from "../data/certificate-data.ts";
-import { buildCertificateShape, type CertificateMode } from "../lib/manual-explorers.ts";
+import { buildCertificateShape, parseRateBounds, type CertificateMode } from "../lib/manual-explorers.ts";
 import { DisplayMath } from "./RenderedMath.tsx";
 
 export interface CertificateOption {
@@ -20,8 +20,9 @@ export interface CertificateOption {
 /** Switch between certificate summaries with accessible tab semantics. */
 export default function CertificateChooser({ options }: { options: CertificateOption[] }) {
   const [selected, setSelected] = useState(0);
-  const [draft, setDraft] = useState({ cells: "2", nPar: "1", degree: "2", rateMode: "ordinary" as "ordinary" | "rhodiff", order: "1", cliqueSize: "2", bandWidth: "2", matrixSize: "2", mode: "semidefinite" as CertificateMode });
+  const [draft, setDraft] = useState({ cells: "2", nPar: "1", degree: "2", rateMode: "ordinary" as "ordinary" | "rhodiff", rateBounds: "-1 1", order: "1", cliqueSize: "2", bandWidth: "2", matrixSize: "2", mode: "semidefinite" as CertificateMode });
   const [shape, setShape] = useState(() => buildCertificateShape({ selector: "direct", cells: 2, nPar: 1, degree: 2, rateRows: 1, order: 1, matrixSize: 2, mode: "semidefinite" }));
+  const [numRateRows, setNumRateRows] = useState(0);
   const [error, setError] = useState("");
   const panelId = useId();
   const option = options[selected];
@@ -30,7 +31,16 @@ export default function CertificateChooser({ options }: { options: CertificateOp
   const calculate = (selector = option.key, nextDraft = draft) => {
     try {
       const nPar = numberFrom(nextDraft.nPar);
-      setShape(buildCertificateShape({ selector, cells: numberFrom(nextDraft.cells), nPar, degree: numberFrom(nextDraft.degree), rateRows: nextDraft.rateMode === "rhodiff" ? 2 ** nPar : 1, order: numberFrom(nextDraft.order), cliqueSize: numberFrom(nextDraft.cliqueSize), bandWidth: numberFrom(nextDraft.bandWidth), matrixSize: numberFrom(nextDraft.matrixSize), mode: nextDraft.mode }));
+      let nextRateRows = 0;
+      if (nextDraft.rateMode === "rhodiff") {
+        const rateModel = parseRateBounds(nextDraft.rateBounds, 1);
+        if (rateModel.bounds.length !== nPar) {
+          throw new RangeError(`RateBounds must contain ${nPar} row${nPar === 1 ? "" : "s"}.`);
+        }
+        nextRateRows = rateModel.vertices.length;
+      }
+      setShape(buildCertificateShape({ selector, cells: numberFrom(nextDraft.cells), nPar, degree: numberFrom(nextDraft.degree), rateRows: Math.max(1, nextRateRows), order: numberFrom(nextDraft.order), cliqueSize: numberFrom(nextDraft.cliqueSize), bandWidth: numberFrom(nextDraft.bandWidth), matrixSize: numberFrom(nextDraft.matrixSize), mode: nextDraft.mode }));
+      setNumRateRows(nextRateRows);
       setError("");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Invalid certificate shape."); }
   };
@@ -105,16 +115,19 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             ))}
             <label>Residual rows
               <select value={draft.rateMode} onChange={(event) => setDraft({ ...draft, rateMode: event.target.value as "ordinary" | "rhodiff" })}>
-                <option value="ordinary">ordinary: 1 row</option><option value="rhodiff">rhodiff: 2^ℓ rows</option>
+                <option value="ordinary">ordinary metadata: NumRateRows = 0</option><option value="rhodiff">rhodiff: distinct rate-box vertices</option>
               </select>
             </label>
+            {draft.rateMode === "rhodiff" ? <label>RateBounds rows
+              <textarea rows={3} value={draft.rateBounds} onChange={(event) => setDraft({ ...draft, rateBounds: event.target.value })} />
+            </label> : null}
             {option.key === "direct" ? <p><strong>Order:</strong> not used by the direct selector.</p> : <label>{option.key === "polya" ? "Elevation increment" : "Gram order"}
               <input inputMode="numeric" value={draft.order} onChange={(event) => setDraft({ ...draft, order: event.target.value })} />
             </label>}
-            {option.key === "sparsefullbox" ? <label>Bandwidth w
+            {option.key === "sparsefullbox" ? <label>Tensor-window side w
               <input inputMode="numeric" value={draft.bandWidth} onChange={(event) => setDraft({ ...draft, bandWidth: event.target.value })} />
             </label> : null}
-            {option.key === "sparseputinar" ? <label>Clique size b
+            {option.key === "sparseputinar" ? <label>Tensor-window side b (`CliqueSize`)
               <input inputMode="numeric" value={draft.cliqueSize} onChange={(event) => setDraft({ ...draft, cliqueSize: event.target.value })} />
             </label> : null}
             <label>Assembly mode
@@ -135,6 +148,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             ))}
           </div>
           <div className="certificate-shape-readout" aria-live="polite">
+            <p><strong><code>NumRateRows</code>:</strong> {numRateRows}</p>
             <p><strong>Target tensor degree:</strong> {Array.isArray(shape.targetDegree) ? `[${shape.targetDegree.join(", ")}]` : shape.targetDegree}</p>
             <p><strong>Coefficient sign tests:</strong> {shape.coefficientTests}</p>
             <p><strong>Coefficient identities:</strong> {shape.coefficientIdentities}</p>

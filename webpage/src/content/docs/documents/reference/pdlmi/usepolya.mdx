@@ -1,5 +1,5 @@
 ---
-title: pdlmi applyPolya
+title: pdlmi usePolya
 description: Rebuild a PD-LMI residual with a Pólya degree increment.
 ---
 
@@ -10,7 +10,7 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>/</span>
   <a href="/GriD-LMIA/documents/reference/pdlmi/">pdlmi</a>
   <span>/</span>
-  <span>applyPolya</span>
+  <span>usePolya</span>
 </nav>
 
 <CertificateNavigation selected="polya" showSections={false} />
@@ -23,9 +23,9 @@ degree increment.
 ## Syntax
 
 ```matlab
-Cpolya = C.applyPolya()
-Cpolya = C.applyPolya(degreeIncrement)
-Cpolya = C.applyPolya(..., ValidationMode=mode)
+Cpolya = C.usePolya()
+Cpolya = C.usePolya(degreeIncrement)
+Cpolya = C.usePolya(..., ValidationMode=mode)
 ```
 
 ## Description
@@ -37,13 +37,13 @@ elevated coefficient and every active rate-vertex row. The method is
 value-like: it returns a new object and leaves `C` unchanged.
 
 Each call rebuilds from `C.Residual`, rather than compounding a previous
-elevation. Thus `C.applyPolya(2)` and `C.applyPolya().applyPolya(2)` both use
+elevation. Thus `C.usePolya(2)` and `C.usePolya().usePolya(2)` both use
 an increment of two from the original residual. A prior Putinar or full-box
 selection is replaced in the same way.
 
 The diagram's first and second boxes represent the same residual polynomial.
 Only its Bernstein coefficient row is longer. The final arrow is the ordinary
-direct sign test; no multiplier search occurs.
+direct sign test. No multiplier search occurs.
 
 ## Example
 
@@ -51,8 +51,8 @@ direct sign test; no multiplier search occurs.
 yalmip('clear')
 P = pdvar(1, [0 1], Degree=1);
 direct = P >= 0;
-one = direct.applyPolya();
-two = one.applyPolya(2);
+one = direct.usePolya();
+two = one.usePolya(2);
 [direct.PolyaDegree one.PolyaDegree two.PolyaDegree]
 ```
 
@@ -84,4 +84,4 @@ for the theorem's strict-positivity setting and the narrower runtime contract.
 
 ## See Also
 
-[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`applyPutinar`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/) · [`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) · [`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) · [`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/) · [`SOS certificates`](/GriD-LMIA/documents/math/sos-certificates/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) · [`pdbase storage and inspection`](/GriD-LMIA/documents/reference/pdbase/storage-inspection/)
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`SOS certificates`](/GriD-LMIA/documents/math/sos-certificates/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) · [`pdbase storage and inspection`](/GriD-LMIA/documents/reference/pdbase/storage-inspection/)

@@ -46,7 +46,7 @@ Nonnegative Bernstein basis functions sum to one, so this condition implies
 $S^{(\mathbf c)}(\boldsymbol\alpha)\succeq0$ on the unit cell. It is the
 default `pdlmi` state.
 The theoretical target is strict,
-$S^{(\mathbf c)}(\boldsymbol\alpha)\succ0$; the software constraints are
+$S^{(\mathbf c)}(\boldsymbol\alpha)\succ0$. The software constraints are
 non-strict and require an explicit
 $S^{(\mathbf c)}-\varepsilon I\succeq0$ margin when strictness is needed.
 
@@ -72,12 +72,18 @@ the same coefficient test to the elevated matrices
 $\tilde C^{(\mathbf c)}[\mathbf i]$.
 
 ```matlab
-selected = L.applyPolya(d);
+selected = L.usePolya(d);
 constraints = selected.toYalmip();
 ```
 
 The residual polynomial is unchanged. Reapplying a selector rebuilds from the
-stored original residual $\mathcal F$; certificate choices do not compound.
+stored original residual $\mathcal F$. Certificate choices do not compound.
+
+## Ordered Preallocation And Assembly
+
+Direct and Pólya first determine the target tensor degree and the exact number of coefficient constraints. The implementation preallocates that many cells, then fills them in physical-cell, rate-row, and local-label order. Pólya builds one numeric elevation plan for each compatible degree pair and applies it before the sign constraints are stored. This removes repeated structural discovery while retaining the established order seen by `toYalmip`.
+
+The optimized path preserves represented functions, existing YALMIP variables, certificate families, constraint order, PSD block dimensions, and cone partition, apart from ordinary floating-point summation differences. Direct and Pólya create no Gram variables, so their reusable data consist only of numeric label and elevation maps.
 
 ## When To Use Each
 
@@ -109,5 +115,5 @@ search increments adaptively. Equality assembly is direct-only.
 [Previous: Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/) ·
 [Next: Markov–Lukács And Putinar](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/) ·
 [Notation](/GriD-LMIA/documents/math/notation/#residual-and-positive-target) ·
-[`applyPolya`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) ·
+[`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) ·
 [`pdlmi` constructor](/GriD-LMIA/documents/reference/pdlmi/constructor/)

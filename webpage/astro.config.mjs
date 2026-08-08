@@ -56,7 +56,7 @@ export default defineConfig({
                 { label: "evaluate", slug: "documents/reference/pdmat/evaluate" },
                 { label: "rhodiff", slug: "documents/reference/pdmat/rhodiff" },
                 { label: "plot", slug: "documents/reference/pdmat/plot" },
-                { label: "bernsteinTable", slug: "documents/reference/pdmat/bernsteintable" },
+                { label: "bernTable", slug: "documents/reference/pdmat/berntable" },
                 { label: "Comparisons", slug: "documents/reference/pdmat/comparisons" },
                 {
                   label: "Matrix Operations",
@@ -77,7 +77,7 @@ export default defineConfig({
                 { label: "Storage And Evaluation", slug: "documents/reference/pdvar/storage-and-evaluation" },
                 { label: "value", slug: "documents/reference/pdvar/value" },
                 { label: "rhodiff", slug: "documents/reference/pdvar/rhodiff" },
-                { label: "bernsteinTable", slug: "documents/reference/pdvar/bernsteintable" },
+                { label: "bernTable", slug: "documents/reference/pdvar/berntable" },
                 {
                   label: "Matrix Operations",
                   items: [
@@ -99,11 +99,11 @@ export default defineConfig({
                 {
                   label: "Certificates",
                   items: [
-                    { label: "Pólya", slug: "documents/reference/pdlmi/applypolya" },
-                    { label: "Putinar", slug: "documents/reference/pdlmi/applyputinar" },
-                    { label: "SparsePutinar", slug: "documents/reference/pdlmi/applysparseputinar" },
-                    { label: "SparseFullBox", slug: "documents/reference/pdlmi/applysparsefullboxpreorder" },
-                    { label: "FullBox", slug: "documents/reference/pdlmi/applyfullboxpreorder" },
+                    { label: "Pólya", slug: "documents/reference/pdlmi/usepolya" },
+                    { label: "Putinar", slug: "documents/reference/pdlmi/useputinar" },
+                    { label: "SparsePutinar", slug: "documents/reference/pdlmi/usespput" },
+                    { label: "SparseFullBox", slug: "documents/reference/pdlmi/usespbox" },
+                    { label: "FullBox", slug: "documents/reference/pdlmi/usefullbox" },
                   ],
                 },
               ],
@@ -157,7 +157,7 @@ export default defineConfig({
                 { label: "Certificate Map And Selection Guide", slug: "documents/math/sos-certificates" },
                 { label: "Direct And Pólya", slug: "documents/math/finite-certificates/direct-and-polya" },
                 { label: "Markov–Lukács And Putinar", slug: "documents/math/finite-certificates/markov-lukacs-and-putinar" },
-                { label: "SparsePutinar Clique Windows", slug: "documents/math/finite-certificates/sparseputinar" },
+                { label: "SparsePutinar Tensor Windows", slug: "documents/math/finite-certificates/sparseputinar" },
                 { label: "SparseFullBox And FullBox", slug: "documents/math/finite-certificates/sparsefullbox-and-fullbox" },
               ],
             },

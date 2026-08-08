@@ -1,0 +1,345 @@
+\chapter{Shared Helper Utilities}
+\label{sec:helpers}
+
+The \code{+helper} namespace contains thirteen publicly callable, developer-facing utilities whose ownership crosses class boundaries. This chapter covers \code{bernConvRatios}, \code{bernConvWeights}, \code{cellGet}, \code{chk}, \code{chkCont}, \code{combRows}, \code{fitVals}, \code{isZero}, \code{mkGrid}, \code{mkNest}, \code{normDeg}, \code{normMode}, and \code{rateVerts}. Ordinary modeling code should enter through \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}, while local subfunctions and protected class kernels remain implementation details.
+
+\section{Bernstein Convolution Utilities}
+\label{sec:helper-bern-conv}
+\index{bernConvWeights@\texttt{bernConvWeights}}\index{bernConvRatios@\texttt{bernConvRatios}}
+
+\code{helper.bernConvWeights} returns normalized tensor binomial weights, and\linebreak \code{helper.bernConvRatios} returns the row-aligned ratios used by Bernstein products, elevation, and Gram maps.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+weights = helper.bernConvWeights(labels, degree)
+ratios = helper.bernConvRatios(lhsLabels, lhsDegree, ...
+    rhsLabels, rhsDegree)
+ratios = helper.bernConvRatios(lhsLabels, lhsDegree, ...
+    rhsLabels, rhsDegree, outputLabels, outputDegree)
+\end{lstlisting}
+
+\arghead
+\code{labels} and each label argument are finite nonnegative integer tables with one row per requested factor and one column per parameter. Each \code{degree} argument is a finite nonnegative integer row with the same parameter count, and every label must lie inside its degree box. The four-input ratio form sets \code{outputLabels=lhsLabels+rhsLabels} and \code{outputDegree=lhsDegree+rhsDegree}. The six-input form accepts explicit shifted outputs, as required by generator-weighted Gram terms. \code{weights} and \code{ratios} are numeric column vectors aligned with the input rows. Invalid weight inputs raise \codeerr{helper}{InvalidBernConvWeights}, while invalid ratio arity, shape, labels, or degrees raise \codeerr{helper}{InvalidBernConvRatios}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+weights = helper.bernConvWeights((0:2).', 2)
+ratios = helper.bernConvRatios([0; 1], 1, [0; 0], 1)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+weights = 3×1 double
+    0.2500
+    0.5000
+    0.2500
+
+ratios = 2×1 double
+    1.0000
+    0.5000
+\end{lstlisting}
+
+\paragraph{See also.} \Cref{sec:bernstein-product-math,sec:bernstein-degree-elevation,sec:certificate-gram-map} derive the operations that use these ratios.
+
+\section{\texorpdfstring{\code{helper.cellGet}}{helper.cellGet}}
+
+\textit{Purpose.} Read one flat coefficient leaf from a nested physical-cell tree.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+leaf = helper.cellGet(vals, subs)
+\end{lstlisting}
+
+\descriptionhead
+\code{vals} is addressed as \code{vals{i1}{i2}...{i_ell}} and \code{subs} supplies one index per level. The returned \code{leaf} is the selected flat coefficient cell or rate-row table; no copy, reshaping, or multi-index cell interpretation is introduced.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+vals = {{{10, 20}}, {{30, 40}}};
+leaf = cell2mat(helper.cellGet(vals, [2 1]))
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+leaf = 1×2 double
+    30    40
+\end{lstlisting}
+
+\remarkshead
+The helper deliberately relies on ordinary MATLAB cell indexing.  Callers validate the subscript length and bounds before traversal.
+
+\section{\texorpdfstring{\code{helper.chk}}{helper.chk}}
+
+\textit{Purpose.} Apply shared validation predicates while retaining a caller-owned error identifier and message.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+val = helper.chk(val, errId, msg, tags...)
+val = helper.chk(val, errId, msg, tags..., Name, Value)
+\end{lstlisting}
+
+\descriptionhead
+Predicate tags are \code{numeric}, \code{real}, \code{cell}, \code{struct}, \code{nonempty}, \code{scalar}, \code{vector}, \code{matrix}, \code{finite}, \code{integer}, \code{positive}, \code{nonnegative}, \code{increasing}, and \code{rowbounds}.  Named tests are \code{Size}, \code{Numel}, \code{MinNumel}, \code{Min}, and \code{Max}.  Successful validation returns \code{val} unchanged.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+validated = helper.chk([1 2], "demo:BadValue", "bad value", ...
+    "numeric", "real", "finite", "Size", [1 2])
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+validated = 1×2 double
+     1     2
+\end{lstlisting}
+
+\remarkshead
+A failed data predicate raises \code{errId}.  An unknown predicate, or a named test without a value, raises \codeerr{helper}{InvalidValidatorCall}; these errors signal a validator-programming defect rather than bad caller data.
+
+\section{\texorpdfstring{\code{helper.combRows}}{helper.combRows}}
+
+\textit{Purpose.} Enumerate Cartesian combinations in the ordering shared by physical cells, local labels, and rate vertices.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+rows = helper.combRows(vecs)
+\end{lstlisting}
+
+\descriptionhead
+\code{vecs} is a cell array containing one vector per tensor axis. \code{rows} contains every Cartesian combination, with earlier dimensions varying more slowly.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+rows = helper.combRows({0:1, 10:11})
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+rows = 4×2 double
+     0    10
+     0    11
+     1    10
+     1    11
+\end{lstlisting}
+
+\remarkshead
+This ordering is part of the storage contract.  Reordering the rows would misalign tensor labels, physical-cell traversal, and derivative rate vertices.
+
+\section{\texorpdfstring{\code{helper.isZero}}{helper.isZero}}
+
+\textit{Purpose.} Prove the distinct zero notions used by known-data and affine algebra fast paths.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+tf = helper.isZero(val, "num")
+tf = helper.isZero(val, "add", matrixSize)
+tf = helper.isZero(vals, "vals")
+tf = helper.isZero(obj, "obj")
+\end{lstlisting}
+
+\descriptionhead
+\code{"num"} requires a nonempty finite real numeric zero; \code{"add"} additionally enforces scalar expansion or the supplied matrix shape; \code{"vals"} recursively checks nested, symbolic, and rate-structured payloads; and \code{"obj"} accepts coefficient-backed \code{pdmat} or \code{pdvar} evidence.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+numericZero = helper.isZero(zeros(2), "add", [2 2])
+A = pdmat({[0 1]}, {0, 0}, Degree=1);
+objectZero = helper.isZero(A, "obj")
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+numericZero =
+  logical
+   1
+objectZero =
+  logical
+   1
+\end{lstlisting}
+
+\remarkshead
+Function-only \code{pdmat} placeholders are not coefficient evidence and therefore do not prove object zero.  Invalid modes raise \codeerr{helper}{InvalidZeroMode}; the wrong mode-specific arity raises \codeerr{helper}{InvalidZeroCall}.
+
+\section{\texorpdfstring{\code{helper.mkGrid}}{helper.mkGrid}}
+
+\textit{Purpose.} Validate tensor-grid vectors and construct the shared \code{GridInfo} record.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+info = helper.mkGrid(grid)
+info = helper.mkGrid(grid, owner)
+\end{lstlisting}
+
+\descriptionhead
+\code{grid} is a nonempty cell array of finite, real, strictly increasing vectors with at least two nodes each.  \code{owner} defaults to \code{"pdbase"} and prefixes validation identifiers.  The result contains \code{Vectors}, Cartesian-product \code{Points}, per-axis \code{Bounds}, and \code{NumNodes}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+info = helper.mkGrid({[0 1], [10 20]}, "demo");
+bounds = info.Bounds
+points = info.Points
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+bounds = 2×2 double
+     0     1
+    10    20
+
+points = 4×2 double
+     0    10
+     0    20
+     1    10
+     1    20
+\end{lstlisting}
+
+\remarkshead
+Malformed containers use \code{owner + ":InvalidGrid"}; malformed individual axes use \code{owner + ":InvalidGridVector"}.  Cell counts are derived by consumers and are not duplicated in \code{GridInfo}.
+
+\section{\texorpdfstring{\code{helper.mkNest}}{helper.mkNest}}
+
+\textit{Purpose.} Allocate recursive physical-cell storage and construct each leaf from its complete cell subscript.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+vals = helper.mkNest(nCell, mkLeaf)
+vals = helper.mkNest(nCell, mkLeaf, prefix)
+\end{lstlisting}
+
+\descriptionhead
+\code{nCell} gives the positive cell count per parameter direction and \code{mkLeaf} receives one completed one-based subscript row.  \code{prefix} is recursion state used internally; ordinary callers omit it.  The result is addressed as \code{vals{i1}{i2}...{i_ell}}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+vals = helper.mkNest([2 1], @(subs) {sum(subs)});
+secondLeaf = cell2mat(helper.cellGet(vals, [2 1]))
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+secondLeaf = 3
+\end{lstlisting}
+
+\remarkshead
+\code{mkLeaf} owns the leaf payload.  The helper supplies deterministic physical-cell subscripts but does not infer coefficient count, matrix size, or rate semantics.
+
+\section{\texorpdfstring{\code{helper.normDeg}}{helper.normDeg}}
+
+\textit{Purpose.} Validate scalar shorthand or direction-wise Bernstein degrees while preserving the caller's error namespace.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+degree = helper.normDeg(value, nPar, errId, label)
+\end{lstlisting}
+
+\descriptionhead
+\code{value} must be one finite nonnegative integer scalar or an \code{nPar}-element vector. A scalar expands uniformly, a column vector is reshaped, and every accepted result is a \code{1}-by-\code{nPar} double row. \code{errId} is raised for empty, nonnumeric, complex, nonfinite, noninteger, negative, or incorrectly sized input; \code{label} supplies the public option name in the error message and defaults to \code{"Degree"}.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+degree = helper.normDeg([0; 2; 1], 3, ...
+    "demo:InvalidDegree", "Degree")
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+degree = 1×3 double
+     0     2     1
+\end{lstlisting}
+
+\remarkshead
+The helper performs normalization only. Constructors and certificate selectors own user-facing warnings, minimum-order checks, and their class-specific error identifiers.
+
+\section{Continuity Classification and Coefficient Fitting}
+\index{chkCont@\texttt{chkCont}}\index{fitVals@\texttt{fitVals}}
+
+\subsection{\texorpdfstring{\code{helper.chkCont}}{helper.chkCont}}
+
+\textit{Purpose.} Classify whether stored coefficients agree on every shared physical-cell face.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+tf = helper.chkCont(vals, nCell, degree)
+\end{lstlisting}
+
+\descriptionhead
+\code{vals} is a normalized nested coefficient tree, while \code{nCell} and \code{degree} are direction-wise row vectors. The logical scalar \code{tf} is true only when every row of each neighboring leaf has matching boundary coefficients on every shared face. Numeric faces use a scale-aware tolerance, while affine YALMIP faces require identical coefficient bases. The helper only classifies existing storage and does not change coefficients or impose continuity constraints. It expects the normalized internal storage contract, so malformed trees, row counts, or payloads are rejected by the underlying indexing or matrix operations rather than a separate \code{chkCont} error namespace.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+vals = {{0, 1}, {1, 2}};
+isContinuous = helper.chkCont(vals, 2, 1)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+isContinuous =
+  logical
+   1
+\end{lstlisting}
+
+\paragraph{See also.} \code{pdbase.IsContinuous}, the \code{pdmat} constructor in \cref{sec:pdmat-construction}, and the shared-face convention in \cref{sec:bernstein-tensor-grids}.
+
+\subsection{\texorpdfstring{\code{helper.fitVals}}{helper.fitVals}}
+
+\textit{Purpose.} Fit cell-local Bernstein coefficients from values sampled at the local tensor Bernstein nodes.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+vals = helper.fitVals(info, degree, matrixSize, evalFcn, owner)
+[vals, labels] = helper.fitVals(info, degree, matrixSize, evalFcn, owner)
+\end{lstlisting}
+
+\descriptionhead
+\code{info} is normalized grid metadata from \code{helper.mkGrid}, \code{degree} is scalar shorthand or one value per parameter, and \code{matrixSize} is the common sampled matrix size. The function \code{evalFcn} receives one physical parameter point as a row vector, and \code{owner} supplies the error-identifier stem for degree validation. The result \code{vals} is a nested physical-cell tree in \code{helper.combRows} label order, while \code{labels} is the common local label table. Invalid degree input raises \code{owner + ":InvalidDegree"}. Errors from \code{evalFcn} propagate to the caller, and this developer utility assumes that \code{info}, \code{matrixSize}, and sampled payload sizes were already normalized by the owning constructor.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+info = helper.mkGrid({[0 1]}, "demo");
+[vals, labels] = helper.fitVals(info, 2, [1 1], ...
+    @(rho) 1 + rho(1)^2, "demo");
+localLabels = labels
+localCoefficients = cell2mat(vals{1})
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+localLabels = 3×1 double
+     0
+     1
+     2
+
+localCoefficients = 1×3 double
+     1     1     2
+\end{lstlisting}
+
+\paragraph{See also.} The \code{pdmat} constructor in \cref{sec:pdmat-construction} and the power-to-Bernstein conversion in \cref{sec:bernstein-power-conversion}.
+
+\section{Validation Modes and Rate Vertices}
+\index{normMode@\texttt{normMode}}\index{rateVerts@\texttt{rateVerts}}
+
+\subsection{\texorpdfstring{\code{helper.normMode}}{helper.normMode}}
+
+\textit{Purpose.} Normalize a transient validation mode while preserving the caller's error namespace.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+mode = helper.normMode(value, owner)
+\end{lstlisting}
+
+\descriptionhead
+\code{value} must be scalar text equal to \code{"fast"} or \code{"strict"}, case-insensitively, and \code{owner} is the class or package stem used in diagnostics. The returned \code{mode} is the lowercase string scalar \code{"fast"} or \code{"strict"}. Invalid or missing text raises \code{owner + ":InvalidValidationMode"}. The result controls operation-local consistency checks and is not stored as object or certificate state.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+mode = helper.normMode("Strict", "pdlmi")
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+mode = "strict"
+\end{lstlisting}
+
+\paragraph{See also.} \code{ValidationMode} in \cref{sec:pdbase-constructor,sec:pdmat-construction,sec:pdvar-construction}.
+
+\subsection{\texorpdfstring{\code{helper.rateVerts}}{helper.rateVerts}}
+
+\textit{Purpose.} Enumerate the distinct vertices of a normalized parameter-rate box.
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+vertices = helper.rateVerts(rateBounds)
+\end{lstlisting}
+
+\descriptionhead
+\code{rateBounds} is an $\ell$-by-2 matrix that has already passed the package rate-bound checks. Each varying direction contributes its lower value and then its upper value, while a direction with equal bounds contributes one value. The rows of \code{vertices} follow \code{helper.combRows} order, and empty bounds return a zero-row matrix. This helper performs enumeration rather than public input validation, so constructors and \code{rhodiff} own malformed-bound errors.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+vertices = helper.rateVerts([-1 2; 3 3])
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+vertices = 2×2 double
+    -1     3
+     2     3
+\end{lstlisting}
+
+\paragraph{See also.} \code{helper.combRows}, \code{pdbase.NumRateRows}, and the rate-row storage derivation in \cref{sec:bernstein-rate-vertex-storage}.

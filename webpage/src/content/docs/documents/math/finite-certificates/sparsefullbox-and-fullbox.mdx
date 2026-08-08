@@ -1,165 +1,126 @@
 ---
 title: SparseFullBox And FullBox
-description: Full-box preorderings, band-limited Gram support, bandwidth endpoints, and exact coefficient matching.
+description: Full-box preorderings, sliding tensor-window Gram blocks, endpoints, and exact coefficient matching.
 ---
 
 import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import GramAssemblyExplorer from "../../../../../components/GramAssemblyExplorer.tsx";
 
-<nav class="manual-trail">
-  <a href="/GriD-LMIA/documents/">Documents</a>
-  <span>/</span>
-  <span>Finite Certificates</span>
-  <span>/</span>
-  <span>SparseFullBox And FullBox</span>
-</nav>
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><span>Finite Certificates</span><span>/</span><span>SparseFullBox And FullBox</span></nav>
 
 <CertificateSpectrum selected="sparsefullbox" />
 
-The mathematical construction is FullBox with **band-limited Gram support**;
-the software state is `SparseFullBox`. The dense construction is the
-**full-box preordering**, with software state `FullBox`.
+FullBox uses every square-free product of the box generators. SparseFullBox keeps the same generator families, but it replaces each dense tensor Bernstein basis by overlapping sliding tensor windows.
 
 ## Full-Box Preordering
 
-For each subset $J\subseteq\{1,\ldots,\ell\}$, define
+For $J\subseteq\{1,\ldots,\ell\}$, define
 
 $$
-\begin{aligned}
 g_J(\boldsymbol\alpha)
-&=\prod_{s\in J}\alpha_s(1-\alpha_s),\\
-g_{\varnothing}&=1.
-\end{aligned}
+=\prod_{s\in J}\alpha_s(1-\alpha_s),
+\qquad g_{\varnothing}=1.
 $$
 
-FullBox represents
+The FullBox certificate has the form
 
 $$
-\begin{aligned}
 S^{(\mathbf c)}(\boldsymbol\alpha)
-&=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha),\\
-S^{(\mathbf c)}(\boldsymbol\alpha)
-&=\sum_{J\subseteq[\ell]}
-g_J(\boldsymbol\alpha)S_J(\boldsymbol\alpha),\\
-C^{(\mathbf c)}&=-\mathcal C^{(\mathbf c)}.
-\end{aligned}
+=\sum_{J\subseteq[\ell]}
+g_J(\boldsymbol\alpha)T_J(\boldsymbol\alpha).
 $$
 
-where every $S_J$ has a free positive-semidefinite Gram matrix. The weighted
-Gram maps are assembled in the Bernstein basis and matched exactly to every
-$C^{(\mathbf c)}[\mathbf i]$.
+Here each subset contributes
+
+$$
+T_J(\boldsymbol\alpha)
+=Z_J(\boldsymbol\alpha)^{\mathsf T}Q_JZ_J(\boldsymbol\alpha),
+$$
+
+with
+
+$$
+Q_J\succeq0.
+$$
+
+Every Bernstein coefficient of this sum is matched to the sign-normalized residual coefficient. A negative component in the basis degree omits the corresponding generator term.
 
 ```matlab
-selected = L.applyFullBoxPreorder();
-selected = L.applyFullBoxPreorder(r);
+selected = L.useFullBox();
+selected = L.useFullBox(r);
 ```
 
-## SparseFullBox Band-Limited Support
+## Sliding Tensor Windows
 
-SparseFullBox retains every FullBox parity or generator-mask term and every
-exact target-coefficient identity, but replaces each dense Gram matrix $Q_J$
-by the symmetric block-band Gram matrix $Q_J^{(w)}$ of bandwidth $w$. For
-selected absolute order $r$, use the paper notation
-$\mathbf a_J=r\boldsymbol 1-\boldsymbol\chi_J$. Introduce the generator
-weight and lifted Bernstein basis
+Let the Gram basis for one active generator term have degree $\mathbf d$. For side length $w$, define the side on axis $s$ by
 
 $$
-\begin{aligned}
-g_J(\boldsymbol\alpha)
-&:=\prod_{s\in J}g_s(\boldsymbol\alpha),\\
-Z_J(\boldsymbol\alpha)
-&:=\mathbf b_{\mathbf a_J}(\boldsymbol\alpha)\otimes I_n.
-\end{aligned}
+h_s=\min(w,d_s+1).
 $$
 
-Each band-limited Gram contribution is
+Each start tuple $\mathbf u$ satisfies $0\le u_s\le d_s-h_s+1$ and selects the tensor label window
 
 $$
-\begin{aligned}
-T_J^{(w)}(\boldsymbol\alpha)
-&:=g_J(\boldsymbol\alpha)\,
-  Z_J(\boldsymbol\alpha)^{\mathsf T}\\
-&\qquad{}\cdot Q_J^{(w)}Z_J(\boldsymbol\alpha),\\
-Q_J^{(w)}&\succeq0.
-\end{aligned}
+\mathcal W_{\mathbf u}
+=\left\{\mathbf a:u_s\le a_s<u_s+h_s\right\}.
 $$
 
-The complete certificate is the short subset sum
+The window basis $Z_{J,\mathbf u}$ contains only those labels. SparseFullBox assembles
 
 $$
 S^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{J\subseteq\{1,\ldots,\ell\}}T_J^{(w)}(\boldsymbol\alpha).
+=\sum_{J\subseteq[\ell]}g_J(\boldsymbol\alpha)
+\sum_{\mathbf u}T_{J,\mathbf u}(\boldsymbol\alpha).
 $$
 
-Terms with a negative component in $\mathbf a_J$ are omitted. The
-one-parameter parity-specific formulas use the same replacement
-$Q_J\mapsto Q_J^{(w)}$. Exact coefficient matching is unchanged.
+Each window contribution is
+
+$$
+T_{J,\mathbf u}(\boldsymbol\alpha)
+=Z_{J,\mathbf u}(\boldsymbol\alpha)^{\mathsf T}
+Q_{J,\mathbf u}Z_{J,\mathbf u}(\boldsymbol\alpha),
+$$
+
+with a separate positive semidefinite condition
+
+$$
+Q_{J,\mathbf u}\succeq0.
+$$
+
+The construction uses sliding windows in the tensor label lattice. It is not a bandwidth constraint on one flattened Gram matrix. Overlapping windows contribute to the same target labels, and the exact coefficient identities accumulate every contribution.
+
+For a matrix inequality of size $n$, the PSD dimension of one window is
+
+$$
+n\prod_{s=1}^{\ell}h_s.
+$$
 
 ```matlab
-selected = L.applySparseFullBoxPreorder();
-selected = L.applySparseFullBoxPreorder(w);
-selected = L.applySparseFullBoxPreorder(w, r);
+selected = L.useSpBox();
+selected = L.useSpBox(w);
+selected = L.useSpBox(w, r);
 ```
+
+<GramAssemblyExplorer client:visible />
 
 ## Canonical Endpoints
 
-- $w=1$ canonicalizes to actual Direct state after validating $r$.
-- $1<w<\max_s(r_s+1)$ stores actual SparseFullBox state.
-- $w\ge\max_s(r_s+1)$ canonicalizes to actual FullBox state.
+- $w=1$ normalizes to Direct after order validation.
+- An intermediate $w$ stores a SparseFullBox certificate with overlapping tensor windows.
+- When $w$ spans every active basis axis, the request normalizes to FullBox.
 
-These are state transitions, not merely descriptive similarities. Inspect the
-read-only `pdlmi` properties when code must report the selected state.
+These are stored selector states, not timing comparisons. Inspect the read-only `pdlmi` state when code must report the selected family.
 
-## One-Parameter Boundary
+## Reusable Maps And Fresh Variables
 
-In one parameter, the parity-specific Markov–Lukács terms are used. For even
-$M=4$ and $r=2$, $Q_J^{(1)}$ is block diagonal and canonicalizes to Direct,
-$Q_J^{(2)}$ is block tridiagonal, and $Q_J^{(3)}$ is block pentadiagonal.
-Because $w=3=r+1$, that endpoint canonicalizes to FullBox.
+The Bernstein product weights, target-label groups, generator maps, and window incidence are numeric. The implementation may reuse them across compatible entries, cells, rate rows, and blocks. However, every entrywise certificate copy, physical cell, rate row, and window receives a fresh Gram variable. This retains the original cone partition and prevents unintended coupling between certificates.
 
-## Multivariate Boundary
+The optimized path preserves represented functions, existing YALMIP variables, certificate families, constraint order, PSD block dimensions, and cone partition, apart from ordinary floating-point summation differences.
 
-For $\ell\ge2$, the minimum absolute order is componentwise
-$\mathbf r=\lceil\mathbf M/2\rceil$. FullBox can grow rapidly because every generator
-subset and dense tensor basis block contributes. SparseFullBox restricts each
-$Q_J$ to the symmetric block-band form $Q_J^{(w)}$ while retaining exact
-coefficient matching.
+## Failure Interpretation And Limits
 
-## Selection Guidance
-
-Use Direct as the baseline. Use SparseFullBox when a Gram certificate is
-desired but dense FullBox blocks are too large, and vary $w$ independently
-of $r$. Use FullBox when the dense preordering is computationally acceptable.
-Always record $\mathcal G_s$, $\mathbf m$, $\mathbf M$, $\mathbf r$, $w$, solver, and solver
-status.
-
-## Failure Interpretation
-
-A fixed $r$ or $w$ failure is inconclusive. A solver abort, memory limit,
-or nonzero `diagnostics.problem` is not objective data and does not establish
-continuous infeasibility.
-
-## Limitations
-
-SparseFullBox uses symmetric block-band Gram matrices of a user-selected
-bandwidth $w$; it does not search arbitrary chordal patterns or adapt $w$
-automatically. FullBox is limited to box
-generators and can become large with dimension and order. Neither selector
-calls a solver or inserts a positivity margin.
-
-## Further Reading
-
-- Schmüdgen, [The K-moment problem for compact semi-algebraic sets](https://doi.org/10.1007/BF01234651), for preorderings.
-- Harris and Parrilo, [Improved nonnegativity testing in the Bernstein basis via geometric means](https://arxiv.org/abs/2309.10675), for a related univariate sparse Bernstein-Gram precedent.
-- Zheng and Fantuzzi, [Sum-of-squares chordal decomposition of polynomial matrix inequalities](https://arxiv.org/abs/2007.11410), for broader sparse polynomial-matrix Gram context.
-
-These sparse-Gram sources motivate structure; they do not define the package's
-block-band Gram matrices.
+A fixed order or window size is a sufficient certificate choice. Failure is inconclusive for the continuous inequality. SparseFullBox does not search tensor windows, infer a chordal graph, choose a solver, or insert a positivity margin.
 
 ## See Also
 
-[Previous: SparsePutinar Clique Windows](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) ·
-[Next: `pdlmi` Overview](/GriD-LMIA/documents/reference/pdlmi/) ·
-[Notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters) ·
-[`applySparseFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/) ·
-[`applySparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/) ·
-[`applyFullBoxPreorder`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/)
+[SparsePutinar Tensor Windows](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) · [Bernstein–Gram Map](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/#reusable-bernsteingram-map) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [Certificate Map](/GriD-LMIA/documents/math/sos-certificates/)

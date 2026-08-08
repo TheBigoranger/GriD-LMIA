@@ -1,0 +1,62 @@
+---
+title: pdlmi useSpBox
+description: Select the SparseFullBox sliding tensor-window certificate and its canonical endpoints.
+---
+
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdlmi/">pdlmi</a><span>/</span><span>useSpBox</span></nav>
+
+<CertificateNavigation selected="sparsefullbox" showSections={false} />
+
+# `useSpBox`
+
+`useSpBox` rebuilds an inequality from its stored `Residual` with SparseFullBox sliding tensor-window Gram blocks. It is a value-semantic selector and does not modify the source object.
+
+## Syntax
+
+```matlab
+selected = C.useSpBox()
+selected = C.useSpBox(windowSize)
+selected = C.useSpBox(windowSize, order)
+selected = C.useSpBox(..., ValidationMode=mode)
+```
+
+## Arguments And Options
+
+| Input | Meaning |
+| --- | --- |
+| `windowSize` | Positive integer tensor-window side. Default `2`. |
+| `order` | Nonnegative scalar or one entry per parameter axis. The default is the minimum admissible absolute order. |
+| `ValidationMode` | Current supported transient validation mode. It changes validation work, not certificate meaning. |
+
+## Returned Object
+
+The returned `pdlmi` selects `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, and `BandWidth`. All other certificate-family flags are false. A window size of one normalizes to Direct. A window that spans every active basis axis normalizes to FullBox.
+
+<span id="deterministic-transcript"></span>
+
+## Example
+
+```matlab
+yalmip('clear')
+P = pdvar(2, {[0 0.5 1]}, "symmetric", Degree=2);
+direct = P >= eye(2);
+sparse = direct.useSpBox(2, 2);
+F = sparse.toYalmip();
+```
+
+The selector creates fresh Gram variables for every entrywise copy when applicable, physical cell, rate row, and tensor window. Numeric coefficient maps may be reused.
+
+## Validation And Limitations
+
+- Equality residuals reject every non-Direct selector.
+- Window size and order must be finite nonnegative integers in the implemented ranges.
+- A fixed order and window size give a sufficient certificate. Failure is inconclusive.
+- The construction uses sliding windows in tensor-label space. It is not a band constraint on a flattened Gram matrix.
+
+The full derivation, PSD dimensions, coefficient identities, and canonical endpoints are in [SparseFullBox And FullBox](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/).
+
+## See Also
+
+[`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)

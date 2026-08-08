@@ -26,8 +26,8 @@ local coordinates, and evaluates the tensor Bernstein row.
 At an interior grid node the cell on the right owns the evaluation. At the
 last grid node, the final cell owns it. Numeric coefficients return a numeric
 matrix; symbolic coefficients return an `sdpvar` expression. A derivative
-leaf returns a `1 × 2^npar` cell array, one reconstructed payload per stored
-rate row in `helper.combRows` order.
+leaf returns a `1 × NumRateRows` cell array, one reconstructed payload per
+distinct stored rate row in `helper.combRows` order.
 
 ```matlab
 obj = pdbase({[0 1 2]}, [1 1], 1, {{0, 2}, {20, 40}});
@@ -50,40 +50,6 @@ Invalid point shape or values use `<dynamic-class>:InvalidPoint`; an
 out-of-bounds point uses `<dynamic-class>:PointOutOfBounds`. Thus a `pdmat`
 call reports a `pdmat:` identifier and a `pdvar` call reports a `pdvar:`
 identifier.
-
-## <span id="pdbase-elevVals"></span>`elevVals`
-
-### Syntax
-
-```matlab
-values = elevVals(obj, degreeIncrement)
-values = obj.elevVals(degreeIncrement)
-```
-
-`degreeIncrement` accepts one finite nonnegative integer scalar shorthand or an
-`npar(obj)`-element vector. It is added componentwise to `obj.Degree`; a scalar
-expands uniformly. The returned value is an elevated nested `LocalValues` tree,
-not an object. Physical cells, numeric or symbolic payloads, and independent
-rate-row order are preserved; `obj` is unchanged.
-
-```matlab
-A = pdmat({[0 1]}, {0, 1}, Degree=1);
-values = A.elevVals(1);
-sourceDegree = A.Degree
-elevatedRow = [values{1}{:}]
-```
-
-```text
-sourceDegree =
-     1
-
-elevatedRow =
-         0    0.5000    1.0000
-```
-
-An invalid increment raises `pdbase:InvalidDegreeIncrement`. A function-only
-`pdmat` has no stored Bernstein evidence and raises
-`pdbase:MissingCoefficientEvidence`.
 
 ## <span id="pdbase-elevate"></span>`elevate`
 
@@ -121,7 +87,7 @@ values =
     1.6000    1.6000
 ```
 
-Validation matches `elevVals`, including the function-only missing-evidence
+Validation matches `elevate`, including the function-only missing-evidence
 boundary. Degree elevation changes the Bernstein representation, not the
 represented polynomial, physical grid, or ownership of interior boundaries.
 
@@ -139,7 +105,8 @@ stored bounds when both are present. One-parameter degree `m > 0` becomes
 axis `s` has degree `Degree-e_s` when `Degree(s)>0`, then is elevated exactly
 to the common vector `Degree` before rate weighting. A zero-degree axis
 contributes the zero partial. Every physical cell stores one row per rate-box
-vertex in `helper.combRows` order.
+distinct vertex in `helper.combRows` order. A fixed axis contributes one value,
+so `[3 3]` produces one row and `[1 1; -3 5]` produces two.
 
 ```matlab
 A = pdbase({[0 2]}, [1 1], 1, {{1, 5}}, ...
@@ -168,5 +135,5 @@ raise `pdbase:InvalidDiff`. Missing, malformed, or inconsistent bounds raise
 [`pdmat storage and elevation`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) ·
 [`pdmat rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) ·
 [`pdvar storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) ·
-[`Pólya certificate`](/GriD-LMIA/documents/reference/pdlmi/applypolya/) ·
+[`Pólya certificate`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) ·
 [`Bernstein polynomial`](/GriD-LMIA/documents/math/bernstein-polynomial/)

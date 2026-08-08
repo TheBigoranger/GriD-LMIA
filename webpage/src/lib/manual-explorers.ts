@@ -68,7 +68,8 @@ export function parseRateBounds(input: string, coefficientColumns: number): Rate
     }
     return values as [number, number];
   });
-  return { bounds, vertices: combinationRows(bounds), coefficientColumns };
+  const choices = bounds.map(([lower, upper]) => lower === upper ? [lower] : [lower, upper]);
+  return { bounds, vertices: combinationRows(choices), coefficientColumns };
 }
 
 /** One-dimensional normalized Bernstein elevation, applied one degree at a time. */
@@ -164,13 +165,13 @@ export function buildCertificateShape(input: {
   const degree = axisVector(input.degree, nPar, "degree");
   const order = axisVector(input.order, nPar, "order");
   if (!Number.isInteger(cliqueSize) || cliqueSize < 1 || cliqueSize > 9) {
-    throw new RangeError("clique size b must be an integer from 1 to 9.");
+    throw new RangeError("CliqueSize b must be an integer from 1 to 9.");
   }
   if (!Number.isInteger(bandWidth) || bandWidth < 1 || bandWidth > 9) {
-    throw new RangeError("bandwidth w must be an integer from 1 to 9.");
+    throw new RangeError("BandWidth w must be a tensor-window side from 1 to 9.");
   }
-  if (rateRows !== 1 && rateRows !== 2 ** nPar) {
-    throw new RangeError(`Active rate rows must be 1 for an ordinary residual or ${2 ** nPar} for rhodiff in ${nPar} dimensions.`);
+  if (!Number.isInteger(rateRows) || rateRows < 1 || rateRows > 2 ** nPar) {
+    throw new RangeError(`Stored rows must be 1 for ordinary data or between 1 and ${2 ** nPar} distinct rhodiff vertices in ${nPar} dimensions.`);
   }
   const physicalCopies = cells * rateRows;
   const minimumOrder = degree.map((value) => nPar === 1 ? Math.floor(value / 2) : Math.ceil(value / 2));

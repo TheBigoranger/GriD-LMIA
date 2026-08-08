@@ -39,17 +39,17 @@ D = rhodiff(P)
 
 ## Output
 
-`D` is a `pdvar` with `HasRateDependence=true`, `IsContinuous=false`, and
-`SourceSummary="derivative"`. It inherits the usual read-only fields
+`D` is a `pdvar` with `IsContinuous=false`, `NumRateRows` equal to the exact
+stored-row count, and `SourceSummary="derivative"`. It inherits the usual read-only fields
 (`GridInfo`, `MatrixSize`, `Degree`, `LocalValues`, `ContainsDecision`,
 `RateBounds`, and the rest) and is inspected with ordinary dot syntax or
 `coeffs`.
 
-Each physical cell stores one coefficient row per active `rho_dot` vertex. If
-`rb` has $\ell$ rows, each row contributes a lower and upper rate choice, so
-`rhodiff` enumerates the Cartesian product of those choices and stores $2^\ell$
-rate rows. The coefficient columns still follow the Bernstein label order
-returned by `D.lbls()`.
+Each physical cell stores one coefficient row per distinct `rho_dot` vertex.
+An axis contributes two choices only when its lower and upper bounds differ.
+Thus `NumRateRows` equals the product of the per-axis distinct-choice counts,
+and it is $2^\ell$ only when every axis varies. The coefficient columns still
+follow the Bernstein label order returned by `D.lbls()`.
 
 <RhodiffDiagram />
 
@@ -79,7 +79,7 @@ P = pdvar(1, {[0 1 2]}, RateBounds=[-1 1]);
 D = rhodiff(P);
 D.Degree
 D.IsContinuous
-D.HasRateDependence
+D.NumRateRows
 D.RateBounds
 size(D.coeffs(1))
 ```
@@ -93,8 +93,7 @@ ans =
    0
 
 ans =
-  logical
-   1
+     2
 
 ans =
     -1     1
@@ -138,6 +137,9 @@ The first `8` is the number of rate vertices. The second `8` is
 degree basis before the rate-weighted sum is stored. This design keeps
 derivative evidence cell-local and lets `pdlmi` later check affine
 `rho_dot` dependence by finite rate-box vertices.
+
+Fixed axes collapse before storage. For `rb = [1 1; -3 5]`, the first rate is
+always `1`, the second rate has two endpoints, and `D.NumRateRows` is `2`.
 
 ## Validation And Errors
 

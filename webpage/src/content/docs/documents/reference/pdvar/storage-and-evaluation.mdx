@@ -40,8 +40,8 @@ symbolicCoefficients = coeffs(P,cellSubscript)
 
 For an ordinary expression, returns a `1 × ncoeff(P)` cell row of numeric or
 `sdpvar` matrices. For `D = rhodiff(P)`, returns a
-`2^npar(P) × ncoeff(D)` table: every rate vertex is a separate row and no row
-is averaged or merged. Bad selectors raise `pdbase:InvalidCellSubs`.
+`D.NumRateRows × ncoeff(D)` table: every distinct rate vertex is a separate row
+and no row is averaged or merged. Bad selectors raise `pdbase:InvalidCellSubs`.
 
 ## <span id="pdvar-lbls"></span>`lbls`
 
@@ -82,58 +82,6 @@ coefficientShape =
      1     9
 ```
 
-## <span id="pdvar-elevVals"></span>`elevVals`
-
-```matlab
-elevatedTree = elevVals(P,degreeIncrement)
-```
-
-Returns a new nested symbolic coefficient tree. Every physical-cell and
-derivative rate row is elevated independently. The source `P`, its variables,
-and metadata remain unchanged.
-
-The coefficient map is exactly the
-[`pdmat` elevation formula](/GriD-LMIA/documents/reference/pdmat/elevate/#what-degree-elevation-does),
-applied linearly to symbolic coefficient matrices. Let
-
-$$
-\begin{aligned}
-\mathcal I_{\boldsymbol m}
-&:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
-\mathcal I_{\boldsymbol M}
-&:=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}.
-\end{aligned}
-$$
-
-For $\boldsymbol M\ge\boldsymbol m$, define the direction-wise and tensor
-weights
-
-$$
-\begin{aligned}
-\omega_s(i_s,k_s)
-&:=\frac{\binom{m_s}{i_s}
-  \binom{M_s-m_s}{k_s-i_s}}
-  {\binom{M_s}{k_s}},\\
-\Omega(\boldsymbol i,\boldsymbol k)
-&:=\prod_{s=1}^{\ell}\omega_s(i_s,k_s).
-\end{aligned}
-$$
-
-Then symbolic elevation is the short affine map
-
-$$
-\begin{aligned}
-\hat X^{(\boldsymbol c)}[\boldsymbol k]
-&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
-\Omega(\boldsymbol i,\boldsymbol k)
-X^{(\boldsymbol c)}[\boldsymbol i],\\
-\boldsymbol k&\in\mathcal I_{\boldsymbol M}.
-\end{aligned}
-$$
-
-No new independent YALMIP variable is created; the elevated coefficients are
-affine combinations of the original handles.
-
 ## <span id="pdvar-elevate"></span>`elevate`
 
 ```matlab
@@ -143,7 +91,7 @@ Q = P.elevate(degreeIncrement)
 
 Returns a `pdvar` with higher Bernstein degree and the same underlying YALMIP
 variables, grid, payload shape, continuity flag, `ContainsDecision`,
-`HasRateDependence`, `RateBounds`, and row ordering. It does not create a new
+`NumRateRows`, `RateBounds`, and row ordering. It does not create a new
 independent decision field.
 
 ## <span id="pdvar-evaluate"></span>`evaluate`
@@ -156,7 +104,8 @@ rateValues = evaluate(D,point)
 `point` is a finite in-bounds vector with one coordinate per parameter.
 Ordinary `pdvar` returns one interpolated numeric/`sdpvar` matrix without
 consulting the current `assign` state. A derivative `pdvar` returns a
-`1 × 2^npar` cell array, with one affine expression per rate row.
+`1 × D.NumRateRows` cell array, with one affine expression per distinct rate
+row.
 
 For the selected physical cell, ordinary evaluation is the symbolic Bernstein
 sum
@@ -213,5 +162,5 @@ assignment, solve, or merge derivative rows.
 
 [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) ·
 [`value`](/GriD-LMIA/documents/reference/pdvar/value/) ·
-[`bernsteinTable`](/GriD-LMIA/documents/reference/pdvar/bernsteintable/) ·
+[`bernTable`](/GriD-LMIA/documents/reference/pdvar/berntable/) ·
 [`pdbase evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/)

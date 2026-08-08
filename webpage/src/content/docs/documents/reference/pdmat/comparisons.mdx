@@ -54,7 +54,7 @@ same = (A == B)
 different = (A == C)
 direct = A >= 0;
 directCertificate = toYalmip(direct)
-polya = direct.applyPolya(1);
+polya = direct.usePolya(1);
 polyaCertificate = toYalmip(polya)
 ```
 

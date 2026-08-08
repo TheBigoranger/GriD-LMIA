@@ -19,7 +19,7 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 | :--- | :--- |
 | [`Storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) | Traverse symbolic/rate rows, elevate them independently, and evaluate without consulting assignments. |
 | [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) | Build discontinuous rate-vertex derivative expressions. |
-| [`bernsteinTable`](/GriD-LMIA/documents/reference/pdvar/bernsteintable/) | Inspect symbolic coefficient rows and rate vertices. |
+| [`bernTable`](/GriD-LMIA/documents/reference/pdvar/berntable/) | Inspect symbolic coefficient rows and rate vertices. |
 | [`value`](/GriD-LMIA/documents/reference/pdvar/value/) | Convert assigned coefficients to known `pdmat` data. |
 
 ### Algebra and matrix operations

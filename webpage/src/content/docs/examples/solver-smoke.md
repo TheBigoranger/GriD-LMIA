@@ -173,8 +173,8 @@ FullBox—through the same solver policy, which prefers MOSEK when available.
 
 These examples do not call a package-owned solver wrapper. They document the
 current boundary: GriD-LMIA builds direct, Pólya-elevated,
-[`Putinar box`](/GriD-LMIA/documents/reference/pdlmi/applyputinar/), or
-[`SparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/applysparseputinar/), or
-[`SparseFullBox`](/GriD-LMIA/documents/reference/pdlmi/applysparsefullboxpreorder/), or
-[`full-box`](/GriD-LMIA/documents/reference/pdlmi/applyfullboxpreorder/)
+[`Putinar box`](/GriD-LMIA/documents/reference/pdlmi/useputinar/), or
+[`SparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/usespput/), or
+[`SparseFullBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/), or
+[`full-box`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/)
 YALMIP constraints, and users call `optimize` directly.
