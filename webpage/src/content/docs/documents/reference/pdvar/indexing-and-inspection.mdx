@@ -105,7 +105,7 @@ P
 ```
 
 Display prints a concise object summary with deterministic fields. Workspace-dependent
-YALMIP variable names. use
+YALMIP variable names. Use
 [`bernTable`](/GriD-LMIA/documents/reference/pdvar/berntable/)
 for stable row-oriented diagnostics.
 
@@ -117,8 +117,8 @@ object for chained dot access. Modeling uses the documented public operations.
 ## Validation, limitations, and See Also
 
 Malformed subscripts and incompatible assignments use `pdvar`-owned errors.
-Indexing never selects cells, labels, or derivative rows and never calls
-`value` or a solver.
+Indexing addresses payload entries while cells, labels, derivative rows, and
+solver state remain unchanged.
 
 [`storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) ·
 [`comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) ·

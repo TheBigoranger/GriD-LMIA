@@ -22,16 +22,16 @@ SparsePutinar starts from the same local positive target $S^{(\vect c)}(\vect\al
 
 ## Scalar And Matrix SOS
 
-A scalar polynomial $s(\vect\alpha)$ is a sum of squares when there are polynomial functions $h_j$ such that
+A scalar polynomial $s(\vect\alpha)$ is a sum of squares when there are polynomial functions $h_1,\ldots,h_N$ such that
 
 $$
-s(\vect\alpha)=\sum_j h_j(\vect\alpha)^2.
+s(\vect\alpha)=\sum_{j=1}^{N} h_j(\vect\alpha)^2.
 $$
 
-A symmetric polynomial matrix $S(\vect\alpha)$ is a matrix SOS when there is a polynomial matrix $H(\vect\alpha)$ such that $S=H^{\mathsf T}H$. Both definitions admit a Gram representation. If $\vect b_{\vect d}$ is the tensor Bernstein basis indexed by $\mathcal I_{\vect d}=\prod_s\{0,\ldots,d_s\}$, define $Z_{\vect d}=\vect b_{\vect d}\otimes I_n$. Then
+A symmetric polynomial matrix $S(\vect\alpha)$ is a matrix SOS when there is a polynomial matrix $H(\vect\alpha)$ such that $S=H^\top H$. Both definitions admit a Gram representation. Let $\vect b_{\vect d}$ contain the tensor Bernstein basis functions with labels $\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,d_s\}$, and define $Z_{\vect d}=\vect b_{\vect d}\otimes I_n$. Then
 
 $$
-S(\vect\alpha)=Z_{\vect d}(\vect\alpha)^{\mathsf T}QZ_{\vect d}(\vect\alpha),
+S(\vect\alpha)=Z_{\vect d}(\vect\alpha)^\top QZ_{\vect d}(\vect\alpha),
 \qquad Q\succeq0.
 $$
 
@@ -45,8 +45,8 @@ $M_1=2r_1$, define the two Gram terms
 
 $$
 \begin{aligned}
-G_0(\alpha)&=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha),\\
-G_1(\alpha)&=Z_{r_1-1}(\alpha)^{\mathsf T}Q_1Z_{r_1-1}(\alpha).
+G_0(\alpha)&=Z_{\vect r}(\alpha)^\top Q_0Z_{\vect r}(\alpha),\\
+G_1(\alpha)&=Z_{\vect r-\vect e_1}(\alpha)^\top Q_1Z_{\vect r-\vect e_1}(\alpha).
 \end{aligned}
 $$
 
@@ -59,13 +59,13 @@ $$
 For target component $M_1=2r_1+1$, define the two Gram terms
 
 $$
-H_0(\alpha)=Z_r(\alpha)^{\mathsf T}Q_0Z_r(\alpha).
+H_0(\alpha)=Z_{\vect r}(\alpha)^\top Q_0Z_{\vect r}(\alpha).
 $$
 
 Here, $Q_0\succeq0$.
 
 $$
-H_1(\alpha)=Z_r(\alpha)^{\mathsf T}Q_1Z_r(\alpha).
+H_1(\alpha)=Z_{\vect r}(\alpha)^\top Q_1Z_{\vect r}(\alpha).
 $$
 
 Here, $Q_1\succeq0$.
@@ -79,7 +79,7 @@ $$
 In two or more parameters, define $g_0=1$ and $g_s=\alpha_s(1-\alpha_s)$ for $s=1,\ldots,\ell$. Let $\mathcal Q_{\mathrm P}\subseteq\{0,1,\ldots,\ell\}$ index the empty and singleton Putinar specifications whose Gram degrees are nonnegative. For each active specification, suppress the common argument $\vect\alpha$ and define the dense Gram term by
 
 $$
-D_q=Z_{\vect d_q}^{\mathsf T}Q_qZ_{\vect d_q},
+D_q=Z_{\vect d_q}^\top Q_qZ_{\vect d_q},
 $$
 
 where $Q_q\succeq0$. Putinar uses only these active terms, so
@@ -115,7 +115,7 @@ For the multidimensional empty and singleton family, let $\vect b_{\vect d,\vect
 
 $$
 T_{q,\vect u}
-=Z_{q,\vect u}^{\mathsf T}Q_{q,\vect u}Z_{q,\vect u},
+=Z_{q,\vect u}^\top Q_{q,\vect u}Z_{q,\vect u},
 $$
 
 where $Q_{q,\vect u}\succeq0$. Accumulating all windows for one active specification gives
@@ -151,12 +151,12 @@ C^{(\vect c)}[\vect k]
 =\sum_{q\in\mathcal Q_{\mathrm P}}a_q[\vect k].
 $$
 
-This equality holds for every $\vect k\in\mathcal I_{\mathrm{targetDegree}}$.
+This equality holds for every $\vect k\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}$.
 
 This accumulated equality combines every window contribution. Therefore, each certificate copy keeps exactly
 
 $$
-\prod_{s=1}^{\ell}(\mathrm{targetDegree}_s+1)
+\prod_{s=1}^{\ell}(M_s+1)
 $$
 
 target coefficient identities.
@@ -186,9 +186,9 @@ the block count. Total SDP size and solve time depend on the complete block and
 equality structure. The coefficient-identity count stays fixed because the
 assembled polynomial must still match the full target tensor.
 
-For example, a scalar two-parameter degree-$[4,4]$ target at order $[2,2]$ has three Putinar specifications. At $b=1$, the specifications contribute $9+6+6=21$ scalar PSD windows and 25 identities. At $b=2$, they contribute $4+2+2=8$ PSD windows of dimension four and the same 25 identities. At $b=3$, every basis saturates and the request normalizes to dense Putinar, whose Gram dimensions are $9$, $6$, and $6$.
+For example, a scalar two-parameter target with $\vect M=(4,4)$ at order $\vect r=(2,2)$ has three Putinar specifications. At $b=1$, the specifications contribute $9+6+6=21$ scalar PSD windows and 25 identities. At $b=2$, they contribute $4+2+2=8$ PSD windows of dimension four and the same 25 identities. At $b=3$, every basis saturates and the request normalizes to dense Putinar, whose Gram dimensions are $9$, $6$, and $6$.
 
-For the anisotropic target degree $[2,6]$ at order $[1,3]$ and $b=2$, the window block dimensions are
+For the anisotropic target degree $\vect M=(2,6)$ at order $\vect r=(1,3)$ and $b=2$, the window block dimensions are
 
 $$
 4,4,4,2,2,2,4,4.
@@ -198,7 +198,7 @@ The two axes may have different degrees and different numbers of window starts.
 
 ## Endpoint Interpretation
 
-In one parameter, `CliqueSize=1` normalizes to Direct after order validation. In two or more parameters, size one remains SparsePutinar because the singleton Putinar generator family still differs from a direct coefficient test. If `b > 1` and `b >= max(r + 1)`, every active window covers its full Gram basis and the state normalizes to dense Putinar.
+In one parameter, `CliqueSize=1` normalizes to Direct after order validation. In two or more parameters, size one remains SparsePutinar because the singleton Putinar generator family still differs from a direct coefficient test. If $b>1$ and $b\ge\max_{s=1}^{\ell}(r_s+1)$, every active window covers its full Gram basis and the state normalizes to dense Putinar.
 
 ## Further Reading
 

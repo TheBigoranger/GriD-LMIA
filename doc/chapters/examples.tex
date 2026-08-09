@@ -30,7 +30,7 @@ elevatedDegree = 1×2 double
 constraintCount = 6
 \end{lstlisting}
 
-This anisotropic example has three original labels and six labels after direction-wise elevation: \((2+1)(0+1)=3\) and \((2+1)(1+1)=6\). The zero second component of \code{Pa.Degree} makes the decision constant in the second parameter. \code{PolyaDegree=[0 1]} changes only its certificate representation.
+This anisotropic example has three original labels and six labels after direction-wise elevation: $(2+1)(0+1)=3$ and $(2+1)(1+1)=6$. The zero second component of \code{Pa.Degree} makes the decision constant in the second parameter. \code{PolyaDegree=[0 1]} changes only its certificate representation.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -141,24 +141,24 @@ plot(Pplot, SamplesPerCell=40, LineWidth=1.5)
 title("Solved parameter-dependent Lyapunov matrix")
 \end{lstlisting}
 
-The figure contains one curve for each entry of the solved \(2\)-by-\(2\) matrix \(P(\rho)\), sampled on the parameter interval. It is a diagnostic visualization of the feasible solution, while the coefficient-wise constraints supplied to the solver remain the certificate. The constant-case result is retained to exercise the comparison in the smoke test. A MOSEK solve certifies its intended infeasibility distinction.
+The figure contains one curve for each entry of the solved $2$-by-$2$ matrix $P(\rho)$, sampled on the parameter interval. It is a diagnostic visualization of the feasible solution, while the coefficient-wise constraints supplied to the solver remain the certificate. The constant-case result is retained to exercise the comparison in the smoke test. A MOSEK solve certifies its intended infeasibility distinction.
 
 \needspace{14\baselineskip}
 \section{Solve a Rate-Dependent Block LMI}
 \label{sec:solver-example}
 
-This example is adapted from \code{+tests/+pdlmi/test_solver_smoke.m}.  The goal is to find a parameter-dependent \(P(\rho)\) and scalar \(\gamma\) such that, on every Bernstein coefficient and rate vertex,
-\[
+This example is adapted from \code{+tests/+pdlmi/test_solver_smoke.m}.  The goal is to find a parameter-dependent $P(\rho)$ and scalar $\gamma$ such that, on every Bernstein coefficient and rate vertex,
+\begin{gather*}
 \begin{bmatrix}
-\dot P + PA + A^\top P & PB & C^\top\\
-B^\top P & -\gamma I & D^\top\\
+\dot P + PA + A^\top P & PB & C^\top \\
+B^\top P & -\gamma I & D^\top \\
 C & D & -\gamma I
 \end{bmatrix}
 \preceq 0,
 \qquad
 P(\rho)\succeq 0.
-\]
-The derivative term \(\dot P\) is built with \code{rhodiff(P, [-1 1])}.  The comparison operators create \code{pdlmi} wrappers, and \code{toYalmip} hands the coefficient-wise constraints to YALMIP.  The second listing assigns the solver- and tolerance-dependent numeric value of \(\gamma\) to \code{gammaValue}.  For this model, \code{numel(E1.Constraints)} returns 6, and \code{numel(E2.Constraints)} returns 2.
+\end{gather*}
+The derivative term $\dot P$ is built with \code{rhodiff(P, [-1 1])}.  The comparison operators create \code{pdlmi} wrappers, and \code{toYalmip} hands the coefficient-wise constraints to YALMIP.  The second listing assigns the solver- and tolerance-dependent numeric value of $\gamma$ to \code{gammaValue}.  For this model, \code{numel(E1.Constraints)} returns 6, and \code{numel(E2.Constraints)} returns 2.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -219,23 +219,23 @@ The constraint counts above follow directly from the three independent assembly 
     font=\scriptsize,align=center,minimum width=75mm,minimum height=12mm,
     inner sep=4pt}]
   \node[lane] (e1) {\code{E1}: rate-dependent block residual\\
-    \(R^{(c,v)}[i]\preceq0\)};
+    $R^{(c,v)}[i]\preceq0$};
   \node[lane,right=of e1] (e2) {\code{E2}: ordinary positivity residual\\
-    \(P^{(c)}[i]\succeq0\)};
+    $P^{(c)}[i]\succeq0$};
 
   \node[axes,below=of e1] (a1) {
-    physical cells: \(c\in\{1\}\) \hfill (1)\\
-    rate rows: \(v\in\{-,+\}\) \hfill (2)\\
-    degree-two local labels: \(i\in\{0,1,2\}\) \hfill (3)};
+    physical cells: $c\in\{1\}$ \hfill (1)\\
+    rate rows: $v\in\{-,+\}$ \hfill (2)\\
+    degree-two local labels: $i\in\{0,1,2\}$ \hfill (3)};
   \node[axes,below=of e2] (a2) {
-    physical cells: \(c\in\{1\}\) \hfill (1)\\
+    physical cells: $c\in\{1\}$ \hfill (1)\\
     ordinary row (one stored row) \hfill (1)\\
-    degree-one local labels: \(i\in\{0,1\}\) \hfill (2)};
+    degree-one local labels: $i\in\{0,1\}$ \hfill (2)};
 
   \node[count,below=of a1] (n1)
-    {\(1\times2\times3=6\) finite LMIs};
+    {$1\times2\times3=6$ finite LMIs};
   \node[count,below=of a2] (n2)
-    {\(1\times1\times2=2\) finite LMIs};
+    {$1\times1\times2=2$ finite LMIs};
 
   \node[merge,below=14mm of n1,xshift=37mm] (export)
     {\code{E1.toYalmip} and \code{E2.toYalmip}\\

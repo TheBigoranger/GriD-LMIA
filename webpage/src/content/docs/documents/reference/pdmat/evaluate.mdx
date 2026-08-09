@@ -14,7 +14,7 @@ import { Aside } from "@astrojs/starlight/components";
   <span>evaluate</span>
 </nav>
 
-Here $\alpha=\phi_c^{-1}(\rho)$ is the local coordinate defined in the
+Here $\vect\alpha=\phi_{\vect c}^{-1}(\vect\rho)$ is the local coordinate defined in the
 [global notation](/GriD-LMIA/documents/math/notation/#grids-cells-and-local-coordinates).
 
 The explorer compares scalar evaluation on one parameter axis with tensor
@@ -69,12 +69,10 @@ $\vect m=(m_1,\ldots,m_\ell)$, `evaluate` computes the tensor expansion
 
 $$
 \begin{aligned}
-\mathcal I_{\vect m}
-&:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
 A(\vect\rho)
 &=A^{(\vect c)}(\vect\alpha),\\
 A^{(\vect c)}(\vect\alpha)
-&=\sum_{\vect i\in\mathcal I_{\vect m}}
+&=\sum_{\vect i\in\mathcal I_{\vect m}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
 C^{(\vect c)}[\vect i]\,
 B_{\vect i}^{\vect m}(\vect\alpha).
 \end{aligned}
@@ -93,12 +91,12 @@ B_{\vect i}^{\vect m}(\vect\alpha)
 $$
 
 Each $C^{(\vect c)}[\vect i]$ is the stored scalar or matrix
-coefficient at local label $\vect i$. the scalar basis weight multiplies
+coefficient at local label $\vect i$. The scalar basis weight multiplies
 the entire coefficient matrix. Function-backed objects keep the exact MATLAB
 function handle and call it directly.
 
 <Aside type="note" title="Implementation remark: boundary ownership and row reconstruction">
-At an interior grid node, `evaluate` selects the cell on the right. only the
+At an interior grid node, `evaluate` selects the cell on the right. Only the
 global upper endpoint belongs to the final cell. It forms every tensor
 Bernstein weight explicitly from the local coordinates and reconstructs each
 stored ordinary or rate-vertex row independently in storage order. This path

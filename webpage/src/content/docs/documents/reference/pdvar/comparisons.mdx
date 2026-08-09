@@ -28,7 +28,7 @@ Each inequality is classified **once for the complete original residual**:
 
 1. Scan every original coefficient in every physical cell and active rate row.
 2. Use semidefinite meaning only when every coefficient is square and Hermitian. Numeric Hermitian checks use the inclusive tolerance `1e-10`.
-3. If any coefficient fails, the whole inequality is entry-wise and construction emits one `pdlmi:ElementwiseInequality` warning. A relation never mixes semidefinite and entry-wise coefficient groups.
+3. If any coefficient fails, the whole inequality is entry-wise and construction emits one `pdlmi:ElementwiseInequality` warning. Each relation uses one meaning across all coefficient groups.
 
 Direct semidefinite assembly stores one matrix-sign condition per cell, rate row, and local coefficient. Direct entry-wise assembly vectorizes each coefficient in MATLAB column-major order and stores one vector inequality for the complete entry family at that coefficient.
 

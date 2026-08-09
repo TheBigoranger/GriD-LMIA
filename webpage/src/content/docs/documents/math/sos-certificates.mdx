@@ -1,6 +1,6 @@
 ---
 title: Certificate Map And Selection Guide
-description: Choose among Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox without confusing finite certificates with exact rate reduction.
+description: Choose among Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox while keeping finite certificates distinct from exact rate reduction.
 ---
 
 import CertificateChooser from "../../../../components/CertificateChooser.astro";
@@ -28,7 +28,7 @@ A <Term id="psd" definition /> matrix has nonnegative quadratic forms. A <Term i
 
 <CertificateFlow />
 
-All six paths start from the same cell-local original residual
+All six paths start from the same cell-wise original residual
 $\mathcal F^{(\vect c)}$. The comparison relation determines
 $S^{(\vect c)}=-\mathcal F^{(\vect c)}$ and
 $C^{(\vect c)}=-\mathcal C^{(\vect c)}$.
@@ -57,8 +57,8 @@ different logical steps.
 
 <ConstraintAssemblyDiagram />
 
-`toYalmip` returns the already assembled finite YALMIP constraints. It neither
-selects a solver nor calls `optimize`.
+`toYalmip` returns the already assembled finite YALMIP constraints. Solver
+selection and calls to `optimize` remain with the caller.
 
 ## A Tiny Example: Positive Polynomial, Failed Direct Test
 
@@ -95,7 +95,7 @@ for the formula and selection boundary.
 
 ## Putinar Quadratic Modules
 
-For one parameter, write $\vect M=(M_1)$ and $\vect r=(r_1)$. the minimum
+For one parameter, write $\vect M=(M_1)$ and $\vect r=(r_1)$. The minimum
 component is $r_1=\lfloor M_1/2\rfloor$. For two or more parameters
 $(\ell\ge2)$, Putinar uses an unweighted Gram/SOS term plus the singleton
 generators $g_s=\alpha_s(1-\alpha_s)$, with componentwise minimum
@@ -172,7 +172,7 @@ selectors in one parameter.
 - Change SparsePutinar `CliqueSize` value $b$ or SparseFullBox window side $w$ to
   change the sparse Gram support.
 
-Assembled residual degree $\vect M$ is determined after algebra and alignment. it
+Assembled residual degree $\vect M$ is determined after algebra and alignment. It
 is derived from the assembled residual and stays independent of the user-selected certificate controls.
 
 ## Exact Software Boundary
@@ -188,7 +188,7 @@ continuous feasibility question.
 Every certificate is sufficient over a tensor-product cell. Gram blocks can
 grow quickly with dimension and order. Equality assembly is direct-only, and
 every strict margin is written explicitly by the modeler.
-The mathematical target is $S^{(\vect c)}\succ0$. encode strictness
+The mathematical target is $S^{(\vect c)}\succ0$. Encode strictness
 explicitly as $S^{(\vect c)}-\varepsilon I\succeq0$ before exporting the
 non-strict software constraints.
 

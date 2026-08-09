@@ -1,6 +1,6 @@
 ---
 title: Bernstein Basis, Continuity, And Storage
-description: Cell-local tensor Bernstein representation, shared-face values, storage labels, and the main algebraic links.
+description: Cell-wise tensor Bernstein representation, shared-face values, storage labels, and the main algebraic links.
 ---
 
 import BernsteinConceptDiagram from "../../../../components/BernsteinConceptDiagram.astro";
@@ -46,7 +46,7 @@ B_{\vect i}^{\vect M}(\vect\alpha)
 \end{aligned}
 $$
 
-A cell-local matrix polynomial therefore has one matrix coefficient for each
+A cell-wise matrix polynomial therefore has one matrix coefficient for each
 tensor label:
 
 $$
@@ -55,7 +55,7 @@ A^{(\vect c)}(\vect\alpha)
 B_{\vect i}^{\vect M}(\vect\alpha).
 $$
 
-Local coefficient labels are zero-based. physical grid nodes and cell indices
+Local coefficient labels are zero-based. Physical grid nodes and cell indices
 are one-based. Different physical cell sizes can still use the same tensor
 rules because every cell is represented on the reference box.
 
@@ -82,12 +82,12 @@ sufficient condition. A strict theoretical target must be represented in
 software with an explicit margin such as
 $S^{(\vect c)}-\varepsilon I\succeq0$.
 
-## `LocalValues`, Face Continuity, And Cell-Local Differentiation
+## `LocalValues`, Face Continuity, And cell-wise Differentiation
 
 `LocalValues` mirrors the tensor geometry. Its outer nesting selects a
-physical cell. the leaf row follows the local label order returned by
-`lbls()`. There are $\prod_s(k_s-1)$ physical cells and
-$\prod_s(M_s+1)$ coefficient labels per ordinary residual row. Explicit
+physical cell. The leaf row follows the local label order returned by
+`lbls()`. There are $\prod_{s=1}^{\ell}(k_s-1)$ physical cells and
+$\prod_{s=1}^{\ell}(M_s+1)$ coefficient labels per ordinary residual row. Explicit
 scheduling-rate dependence adds rows at each leaf while preserving cells and
 coefficient labels.
 
@@ -98,13 +98,13 @@ control face between adjacent cells. The shared handles enforce equality of
 face values through shared handles. Neighboring cells may have different one-sided
 gradients at the same interface.
 
-Differentiation is therefore deliberately cell-local. Along direction $s$,
+Differentiation is therefore deliberately cell-wise. Along direction $s$,
 forward coefficient differences are multiplied by $M_s$ and divided by the
 physical width $h_s^{\vect c}$. `rhodiff` elevates the directional partials
 to a common tensor degree, combines them with rate-box vertices in a
 deterministic order, and stores one row per vertex. The interface interpretation
 is developed in [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/).
-the exact coefficient formulas are in
+The exact coefficient formulas are in
 [Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-rows).
 
 ## Exact Algebra, Finite Certificates, And Independent Refinements

@@ -3,7 +3,7 @@
 
 \code{pdmat} stores known finite real matrix data on a tensor grid. Objects can be coefficient-backed, function-only, or function-backed with explicit Bernstein coefficient evidence. Coefficient-backed objects participate in algebra. Function-only objects evaluate exactly through the stored handle and reserve \code{bernTable} and coefficient algebra for objects with coefficient evidence. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdmat} behavior. This chapter documents their known-data syntax, numeric examples, validations, and boundaries.
 
-For coefficient-backed data, one storage leaf is the pullback \(A^{(\vect{c})}=A\circ\phi_{\vect{c}}\), with local expansion \(A^{(\vect{c})}(\vect{\alpha})=\sum_{\vect{i}}B_{\vect{i}}^{\vect{m}}(\vect{\alpha})A^{(\vect{c})}[\vect{i}]\) and \(\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})\). Construction chooses the source of those coefficients. \code{evaluate} reconstructs the matrix value. \code{elevate} changes the coefficient representation while preserving the polynomial. Ordered multiplication applies the binomial-weighted convolution in \cref{sec:bernstein-product-math}. A function-backed object keeps exact handle evaluation separate from its finite coefficient evidence, while a function-only object supports exact evaluation exclusively.
+For coefficient-backed data, one storage leaf is the pullback $A^{(\vect{c})}=A\circ\phi_{\vect{c}}$, with local expansion $A^{(\vect{c})}(\vect{\alpha})=\sum_{\vect{i}\in\mathcal I_{\vect{m}}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}B_{\vect{i}}^{\vect{m}}(\vect{\alpha})A^{(\vect{c})}[\vect{i}]$ and $\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})$. Construction chooses the source of those coefficients. \code{evaluate} reconstructs the matrix value. \code{elevate} changes the coefficient representation while preserving the polynomial. Ordered multiplication applies the binomial-weighted convolution in \cref{sec:bernstein-product-math}. A function-backed object keeps exact handle evaluation separate from its finite coefficient evidence, while a function-only object supports exact evaluation exclusively.
 
 \section{API Map}
 \label{sec:pdmat-lookup}
@@ -59,11 +59,11 @@ A = pdmat(..., ValidationMode=mode)
   \item \code{source} may be:
   \begin{enumerate}
       \item A function handle, e.g., \code{@(rho) [rho rho^2]} is a one-parameter function with two matrix entries.
-      \item A global cell grid of numeric Bernstein coefficients, e.g., \code{{[1 2], [3 4]}} is a two-cell degree-one grid with two \(1\times1\) coefficients per cell.
+      \item A global cell grid of numeric Bernstein coefficients, e.g., \code{{[1 2], [3 4]}} is a two-cell degree-one grid with two $1\times1$ coefficients per cell.
       \item A explicit nested \code{LocalValues}, e.g., \code{{1, 2, 3}} is scalar degree-two data on one cell.
   \end{enumerate}
-  \item \code{Degree=degree} accepts one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector and is stored as a \(1\)-by-\(\ell\) row \(\vect{m}=(m_1,\ldots,m_\ell)\). A scalar expands uniformly. An explicitly supplied scalar on a multidimensional grid emits \codeerr{pdmat}{ScalarDegreeExpansion} once. Omitted degree inference, function-only defaults, and one-dimensional forms remain warning-free. For function handles, omitting \code{Degree} creates a function-only object. Supplying \code{Degree} validates and stores Bernstein coefficient evidence while retaining the exact function handle for \code{evaluate}.
-  \item \code{RateBounds=rb} is an \(\ell\)-by-\(2\) finite real matrix of lower and upper scheduling-rate bounds and is accepted with every source family. With an ordinary one-row source it is metadata used by \code{rhodiff}. An explicit nested leaf may instead contain either one ordinary row or all \(N_v=\code{size(helper.rateVerts(rb),1)}\) distinct-vertex rows, uniformly across every physical cell, in \code{helper.rateVerts(rb)} order. A fixed rate direction contributes one value, so \(N_v\le 2^\ell\).
+  \item \code{Degree=degree} accepts one finite nonnegative integer scalar shorthand or an $\ell$-element vector and is stored as a $1$-by-$\ell$ row $\vect{m}=(m_1,\ldots,m_\ell)$. A scalar expands uniformly. An explicitly supplied scalar on a multidimensional grid emits \codeerr{pdmat}{ScalarDegreeExpansion} once. Omitted degree inference, function-only defaults, and one-dimensional forms remain warning-free. For function handles, omitting \code{Degree} creates a function-only object. Supplying \code{Degree} validates and stores Bernstein coefficient evidence while retaining the exact function handle for \code{evaluate}.
+  \item \code{RateBounds=rb} is an $\ell$-by-$2$ finite real matrix of lower and upper scheduling-rate bounds and is accepted with every source family. With an ordinary one-row source it is metadata used by \code{rhodiff}. An explicit nested leaf may instead contain either one ordinary row or all $N_v=\code{size(helper.rateVerts(rb),1)}$ distinct-vertex rows, uniformly across every physical cell, in \code{helper.rateVerts(rb)} order. A fixed rate direction contributes one value, so $N_v\le 2^\ell$.
   \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It controls only repeated post-normalization structural checks and remains transient call state. Public source validation remains complete in both modes.
 \end{itemize}
 
@@ -80,7 +80,7 @@ The two public constructors share the same normalization boundary. A \code{pdmat
   \node[choice,below=of normal] (fork) {constructor\\kind};
   \node[dp/call-branch,below left=9mm and 18mm of fork] (source) {\code{pdmat}: source conversion\\or function validation};
   \node[dp/call-branch,below right=9mm and 18mm of fork] (control) {\code{pdvar}: control lattice\\and shared-face handles};
-  \node[dp/call-result,below=25mm of fork] (store) {\hyperref[sec:pdbase-constructor]{\code{pdbase}}\\cell-local storage};
+  \node[dp/call-result,below=25mm of fork] (store) {\hyperref[sec:pdbase-constructor]{\code{pdbase}}\\cell-wise storage};
   \draw[dp/call-arrow] (entry) -- (parse);
   \draw[dp/call-arrow] (parse) -- (normal);
   \draw[dp/call-arrow] (normal) -- (fork);
@@ -136,7 +136,7 @@ disp(T)
     "(1-α1)^2 * (1-α2)*0 + (1-α1)^2 * α2*2 + 2(1-α1)α1 * (1-α2)*0 + 2(1-α1)α1 * α2*2 + α1^2 * (1-α2)*1 + α1^2 * α2*3"
 \end{lstlisting}
 
-Use explicit nested \code{LocalValues} when each physical cell must be written directly.  Here each cell stores two \(1\times2\) row-vector coefficients.
+Use explicit nested \code{LocalValues} when each physical cell must be written directly.  Here each cell stores two $1\times2$ row-vector coefficients.
 
 \begin{lstlisting}[style=dpmatlab]
 localVals = {{[1 0], [0 1]}, {[0 1], [0 2]}};
@@ -224,7 +224,7 @@ rateRowValues =
 
 \section{Inspect Object Properties}
 
-\code{pdmat} adds the read-only \code{FunctionHandle} property to the inherited \code{pdbase} properties in \cref{sec:pdbase-fields}.  All use private set access.  \code{FunctionHandle} contains the supplied handle for function and function-Bernstein sources and is empty for cell-backed sources. The inherited properties describe the grid, matrix size, Bernstein degree, cell-local evidence, continuity, and origin.
+\code{pdmat} adds the read-only \code{FunctionHandle} property to the inherited \code{pdbase} properties in \cref{sec:pdbase-fields}.  All use private set access.  \code{FunctionHandle} contains the supplied handle for function and function-Bernstein sources and is empty for cell-backed sources. The inherited properties describe the grid, matrix size, Bernstein degree, cell-wise evidence, continuity, and origin.
 
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1]}, @(rho) rho.^2, Degree=2);
@@ -252,7 +252,7 @@ B = A.elevate(degreeIncrement, validationMode)
 \end{lstlisting}
 
 \descriptionhead
-The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row, \code{lbls} returns the zero-based tensor labels $\vect{i}\in\prod_s\{0,\ldots,m_s\}$, and \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, $\prod_s(m_s+1)$ coefficients per cell, and parameter directions. \code{elevate} accepts a scalar shorthand or direction-wise increment and returns a new \code{pdmat} at the componentwise degree sum while preserving the represented known function, metadata, physical cells, and stored rate-row order. The optional positional validation mode and its errors follow the canonical contract in \cref{sec:pdbase-elevate}. The sparse elevation map and its reuse are derived in \cref{sec:bernstein-degree-elevation}.
+The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row, \code{lbls} returns the zero-based tensor labels $\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}$, and \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, $\prod_{s=1}^{\ell}(m_s+1)$ coefficients per cell, and parameter directions. \code{elevate} accepts a scalar shorthand or direction-wise increment and returns a new \code{pdmat} at the componentwise degree sum while preserving the represented known function, metadata, physical cells, and stored rate-row order. The optional positional validation mode and its errors follow the canonical contract in \cref{sec:pdbase-elevate}. The sparse elevation map and its reuse are derived in \cref{sec:bernstein-degree-elevation}.
 
 For a source degree $\vect{m}$ and increment $\vect{d}$, \code{elevate} forms the target $\vect{M}=\vect{m}+\vect{d}$. The numeric ratios in \code{bernConvRatios} define a sparse exact change of Bernstein basis, so the returned coefficients preserve the represented function and decision freedom. See \cref{sec:bernstein-degree-elevation} for the operator formula.
 
@@ -348,37 +348,37 @@ val = A.evaluate(point)
 \remarkshead
 A point with the wrong type, length, or finite-real shape raises \codeerr{pdmat}{InvalidPoint}. A point outside any grid bound raises \codeerr{pdmat}{PointOutOfBounds}.  If a stored function fails or returns a nonfinite, complex, empty, or size-inconsistent matrix at the requested point, \code{evaluate} raises \codeerr{pdmat}{Invalid}\allowbreak\code{FunctionValue}.
 
-For a degree-one scalar coefficient-backed object on \([\rho_1^{(1)},\rho_1^{(2)}]\),
-\[
+For a degree-one scalar coefficient-backed object on $[\rho_1^{(1)},\rho_1^{(2)}]$,
+\begin{gather*}
 A(\rho) = (1-\alpha)A^{(c)}[0]+\alpha A^{(c)}[1],\qquad
   \alpha = \frac{\rho_1-\rho_1^{(1)}}
                  {\rho_1^{(2)}-\rho_1^{(1)}}.
-\]
+\end{gather*}
 The same local-coordinate rule is applied entrywise for matrix-valued data.
 
 \begin{center}
 \begin{tikzpicture}[x=5.4cm,y=0.72cm]
-  \draw[->,black!65] (0,0)--(1.08,0) node[right,font=\scriptsize] {\(\rho\)};
-  \draw[->,black!65] (0,0)--(0,4.35) node[above,font=\scriptsize] {\(A(\rho)\)};
+  \draw[->,black!65] (0,0)--(1.08,0) node[right,font=\scriptsize] {$\rho$};
+  \draw[->,black!65] (0,0)--(0,4.35) node[above,font=\scriptsize] {$A(\rho)$};
   \draw[very thick,dpblue,domain=0:1,samples=70,smooth]
     plot (\x,{2+6*\x-5*\x*\x});
   \filldraw[fill=white,draw=black!70] (0,2) circle (1.5pt);
   \node[above=3pt,anchor=east,font=\scriptsize] at (-0.03,2)
-  {\(A^{(c)}[0]=2\)};
+  {$A^{(c)}[0]=2$};
   \foreach \x/\y/\lab in {0.5/3.75/{A^{(c)}[1]=5},1/3/{A^{(c)}[2]=3}}{
     \filldraw[fill=white,draw=black!70] (\x,\y) circle (1.5pt);
-    \node[above=3pt,font=\scriptsize] at (\x,\y) {\(\lab\)};}
+    \node[above=3pt,font=\scriptsize] at (\x,\y) {$\lab$};}
   \def\evalx{0.35}
   \def\evaly{3.4875}
   \draw[densely dashed,black!60] (\evalx,0)--(\evalx,\evaly);
   \filldraw[fill=dpblue,draw=dpblue] (\evalx,\evaly) circle (1.7pt);
   \node[below=3pt,font=\scriptsize] at (\evalx,0)
-    {\(\rho_\star\)};
+    {$\rho_\star$};
   \node[dp/label,anchor=west] at (0.39,2.65)
-    {\(\code{Astar=A.evaluate(rhoStar)}\)};
+    {$\code{Astar=A.evaluate(rhoStar)}$};
 \end{tikzpicture}
 
-\textit{Evaluation follows the degree-two Bernstein curve with coefficients \([2,5,3]\). The dashed line locates the requested physical point.}
+\textit{Evaluation follows the degree-two Bernstein curve with coefficients $[2,5,3]$. The dashed line locates the requested physical point.}
 \end{center}
 
 \examplehead
@@ -393,7 +393,7 @@ val = evaluate(A, 0.25)
 val = 2.5000
 \end{lstlisting}
 
-At \(\rho=0.25\), the public local coordinate is \(\alpha=0.25\), so the interpolated value is \(0.75\cdot2+0.25\cdot4=2.5\).
+At $\rho=0.25$, the public local coordinate is $\alpha=0.25$, so the interpolated value is $0.75\cdot2+0.25\cdot4=2.5$.
 
 The dot-call form is equivalent and can be convenient in command-window exploration.
 
@@ -466,7 +466,7 @@ disp(T)
         {[1]}               2              {[ 2]}       "1*4"
 \end{lstlisting}
 
-In several parameters, each partial is restored to the common tensor degree before the rate-weighted sum. Here the four rate rows are constant over all four local labels, but the stored degree remains \([1,1]\).
+In several parameters, each partial is restored to the common tensor degree before the rate-weighted sum. Here the four rate rows are constant over all four local labels, but the stored degree remains $[1,1]$.
 
 \begin{lstlisting}[style=dpmatlab]
 A = pdmat({[0 1], [0 1]}, ...
@@ -508,9 +508,9 @@ T = bernTable(A, cellSubs, "oneLine")
 \end{itemize}
 
 For one parameter, write the stored degree vector as $\vect{m}=(m_1)$. The \code{Basis} column reports
-\[
+\begin{gather*}
   \binom{m_1}{j}(1-\alpha)^{m_1-j}\alpha^j.
-\]
+\end{gather*}
 For multiple parameters, the basis is the tensor product of that expression in each local coordinate, using \code{alpha1}, \code{alpha2}, and so on. \code{LocalIndex} is the local Bernstein label. \code{CoeffSubscript} maps the local label back to the global coefficient subscript on the physical grid.  \code{IsPhysicalNode} is true when that coefficient lies on a physical grid node.
 
 \begin{center}
@@ -731,12 +731,12 @@ legend(h, ["A(1,1)", "A(2,1)"], ...
     "Location", "eastoutside")
 \end{lstlisting}
 
-The two entries are equal for every \(\rho_2\) along \(\rho_1=0\). Their ordering reverses on opposite sides: the first entry is lower when \(\rho_1<0\) and higher when \(\rho_1>0\). The crossing therefore comes from the matrix function itself.
+The two entries are equal for every $\rho_2$ along $\rho_1=0$. Their ordering reverses on opposite sides: the first entry is lower when $\rho_1<0$ and higher when $\rho_1>0$. The crossing therefore comes from the matrix function itself.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.65\textwidth]{matlab-figures/pdmat-plot-2d-matrix.png}
-  \caption{Two entry surfaces of a \(2\)-by-\(1\) matrix-valued function.  The outside legend distinguishes the entries while their intersection remains visible along \(\rho_1=0\).}
+  \caption{Two entry surfaces of a $2$-by-$1$ matrix-valued function.  The outside legend distinguishes the entries while their intersection remains visible along $\rho_1=0$.}
   \label{fig:pdmat-plot-2d-matrix}
   \label{fig:pdmat-plot-3d-slice}
 \end{figure}
@@ -767,7 +767,7 @@ Addition, subtraction, concatenation, block assembly, indexing assignment, and r
 
 \subsection{Signs, Addition, And Subtraction}
 
-Use signs, sums, and differences to build known matrix expressions. For two parameter-dependent operands, the backend first checks matching outer bounds, forms the sorted union of the interior nodes on every axis, and exactly subdivides/re-expresses both coefficient trees on that common grid. It then elevates both operands componentwise to \(\max(\vect{m}_A,\vect{m}_B)\) and combines matching coefficients. Numeric and affine constant operands are promoted on the active grid before the same coefficientwise operation. The corresponding MATLAB overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}. \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation} document the exact grid and degree mechanisms.
+Use signs, sums, and differences to build known matrix expressions. For two parameter-dependent operands, the backend first checks matching outer bounds, forms the sorted union of the interior nodes on every axis, and exactly subdivides/re-expresses both coefficient trees on that common grid. It then elevates both operands componentwise to $\max(\vect{m}_A,\vect{m}_B)$ and combines matching coefficients. Numeric and affine constant operands are promoted on the active grid before the same coefficientwise operation. The corresponding MATLAB overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}. \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation} document the exact grid and degree mechanisms.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -799,7 +799,7 @@ disp(T)
         {[1]}        "(1-α)^2*11 + 2(1-α)α*21.5000 + α^2*32"
 \end{lstlisting}
 
-The middle coefficient of the elevated \(A\) is \((1+2)/2=1.5\), so the middle sum is \(1.5+20=21.5\). Subtraction and unary signs act immediately on the same local coefficients.
+The middle coefficient of the elevated $A$ is $(1+2)/2=1.5$, so the middle sum is $1.5+20=21.5$. Subtraction and unary signs act immediately on the same local coefficients.
 
 \begin{lstlisting}[style=dpmatlab]
 D = 5 - A;
@@ -823,10 +823,10 @@ positiveClass = 'pdmat'
     minimum width=31mm,minimum height=8mm},
   result/.style={dp/result,
     font=\scriptsize,align=center,minimum width=35mm,minimum height=8mm}]
-  \node[box] (a) {degree 1: \([1,2]\)};
-  \node[box,below=of a] (b) {degree 2: \([10,20,30]\)};
+  \node[box] (a) {degree 1: $[1,2]$};
+  \node[box,below=of a] (b) {degree 2: $[10,20,30]$};
   \node[result,right=of a,yshift=-7mm] (s) {elevate, then add:\\
-    \([11,21.5,32]\)};
+    $[11,21.5,32]$};
   \draw[->,thick,dpblue] (a.east) -- (s.west);
   \draw[->,thick,dpblue] (b.east) -- (s.west);
 \end{tikzpicture}
@@ -962,7 +962,7 @@ polyaCertificate = logical
 \end{lstlisting}
 
 \remarkshead
-Equality with an operand outside \code{pdmat} raises \codeerr{pdmat}{InvalidEquality}. Between two \code{pdmat} objects, subtraction owns compatibility checks and representation alignment, so incompatible operands propagate the corresponding subtraction, grid, continuity, or rate-bound error. A known \code{pdmat} equality returns a scalar logical result. Direct and P\'olya known-data exports reduce the complete family to one scalar logical certificate using the wrapper's global inequality classification and inclusive absolute tolerance $10^{-10}$. In semidefinite mode, every coefficient matrix is symmetrized as $(C+C^\mathsf{T})/2$ and its eigenvalues are tested against the oriented tolerance, while element-wise mode tests every scalar matrix entry. A false result emits \codeerr{pdlmi}{InconclusiveCertificate} when exported and leaves continuous violation or indefiniteness inconclusive. Putinar, SparsePutinar, SparseFullBox, and FullBox still return YALMIP constraints and may introduce auxiliary Gram variables even when the residual is known.
+Equality with an operand outside \code{pdmat} raises \codeerr{pdmat}{InvalidEquality}. Between two \code{pdmat} objects, subtraction owns compatibility checks and representation alignment, so incompatible operands propagate the corresponding subtraction, grid, continuity, or rate-bound error. A known \code{pdmat} equality returns a scalar logical result. Direct and P\'olya known-data exports reduce the complete family to one scalar logical certificate using the wrapper's global inequality classification and inclusive absolute tolerance $10^{-10}$. In semidefinite mode, every coefficient matrix is symmetrized as $(C+C^\top)/2$ and its eigenvalues are tested against the oriented tolerance, while element-wise mode tests every scalar matrix entry. A false result emits \codeerr{pdlmi}{InconclusiveCertificate} when exported and leaves continuous violation or indefiniteness inconclusive. Putinar, SparsePutinar, SparseFullBox, and FullBox still return YALMIP constraints and may introduce auxiliary Gram variables even when the residual is known.
 
 \section{Reshape and Transform Known Matrices}
 \label{sec:pdmat-matrix-ops}
@@ -1065,8 +1065,8 @@ transposeAtZero = 3×2 double
   \matrix[a] (m) {1&2&3\\4&5&6\\};
   \matrix[a,right=of m] (t) {1&4\\2&5\\3&6\\};
   \draw[->,thick,dpblue] (m.east) -- node[above,lab]{transpose each\\coefficient} (t.west);
-  \node[below=3pt of m,lab]{\(2\times3\)};
-  \node[below=3pt of t,lab]{\(3\times2\)};
+  \node[below=3pt of m,lab]{$2\times3$};
+  \node[below=3pt of t,lab]{$3\times2$};
 \end{tikzpicture}
 \end{center}
 
@@ -1112,7 +1112,7 @@ Malformed or element-count-changing reshape requests raise \codeerr{pdmat}{Inval
 \subsection{Diagonals And Trace}
 \index{diagonal}\index{trace}
 
-\code{diag} extracts a selected diagonal from a matrix, or builds a square diagonal matrix from a vector. A finite integer offset \code{k} must select a nonempty diagonal. \code{trace} returns a \(1\)-by-\(1\) \code{pdmat}.
+\code{diag} extracts a selected diagonal from a matrix, or builds a square diagonal matrix from a vector. A finite integer offset \code{k} must select a nonempty diagonal. \code{trace} returns a $1$-by-$1$ \code{pdmat}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1218,7 +1218,7 @@ runningAtZero = 2×2 double
 \subsection{Reordering And Rotation}
 \label{sec:pdmat-matrix-reorder}
 
-These methods reorder rows or columns inside every coefficient. They never reverse the scheduling grid.
+These methods reorder rows or columns inside every coefficient while preserving the scheduling-grid order.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1252,9 +1252,9 @@ rotatedAtZero = 2×2 double
 \begin{tikzpicture}[>=Latex,node distance=9mm,
   b/.style={dp/result,
     font=\scriptsize,align=center,minimum width=22mm,minimum height=10mm}]
-  \node[b] (a) {\(1\ \ 2\)\\\(3\ \ 4\)};
-  \node[b,right=of a] (f) {\(3\ \ 4\)\\\(1\ \ 2\)};
-  \node[b,right=of f] (r) {\(2\ \ 4\)\\\(1\ \ 3\)};
+  \node[b] (a) {$1\ \ 2$\\$3\ \ 4$};
+  \node[b,right=of a] (f) {$3\ \ 4$\\$1\ \ 2$};
+  \node[b,right=of f] (r) {$2\ \ 4$\\$1\ \ 3$};
   \draw[->,thick,dpblue] (a) -- node[above,font=\scriptsize]{\code{flipud}} (f);
   \draw[->,thick,dpblue] (a) to[bend left=22]
     node[above,font=\scriptsize]{\code{rot90}} (r);

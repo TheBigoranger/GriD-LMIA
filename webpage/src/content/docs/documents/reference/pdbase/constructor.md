@@ -1,6 +1,6 @@
 ---
 title: pdbase Constructor
-description: Validated backend construction for shared grid and cell-local Bernstein storage.
+description: Validated backend construction for shared grid and cell-wise Bernstein storage.
 ---
 
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdbase/">pdbase</a><span>/</span><span>constructor</span></nav>
@@ -9,7 +9,7 @@ description: Validated backend construction for shared grid and cell-local Berns
 
 `pdbase` owns the common grid, payload-shape, degree, local-value, continuity,
 decision, and rate metadata inherited by `pdmat` and `pdvar`. Direct
-construction is mainly useful for backend tests and maintainers. modeling code
+Construction is mainly useful for backend tests and maintainers. Modeling code
 normally starts with a [`pdmat`](/GriD-LMIA/documents/reference/pdmat/constructor/)
 or [`pdvar`](/GriD-LMIA/documents/reference/pdvar/constructor/).
 
@@ -29,11 +29,11 @@ obj = pdbase(..., ValidationMode=mode)
 | `gridVectors` | Nonempty cell array of finite, real, strictly increasing vectors, each with at least two nodes. |
 | `matrixSize` | Positive integer row vector `[rows columns]`. |
 | `degree` | One finite nonnegative integer scalar shorthand or an `npar`-element direction-wise vector. A scalar expands uniformly, and the result is stored as a `1 × npar` row. |
-| `localValues` | Optional nested physical-cell tree. An ordinary leaf is a `1 × prod(degree+1)` coefficient cell. a rate-dependent leaf is a rate-row-by-coefficient cell array. |
-| `IsContinuous` | Logical scalar metadata. default `false`. |
-| `ContainsDecision` | Logical scalar metadata. default `false`. |
+| `localValues` | Optional nested physical-cell tree. An ordinary leaf is a `1 × prod(degree+1)` coefficient cell. A rate-dependent leaf is a rate-row-by-coefficient cell array. |
+| `IsContinuous` | Logical scalar metadata. Default `false`. |
+| `ContainsDecision` | Logical scalar metadata. Default `false`. |
 | `RateBounds` | Empty or finite `npar × 2` lower/upper bounds with each lower bound less than or equal to its upper bound. |
-| `SourceSummary` | Source label. default `"coefficient-backed"`. |
+| `SourceSummary` | Source label. Default `"coefficient-backed"`. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"` and transient for the current construction. |
 
 When `localValues` is omitted or empty, each physical cell receives a
@@ -80,7 +80,7 @@ coefficientCount =
 
 The backend stores the full vector. It is linear along the first parameter,
 cubic along the second, and constant along the third. The eight labels are
-$\prod_s(m_s+1)=2\cdot4\cdot1$.
+$\prod_{s=1}^{\ell}(m_s+1)=2\cdot4\cdot1$.
 
 ## Validation and limitations
 
@@ -91,7 +91,7 @@ rate failures use the corresponding `pdbase:Invalid...` identifier. Direct
 algebra, `pdvar` decision construction, plotting, comparisons, and LMI assembly.
 
 Fast mode checks repeated supplied coefficient structure only in the first
-physical cell. malformed later coefficient counts, payloads, or rate-row
+physical cell. Malformed later coefficient counts, payloads, or rate-row
 layouts can remain undetected. Strict mode audits every supplied cell. Grid,
 metadata, and options are global in both modes. This raw backend exception
 defines the raw backend contract. The public `pdmat` and `pdvar` constructors

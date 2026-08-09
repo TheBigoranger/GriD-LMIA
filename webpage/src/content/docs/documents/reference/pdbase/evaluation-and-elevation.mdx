@@ -25,7 +25,7 @@ local coordinates, and evaluates the tensor Bernstein row.
 
 At an interior grid node the cell on the right owns the evaluation. At the
 last grid node, the final cell owns it. Numeric coefficients return a numeric
-matrix. symbolic coefficients return an `sdpvar` expression. A derivative
+matrix. Symbolic coefficients return an `sdpvar` expression. A derivative
 leaf returns a `1 × NumRateRows` cell array, one reconstructed payload per
 distinct stored rate row in `helper.combRows` order.
 
@@ -46,7 +46,7 @@ rightInterior =
 The example uses discontinuous backend evidence deliberately: the exact
 interior point uses the second cell, demonstrating right-cell ownership.
 
-Invalid point shape or values use `<dynamic-class>:InvalidPoint`. an
+Invalid point shape or values use `<dynamic-class>:InvalidPoint`. An
 out-of-bounds point uses `<dynamic-class>:PointOutOfBounds`. Thus a `pdmat`
 call reports a `pdmat:` identifier and a `pdvar` call reports a `pdvar:`
 identifier.
@@ -127,7 +127,7 @@ derivativeRows = 2×1 double
      6
 ```
 
-Function-only storage raises `pdbase:FunctionOnlyDiff`. existing rate rows
+Function-only storage raises `pdbase:FunctionOnlyDiff`. Existing rate rows
 raise `pdbase:InvalidDiff`. Missing, malformed, or inconsistent bounds raise
 `pdbase:MissingRateBounds`, `pdbase:InvalidRateBounds`, or
 `pdbase:RateBoundsMismatch`.

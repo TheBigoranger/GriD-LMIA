@@ -4,7 +4,7 @@ export const referenceGroups = [
   { id: "pdmat", label: "pdmat", description: "Function-backed known data and coefficient-backed Bernstein operations." },
   { id: "pdvar", label: "pdvar", description: "Continuous arbitrary-degree affine decisions and rate-vertex differentiation." },
   { id: "pdlmi", label: "pdlmi", description: "Direct constraints and five opt-in finite certificate families." },
-  { id: "pdbase-backend", label: "pdbase", description: "Public cell-local storage, traversal, transformation, and matrix protocols." },
+  { id: "pdbase-backend", label: "pdbase", description: "Public cell-wise storage, traversal, transformation, and matrix protocols." },
   { id: "shared-helpers", label: "Shared helpers", description: "Public validation, grid, degree, rate-row, and Bernstein-convolution functions." },
   { id: "setup", label: "Setup", description: "Repository installation and verification entry point." },
 ];

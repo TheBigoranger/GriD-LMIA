@@ -102,8 +102,8 @@ rateValues = evaluate(D,point)
 ```
 
 `point` is a finite in-bounds vector with one coordinate per parameter.
-Ordinary `pdvar` returns one interpolated numeric/`sdpvar` matrix and carries
-consulting the current `assign` state. A derivative `pdvar` returns a
+Ordinary `pdvar` returns one interpolated numeric/`sdpvar` matrix while
+preserving the current `assign` state. A derivative `pdvar` returns a
 `1 × D.NumRateRows` cell array, with one affine expression per distinct rate
 row.
 
@@ -112,12 +112,10 @@ sum
 
 $$
 \begin{aligned}
-\mathcal I_{\vect m}
-&:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
 \vect\alpha
 &:=\phi_{\vect c}^{-1}(\vect\rho),\\
 P^{(\vect c)}(\vect\rho)
-&=\sum_{\vect i\in\mathcal I_{\vect m}}
+&=\sum_{\vect i\in\mathcal I_{\vect m}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
 X^{(\vect c)}[\vect i]\,
 B_{\vect i}^{\vect m}(\vect\alpha).
 \end{aligned}
@@ -125,10 +123,10 @@ $$
 
 This is the same basis evaluation illustrated on
 [`pdmat evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/).
-only the stored coefficients and returned value are symbolic.
+Only the stored coefficients and returned value are symbolic.
 
 Interior grid boundaries use the cell on the right, including discontinuous
-derivative rows. the last global boundary uses the last cell. Numeric and
+derivative rows. The last global boundary uses the last cell. Numeric and
 symbolic payload types are preserved.
 
 ```matlab
@@ -153,10 +151,13 @@ ordinaryType =
     "sdpvar"
 ```
 
+## Validation And Errors
+
 Invalid elevation uses `pdbase:InvalidDegreeIncrement`. Invalid points use
-`pdvar:InvalidPoint`. out-of-bounds points use
-`pdvar:PointOutOfBounds`. Evaluation interpolates stored expressions directly and leaves
-assignment, solve, or merge derivative rows.
+`pdvar:InvalidPoint`. Out-of-bounds points use
+`pdvar:PointOutOfBounds`. Evaluation interpolates stored expressions directly.
+YALMIP retains ownership of assignment and solution recovery, while derivative
+rows remain separate.
 
 ## See Also
 

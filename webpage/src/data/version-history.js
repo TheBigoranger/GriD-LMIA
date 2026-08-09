@@ -1,10 +1,10 @@
 export const versionHistory = [
   {
-    version: "v1.3.2",
-    date: "2026-08-08",
+    version: "v1.3.3",
+    date: "2026-08-09",
     status: "current documentation",
     summary:
-      "Synchronizes 192 public API records and eight governed terms, adds Learn and Reference paths with task, example, capability, certificate, and diagnostic lookup, and enforces semantic vector notation and affirmative prose across the Web manual.",
+      "Aligns the TeX and Web manuals at v1.3.3, standardizes mathematical notation and cell-wise terminology, consolidates Learn and Reference navigation, and retains 192 public API records and eight governed terms.",
   },
   {
     version: "v1.3.1",
@@ -39,21 +39,21 @@ export const versionHistory = [
     date: "2026-07-19",
     status: "previous · 6d19619",
     summary:
-      "Marks the first stable public release of the documented package workflow. It consolidates installation and test-suite verification, the pdbase/pdmat/pdvar/pdlmi object model, continuous arbitrary-degree decision storage and rate-vertex differentiation, MATLAB-style matrix operations and indexing, and direct, Pólya, Putinar, and full-box finite certificate assembly. This milestone stabilizes the implemented and tested surface; it does not add new runtime behavior.",
+      "Marks the first stable public release of the documented package workflow. It consolidates installation and test-suite verification, the pdbase/pdmat/pdvar/pdlmi object model, continuous arbitrary-degree decision storage and rate-vertex differentiation, MATLAB-style matrix operations and indexing, and direct, Pólya, Putinar, and full-box finite certificate assembly. This milestone records the implemented and tested surface while preserving runtime behavior.",
   },
   {
     version: "v0.4.7",
     date: "2026-07-18",
     status: "previous · c6a2e25",
     summary:
-      "Completed the v0.4 manual and Web explorer refresh around the LPV-to-cellwise-Bernstein-to-solver workflow, including installer guidance, the public API reference, mathematical cross-references, and storage-transformation examples.",
+      "Completed the v0.4 manual and Web explorer refresh around the LPV-to-cell-wise-Bernstein-to-solver workflow, including installer guidance, the public API reference, mathematical cross-references, and storage-transformation examples.",
   },
   {
     version: "v0.3.6",
     date: "2026-07-16",
     status: "previous · fe74a65",
     summary:
-      "Completed the renamed pdbase, pdmat, pdvar, and pdlmi reference; expanded cell-local Bernstein and solver examples; documented direct, Pólya, Putinar, and full-box certificates; and refreshed the printable and Web plotting assets across the v0.3 line.",
+      "Completed the renamed pdbase, pdmat, pdvar, and pdlmi reference, expanded cell-wise Bernstein and solver examples, documented direct, Pólya, Putinar, and full-box certificates, and refreshed the printable and Web plotting assets across the v0.3 line.",
   },
   {
     version: "v0.2.12",

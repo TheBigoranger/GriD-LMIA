@@ -177,7 +177,7 @@ disp(bernTable(K, 1, "oneLine"))
         {[1]}        "(1-α)^2*6 + 2(1-α)α*11 + α^2*20"
 ```
 
-Here the middle Bernstein coefficient is `11 = 0.5*(2*5 + 4*3)`. this is an ordered coefficient
+Here the middle Bernstein coefficient is `11 = 0.5*(2*5 + 4*3)`. This is an ordered coefficient
 convolution, which represents the exact polynomial product.
 
 ```matlab
@@ -212,7 +212,7 @@ disp(bernTable(K, [1 1], "oneLine"))
 ```
 
 The tensor convolution adds degrees componentwise, so `[1 0]+[0 2]=[1 2]`.
-the zero-degree axes remain valid inputs and enter the planned contraction directly before
+The zero-degree axes remain valid inputs and enter the planned contraction directly before
 multiplication. The complete coefficient rule is derived in
 [Coefficient algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
 

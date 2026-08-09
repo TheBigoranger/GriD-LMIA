@@ -37,7 +37,7 @@ Normalizes two-dimensional numeric, logical, colon, and `end` matrix subscripts 
 
 ## <span id="pdbase-mergegrid"></span>`mergeGrid`
 
-Checks compatible parameter bounds and constructs the sorted union of interior grid nodes before cell-local algebra.
+Checks compatible parameter bounds and constructs the sorted union of interior grid nodes before cell-wise algebra.
 
 ## <span id="pdbase-mapunary"></span>`mapUnary` And <span id="pdbase-mkunop"></span>`mkUnOp`
 

@@ -26,7 +26,7 @@ const boundaryX = margin.left + plotWidth / 2;
 <DiagramFrame
   class="differentiation-storage"
   label="A continuous two-cell quadratic spline and its piecewise-linear rhodiff result"
-  caption="On grid [0, 0.5, 1], rhodiff differentiates each physical cell independently. The +1 rate row is shown; the −1 rate row is its negative."
+  caption="On grid [0, 0.5, 1], rhodiff differentiates each physical cell independently. The +1 rate row is shown. The −1 rate row is its negative."
 >
   <div class="diff-plots">
     <section class="diff-panel">
@@ -47,7 +47,7 @@ const boundaryX = margin.left + plotWidth / 2;
     <section class="diff-panel diff-panel--result">
       <header><strong>After · degree 1</strong><code>[5.6, −3.2] | [−6.4, 8]</code></header>
       <div class="diff-legend"><i></i><span>rate row at ρ̇ = +1</span></div>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Piecewise-linear cell-local derivative row">
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Piecewise-linear cell-wise derivative row">
         <path class="diff-axis" d={`M${margin.left} ${height - margin.bottom} H${width - margin.right} M${margin.left} ${height - margin.bottom} V${margin.top}`} />
         <path class="diff-zero" d={`M${margin.left} ${margin.top + 8 / 16 * plotHeight} H${width - margin.right}`} />
         <path class="diff-boundary" d={`M${boundaryX} ${margin.top} V${height - margin.bottom}`} />

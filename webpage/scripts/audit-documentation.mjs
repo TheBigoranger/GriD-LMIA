@@ -3,6 +3,14 @@ import { readFileSync, readdirSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 import { documentationRecords, terminologyTerms } from "../src/data/documentation-contracts.js";
 import { referenceEntries } from "../src/data/reference-index.js";
+import { certificateSources } from "../src/data/certificate-data.ts";
+import {
+  componentUserVisibleEntries,
+  hasLowercaseSentenceStart,
+  markdownProseLines,
+  negativePattern,
+  stripAllowedComponentContexts,
+} from "./documentation-prose-policy.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const failures = [];
@@ -105,29 +113,74 @@ for (const term of terminologyTerms) {
   if (!source.includes(`<Term id="${term.id}" definition />`)) failures.push(`Missing canonical definition for ${term.id}.`);
 }
 
-const negativePattern = /\b(?:is not|are not|was not|were not|does not|do not|did not|cannot|can't|without|rather than|not|no)\b/i;
 const bannedPattern = /\b(?:delve|tapestry|myriad|groundbreaking|game-changing|seamless|seamlessly|transformative|intricate|multifaceted|holistic|revolutionary|unlock|unlocks|unlocking)\b/i;
 for (const file of sourceFiles.filter((path) => /src[\\/]content[\\/]docs[\\/].*\.(?:md|mdx)$/.test(path))) {
-  const prose = markdownProse(readFileSync(file, "utf8"));
-  const negative = prose.split(/\r?\n/).filter((line) => negativePattern.test(line));
-  const banned = prose.split(/\r?\n/).find((line) => bannedPattern.test(line));
-  for (const line of negative) failures.push(`${relative(root, file)} contains negative prose: ${line.trim()}`);
-  if (banned) failures.push(`${relative(root, file)} contains promotional prose: ${banned.trim()}`);
-  for (const line of prose.split(/\r?\n/).filter((candidate) => candidate.includes(";"))) {
-    failures.push(`${relative(root, file)} contains a prose semicolon: ${line.trim()}`);
+  const prose = markdownProseLines(readFileSync(file, "utf8"));
+  for (const entry of prose) {
+    if (negativePattern.test(entry.text) && !entry.allowedNegative) {
+      failures.push(`${relative(root, file)}:${entry.line} contains negative prose outside an allowed boundary context: ${entry.text}`);
+    }
+    if (bannedPattern.test(entry.text)) {
+      failures.push(`${relative(root, file)}:${entry.line} contains promotional prose: ${entry.text}`);
+    }
+    if (entry.text.includes(";")) {
+      failures.push(`${relative(root, file)}:${entry.line} contains a prose semicolon: ${entry.text}`);
+    }
+    const generatedReferenceIdentifier = file.endsWith("reference-index.mdx");
+    if (!generatedReferenceIdentifier && hasLowercaseSentenceStart(entry.text, entry.startsSentence)) {
+      failures.push(`${relative(root, file)}:${entry.line} contains a lowercase ordinary sentence start: ${entry.text}`);
+    }
   }
 }
 for (const file of sourceFiles.filter((path) => /src[\\/]components[\\/].*\.(?:astro|tsx)$/.test(path))) {
   if (file.endsWith("Term.astro") || file.endsWith("TermText.tsx")) continue;
-  const prose = componentProse(readFileSync(file, "utf8"), file);
-  const negative = prose.split(/\r?\n/).filter((line) => negativePattern.test(line));
-  for (const line of negative) failures.push(`${relative(root, file)} contains negative component prose: ${line.trim()}`);
-  if (prose.includes(";")) failures.push(`${relative(root, file)} contains a component-prose semicolon.`);
+  const source = readFileSync(file, "utf8");
+  const entries = componentUserVisibleEntries(source, relative(root, file));
+  const negativeEntries = componentUserVisibleEntries(stripAllowedComponentContexts(source), relative(root, file));
+  for (const entry of entries) {
+    if (/\b(?:const|export|function|interface|return)\b|=>|^\s*\{/.test(entry.text)) continue;
+    const label = `${relative(root, file)}:${entry.line} ${entry.origin}`;
+    if (bannedPattern.test(entry.text)) failures.push(`${label} contains promotional component prose: ${entry.text}`);
+    if (entry.text.includes(";")) failures.push(`${label} contains a component-prose semicolon: ${entry.text}`);
+    const dataSentence = entry.origin.startsWith("data:") && !/data:(?:inlineNoteParts|textParts)/.test(entry.origin) && /[.!?][\"')\]]?$/.test(entry.text);
+    if (hasLowercaseSentenceStart(entry.text, dataSentence)) failures.push(`${label} contains a lowercase ordinary sentence start: ${entry.text}`);
+  }
+  for (const entry of negativeEntries) {
+    if (/\b(?:const|export|function|interface|return)\b|=>|^\s*\{/.test(entry.text)) continue;
+    if (negativePattern.test(entry.text)) failures.push(`${relative(root, file)}:${entry.line} ${entry.origin} contains negative component prose: ${entry.text}`);
+  }
+  const prose = componentProse(source, file);
   for (const term of terminologyTerms.filter((candidate) => candidate.auto_link)) {
     if (new RegExp(`\\b${term.abbreviation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(prose)) {
       failures.push(`${relative(root, file)} contains raw registered component prose: ${term.abbreviation}.`);
     }
   }
+}
+
+for (const relativeFile of ["astro.config.mjs", "src/data/version-history.js"]) {
+  const file = join(root, relativeFile);
+  for (const entry of componentUserVisibleEntries(readFileSync(file, "utf8"), relativeFile)) {
+    const label = `${relativeFile}:${entry.line} ${entry.origin}`;
+    if (negativePattern.test(entry.text)) failures.push(`${label} contains negative user-visible data copy: ${entry.text}`);
+    if (bannedPattern.test(entry.text)) failures.push(`${label} contains promotional user-visible data copy: ${entry.text}`);
+    if (entry.text.includes(";")) failures.push(`${label} contains a user-visible data semicolon: ${entry.text}`);
+    if (entry.origin === "version-summary" && hasLowercaseSentenceStart(entry.text)) failures.push(`${label} contains a lowercase user-visible sentence start: ${entry.text}`);
+  }
+}
+
+for (const certificate of certificateSources) {
+  for (const field of ["description", "constraintCount"]) {
+    const prose = certificate[field];
+    const label = "src/data/certificate-data.ts " + certificate.key + "." + field;
+    if (negativePattern.test(prose)) failures.push(label + " contains negative component prose.");
+    if (bannedPattern.test(prose)) failures.push(label + " contains promotional component prose.");
+    if (prose.includes(";")) failures.push(label + " contains a component-prose semicolon.");
+    if (hasLowercaseSentenceStart(prose)) failures.push(label + " contains a lowercase ordinary sentence start.");
+  }
+  const boundaryLabel = "src/data/certificate-data.ts " + certificate.key + ".boundaryNote";
+  if (bannedPattern.test(certificate.boundaryNote)) failures.push(boundaryLabel + " contains promotional component prose.");
+  if (certificate.boundaryNote.includes(";")) failures.push(boundaryLabel + " contains a component-prose semicolon.");
+  if (hasLowercaseSentenceStart(certificate.boundaryNote)) failures.push(boundaryLabel + " contains a lowercase ordinary sentence start.");
 }
 
 const headingPattern = /^#{1,6} .*\b(?:not|no|without|cannot|rather than)\b.*$/gim;
@@ -142,4 +195,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Documentation audit passed: 192 public API records, 8 governed terms, semantic vectors, canonical definitions, affirmative prose, and style checks.");
+console.log("Documentation audit passed: 192 public API records, 8 governed terms, semantic vectors, canonical definitions, contextual boundary prose, and style checks.");

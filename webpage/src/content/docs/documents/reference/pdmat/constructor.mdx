@@ -57,7 +57,7 @@ A = pdmat(..., ValidationMode=mode)
 | `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of strictly increasing vectors, such as `{[0 1], [10 20]}`. |
 | `source` | Function handle, global cell grid of numeric Bernstein coefficients such as `{1, 2, 3}`, or explicit nested `LocalValues` such as `{{[1 0], [0 1]}, {[2 0], [0 2]}}`. |
 | `Degree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector, such as `Degree=[1 3]`. The accepted value is stored as a $1\times\ell$ row. Required when a function handle should be validated as Bernstein coefficient evidence. |
-| `RateBounds` | Finite $\ell\times2$ lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`. explicit nested leaves may instead contain one row per distinct rate-box vertex. Fixed axes contribute one value. |
+| `RateBounds` | Finite $\ell\times2$ lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`. Explicit nested leaves may instead contain one row per distinct rate-box vertex. Fixed axes contribute one value. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"` and transient for the current construction. Public source validation remains complete in both modes. |
 
 Unsupported metadata options: `IsContinuous` and `ContainsDecision`.
@@ -76,17 +76,17 @@ readable through dot syntax and have private set access:
 | `GridInfo` | `A.GridInfo.Vectors{1}`, `A.GridInfo.Points`, `A.GridInfo.Bounds` | Validated tensor-grid metadata. |
 | `MatrixSize` | `A.MatrixSize` | Matrix size of each numeric payload. |
 | `Degree` | `A.Degree` | Direction-wise local Bernstein degree stored as a $1\times\ell$ row. |
-| `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | Cell-local numeric Bernstein coefficients. |
-| `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces. otherwise the constructor warns and returns `false`. |
+| `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | cell-wise numeric Bernstein coefficients. |
+| `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces. Otherwise the constructor warns and returns `false`. |
 | `ContainsDecision` | `A.ContainsDecision` | Always `false`, which records known data free of YALMIP decisions. |
 | `NumRateRows` | `A.NumRateRows` | Exact explicit stored-row count. Ordinary data and `RateBounds`-only metadata report `0`. |
 | `RateBounds` | `A.RateBounds` | Empty or the stored scheduling-rate box used by `rhodiff`, rate-row inspection, and `pdlmi`. |
 | `SourceSummary` | `A.SourceSummary` | Source label such as `coefficient-backed`, `function`, or `function-bernstein`. |
-| `FunctionHandle` | `A.FunctionHandle` | Exact evaluator for function-backed objects. empty for coefficient-backed data. |
+| `FunctionHandle` | `A.FunctionHandle` | Exact evaluator for function-backed objects. Empty for coefficient-backed data. |
 
 These fields are exposed for inspection. Constructors and algebra create replacement values. The constructor
 and algebra methods keep `GridInfo`, `Degree`, `LocalValues`, and matrix sizes
-consistent. direct assignment would break the coefficient-label contract.
+consistent. Direct assignment would break the coefficient-label contract.
 
 ## Examples
 
@@ -270,20 +270,20 @@ lower-equals-upper axes are collapsed. This example has
 - Unknown options raise `pdmat:UnknownOption`.
 - Internal metadata options raise `pdmat:UnsupportedOption`.
 - Function-handle probing or validation may raise `pdmat:InvalidFunctionHandle` or `pdmat:InvalidFunctionOutput`.
-- Unsupported source forms raise `pdmat:InvalidSource`. inconsistent global
+- Unsupported source forms raise `pdmat:InvalidSource`. Inconsistent global
   coefficient grids raise `pdmat:InvalidData`.
 - Invalid degrees and malformed nested storage raise `pdmat:InvalidDegree` and
   `pdmat:InvalidLocalValues`.
 - An explicit multidimensional scalar `Degree` expands uniformly and warns
   `pdmat:ScalarDegreeExpansion`. Omitted degree inference, function-only
   construction that omits `Degree`, and all one-dimensional forms are silent.
-- Malformed rate boxes raise `pdmat:InvalidRateBounds`. malformed, duplicate,
+- Malformed rate boxes raise `pdmat:InvalidRateBounds`. Malformed, duplicate,
   or missing validation values raise `pdmat:InvalidValidationMode`.
 - Malformed explicit coefficient-leaf counts or shapes raise
-  `pdmat:InvalidCoefficientCell`. invalid, nonfinite, nonreal, or wrong-size
+  `pdmat:InvalidCoefficientCell`. Invalid, nonfinite, nonreal, or wrong-size
   payloads raise `pdmat:InvalidCoefficientPayload`.
 - A function outside the representable space at an explicit degree raises
-  `pdmat:NonBernsteinPolynomial`. a failed or size-inconsistent validation
+  `pdmat:NonBernsteinPolynomial`. A failed or size-inconsistent validation
   probe raises `pdmat:InvalidFunctionValue`.
 - Mismatched shared faces are retained as discontinuous local data and emit
   `pdmat:DiscontinuousLocalValues`.

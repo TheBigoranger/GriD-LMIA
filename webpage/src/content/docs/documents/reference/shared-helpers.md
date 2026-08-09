@@ -16,7 +16,7 @@ page.
 **Syntax:** `leaf = helper.cellGet(values,cellSubscripts)`.
 
 Returns one nested physical-cell leaf. The caller supplies a validated tree and
-one subscript per parameter axis. ordinary MATLAB cell-access errors surface
+one subscript per parameter axis. Ordinary MATLAB cell-access errors surface
 for malformed internal use.
 
 ## <span id="helper-chk"></span>`helper.chk`
@@ -25,7 +25,7 @@ for malformed internal use.
 
 Returns the unchanged value after common predicates pass. Supported tags cover
 numeric/real/cell/struct type, emptiness, scalar/vector/matrix shape, finite
-integer sign, strict increase, and row bounds. size/count/range options add
+integer sign, strict increase, and row bounds. Size/count/range options add
 exact constraints. A failed predicate raises the caller-owned identifier.
 Malformed validator syntax raises `helper:InvalidValidatorCall`.
 
@@ -54,14 +54,14 @@ additive, coefficient-tree, and object evidence rules. A function-only
 Validates a nonempty cell array of finite, real, strictly increasing vectors
 with at least two nodes. Returns `Vectors`, tensor-product `Points`, `Bounds`,
 and `NumNodes`. Errors use `<owner>:InvalidGrid` or
-`<owner>:InvalidGridVector`. the default owner is `pdbase`.
+`<owner>:InvalidGridVector`. The default owner is `pdbase`.
 
 ## <span id="helper-mknest"></span>`helper.mkNest`
 
 **Syntax:** `values = helper.mkNest(cellCounts,makeLeaf)`.
 
 Constructs `values{i1}{i2}...{i_npar}` and calls `makeLeaf` once for each
-physical-cell subscript row. Inputs are internal validated values. allocation
+physical-cell subscript row. Inputs are internal validated values. Allocation
 or callback failures propagate.
 
 ## <span id="helper-normdeg"></span>`helper.normDeg`

@@ -21,7 +21,7 @@ plain = A.'
 conjugate = A'
 ```
 
-Both swap payload rows and columns. only `ctranspose` conjugates.
+Both swap payload rows and columns. Only `ctranspose` conjugates.
 
 ### <span id="pdmat-reshape"></span>`reshape`
 
@@ -42,7 +42,7 @@ out = squeeze(A)
 ```
 
 Applies MATLAB `squeeze` coefficient-wise, then preserves the package's
-always-two-dimensional payload contract. It never creates an N-D `pdmat`.
+always-two-dimensional payload contract. The result remains a two-dimensional `pdmat`.
 
 ### <span id="pdmat-vec"></span>`vec`
 
@@ -199,7 +199,7 @@ out = blkdiag(A,B,...)
 ```
 
 Builds a block diagonal after compatible known-data promotion and alignment.
-At least one input must be `pdmat`. malformed calls use
+At least one input must be `pdmat`. Malformed calls use
 `pdmat:InvalidBlkdiag`.
 
 ### <span id="pdmat-repmat"></span>`repmat`

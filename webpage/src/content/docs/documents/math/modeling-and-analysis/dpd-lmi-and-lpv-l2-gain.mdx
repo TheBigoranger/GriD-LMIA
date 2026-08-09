@@ -41,7 +41,7 @@ is the performance output. The scheduling vector and rate satisfy
 
 $$
 \vect\rho(t)\in\mathcal P,\qquad
-\vect\nu(t)=\dot{\vect\rho}(t)\in\mathcal R,
+\dot{\vect\rho}(t)\in\mathcal R,
 $$
 
 with parameter and rate boxes
@@ -49,7 +49,7 @@ with parameter and rate boxes
 $$
 \mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s],
 \qquad
-\mathcal R=\prod_{s=1}^{\ell}[\underline\nu_s,\overline\nu_s].
+\mathcal R=\prod_{s=1}^{\ell}[\underline{\dot\rho}_s,\overline{\dot\rho}_s].
 $$
 
 The goal is a zero-state induced-$L_2$ bound
@@ -68,21 +68,21 @@ and
 
 $$
 \Biggl[\begin{matrix}
-\dot P+\operatorname{He}(PA) & PB & C^{\mathsf T}\\
-B^{\mathsf T}P & -\gamma I & D^{\mathsf T}\\
+\dot P+\operatorname{He}(PA) & PB & C^\top\\
+B^\top P & -\gamma I & D^\top\\
 C & D & -\gamma I
 \end{matrix}\Biggr]\prec0
 $$
 
 for every
-$(\vect\rho,\vect\nu)\in\mathcal P\times\mathcal R$, where
+$(\vect\rho,\dot{\vect\rho})\in\mathcal P\times\mathcal R$, where
 
 $$
 \begin{aligned}
-\dot P(\vect\rho,\vect\nu)
-&=\sum_{s=1}^{\ell}\nu_s\\
+\dot P(\vect\rho,\dot{\vect\rho})
+&=\sum_{s=1}^{\ell}\dot\rho_s\\
 &\quad{}\cdot\frac{\partial P}{\partial\rho_s}(\vect\rho),\\
-\operatorname{He}(X)&=X+X^{\mathsf T}.
+\operatorname{He}(X)&=X+X^\top.
 \end{aligned}
 $$
 
@@ -96,11 +96,11 @@ $y_k(\vect\rho)$ and their partial derivatives:
 
 $$
 \begin{aligned}
-\mathcal F(\vect\rho,\vect\nu)
+\mathcal F(\vect\rho,\dot{\vect\rho})
 &=F_0(\vect\rho)\\
 &\quad+\sum_{k=1}^{N}F_k(\vect\rho)y_k(\vect\rho)\\
 &\quad+\sum_{k=1}^{N}\sum_{s=1}^{\ell}R_{ks}(\vect\rho)\\
-&\qquad{}\cdot\frac{\partial y_k}{\partial\rho_s}(\vect\rho)\nu_s.
+&\qquad{}\cdot\dot\rho_s\frac{\partial y_k}{\partial\rho_s}(\vect\rho).
 \end{aligned}
 $$
 
@@ -110,7 +110,7 @@ are rejected.
 
 ## From Analysis Residual To Positive Target
 
-A comparison such as `residual <= 0` stores the original cell-local residual
+A comparison such as `residual <= 0` stores the original cell-wise residual
 $\mathcal F^{(\vect c)}$ and normalizes its sign to a positive target
 
 $$

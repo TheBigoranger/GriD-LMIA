@@ -61,7 +61,7 @@ function GridDefinition({
 }) {
   const label = knots
     .map((knot, axis) => `G ${axis + 1} equals set 0, ${formatNumber(knot)}, 1`)
-    .join("; ");
+    .join(", ");
   return (
     <span aria-label={label} className="structured-math structured-math--definitions" role="math">
       {knots.map((knot, axis) => (
@@ -464,7 +464,7 @@ export default function GridPartitionExplorer({
             <p>
               <strong>Cell {labelCell(activeCell)}:</strong>{" "}
               {bounds.map(([lower, upper], axis) => (
-                <span key={axis}>{axisLabels[axis]} ∈ [{formatNumber(lower)}, {formatNumber(upper)}]{axis < bounds.length - 1 ? "; " : ""}</span>
+                <span key={axis}>{axisLabels[axis]} ∈ [{formatNumber(lower)}, {formatNumber(upper)}]{axis < bounds.length - 1 ? ", " : ""}</span>
               ))}
             </p>
           </div>

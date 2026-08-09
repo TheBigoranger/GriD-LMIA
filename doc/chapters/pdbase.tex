@@ -90,11 +90,11 @@ objectSize = 1×2 double
      2     2
 \end{lstlisting}
 
-The printed \code{ncoeff} value is $\prod_s(m_s+1)=(1+1)(3+1)(0+1)=8$, one local Bernstein coefficient for each label in $\mathcal I_{\vect{m}}$. This count is part of the backend inspection contract and appears directly as an operation result.
+The printed \code{ncoeff} value is $\prod_{s=1}^{\ell}(m_s+1)=(1+1)(3+1)(0+1)=8$, one local Bernstein coefficient for each label in $\mathcal I_{\vect{m}}$. This count is part of the backend inspection contract and appears directly as an operation result.
 
 \remarkshead
 \begin{itemize}[leftmargin=*]
-    \item Malformed grids and node vectors raise \codeerr{pdbase}{InvalidGrid} or \codeerr{pdbase}{Invalid}\allowbreak\code{GridVector}. \item Invalid matrix sizes, degrees, rate bounds, rate-row counts, or validation modes raise \codeerr{pdbase}{Invalid}\allowbreak\code{MatrixSize}, \codeerr{pdbase}{InvalidDegree}, \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}, \codeerr{pdbase}{Invalid}\allowbreak\code{Options}, or \codeerr{pdbase}{Invalid}\allowbreak\code{ValidationMode}. \item The nested tree must contain one leaf per physical cell and $\prod_s(m_s+1)$ coefficient columns per leaf. Violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{LocalValues} or \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientCell}. \item Payload matrices must have the declared size and be finite, real, and numeric or supported real YALMIP expressions. Malformed payloads raise \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientPayload}. \item A positive \code{NumRateRows} requires nonempty \code{RateBounds}, must match the number of distinct rate-box vertices, and requires every supplied leaf to use that many rows.
+    \item Malformed grids and node vectors raise \codeerr{pdbase}{InvalidGrid} or \codeerr{pdbase}{Invalid}\allowbreak\code{GridVector}. \item Invalid matrix sizes, degrees, rate bounds, rate-row counts, or validation modes raise \codeerr{pdbase}{Invalid}\allowbreak\code{MatrixSize}, \codeerr{pdbase}{InvalidDegree}, \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}, \codeerr{pdbase}{Invalid}\allowbreak\code{Options}, or \codeerr{pdbase}{Invalid}\allowbreak\code{ValidationMode}. \item The nested tree must contain one leaf per physical cell and $\prod_{s=1}^{\ell}(m_s+1)$ coefficient columns per leaf. Violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{LocalValues} or \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientCell}. \item Payload matrices must have the declared size and be finite, real, and numeric or supported real YALMIP expressions. Malformed payloads raise \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientPayload}. \item A positive \code{NumRateRows} requires nonempty \code{RateBounds}, must match the number of distinct rate-box vertices, and requires every supplied leaf to use that many rows.
 \end{itemize}
 
 \section{Inspect Grid and Storage Properties}\index{GridInfo@\texttt{GridInfo}}\index{LocalValues@\texttt{LocalValues}}\index{Degree@\texttt{Degree}}\index{IsContinuous@\texttt{IsContinuous}}\index{ContainsDecision@\texttt{ContainsDecision}}
@@ -108,7 +108,7 @@ Every \code{pdbase} property below is publicly readable through dot access but h
     \midrule
     \code{GridInfo}          & Grid vectors, node counts, and grid bounds.                                                  \\
     \code{MatrixSize}        & Size of each matrix coefficient or matrix expression.                                        \\
-    \code{Degree}            & Direction-wise local Bernstein degree stored as a \(1\)-by-\(\ell\) row.                    \\
+    \code{Degree}            & Direction-wise local Bernstein degree stored as a $1$-by-$\ell$ row.                    \\
     \code{LocalValues}       & Nested cell tree indexed by physical-cell subscript. Each leaf stores coefficient cells.     \\
     \code{IsContinuous}      & Metadata flag. Subclasses are responsible for boundary sharing if continuity is true.        \\
     \code{ContainsDecision}  & True when coefficient payloads include YALMIP decision variables.                            \\
@@ -135,17 +135,17 @@ source = obj.SourceSummary
                     text width=58mm,minimum height=18mm,inner sep=5pt}]
         \node[store] (root) {\texttt{LocalValues}\\nested root};
         \node[store,below left=of root] (first)
-        {first index \texttt{\{1\}}\\cell path \([1,\cdot]\)};
+        {first index \texttt{\{1\}}\\cell path $[1,\cdot]$};
         \node[store,below right=of root] (second)
-        {first index \texttt{\{2\}}\\cell path \([2,\cdot]\)};
+        {first index \texttt{\{2\}}\\cell path $[2,\cdot]$};
         \node[leaf,below=of first] (leafone)
         {\texttt{LocalValues\{1\}\{1\}}\\
-            labels \([0,0],[0,1],[1,0],[1,1]\)\\
-            values \(C^{(1,1)}[\vect{i}]\)};
+            labels $[0,0],[0,1],[1,0],[1,1]$\\
+            values $C^{(1,1)}[\vect{i}]$};
         \node[leaf,below=of second] (leaftwo)
         {\texttt{LocalValues\{2\}\{1\}}\\
-            labels \([0,0],[0,1],[1,0],[1,1]\)\\
-            values \(C^{(2,1)}[\vect{i}]\)};
+            labels $[0,0],[0,1],[1,0],[1,1]$\\
+            values $C^{(2,1)}[\vect{i}]$};
         \draw[dp/arrow] (root.south) -- ++(0,-3mm) -| (first.north);
         \draw[dp/arrow] (root.south) -- ++(0,-3mm) -| (second.north);
         \draw[dp/arrow] (first.south) -- (leafone.north);
@@ -153,11 +153,11 @@ source = obj.SourceSummary
         \node[dp/label,above=3pt of root]
         {second physical index is \texttt{\{1\}} on both paths};
     \end{tikzpicture}
-    \caption{Nested cell-local storage for a two-parameter, degree-one object on \code{{[0 1 2], [10 20]}}.  There are two physical cells, \([1,1]\) and \([2,1]\).  Each leaf is a flat local coefficient cell in \code{lbls} order: \([0,0]\), \([0,1]\), \([1,0]\), \([1,1]\).}
+    \caption{Nested cell-wise storage for a two-parameter, degree-one object on \code{{[0 1 2], [10 20]}}.  There are two physical cells, $[1,1]$ and $[2,1]$.  Each leaf is a flat local coefficient cell in \code{lbls} order: $[0,0]$, $[0,1]$, $[1,0]$, $[1,1]$.}
     \label{fig:localvalues-tree}
 \end{figure}
 
-The nesting follows physical-cell subscripts, while the flat leaf follows Bernstein labels. Start with \code{LocalValues{i1}}, then take one cell index per remaining parameter. This selects physical cell \([i_1,i_2,\ldots,i_\ell]\). After that selection, the leaf's flat cell array enumerates the \(\prod_s(m_s+1)\) local Bernstein coefficients. Thus \code{coeffs(obj, [2 1])} returns the lower leaf in \cref{fig:localvalues-tree}, while \code{lbls(obj)} explains the order inside that leaf.
+The nesting follows physical-cell subscripts, while the flat leaf follows Bernstein labels. Start with \code{LocalValues{i1}}, then take one cell index per remaining parameter. This selects physical cell $[i_1,i_2,\ldots,i_\ell]$. After that selection, the leaf's flat cell array enumerates the $\prod_{s=1}^{\ell}(m_s+1)$ local Bernstein coefficients. Thus \code{coeffs(obj, [2 1])} returns the lower leaf in \cref{fig:localvalues-tree}, while \code{lbls(obj)} explains the order inside that leaf.
 
 \section{Inspect \texorpdfstring{\code{cells}}{cells}, \texorpdfstring{\code{lbls}}{lbls}, and \texorpdfstring{\code{coeffs}}{coeffs}}
 \index{cells@\texttt{cells}}\index{lbls@\texttt{lbls}}\index{coeffs@\texttt{coeffs}}
@@ -177,7 +177,7 @@ c = obj.coeffs(cellSubs)
 
 \arghead
 \begin{itemize}[leftmargin=*]
-    \item \code{obj} is a \code{pdbase} object or a \code{pdmat}/\code{pdvar} subclass instance using the shared cell-local storage convention.
+    \item \code{obj} is a \code{pdbase} object or a \code{pdmat}/\code{pdvar} subclass instance using the shared cell-wise storage convention.
     \item \code{cellSubs} selects one physical cell for \code{coeffs}.  Supply a numeric row vector such as \code{[2 1]} or a cell array of scalar subscripts such as \code{{2,1}}.
     \item \code{cells} returns physical hypercube subscripts in the shared traversal order.
     \item \code{lbls} returns local Bernstein labels in the shared coefficient order.
@@ -188,7 +188,7 @@ c = obj.coeffs(cellSubs)
 \code{coeffs} requires one positive integer physical-cell index per parameter, within the corresponding cell count.  Invalid numeric or cell-array selectors raise \codeerr{pdbase}{InvalidCellSubs}.
 
 \examplehead
-The label order is shared by \code{pdmat}, \code{pdvar}, and \code{pdlmi}.  In this two-parameter degree-one object, each physical cell stores four coefficient entries with labels \([0,0]\), \([0,1]\), \([1,0]\), and \([1,1]\).
+The label order is shared by \code{pdmat}, \code{pdvar}, and \code{pdlmi}.  In this two-parameter degree-one object, each physical cell stores four coefficient entries with labels $[0,0]$, $[0,1]$, $[1,0]$, and $[1,1]$.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20]}, [1 1], 1);
@@ -223,7 +223,7 @@ val = obj.evaluate(point)
 \end{lstlisting}
 
 \arghead
-\code{point} is a finite real scalar for one parameter or a finite real vector with one coordinate per parameter, inside the physical grid bounds. The method locates one physical cell using right-cell ownership at interior grid nodes, converts the point to local coordinates, and reconstructs the tensor-product Bernstein polynomial. One ordinary coefficient row returns one numeric matrix or symbolic YALMIP expression with \code{size(obj)}. Rate-row storage returns a \(1\)-by-\(N\) cell array in stored row order.
+\code{point} is a finite real scalar for one parameter or a finite real vector with one coordinate per parameter, inside the physical grid bounds. The method locates one physical cell using right-cell ownership at interior grid nodes, converts the point to local coordinates, and reconstructs the tensor-product Bernstein polynomial. One ordinary coefficient row returns one numeric matrix or symbolic YALMIP expression with \code{size(obj)}. Rate-row storage returns a $1$-by-$N$ cell array in stored row order.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -255,13 +255,13 @@ D = rhodiff(A, rateBounds)
 \end{lstlisting}
 
 \arghead
-\code{rhodiff} differentiates coefficient-backed storage cell by cell and returns the same dynamic class as \code{A}. The form \code{rhodiff(A)} uses \code{A.RateBounds}. Empty stored bounds require explicit \code{rateBounds}. Explicit bounds supply missing metadata, but when \code{A.RateBounds} is already stored they must match it exactly. On physical cell \(\vect{c}\), the partial coefficient along a nonzero-degree axis \(s\) is
-\[
+\code{rhodiff} differentiates coefficient-backed storage cell by cell and returns the same dynamic class as \code{A}. The form \code{rhodiff(A)} uses \code{A.RateBounds}. Empty stored bounds require explicit \code{rateBounds}. Explicit bounds supply missing metadata, but when \code{A.RateBounds} is already stored they must match it exactly. On physical cell $\vect{c}$, the partial coefficient along a nonzero-degree axis $s$ is
+\begin{gather*}
 \left(\partial_s A^{(\vect{c})}\right)[\vect{i}]
 =\frac{m_s}{h_s^{\vect{c}}}
 \left(A^{(\vect{c})}[\vect{i}+\vect{e}_s]-A^{(\vect{c})}[\vect{i}]\right),
 \qquad i_s=0,\ldots,m_s-1.
-\]
+\end{gather*}
 For one parameter, an input degree $\vect{m}=(m_1)$ with $m_1>0$ returns $(m_1-1)$, while $(0)$ remains $(0)$. For more than one parameter, a nonzero-axis partial first has degree $\vect{m}-\vect{e}_s$, then is elevated exactly to the common tensor degree $\vect{m}=\code{A.Degree}$ before the rate-weighted partials are added, so \code{D.Degree=A.Degree}. A zero-degree axis contributes the zero partial and still remains part of that common degree vector. Each physical-cell leaf has \code{D.NumRateRows} rows, one per distinct rate-box vertex in \code{helper.rateVerts(D.RateBounds)} order. The result has \code{IsContinuous=false} and derivative source metadata. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the degree reduction, common-degree restoration, and row ordering.
 
 \examplehead
@@ -320,11 +320,11 @@ n = numArgumentsFromSubscript(obj, S, ctx)
 
 \arghead
 \begin{itemize}[leftmargin=*]
-    \item \code{obj} is a \code{pdbase} object or subclass instance. \item \code{dim} is a positive integer matrix dimension for \code{size}. Dimensions after row and column are singleton, and multiple outputs split the stored two-dimensional shape with trailing outputs equal to one. \item \code{ncell} returns \(\prod_s(k_s-1)\), the number of physical hypercube cells. \item \code{ncoeff} returns \(\prod_s(\code{obj.Degree}(s)+1)\), the number of local Bernstein coefficients stored per physical cell. \item \code{npar} returns the parameter dimension \(\ell\). \item \code{size}, \code{height}, \code{width}, \code{length}, \code{ndims}, and one-argument \code{numel} report the matrix payload: respectively its two-element shape, row count, column count, largest dimension, the value two, and the product of the two dimensions. \item \code{end} reports the payload boundary used by inherited two-index syntax. One-index use returns the product of the dimensions, dimensions after two return one. \item \code{numArgumentsFromSubscript} always returns one, which keeps dot access and subclass indexing as one-output operations while \code{numel} follows payload semantics.
+    \item \code{obj} is a \code{pdbase} object or subclass instance. \item \code{dim} is a positive integer matrix dimension for \code{size}. Dimensions after row and column are singleton, and multiple outputs split the stored two-dimensional shape with trailing outputs equal to one. \item \code{ncell} returns $\prod_{s=1}^{\ell}(k_s-1)$, the number of physical hypercube cells. \item \code{ncoeff} returns $\prod_{s=1}^{\ell}(\code{obj.Degree}(s)+1)$, the number of local Bernstein coefficients stored per physical cell. \item \code{npar} returns the parameter dimension $\ell$. \item \code{size}, \code{height}, \code{width}, \code{length}, \code{ndims}, and one-argument \code{numel} report the matrix payload: respectively its two-element shape, row count, column count, largest dimension, the value two, and the product of the two dimensions. \item \code{end} reports the payload boundary used by inherited two-index syntax. One-index use returns the product of the dimensions, dimensions after two return one. \item \code{numArgumentsFromSubscript} always returns one, which keeps dot access and subclass indexing as one-output operations while \code{numel} follows payload semantics.
 \end{itemize}
 
 \examplehead
-For a two-parameter (\(\ell=2\)) degree-one backend object, the first grid has two physical intervals and the second has one.  The matrix payload is \(2\)-by-\(3\), independently of the grid shape.  Thus \(n_{\mathrm{cell}}=(3-1)(2-1)=2\) and each cell stores \(n_{\mathrm{coeff}}=(1+1)^2=4\) entries, ordered by the explicit labels \([0,0],[0,1],[1,0],[1,1]\).
+For a two-parameter ($\ell=2$) degree-one backend object, the first grid has two physical intervals and the second has one.  The matrix payload is $2$-by-$3$, independently of the grid shape.  Thus $n_{\mathrm{cell}}=(3-1)(2-1)=2$ and each cell stores $n_{\mathrm{coeff}}=(1+1)^2=4$ entries, ordered by the explicit labels $[0,0],[0,1],[1,0],[1,1]$.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20]}, [2 3], 1);
@@ -391,7 +391,7 @@ S = squeeze(A)
 \end{lstlisting}
 
 \descriptionhead
-Unary plus returns the same value. Unary minus, transpose, conjugate transpose, vectorization, diagonal extraction/construction, trace, reshape, and squeeze map coefficient payloads while preserving the parameter representation. \code{vec} uses MATLAB column-major order. \code{trace} returns a \(1\)-by-\(1\) object and sums the main diagonal even for a row or column vector. \code{diag} accepts a finite integer offset and requires a nonempty selected diagonal because every package payload has positive dimensions. \code{reshape} supports exactly two positive dimensions, permits at most one inferred \code{[]} dimension, and preserves the element count. \code{squeeze} is the identity because the storage contract remains two-dimensional.
+Unary plus returns the same value. Unary minus, transpose, conjugate transpose, vectorization, diagonal extraction/construction, trace, reshape, and squeeze map coefficient payloads while preserving the parameter representation. \code{vec} uses MATLAB column-major order. \code{trace} returns a $1$-by-$1$ object and sums the main diagonal even for a row or column vector. \code{diag} accepts a finite integer offset and requires a nonempty selected diagonal because every package payload has positive dimensions. \code{reshape} supports exactly two positive dimensions, permits at most one inferred \code{[]} dimension, and preserves the element count. \code{squeeze} is the identity because the storage contract remains two-dimensional.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -675,40 +675,40 @@ rho2Grid = 1×3 double
          0    0.5000    1.0000
 \end{lstlisting}
 
-The example invokes the protected helper through public addition, which is the supported user entry point. Here \(\ell=2\). The physical-cell index \(\vect{c}=(c_1,c_2)\) is one-based, while the degree-one local Bernstein label \(\vect{i}=(i_1,i_2)\in\{0,1\}^2\) is zero-based inside every cell.
+The example invokes the protected helper through public addition, which is the supported user entry point. Here $\ell=2$. The physical-cell index $\vect{c}=(c_1,c_2)$ is one-based, while the degree-one local Bernstein label $\vect{i}=(i_1,i_2)\in\{0,1\}^2$ is zero-based inside every cell.
 
 \begin{center}
     \begin{tikzpicture}[x=1.25cm,y=1.25cm]
     \node[dp/label,font=\scriptsize\bfseries] at (0.9,2.30)
-    {\(\mathcal G_A=\{[0,1],[0,0.5,1]\}\)};
+    {$\mathcal G_A=\{[0,1],[0,0.5,1]\}$};
     \draw[dp/grid-line] (0,0)--(1.8,0)--(1.8,1.8)--(0,1.8)--cycle;
     \draw[dp/grid-line] (0,0.9)--(1.8,0.9);
-    \node[dp/label] at (0.9,0.45) {\(\vect{c}=(1,1)\)};
-    \node[dp/label] at (0.9,1.35) {\(\vect{c}=(1,2)\)};
+    \node[dp/label] at (0.9,0.45) {$\vect{c}=(1,1)$};
+    \node[dp/label] at (0.9,1.35) {$\vect{c}=(1,2)$};
 
         \node[dp/label,font=\scriptsize\bfseries] at (3.5,2.30)
-        {\(\mathcal G_B=\{[0,0.5,1],[0,1]\}\)};
+        {$\mathcal G_B=\{[0,0.5,1],[0,1]\}$};
         \draw[dp/grid-line] (2.6,0)--(4.4,0)--(4.4,1.8)--(2.6,1.8)--cycle;
         \draw[dp/grid-line] (3.5,0)--(3.5,1.8);
         \node[dp/label,font=\tiny] at (3.05,0.9)
-        {\(\vect{c}=\)\\\((1,1)\)};
+        {$\vect{c}=$\\$(1,1)$};
         \node[dp/label,font=\tiny] at (3.95,0.9)
-        {\(\vect{c}=\)\\\((2,1)\)};
+        {$\vect{c}=$\\$(2,1)$};
 
         \draw[dp/arrow] (4.65,0.9)--(5.20,0.9)
         node[midway,above,font=\tiny]{merge};
         \node[dp/label,font=\scriptsize\bfseries] at (6.35,2.30)
-        {\(\mathcal G=\{[0,0.5,1],[0,0.5,1]\}\)};
+        {$\mathcal G=\{[0,0.5,1],[0,0.5,1]\}$};
         \draw[dp/grid-line,very thick] (5.45,0)--(7.25,0)--(7.25,1.8)--(5.45,1.8)--cycle;
         \draw[dp/grid-line,very thick] (6.35,0)--(6.35,1.8);
         \draw[dp/grid-line,very thick] (5.45,0.9)--(7.25,0.9);
-        \node[dp/label] at (5.90,0.45) {\((1,1)\)};
-        \node[dp/label] at (6.80,0.45) {\((2,1)\)};
-        \node[dp/label] at (5.90,1.35) {\((1,2)\)};
-        \node[dp/label] at (6.80,1.35) {\((2,2)\)};
+        \node[dp/label] at (5.90,0.45) {$(1,1)$};
+        \node[dp/label] at (6.80,0.45) {$(2,1)$};
+        \node[dp/label] at (5.90,1.35) {$(1,2)$};
+        \node[dp/label] at (6.80,1.35) {$(2,2)$};
         \node[dp/label,text width=45mm] at (6.35,-0.55)
         {four physical cells; local labels in each cell:\\
-            \(\vect{i}\in\{0,1\}^2\) (zero-based)};
+            $\vect{i}\in\{0,1\}^2$ (zero-based)};
         \end{tikzpicture}
 
     \textit{Each axis uses the sorted union of its input nodes.  The result is the unique minimal same-bound tensor grid containing both inputs.}

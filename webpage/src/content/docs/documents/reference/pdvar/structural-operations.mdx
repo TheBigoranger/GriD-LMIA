@@ -21,7 +21,7 @@ plain = P.'
 conjugate = P'
 ```
 
-Both swap symbolic payload dimensions. only `ctranspose` conjugates.
+Both swap symbolic payload dimensions. Only `ctranspose` conjugates.
 
 ### <span id="pdvar-reshape"></span>`reshape`
 
@@ -31,7 +31,7 @@ out = reshape(P,[rows columns])
 out = reshape(P,[],columns)
 ```
 
-Exactly two dimensions are supported. element count must be preserved.
+Exactly two dimensions are supported. Element count must be preserved.
 Failures use `pdvar:InvalidReshape`.
 
 ### <span id="pdvar-squeeze"></span>`squeeze`
@@ -41,7 +41,7 @@ out = squeeze(P)
 ```
 
 Applies squeeze coefficient-wise while preserving the always-two-dimensional
-`MatrixSize`. It never turns coefficient storage or rate rows into payload
+`MatrixSize`. Coefficient storage and rate rows remain separate from payload
 dimensions.
 
 ### <span id="pdvar-vec"></span>`vec`
@@ -193,7 +193,7 @@ out = repmat(P,[rows columns])
 out = repmat(P,rows,columns)
 ```
 
-Uses positive integer two-dimensional repeats. malformed forms raise
+Uses positive integer two-dimensional repeats. Malformed forms raise
 `pdvar:InvalidRepmat`.
 
 ```matlab
@@ -216,7 +216,7 @@ shapes =
      2     3
 ```
 
-<MatrixGlyphDiagram before={[["P", "A"]]} after={[["P", "0"], ["0", "A"]]} beforeLabel="symbolic + known" afterLabel="blkdiag(P,A)" caption="Derived-class assembly retains the symbolic handles and common cell-local geometry of every block." />
+<MatrixGlyphDiagram before={[["P", "A"]]} after={[["P", "0"], ["0", "A"]]} beforeLabel="symbolic + known" afterLabel="blkdiag(P,A)" caption="Derived-class assembly retains the symbolic handles and common cell-wise geometry of every block." />
 
 ## Flip and rotation
 
@@ -240,7 +240,7 @@ out = rot90(P,k)
 ```
 
 Rotates each symbolic payload by a finite integer number of quarter turns.
-Odd turns swap payload dimensions. errors use `pdvar:InvalidRot90`.
+Odd turns swap payload dimensions. Errors use `pdvar:InvalidRot90`.
 
 ```matlab
 yalmip('clear')
@@ -266,8 +266,8 @@ shapes =
 
 These methods preserve affine decision dependence and operate on the symbolic
 expressions before any `value` call,
-`optimize`, or a solver. They never reorder physical cells, local labels, or
-rate vertices.
+`optimize`, or a solver. Physical cells, local labels, and rate vertices retain
+their order.
 
 [`pdvar algebra`](/GriD-LMIA/documents/reference/pdvar/algebra/) ·
 [`storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) ·

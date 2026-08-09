@@ -31,9 +31,23 @@ EXCLUDED_ENVIRONMENTS = {
     "multline", "multline*", "displaymath", "split", "cases", "bmatrix", "pmatrix"
 }
 
-NEGATIVE = re.compile(r"\b(?:not|no|without|cannot|does\s+not|is\s+not|rather\s+than)\b", re.IGNORECASE)
+NEGATIVE = re.compile(
+    r"\b(?:not|no|without|cannot|does\s+not|do\s+not|is\s+not|are\s+not|"
+    r"rather\s+than|never|none|neither|nor|unable|fails?|failure|inconclusive)\b",
+    re.IGNORECASE,
+)
 BANNED = re.compile(r"\b(?:delve|tapestry|myriad|groundbreaking|game-changing|seamless|seamlessly|transformative|intricate|multifaceted|holistic|revolutionary|unlock|unlocks|unlocking)\b", re.IGNORECASE)
 ACRONYM = re.compile(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b|\b[A-Z]{2,}\b")
+BOUNDARY_HEADING = re.compile(
+    r"\b(?:remarks?|boundaries|validation|errors?|diagnostics?|limitations?|status|failure)\b",
+    re.IGNORECASE,
+)
+BOUNDARY_SENTENCE = re.compile(
+    r"\\codeerr|\b(?:accepts?|rejects?|requires?|valid(?:ation)?|invalid|errors?|warnings?|"
+    r"fails?|failure|solver\s+status|infeasible|inconclusive|unsupported|unavailable|"
+    r"missing|absent|empty|boundary|limitation|read-only|must|may\s+not)\b",
+    re.IGNORECASE,
+)
 
 GENERAL_OR_EXTERNAL = {
     "API", "HTML", "PDF", "SVG", "MATLAB", "YALMIP", "MOSEK", "COPT", "SEDUMI",
@@ -143,6 +157,24 @@ def author_prose(path: Path) -> list[tuple[int, str]]:
     return result
 
 
+def negative_context_lines(path: Path) -> set[int]:
+    """Return lines whose surrounding heading or sentence states a boundary."""
+    allowed: set[int] = set()
+    active_boundary = False
+    reset_macros = re.compile(
+        r"\\(?:section|subsection|subsubsection|paragraph|syntaxhead|arghead|"
+        r"descriptionhead|examplehead|seealsohead|ideastep)\b"
+    )
+    for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if r"\remarkshead" in raw:
+            active_boundary = True
+        elif reset_macros.search(raw):
+            active_boundary = BOUNDARY_HEADING.search(raw) is not None
+        if active_boundary or BOUNDARY_SENTENCE.search(raw):
+            allowed.add(number)
+    return allowed
+
+
 def manual_files() -> list[Path]:
     return [DOC / "manual.tex", *(DOC / "chapters" / name for name in CHAPTER_ORDER)]
 
@@ -184,6 +216,12 @@ def audit_inventory(errors: list[str]) -> Counter:
             errors.append(f"{record['id']} TeX anchor is absent: {record['tex_anchor']}")
         if f"% inventory-id: {record['id']}" not in index_text:
             errors.append(f"{record['id']} generated TeX index evidence is absent")
+        record_prose = " ".join(
+            str(record[field])
+            for field in ("call_forms_options", "inputs", "return_type_shape", "validation_errors", "supported_scope")
+        )
+        if re.search(r"\b(?:cellwise|cell-local|cell-locally)\b", record_prose, re.IGNORECASE):
+            errors.append(f"{record['id']} uses noncanonical cell-wise terminology")
         if "{member}" in record["tex_index"]:
             errors.append(f"{record['id']} has a templated TeX index")
         example_path = record["tex_example_evidence"].split("#", 1)[0]
@@ -229,23 +267,65 @@ def audit_terminology(errors: list[str]) -> None:
 def audit_tex(errors: list[str]) -> None:
     for path in manual_files():
         source = path.read_text(encoding="utf-8")
+        relative = path.relative_to(ROOT)
+        for pattern, description in (
+            (r"\\\(", r"uses \\( inline math"),
+            (r"(?m)^\s*\\\[\s*$", r"uses \\[ display math"),
+            (r"\\begin\{(?:equation\*?|align\*?|displaymath|multline\*?)\}", "uses a non-gather display environment"),
+            (r"\^\\mathsf\{?T\}?|\^\{\\mathsf\s*T\}|\^\{\\mathsf\{T\}\}|\^T", "uses a noncanonical transpose"),
+        ):
+            match = re.search(pattern, source)
+            if match:
+                line = source.count("\n", 0, match.start()) + 1
+                errors.append(f"{relative}:{line} {description}")
+        empty_gather = re.search(r"\\begin\{gather\*\}\s*\\end\{gather\*\}", source)
+        if empty_gather:
+            line = source.count("\n", 0, empty_gather.start()) + 1
+            errors.append(f"{relative}:{line} has an empty gather* environment")
+        incomplete_operator = re.search(
+            r"\\(?:sum|prod)_(?:[A-Za-z]|\{[A-Za-z]+\})(?!\s*(?:=|\\in|\\subset))",
+            source,
+        )
+        if incomplete_operator:
+            line = source.count("\n", 0, incomplete_operator.start()) + 1
+            errors.append(f"{relative}:{line} has a scalar-indexed sum or product without explicit bounds")
+        for forbidden in (
+            r"\\sum_\{\\vect\{i\}\}",
+            r"\\sum_\{\\vect\{i\}\\in\s*\\prod",
+            r"\\sum_\{\\vect\{i\}\\in\\mathcal I_\{\\vect\{[mM]\}\}\}",
+        ):
+            match = re.search(forbidden, source)
+            if match:
+                line = source.count("\n", 0, match.start()) + 1
+                errors.append(f"{relative}:{line} shortens the complete local-label summation domain")
         for command in (r"\mathbf", r"\boldsymbol", r"\vec"):
             if re.search(re.escape(command) + r"(?![A-Za-z])", source):
-                errors.append(f"{path.relative_to(ROOT)} uses legacy semantic vector command {command}")
+                errors.append(f"{relative} uses legacy semantic vector command {command}")
         vector_source = source.replace(r"\newcommand{\vect}[1]{\boldsymbol{#1}}", "")
         for match in re.finditer(r"\vect(?!\{)", vector_source):
             line = vector_source.count("\n", 0, match.start()) + 1
-            errors.append(f"{path.relative_to(ROOT)}:{line} uses unbraced semantic vector command")
+            errors.append(f"{relative}:{line} uses unbraced semantic vector command")
         prose_lines = author_prose(path)
+        negative_allowed = negative_context_lines(path)
+        protected_anchor = None
+        if path.name == "workflow-introduction.tex":
+            for number, raw in enumerate(source.splitlines(), 1):
+                if "On this common unit box" in raw:
+                    protected_anchor = number
+                    break
         for number, text in prose_lines:
             negative = NEGATIVE.search(text)
-            if negative:
-                errors.append(f"{path.relative_to(ROOT)}:{number} negative construction `{negative.group(0)}`")
+            if negative and number not in negative_allowed:
+                errors.append(f"{relative}:{number} negative construction `{negative.group(0)}` outside a boundary context")
             banned = BANNED.search(text)
             if banned:
-                errors.append(f"{path.relative_to(ROOT)}:{number} banned promotional term `{banned.group(0)}`")
+                errors.append(f"{relative}:{number} banned promotional term `{banned.group(0)}`")
             if ";" in text:
-                errors.append(f"{path.relative_to(ROOT)}:{number} semicolon in author prose")
+                errors.append(f"{relative}:{number} semicolon in author prose")
+            if re.search(r"\b(?:cellwise|cell-local|cell-locally)\b", text, re.IGNORECASE):
+                protected = protected_anchor is not None and number < protected_anchor
+                if not protected:
+                    errors.append(f"{relative}:{number} uses noncanonical cell-wise terminology")
         prose_numbers = {number for number, _ in prose_lines}
         source_lines = source.splitlines()
         for number in sorted(prose_numbers):
@@ -255,16 +335,16 @@ def audit_tex(errors: list[str]) -> None:
                 plain_first = bool(re.match(r"^[A-Z][^\\{}&]*[.!?]$", first))
                 plain_second = bool(re.match(r"^[A-Z][^\\{}&]*", second))
                 if plain_first and plain_second:
-                    errors.append(f"{path.relative_to(ROOT)}:{number}-{number + 1} prose paragraph spans physical source lines")
+                    errors.append(f"{relative}:{number}-{number + 1} prose paragraph spans physical source lines")
     style = (DOC / "manual-style.tex").read_text(encoding="utf-8")
     if r"\newcommand{\vect}[1]{\boldsymbol{#1}}" not in style:
         errors.append("manual-style.tex misses the semantic vector definition")
     manual = (DOC / "manual.tex").read_text(encoding="utf-8")
-    if "Version v1.3.2" not in manual:
-        errors.append("manual metadata is not v1.3.2")
+    if "Version v1.3.3" not in manual or r"\date{August 9, 2026}" not in manual:
+        errors.append("manual metadata is not v1.3.3 dated August 9, 2026")
     history = (DOC / "chapters" / "release-history.tex").read_text(encoding="utf-8")
-    if "v1.3.2" not in history:
-        errors.append("release history misses v1.3.2")
+    if "v1.3.3" not in history or "August 9, 2026" not in history:
+        errors.append("release history misses v1.3.3 dated August 9, 2026")
 
 
 def main() -> int:
@@ -285,7 +365,7 @@ def main() -> int:
     total = sum(counts.values())
     summary = ", ".join(f"{owner}={count}" for owner, count in sorted(counts.items()))
     print(f"documentation audit passed: {total} per-symbol API records ({summary})")
-    print("terminology, first-use definitions, generated index evidence, semantic vectors, affirmative prose, and style checks passed")
+    print("terminology, first-use definitions, generated index evidence, semantic vectors, contextual boundary prose, and style checks passed")
     return 0
 
 

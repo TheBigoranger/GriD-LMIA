@@ -62,7 +62,7 @@ C = lhs == rhs
 
 Direct coefficient-wise assembly is the default. For `<=` and `>=`, one scan
 of every original coefficient selects semidefinite mode only when all are
-square Hermitian (numeric tolerance `1e-10` inclusive). otherwise the entire
+square Hermitian (numeric tolerance `1e-10` inclusive). Otherwise the entire
 inequality is entry-wise and warns once with `pdlmi:ElementwiseInequality`.
 For `==`, direct column-major coefficient equality accepts rectangular and
 non-Hermitian residuals. `UsePolya` selects exact
@@ -137,7 +137,7 @@ least `max(SparsePutinarOrder + 1)` returns dense Putinar.
 
 SparseFullBox uses the same dimension-dependent minimum and default order.
 `BandWidth` remains one scalar width interpreted on every tensor axis. Width one
-returns actual Direct state after order validation. width at least
+returns actual Direct state after order validation. Width at least
 `max(SparseFullBoxOrder + 1)` returns actual FullBox state.
 
 ## Returned Object
@@ -151,7 +151,7 @@ coefficient inequalities, Pólya-elevated coefficient inequalities, or the PSD
 blocks and exact identities for the selected Gram mode.
 
 Equality stores direct coefficient equalities only. A proven identity may have
-empty `Constraints`. inspect properties with dot access such as `C.Relation`,
+empty `Constraints`. Inspect properties with dot access such as `C.Relation`,
 `C.Residual`, and `C.Constraints`.
 
 ## Examples
@@ -213,13 +213,13 @@ at the selected degree, constraining every elevated coefficient and active
 rate-vertex row. It returns a new value and preserves the input expression and source `pdlmi`:
 `one = direct.usePolya()` leaves `direct.UsePolya` false and returns
 `one.UsePolya` true. Reapplying another selector likewise rebuilds a new
-object from `Residual`. it never accumulates certificate constraints in the
-existing object.
+object from `Residual`. The existing object's certificate constraints remain
+unchanged.
 
 <Aside type="note" title="Implementation remark: rebuild, do not stack">
 Every certificate selector constructs a new object from the stored original
-`Residual` and relation. it never transforms an earlier selector's finite
-constraints. Direct and Pólya coefficient constraints follow `cells()` order,
+`Residual` and relation. It builds finite constraints directly from that stored
+pair. Direct and Pólya coefficient constraints follow `cells()` order,
 then stored rate-row order, then `lbls()` coefficient order. Entry-wise
 inequalities and equalities use MATLAB column-major vectorization within each
 coefficient matrix.
@@ -278,7 +278,7 @@ numel(paired.Constraints)
 `PutinarOrder` alone selects Putinar assembly silently. Name-value
 syntax and paired string/value syntax select the same implemented mode. Each
 object uses independent Gram blocks and exact coefficient identities.
-construction stores constraints for the caller's solver and explicit positivity margin.
+Construction stores constraints for the caller's solver and explicit positivity margin.
 
 ### SparseFullBox option forms
 
@@ -335,9 +335,9 @@ more parameters, `CliqueSize=1` remains SparsePutinar.
 - Nonsquare or non-Hermitian inequality coefficients select supported entry-wise mode and warn once with `pdlmi:ElementwiseInequality`.
 - Rectangular and non-Hermitian equality coefficients are supported.
 - A residual outside supported `pdvar`/coefficient-backed `pdmat` forms raises
-  `pdlmi:InvalidExpression`. function-only `pdmat` raises
+  `pdlmi:InvalidExpression`. Function-only `pdmat` raises
   `pdlmi:MissingCoefficientEvidence`. `pdlmi(A,"==")` for `pdmat` raises
-  `pdlmi:UnsupportedPdmatEquality`. an unsupported relation raises
+  `pdlmi:UnsupportedPdmatEquality`. An unsupported relation raises
   `pdlmi:InvalidRelation`.
 - Nonlogical selectors raise the matching `pdlmi:InvalidUse...` identifier, including `pdlmi:InvalidUseSparsePutinar`.
 - Invalid Pólya increments, Gram orders, clique sizes, or widths raise their matching validation identifiers, including `pdlmi:InvalidSparsePutinarOrder` and `pdlmi:InvalidCliqueSize`.

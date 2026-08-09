@@ -21,7 +21,7 @@ Gram bases, absolute order $\vect r$, and target coefficients follow the
 ## Purpose
 
 Create a new `pdlmi` that represents the stored residual with the implemented
-cell-local full-box Bernstein-Gram preordering.
+cell-wise full-box Bernstein-Gram preordering.
 
 ## Syntax
 
@@ -156,7 +156,7 @@ by five identities. The selection made from `polya` replaces Pólya assembly
 and rebuilds from the stored residual.
 
 `ValidationMode` is transient, accepts case-insensitive `"fast"` or
-`"strict"`, applies only to this rebuild, and is neither stored nor inherited.
+`"strict"`, and applies only to this rebuild. Stored and inherited state remain unchanged.
 
 ## Anisotropic Assembly Output
 

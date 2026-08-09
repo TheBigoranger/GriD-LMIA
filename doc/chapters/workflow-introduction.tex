@@ -1,54 +1,57 @@
-\chapter[From a Parameter Box to Finite Constraints]{From a Parameter Box\\
- to Finite Constraints}
+\chapter[From a Parameter Hyper-rectangle to Finite Constraints]{From a Parameter Hyper-rectangle to Finite Constraints}
 \label{sec:bernstein-motivation}
 
-Parameter-dependent LMIs require a matrix inequality to hold at every point of a continuous parameter domain. The package represents the known data and decision functions on a parameter box with cellwise Bernstein polynomials, then converts the resulting continuum condition into finite constraints for YALMIP. An \term{lpv} induced-\(L_2\)-gain problem provides the first example. The sections that follow develop the general \term{dpd-lmi} and its finite certificate construction. The supporting algebra is developed in Appendices~\ref{app:bernstein-math} and~\ref{app:certificates}, and the API contracts are presented in Chapters~\ref{sec:pdmat}--\ref{sec:pdlmi}.
+\term{pd-lmi} requires a matrix inequality to hold at every point of a continuous parameter domain. The package represents the known data and decision variables on a hyper-rectangle with cellwise Bernstein polynomials, then converts the resulting continuous condition into finite constraints for YALMIP. An \termdef{lpv} induced-$\mathcal{L}_2$-gain problem provides the first example. A general \termdef{dpd-lmi} problem is formulated with its finite certificate construction. The supporting algebra is developed in Appendices~\ref{app:bernstein-math} and~\ref{app:certificates}, and the API contracts are presented in Chapters~\ref{sec:pdmat}--\ref{sec:pdlmi}.
 
-\section[LPV Induced-L2-Gain Motivation]{Motivation: LPV Induced-\(L_2\)-Gain}
+\section[LPV Induced-L2-Gain Motivation]{Motivation: LPV induced-$\mathcal{L}_2$-Gain}
 
-Consider a linear parameter-varying (LPV) plant
-\begin{align}
-    \dot x(t) & =A(\vect{\rho}(t))x(t)+B_w(\vect{\rho}(t))w(t),\nonumber \\
-    z(t)      & =C_z(\vect{\rho}(t))x(t)+D_{zw}(\vect{\rho}(t))w(t),
+Consider a \termdef{lpv} plant
+\begin{gather}
+    \begin{aligned}
+        \dot x(t) & =A(\vect{\rho}(t))x(t)+B_w(\vect{\rho}(t))w(t), \\
+        z(t)       & =C_z(\vect{\rho}(t))x(t)+D_{zw}(\vect{\rho}(t))w(t).
+    \end{aligned}
     \label{eq:lpv-l2-model}
-\end{align}
-where \(x\in\mathbb R^{n_x}\), \(w\in\mathbb R^{n_w}\), \(z\in\mathbb R^{n_z}\), and the measurable scheduling trajectory satisfies \((\vect{\rho}(t),\dot{\vect{\rho}}(t))\in\mathcal P\times\mathcal R\). For \(\gamma>0\), the zero-state induced-\(L_2\) objective is to certify
-\[
+\end{gather}
+where $x\in\mathbb R^{n_x}$, $w\in\mathbb R^{n_w}$, $z\in\mathbb R^{n_z}$, and the measurable scheduling trajectory satisfies $(\vect{\rho}(t),\dot{\vect{\rho}}(t))\in\mathcal P\times\mathcal R$. For $\gamma>0$, the zero-state induced-$\mathcal{L}_2$ objective is to certify
+\begin{gather*}
     \lVert z\rVert_{\mathcal L_2}<\gamma\lVert w\rVert_{\mathcal L_2}
-\]
-for every nonzero admissible disturbance and every admissible scheduling trajectory.
-
-A differentiable matrix $P(\vect{\rho})=P(\vect{\rho})^{\mathsf T}$ supplies the scaled bounded-real DPD-LMI \cite{scherer1996}
-\begin{align}
-    P(\vect{\rho})                                                                                                          & \succ0,
-    \label{eq:canonical-positive}                                                                                                         \\
+\end{gather*}
+A differentiable matrix $P(\vect{\rho})=P(\vect{\rho})^\top$ supplies the scaled bounded-real DPD-LMI \cite{scherer1996}
+\begin{gather}
+    P(\vect{\rho}) \succ0.
+    \label{eq:canonical-positive}
+\end{gather}
+\begin{gather}
     \begin{bmatrix}
         \dot P(\vect{\rho},\dot{\vect{\rho}})+\operatorname{He}\!\left(P(\vect{\rho})A(\vect{\rho})\right) &
         P(\vect{\rho})B_w(\vect{\rho})                                                                             &
-        C_z(\vect{\rho})^{\mathsf T}                                                                                     \\
-        B_w(\vect{\rho})^{\mathsf T}P(\vect{\rho})                                                                 &
+        C_z(\vect{\rho})^\top                                                                                        \\
+        B_w(\vect{\rho})^\top P(\vect{\rho})                                                                       &
         -\gamma I_{n_w}                                                                                                    &
-        D_{zw}(\vect{\rho})^{\mathsf T}                                                                                  \\
+        D_{zw}(\vect{\rho})^\top                                                                                         \\
         C_z(\vect{\rho})                                                                                               &
         D_{zw}(\vect{\rho})                                                                                            &
         -\gamma I_{n_z}
-    \end{bmatrix} & \prec0
+    \end{bmatrix} \prec0.
     \label{eq:lpv-spine}
-\end{align}
-for every \((\vect{\rho},\dot{\vect{\rho}})\in\mathcal P\times\mathcal R\), where \(\operatorname{He}(X)=X+X^{\mathsf T}\) and
-\[
+\end{gather}
+for every $(\vect{\rho},\dot{\vect{\rho}})\in\mathcal P\times\mathcal R$, where $\operatorname{He}(X)=X+X^\top$ and
+\begin{gather*}
     \dot P(\vect{\rho},\dot{\vect{\rho}})
     =\sum_{s=1}^{\ell}\dot\rho_s
     \frac{\partial P}{\partial\rho_s}(\vect{\rho}).
-\]
-This application is one instance of the general derivative-dependent residual below. The strict signs are analysis notation. The package uses non-strict semidefinite comparisons and applies exactly the numerical margin stated by the user.
+\end{gather*}
+This application is one instance of the general derivative-dependent \term{pd-lmi} below. The strict signs are analysis notation. The package uses non-strict semidefinite comparisons and applies exactly the numerical margin stated by the user.
 
 \section{General Problem and Assumptions}
 \label{sec:general-problem-assumptions}
 
-Let $y=(y_1,\ldots,y_N)$ collect scalar parameter-dependent decision functions. The general task is to satisfy the single residual
-\begin{equation}
-    \mathcal F(\vect{\rho},\dot{\vect{\rho}};y)
+Let $\vect{y}(\vect{\rho})=\begin{bmatrix}
+    y_1(\vect{\rho})&\ldots&y_N(\vect{\rho})
+\end{bmatrix}^\top$ be a parameter-dependent $N$-dimensional decision vector. The goal of this package is to formulate a finite certificate for the following \term{dpd-lmi} problem:
+\begin{gather}
+    \mathcal F(\vect{\rho},\dot{\vect{\rho}};\vect{y})
     =F_0(\vect{\rho})
     +\sum_{k=1}^{N}F_k(\vect{\rho})y_k(\vect{\rho})+\sum_{k=1}^{N}\sum_{s=1}^{\ell}
     T_{k,s}(\vect{\rho})\dot\rho_s
@@ -57,57 +60,56 @@ Let $y=(y_1,\ldots,y_N)$ collect scalar parameter-dependent decision functions. 
     \quad
     \forall(\vect{\rho},\dot{\vect{\rho}})\in\mathcal P\times\mathcal R.
     \label{eq:general-pdlmi}
-\end{equation}
-The package fixes the abstract sets and decision class in \cref{eq:general-pdlmi} through the following assumptions.
+\end{gather}
+The package supposes  the following assumptions to hold throughout the modeling and certification process.
 \begin{itemize}
-    \item The scheduling set and rate set are axis-aligned boxes. General polytopic or curved scheduling domains are outside the implemented model:
-          \[
+    \item The scheduling set and rate set are hyper-rectangles.
+          \begin{gather*}
               \mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s],
               \qquad
               \mathcal R=\prod_{s=1}^{\ell}[\underline v_s,\overline v_s],
               \qquad
               \mathcal V_{\mathcal R}
               =\prod_{s=1}^{\ell}\{\underline v_s,\overline v_s\}.
-          \]
-    \item The functions $F_0$, $F_k$, and $T_{k,s}$ are known matrix functions of compatible dimensions, and the $y_k$ are scalar decision functions. A matrix-valued decision is represented by vectorizing its independent scalar entries and assigning one component $y_k$ to each entry, which encodes symmetry through the independent scalar entries. Setting every $T_{k,s}=0$ removes the derivative term and recovers an ordinary derivative-free \term{pd-lmi}.
-    \item The theoretical statement uses differentiable $y_k$. The package searches instead over continuous piecewise-Bernstein functions that are differentiable within each physical cell. Their values agree on shared faces, but their one-sided derivatives may differ, so derivative data and the resulting residual conditions remain cell-local at those interfaces.
-    \item Known data used by a certificate have cell-local polynomial coefficient evidence, and the assembled residual remains affine in the underlying YALMIP decisions. Supported numeric or known parameter-dependent factors may multiply a decision expression, but products of two decision-bearing expressions are outside the affine model.
-    \item Dependence on $\dot{\vect{\rho}}$ is affine. Consequently, checking the distinct vertices in $\mathcal V_{\mathcal R}$ is exactly equivalent to checking the complete rate box $\mathcal R$. There are at most $2^\ell$ such vertices because a direction with equal lower and upper bounds contributes only one value. This exact reduction is separate from the two finite restrictions over the scheduling variables.
-    \item MATLAB and YALMIP use non-strict semidefinite comparisons. A theoretical strict condition therefore requires an explicit user-selected margin, for example \(-\mathcal F(\vect{\rho},\dot{\vect{\rho}};y)-\varepsilon I\succeq0\). Failure of a finite certificate leaves feasibility of \cref{eq:general-pdlmi} inconclusive.
+          \end{gather*}
+    % \item The functions $F_0$, $F_k$, and $T_{k,s}$ are known parameter-dependent matrix functions of compatible dimensions, and $\vect{y}$ is a parameter-dependent decision vector. Setting every $T_{k,s}\equiv0, \forall k,s$ removes the derivative term and recovers an ordinary derivative-free \term{pd-lmi}.
+    \item $\vect{y}$ is continuous, and under given gridding, cell-wise polynomial of appropriate degree. Their values agree on shared faces, but their one-sided derivatives may differ.
+    \item Under given gridding, known data $F_0$, $F_k$, and $T_{k,s}$ are continuous, and cell-wise polynomial of appropriate degree.
+    \item MATLAB and YALMIP use non-strict semidefinite comparisons. A theoretical strict condition therefore requires an explicit user-selected margin, for example $-\mathcal F(\vect{\rho},\dot{\vect{\rho}};y)-\varepsilon I\succeq0$. Failure of a finite certificate leaves feasibility of \cref{eq:general-pdlmi} inconclusive.
 \end{itemize}
 
 \section[Gridding the Parameter Domain]{Gridding the Parameter Domain}
 \label{sec:intro-gridding}
 \index{physical grid}\index{physical node}\index{physical cell}\index{tensor grid}
 
-For each parameter direction \(s=1,\ldots,\ell\), choose an independent, possibly nonuniform axis grid
-\[
+For each parameter direction $s=1,\ldots,\ell$, choose an independent, possibly nonuniform axis grid
+\begin{gather*}
     \mathcal G_s=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},
     \qquad
     \underline\rho_s=\rho_s^{(1)}<\cdots<\rho_s^{(k_s)}=\overline\rho_s.
-\]
+\end{gather*}
 Their Cartesian product is
-\[
+\begin{gather*}
     \mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell,
-\]
-which contains \(\prod_{s=1}^{\ell}k_s\) physical nodes. The  multi-index \(\vect{c}=(c_1,\ldots,c_\ell)\), with \(c_s\in\{1,\ldots,k_s-1\}\), defines the location of a physical cell $\vect{c}$ and its width along $s$:
-\[
+\end{gather*}
+which contains $\prod_{s=1}^{\ell}k_s$ physical nodes. The  multi-index $\vect{c}=(c_1,\ldots,c_\ell)$, with $c_s\in\{1,\ldots,k_s-1\}$, defines the location of a physical cell $\vect{c}$ and its width along $s$:
+\begin{gather*}
     \mathcal H_{\vect{c}}
     =\prod_{s=1}^{\ell}
     [\rho_s^{(c_s)},\rho_s^{(c_s+1)}],
     \qquad
     h_s^{\vect{c}}
     =\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0.
-\]
-Thus $\mathcal G$ has $\prod_s k_s$ physical nodes and determines $\prod_s(k_s-1)$ physical cells whose union is exactly $\mathcal P$. The grid exactly partitions the box geometry. Gridding remains a modeling approximation because it restricts the infinite-dimensional search for $y$ to a selected finite-dimensional space of continuous piecewise-polynomial decision functions.
+\end{gather*}
+Thus $\mathcal G$ has $\prod_{s=1}^{\ell} k_s$ physical nodes and determines $\prod_{s=1}^{\ell}(k_s-1)$ physical cells whose union is exactly $\mathcal P$. Gridding remains a modeling approximation as it restricts the search for $\vect{y}$ from a large $\mathcal{P}$ to a bunch of selected smaller physical cells $\mathcal{H}_{\vect{c}}$.
 
 For example, take the following nonuniform two-dimensional grid on $[0,1]^2$:
-\[
+\begin{gather*}
     \mathcal G_1=\{0,0.4,1\},
     \qquad
     \mathcal G_2=\{0,0.25,1\}.
-\]
-Their tensor grid \(\mathcal G=\mathcal G_1\times\mathcal G_2\) has nine physical nodes and exactly partitions \([0,1]^2\) into four physical cells. The cell indices are \((1,1)\), \((1,2)\), \((2,1)\), and \((2,2)\).
+\end{gather*}
+Their tensor grid $\mathcal G=\mathcal G_1\times\mathcal G_2$ has nine physical nodes and exactly partitions $[0,1]^2$ into four physical cells. The cell indices are $(1,1)$, $(1,2)$, $(2,1)$, and $(2,2)$.
 
 \begin{figure}[H]
     \centering
@@ -124,52 +126,56 @@ Their tensor grid \(\mathcal G=\mathcal G_1\times\mathcal G_2\) has nine physica
         \foreach \y/\lab in {0/{0},0.25/{0.25},1/{1}} {
                 \node[left=5pt] at (0,\y) {$\lab$};
             }
-        \node at (0.2,0.125) {\(\vect{c}=(1,1)\)};
-        \node at (0.2,0.625) {\(\vect{c}=(1,2)\)};
-        \node at (0.7,0.125) {\(\vect{c}=(2,1)\)};
-        \node at (0.7,0.625) {\(\vect{c}=(2,2)\)};
-        \node[below=14pt] at (0.5,0) {\(\rho_1\)};
-        \node[rotate=90,above=14pt] at (0,0.5) {\(\rho_2\)};
+        \node at (0.2,0.125) {$\vect{c}=(1,1)$};
+        \node at (0.2,0.625) {$\vect{c}=(1,2)$};
+        \node at (0.7,0.125) {$\vect{c}=(2,1)$};
+        \node at (0.7,0.625) {$\vect{c}=(2,2)$};
+        \node[below=14pt] at (0.5,0) {$\rho_1$};
+        \node[rotate=90,above=14pt] at (0,0.5) {$\rho_2$};
     \end{tikzpicture}
     \caption{A nonuniform two-dimensional tensor grid with nine physical nodes and four physical cells. Every point of the box belongs to at least one cell, and the lines are exact cell boundaries of the domain.}
     \label{fig:intro-two-dimensional-grid}
 \end{figure}
 
-Each physical cell has its own local coordinate $\vect{\alpha}\in[0,1]^\ell$ and a separate finite coefficient set. Let the direction-wise modeled degree be $\vect{m}=(m_1,\ldots,m_\ell)$ and define the zero-based local-label set $\mathcal I_{\vect{m}}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}$. The cell then stores $\prod_s(m_s+1)$ coefficients. For the independent choice $\vect{m}=(3,1)$, every two-dimensional cell above has eight labels $\vect{i}=(i_1,i_2)\in\{0,1,2,3\}\times\{0,1\}$. These labels identify in-cell coefficient positions, while the physical sample points remain the grid nodes. They also show that different parameter directions may use different degrees. Shared-face coefficient identification makes the represented decision function continuous across neighboring cells. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
+Each physical cell has its own local coordinate $\vect{\alpha}\in[0,1]^\ell$ which will be defined in the next section, and a separate finite coefficient set.
 
-\section[Bernstein Basis on Each Cell]{\texorpdfstring{\hspace{0.3em}Bernstein Basis on Each Cell}{Bernstein Basis on Each Cell}}
+\section[Bernstein Basis on Each Cell]{Bernstein Basis on Each Cell}
 \label{sec:continuous-bernstein-representation}
 \index{Bernstein basis}\index{cell-local storage}\index{local Bernstein label}
 
-On the unit box $[0,1]^\ell$, the normalized tensor-product Bernstein basis of direction-wise modeled degree $\vect{m}$ is
-\[
+Fix a physical cell $\mathcal H_{\vect{c}}$. Because the physical cells may have different side lengths, we first express every cell on the same domain. Define the forward affine map
+\begin{gather*}
+    \phi_{\vect{c}}:[0,1]^\ell\longrightarrow\mathcal H_{\vect{c}},
+    \qquad
+    \phi_{\vect{c},s}(\alpha_s)
+    =\rho_s^{(c_s)}+h_s^{\vect{c}}\alpha_s.
+\end{gather*}
+Its inverse defines the local coordinate $\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})$, where $\alpha_s=(\rho_s-\rho_s^{(c_s)})/h_s^{\vect{c}}$, and maps every physical hyper-rectangle to the unit box $[0,1]^\ell$. Since $\vect{c}$ is arbitrary, this normalization gives a uniform coordinate domain for all cellwise expressions. For any cellwise quantity $X$, write its pullback as $X^{(\vect{c})}=X\circ\phi_{\vect{c}}$.
+
+On this common unit box, we use the normalized tensor-product Bernstein basis
+\begin{gather*}
     B_{\vect{i}}^{\vect{m}}(\vect{\alpha})
     =\prod_{s=1}^{\ell}
     B_{i_s}^{m_s}(\alpha_s)
     =\prod_{s=1}^{\ell}\binom{m_s}{i_s}(1-\alpha_s)^{m_s-i_s}\alpha_s^{i_s},
     \qquad
-    \vect{i}\in\mathcal I_{\vect{m}}.
-\]
-
-To use this basis on a physical cell, fix any physical cell $\mathcal H_{\vect{c}}$ and map it to the unit box with the inverse of the forward affine map
-\[
-    \phi_{\vect{c}}:[0,1]^\ell\longrightarrow\mathcal H_{\vect{c}},
-    \qquad
-    \phi_{\vect{c},s}(\alpha_s)
-    =\rho_s^{(c_s)}+h_s^{\vect{c}}\alpha_s.
-\]
-Thus $\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})$, with $\alpha_s=(\rho_s-\rho_s^{(c_s)})/h_s^{\vect{c}}$. For any cellwise quantity $X$, write its pullback as $X^{(\vect{c})}=X\circ\phi_{\vect{c}}$. A cell-local polynomial is represented by
-\begin{equation}
+    \vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}.
+\end{gather*}
+A cell-wise polynomial is then represented by
+\begin{gather}
     X^{(\vect{c})}(\vect{\alpha})
-    =\sum_{\vect{i}\in\mathcal I_{\vect{m}}}
+    =\sum_{\vect{i}\in\mathcal I_{\vect{m}}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}
     B_{\vect{i}}^{\vect{m}}(\vect{\alpha})X^{(\vect{c})}[\vect{i}].
     \label{eq:intro-cell-bernstein}
-\end{equation}
+\end{gather}
+The Bernstein basis exposes the coefficients on each cell face. Corresponding face coefficients of neighboring cells can therefore be identified to enforce continuity across their shared boundary.
+
+The vector $\vect{m}=(m_1,\ldots,m_\ell)$ specifies the modeled degree in each parameter direction, so each cell stores $\prod_{s=1}^{\ell}(m_s+1)$ coefficients. With $\vect{m}=(3,1)$, each two-dimensional cell above has eight labels $\vect{i}=(i_1,i_2)\in\{0,1,2,3\}\times\{0,1\}$. These labels identify coefficient positions, and the physical sample points remain the grid nodes. The unequal components allow different degrees in the two directions. \Cref{sec:bernstein-tensor-grids} gives the complete traversal convention.
 
 The notation is illustrated by the following one-dimensional known-data example, where the degree is still a vector $\vect{m}=(m_1)=(2)$. Consider the scalar polynomial
-\[
+\begin{gather*}
     a(\rho)=1+\rho+\rho^2
-\]
+\end{gather*}
 on the two-cell grid $\mathcal G_1=\{0,0.5,1\}$. In this one-dimensional case, $\mathcal H_c=[\rho_1^{(c)},\rho_1^{(c+1)}]$, $h_1^c=\rho_1^{(c+1)}-\rho_1^{(c)}$, and $\phi_c(\alpha)=\rho_1^{(c)}+h_1^c\alpha$, so $\alpha=\phi_c^{-1}(\rho)=(\rho-\rho_1^{(c)})/h_1^c$. Thus $c$ is the one-dimensional physical-cell index, while the Bernstein label remains a separate subscript. The scalar MATLAB input \code{Degree=2} is uniform shorthand for the stored vector $\vect{m}=(2)$ and instructs \code{pdmat} to retain exact function evaluation together with validated Bernstein coefficient data.
 
 \begin{lstlisting}[style=dpmatlab]
@@ -206,14 +212,14 @@ cell2Coefficients = 1×3 double
         {[1]}        "(1-alpha)^2*1 + 2(1-alpha)alpha*1.25 + alpha^2*1.75"
 \end{lstlisting}
 
-Fix the first physical cell \(\mathcal H_1=[0,0.5]\). Its local coordinate is \(\alpha^{(1)}(\rho)=2\rho\), and \cref{eq:intro-cell-bernstein} becomes
-\[
+Fix the first physical cell $\mathcal H_1=[0,0.5]$. Its local coordinate is $\alpha^{(1)}(\rho)=2\rho$, and \cref{eq:intro-cell-bernstein} becomes
+\begin{gather*}
     a^{(1)}(\alpha)
     =B_0^2(\alpha)\,1
     +B_1^2(\alpha)\,1.25
     +B_2^2(\alpha)\,1.75,
     \qquad \alpha=\alpha^{(1)}(\rho).
-\]
-This equality represents \(1+\rho+\rho^2\) throughout the complete cell. The three coefficients are basis coordinates inside the cell, and the physical grid points remain the cell endpoints. The upper-face coefficient \(1.75\) of cell 1 equals the lower-face coefficient of cell 2, reflecting continuity of this known polynomial at the shared physical node \(\rho=0.5\). \Cref{sec:bernstein-higher-degree,sec:bernstein-degree-elevation,sec:bernstein-product-math} develop the corresponding higher-degree, elevation, and multiplication rules.
+\end{gather*}
+This equality represents $1+\rho+\rho^2$ throughout the complete cell. The three coefficients are basis coordinates inside the cell, and the physical grid points remain the cell endpoints. The upper-face coefficient $1.75$ of cell 1 equals the lower-face coefficient of cell 2, reflecting continuity of this known polynomial at the shared physical node $\rho=0.5$. \Cref{sec:bernstein-higher-degree,sec:bernstein-degree-elevation,sec:bernstein-product-math} develop the corresponding higher-degree, elevation, and multiplication rules.
 
 \input{chapters/workflow-constraints}

@@ -38,7 +38,7 @@ const lmiSteps = [
       { tex: "\\vect\\rho" },
       ".",
     ],
-    math: "\\mathcal F(\\vect\\rho,\\dot{\\vect\\rho};y)=F_0+\\sum_{k=1}^{N}F_ky_k+\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}\\frac{\\partial y_k}{\\partial\\rho_s}\\preceq0.",
+    math: "\\mathcal F(\\vect\\rho,\\dot{\\vect\\rho};\\vect y)=F_0+\\sum_{k=1}^{N}F_ky_k+\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}\\frac{\\partial y_k}{\\partial\\rho_s}\\preceq0.",
     oneLine: true,
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/",
     manualLabel: "Open the induced-L₂-gain specialization ↗",
@@ -48,13 +48,13 @@ const lmiSteps = [
     title: "Partition the supported parameter box",
     textParts: [
       "Axis ", { tex: "s" }, " uses ", { tex: "k_s" }, " physical nodes in ",
-      { tex: "\\mathcal G_s" }, "; the one-based vector ", { tex: "\\vect c" },
+      { tex: "\\mathcal G_s" }, ". The one-based vector ", { tex: "\\vect c" },
       " selects ", { tex: "\\mathcal H_{\\vect c}" },
       ". The tensor grid partitions ", { tex: "\\mathcal P" },
-      " exactly. Approximation comes only from restricting the decision-function space; affine rate-vertex reduction remains exact.",
+      " exactly. Approximation comes only from restricting the decision-function space. Affine rate-vertex reduction remains exact.",
     ],
     math: [
-      "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline\\nu_s,\\overline\\nu_s].",
+      "\\mathcal P=\\prod_{s=1}^{\\ell}[\\underline\\rho_s,\\overline\\rho_s],\\qquad\\mathcal R=\\prod_{s=1}^{\\ell}[\\underline{\\dot\\rho}_s,\\overline{\\dot\\rho}_s].",
     ],
     annotatedMath: [
       {
@@ -76,12 +76,12 @@ const lmiSteps = [
     title: "Fix one cell and use the Bernstein basis",
     textParts: [
       "Pull one physical cell back to ", { tex: "\\vect\\alpha\\in[0,1]^\\ell" },
-      ". The normalized basis is nonnegative and sums to one, exposes endpoint and face coefficients, and supports cell-local coefficient algebra.",
+      ". The normalized basis is nonnegative and sums to one, exposes endpoint and face coefficients, and supports cell-wise coefficient algebra.",
     ],
     math: [
       "\\vect\\alpha=\\phi_{\\vect c}^{-1}(\\vect\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{\\vect c}}.",
-      "B_{\\vect i}^{\\vect m}(\\vect\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad\\sum_{\\vect i}B_{\\vect i}^{\\vect m}(\\vect\\alpha)=1.",
-      "A^{(\\vect c)}(\\vect\\alpha)=\\sum_{\\vect i}C^{(\\vect c)}[\\vect i]B_{\\vect i}^{\\vect m}(\\vect\\alpha).",
+      "B_{\\vect i}^{\\vect m}(\\vect\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad\\sum_{\\vect i\\in\\mathcal I_{\\vect m}=\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}B_{\\vect i}^{\\vect m}(\\vect\\alpha)=1.",
+      "A^{(\\vect c)}(\\vect\\alpha)=\\sum_{\\vect i\\in\\mathcal I_{\\vect m}=\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}C^{(\\vect c)}[\\vect i]B_{\\vect i}^{\\vect m}(\\vect\\alpha).",
     ],
     storageMath: "A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
     visual: "storage",
@@ -107,7 +107,7 @@ const lmiSteps = [
   {
     number: "05",
     title: "Assemble the panorama, solve, and validate status",
-    text: "Combine known pdmat data with pdvar decisions, optional cellwise rhodiff terms, a residual comparison, and the selected finite certificate. Export to YALMIP, solve, require sol.problem == 0, and only then recover decisions or objectives.",
+    text: "Combine known pdmat data with pdvar decisions, optional cell-wise rhodiff terms, a residual comparison, and the selected finite certificate. Export to YALMIP, solve, require sol.problem == 0, and only then recover decisions or objectives.",
     math: "\\texttt{toYalmip}\\;\\longrightarrow\\;\\texttt{optimize}\\;\\longrightarrow\\;\\texttt{value(P)}",
     visual: "export",
     fullCode: "yalmip('clear')\nP = pdvar(n, grid, \"symmetric\", Degree=[2 2]);\nD = rhodiff(P, rateBounds);                 % optional rate term\nL = D + P*A + A'*P <= -epsilon*eye(n);     % residual comparison\nselected = L;                              % Direct by default\nsol = optimize(selected.toYalmip(), objective, options);\nif sol.problem == 0\n    Psol = value(P);\n    gammaSol = value(gamma);\nend",
@@ -134,7 +134,7 @@ const storageMathMarkup = {
       label: renderMath(`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`),
       value: renderMath(coefficient.tex),
     })),
-    bernstein: renderMath(`A^{(${cell.c1},1)}(\\vect\\alpha)=\\sum_{\\vect i\\in\\{0,1,2\\}^{\\ell}}C_{\\vect i}^{(${cell.c1},1)}B_{\\vect i}^{2}(\\vect\\alpha)`),
+    bernstein: renderMath(`\\vect m=(2,2),\\qquad A^{(${cell.c1},1)}(\\vect\\alpha)=\\sum_{\\vect i\\in\\mathcal I_{\\vect m}=\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}C_{\\vect i}^{(${cell.c1},1)}B_{\\vect i}^{\\vect m}(\\vect\\alpha)`),
   })),
 };
 
@@ -162,7 +162,7 @@ const gridPartitionMathMarkup = {
       <p class="home-summary">
         Model general symmetric residual inequalities with continuous
         piecewise-polynomial decisions, optional exact scheduling-rate vertex
-        reduction, cell-local Bernstein algebra, and five selectable finite
+        reduction, cell-wise Bernstein algebra, and five selectable finite
         certificate states.
       </p>
       <nav class="home-actions" aria-label="Primary documentation links">

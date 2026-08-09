@@ -21,7 +21,7 @@ Gram bases, absolute order $\vect r$, and target coefficients follow the
 ## Purpose
 
 Create a new `pdlmi` that represents the stored residual with the implemented
-cell-local Putinar box Bernstein-Gram certificate.
+cell-wise Putinar box Bernstein-Gram certificate.
 
 ## Syntax
 
@@ -128,7 +128,7 @@ followed by five identities. Selecting Putinar from `polya` returns to the
 stored degree-two residual and rebuilds the certificate from that evidence.
 
 `ValidationMode` is transient, accepts case-insensitive `"fast"` or
-`"strict"`, applies only to this rebuild, and is neither stored nor inherited.
+`"strict"`, and applies only to this rebuild. Stored and inherited state remain unchanged.
 
 ## Anisotropic Assembly Output
 

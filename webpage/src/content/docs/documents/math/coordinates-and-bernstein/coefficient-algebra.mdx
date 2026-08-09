@@ -46,7 +46,7 @@ The implementation packs the coefficient matrices into one row and applies the o
 
 $$
 \vect c^{\mathrm{elv}}
-=\vect c\left(E_{\vect M\leftarrow\vect m}^{\mathsf T}\otimes I_q\right).
+=\vect c\left(E_{\vect M\leftarrow\vect m}^\top\otimes I_q\right).
 $$
 
 `elevRow` builds this operator for one source and target degree pair. `elevData` reuses the plan for every coefficient row with the same source degree, including repeated physical cells and rate rows. The public [`elevate`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-elevate) method rebuilds the same dynamic class with the elevated data.
@@ -148,7 +148,7 @@ $$
 
 Each nonzero partial is elevated to a common tensor degree before rate weighting. A zero-degree axis contributes zero. The resulting lower and upper rate combinations are stored as separate rate rows in deterministic tensor order.
 
-<CallGraph family="differentiation" caption="Cellwise partials are re-elevated before rate-vertex rows are assembled." links={[
+<CallGraph family="differentiation" caption="cell-wise partials are re-elevated before rate-vertex rows are assembled." links={[
   { href: "#differentiation-and-rate-rows", label: "Differentiation derivation" },
   { href: "/GriD-LMIA/documents/reference/pdmat/rhodiff/", label: "pdmat rhodiff" },
   { href: "/GriD-LMIA/documents/reference/pdvar/rhodiff/", label: "pdvar rhodiff" },
@@ -166,7 +166,7 @@ Decision-by-decision products remain outside the supported affine operation set.
 
 ## Limitations
 
-The algebra is cell-local on tensor-product boxes. Matrix products must remain dimensionally valid and affine in decision data. Function-only `pdmat` sources can be evaluated, but elevation and coefficient diagnostics require coefficient evidence.
+The algebra is cell-wise on tensor-product boxes. Matrix products must remain dimensionally valid and affine in decision data. Function-only `pdmat` sources can be evaluated, but elevation and coefficient diagnostics require coefficient evidence.
 
 ## See Also
 

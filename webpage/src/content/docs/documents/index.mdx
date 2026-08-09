@@ -17,12 +17,12 @@ vertices, and finite certificates. Each guide defines its prerequisites and
 connects the mathematics to a verified package operation.
 
 The package represents continuous piecewise-polynomial matrix functions on
-physical grid cells in a cell-local tensor-product Bernstein basis. `pdvar`
+physical grid cells in a cell-wise tensor-product Bernstein basis. `pdvar`
 shares complete face values between adjacent cells. Differentiation remains
-cell-local, which gives a continuous piecewise-polynomial representation with
-cellwise derivatives. A DPD-LMI contains explicit derivative and rate terms.
+cell-wise, which gives a continuous piecewise-polynomial representation with
+cell-wise derivatives. A DPD-LMI contains explicit derivative and rate terms.
 
-## Documentation v1.3.2 Supported Scope
+## Documentation v1.3.3 Supported Scope
 
 Version 1.3.2 documents the implemented package workflow after shared matrix
 protocols, unary transformations, and reductions were centralized in
@@ -62,12 +62,12 @@ supports workflow-oriented search.
 ### Modeling And Analysis
 
 - [DPD-LMI And LPV L2-Gain Model](/GriD-LMIA/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/): plant, induced-$L_2$ objective, bounded-real DPD-LMI, sign normalization, and YALMIP boundary.
-- [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/): exact rate vertices, cellwise derivatives, value continuity, and Clarke interface coverage.
+- [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/): exact rate vertices, cell-wise derivatives, value continuity, and Clarke interface coverage.
 
 ### Coordinates And Bernstein
 
 - [Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/): tensor grids, physical cells, widths, and forward pullbacks.
-- [Bernstein Basis, Continuity, And Storage](/GriD-LMIA/documents/math/bernstein-polynomial/): basis geometry, shared faces, and cell-local data.
+- [Bernstein Basis, Continuity, And Storage](/GriD-LMIA/documents/math/bernstein-polynomial/): basis geometry, shared faces, and cell-wise data.
 - [Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/): elevation, differentiation, ordered convolution, subdivision, and finite residual assembly.
 
 ### Finite Certificates

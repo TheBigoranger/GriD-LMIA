@@ -33,8 +33,8 @@ $$
 The one-based symbol $\rho_s^{(j)}$ denotes physical node $j$ on axis
 $s$, while $k_s$ is that axis's node count. The tensor grid exactly
 partitions the parameter box
-$\mathcal P=\prod_s[\underline\rho_s,\overline\rho_s]$ into
-$\prod_s(k_s-1)$ physical cells.
+$\mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s]$ into
+$\prod_{s=1}^{\ell}(k_s-1)$ physical cells.
 
 The one-based physical cell index
 $\vect c=(c_1,\ldots,c_\ell)$ selects
@@ -100,7 +100,7 @@ The first axis has two physical intervals and the second has one. Every cell
 still uses local coordinates
 $\vect\alpha=(\alpha_1,\alpha_2)\in[0,1]^2$.
 For direction-wise degree $\vect m=(3,1)$, each local coefficient array has
-$\prod_s(m_s+1)=8$ labels $\vect i=(i_1,i_2)$. This anisotropic choice
+$\prod_{s=1}^{\ell}(m_s+1)=8$ labels $\vect i=(i_1,i_2)$. This anisotropic choice
 allows a cubic first-parameter dependence and only a linear second-parameter
 dependence inside each cell.
 
@@ -113,7 +113,7 @@ dependence inside each cell.
 The number of physical cells is
 $\prod_{s=1}^{\ell}(k_s-1)$. For direction-wise degree
 $\vect m=(m_1,\ldots,m_\ell)$, each cell has
-$\prod_s(m_s+1)$ local labels. A scalar input is uniform shorthand for this
+$\prod_{s=1}^{\ell}(m_s+1)$ local labels. A scalar input is uniform shorthand for this
 row vector. The two products measure different things:
 physical partition size and local polynomial representation size.
 

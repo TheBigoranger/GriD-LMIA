@@ -8,7 +8,7 @@ import ApiInventory from "../../../../../components/ApiInventory.astro";
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference-index/">Reference</a><span>/</span><span>pdbase</span></nav>
 
 `pdbase` is the backend parent of `pdmat` and `pdvar`. It centralizes the
-tensor-grid, cell-local Bernstein, shape, evaluation, elevation, unary,
+tensor-grid, cell-wise Bernstein, shape, evaluation, elevation, unary,
 structural, reduction, and MATLAB indexing protocols. Central ownership avoids
 duplicate implementations while `pdmat` and `pdvar` expose the inherited public
 features.

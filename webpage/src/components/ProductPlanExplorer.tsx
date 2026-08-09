@@ -55,9 +55,9 @@ export default function ProductPlanExplorer() {
           <label htmlFor={`${id}-route`}>Payload route</label>
           <select id={`${id}-route`} aria-describedby={`${id}-error`} value={draft.route}
             onChange={(event) => setDraft((current) => ({ ...current, route: event.target.value as ProductRoute }))}>
-            <option value="numeric">numeric tensor convolution</option>
-            <option value="known-affine">known–affine contraction</option>
-            <option value="generic">generic planned fallback</option>
+            <option value="numeric">Numeric tensor convolution</option>
+            <option value="known-affine">Known–affine contraction</option>
+            <option value="generic">Generic planned fallback</option>
           </select>
           {draft.route === "numeric" ? <>
             <label htmlFor={`${id}-left`}>Left coefficients</label>
@@ -74,7 +74,7 @@ export default function ProductPlanExplorer() {
           <p><strong>Kernel:</strong> {model.kernel}</p>
           <p><strong>Packed tensor shapes:</strong> {model.packedShapes.map((shape) => `[${shape.join(" × ")}]`).join(" → ")}</p>
           <p><strong>Planned label pairs:</strong> {model.contributions.length}</p>
-          <p><strong><code>convn</code> route:</strong> {model.usesConvn ? "numeric payload only" : "not used"}</p>
+          <p><strong><code>convn</code> route:</strong> {model.usesConvn ? "Numeric payload" : "Inactive"}</p>
           {model.outputCoefficients ? <p><strong>Product coefficients:</strong> [{model.outputCoefficients.map((value) => Number(value.toPrecision(6))).join(", ")}]</p> : null}
           {model.contractionBlocks.length ? <p><strong>Affine blocks:</strong> {model.contractionBlocks.join(" and ")}</p> : null}
         </section>

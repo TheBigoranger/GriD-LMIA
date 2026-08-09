@@ -6,7 +6,7 @@ description: Canonical symbols for parameter boxes, tensor grids, local Bernstei
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
   <span>/</span>
-  <span>Math Concepts</span>
+  <span>Learn</span>
   <span>/</span>
   <span>Notation</span>
 </nav>
@@ -23,15 +23,16 @@ $$
 \mathcal P&=\prod_{s=1}^{\ell}
 [\underline\rho_s,\overline\rho_s],\\
 \mathcal R&=\prod_{s=1}^{\ell}
-[\underline\nu_s,\overline\nu_s].
+[\underline{\dot\rho}_s,\overline{\dot\rho}_s].
 \end{aligned}
 $$
 
 - $\vect\rho\in\mathcal P$ is the scheduling parameter and
-  $\vect\nu=\dot{\vect\rho}\in\mathcal R$ is its admissible rate.
+  $\dot{\vect\rho}\in\mathcal R$ is its admissible rate.
 - $\ell$ is the number of parameter axes.
-- $\mathcal V_{\mathcal R}$ is the set of distinct lower/upper rate vertices.
-  Its size is $\prod_s(1+\mathbb 1_{\underline\nu_s<\overline\nu_s})$, which
+- $\vect\nu\in\mathcal V_{\mathcal R}$ denotes one distinct lower/upper rate
+  vertex. The set has size
+  $\prod_{s=1}^{\ell}(1+\mathbb 1_{\underline{\dot\rho}_s<\overline{\dot\rho}_s})$, which
   equals $2^\ell$ when every axis varies. Reduction to these vertices is exact
   when the residual is affine in $\vect\nu$.
 
@@ -46,8 +47,8 @@ $$
 \end{aligned}
 $$
 
-Here $k_s$ is the number of nodes on axis $s$. The one-based physical-cell
-index $\vect c=(c_1,\ldots,c_\ell)$ selects
+Here $k_s$ is the number of nodes on axis $s$. The physical-cell index
+$\vect c=(c_1,\ldots,c_\ell)$, where $c_s\in\{1,\ldots,k_s-1\}$, selects
 
 $$
 \begin{aligned}
@@ -74,8 +75,8 @@ $$
 \end{aligned}
 $$
 
-Physical nodes and $\vect c$ are one-based. A local Bernstein label
-$\vect i=(i_1,\ldots,i_\ell)$ is zero-based.
+A local Bernstein label $\vect i=(i_1,\ldots,i_\ell)$ satisfies
+$i_s\in\{0,\ldots,m_s\}$ on axis $s$.
 
 <span id="bernstein-labels-and-degrees"></span>
 
@@ -94,10 +95,10 @@ The public MATLAB properties store these degree and order vectors as
 $1\times\ell$ rows. Scalar inputs are uniform shorthand. These quantities are
 independent of the number of physical grid cells.
 
-The direction-wise label set, tensor basis, and coefficient count are
+The local-label domain, tensor basis, and coefficient count are
 
 $$
-\mathcal I_{\vect m}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}.
+\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}.
 $$
 
 $$
@@ -105,7 +106,7 @@ B_{\vect i}^{\vect m}(\vect\alpha)=\prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
 $$
 
 $$
-|\mathcal I_{\vect m}|=\prod_{s=1}^{\ell}(m_s+1).
+\prod_{s=1}^{\ell}(m_s+1).
 $$
 
 Even when $\ell=1$, the degree is written $\vect m=(m_1)$. Parity,
@@ -120,7 +121,7 @@ On one physical cell,
 $$
 \begin{aligned}
 \mathcal F^{(\vect c)}(\vect\alpha)
-&=\sum_{\vect i\in\mathcal I_{\vect M}}
+&=\sum_{\vect i\in\mathcal I_{\vect M}=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}
 B_{\vect i}^{\vect M}(\vect\alpha)\\
 &\qquad{}\cdot\mathcal C^{(\vect c)}[\vect i].
 \end{aligned}
@@ -137,7 +138,7 @@ $$
 
 The theoretical target is
 $S^{(\vect c)}(\vect\alpha)\succ0$. YALMIP models non-strict
-semidefinite constraints. encode a chosen margin explicitly as
+semidefinite constraints. Encode a chosen margin explicitly as
 $S^{(\vect c)}(\vect\alpha)-\varepsilon I\succeq0$.
 
 <span id="strict-theory-and-software-constraints"></span>
@@ -150,7 +151,7 @@ For tensor Bernstein basis vector $\vect b_{\vect a}$, define
 $$
 \begin{aligned}
 Z_{\vect a}&=\vect b_{\vect a}\otimes I_n,\\
-G_{\vect a}&:=Z_{\vect a}^{\mathsf T}QZ_{\vect a},\\
+G_{\vect a}&:=Z_{\vect a}^\top QZ_{\vect a},\\
 Q&\succeq0.
 \end{aligned}
 $$

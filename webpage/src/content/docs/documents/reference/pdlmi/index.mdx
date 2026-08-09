@@ -1,6 +1,6 @@
 ---
 title: pdlmi
-description: Cell-local YALMIP constraints for PD-LMI expressions.
+description: Cell-wise YALMIP constraints for PD-LMI expressions.
 ---
 
 import CertificateChooser from "../../../../../components/CertificateChooser.astro";
@@ -16,13 +16,13 @@ import ApiInventory from "../../../../../components/ApiInventory.astro";
 
 Throughout this reference,
 $S^{(\vect c)}=-\mathcal F^{(\vect c)}$ and $\vect M$ is the assembled
-residual degree. see the
+residual degree. See the
 [global notation](/GriD-LMIA/documents/math/notation/#residual-and-positive-target).
 
 `pdlmi` stores finite certificates generated from `pdvar` residuals or
 coefficient-backed `pdmat` inequalities. Inequalities use semidefinite meaning
 only when every original
-coefficient is square Hermitian. otherwise the whole inequality is entry-wise.
+coefficient is square Hermitian. Otherwise the whole inequality is entry-wise.
 Equality is direct coefficient equality and may be rectangular. Direct
 coefficient assembly is the default. Pólya degree elevation, fixed-order
 Putinar box assembly, tensor-window SparsePutinar assembly, tensor-window
@@ -57,7 +57,7 @@ canonicalizes to Direct, and a side at least
   `max(order + 1)` canonicalizes to FullBox. Every Gram path matches exact
 box-polynomial identities. The
 [SOS certificate chapter](/GriD-LMIA/documents/math/sos-certificates/)
-derives these ideas. the API pages below stay focused on callable syntax.
+derives these ideas. The API pages below stay focused on callable syntax.
 
 ## Reference Index
 
@@ -66,7 +66,7 @@ derives these ideas. the API pages below stay focused on callable syntax.
 | Reference | Task |
 | :--- | :--- |
 | [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) | Select Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox assembly. |
-| [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) | Create known-data inequalities with `<=`/`>=`. logical `pdmat == pdmat` remains separate. |
+| [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) | Create known-data inequalities with `<=`/`>=`. Logical `pdmat == pdmat` remains separate. |
 | [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) | Create semidefinite or entry-wise inequalities with `<=`/`>=`, and direct equalities with `==`. |
 | [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) | Rebuild the original residual with a selected Pólya degree increment. |
 | [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) | Rebuild the original residual with the minimum or a selected absolute Putinar order. |
@@ -116,7 +116,7 @@ The constructor exposes private-set, read-only properties through dot access:
 | `UsePolya`, `PolyaDegree` | `C.UsePolya`, `C.PolyaDegree` | Pólya selector and degree increment. |
 | `UsePutinar`, `PutinarOrder` | `C.UsePutinar`, `C.PutinarOrder` | Putinar selector and absolute order. |
 | `UseSparsePutinar`, `SparsePutinarOrder`, `CliqueSize` | `C.UseSparsePutinar`, `C.SparsePutinarOrder`, `C.CliqueSize` | SparsePutinar selector, direction-wise absolute order, and scalar tensor-window side `b`. |
-| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar tensor-window side `w`. Side one normalizes to Direct. a side at least `max(order + 1)` normalizes to FullBox. |
+| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar tensor-window side `w`. Side one normalizes to Direct. A side at least `max(order + 1)` normalizes to FullBox. |
 | `UseFullBoxPreorder`, `FullBoxOrder` | `C.UseFullBoxPreorder`, `C.FullBoxOrder` | Full-box selector and absolute order. |
 
 Certificate selectors apply only to inequalities. Any selector on equality raises `pdlmi:UnsupportedEqualityCertificate`.

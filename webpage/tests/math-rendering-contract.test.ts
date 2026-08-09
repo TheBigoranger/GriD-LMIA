@@ -127,7 +127,7 @@ test("authors the Welcome DPD-LMI as one unbroken centered display", () => {
 
   assert.match(
     firstStep,
-    /math:\s*"\\\\mathcal F\(\\\\vect\\\\rho,\\\\dot\{\\\\vect\\\\rho\};y\)=F_0\+\\\\sum_\{k=1\}\^\{N\}F_ky_k\+\\\\sum_\{k=1\}\^\{N\}\\\\sum_\{s=1\}\^\{\\\\ell\}\\\\dot\\\\rho_sT_\{k,s\}\\\\frac\{\\\\partial y_k\}\{\\\\partial\\\\rho_s\}\\\\preceq0\."/,
+    /math:\s*"\\\\mathcal F\(\\\\vect\\\\rho,\\\\dot\{\\\\vect\\\\rho\};\\\\vect y\)=F_0\+\\\\sum_\{k=1\}\^\{N\}F_ky_k\+\\\\sum_\{k=1\}\^\{N\}\\\\sum_\{s=1\}\^\{\\\\ell\}\\\\dot\\\\rho_sT_\{k,s\}\\\\frac\{\\\\partial y_k\}\{\\\\partial\\\\rho_s\}\\\\preceq0\."/,
   );
   assert.match(firstStep, /All coefficient functions in the residual are evaluated at/);
   assert.match(firstStep, /oneLine:\s*true/);
@@ -212,7 +212,7 @@ test("elevation kernel shorthand stays consistent with the direct coefficient ru
   assert.match(elevate, /Let \$\\vect d:=\\vect M-\\vect m\$/);
   assert.match(
     elevate,
-    /\\mathcal E_\{\\vect d\}\[\\vect j\]:=\\prod_\{s=1\}\^\{\\ell\}\\binom\{d_s\}\{j_s\},\\qquad\\vect j\\in\\prod_s\\\{0,\\ldots,d_s\\\}/,
+    /\\mathcal E_\{\\vect d\}\[\\vect j\]:=\\prod_\{s=1\}\^\{\\ell\}\\binom\{d_s\}\{j_s\},\\qquad\\vect j\\in\\prod_\{s=1\}\^\{\\ell\}\\\{0,\\ldots,d_s\\\}/,
   );
   assert.equal(
     (elevate.match(/\\mathcal E_\{\\vect d\}\[\\vect j\]/g) ?? []).length,

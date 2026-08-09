@@ -8,7 +8,7 @@ import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
 
-`pdvar` stores affine YALMIP expressions at cell-local Bernstein labels. The
+`pdvar` stores affine YALMIP expressions at cell-wise Bernstein labels. The
 examples use deterministic metadata in place of session-dependent YALMIP
 variable names.
 
@@ -90,7 +90,7 @@ converted operand may carry decision dependence.
 `mtimes` applies the planned normalized Bernstein convolution cell by cell,
 adds the operand degrees componentwise, and preserves the written
 matrix-factor order. The route is accepted only when decision dependence
-occurs on at most one converted operand. two decision-bearing sides would
+occurs on at most one converted operand. Two decision-bearing sides would
 leave the package's affine YALMIP layer.
 </Aside>
 

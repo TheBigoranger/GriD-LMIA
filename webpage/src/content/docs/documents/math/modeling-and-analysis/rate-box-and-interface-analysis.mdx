@@ -1,6 +1,6 @@
 ---
 title: Rate-Box Reduction And Interface Analysis
-description: Exact rate-vertex reduction, cellwise derivatives, value continuity, and Clarke coverage at shared faces.
+description: Exact rate-vertex reduction, cell-wise derivatives, value continuity, and Clarke coverage at shared faces.
 ---
 
 import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
@@ -13,8 +13,8 @@ import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
   <span>Rate-Box Reduction And Interface Analysis</span>
 </nav>
 
-Two distinct reductions occur in the workflow. Affinity in
-$\vect\nu$ makes rate-box vertex reduction exact. Bernstein, Pólya, or
+Two distinct reductions occur in the workflow. Let $\vect\nu\in\mathcal R$
+denote one rate vertex. Affinity in $\vect\nu$ makes rate-box vertex reduction exact. Bernstein, Pólya, or
 Gram conditions over $\vect\rho$ are finite sufficient certificates.
 
 ## Exact Rate-Box Vertex Reduction
@@ -42,7 +42,7 @@ The rate-vertex index is useful while explaining or inspecting these stored
 rows. After rows are stacked into the finite residual array, certificate
 formulas suppress it.
 
-## Cellwise Derivatives
+## Cell-Wise Derivatives
 
 Within physical cell $\mathcal H_{\vect c}$, let
 $\vect\rho=\phi_{\vect c}(\vect\alpha)$ and
@@ -56,7 +56,7 @@ $$
 (\vect\alpha).
 $$
 
-`rhodiff(P, rateBounds)` differentiates cell-local Bernstein data, aligns the
+`rhodiff(P, rateBounds)` differentiates cell-wise Bernstein data, aligns the
 partial derivatives to a common tensor degree, multiplies them by each rate
 vertex, and stores the resulting rows. See
 [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) for its input
@@ -78,7 +78,7 @@ P_{\vect c^-}|_{\text{face}}
 \end{aligned}
 $$
 
-This is $C^0$ piecewise-polynomial storage with cellwise derivatives that may
+This is $C^0$ piecewise-polynomial storage with cell-wise derivatives that may
 differ across faces.
 
 ## Clarke Interface Coverage
@@ -109,7 +109,7 @@ failure remains inconclusive about the original continuous inequality.
 The exact vertex statement requires affine dependence on
 $\vect\nu$ over a hyperrectangle. The interface argument requires
 value continuity and local Lipschitz regularity of the decision function.
-Discontinuous known data must be analyzed cellwise, and nonlinear rate
+Discontinuous known data must be analyzed cell-wise, and nonlinear rate
 dependence would need a different treatment.
 
 ## Further Reading

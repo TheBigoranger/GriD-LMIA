@@ -122,7 +122,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             {draft.rateMode === "rhodiff" ? <label>RateBounds rows
               <textarea rows={3} value={draft.rateBounds} onChange={(event) => setDraft({ ...draft, rateBounds: event.target.value })} />
             </label> : null}
-            {option.key === "direct" ? <p><strong>Order:</strong> not used by the direct selector.</p> : <label>{option.key === "polya" ? "Elevation increment" : "Gram order"}
+            {option.key === "direct" ? <p><strong>Order:</strong> inactive for the direct selector.</p> : <label>{option.key === "polya" ? "Elevation increment" : "Gram order"}
               <input inputMode="numeric" value={draft.order} onChange={(event) => setDraft({ ...draft, order: event.target.value })} />
             </label>}
             {option.key === "sparsefullbox" ? <label>Tensor-window side w

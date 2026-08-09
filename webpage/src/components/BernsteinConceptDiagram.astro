@@ -5,8 +5,8 @@ interface Props { kind: "basis" | "tensor" | "derivative" | "convex"; }
 const { kind } = Astro.props;
 const labels = {
   basis: "Three nonnegative degree-two Bernstein basis functions sum to one across a local cell.",
-  tensor: "A four-by-three physical node grid creates three-by-two cells; one degree-one tensor cell stores four local labels.",
-  derivative: "Cell-local forward differences lower degree by one; rate-box vertices create separate rows without asserting derivative continuity across cells.",
+  tensor: "A four-by-three physical node grid creates three-by-two cells. One degree-one tensor cell stores four local labels.",
+  derivative: "Cell-wise forward differences lower degree by one. Rate-box vertices create separate rows, and each cell retains an independent derivative trace.",
   convex: "Nonnegative Bernstein weights combine coefficient matrices into a value inside their convex hull.",
 };
 ---

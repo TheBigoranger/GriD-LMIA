@@ -1,7 +1,7 @@
 \chapter{\texorpdfstring{\code{pdlmi}}{pdlmi}: Finite Certificate Assembly}\index{pdlmi@\texttt{pdlmi}}
 \label{sec:pdlmi}
 
-\code{pdlmi} stores finite certificates assembled from \code{pdvar} expressions or coefficient-backed \code{pdmat} inequalities. Square Hermitian inequality families use semidefinite constraints, other inequalities use entry-wise scalar constraints, and \code{pdvar} equality uses direct coefficient equations. Direct assembly is the default. The five explicit inequality alternatives are cell-local P\'olya elevation, dense Putinar, tensor-window SparsePutinar, tensor-window SparseFullBox, and the dense full-box preordering. This class is the package boundary between Bernstein objects and ordinary YALMIP solver calls.
+\code{pdlmi} stores finite certificates assembled from \code{pdvar} expressions or coefficient-backed \code{pdmat} inequalities. Square Hermitian inequality families use semidefinite constraints, other inequalities use entry-wise scalar constraints, and \code{pdvar} equality uses direct coefficient equations. Direct assembly is the default. The five explicit inequality alternatives are cell-wise P\'olya elevation, dense Putinar, tensor-window SparsePutinar, tensor-window SparseFullBox, and the dense full-box preordering. This class is the package boundary between Bernstein objects and ordinary YALMIP solver calls.
 
 \begin{center}
 \begin{tikzpicture}[node distance=4mm and 4mm]
@@ -127,7 +127,7 @@ C = lhs == rhs
 \begin{itemize}[leftmargin=*]
   \item \code{expr} is a \code{pdvar} residual, or a coefficient-backed \code{pdmat} residual for \code{"<="} or \code{">="}. \code{relation} is exactly \code{"<="}, \code{">="}, or \code{"=="}. Inequalities are classified globally from the original coefficient family. \code{pdvar} equality is entry-wise direct coefficient assembly and accepts rectangular or nonsymmetric residuals. \code{pdmat} equality is instead the scalar logical comparison \code{A==B} and never creates a \code{pdlmi}.
   \item \code{UsePolya} is a logical scalar option with default \code{false}. Its bare form, \code{"UsePolya"}, and \code{UsePolya=true} with the degree omitted select increment one.
-  \item \code{PolyaDegree=d} accepts one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector and is stored as a \(1\)-by-\(\ell\) row. It elevates the residual componentwise by \(\vect{d}\) before assembling constraints. Supplying the degree by itself enables P\'olya and issues \codeerr{pdlmi}{ImplicitUsePolya}. \code{UsePolya=false} with any positive component raises \codeerr{pdlmi}{ConflictingPolyaOptions}.
+  \item \code{PolyaDegree=d} accepts one finite nonnegative integer scalar shorthand or an $\ell$-element vector and is stored as a $1$-by-$\ell$ row. It elevates the residual componentwise by $\vect{d}$ before assembling constraints. Supplying the degree by itself enables P\'olya and issues \codeerr{pdlmi}{ImplicitUsePolya}. \code{UsePolya=false} with any positive component raises \codeerr{pdlmi}{ConflictingPolyaOptions}.
   \item \code{UsePutinar} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select the dimension-appropriate Putinar certificate at the smallest admissible order.
   \item \code{PutinarOrder=r} accepts one finite nonnegative integer scalar shorthand or an $\ell$-element vector and is stored as the $1$-by-$\ell$ absolute Bernstein Gram order $\vect{r}$, which is distinct from a degree increment. For one parameter, $\vect{M}=(M_1)$ and the default and minimum are $\vect{r}=(\lfloor M_1/2\rfloor)$. For two or more parameters, the default and componentwise minimum are $\lceil\vect{M}/2\rceil$. Supplying the order by itself enables Putinar assembly. Pairing \code{UsePutinar=false} with any explicit order, including zero, raises \codeerr{pdlmi}{ConflictingPutinarOptions}.
   \item \code{UseSparsePutinar} is a logical scalar option with default \code{false}. Its bare form and the explicit value \code{true} select SparsePutinar with default \code{CliqueSize=2}. Supplying \code{CliqueSize} or \code{SparsePutinarOrder} alone also enables this family. Explicit \code{UseSparsePutinar=false} conflicts with either parameter.
@@ -229,32 +229,32 @@ Every certificate selector rebuilds the wrapper from its original residual and r
 \section{Assemble Direct Coefficient Constraints}\index{direct assembly}\index{direct coefficient assembly}
 \label{sec:pdlmi-direct}
 
-For a \code{pdvar} residual, including equality behavior, each physical cell, local Bernstein coefficient, and rate-vertex row if present creates one stored YALMIP constraint entry. For an ordinary expression with \(N_c\) physical cells and \(N_b\) Bernstein coefficients per cell, the number of entries is \(N_cN_b\). With \(N_v\) rate vertices it is \(N_cN_bN_v\). A semidefinite-mode entry is one matrix constraint. An entry-wise-mode entry is the column-major vector of scalar matrix entries compared independently. An equality entry is the corresponding direct coefficient equation and may be rectangular. For a coefficient-backed known \code{pdmat} inequality, Direct and P\'olya assembly instead scan the complete numeric coefficient family and store exactly one logical cell containing the global certificate. \code{toYalmip} exports that state as one scalar logical.
+For a \code{pdvar} residual, including equality behavior, each physical cell, local Bernstein coefficient, and rate-vertex row if present creates one stored YALMIP constraint entry. For an ordinary expression with $N_c$ physical cells and $N_b$ Bernstein coefficients per cell, the number of entries is $N_cN_b$. With $N_v$ rate vertices it is $N_cN_bN_v$. A semidefinite-mode entry is one matrix constraint. An entry-wise-mode entry is the column-major vector of scalar matrix entries compared independently. An equality entry is the corresponding direct coefficient equation and may be rectangular. For a coefficient-backed known \code{pdmat} inequality, Direct and P\'olya assembly instead scan the complete numeric coefficient family and store exactly one logical cell containing the global certificate. \code{toYalmip} exports that state as one scalar logical.
 
-The idea is the Bernstein convex-hull property. After orienting the cell residual \(\mathcal F^{(\vect{c})}\) as the sign-normalized positive target \(S^{(\vect{c})}\), suppress the already-stacked rate-row index and write
-\[
+The idea is the Bernstein convex-hull property. After orienting the cell residual $\mathcal F^{(\vect{c})}$ as the sign-normalized positive target $S^{(\vect{c})}$, suppress the already-stacked rate-row index and write
+\begin{gather*}
 S^{(\vect{c})}(\vect{\alpha})=
-  \sum_{\vect{i}}B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
+  \sum_{\vect{i}\in\mathcal I_{\vect{M}}=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
   C^{(\vect{c})}[\vect{i}],
-\]
-where \(\vect{M}\) is the assembled residual tensor degree and \(\vect{i}\in\prod_s\{0,\ldots,M_s\}\). The semidefinite direct certificate requires \(C^{(\vect{c})}[\vect{i}]\succeq0\) for every physical cell \(\vect{c}\) and local label \(\vect{i}\), repeated independently for every stored rate row. This condition is sufficient, and feasible residuals may lie outside its certificate set.
+\end{gather*}
+where $\vect{M}$ is the assembled residual tensor degree and $\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}$. The semidefinite direct certificate requires $C^{(\vect{c})}[\vect{i}]\succeq0$ for every physical cell $\vect{c}$ and local label $\vect{i}$, repeated independently for every stored rate row. This condition is sufficient, and feasible residuals may lie outside its certificate set.
 
-For an entry-wise inequality, replace each matrix coefficient by \code{C(:)} and impose the oriented scalar sign on every component. The global classification is made before P\'olya elevation or Gram assembly, so every coefficient and every certificate in one wrapper uses the same mode. Putinar, SparsePutinar, SparseFullBox, and FullBox create one independent scalar Gram certificate for each column-major entry. Direct equality simply imposes \code{C(:) == 0} and uses neither a positivity certificate nor an implicit tolerance. \Cref{sec:certificate-direct} proves the convex-hull implication and separates this sufficient coefficient test from point sampling.
+For an entry-wise inequality, replace each matrix coefficient by \code{C(:)} and impose the oriented scalar sign on every component. The global classification is made before P\'olya elevation or Gram assembly, so every coefficient and every certificate in one wrapper uses the same mode. Putinar, SparsePutinar, SparseFullBox, and FullBox create one independent scalar Gram certificate for each column-major entry. Direct equality simply imposes \code{C(:) == 0} with an exact zero target and direct equations in place of a positivity certificate. \Cref{sec:certificate-direct} proves the convex-hull implication and separates this sufficient coefficient test from point sampling.
 
 \begin{center}
-The diagram specializes to one parameter, degree two, and one ordinary (non-rate) row. Therefore \(c\) is a scalar one-based cell index and \(i\in\{0,1,2\}\).
+The diagram specializes to one parameter, degree two, and one ordinary (non-rate) row. Therefore $c$ is a scalar one-based cell index and $i\in\{0,1,2\}$.
 
 \begin{tikzpicture}[>=Latex,node distance=5mm and 7mm,
   c/.style={dp/neutral,font=\scriptsize,
     minimum width=14mm,minimum height=7mm},
   ok/.style={dp/certificate,
     font=\scriptsize,minimum width=19mm,minimum height=7mm}]
-  \node[c] (c0) {\(C^{(c)}[0]\)};
-  \node[c,right=of c0] (c1) {\(C^{(c)}[1]\)};
-  \node[c,right=of c1] (c2) {\(C^{(c)}[2]\)};
-  \node[ok,below=of c0] (p0) {\(\succeq0\)};
-  \node[ok,below=of c1] (p1) {\(\succeq0\)};
-  \node[ok,below=of c2] (p2) {\(\succeq0\)};
+  \node[c] (c0) {$C^{(c)}[0]$};
+  \node[c,right=of c0] (c1) {$C^{(c)}[1]$};
+  \node[c,right=of c1] (c2) {$C^{(c)}[2]$};
+  \node[ok,below=of c0] (p0) {$\succeq0$};
+  \node[ok,below=of c1] (p1) {$\succeq0$};
+  \node[ok,below=of c2] (p2) {$\succeq0$};
   \draw[->,dpblue] (c0) -- (p0); \draw[->,dpblue] (c1) -- (p1);
   \draw[->,dpblue] (c2) -- (p2);
   \node[below=4pt of p1,font=\scriptsize]
@@ -311,7 +311,7 @@ Here the degree-two, one-parameter residual has three local Bernstein coefficien
 \index{Polya@P\'olya}\index{usePolya@\texttt{usePolya}}\index{P\'olya certificate}\index{P\'olya elevation}
 \label{sec:pdlmi-polya}
 
-With \code{UsePolya=true}, \code{pdlmi} first elevates the stored residual componentwise by \(\vect{d}=\code{PolyaDegree}\). For a \code{pdvar} residual it then constrains every elevated local coefficient and stored rate row: if the assembled residual degree is \(\vect{M}\), the count is \(N_c\prod_s(M_s+d_s+1)\) for ordinary expressions and \(N_cN_v\prod_s(M_s+d_s+1)\) for rate-row expressions. A coefficient-backed known \code{pdmat} residual instead stores exactly one logical cell containing the global numeric certificate, including after P\'olya elevation. An all-zero increment is valid and has the same coefficient count as Direct. For an entry-wise \code{pdvar} inequality, elevation preserves the global mode and the oriented sign is applied independently to every column-major scalar entry of each elevated coefficient. Equality wrappers reject this method.
+With \code{UsePolya=true}, \code{pdlmi} first elevates the stored residual componentwise by $\vect{d}=\code{PolyaDegree}$. For a \code{pdvar} residual it then constrains every elevated local coefficient and stored rate row: if the assembled residual degree is $\vect{M}$, the count is $N_c\prod_{s=1}^{\ell}(M_s+d_s+1)$ for ordinary expressions and $N_cN_v\prod_{s=1}^{\ell}(M_s+d_s+1)$ for rate-row expressions. A coefficient-backed known \code{pdmat} residual instead stores exactly one logical cell containing the global numeric certificate, including after P\'olya elevation. An all-zero increment is valid and has the same coefficient count as Direct. For an entry-wise \code{pdvar} inequality, elevation preserves the global mode and the oriented sign is applied independently to every column-major scalar entry of each elevated coefficient. Equality wrappers reject this method.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -405,7 +405,7 @@ For this one-parameter scalar degree-two cell, order one uses the exact even Mar
 \begin{center}
 \begin{tikzpicture}[node distance=7mm]
   \node[dp/call-entry] (a) {$\vect{M}=(3,1)$\\$\vect{r}=(2,1)$};
-  \node[dp/call-branch,right=of a] (b) {$Z_{(2,1)}^{\mathsf T}Q_0Z_{(2,1)}$\\$+\,g_1Z_{(1,1)}^{\mathsf T}Q_1Z_{(1,1)}$\\$+\,g_2Z_{(2,0)}^{\mathsf T}Q_2Z_{(2,0)}$};
+  \node[dp/call-branch,right=of a] (b) {$Z_{(2,1)}^\top Q_0Z_{(2,1)}$\\$+\,g_1Z_{(1,1)}^\top Q_1Z_{(1,1)}$\\$+\,g_2Z_{(2,0)}^\top Q_2Z_{(2,0)}$};
   \node[dp/call-result,right=of b] (c) {$Q_0,Q_1,Q_2\succeq0$\\exact match at $(4,2)$};
   \draw[dp/call-arrow] (a) -- (b); \draw[dp/call-arrow] (b) -- (c);
 \end{tikzpicture}
@@ -613,7 +613,7 @@ At this order the scalar degree-two cell has two PSD Gram constraints followed b
 \begin{center}
 \begin{tikzpicture}[node distance=7mm]
   \node[dp/call-entry] (a) {$\vect{M}=(1,3)$\\$\vect{r}=(1,2)$};
-  \node[dp/call-branch,right=of a] (b) {$J=\varnothing,\{1\},\{2\},\{1,2\}$\\$g_JZ_J^{\mathsf T}Q_JZ_J$};
+  \node[dp/call-branch,right=of a] (b) {$J=\varnothing,\{1\},\{2\},\{1,2\}$\\$g_JZ_J^\top Q_JZ_J$};
   \node[dp/call-result,right=of b] (c) {$Q_J\succeq0$\\exact match at $(2,4)$};
   \draw[dp/call-arrow] (a) -- (b); \draw[dp/call-arrow] (b) -- (c);
 \end{tikzpicture}
@@ -638,7 +638,7 @@ F = toYalmip(C)
 F = C.toYalmip()
 \end{lstlisting}
 
-\arghead For a \code{pdvar} residual, \code{toYalmip} concatenates the stored constraint cells into a YALMIP constraint array for Direct, P\'olya, Putinar, SparsePutinar, SparseFullBox, and FullBox objects. For a coefficient-backed known \code{pdmat} residual, Direct and P\'olya instead return the one stored scalar logical certificate. Its numeric check uses the wrapper's global inequality classification and inclusive absolute tolerance $10^{-10}$. Semidefinite mode symmetrizes each coefficient matrix as $(C+C^\mathsf{T})/2$ and tests its eigenvalues, while element-wise mode tests individual scalar entries. A false result emits warning \codeerr{pdlmi}{InconclusiveCertificate}. Failure means this sufficient coefficient certificate is inconclusive about violation or indefiniteness of the continuous function. Known-data Putinar, SparsePutinar, SparseFullBox, and FullBox objects still export YALMIP constraints and may contain auxiliary Gram variables. The method accepts zero package-specific options and returns the assembled constraint object. Solver wrappers, objectives, margins, and diagnostic layers belong to the caller's YALMIP workflow.
+\arghead For a \code{pdvar} residual, \code{toYalmip} concatenates the stored constraint cells into a YALMIP constraint array for Direct, P\'olya, Putinar, SparsePutinar, SparseFullBox, and FullBox objects. For a coefficient-backed known \code{pdmat} residual, Direct and P\'olya instead return the one stored scalar logical certificate. Its numeric check uses the wrapper's global inequality classification and inclusive absolute tolerance $10^{-10}$. Semidefinite mode symmetrizes each coefficient matrix as $(C+C^\top)/2$ and tests its eigenvalues, while element-wise mode tests individual scalar entries. A false result emits warning \codeerr{pdlmi}{InconclusiveCertificate}. Failure means this sufficient coefficient certificate is inconclusive about violation or indefiniteness of the continuous function. Known-data Putinar, SparsePutinar, SparseFullBox, and FullBox objects still export YALMIP constraints and may contain auxiliary Gram variables. The method accepts zero package-specific options and returns the assembled constraint object. Solver wrappers, objectives, margins, and diagnostic layers belong to the caller's YALMIP workflow.
 
 \examplehead
 The function-call and dot-call forms return equivalent YALMIP constraint arrays.
@@ -720,4 +720,4 @@ assert(sol.problem == 0, sol.info)
 objectiveValue = value(objective);
 \end{lstlisting}
 
-An optimized certificate value requires \code{problem == 0}. Numerical, unknown, aborted, memory, and space-exhaustion statuses are inconclusive about both the original continuous problem and the value of \(\gamma\).
+An optimized certificate value requires \code{problem == 0}. Numerical, unknown, aborted, memory, and space-exhaustion statuses are inconclusive about both the original continuous problem and the value of $\gamma$.

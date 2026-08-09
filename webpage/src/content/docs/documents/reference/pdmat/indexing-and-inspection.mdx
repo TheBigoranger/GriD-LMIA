@@ -30,7 +30,7 @@ A(rows,columns) = compatiblePdmat
 
 Assignment replaces the same block coefficient-wise. Numeric values must fit
 the indexed shape. A `pdmat` value must have compatible physical bounds and
-coefficient evidence. alignment preserves the destination grid contract.
+coefficient evidence. Alignment preserves the destination grid contract.
 Unsupported dot/brace assignment uses `pdmat:UnsupportedAssignment`.
 
 ```matlab
@@ -50,7 +50,7 @@ assignedAtOne =
     10     8
 ```
 
-<MatrixGlyphDiagram before={[["a₁₁", "a₁₂"], ["a₂₁", "a₂₂"]]} after={[["a₁₂"]]} beforeLabel="each known matrix" afterLabel="A(1,2)" caption="Indexing and assignment visit the same payload block in every cell-local coefficient." />
+<MatrixGlyphDiagram before={[["a₁₁", "a₁₂"], ["a₂₁", "a₂₂"]]} after={[["a₁₂"]]} beforeLabel="each known matrix" afterLabel="A(1,2)" caption="Indexing and assignment visit the same payload block in every cell-wise coefficient." />
 
 ## Payload shape
 
@@ -72,7 +72,7 @@ rows = height(A)
 columns = width(A)
 ```
 
-All describe one numeric payload. `ndims` is always two. use `ncell`,
+All describe one numeric payload. `ndims` is always two. Use `ncell`,
 `ncoeff`, and `npar` for storage axes.
 
 ## <span id="pdmat-isequal"></span>`isequal`
@@ -120,8 +120,8 @@ options or separate output workflow.
 ## Validation, limitations, and See Also
 
 Malformed matrix subscripts and incompatible assignments use `pdmat`-owned
-errors. Indexing never selects physical cells or coefficient labels and does
-preserve the function state for later evaluation.
+errors. Indexing addresses matrix payload entries and preserves physical cells,
+coefficient labels, and the function state for later evaluation.
 
 [`storage`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) ·
 [`structural operations`](/GriD-LMIA/documents/reference/pdmat/structural-operations/) ·

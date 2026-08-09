@@ -9,8 +9,8 @@ description: Two solver-facing examples mirrored from +tests/+pdlmi/test_solver_
   <span>Solver Smoke Cases</span>
 </nav>
 
-These examples mirror the tested solver-facing workflows in `+tests/+pdlmi/test_solver_smoke.m`. They use the package to assemble YALMIP constraints. solver selection and execution still happen through ordinary YALMIP calls.
-They are non-strict regression constraints. strict analysis requires an
+These examples mirror the tested solver-facing workflows in `+tests/+pdlmi/test_solver_smoke.m`. They use the package to assemble YALMIP constraints. Solver selection and execution still happen through ordinary YALMIP calls.
+They are non-strict regression constraints. Strict analysis requires an
 explicit $\varepsilon I$ margin as described in the
 [global notation](/GriD-LMIA/documents/math/notation/#strict-theory-and-software-constraints).
 
@@ -76,7 +76,7 @@ In the regression, MOSEK reports the constant case as infeasible and the
 parameter-dependent case as feasible. `lmilab` supplies a fallback execution
 path, while MOSEK provides the stated infeasibility distinction.
 
-After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `pdmat` (`Pplot`) before calling [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
+After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-wise Bernstein coefficients are evaluated with `value` and used to construct a known `pdmat` (`Pplot`) before calling [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
 
 <span id="induced-l2-gain-with-rate-vertex-derivatives"></span>
 

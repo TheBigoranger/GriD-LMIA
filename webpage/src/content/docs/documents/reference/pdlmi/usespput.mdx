@@ -78,7 +78,7 @@ Inactive sparse properties are zero. Therefore, inspect the returned selector pr
 
 ## Construction And Constraint Order
 
-For one Gram specification with Bernstein degree vector $\vect d$, define the window side length by $w_s=\min(b,d_s+1)$. A start vector $\vect u$ ranges over $u_s=0,\ldots,d_s-w_s+1$, and the corresponding basis contains the labels in the tensor window $\vect u+\prod_s\{0,\ldots,w_s-1\}$. Each window receives an independent PSD Gram block.
+For one Gram specification with Bernstein degree vector $\vect d$, define the window side length by $w_s=\min(b,d_s+1)$. A start vector $\vect u$ ranges over $u_s=0,\ldots,d_s-w_s+1$, and the corresponding basis contains the labels in the tensor window $\vect u+\prod_{s=1}^{\ell}\{0,\ldots,w_s-1\}$. Each window receives an independent PSD Gram block.
 
 The block dimension for a symmetric $n\times n$ inequality is
 
@@ -92,7 +92,7 @@ $$
 \prod_{s=1}^{\ell}(d_s-w_s+2).
 $$
 
-The exact target coefficient at each Bernstein label is the sum of the contributions from every overlapping window and every active Putinar term. The number of target coefficient identities remains $\prod_s(\mathrm{targetDegree}_s+1)$ for each certificate copy.
+The exact target coefficient at each Bernstein label is the sum of the contributions from every overlapping window and every active Putinar term. The number of target coefficient identities remains $\prod_{s=1}^{\ell}(\mathrm{targetDegree}_s+1)$ for each certificate copy.
 
 Certificates are independent for every physical cell, every stored rate row, and every column-major matrix entry of an entrywise inequality. A symmetric matrix inequality instead uses matrix-valued PSD blocks.
 
