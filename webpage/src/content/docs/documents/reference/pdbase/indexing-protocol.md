@@ -9,12 +9,13 @@ description: Shared MATLAB end-index and scalar subscript-dispatch behavior.
 
 **Syntax:** `obj(:,end)`, `obj(end,:)`, and `k = end(obj,indexPosition,numberOfIndices)`.
 
-**Returned value:** the selected matrix-payload dimension. The grid, physical
-cells, coefficient labels, and rate rows are not indexing dimensions.
+**Returned value:** the selected matrix-payload dimension. Indexing applies to
+the matrix payload and preserves the grid, physical cells, coefficient labels,
+and rate rows.
 
 `pdbase` supplies this protocol for the `pdmat` and `pdvar` `subsref` and
-`subsasgn` implementations. A direct `pdbase` does not expose matrix
-parentheses indexing by itself.
+`subsasgn` implementations. Matrix parentheses indexing belongs to those
+derived classes.
 
 ## <span id="pdbase-numArgumentsFromSubscript"></span>`numArgumentsFromSubscript`
 
@@ -24,9 +25,9 @@ parentheses indexing by itself.
 produces one scalar object for subsequent dot dispatch, such as
 `A(1,2).Degree`.
 
-The method is infrastructure for MATLAB indexing and has no user options.
+The method is infrastructure for MATLAB indexing with a fixed protocol.
 Malformed matrix subscripts are validated by the derived `pdmat` or `pdvar`
-method, not by this dispatch hook.
+method. This dispatch hook reports argument counts.
 
 ## Example
 

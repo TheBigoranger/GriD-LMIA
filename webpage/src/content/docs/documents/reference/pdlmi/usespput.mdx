@@ -52,8 +52,8 @@ Csparse = pdlmi(expr, relation, CliqueSize=b, SparsePutinarOrder=r)
 | :--- | :--- |
 | `C` | Any `pdlmi` object. The method rebuilds from `C.Residual` and replaces the currently selected family. |
 | `b` | Finite positive integer scalar passed as `CliqueSize`. Default `2`. The same tensor-window side is used on each axis, with automatic saturation on shorter axes. |
-| `r` | Finite nonnegative integer scalar shorthand or an $\ell$-entry direction-wise absolute Gram order. It is not an increment. |
-| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. It applies only to this rebuild and is not stored. |
+| `r` | Finite nonnegative integer scalar shorthand or an $\ell$-entry direction-wise absolute Gram order specified independently of the residual degree. |
+| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. It applies to the current rebuild as transient state. |
 
 For residual degree `Degree`, the default and minimum order are `floor(Degree/2)` in one parameter and componentwise `ceil(Degree/2)` in two or more parameters. The accepted order is stored as a $1\times\ell$ row vector.
 
@@ -78,7 +78,7 @@ Inactive sparse properties are zero. Therefore, inspect the returned selector pr
 
 ## Construction And Constraint Order
 
-For one Gram specification with Bernstein degree vector $\mathbf d$, define the window side length by $w_s=\min(b,d_s+1)$. A start vector $\mathbf u$ ranges over $u_s=0,\ldots,d_s-w_s+1$, and the corresponding basis contains the labels in the tensor window $\mathbf u+\prod_s\{0,\ldots,w_s-1\}$. Each window receives an independent PSD Gram block.
+For one Gram specification with Bernstein degree vector $\vect d$, define the window side length by $w_s=\min(b,d_s+1)$. A start vector $\vect u$ ranges over $u_s=0,\ldots,d_s-w_s+1$, and the corresponding basis contains the labels in the tensor window $\vect u+\prod_s\{0,\ldots,w_s-1\}$. Each window receives an independent PSD Gram block.
 
 The block dimension for a symmetric $n\times n$ inequality is
 
@@ -97,7 +97,10 @@ The exact target coefficient at each Bernstein label is the sum of the contribut
 Certificates are independent for every physical cell, every stored rate row, and every column-major matrix entry of an entrywise inequality. A symmetric matrix inequality instead uses matrix-valued PSD blocks.
 
 <Aside type="note" title="Implementation remark: overlapping coefficient accumulation">
-The assembler maps every window Gram entry to its target Bernstein label and adds all contributions that reach that label. Window overlap changes the number and maximum dimension of the PSD blocks, but it does not remove any target coefficient identity.
+The assembler maps every window Gram entry to its target Bernstein label and
+adds all contributions that reach that label. Window overlap changes the
+number and maximum dimension of the PSD blocks while preserving every target
+coefficient identity.
 </Aside>
 
 ## Examples
@@ -169,7 +172,7 @@ numel(C.Constraints)
 
 ## Anisotropic Assembly Output
 
-For $\mathbf M=(2,6)$, $\mathbf r=(1,3)$, and `CliqueSize=2`, the three
+For $\vect M=(2,6)$, $\vect r=(1,3)$, and `CliqueSize=2`, the three
 active Putinar basis degrees are $(1,3)$, $(0,3)$, and $(1,2)$. Their window
 diagrams contain respectively $3$, $3$, and $2$ PSD blocks, with block
 dimensions $4$, $2$, and $4$. All eight windows contribute to the same
@@ -187,12 +190,15 @@ $3\times7$ tensor of 21 exact coefficient identities.
 
 ## Limitations
 
-SparsePutinar is not the Zheng–Fantuzzi structural-matrix graph-chordal
-decomposition. It does not infer a polynomial-matrix sparsity graph, compute
-graph cliques, or perform chordal completion. It uses user-selected sliding
-tensor windows over Bernstein Gram-basis labels.
+SparsePutinar uses user-selected sliding tensor windows over Bernstein
+Gram-basis labels. The Zheng–Fantuzzi method instead derives structural-matrix
+graph cliques and a chordal decomposition from a polynomial-matrix sparsity
+graph.
 
-Smaller maximum PSD blocks trade against a larger block count. Therefore, this fixed-order sufficient certificate does not guarantee a smaller total SDP or shorter solve time. Failure is inconclusive for the continuous inequality, and the method does not add a positivity margin or select a solver.
+Smaller maximum PSD blocks trade against a larger block count. Total SDP size
+and solve time therefore depend on the complete block and equality structure.
+Failure remains inconclusive for the continuous inequality. The caller writes
+the positivity margin and selects the solver.
 
 ## See Also
 

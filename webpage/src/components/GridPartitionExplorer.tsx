@@ -472,7 +472,7 @@ export default function GridPartitionExplorer({
       </div>
       <figcaption>
         The tensor grid exactly partitions the box. Moving a knot changes the
-        physical cells independently along each axis; the modeling approximation
+        physical cells independently along each axis. The modeling approximation
         comes from restricting the decision-function space on those cells.
       </figcaption>
     </figure>

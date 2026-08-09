@@ -1,9 +1,9 @@
 \chapter{\texorpdfstring{\code{pdvar}}{pdvar}: Decision Matrix Functions}
 \label{sec:pdvar}
 
-\code{pdvar} creates continuous cell-local Bernstein decision expressions backed by YALMIP \code{sdpvar} coefficients. It participates in supported affine and known-data algebra. It does not choose solvers or call \code{optimize}. Comparison overloads create \code{pdlmi} objects, whose \code{toYalmip} method later converts them to YALMIP constraints. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdvar} behavior; this chapter documents their decision-expression syntax, stable shape examples, validations, and rate-aware boundaries.
+\code{pdvar} creates continuous cell-local Bernstein decision expressions backed by YALMIP \code{sdpvar} coefficients. It participates in supported affine and known-data algebra. Solver selection and the call to \code{optimize} belong to the caller's optimization workflow. Comparison overloads create \code{pdlmi} objects, whose \code{toYalmip} method later converts them to YALMIP constraints. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdvar} behavior. This chapter documents their decision-expression syntax, stable shape examples, validations, and rate-aware boundaries.
 
-A \code{pdvar} with direction-wise degree $\mathbf m=(m_1,\ldots,m_\ell)$ represents a decision such as $P(\boldsymbol\rho)$ or $y_k(\boldsymbol\rho)$. When a component $m_s$ is positive, neighboring cells reuse every decision handle on the corresponding shared face, which enforces value continuity without auxiliary equality constraints. A zero component makes the decision constant along that direction, and $\mathbf m=\mathbf0$ reuses one decision matrix over the complete grid. \code{rhodiff} applies cellwise forward differences scaled by $1/h_s^{\mathbf c}$ and stores one row per vertex in $\mathcal V_{\mathcal R}$, while \code{value} recovers numeric coefficient payloads only after the caller has validated YALMIP's solver status. Products remain affine only when the other factor is known numeric or \code{pdmat} data.
+A \code{pdvar} with direction-wise degree $\vect{m}=(m_1,\ldots,m_\ell)$ represents a decision such as $P(\vect{\rho})$ or $y_k(\vect{\rho})$. When a component $m_s$ is positive, neighboring cells reuse every decision handle on the corresponding shared face, which enforces value continuity through shared variables and zero auxiliary equality constraints. A zero component makes the decision constant along that direction, and $\vect{m}=\vect{0}$ reuses one decision matrix over the complete grid. \code{rhodiff} applies cellwise forward differences scaled by $1/h_s^{\vect{c}}$ and stores one row per vertex in $\mathcal V_{\mathcal R}$, while \code{value} recovers numeric coefficient payloads only after the caller has validated YALMIP's solver status. Products remain affine only when the other factor is known numeric or \code{pdmat} data.
 
 \section{API Map}
 \label{sec:pdvar-lookup}
@@ -55,7 +55,7 @@ P = pdvar(..., ValidationMode=mode)
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{pdvar(n, gridVectors)} creates an \(n\times n\) square variable using scalar-size shorthand; for example, \code{pdvar(2, {[0 1]})}. Square variables default to symmetric YALMIP coefficients. \item \code{pdvar(n, n, gridVectors)} is the explicit square-size form; for example, \code{pdvar(2, 2, {[0 1]})}. It has the same default symmetric structure as the shorthand. \item \code{pdvar(n, p, gridVectors)} creates an \(n\times p\) variable. Rectangular variables default to full YALMIP coefficients; for example, \code{pdvar(2, 3, {[0 1]})}. \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP coefficient structure. \code{"symmetric"} requires a square size. \item \code{Degree=degree} accepts one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector and is stored as a \(1\)-by-\(\ell\) row \(\mathbf m=(m_1,\ldots,m_\ell)\). The omitted default is \(\mathbf1\). An explicitly supplied scalar on a multidimensional grid expands uniformly and emits \codeerr{pdvar}{ScalarDegreeExpansion} once; omitted defaults and one-dimensional forms remain warning-free. An all-zero vector creates one parameter-independent decision matrix shared across the grid. Otherwise neighboring cells share complete control faces; a zero component means constancy in that parameter direction. \item \code{RateBounds=rb} stores parameter-rate metadata for later \code{rhodiff(P)} calls. Use \code{RateBounds=[-1 1]} for one parameter; use a two-row matrix for two parameters, as shown in the rate-metadata example below. \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It affects repeated validation of package-generated storage only; public options, grid, structure, affine safety, continuity, and source semantics remain global in both modes. The mode is not stored.
+  \item \code{pdvar(n, gridVectors)} creates an \(n\times n\) square variable using scalar-size shorthand. For example, \code{pdvar(2, {[0 1]})}. Square variables default to symmetric YALMIP coefficients. \item \code{pdvar(n, n, gridVectors)} is the explicit square-size form. For example, \code{pdvar(2, 2, {[0 1]})}. It has the same default symmetric structure as the shorthand. \item \code{pdvar(n, p, gridVectors)} creates an \(n\times p\) variable. Rectangular variables default to full YALMIP coefficients. For example, \code{pdvar(2, 3, {[0 1]})}. \item \code{"full"} and \code{"symmetric"} explicitly choose the YALMIP coefficient structure. \code{"symmetric"} requires a square size. \item \code{Degree=degree} accepts one finite nonnegative integer scalar shorthand or an \(\ell\)-element vector and is stored as a \(1\)-by-\(\ell\) row \(\vect{m}=(m_1,\ldots,m_\ell)\). The omitted default is \(\vect{1}\). An explicitly supplied scalar on a multidimensional grid expands uniformly and emits \codeerr{pdvar}{ScalarDegreeExpansion} once. Omitted defaults and one-dimensional forms remain warning-free. An all-zero vector creates one parameter-independent decision matrix shared across the grid. Otherwise neighboring cells share complete control faces. A zero component means constancy in that parameter direction. \item \code{RateBounds=rb} stores parameter-rate metadata for later \code{rhodiff(P)} calls. Use \code{RateBounds=[-1 1]} for one parameter. Use a two-row matrix for two parameters, as shown in the rate-metadata example below. \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It affects repeated validation of package-generated storage only. Public options, grid, structure, affine safety, continuity, and source semantics remain global in both modes. The mode is transient constructor input.
 \end{itemize}
 
 \begin{center}
@@ -77,11 +77,11 @@ P = pdvar(..., ValidationMode=mode)
     {same YALMIP handle: \(P^{(1)}[2]=P^{(2)}[0]\)};
 \end{tikzpicture}
 
-\textit{For positive degree, neighboring physical cells reuse complete boundary-face YALMIP handles; no extra continuity LMI is generated.}
+\textit{For positive degree, neighboring physical cells reuse complete boundary-face YALMIP handles. Shared handles enforce continuity with zero auxiliary continuity LMIs.}
 \end{center}
 
 \examplehead
-The square shorthand creates a \(2\times2\) continuous decision object.  The default degree is one and the object carries no rate metadata.
+The square shorthand creates a \(2\times2\) continuous decision object. The default degree is one and the object's \code{RateBounds} property is empty.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -123,7 +123,7 @@ matrixSize = 1×2 double
 degree = 1
 \end{lstlisting}
 
-The structure flag makes the coefficient structure explicit.  This is useful when a square variable should use full, not symmetric, coefficients.
+The structure flag makes the coefficient structure explicit. Use \code{"full"} when a square variable requires full coefficients in place of the symmetric default.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -165,7 +165,7 @@ cellCount = 2
 \end{lstlisting}
 
 \shortpairspace
-Direction-wise degree permits variation in selected parameters and exact constancy in the others. The following clean-session transcript uses $\mathbf m=(2,0)$, so the result has three independent coefficients along the first parameter and no variation along the second. The symbolic identifiers printed by YALMIP are local to the MATLAB session and are not stable object identifiers.
+Direction-wise degree permits variation in selected parameters and exact constancy in the others. The following clean-session transcript uses $\vect{m}=(2,0)$, so the result has three independent coefficients along the first parameter and is constant along the second. The symbolic identifiers printed by YALMIP are session-local display labels.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -203,12 +203,12 @@ rateBounds = 2×2 double
 
 \remarkshead
 \begin{itemize}[leftmargin=*]
-  \item Missing or misplaced dimensions and grids raise \codeerr{pdvar}{InvalidInput}; invalid sizes and degrees raise \codeerr{pdvar}{Invalid}\allowbreak\code{MatrixSize} or \codeerr{pdvar}{InvalidDegree}. Explicit multidimensional scalar degree expansion is accepted with warning \codeerr{pdvar}{ScalarDegreeExpansion}. \item Option failures use \codeerr{pdvar}{Invalid}\allowbreak\code{Options}, \codeerr{pdvar}{Unknown}\allowbreak\code{Option}, or \codeerr{pdvar}{Unsupported}\allowbreak\code{Option}; invalid modes raise \codeerr{pdvar}{Invalid}\allowbreak\code{ValidationMode}. \item A symmetric nonsquare request raises \codeerr{pdvar}{InvalidStructure}; grid failures use \codeerr{pdvar}{InvalidGrid} or \codeerr{pdvar}{Invalid}\allowbreak\code{GridVector}. \item \code{RateBounds} must be a finite \(\ell\)-by-2 matrix with each lower bound no greater than its upper bound; violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
+  \item Missing or misplaced dimensions and grids raise \codeerr{pdvar}{InvalidInput}. Invalid sizes and degrees raise \codeerr{pdvar}{Invalid}\allowbreak\code{MatrixSize} or \codeerr{pdvar}{InvalidDegree}. Explicit multidimensional scalar degree expansion is accepted with warning \codeerr{pdvar}{ScalarDegreeExpansion}. \item Option failures use \codeerr{pdvar}{Invalid}\allowbreak\code{Options}, \codeerr{pdvar}{Unknown}\allowbreak\code{Option}, or \codeerr{pdvar}{Unsupported}\allowbreak\code{Option}. Invalid modes raise \codeerr{pdvar}{Invalid}\allowbreak\code{ValidationMode}. \item A symmetric nonsquare request raises \codeerr{pdvar}{InvalidStructure}. Grid failures use \codeerr{pdvar}{InvalidGrid} or \codeerr{pdvar}{Invalid}\allowbreak\code{GridVector}. \item \code{RateBounds} must be a finite \(\ell\)-by-2 matrix with each lower bound at most its upper bound. Violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
 \end{itemize}
 
 \section{Inspect Object Properties}
 
-\code{pdvar} declares no additional class-owned properties.  It exposes the read-only inherited \code{pdbase} properties listed in \cref{sec:pdbase-fields}; their private set access prevents user assignment. In particular, decision coefficients are inspected through \code{P.LocalValues}, while \code{P.Degree}, \code{P.IsContinuous}, and \code{P.RateBounds} describe their representation and rate metadata.
+\code{pdvar} exposes the complete read-only inherited \code{pdbase} property set listed in \cref{sec:pdbase-fields}. Their private set access rejects user assignment. In particular, decision coefficients are inspected through \code{P.LocalValues}, while \code{P.Degree}, \code{P.IsContinuous}, and \code{P.RateBounds} describe their representation and rate metadata.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -232,7 +232,7 @@ rateBounds = 1×2 double
 firstCellCoefficientCount = 3
 \end{lstlisting}
 
-Use public algebra to create a modified value; direct assignments such as \code{P.Degree = 1} are not supported.
+Use public algebra to create a modified value. Direct assignments such as \code{P.Degree = 1} raise MATLAB's private-set property error.
 
 \section{Inspect, Evaluate, And Elevate Inherited Storage}
 \label{sec:pdvar-backend-inheritance}
@@ -252,10 +252,10 @@ Q = P.elevate(degreeIncrement, validationMode)
 \end{lstlisting}
 
 \descriptionhead
-The storage queries use the shared \code{pdbase} cell and label order and return the symbolic \code{sdpvar} coefficient payloads of the selected decision expression. \code{evaluate} reconstructs the affine symbolic matrix at one in-bounds parameter point, while a derivative or rate-row object returns a $1$-by-$N_v$ cell row in stored distinct-vertex order, where $N_v=\code{P.NumRateRows}$. \code{elevate} returns a new \code{pdvar} of the same dynamic class with the same represented expression, physical cells, YALMIP variables, metadata, and rate-row order at the higher degree. It does not create decision freedom or modify \code{P}. The optional positional validation mode and its errors follow the canonical contract in \cref{sec:pdbase-elevate}. \Cref{sec:bernstein-degree-elevation} derives the sparse elevation map used for this exact representation change.
+The storage queries use the shared \code{pdbase} cell and label order and return the symbolic \code{sdpvar} coefficient payloads of the selected decision expression. \code{evaluate} reconstructs the affine symbolic matrix at one in-bounds parameter point, while a derivative or rate-row object returns a $1$-by-$N_v$ cell row in stored distinct-vertex order, where $N_v=\code{P.NumRateRows}$. \code{elevate} returns a new \code{pdvar} of the same dynamic class with the same represented expression, physical cells, YALMIP variables, metadata, rate-row order, and decision freedom at the higher degree. The original \code{P} remains unchanged. The optional positional validation mode and its errors follow the canonical contract in \cref{sec:pdbase-elevate}. \Cref{sec:bernstein-degree-elevation} derives the sparse elevation map used for this exact representation change.
 
 \examplehead
-The one-line examples in this chapter print the \code{Expression} column returned by \code{bernTable(...,}\allowbreak\code{"oneLine")} so long symbolic formulas can wrap without altering their terms. YALMIP's \code{internal(...)} identifiers are local to the clean MATLAB session and may differ in another session.
+The one-line examples in this chapter print the \code{Expression} column returned by \code{bernTable(...,}\allowbreak\code{"oneLine")} so long symbolic formulas can wrap while preserving their terms. YALMIP's \code{internal(...)} identifiers are local to the clean MATLAB session and may differ in another session.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -317,7 +317,7 @@ elevatedDegree = 1×2 double
 \end{lstlisting}
 
 \remarkshead
-Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}. Malformed points raise \codeerr{pdvar}{InvalidPoint}; out-of-bounds points raise \codeerr{pdvar}{PointOutOfBounds}. Invalid elevation increments raise \codeerr{pdbase}{InvalidDegreeIncrement}. Evaluation returns symbolic expressions until the user assigns or solves the underlying YALMIP variables; use \code{value} for the post-assignment numeric conversion documented in \cref{sec:pdvar-value}.
+Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}. Malformed points raise \codeerr{pdvar}{InvalidPoint}. Out-of-bounds points raise \codeerr{pdvar}{PointOutOfBounds}. Invalid elevation increments raise \codeerr{pdbase}{InvalidDegreeIncrement}. Evaluation returns symbolic expressions until the user assigns or solves the underlying YALMIP variables. Use \code{value} for the post-assignment numeric conversion documented in \cref{sec:pdvar-value}.
 
 \section{\texorpdfstring{\code{rhodiff}}{rhodiff}}
 \index{rhodiff@\texttt{rhodiff}}
@@ -331,17 +331,17 @@ D = rhodiff(P, rb)
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{P} is a \code{pdvar} without existing rate-vertex rows. \item \code{rb} is a finite $\ell$-by-$2$ numeric matrix of lower and upper parameter-rate bounds, with each lower bound no greater than its upper bound. It must equal \code{P.RateBounds} when the object already carries nonempty bounds. \item Without \code{rb}, \code{rhodiff(P)} requires nonempty \code{P.RateBounds}. \item \code{D} is a discontinuous \code{pdvar} with one coefficient row per rate vertex. In one parameter, $\mathbf m=(m_1)$ becomes $(m_1-1)$ when $m_1>0$, while $(0)$ remains $(0)$. In two or more parameters, every nonzero-axis partial is elevated exactly from $\mathbf m-\mathbf e_s$ to the common tensor degree $\mathbf m=\code{P.Degree}$ before summation. A zero-degree axis contributes zero, and an all-zero tensor degree returns a complete zero row for every rate vertex.
+  \item \code{P} is an ordinary \code{pdvar} whose \code{NumRateRows} equals zero. \item \code{rb} is a finite $\ell$-by-$2$ numeric matrix of lower and upper parameter-rate bounds, with each lower bound at most its upper bound. It must equal \code{P.RateBounds} when the object already carries nonempty bounds. \item The one-input form \code{rhodiff(P)} requires nonempty \code{P.RateBounds}. \item \code{D} is a discontinuous \code{pdvar} with one coefficient row per rate vertex. In one parameter, $\vect{m}=(m_1)$ becomes $(m_1-1)$ when $m_1>0$, while $(0)$ remains $(0)$. In two or more parameters, every nonzero-axis partial is elevated exactly from $\vect{m}-\vect{e}_s$ to the common tensor degree $\vect{m}=\code{P.Degree}$ before summation. A zero-degree axis contributes zero, and an all-zero tensor degree returns a complete zero row for every rate vertex.
 \end{itemize}
 
-For a coefficient row of direction-wise degree \(\mathbf m\) on physical cell \(\mathcal H_{\mathbf c}\), define \(h_s^{\mathbf c}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0\). Before rate substitution, differentiation along a nonzero-degree axis uses the forward difference
+For a coefficient row of direction-wise degree \(\vect{m}\) on physical cell \(\mathcal H_{\vect{c}}\), define \(h_s^{\vect{c}}=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}>0\). Before rate substitution, differentiation along a nonzero-degree axis uses the forward difference
 \[
-\left(\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}\right)[\mathbf i]
-=\frac{m_s}{h_s^{\mathbf c}}
-\left(P^{(\mathbf c)}[\mathbf i+\mathbf e_s]-P^{(\mathbf c)}[\mathbf i]\right),
+\left(\frac{\partial P^{(\vect{c})}}{\partial\rho_s}\right)[\vect{i}]
+=\frac{m_s}{h_s^{\vect{c}}}
+\left(P^{(\vect{c})}[\vect{i}+\vect{e}_s]-P^{(\vect{c})}[\vect{i}]\right),
 \qquad i_s=0,\ldots,m_s-1.
 \]
-Thus the \(s\)-th partial has degree \(\mathbf m-\mathbf e_s\). In one parameter this reduced degree is the public result degree. In two or more parameters, \code{rhodiff} elevates every nonzero partial back to the common degree \(\mathbf m\) before adding the rate-weighted rows, so partials from different axes have compatible tensor labels. \Cref{sec:bernstein-differentiation} derives the reduction and exact re-elevation.
+Thus the \(s\)-th partial has degree \(\vect{m}-\vect{e}_s\). In one parameter this reduced degree is the public result degree. In two or more parameters, \code{rhodiff} elevates every nonzero partial back to the common degree \(\vect{m}\) before adding the rate-weighted rows, so partials from different axes have compatible tensor labels. \Cref{sec:bernstein-differentiation} derives the reduction and exact re-elevation.
 
 For a one-parameter degree-one coefficient pair \(P^{(c)}[0],P^{(c)}[1]\), the rate-dependent derivative row reduces to
 \[
@@ -366,17 +366,17 @@ This is the one-dimensional special case: the two rows correspond to the lower a
   \draw[->,thick,dpblue] (d) -- (hi);
 \end{tikzpicture}
 
-\textit{Differentiation changes local coefficients; rate substitution creates rows.  Neither operation adds physical cells.}
+\textit{Differentiation changes local coefficients. Rate substitution creates rows.  Neither operation adds physical cells.}
 \end{center}
 
 For \(\ell\) parameters, nonuniform grids use a distinct step length in every direction and cell:
 \[
-    \dot P^{(\mathbf c)}(\boldsymbol\rho,\boldsymbol\nu)=\sum_{s=1}^{\ell}\nu_s\,\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}(\boldsymbol\rho).
+    \dot P^{(\vect{c})}(\vect{\rho},\vect{\nu})=\sum_{s=1}^{\ell}\nu_s\,\frac{\partial P^{(\vect{c})}}{\partial\rho_s}(\vect{\rho}).
 \]
-\code{RateBounds} fixes \(\mathcal R\), so \code{rhodiff} evaluates this affine expression at the \(N_v\) distinct vertices in \(\mathcal V_{\mathcal R}\) and stores one row per vertex. Here \(N_v=\code{size(helper.rateVerts(P.RateBounds),1)}\le 2^\ell\), with one value from each fixed rate direction. Supply the bounds explicitly as \code{rhodiff(P, rb)}, or initialize \code{P} with \code{RateBounds=rb}; if both are present they must match. Without bounds there is no finite vertex set to store, so \code{rhodiff(P)} raises \codeerr{pdvar}{MissingRateBounds}. \Cref{sec:bernstein-rate-vertex-storage} gives the exact hypercube-local row and coefficient layout.
+\code{RateBounds} fixes \(\mathcal R\), so \code{rhodiff} evaluates this affine expression at the \(N_v\) distinct vertices in \(\mathcal V_{\mathcal R}\) and stores one row per vertex. Here \(N_v=\code{size(helper.rateVerts(P.RateBounds),1)}\le 2^\ell\), with one value from each fixed rate direction. Supply the bounds explicitly as \code{rhodiff(P, rb)}, or initialize \code{P} with \code{RateBounds=rb}. If both are present they must match. An empty bound set leaves the finite rate-vertex set undefined, so \code{rhodiff(P)} raises \codeerr{pdvar}{MissingRateBounds}. \Cref{sec:bernstein-rate-vertex-storage} gives the exact hypercube-local row and coefficient layout.
 
 \remarkshead
-Unsupported call arity or differentiating an expression that already contains rate-vertex rows raises \codeerr{pdvar}{InvalidDiff}.  Explicit malformed rate bounds raise \codeerr{pdvar}{Invalid}\allowbreak\code{RateBounds}.  Calling \code{rhodiff(P)} without stored bounds raises \codeerr{pdvar}{Missing}\allowbreak\code{RateBounds}; explicit bounds that disagree with \code{P.RateBounds} raise \codeerr{pdvar}{RateBounds}\allowbreak\code{Mismatch}.
+Unsupported call arity or differentiating an expression that already contains rate-vertex rows raises \codeerr{pdvar}{InvalidDiff}. Explicit malformed rate bounds raise \codeerr{pdvar}{Invalid}\allowbreak\code{RateBounds}. Calling the one-input form with empty stored bounds raises \codeerr{pdvar}{Missing}\allowbreak\code{RateBounds}. Explicit bounds that disagree with \code{P.RateBounds} raise \codeerr{pdvar}{RateBounds}\allowbreak\code{Mismatch}.
 
 \examplehead
 When rate bounds live on the object, \code{rhodiff(P)} uses them directly.
@@ -525,7 +525,7 @@ T = bernTable(P, cellSubs, "oneLine")
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{P} is a \code{pdvar} object. \item \code{cellSubs} selects one physical cell; omit it to list every cell. \item \code{"oneLine"} is the only supported text option.  It returns one compact Bernstein expression per selected cell. \item \code{T} is a table.  Ordinary rows contain the local label, basis, physical-node flag, and symbolic or numeric value.  A rate-dependent derivative also includes \code{RateVertexIndex} and \code{RateVertex}.
+  \item \code{P} is a \code{pdvar} object. \item \code{cellSubs} selects one physical cell. Omit it to list every cell. \item \code{"oneLine"} is the only supported text option.  It returns one compact Bernstein expression per selected cell. \item \code{T} is a table.  Ordinary rows contain the local label, basis, physical-node flag, and symbolic or numeric value.  A rate-dependent derivative also includes \code{RateVertexIndex} and \code{RateVertex}.
 \end{itemize}
 
 \begin{center}
@@ -561,7 +561,7 @@ hasExpression = logical
 \end{lstlisting}
 
 \shortpairspace
-For \code{D = rhodiff(P)}, \code{bernTable(D, cellSubs, "oneLine")} emits one row for every selected physical cell and rate-box vertex rather than one row per local Bernstein coefficient. \code{RateVertexIndex} and \code{RateVertex} identify the lower or upper rate tuple, and their tensor order is defined in \cref{sec:bernstein-rate-vertex-storage}.
+For \code{D = rhodiff(P)}, \code{bernTable(D, cellSubs, "oneLine")} emits one row for every selected physical cell and rate-box vertex in place of the local-coefficient row format. \code{RateVertexIndex} and \code{RateVertex} identify the lower or upper rate tuple, and their tensor order is defined in \cref{sec:bernstein-rate-vertex-storage}.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -590,7 +590,7 @@ expressionCount = 4
 \end{lstlisting}
 
 \remarkshead
-\code{bernTable} is an inspection method, not a solver call. Text options other than \code{"oneLine"}, repeated selectors, invalid physical-cell selectors, or inconsistent rate-vertex rows raise \codeerr{pdvar}{Invalid}\allowbreak\code{BernsteinTableInput}.
+\code{bernTable} is an inspection method that remains separate from solver invocation. Text options other than \code{"oneLine"}, repeated selectors, invalid physical-cell selectors, or inconsistent rate-vertex rows raise \codeerr{pdvar}{Invalid}\allowbreak\code{BernsteinTableInput}.
 
 \section{Build Affine Algebra with Known Data}
 \label{sec:pdvar-algebra}
@@ -599,7 +599,7 @@ A \code{pdvar} result must remain affine in the underlying YALMIP decisions. The
 
 \subsection{Signs, Addition, And Subtraction}
 
-Use this family to combine compatible decision expressions, coefficient-backed known data, finite real numeric data, and affine \code{sdpvar} matrices. For two parameter-dependent operands, alignment proceeds in a fixed order: verify matching outer bounds, form the sorted union of interior nodes on each axis, exactly subdivide/re-express both coefficient trees on that common grid, elevate both to the componentwise maximum degree, and finally add or subtract matching coefficients. Numeric and affine constant operands are promoted before the last two steps. The corresponding overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}; see \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
+Use this family to combine compatible decision expressions, coefficient-backed known data, finite real numeric data, and affine \code{sdpvar} matrices. For two parameter-dependent operands, alignment proceeds in a fixed order: verify matching outer bounds, form the sorted union of interior nodes on each axis, exactly subdivide/re-express both coefficient trees on that common grid, elevate both to the componentwise maximum degree, and finally add or subtract matching coefficients. Numeric and affine constant operands are promoted before the last two steps. The corresponding overload names are \code{plus}, \code{minus}, \code{uplus}, and \code{uminus}. See \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -619,7 +619,7 @@ R = +P
 R = -P
 \end{lstlisting}
 
-Here \code{A} is coefficient-backed \code{pdmat}, \code{M} is numeric, and \code{X} is affine \code{sdpvar}.  A numeric scalar broadcasts to the payload size; an affine \code{sdpvar} is promoted as parameter-independent data.
+Here \code{A} is coefficient-backed \code{pdmat}, \code{M} is numeric, and \code{X} is affine \code{sdpvar}.  A numeric scalar broadcasts to the payload size. An affine \code{sdpvar} is promoted as parameter-independent data.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -649,7 +649,7 @@ differenceClass = 'pdvar'
 negativeClass = 'pdvar'
 \end{lstlisting}
 
-A nonlinear symbolic operand such as \code{eta*eta} is rejected. Rate-vertex rows from \code{rhodiff} may be added to compatible ordinary expressions; the ordinary rows are broadcast over the active rate vertices.
+A nonlinear symbolic operand such as \code{eta*eta} is rejected. Rate-vertex rows from \code{rhodiff} may be added to compatible ordinary expressions. The ordinary rows are broadcast over the active rate vertices.
 
 The next example exercises both stages of parameter-dependent alignment: a coarse degree-one decision is refined to the known operand's two-cell grid and elevated to degree two before coefficientwise addition.
 
@@ -691,7 +691,7 @@ R = M * P
 R = P * M
 \end{lstlisting}
 
-The first example shows numeric left and right matrix products without exposing incidental YALMIP variable identifiers.
+The first example shows numeric left and right matrix products while keeping incidental YALMIP variable identifiers outside the transcript.
 
 \refhead{Examples and output}
 \begin{lstlisting}[style=dpmatlab]
@@ -786,18 +786,18 @@ A derivative object may be multiplied by numeric data or a matching-grid known o
 Two decision-bearing factors are also rejected: their product would be quadratic in YALMIP decision coefficients.  The supported boundary is numeric or known \code{pdmat} data multiplying one affine \code{pdvar} expression on either side, with the written matrix order preserved.
 
 \remarkshead
-Incompatible affine operands raise \codeerr{pdvar}{InvalidAddition} or \codeerr{pdvar}{InvalidSubtraction}.  Bad dimensions, two decision-bearing factors, nonlinear symbolic data, or unsupported rate combinations raise \codeerr{pdvar}{InvalidMultiplication}.  Incompatible parameter bounds raise \codeerr{pdvar}{MixedGrid}; a function-only \code{pdmat} operand raises \codeerr{pdvar}{FunctionOnlyAlgebra}.
+Incompatible affine operands raise \codeerr{pdvar}{InvalidAddition} or \codeerr{pdvar}{InvalidSubtraction}.  Bad dimensions, two decision-bearing factors, nonlinear symbolic data, or unsupported rate combinations raise \codeerr{pdvar}{InvalidMultiplication}.  Incompatible parameter bounds raise \codeerr{pdvar}{MixedGrid}. A function-only \code{pdmat} operand raises \codeerr{pdvar}{FunctionOnlyAlgebra}.
 
 \section{Reshape and Transform Decision Matrices}
 \label{sec:pdvar-matrix-ops}
 
-Every method below is inherited from the centralized \code{pdbase} implementation and transforms each local affine YALMIP payload while the \code{pdvar} reconstruction hook preserves the physical grid, degree, class, decision metadata, and compatible rate rows. The examples report stable classes, dimensions, and metadata rather than YALMIP's internal variable numbers.
+Every method below is inherited from the centralized \code{pdbase} implementation and transforms each local affine YALMIP payload while the \code{pdvar} reconstruction hook preserves the physical grid, degree, class, decision metadata, and compatible rate rows. The examples report stable classes, dimensions, and metadata in place of YALMIP's session-local variable numbers.
 
 \subsection{Shape, Equality, And MATLAB Protocols}
 \label{sec:pdvar-matrix-shape}
 \label{sec:pdvar-matrix-protocol}
 
-Shape queries describe the matrix payload.  \code{isequal} is an exact identity check: grid, degree, matrix size, metadata, and local symbolic payloads must already match; it does not merge or elevate operands.
+Shape queries describe the matrix payload. \code{isequal} is an exact identity check: grid, degree, matrix size, metadata, and local symbolic payloads must already match. Each operand retains its original grid and degree during this check.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -840,12 +840,12 @@ equalsUnaryPlus =
    1
 \end{lstlisting}
 
-\code{end}, \code{subsref}, \code{subsasgn}, and \code{numArgumentsFromSubscript} support the two-index and dot-access forms shown in \cref{sec:pdvar-indexing}; they do not expose physical-cell storage.
+\code{end}, \code{subsref}, \code{subsasgn}, and \code{numArgumentsFromSubscript} support the two-index and dot-access forms shown in \cref{sec:pdvar-indexing}. Physical-cell storage remains encapsulated behind these matrix-level protocols.
 
 \subsection{Transpose And Conjugate Transpose}
 \label{sec:pdvar-matrix-transform}
 
-Both forms transpose every local affine payload without breaking the YALMIP coefficient graph.
+Both forms transpose every local affine payload and preserve the YALMIP coefficient graph.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -924,7 +924,7 @@ Malformed or size-changing reshape requests raise \codeerr{pdvar}{InvalidReshape
 
 \subsection{Diagonals And Trace}
 
-\code{diag} extracts a diagonal or constructs a diagonal matrix from a vector; the selected offset may not be empty.  \code{trace} returns a scalar decision expression.
+\code{diag} extracts a diagonal or constructs a diagonal matrix from a vector. The selected offset requires a nonempty value. \code{trace} returns a scalar decision expression.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -961,7 +961,7 @@ Invalid offsets or empty selections raise \codeerr{pdvar}{InvalidDiag}.
 \subsection{Triangular Parts And Reductions}
 \label{sec:pdvar-matrix-reductions}
 
-Triangular methods zero the complementary part of every coefficient. Reductions act on matrix dimensions; \code{"all"} is available for \code{sum} and \code{mean}.
+Triangular methods zero the complementary part of every coefficient. Reductions act on matrix dimensions. \code{"all"} is available for \code{sum} and \code{mean}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1027,12 +1027,12 @@ runningSize = 1×2 double
      2     3
 \end{lstlisting}
 
-\code{vecdim} is a nonempty vector of unique positive integer dimensions; dimensions above two are singleton no-ops. \code{direction} is \code{"forward"} or \code{"reverse"}, case-insensitively. A direction supplied without a dimension uses the first nonsingleton matrix dimension, and \code{cumsum} along a dimension above two returns the same symbolic payloads. Invalid triangular offsets raise \codeerr{pdvar}{InvalidTriangularPart}. Invalid reduction calls raise \codeerr{pdvar}{InvalidSum}, \codeerr{pdvar}{InvalidMean}, or \codeerr{pdvar}{InvalidCumsum}; missing-value and native-output flags are not supported.
+\code{vecdim} is a nonempty vector of unique positive integer dimensions. Dimensions above two are singleton identity operations. \code{direction} is \code{"forward"} or \code{"reverse"}, case-insensitively. A direction supplied by itself uses the first nonsingleton matrix dimension, and \code{cumsum} along a dimension above two returns the same symbolic payloads. Invalid triangular offsets raise \codeerr{pdvar}{InvalidTriangularPart}. Invalid reduction calls raise \codeerr{pdvar}{InvalidSum}, \codeerr{pdvar}{InvalidMean}, or \codeerr{pdvar}{InvalidCumsum}. Missing-value and native-output flags lie outside the supported call forms.
 
 \subsection{Reordering And Rotation}
 \label{sec:pdvar-matrix-reorder}
 
-These methods rearrange matrix entries inside every symbolic coefficient; they do not reverse the parameter grid.
+These methods rearrange matrix entries inside every symbolic coefficient. The parameter grid retains its original order.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1115,7 +1115,7 @@ blockDiagonalSize = 1×2 double
      4     4
 \end{lstlisting}
 
-Incompatible blocks or rate metadata raise \codeerr{pdvar}{InvalidConcatenation}; unsupported dimensions raise \linebreak[4]\code{pdvar:}\allowbreak\code{UnsupportedCat}\allowbreak\code{Dimension}; invalid block-diagonal inputs raise \codeerr{pdvar}{InvalidBlkdiag}.  Incompatible bounds raise \codeerr{pdvar}{MixedGrid}; function-only known blocks raise \linebreak[4]\code{pdvar:}\allowbreak\code{FunctionOnly}\allowbreak\code{Algebra}.
+Incompatible blocks or rate metadata raise \codeerr{pdvar}{InvalidConcatenation}. Unsupported dimensions raise \linebreak[4]\code{pdvar:}\allowbreak\code{UnsupportedCat}\allowbreak\code{Dimension}. Invalid block-diagonal inputs raise \codeerr{pdvar}{InvalidBlkdiag}.  Incompatible bounds raise \codeerr{pdvar}{MixedGrid}. Function-only known blocks raise \linebreak[4]\code{pdvar:}\allowbreak\code{FunctionOnly}\allowbreak\code{Algebra}.
 
 \subsection{Repetition}
 
@@ -1152,7 +1152,7 @@ Invalid repetition shapes raise \codeerr{pdvar}{InvalidRepmat}.
 \section{Index and Assign \texorpdfstring{\code{pdvar}}{pdvar} Entries}
 \label{sec:pdvar-indexing}
 
-Parenthesis indexing selects a matrix block from every symbolic coefficient. Assignment writes a compatible numeric, \code{pdvar}, coefficient-backed \code{pdmat}, or affine \code{sdpvar} block into that position after the same common-grid refinement and componentwise maximum-degree elevation used by affine addition. The left object and parameter-dependent right-hand side are exactly re-expressed on the sorted union grid before the selected payload block is replaced at every aligned label. It does not select one physical cell. See \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
+Parenthesis indexing selects a matrix block from every symbolic coefficient. Assignment writes a compatible numeric, \code{pdvar}, coefficient-backed \code{pdmat}, or affine \code{sdpvar} block into that position after the same common-grid refinement and componentwise maximum-degree elevation used by affine addition. The left object and parameter-dependent right-hand side are exactly re-expressed on the sorted union grid before the selected payload block is replaced at every aligned label. Physical-cell selection belongs to \code{cells} and \code{coeffs}. See \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1220,7 +1220,7 @@ containsDecision =
    1
 \end{lstlisting}
 
-Invalid selectors raise \codeerr{pdvar}{InvalidSubscript}.  Linear indexing, deletion, or non-parenthesis assignment raises \codeerr{pdvar}{UnsupportedAssignment}; incompatible or nonlinear right-hand sides raise \codeerr{pdvar}{InvalidAssignment}.
+Invalid selectors raise \codeerr{pdvar}{InvalidSubscript}.  Linear indexing, deletion, or non-parenthesis assignment raises \codeerr{pdvar}{UnsupportedAssignment}. Incompatible or nonlinear right-hand sides raise \codeerr{pdvar}{InvalidAssignment}.
 \section{\texorpdfstring{\code{value}}{value}}
 \index{value@\texttt{value}}
 \label{sec:pdvar-value}
@@ -1231,7 +1231,7 @@ A = value(P)
 rows = value(rhodiff(P))
 \end{lstlisting}
 
-\code{value} converts assigned \code{pdvar} coefficients into known, coefficient-backed \code{pdmat} data. An ordinary expression returns one \code{pdmat}, preserving its grid, matrix size, degree, local coefficient order, and continuity metadata. A rate-vertex expression created by \code{rhodiff} returns a \(1\)-by-\(N_v\) cell array of \code{pdmat} objects, where \(N_v=\code{P.NumRateRows}\), in \code{helper.rateVerts(P.RateBounds)} order. The returned \code{pdmat} objects do not carry rate metadata. Every symbolic coefficient must have an assigned finite real YALMIP value; otherwise the method raises \codeerr{pdvar}{UnassignedValue}.
+\code{value} converts assigned \code{pdvar} coefficients into known, coefficient-backed \code{pdmat} data. An ordinary expression returns one \code{pdmat}, preserving its grid, matrix size, degree, local coefficient order, and continuity metadata. A rate-vertex expression created by \code{rhodiff} returns a \(1\)-by-\(N_v\) cell array of \code{pdmat} objects, where \(N_v=\code{P.NumRateRows}\), in \code{helper.rateVerts(P.RateBounds)} order. Each returned \code{pdmat} has empty rate metadata. Every symbolic coefficient must have an assigned finite real YALMIP value. Otherwise the method raises \codeerr{pdvar}{UnassignedValue}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -1248,7 +1248,7 @@ assignedCoefficients = 1×3 double
      1     2     4
 \end{lstlisting}
 
-For rate rows, \code{value} returns one known object per rate vertex rather than collapsing the rows.
+For rate rows, \code{value} returns one known object per rate vertex and preserves the row separation.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -1275,7 +1275,7 @@ upperRateCoefficients = 2
 \section{Comparisons To \texorpdfstring{\code{pdlmi}}{pdlmi}}
 \label{sec:pdvar-comparison}
 
-The \code{le}, \code{ge}, and \code{eq} overloads implement \code{<=}, \code{>=}, and \code{==}.  Inequalities select either semidefinite or entry-wise meaning once for the complete original residual; equality is always direct coefficient equality.
+The \code{le}, \code{ge}, and \code{eq} overloads implement \code{<=}, \code{>=}, and \code{==}.  Inequalities select either semidefinite or entry-wise meaning once for the complete original residual. Equality is always direct coefficient equality.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1288,7 +1288,7 @@ C = lhs == rhs
 
 \arghead
 \begin{itemize}[leftmargin=*]
-  \item \code{rhs} may be compatible numeric, coefficient-backed \code{pdmat}, affine \code{sdpvar}, or \code{pdvar} data. Ordinary operands use the same grid refinement, componentwise maximum-degree alignment, and promotion as subtraction. \item For \code{<=} and \code{>=}, every coefficient in every physical cell and rate row is scanned before assembly. The complete relation is semidefinite only if every original coefficient is square Hermitian. Numeric Hermitian testing uses the inclusive rule \(\lVert A-A^{\mathsf T}\rVert_\infty\le10^{-10}\); symbolic coefficients use YALMIP's \code{ishermitian}. If any coefficient fails, the complete inequality is entry-wise and warning \codeerr{pdlmi}{ElementwiseInequality} is issued once. Modes are never mixed coefficient by coefficient or entry by entry. \item \code{==} accepts rectangular and nonsymmetric residuals without that warning. It equates corresponding coefficient entries directly. Ordinary rows compare with ordinary rows; derivative rows compare only with compatible derivative rows. \item \code{C} is a \code{pdlmi} wrapper. A comparison assembles constraints but does not solve an optimization problem.
+  \item \code{rhs} may be compatible numeric, coefficient-backed \code{pdmat}, affine \code{sdpvar}, or \code{pdvar} data. Ordinary operands use the same grid refinement, componentwise maximum-degree alignment, and promotion as subtraction. \item For \code{<=} and \code{>=}, every coefficient in every physical cell and rate row is scanned before assembly. The complete relation is semidefinite only if every original coefficient is square Hermitian. Numeric Hermitian testing uses the inclusive rule \(\lVert A-A^{\mathsf T}\rVert_\infty\le10^{-10}\). Symbolic coefficients use YALMIP's \code{ishermitian}. If any coefficient fails, the complete inequality is entry-wise and warning \codeerr{pdlmi}{ElementwiseInequality} is issued once. Each complete relation uses one consistent mode across all coefficients and entries. \item \code{==} accepts rectangular and nonsymmetric residuals and equates corresponding coefficient entries directly. Ordinary rows compare with ordinary rows. Derivative rows compare only with compatible derivative rows. \item \code{C} is a \code{pdlmi} wrapper. A comparison assembles constraints and leaves optimization invocation to the caller.
 \end{itemize}
 
 \examplehead
@@ -1367,7 +1367,7 @@ Each group above corresponds to one local coefficient and contains six scalar en
 \label{sec:pdvar-limits}
 
 \begin{enumerate}[leftmargin=*]
-  \item Constructor-created \code{pdvar} objects support every finite nonnegative scalar or direction-wise integer degree. Each cell stores \(\prod_s(m_s+1)\) Bernstein control matrices; a zero-degree axis is constant in that direction. \item Products may contain decision variables on at most one side; nonlinear decision products such as \code{P * Q} are outside this slice. \item Function-only \code{pdmat} operands cannot enter \code{pdvar} algebra unless they were constructed with explicit Bernstein evidence. \item \code{rhodiff} of an existing rate-vertex derivative expression is not part of the current public workflow.
+  \item Constructor-created \code{pdvar} objects support every finite nonnegative scalar or direction-wise integer degree. Each cell stores \(\prod_s(m_s+1)\) Bernstein control matrices. A zero-degree axis is constant in that direction. \item Products may contain decision variables on at most one side. Nonlinear decision products such as \code{P * Q} are outside this slice. \item Function-only \code{pdmat} operands require reconstruction with explicit Bernstein evidence before entering \code{pdvar} algebra. \item The current public \code{rhodiff} workflow accepts an ordinary expression whose \code{NumRateRows} equals zero.
 \end{enumerate}
 
 \paragraph{Related APIs.}

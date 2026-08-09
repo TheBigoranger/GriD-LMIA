@@ -127,7 +127,7 @@ test("authors the Welcome DPD-LMI as one unbroken centered display", () => {
 
   assert.match(
     firstStep,
-    /math:\s*"\\\\mathcal F\(\\\\boldsymbol\\\\rho,\\\\dot\{\\\\boldsymbol\\\\rho\};y\)=F_0\+\\\\sum_\{k=1\}\^\{N\}F_ky_k\+\\\\sum_\{k=1\}\^\{N\}\\\\sum_\{s=1\}\^\{\\\\ell\}\\\\dot\\\\rho_sT_\{k,s\}\\\\frac\{\\\\partial y_k\}\{\\\\partial\\\\rho_s\}\\\\preceq0\."/,
+    /math:\s*"\\\\mathcal F\(\\\\vect\\\\rho,\\\\dot\{\\\\vect\\\\rho\};y\)=F_0\+\\\\sum_\{k=1\}\^\{N\}F_ky_k\+\\\\sum_\{k=1\}\^\{N\}\\\\sum_\{s=1\}\^\{\\\\ell\}\\\\dot\\\\rho_sT_\{k,s\}\\\\frac\{\\\\partial y_k\}\{\\\\partial\\\\rho_s\}\\\\preceq0\."/,
   );
   assert.match(firstStep, /All coefficient functions in the residual are evaluated at/);
   assert.match(firstStep, /oneLine:\s*true/);
@@ -146,7 +146,7 @@ test("Welcome stages 02 and 03 keep semantic formulas paired through responsive 
 
   assert.match(secondStep, /annotatedMath:\s*\[/);
   assert.match(secondStep, /label:\s*\["axis-",\s*\{\s*tex:\s*"s"\s*\},\s*" physical nodes"\]/);
-  assert.match(secondStep, /label:[^\n]*physical cell selected by[^\n]*mathbf c/);
+  assert.match(secondStep, /label:[^\n]*physical cell selected by[^\n]*vect c/);
   assert.doesNotMatch(secondStep, /\\underbrace|\\begin\{(?:aligned|gathered|split)\}/);
   assert.equal((home.match(/class="math-square-underbracket"/g) ?? []).length, 1);
   assert.match(home, /math-square-underbracket__expression[\s\S]*math-square-underbracket__rule[\s\S]*math-square-underbracket__label/);
@@ -179,7 +179,7 @@ test("only explicitly indivisible one-line formulas opt into local scrolling", (
   assert.equal((solverSmoke.match(/className="solver-one-line"/g) ?? []).length, 3);
   assert.match(
     elevate,
-    /<div className="elevate-direct-coefficient-scroll">[\s\S]*\\hat C\^\{\(\\boldsymbol c\)\}\[\\boldsymbol k\][\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*<\/div>/,
+    /<div className="elevate-direct-coefficient-scroll">[\s\S]*\\hat C\^\{\(\\vect c\)\}\[\\vect k\][\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*<\/div>/,
   );
   assert.match(
     css,
@@ -209,20 +209,20 @@ test("only explicitly indivisible one-line formulas opt into local scrolling", (
 test("elevation kernel shorthand stays consistent with the direct coefficient rule", () => {
   const elevate = read("src/content/docs/documents/reference/pdmat/elevate.mdx");
 
-  assert.match(elevate, /Let \$\\boldsymbol d:=\\boldsymbol M-\\boldsymbol m\$/);
+  assert.match(elevate, /Let \$\\vect d:=\\vect M-\\vect m\$/);
   assert.match(
     elevate,
-    /\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\]:=\\prod_\{s=1\}\^\{\\ell\}\\binom\{d_s\}\{j_s\},\\qquad\\boldsymbol j\\in\\prod_s\\\{0,\\ldots,d_s\\\}/,
+    /\\mathcal E_\{\\vect d\}\[\\vect j\]:=\\prod_\{s=1\}\^\{\\ell\}\\binom\{d_s\}\{j_s\},\\qquad\\vect j\\in\\prod_s\\\{0,\\ldots,d_s\\\}/,
   );
   assert.equal(
-    (elevate.match(/\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\]/g) ?? []).length,
+    (elevate.match(/\\mathcal E_\{\\vect d\}\[\\vect j\]/g) ?? []).length,
     2,
   );
   assert.match(
     elevate,
-    /\\ast_\{\\ell\}[\s\S]*\\mathcal E_\{\\boldsymbol d\}\[\\boldsymbol j\]/,
+    /\\ast_\{\\ell\}[\s\S]*\\mathcal E_\{\\vect d\}\[\\vect j\]/,
   );
-  assert.doesNotMatch(elevate, /\\mathcal E_\{\\boldsymbol M-\\boldsymbol m\}/);
+  assert.doesNotMatch(elevate, /\\mathcal E_\{\\vect M-\\vect m\}/);
   assert.match(
     elevate,
     /<div className="elevate-direct-coefficient-scroll">[\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*\\binom\{M_s\}\{k_s\}[\s\S]*<\/div>/,
@@ -348,7 +348,7 @@ test("the Markdown pipeline uses standard plugins rather than a dollar scanner",
     config,
     /splitInlineMath|nextSingleDollar|isEscaped|source\[index\]\s*===\s*["']\$["']/,
   );
-  assert.match(config, /remarkPlugins:\s*\[\s*remarkMath\s*\]/);
+  assert.match(config, /remarkPlugins:\s*\[\s*remarkTerminologyLinks\s*,\s*remarkMath\s*\]/);
   assert.match(
     config,
     /rehypePlugins:\s*\[\s*\[\s*rehypeKatex,\s*katexOptions\s*\]\s*,\s*rehypeKatexStrict\s*\]/,

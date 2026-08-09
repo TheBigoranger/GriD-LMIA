@@ -12,14 +12,14 @@ continuity metadata, and derivative rate-row order.
 The physical-cell tree, local tensor labels, and traversal functions are the
 same as in the
 [`pdmat Storage` explanation](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/).
-For `pdvar`, the leaf at cell $\boldsymbol c$ and label $\boldsymbol i$ stores
-the symbolic matrix $X^{(\boldsymbol c)}[\boldsymbol i]$:
+For `pdvar`, the leaf at cell $\vect c$ and label $\vect i$ stores
+the symbolic matrix $X^{(\vect c)}[\vect i]$:
 
 $$
 \begin{aligned}
-\operatorname{LocalValues}_{\boldsymbol c}[\boldsymbol i]
-&=X^{(\boldsymbol c)}[\boldsymbol i],\\
-X^{(\boldsymbol c)}[\boldsymbol i]
+\operatorname{LocalValues}_{\vect c}[\vect i]
+&=X^{(\vect c)}[\vect i],\\
+X^{(\vect c)}[\vect i]
 &\in\operatorname{Aff}(\texttt{sdpvar}).
 \end{aligned}
 $$
@@ -41,7 +41,7 @@ symbolicCoefficients = coeffs(P,cellSubscript)
 For an ordinary expression, returns a `1 × ncoeff(P)` cell row of numeric or
 `sdpvar` matrices. For `D = rhodiff(P)`, returns a
 `D.NumRateRows × ncoeff(D)` table: every distinct rate vertex is a separate row
-and no row is averaged or merged. Bad selectors raise `pdbase:InvalidCellSubs`.
+and every row remains distinct. Bad selectors raise `pdbase:InvalidCellSubs`.
 
 ## <span id="pdvar-lbls"></span>`lbls`
 
@@ -59,7 +59,7 @@ coefficientColumns = ncoeff(P)
 parameterCount = npar(P)
 ```
 
-The counts describe the physical tree and label axes, not matrix entries or
+The counts describe the physical tree and label axes, independently of matrix entries or
 rate rows.
 
 ```matlab
@@ -91,7 +91,7 @@ Q = P.elevate(degreeIncrement)
 
 Returns a `pdvar` with higher Bernstein degree and the same underlying YALMIP
 variables, grid, payload shape, continuity flag, `ContainsDecision`,
-`NumRateRows`, `RateBounds`, and row ordering. It does not create a new
+`NumRateRows`, `RateBounds`, and row ordering. It preserves the existing
 independent decision field.
 
 ## <span id="pdvar-evaluate"></span>`evaluate`
@@ -102,7 +102,7 @@ rateValues = evaluate(D,point)
 ```
 
 `point` is a finite in-bounds vector with one coordinate per parameter.
-Ordinary `pdvar` returns one interpolated numeric/`sdpvar` matrix without
+Ordinary `pdvar` returns one interpolated numeric/`sdpvar` matrix and carries
 consulting the current `assign` state. A derivative `pdvar` returns a
 `1 × D.NumRateRows` cell array, with one affine expression per distinct rate
 row.
@@ -112,23 +112,23 @@ sum
 
 $$
 \begin{aligned}
-\mathcal I_{\boldsymbol m}
+\mathcal I_{\vect m}
 &:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
-\boldsymbol\alpha
-&:=\phi_{\boldsymbol c}^{-1}(\boldsymbol\rho),\\
-P^{(\boldsymbol c)}(\boldsymbol\rho)
-&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
-X^{(\boldsymbol c)}[\boldsymbol i]\,
-B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha).
+\vect\alpha
+&:=\phi_{\vect c}^{-1}(\vect\rho),\\
+P^{(\vect c)}(\vect\rho)
+&=\sum_{\vect i\in\mathcal I_{\vect m}}
+X^{(\vect c)}[\vect i]\,
+B_{\vect i}^{\vect m}(\vect\alpha).
 \end{aligned}
 $$
 
 This is the same basis evaluation illustrated on
-[`pdmat evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/);
+[`pdmat evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/).
 only the stored coefficients and returned value are symbolic.
 
 Interior grid boundaries use the cell on the right, including discontinuous
-derivative rows; the last global boundary uses the last cell. Numeric and
+derivative rows. the last global boundary uses the last cell. Numeric and
 symbolic payload types are preserved.
 
 ```matlab
@@ -154,8 +154,8 @@ ordinaryType =
 ```
 
 Invalid elevation uses `pdbase:InvalidDegreeIncrement`. Invalid points use
-`pdvar:InvalidPoint`; out-of-bounds points use
-`pdvar:PointOutOfBounds`. Evaluation does not call `value`, require an
+`pdvar:InvalidPoint`. out-of-bounds points use
+`pdvar:PointOutOfBounds`. Evaluation interpolates stored expressions directly and leaves
 assignment, solve, or merge derivative rows.
 
 ## See Also

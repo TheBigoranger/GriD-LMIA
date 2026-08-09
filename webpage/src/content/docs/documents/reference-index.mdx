@@ -3,7 +3,7 @@ title: Reference Lookup
 description: Generated lookup for implemented GriD-LMIA reference pages and symbols.
 ---
 
-<p>This generated lookup groups every <span class="reference-index__compound">reference-page</span> family by its package role. A <span class="reference-index__compound">one-symbol</span> family links directly to that symbol; <span class="reference-index__compound">multi-symbol</span> families keep their direct symbol and anchor links in one compact disclosure. The source data lives in <code>src/data/reference-index.js</code>; regenerate this page with <code>{"npm --prefix webpage run generate:index"}</code>.</p>
+<p>This generated lookup groups every <span class="reference-index__compound">reference-page</span> family by its package role. A <span class="reference-index__compound">one-symbol</span> family links directly to that symbol. <span class="reference-index__compound">Multi-symbol</span> families keep their direct symbol and anchor links in one compact disclosure. The source data lives in <code>src/data/reference-index.js</code>. Regenerate this page with <code>{"npm --prefix webpage run generate:index"}</code>.</p>
 
 <div class="reference-index">
 <details class="reference-index__group" id="pdmat">
@@ -14,343 +14,235 @@ description: Generated lookup for implemented GriD-LMIA reference pages and symb
 <div class="reference-index__families">
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdmat/"><code>pdmat</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>Known-data class</span>
-<p>Represent finite real matrix data on a parameter grid.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdmat/constructor/"><code>pdmat constructor</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdmat function</span>
-<p>Create <span class="reference-index__compound">coefficient-backed</span> or <span class="reference-index__compound">function-backed</span> <span class="reference-index__compound">known-data</span> matrices.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdmat/berntable/"><code>bernTable</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdmat method</span>
-<p>Inspect coefficient rows and optional <span class="reference-index__compound">one-line</span> expressions.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdmat/evaluate/"><code>evaluate</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdmat method</span>
-<p>Evaluate known data at a parameter point.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdmat/rhodiff/"><code>rhodiff</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdmat method</span>
-<p>Differentiate <span class="reference-index__compound">coefficient-backed</span> known data into numeric <span class="reference-index__compound">rate-vertex</span> rows.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdmat/plot/"><code>plot</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdmat method</span>
-<p>Plot one- or <span class="reference-index__compound">two-parameter</span> known data.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdmat/algebra/">Algebra</a>
-<span>5 symbols</span>
+<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdmat/">Pdmat</a>
+<span>55 symbols</span>
 </div>
 <div class="reference-index__family-content">
 <details class="reference-index__symbols">
 <summary>Show direct symbol links</summary>
 <ul>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/algebra/#pdmat-plus"><code>plus</code></a><span>pdmat method</span></div>
-<p>Add <span class="reference-index__compound">coefficient-backed</span> data or a compatible numeric constant.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-pdmat"><code>pdmat</code></a><span>constructor</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/algebra/#pdmat-minus"><code>minus</code></a><span>pdmat method</span></div>
-<p>Subtract <span class="reference-index__compound">coefficient-backed</span> data or a compatible numeric constant.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-functionhandle"><code>FunctionHandle</code></a><span>read-only property</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/algebra/#pdmat-mtimes"><code>mtimes</code></a><span>pdmat method</span></div>
-<p>Multiply compatible matrix data and scalar constants.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-berntable"><code>bernTable</code></a><span>method</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/algebra/#pdmat-uplus"><code>uplus</code></a><span>pdmat method</span></div>
-<p>Return <span class="reference-index__compound">coefficient-backed</span> data unchanged.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-disp"><code>disp</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/algebra/#pdmat-uminus"><code>uminus</code></a><span>pdmat method</span></div>
-<p>Negate <span class="reference-index__compound">coefficient-backed</span> data.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-display"><code>display</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-plot"><code>plot</code></a><span>method</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-evaluate"><code>evaluate</code></a><span>method</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-plus"><code>plus</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-minus"><code>minus</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-mtimes"><code>mtimes</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-eq"><code>eq</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-ge"><code>ge</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-le"><code>le</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-isequal"><code>isequal</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-blkdiag"><code>blkdiag</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-cat"><code>cat</code></a><span>overload</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-subsref"><code>subsref</code></a><span>protocol</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-subsasgn"><code>subsasgn</code></a><span>protocol</span></div>
+<p>Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires <span class="reference-index__compound">coefficient-backed</span> sources.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-cells"><code>cells</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-coeffs"><code>coeffs</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-ctranspose"><code>ctranspose</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-cumsum"><code>cumsum</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-diag"><code>diag</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-elevate"><code>elevate</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-end"><code>end</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-flip"><code>flip</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-fliplr"><code>fliplr</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-flipud"><code>flipud</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-height"><code>height</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-horzcat"><code>horzcat</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-lbls"><code>lbls</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-length"><code>length</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-mean"><code>mean</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-ncell"><code>ncell</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-ncoeff"><code>ncoeff</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-ndims"><code>ndims</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-npar"><code>npar</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-numargumentsfromsubscript"><code>numArgumentsFromSubscript</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-numel"><code>numel</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-repmat"><code>repmat</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-reshape"><code>reshape</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-rhodiff"><code>rhodiff</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-rot90"><code>rot90</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-size"><code>size</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-squeeze"><code>squeeze</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-sum"><code>sum</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-trace"><code>trace</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-transpose"><code>transpose</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-tril"><code>tril</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-triu"><code>triu</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-uminus"><code>uminus</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-uplus"><code>uplus</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-vec"><code>vec</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-vertcat"><code>vertcat</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdmat/#api-width"><code>width</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdmat. Protected kernels remain implementation context.</p>
 </li>
 </ul>
 </details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdmat/structural-operations/">Structural Operations</a>
-<span>21 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-transpose"><code>transpose</code></a><span>pdmat method</span></div>
-<p>Transpose matrix payloads.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-ctranspose"><code>ctranspose</code></a><span>pdmat method</span></div>
-<p><span class="reference-index__compound">Conjugate-transpose</span> matrix payloads.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-reshape"><code>reshape</code></a><span>pdmat method</span></div>
-<p>Reshape matrix payloads with preserved coefficient storage.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-squeeze"><code>squeeze</code></a><span>pdmat method</span></div>
-<p>Apply squeeze while retaining the <span class="reference-index__compound">two-dimensional</span> payload contract.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-vec"><code>vec</code></a><span>pdmat method</span></div>
-<p>Vectorize matrix payloads.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-diag"><code>diag</code></a><span>pdmat method</span></div>
-<p>Extract or build diagonal matrix payloads.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-trace"><code>trace</code></a><span>pdmat method</span></div>
-<p>Sum each payload main diagonal, including rectangular payloads.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-sum"><code>sum</code></a><span>pdmat method</span></div>
-<p>Sum along one or several matrix dimensions, or all dimensions.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-mean"><code>mean</code></a><span>pdmat method</span></div>
-<p>Average along one or several matrix dimensions, or all dimensions.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-cumsum"><code>cumsum</code></a><span>pdmat method</span></div>
-<p>Cumulatively sum along a dimension in forward or reverse order.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-tril"><code>tril</code></a><span>pdmat method</span></div>
-<p>Keep the lower triangular part.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-triu"><code>triu</code></a><span>pdmat method</span></div>
-<p>Keep the upper triangular part.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-horzcat"><code>horzcat</code></a><span>pdmat method</span></div>
-<p>Concatenate payloads horizontally.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-vertcat"><code>vertcat</code></a><span>pdmat method</span></div>
-<p>Concatenate payloads vertically.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-cat"><code>cat</code></a><span>pdmat method</span></div>
-<p>Concatenate payloads along a selected dimension.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-blkdiag"><code>blkdiag</code></a><span>pdmat method</span></div>
-<p>Build <span class="reference-index__compound">block-diagonal</span> payloads.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-repmat"><code>repmat</code></a><span>pdmat method</span></div>
-<p>Repeat payloads by matrix dimensions.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-flip"><code>flip</code></a><span>pdmat method</span></div>
-<p>Flip payloads along a dimension.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-fliplr"><code>fliplr</code></a><span>pdmat method</span></div>
-<p>Flip payloads left to right.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-flipud"><code>flipud</code></a><span>pdmat method</span></div>
-<p>Flip payloads up to down.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/structural-operations/#pdmat-rot90"><code>rot90</code></a><span>pdmat method</span></div>
-<p>Rotate payloads by quarter turns.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/">Indexing And Inspection</a>
-<span>13 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-subsref"><code>subsref</code></a><span>pdmat method</span></div>
-<p>Index and inspect matrix payloads.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-subsasgn"><code>subsasgn</code></a><span>pdmat method</span></div>
-<p>Assign numeric or compatible pdmat blocks.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-disp"><code>disp</code></a><span>pdmat method</span></div>
-<p>Display a concise object summary.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-display"><code>display</code></a><span>pdmat method</span></div>
-<p>Display using MATLAB display dispatch.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-isequal"><code>isequal</code></a><span>pdmat method</span></div>
-<p>Compare normalized object metadata and evidence.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-end"><code>end</code></a><span>pdmat method</span></div>
-<p>Resolve <span class="reference-index__compound">end-index</span> syntax.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-numArgumentsFromSubscript"><code>numArgumentsFromSubscript</code></a><span>pdmat method</span></div>
-<p>Preserve scalar MATLAB subscript results.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-numel"><code>numel</code></a><span>pdmat method</span></div>
-<p>Count payload elements.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-ndims"><code>ndims</code></a><span>pdmat method</span></div>
-<p>Report the <span class="reference-index__compound">two-dimensional</span> payload protocol.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-length"><code>length</code></a><span>pdmat method</span></div>
-<p>Report the largest payload dimension.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-height"><code>height</code></a><span>pdmat method</span></div>
-<p>Report the first payload dimension.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-width"><code>width</code></a><span>pdmat method</span></div>
-<p>Report the second payload dimension.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/#pdmat-size"><code>size</code></a><span>pdmat method</span></div>
-<p>Inspect matrix payload dimensions.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdmat/comparisons/">Comparisons</a>
-<span>3 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/comparisons/#pdmat-eq"><code>eq</code></a><span>pdmat method</span></div>
-<p>Return a scalar logical <span class="reference-index__compound">coefficient-evidence</span> comparison.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/comparisons/#pdmat-le"><code>le</code></a><span>pdmat method</span></div>
-<p>Create a nonpositive <span class="reference-index__compound">known-data</span> pdlmi residual.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/comparisons/#pdmat-ge"><code>ge</code></a><span>pdmat method</span></div>
-<p>Create a nonnegative <span class="reference-index__compound">known-data</span> pdlmi residual.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/">Storage And Elevation</a>
-<span>6 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/#pdmat-cells"><code>cells</code></a><span>inherited pdmat method</span></div>
-<p>Enumerate pdmat physical cells.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/#pdmat-coeffs"><code>coeffs</code></a><span>inherited pdmat method</span></div>
-<p>Read known coefficients from one pdmat cell.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/#pdmat-lbls"><code>lbls</code></a><span>inherited pdmat method</span></div>
-<p>Inspect pdmat local coefficient labels.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/#pdmat-ncell"><code>ncell</code></a><span>inherited pdmat method</span></div>
-<p>Count pdmat physical cells.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/#pdmat-ncoeff"><code>ncoeff</code></a><span>inherited pdmat method</span></div>
-<p>Count pdmat coefficient columns per cell.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/#pdmat-npar"><code>npar</code></a><span>inherited pdmat method</span></div>
-<p>Count pdmat parameter dimensions.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdmat/elevate/#pdmat-elevate"><code>elevate</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>inherited pdmat method</span>
-<p>Return an elevated pdmat with the same source evidence.</p>
-</div>
 </div>
 </div>
 </div>
@@ -358,321 +250,225 @@ description: Generated lookup for implemented GriD-LMIA reference pages and symb
 <details class="reference-index__group" id="pdvar">
 <summary class="reference-index__group-summary">
 <span class="reference-index__group-copy"><strong>pdvar</strong><span>Continuous <span class="reference-index__compound">arbitrary-degree</span> affine decisions and <span class="reference-index__compound">rate-vertex</span> differentiation.</span></span>
-<span>53 indexed entries</span>
+<span>52 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdvar/"><code>pdvar</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>Decision class</span>
-<p>Create continuous <span class="reference-index__compound">YALMIP-backed</span> Bernstein decision expressions.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdvar/constructor/"><code>pdvar constructor</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdvar function</span>
-<p>Create symmetric or full continuous Bernstein decision variables.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdvar/berntable/"><code>bernTable</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdvar method</span>
-<p>Inspect symbolic coefficient rows and rate vertices.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdvar/rhodiff/"><code>rhodiff</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdvar method</span>
-<p>Build <span class="reference-index__compound">rate-vertex</span> derivative expressions.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdvar/value/"><code>value</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdvar method</span>
-<p>Convert assigned symbolic coefficients to known pdmat data.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdvar/algebra/">Algebra</a>
-<span>5 symbols</span>
+<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdvar/">Pdvar</a>
+<span>52 symbols</span>
 </div>
 <div class="reference-index__family-content">
 <details class="reference-index__symbols">
 <summary>Show direct symbol links</summary>
 <ul>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/algebra/#pdvar-plus"><code>plus</code></a><span>pdvar method</span></div>
-<p>Add affine decision expressions and compatible constants.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-pdvar"><code>pdvar</code></a><span>constructor</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/algebra/#pdvar-minus"><code>minus</code></a><span>pdvar method</span></div>
-<p>Subtract affine decision expressions and compatible constants.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-berntable"><code>bernTable</code></a><span>method</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/algebra/#pdvar-mtimes"><code>mtimes</code></a><span>pdvar method</span></div>
-<p>Multiply while keeping decision dependence on one side.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-blkdiag"><code>blkdiag</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/algebra/#pdvar-uminus"><code>uminus</code></a><span>pdvar method</span></div>
-<p>Negate affine decision expressions.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-cat"><code>cat</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/algebra/#pdvar-uplus"><code>uplus</code></a><span>pdvar method</span></div>
-<p>Return an affine decision expression unchanged.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdvar/structural-operations/">Structural Operations</a>
-<span>21 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-transpose"><code>transpose</code></a><span>pdvar method</span></div>
-<p>Transpose symbolic matrix payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-eq"><code>eq</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-ctranspose"><code>ctranspose</code></a><span>pdvar method</span></div>
-<p><span class="reference-index__compound">Conjugate-transpose</span> symbolic matrix payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-ge"><code>ge</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-reshape"><code>reshape</code></a><span>pdvar method</span></div>
-<p>Reshape symbolic matrix payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-le"><code>le</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-squeeze"><code>squeeze</code></a><span>pdvar method</span></div>
-<p>Apply squeeze while retaining the <span class="reference-index__compound">two-dimensional</span> payload contract.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-isequal"><code>isequal</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-vec"><code>vec</code></a><span>pdvar method</span></div>
-<p>Vectorize symbolic matrix payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-minus"><code>minus</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-diag"><code>diag</code></a><span>pdvar method</span></div>
-<p>Extract or build symbolic diagonal payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-mtimes"><code>mtimes</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-trace"><code>trace</code></a><span>pdvar method</span></div>
-<p>Sum symbolic main diagonals, including rectangular payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-plus"><code>plus</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-sum"><code>sum</code></a><span>pdvar method</span></div>
-<p>Sum one or several symbolic payload dimensions, or all dimensions.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-subsasgn"><code>subsasgn</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-mean"><code>mean</code></a><span>pdvar method</span></div>
-<p>Average one or several symbolic payload dimensions, or all dimensions.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-subsref"><code>subsref</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-cumsum"><code>cumsum</code></a><span>pdvar method</span></div>
-<p>Cumulatively sum symbolic payloads forward or reverse.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-value"><code>value</code></a><span>method</span></div>
+<p><span class="reference-index__compound">Degree-zero</span> or continuous <span class="reference-index__compound">arbitrary-degree</span> cellwise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-tril"><code>tril</code></a><span>pdvar method</span></div>
-<p>Keep the lower triangular symbolic part.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-cells"><code>cells</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-triu"><code>triu</code></a><span>pdvar method</span></div>
-<p>Keep the upper triangular symbolic part.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-coeffs"><code>coeffs</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-horzcat"><code>horzcat</code></a><span>pdvar method</span></div>
-<p>Concatenate symbolic payloads horizontally.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-ctranspose"><code>ctranspose</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-vertcat"><code>vertcat</code></a><span>pdvar method</span></div>
-<p>Concatenate symbolic payloads vertically.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-cumsum"><code>cumsum</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-cat"><code>cat</code></a><span>pdvar method</span></div>
-<p>Concatenate symbolic payloads along a selected dimension.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-diag"><code>diag</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-blkdiag"><code>blkdiag</code></a><span>pdvar method</span></div>
-<p>Build symbolic <span class="reference-index__compound">block-diagonal</span> payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-elevate"><code>elevate</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-repmat"><code>repmat</code></a><span>pdvar method</span></div>
-<p>Repeat symbolic payloads by matrix dimensions.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-end"><code>end</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-flip"><code>flip</code></a><span>pdvar method</span></div>
-<p>Flip symbolic payloads along a dimension.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-evaluate"><code>evaluate</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-fliplr"><code>fliplr</code></a><span>pdvar method</span></div>
-<p>Flip symbolic payloads left to right.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-flip"><code>flip</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-flipud"><code>flipud</code></a><span>pdvar method</span></div>
-<p>Flip symbolic payloads up to down.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-fliplr"><code>fliplr</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/structural-operations/#pdvar-rot90"><code>rot90</code></a><span>pdvar method</span></div>
-<p>Rotate symbolic payloads by quarter turns.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/">Indexing And Inspection</a>
-<span>11 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-subsref"><code>subsref</code></a><span>pdvar method</span></div>
-<p>Index and inspect symbolic matrix payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-flipud"><code>flipud</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-subsasgn"><code>subsasgn</code></a><span>pdvar method</span></div>
-<p>Assign numeric or compatible decision blocks.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-height"><code>height</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-isequal"><code>isequal</code></a><span>pdvar method</span></div>
-<p>Compare normalized symbolic metadata and evidence.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-horzcat"><code>horzcat</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-end"><code>end</code></a><span>pdvar method</span></div>
-<p>Resolve <span class="reference-index__compound">end-index</span> syntax.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-lbls"><code>lbls</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-numArgumentsFromSubscript"><code>numArgumentsFromSubscript</code></a><span>pdvar method</span></div>
-<p>Preserve scalar MATLAB subscript results.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-length"><code>length</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-numel"><code>numel</code></a><span>pdvar method</span></div>
-<p>Count symbolic payload elements.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-mean"><code>mean</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-ndims"><code>ndims</code></a><span>pdvar method</span></div>
-<p>Report the <span class="reference-index__compound">two-dimensional</span> payload protocol.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-ncell"><code>ncell</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-length"><code>length</code></a><span>pdvar method</span></div>
-<p>Report the largest payload dimension.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-ncoeff"><code>ncoeff</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-height"><code>height</code></a><span>pdvar method</span></div>
-<p>Report the first payload dimension.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-ndims"><code>ndims</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-width"><code>width</code></a><span>pdvar method</span></div>
-<p>Report the second payload dimension.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-npar"><code>npar</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/indexing-and-inspection/#pdvar-size"><code>size</code></a><span>pdvar method</span></div>
-<p>Inspect matrix payload dimensions.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdvar/comparisons/">Comparisons</a>
-<span>3 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/comparisons/#pdvar-comparison-le"><code>le</code></a><span>pdvar comparison</span></div>
-<p>Create a nonpositive pdlmi residual.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-numargumentsfromsubscript"><code>numArgumentsFromSubscript</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/comparisons/#pdvar-comparison-ge"><code>ge</code></a><span>pdvar comparison</span></div>
-<p>Create a nonnegative pdlmi residual.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-numel"><code>numel</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/comparisons/#pdvar-comparison-eq"><code>eq</code></a><span>pdvar comparison</span></div>
-<p>Create a direct <span class="reference-index__compound">coefficient-equality</span> pdlmi residual.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/">Storage And Evaluation</a>
-<span>8 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/#pdvar-cells"><code>cells</code></a><span>inherited pdvar method</span></div>
-<p>Enumerate pdvar physical cells.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-repmat"><code>repmat</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/#pdvar-coeffs"><code>coeffs</code></a><span>inherited pdvar method</span></div>
-<p>Read symbolic coefficients or derivative rate rows from one cell.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-reshape"><code>reshape</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/#pdvar-lbls"><code>lbls</code></a><span>inherited pdvar method</span></div>
-<p>Inspect pdvar local coefficient labels.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-rhodiff"><code>rhodiff</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/#pdvar-ncell"><code>ncell</code></a><span>inherited pdvar method</span></div>
-<p>Count pdvar physical cells.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-rot90"><code>rot90</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/#pdvar-ncoeff"><code>ncoeff</code></a><span>inherited pdvar method</span></div>
-<p>Count pdvar coefficient columns per cell.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-size"><code>size</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/#pdvar-npar"><code>npar</code></a><span>inherited pdvar method</span></div>
-<p>Count pdvar parameter dimensions.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-squeeze"><code>squeeze</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/#pdvar-elevate"><code>elevate</code></a><span>inherited pdvar method</span></div>
-<p>Return an elevated pdvar with the same variables and metadata.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-sum"><code>sum</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/#pdvar-evaluate"><code>evaluate</code></a><span>inherited pdvar method</span></div>
-<p>Interpolate symbolic coefficients and independent derivative rows.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-trace"><code>trace</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-transpose"><code>transpose</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-tril"><code>tril</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-triu"><code>triu</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-uminus"><code>uminus</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-uplus"><code>uplus</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-vec"><code>vec</code></a><span>inherited method, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-vertcat"><code>vertcat</code></a><span>inherited overload, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdvar/#api-width"><code>width</code></a><span>inherited protocol, inherited from pdbase</span></div>
+<p>All inherited public behavior remains directly discoverable under pdvar. Protected kernels remain implementation context.</p>
 </li>
 </ul>
 </details>
@@ -683,226 +479,12 @@ description: Generated lookup for implemented GriD-LMIA reference pages and symb
 <details class="reference-index__group" id="pdlmi">
 <summary class="reference-index__group-summary">
 <span class="reference-index__group-copy"><strong>pdlmi</strong><span>Direct constraints and five <span class="reference-index__compound">opt-in</span> finite certificate families.</span></span>
-<span>8 indexed entries</span>
+<span>22 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdlmi/"><code>pdlmi</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>Constraint class</span>
-<p>Store direct equality or direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox inequality constraints.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdlmi/constructor/"><code>pdlmi constructor</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdlmi function</span>
-<p>Select one of six finite assembly states.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdlmi/toyalmip/"><code>toYalmip</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdlmi method</span>
-<p>Concatenate stored constraints for YALMIP optimize calls.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdlmi/usepolya/"><code>usePolya</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdlmi method</span>
-<p>Rebuild a residual with a selected Pólya degree increment.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdlmi/useputinar/"><code>usePutinar</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdlmi method</span>
-<p>Rebuild a residual with a <span class="reference-index__compound">fixed-order</span> Putinar box <span class="reference-index__compound">Bernstein-Gram</span> certificate.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdlmi/usespput/"><code>useSpPut</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdlmi method</span>
-<p>Rebuild a residual with overlapping <span class="reference-index__compound">tensor-window</span> Putinar Gram blocks and canonical endpoints.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdlmi/usespbox/"><code>useSpBox</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdlmi method</span>
-<p>Rebuild a residual with sliding <span class="reference-index__compound">tensor-window</span> FullBox Gram blocks and canonical endpoints.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdlmi/usefullbox/"><code>useFullBox</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdlmi method</span>
-<p>Rebuild a residual with a <span class="reference-index__compound">fixed-order</span> <span class="reference-index__compound">full-box</span> <span class="reference-index__compound">Bernstein-Gram</span> preordering.</p>
-</div>
-</div>
-</div>
-</div>
-</details>
-<details class="reference-index__group" id="pdbase-backend">
-<summary class="reference-index__group-summary">
-<span class="reference-index__group-copy"><strong>pdbase / backend</strong><span>Inherited matrix protocols, <span class="reference-index__compound">cell-local</span> storage, and protected Bernstein utilities.</span></span>
-<span>52 indexed entries</span>
-</summary>
-<div class="reference-index__families">
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdbase/"><code>pdbase</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>Backend class</span>
-<p>Understand the common storage and <span class="reference-index__compound">matrix-operation</span> implementation inherited by pdmat and pdvar.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/reference/pdbase/constructor/"><code>pdbase constructor</code></a>
-<span>1 symbol</span>
-</div>
-<div class="reference-index__family-content">
-<div class="reference-index__direct-meta">
-<span>pdbase function</span>
-<p>Construct a validated backend object for tests and derived classes.</p>
-</div>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/">Storage Inspection</a>
-<span>12 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-cells"><code>cells</code></a><span>pdbase method</span></div>
-<p>Enumerate physical <span class="reference-index__compound">tensor-grid</span> cells.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-coeffs"><code>coeffs</code></a><span>pdbase method</span></div>
-<p>Read one <span class="reference-index__compound">cell-local</span> Bernstein coefficient family.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-lbls"><code>lbls</code></a><span>pdbase method</span></div>
-<p>Inspect flat local Bernstein labels.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-ncell"><code>ncell</code></a><span>pdbase method</span></div>
-<p>Count physical cells.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-ncoeff"><code>ncoeff</code></a><span>pdbase method</span></div>
-<p>Count coefficients in one local cell.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-npar"><code>npar</code></a><span>pdbase method</span></div>
-<p>Count parameter dimensions.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-size"><code>size</code></a><span>pdbase method</span></div>
-<p>Inspect matrix payload dimensions.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-numel"><code>numel</code></a><span>pdbase method</span></div>
-<p>Count <span class="reference-index__compound">matrix-payload</span> elements.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-ndims"><code>ndims</code></a><span>pdbase method</span></div>
-<p>Report the <span class="reference-index__compound">always-two-dimensional</span> payload protocol.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-length"><code>length</code></a><span>pdbase method</span></div>
-<p>Report the largest payload dimension.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-height"><code>height</code></a><span>pdbase method</span></div>
-<p>Report the first payload dimension.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/storage-inspection/#pdbase-width"><code>width</code></a><span>pdbase method</span></div>
-<p>Report the second payload dimension.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/">Evaluation And Elevation</a>
-<span>3 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-evaluate"><code>evaluate</code></a><span>pdbase method</span></div>
-<p>Evaluate one <span class="reference-index__compound">cell-local</span> coefficient family at a physical point.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-rhodiff"><code>rhodiff</code></a><span>pdbase method</span></div>
-<p>Differentiate <span class="reference-index__compound">coefficient-backed</span> storage into deterministic <span class="reference-index__compound">rate-vertex</span> rows.</p>
-</li>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-elevate"><code>elevate</code></a><span>pdbase method</span></div>
-<p>Return an elevated object of the same dynamic class.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/">Matrix Operations</a>
+<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdlmi/">Pdlmi</a>
 <span>22 symbols</span>
 </div>
 <div class="reference-index__family-content">
@@ -910,170 +492,309 @@ description: Generated lookup for implemented GriD-LMIA reference pages and symb
 <summary>Show direct symbol links</summary>
 <ul>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-uplus"><code>uplus</code></a><span>pdbase method</span></div>
-<p>Return a <span class="reference-index__compound">value-semantic</span> copy with the same payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-pdlmi"><code>pdlmi</code></a><span>constructor</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-uminus"><code>uminus</code></a><span>pdbase method</span></div>
-<p>Negate every stored payload.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-constraints"><code>Constraints</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-transpose"><code>transpose</code></a><span>pdbase method</span></div>
-<p>Transpose every matrix payload.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-residual"><code>Residual</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-ctranspose"><code>ctranspose</code></a><span>pdbase method</span></div>
-<p><span class="reference-index__compound">Conjugate-transpose</span> every matrix payload.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-relation"><code>Relation</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-reshape"><code>reshape</code></a><span>pdbase method</span></div>
-<p>Reshape every payload while preserving element count.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-usepolya"><code>UsePolya</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-squeeze"><code>squeeze</code></a><span>pdbase method</span></div>
-<p>Apply the payload squeeze while retaining a <span class="reference-index__compound">2-D</span> object shape.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-polyadegree"><code>PolyaDegree</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-vec"><code>vec</code></a><span>pdbase method</span></div>
-<p>Vectorize every payload in MATLAB <span class="reference-index__compound">column-major</span> order.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-usefullboxpreorder"><code>UseFullBoxPreorder</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-diag"><code>diag</code></a><span>pdbase method</span></div>
-<p>Extract or construct payload diagonals.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-fullboxorder"><code>FullBoxOrder</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-trace"><code>trace</code></a><span>pdbase method</span></div>
-<p>Sum the main diagonal of rectangular, square, or vector payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-useputinar"><code>UsePutinar</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-sum"><code>sum</code></a><span>pdbase method</span></div>
-<p>Reduce payload dimensions, including a dimension vector or all.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-putinarorder"><code>PutinarOrder</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-mean"><code>mean</code></a><span>pdbase method</span></div>
-<p>Average payload dimensions, including a dimension vector or all.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-usesparseputinar"><code>UseSparsePutinar</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-cumsum"><code>cumsum</code></a><span>pdbase method</span></div>
-<p>Compute forward or reverse cumulative payload sums.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-sparseputinarorder"><code>SparsePutinarOrder</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-tril"><code>tril</code></a><span>pdbase method</span></div>
-<p>Keep the lower triangular payload part.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-cliquesize"><code>CliqueSize</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-triu"><code>triu</code></a><span>pdbase method</span></div>
-<p>Keep the upper triangular payload part.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-usesparsefullboxpreorder"><code>UseSparseFullBoxPreorder</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-repmat"><code>repmat</code></a><span>pdbase method</span></div>
-<p>Repeat every payload by <span class="reference-index__compound">two-dimensional</span> repeat counts.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-sparsefullboxorder"><code>SparseFullBoxOrder</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-flip"><code>flip</code></a><span>pdbase method</span></div>
-<p>Flip payloads along a selected dimension.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-bandwidth"><code>BandWidth</code></a><span>read-only property</span></div>
+<p>Direct is the default. <span class="reference-index__compound">Opt-in</span> selectors rebuild one implemented Pólya or box Gram family from the original residual.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-fliplr"><code>fliplr</code></a><span>pdbase method</span></div>
-<p>Flip payloads left to right.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-usepolya"><code>usePolya</code></a><span>method</span></div>
+<p>Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-flipud"><code>flipud</code></a><span>pdbase method</span></div>
-<p>Flip payloads up to down.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-useputinar"><code>usePutinar</code></a><span>method</span></div>
+<p>Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-rot90"><code>rot90</code></a><span>pdbase method</span></div>
-<p>Rotate payloads by quarter turns.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-usespput"><code>useSpPut</code></a><span>method</span></div>
+<p>Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-cat"><code>cat</code></a><span>pdbase method</span></div>
-<p>Reject direct <span class="reference-index__compound">base-class</span> concatenation pending a derived override.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-usespbox"><code>useSpBox</code></a><span>method</span></div>
+<p>Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-horzcat"><code>horzcat</code></a><span>pdbase method</span></div>
-<p>Reject direct <span class="reference-index__compound">base-class</span> horizontal concatenation.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-usefullbox"><code>useFullBox</code></a><span>method</span></div>
+<p>Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/matrix-operations/#pdbase-vertcat"><code>vertcat</code></a><span>pdbase method</span></div>
-<p>Reject direct <span class="reference-index__compound">base-class</span> vertical concatenation.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdlmi/#api-toyalmip"><code>toYalmip</code></a><span>method</span></div>
+<p>Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.</p>
 </li>
 </ul>
 </details>
 </div>
 </div>
+</div>
+</details>
+<details class="reference-index__group" id="pdbase-backend">
+<summary class="reference-index__group-summary">
+<span class="reference-index__group-copy"><strong>pdbase</strong><span>Public <span class="reference-index__compound">cell-local</span> storage, traversal, transformation, and matrix protocols.</span></span>
+<span>49 indexed entries</span>
+</summary>
+<div class="reference-index__families">
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdbase/indexing-protocol/">Indexing Protocol</a>
-<span>2 symbols</span>
+<a class="reference-index__page" href="/GriD-LMIA/documents/reference/pdbase/">Pdbase</a>
+<span>49 symbols</span>
 </div>
 <div class="reference-index__family-content">
 <details class="reference-index__symbols">
 <summary>Show direct symbol links</summary>
 <ul>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/indexing-protocol/#pdbase-end"><code>end</code></a><span>pdbase method</span></div>
-<p>Resolve MATLAB end against payload dimensions.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-pdbase"><code>pdbase</code></a><span>constructor</span></div>
+<p><span class="reference-index__compound">Developer-facing</span> storage backend for <span class="reference-index__compound">coefficient-backed</span> numeric or affine YALMIP payloads.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/pdbase/indexing-protocol/#pdbase-numArgumentsFromSubscript"><code>numArgumentsFromSubscript</code></a><span>pdbase method</span></div>
-<p>Keep indexed object results scalar for dot dispatch.</p>
-</li>
-</ul>
-</details>
-</div>
-</div>
-<div class="reference-index__family-row">
-<div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/bernstein-utilities/">Bernstein Utilities</a>
-<span>11 symbols</span>
-</div>
-<div class="reference-index__family-content">
-<details class="reference-index__symbols">
-<summary>Show direct symbol links</summary>
-<ul>
-<li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-elevrow"><code>elevRow</code></a><span>protected pdbase method</span></div>
-<p>Build and apply one sparse numeric <span class="reference-index__compound">tensor-elevation</span> operator.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-gridinfo"><code>GridInfo</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-elevdata"><code>elevData</code></a><span>protected pdbase method</span></div>
-<p>Reuse elevation plans across compatible physical cells and rate rows.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-matrixsize"><code>MatrixSize</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-prodvals"><code>prodVals</code></a><span>protected pdbase method</span></div>
-<p>Dispatch numeric convolution, <span class="reference-index__compound">known-affine</span> contraction, or planned pair accumulation.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-degree"><code>Degree</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-berntbl"><code>bernTbl</code></a><span>protected pdbase method</span></div>
-<p>Build detailed or <span class="reference-index__compound">one-line</span> Bernstein diagnostic tables.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-localvalues"><code>LocalValues</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-mapvals"><code>mapVals</code></a><span>protected pdbase method</span></div>
-<p>Map a function over every coefficient payload.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-iscontinuous"><code>IsContinuous</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-matsubs"><code>matSubs</code></a><span>protected pdbase method</span></div>
-<p>Normalize <span class="reference-index__compound">two-dimensional</span> matrix subscripts.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-containsdecision"><code>ContainsDecision</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-mergegrid"><code>mergeGrid</code></a><span>protected pdbase method</span></div>
-<p>Build a common physical grid for compatible operands.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-numraterows"><code>NumRateRows</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-mkunop"><code>mkUnOp</code></a><span>protected pdbase method</span></div>
-<p>Rebuild the same dynamic class from transformed payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-ratebounds"><code>RateBounds</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-mapunary"><code>mapUnary</code></a><span>protected pdbase method</span></div>
-<p>Apply one matrix operation across cells, labels, and rate rows.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-sourcesummary"><code>SourceSummary</code></a><span>read-only property</span></div>
+<p>Public inspection of immutable object metadata.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-joinraterows"><code>joinRateRows</code></a><span>protected pdbase method</span></div>
-<p>Join compatible ordinary and <span class="reference-index__compound">rate-row</span> payloads.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-cells"><code>cells</code></a><span>method</span></div>
+<p><span class="reference-index__compound">Coefficient-backed</span> storage traversal, including explicit rate rows.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-zipraterows"><code>zipRateRows</code></a><span>protected pdbase method</span></div>
-<p>Pair compatible rate rows in repository order.</p>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-lbls"><code>lbls</code></a><span>method</span></div>
+<p><span class="reference-index__compound">Coefficient-backed</span> storage traversal, including explicit rate rows.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-coeffs"><code>coeffs</code></a><span>method</span></div>
+<p><span class="reference-index__compound">Coefficient-backed</span> storage traversal, including explicit rate rows.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-evaluate"><code>evaluate</code></a><span>method</span></div>
+<p>Exact Bernstein evaluation, lossless degree elevation, and cellwise differentiation with affine rate enumeration.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-elevate"><code>elevate</code></a><span>method</span></div>
+<p>Exact Bernstein evaluation, lossless degree elevation, and cellwise differentiation with affine rate enumeration.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-rhodiff"><code>rhodiff</code></a><span>method</span></div>
+<p>Exact Bernstein evaluation, lossless degree elevation, and cellwise differentiation with affine rate enumeration.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-ncell"><code>ncell</code></a><span>method</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-ncoeff"><code>ncoeff</code></a><span>method</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-npar"><code>npar</code></a><span>method</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-size"><code>size</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-height"><code>height</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-width"><code>width</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-length"><code>length</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-ndims"><code>ndims</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-numel"><code>numel</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-end"><code>end</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-numargumentsfromsubscript"><code>numArgumentsFromSubscript</code></a><span>protocol</span></div>
+<p><span class="reference-index__compound">Matrix-payload</span> shape, one scalar value object, and <span class="reference-index__compound">two-subscript</span> matrix indexing.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-uplus"><code>uplus</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-uminus"><code>uminus</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-transpose"><code>transpose</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-ctranspose"><code>ctranspose</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-vec"><code>vec</code></a><span>method</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-reshape"><code>reshape</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-squeeze"><code>squeeze</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-diag"><code>diag</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-trace"><code>trace</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-tril"><code>tril</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-triu"><code>triu</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-sum"><code>sum</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-mean"><code>mean</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-cumsum"><code>cumsum</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-flip"><code>flip</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-fliplr"><code>fliplr</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-flipud"><code>flipud</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-rot90"><code>rot90</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-repmat"><code>repmat</code></a><span>overload</span></div>
+<p>Operations applied independently to every coefficient payload while preserving label, cell, and <span class="reference-index__compound">rate-row</span> order.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-cat"><code>cat</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Two-dimensional</span> matrix block assembly only.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-horzcat"><code>horzcat</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Two-dimensional</span> matrix block assembly only.</p>
+</li>
+<li>
+<div><a href="/GriD-LMIA/documents/reference/pdbase/#api-vertcat"><code>vertcat</code></a><span>overload</span></div>
+<p><span class="reference-index__compound">Two-dimensional</span> matrix block assembly only.</p>
 </li>
 </ul>
 </details>
@@ -1083,13 +804,13 @@ description: Generated lookup for implemented GriD-LMIA reference pages and symb
 </details>
 <details class="reference-index__group" id="shared-helpers">
 <summary class="reference-index__group-summary">
-<span class="reference-index__group-copy"><strong>Shared helpers</strong><span>Current validation, grid, degree, <span class="reference-index__compound">rate-row</span>, and <span class="reference-index__compound">Bernstein-convolution</span> helpers.</span></span>
+<span class="reference-index__group-copy"><strong>Shared helpers</strong><span>Public validation, grid, degree, <span class="reference-index__compound">rate-row</span>, and <span class="reference-index__compound">Bernstein-convolution</span> functions.</span></span>
 <span>13 indexed entries</span>
 </summary>
 <div class="reference-index__families">
 <div class="reference-index__family-row">
 <div class="reference-index__family-heading">
-<a class="reference-index__page" href="/GriD-LMIA/documents/reference/shared-helpers/">Shared Helpers</a>
+<a class="reference-index__page" href="/GriD-LMIA/documents/reference/helpers/">Helpers</a>
 <span>13 symbols</span>
 </div>
 <div class="reference-index__family-content">
@@ -1097,59 +818,79 @@ description: Generated lookup for implemented GriD-LMIA reference pages and symb
 <summary>Show direct symbol links</summary>
 <ul>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-cellget"><code>helper.cellGet</code></a><span>shared backend helper</span></div>
-<p>Read one nested LocalValues leaf by <span class="reference-index__compound">physical-cell</span> subscripts.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-bernconvratios"><code>helper.bernConvRatios</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-chk"><code>helper.chk</code></a><span>shared backend helper</span></div>
-<p>Apply common validation predicates with <span class="reference-index__compound">caller-owned</span> errors.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-bernconvweights"><code>helper.bernConvWeights</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-combrows"><code>helper.combRows</code></a><span>shared backend helper</span></div>
-<p>Build Cartesian rows in the package tensor order.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-cellget"><code>helper.cellGet</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-iszero"><code>helper.isZero</code></a><span>shared backend helper</span></div>
-<p>Classify numeric, additive, <span class="reference-index__compound">coefficient-tree</span>, or object zero evidence.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-chk"><code>helper.chk</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-mkgrid"><code>helper.mkGrid</code></a><span>shared backend helper</span></div>
-<p>Validate grid vectors and construct GridInfo.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-chkcont"><code>helper.chkCont</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-mknest"><code>helper.mkNest</code></a><span>shared backend helper</span></div>
-<p>Construct nested <span class="reference-index__compound">physical-cell</span> storage.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-combrows"><code>helper.combRows</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-normdeg"><code>helper.normDeg</code></a><span>shared backend helper</span></div>
-<p>Normalize scalar shorthand or <span class="reference-index__compound">direction-wise</span> degrees to a row vector.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-fitvals"><code>helper.fitVals</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-normmode"><code>helper.normMode</code></a><span>shared backend helper</span></div>
-<p>Return lowercase fast or strict transient validation mode.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-iszero"><code>helper.isZero</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-rateverts"><code>helper.rateVerts</code></a><span>shared backend helper</span></div>
-<p>Enumerate distinct normalized <span class="reference-index__compound">rate-box</span> vertices, collapsing fixed axes.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-mkgrid"><code>helper.mkGrid</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-bernconvratios"><code>helper.bernConvRatios</code></a><span>shared backend helper</span></div>
-<p>Return <span class="reference-index__compound">N-by-1</span> stable ratios for four- or <span class="reference-index__compound">six-input</span> <span class="reference-index__compound">row-aligned</span> Bernstein tables.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-mknest"><code>helper.mkNest</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-bernconvweights"><code>helper.bernConvWeights</code></a><span>shared backend helper</span></div>
-<p>Map <span class="reference-index__compound">N-by-ell</span> labels and a <span class="reference-index__compound">1-by-ell</span> degree to <span class="reference-index__compound">N-by-1</span> normalized product weights.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-normdeg"><code>helper.normDeg</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-chkcont"><code>helper.chkCont</code></a><span>shared backend helper</span></div>
-<p>Classify <span class="reference-index__compound">shared-face</span> continuity without repairing numeric or symbolic storage.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-normmode"><code>helper.normMode</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 <li>
-<div><a href="/GriD-LMIA/documents/reference/shared-helpers/#helper-fitvals"><code>helper.fitVals</code></a><span>shared backend helper</span></div>
-<p>Sample tensor Bernstein nodes into a nested cell tree and optional label table.</p>
+<div><a href="/GriD-LMIA/documents/reference/helpers/#api-rateverts"><code>helper.rateVerts</code></a><span>package function</span></div>
+<p>Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.</p>
 </li>
 </ul>
 </details>
+</div>
+</div>
+</div>
+</details>
+<details class="reference-index__group" id="setup">
+<summary class="reference-index__group-summary">
+<span class="reference-index__group-copy"><strong>Setup</strong><span>Repository installation and verification entry point.</span></span>
+<span>1 indexed entries</span>
+</summary>
+<div class="reference-index__families">
+<div class="reference-index__family-row">
+<div class="reference-index__family-heading">
+<a class="reference-index__direct-symbol" href="/GriD-LMIA/documents/getting-started/installation/#api-install_pd_lmi"><code>install_pd_lmi</code></a>
+<span>1 symbol</span>
+</div>
+<div class="reference-index__family-content">
+<div class="reference-index__direct-meta">
+<span>function</span>
+<p>Adds the repository root, validates package class resolution, probes supported solvers, and persists the path.</p>
+</div>
 </div>
 </div>
 </div>

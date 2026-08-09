@@ -13,7 +13,7 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
   <span>useFullBox</span>
 </nav>
 
-Gram bases, absolute order $\mathbf r$, and target coefficients follow the
+Gram bases, absolute order $\vect r$, and target coefficients follow the
 [global certificate notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters).
 
 <CertificateNavigation selected="fullbox" showSections={false} />
@@ -33,20 +33,20 @@ Cbox = C.useFullBox(..., ValidationMode=mode)
 
 ## Description
 
-The no-argument form selects the smallest admissible absolute order. The
-explicit form selects `order`. It does not add `order` to the residual degree.
+Omitting `order` selects the smallest admissible absolute order. The explicit
+form selects `order` independently of the residual degree.
 Both forms rebuild from `C.Residual` and `C.Relation`, return a new object, and
 leave `C` unchanged. Reapplication therefore replaces an earlier full-box
 order, a Pólya selection, or a Putinar selection instead of compounding it.
 
-For a one-parameter residual of assembled degree $\mathbf M=(M_1)$, the minimum is
+For a one-parameter residual of assembled degree $\vect M=(M_1)$, the minimum is
 $\lfloor M_1/2\rfloor$. Even-degree residuals use an unweighted Gram block plus
 an $\alpha(1-\alpha)$-weighted block when that block has a nonempty basis.
 Odd-degree residuals use separate $\alpha$- and
 $(1-\alpha)$-weighted blocks.
 
 For two or more parameters, the minimum is componentwise
-$\lceil\mathbf M/2\rceil$. The
+$\lceil\vect M/2\rceil$. The
 certificate contains one Gram term for every subset product of the box
 generators $\alpha_s(1-\alpha_s)$. A term whose tensor Gram degree would have
 a negative component is omitted.
@@ -56,9 +56,9 @@ an independent scalar certificate. Assembly creates independent Gram variables f
 active rate-vertex row. Each present Gram matrix is constrained positive
 semidefinite, then exact identities match every Bernstein coefficient. For a
 `<=` relation, the target coefficients are negated before positive-
-semidefinite matching. For `>=`, the residual is matched directly. No implicit
-positivity margin is added. The theoretical target is
-$S^{(\mathbf c)}\succ0$. Encode strictness in the residual with an explicit
+semidefinite matching. For `>=`, the residual is matched directly. The model
+contains every requested positivity margin explicitly. The theoretical target is
+$S^{(\vect c)}\succ0$. Encode strictness in the residual with an explicit
 $\varepsilon I$ margin before selecting this non-strict certificate.
 
 For two parameters the four illustrated blocks correspond to the empty
@@ -70,8 +70,8 @@ develops the Gram and Markov–Lukács background step by step.
 ### Finite-SDP shape: two parameters, degree three
 
 For one cell and one active rate row, let the sign-normalized residual have
-Bernstein coefficients $C^{(\mathbf c)}[(i,k)]$ at tensor degree $(3,3)$. The default order
-is $\mathbf r=(2,2)$, so the residual is exactly elevated to degree $(4,4)$. The returned
+Bernstein coefficients $C^{(\vect c)}[(i,k)]$ at tensor degree $(3,3)$. The default order
+is $\vect r=(2,2)$, so the residual is exactly elevated to degree $(4,4)$. The returned
 constraint list has four PSD Gram constraints, followed by 25 exact affine
 matrix equalities:
 
@@ -79,7 +79,7 @@ $$
 \begin{aligned}
 &Q_{\varnothing}\succeq0,\quad Q_{\{1\}}\succeq0,\\
 &Q_{\{2\}}\succeq0,\quad Q_{\{1,2\}}\succeq0,\\
-&\tilde C^{(\mathbf c)}[(p,q)]\\
+&\tilde C^{(\vect c)}[(p,q)]\\
 &\quad=\mathcal A_{p,q}\bigl(\\
 &\qquad Q_{\varnothing},Q_{\{1\}},\\
 &\qquad Q_{\{2\}},Q_{\{1,2\}}\bigr),\\
@@ -91,15 +91,15 @@ Each $\mathcal A_{p,q}$ is a fixed affine Bernstein-coefficient map of the
 Gram blocks. For instance,
 
 $$
-C^{(\mathbf c)}[(0,0)]=[Q_{\varnothing}]_{(0,0),(0,0)},
+C^{(\vect c)}[(0,0)]=[Q_{\varnothing}]_{(0,0),(0,0)},
 $$
 
 while
 
 $$
 \begin{aligned}
-&\tfrac14C^{(\mathbf c)}[(0,0)]
- +\tfrac34C^{(\mathbf c)}[(1,0)]\\
+&\tfrac14C^{(\vect c)}[(0,0)]
+ +\tfrac34C^{(\vect c)}[(1,0)]\\
 &=\tfrac12[Q_{\varnothing}]_{(0,0),(1,0)}\\
 &\quad+\tfrac12[Q_{\varnothing}]_{(1,0),(0,0)}\\
 &\quad+\tfrac14[Q_{\{1\}}]_{(0,0),(0,0)}.
@@ -152,15 +152,15 @@ length(Fbox)
 
 For the degree-two scalar residual, order one stores two PSD blocks followed by
 three exact coefficient identities. Order two stores two PSD blocks followed
-by five identities. The selection made from `polya` replaces Pólya assembly.
-it does not use the already elevated constraints.
+by five identities. The selection made from `polya` replaces Pólya assembly
+and rebuilds from the stored residual.
 
 `ValidationMode` is transient, accepts case-insensitive `"fast"` or
 `"strict"`, applies only to this rebuild, and is neither stored nor inherited.
 
 ## Anisotropic Assembly Output
 
-For $\mathbf M=(1,3)$ and $\mathbf r=(1,2)$, exact elevation first gives
+For $\vect M=(1,3)$ and $\vect r=(1,2)$, exact elevation first gives
 target degree $(2,4)$. The four full-box generator subsets use Gram basis
 degrees $(1,2)$, $(0,2)$, $(1,1)$, and $(0,1)$, with PSD dimensions
 $6$, $3$, $4$, and $2$. Their sum is matched to the $3\times5$ tensor of 15
@@ -182,8 +182,8 @@ parameter box. In one parameter it shares the parity-specific Markov–Lukács
 assembly with
 [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/).
 For two or more parameters it is distinct because the full-box preordering includes every
-generator-subset product. It is not a general-domain SOS interface, a
-full-space SOS representation, or an automatic hierarchy selector.
+generator-subset product. Its supported scope is the local box with the fixed
+selected order and square-free generator products.
 
 ## See Also
 

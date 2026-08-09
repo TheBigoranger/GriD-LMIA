@@ -5,6 +5,7 @@ description: Build the canonical LPV induced-L2-gain analysis problem from the p
 
 import JourneyCurve from "../../../../../components/JourneyCurve.astro";
 import ExportSolveFlow from "../../../../../components/ExportSolveFlow.astro";
+import Term from "../../../../../components/Term.astro";
 
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
@@ -18,6 +19,8 @@ This page fixes the model and symbols used throughout the manual. Subsequent
 pages carry the same problem through rate reduction, cell coordinates,
 Bernstein residual assembly, a finite certificate, and YALMIP.
 
+A <Term id="lmi" definition /> constrains an affine symmetric matrix expression. A <Term id="pd-lmi" definition /> lets its data and decisions vary with a scheduling parameter. A <Term id="dpd-lmi" definition /> also contains derivative and scheduling-rate terms. A <Term id="lpv" definition /> model provides a standard application for this structure.
+
 <JourneyCurve />
 
 ## LPV Plant And Objective
@@ -27,9 +30,9 @@ Consider
 $$
 \begin{aligned}
 \dot x(t)
-&=A(\boldsymbol\rho(t))x(t)+B(\boldsymbol\rho(t))w(t),\\
+&=A(\vect\rho(t))x(t)+B(\vect\rho(t))w(t),\\
 z(t)
-&=C(\boldsymbol\rho(t))x(t)+D(\boldsymbol\rho(t))w(t).
+&=C(\vect\rho(t))x(t)+D(\vect\rho(t))w(t).
 \end{aligned}
 $$
 
@@ -37,8 +40,8 @@ where $x(t)$ is the plant state, $w(t)$ is the disturbance, and $z(t)$
 is the performance output. The scheduling vector and rate satisfy
 
 $$
-\boldsymbol\rho(t)\in\mathcal P,\qquad
-\boldsymbol\nu(t)=\dot{\boldsymbol\rho}(t)\in\mathcal R,
+\vect\rho(t)\in\mathcal P,\qquad
+\vect\nu(t)=\dot{\vect\rho}(t)\in\mathcal R,
 $$
 
 with parameter and rate boxes
@@ -54,11 +57,11 @@ $\lVert z\rVert_2<\gamma\lVert w\rVert_2$.
 
 ## Bounded-Real DPD-LMI
 
-Choose a differentiable symmetric matrix $P(\boldsymbol\rho)$. A standard
+Choose a differentiable symmetric matrix $P(\vect\rho)$. A standard
 sufficient analysis condition is
 
 $$
-P(\boldsymbol\rho)\succ0
+P(\vect\rho)\succ0
 $$
 
 and
@@ -72,33 +75,32 @@ C & D & -\gamma I
 $$
 
 for every
-$(\boldsymbol\rho,\boldsymbol\nu)\in\mathcal P\times\mathcal R$, where
+$(\vect\rho,\vect\nu)\in\mathcal P\times\mathcal R$, where
 
 $$
 \begin{aligned}
-\dot P(\boldsymbol\rho,\boldsymbol\nu)
+\dot P(\vect\rho,\vect\nu)
 &=\sum_{s=1}^{\ell}\nu_s\\
-&\quad{}\cdot\frac{\partial P}{\partial\rho_s}(\boldsymbol\rho),\\
+&\quad{}\cdot\frac{\partial P}{\partial\rho_s}(\vect\rho),\\
 \operatorname{He}(X)&=X+X^{\mathsf T}.
 \end{aligned}
 $$
 
-The strict signs describe the mathematical analysis condition. The package
-inserts no hidden margin; a numerical model must encode a chosen
-$\varepsilon I$ explicitly.
+The strict signs describe the mathematical analysis condition. The numerical
+model encodes every chosen $\varepsilon I$ margin explicitly.
 
 ## General DPD-LMI Template
 
 The same workflow applies to residuals affine in general decision functions
-$y_k(\boldsymbol\rho)$ and their partial derivatives:
+$y_k(\vect\rho)$ and their partial derivatives:
 
 $$
 \begin{aligned}
-\mathcal F(\boldsymbol\rho,\boldsymbol\nu)
-&=F_0(\boldsymbol\rho)\\
-&\quad+\sum_{k=1}^{N}F_k(\boldsymbol\rho)y_k(\boldsymbol\rho)\\
-&\quad+\sum_{k=1}^{N}\sum_{s=1}^{\ell}R_{ks}(\boldsymbol\rho)\\
-&\qquad{}\cdot\frac{\partial y_k}{\partial\rho_s}(\boldsymbol\rho)\nu_s.
+\mathcal F(\vect\rho,\vect\nu)
+&=F_0(\vect\rho)\\
+&\quad+\sum_{k=1}^{N}F_k(\vect\rho)y_k(\vect\rho)\\
+&\quad+\sum_{k=1}^{N}\sum_{s=1}^{\ell}R_{ks}(\vect\rho)\\
+&\qquad{}\cdot\frac{\partial y_k}{\partial\rho_s}(\vect\rho)\nu_s.
 \end{aligned}
 $$
 
@@ -109,15 +111,15 @@ are rejected.
 ## From Analysis Residual To Positive Target
 
 A comparison such as `residual <= 0` stores the original cell-local residual
-$\mathcal F^{(\mathbf c)}$ and normalizes its sign to a positive target
+$\mathcal F^{(\vect c)}$ and normalizes its sign to a positive target
 
 $$
-S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}\succ0.
+S^{(\vect c)}=-\mathcal F^{(\vect c)}\succ0.
 $$
 
-The package assembles non-strict constraints. It does not silently replace
-the original relation or add the explicit
-$S^{(\mathbf c)}-\varepsilon I\succeq0$ margin required for strictness.
+The package assembles the original relation as non-strict constraints and adds
+exactly the explicit
+$S^{(\vect c)}-\varepsilon I\succeq0$ margin required for strictness.
 
 ## Modeling Path In MATLAB
 
@@ -140,7 +142,7 @@ assert(diagnostics.problem == 0, diagnostics.info)
 Psol = value(P);
 ```
 
-`pdlmi` assembles constraints but does not own solver selection or the
+`pdlmi` assembles constraints. The caller selects the solver and makes the
 `optimize` call. Retain an optimized $\gamma$ only after
 `diagnostics.problem == 0`.
 
@@ -154,10 +156,10 @@ finite sufficient certificate after gridding and Bernstein assembly.
 
 ## Limitations
 
-This is an analysis condition for box-bounded scheduling parameters and rates.
-It does not establish necessity, synthesize controllers, infer a grid, or
-choose $\varepsilon$, a solver, or a certificate order. A nonzero solver
-status is not proof that the continuous LPV problem is infeasible.
+This is a sufficient analysis condition for box-bounded scheduling parameters
+and rates. The modeler supplies the grid, $\varepsilon$, solver, and certificate
+order. Controller synthesis requires a separate formulation. A nonzero solver
+status remains inconclusive about feasibility of the continuous LPV problem.
 
 ## Further Reading
 

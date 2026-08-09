@@ -21,7 +21,7 @@ plain = A.'
 conjugate = A'
 ```
 
-Both swap payload rows and columns; only `ctranspose` conjugates.
+Both swap payload rows and columns. only `ctranspose` conjugates.
 
 ### <span id="pdmat-reshape"></span>`reshape`
 
@@ -98,7 +98,7 @@ out = trace(A)
 ```
 
 Sums the main diagonal and returns `1 × 1` known data. Rectangular matrices
-and row/column vectors are supported; square input is not required.
+and row/column vectors are supported. Rectangular input is supported.
 
 ### <span id="pdmat-sum"></span>`sum` and <span id="pdmat-mean"></span>`mean`
 
@@ -115,7 +115,7 @@ out = mean(A,"all")
 ```
 
 Dimensions must be a nonempty unique positive-integer vector. Dimensions above
-two are singleton no-ops. `"native"`, `"omitmissing"`, and other data flags
+two are singleton identity operations. `"native"`, `"omitmissing"`, and other data flags
 are unsupported. Errors use `pdmat:InvalidSum` or `pdmat:InvalidMean`.
 
 ### <span id="pdmat-cumsum"></span>`cumsum`
@@ -130,7 +130,7 @@ out = cumsum(A,dim,"reverse")
 ```
 
 A lone direction uses the first nonsingleton matrix dimension. Higher
-dimensions are singleton no-ops. Invalid dimensions, directions, or extra
+dimensions are singleton identity operations. Invalid dimensions, directions, or extra
 flags raise `pdmat:InvalidCumsum`.
 
 ### <span id="pdmat-tril"></span>`tril` and <span id="pdmat-triu"></span>`triu`
@@ -199,7 +199,7 @@ out = blkdiag(A,B,...)
 ```
 
 Builds a block diagonal after compatible known-data promotion and alignment.
-At least one input must be `pdmat`; malformed calls use
+At least one input must be `pdmat`. malformed calls use
 `pdmat:InvalidBlkdiag`.
 
 ### <span id="pdmat-repmat"></span>`repmat`
@@ -246,7 +246,7 @@ out = flipud(A)
 ```
 
 `flip` defaults to the first nonsingleton payload dimension. An explicit
-dimension is a positive integer; higher dimensions are no-ops. Invalid calls
+dimension is a positive integer. Higher dimensions are identity operations. Invalid calls
 use `pdmat:InvalidFlip`.
 
 ### <span id="pdmat-rot90"></span>`rot90`
@@ -256,7 +256,7 @@ out = rot90(A)
 out = rot90(A,k)
 ```
 
-Rotates each payload by `k` quarter turns; `k` is a finite integer and odd
+Rotates each payload by `k` quarter turns. `k` is a finite integer and odd
 turns swap the payload dimensions. Errors use `pdmat:InvalidRot90`.
 
 ```matlab
@@ -284,8 +284,8 @@ quarterTurn =
 
 ## Limitations and See Also
 
-Function-only data without stored Bernstein evidence raises
-`pdmat:FunctionOnlyAlgebra`. Structural operations do not sample such a
+Function-only data that omit stored Bernstein evidence raise
+`pdmat:FunctionOnlyAlgebra`. Structural operations preserve such a
 function, call YALMIP, modify the physical grid, or change local-label/rate
 ordering.
 

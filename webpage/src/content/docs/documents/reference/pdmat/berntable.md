@@ -57,7 +57,7 @@ Public formulas use the forward coordinate
 $\alpha=(\rho-\rho_1^{(c)})/(\rho_1^{(c+1)}-\rho_1^{(c)})$ and the normalized factors
 
 $$
-\mathbf m=(m_1).
+\vect m=(m_1).
 $$
 
 $$
@@ -73,7 +73,7 @@ corresponding one-parameter factors.
 
 ### Compact expression for one cell
 
-Use `"oneLine"` when the goal is to see the Bernstein expression rather than
+Use `"oneLine"` when the goal is to see the Bernstein expression in place of
 the full metadata table.
 
 ```matlab
@@ -110,7 +110,7 @@ disp(T)
         3            {[1]}            {[3]}           {[2]}       "alpha^2"                true          {[3]}
 ```
 
-The middle row is not a physical grid node for degree two. It is the middle
+For degree two, the middle row is the middle
 Bernstein coefficient for the single physical cell.
 
 ### Tensor-grid label order
@@ -166,7 +166,7 @@ expressionCount =
 
 ## Validation And Errors
 
-- Function-only objects without Bernstein coefficient evidence raise `pdmat:FunctionOnlyBernsteinTable` when calling `bernTable`. Backend degree elevation instead raises `pdbase:MissingCoefficientEvidence`.
+- Function-only objects that omit Bernstein coefficient evidence raise `pdmat:FunctionOnlyBernsteinTable` when calling `bernTable`. Backend degree elevation instead raises `pdbase:MissingCoefficientEvidence`.
 - Invalid cell subscripts raise `pdbase:InvalidCellSubs`.
 - Unknown display modes, such as `"wide"`, raise `pdmat:InvalidBernsteinTableInput`.
 

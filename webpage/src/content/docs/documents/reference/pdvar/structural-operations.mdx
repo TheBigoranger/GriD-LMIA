@@ -21,7 +21,7 @@ plain = P.'
 conjugate = P'
 ```
 
-Both swap symbolic payload dimensions; only `ctranspose` conjugates.
+Both swap symbolic payload dimensions. only `ctranspose` conjugates.
 
 ### <span id="pdvar-reshape"></span>`reshape`
 
@@ -31,7 +31,7 @@ out = reshape(P,[rows columns])
 out = reshape(P,[],columns)
 ```
 
-Exactly two dimensions are supported; element count must be preserved.
+Exactly two dimensions are supported. element count must be preserved.
 Failures use `pdvar:InvalidReshape`.
 
 ### <span id="pdvar-squeeze"></span>`squeeze`
@@ -93,7 +93,7 @@ out = trace(P)
 ```
 
 Sums the main diagonal of square, rectangular, row-vector, or column-vector
-symbolic payloads. The result is `1 × 1`; square input is not required.
+symbolic payloads. The result is `1 × 1`, and rectangular input is supported.
 
 ### <span id="pdvar-sum"></span>`sum` and <span id="pdvar-mean"></span>`mean`
 
@@ -110,7 +110,7 @@ out = mean(P,"all")
 ```
 
 Dimension vectors are nonempty, unique, positive integers. Dimensions above
-two are singleton no-ops. Data flags are unsupported. Errors use
+two are singleton identity operations. Data flags are unsupported. Errors use
 `pdvar:InvalidSum` and `pdvar:InvalidMean`.
 
 ### <span id="pdvar-cumsum"></span>`cumsum`
@@ -124,7 +124,7 @@ out = cumsum(P,dim,"forward")
 out = cumsum(P,dim,"reverse")
 ```
 
-Higher dimensions are singleton no-ops; invalid directions and extra flags use
+Higher dimensions are singleton identity operations. Invalid directions and extra flags use
 `pdvar:InvalidCumsum`.
 
 ### <span id="pdvar-tril"></span>`tril` and <span id="pdvar-triu"></span>`triu`
@@ -193,7 +193,7 @@ out = repmat(P,[rows columns])
 out = repmat(P,rows,columns)
 ```
 
-Uses positive integer two-dimensional repeats; malformed forms raise
+Uses positive integer two-dimensional repeats. malformed forms raise
 `pdvar:InvalidRepmat`.
 
 ```matlab
@@ -230,7 +230,7 @@ out = flipud(P)
 ```
 
 `flip` defaults to the first nonsingleton payload dimension. Higher dimensions
-are singleton no-ops; invalid dimensions use `pdvar:InvalidFlip`.
+are singleton identity operations. Invalid dimensions use `pdvar:InvalidFlip`.
 
 ### <span id="pdvar-rot90"></span>`rot90`
 
@@ -240,7 +240,7 @@ out = rot90(P,k)
 ```
 
 Rotates each symbolic payload by a finite integer number of quarter turns.
-Odd turns swap payload dimensions; errors use `pdvar:InvalidRot90`.
+Odd turns swap payload dimensions. errors use `pdvar:InvalidRot90`.
 
 ```matlab
 yalmip('clear')
@@ -264,7 +264,8 @@ shapes =
 
 ## Limitations and See Also
 
-These methods preserve affine decision dependence and do not call `value`,
+These methods preserve affine decision dependence and operate on the symbolic
+expressions before any `value` call,
 `optimize`, or a solver. They never reorder physical cells, local labels, or
 rate vertices.
 

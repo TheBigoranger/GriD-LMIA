@@ -10,9 +10,9 @@ import CallGraph from "../../../../../components/CallGraph.astro";
 
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a><span>/</span><span>elevate</span></nav>
 
-Degree elevation changes the Bernstein representation, not the physical grid
+Degree elevation changes the Bernstein representation while preserving the physical grid
 or the represented known-data function. The implementation is inherited from
-`pdbase`; the returned object remains a `pdmat`.
+`pdbase`. the returned object remains a `pdmat`.
 
 <CallGraph family="elevation" caption="elevate builds and reuses the exact tensor elevation plan before updating a same-class copy." links={[
   { href: "/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#sparse-tensor-elevation", label: "Elevation mathematics" },
@@ -22,16 +22,16 @@ or the represented known-data function. The implementation is inherited from
 
 ## What degree elevation does
 
-On physical cell $\mathcal H_{\boldsymbol c}$, write the
-direction-wise-degree-$\boldsymbol m$ tensor
+On physical cell $\mathcal H_{\vect c}$, write the
+direction-wise-degree-$\vect m$ tensor
 Bernstein coefficients as
-$C^{(\boldsymbol c)}[\boldsymbol i]$,
-$\boldsymbol i\in\prod_s\{0,\ldots,m_s\}$. Elevation to any
-$\boldsymbol M\ge\boldsymbol m$ componentwise is defined directly by
+$C^{(\vect c)}[\vect i]$,
+$\vect i\in\prod_s\{0,\ldots,m_s\}$. Elevation to any
+$\vect M\ge\vect m$ componentwise is defined directly by
 
 <KaTeXMath
   class="formula-block formula-one-line"
-  tex={String.raw`A^{(\boldsymbol c)}(\boldsymbol\alpha)=\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}C^{(\boldsymbol c)}[\boldsymbol i]B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)=\sum_{\boldsymbol k\in\prod_s\{0,\ldots,M_s\}}\hat C^{(\boldsymbol c)}[\boldsymbol k]B_{\boldsymbol k}^{\boldsymbol M}(\boldsymbol\alpha).`}
+  tex={String.raw`A^{(\vect c)}(\vect\alpha)=\sum_{\vect i\in\prod_s\{0,\ldots,m_s\}}C^{(\vect c)}[\vect i]B_{\vect i}^{\vect m}(\vect\alpha)=\sum_{\vect k\in\prod_s\{0,\ldots,M_s\}}\hat C^{(\vect c)}[\vect k]B_{\vect k}^{\vect M}(\vect\alpha).`}
 />
 
 The elevated coefficients are
@@ -40,25 +40,25 @@ The elevated coefficients are
 
 <KaTeXMath
   class="formula-block formula-one-line"
-  tex={String.raw`\hat C^{(\boldsymbol c)}[\boldsymbol k]=\sum_{\boldsymbol i\in\prod_s\{0,\ldots,m_s\}}\left[\prod_{s=1}^{\ell}\frac{\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}}{\binom{M_s}{k_s}}\right]\cdot C^{(\boldsymbol c)}[\boldsymbol i],\qquad \boldsymbol k\in\prod_s\{0,\ldots,M_s\}.`}
+  tex={String.raw`\hat C^{(\vect c)}[\vect k]=\sum_{\vect i\in\prod_s\{0,\ldots,m_s\}}\left[\prod_{s=1}^{\ell}\frac{\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}}{\binom{M_s}{k_s}}\right]\cdot C^{(\vect c)}[\vect i],\qquad \vect k\in\prod_s\{0,\ldots,M_s\}.`}
 />
 
 </div>
 
 As usual, a binomial coefficient with an index outside its natural range is
 zero. This direct sum is the mathematical coefficient rule: it gives every
-elevated coefficient from the original coefficient tensor without introducing
+elevated coefficient from the original coefficient tensor while preserving
 an implementation-specific data layout.
 
 <Aside type="note" title="Implementation remark: normalized convolution">
 
 The package evaluates the same direct rule as a normalized tensor convolution.
-Let $\boldsymbol d:=\boldsymbol M-\boldsymbol m$. Its direction-wise
-degree-$\boldsymbol d$ elevation kernel is
+Let $\vect d:=\vect M-\vect m$. Its direction-wise
+degree-$\vect d$ elevation kernel is
 
 <KaTeXMath
   class="formula-block formula-one-line"
-  tex={String.raw`\mathcal E_{\boldsymbol d}[\boldsymbol j]:=\prod_{s=1}^{\ell}\binom{d_s}{j_s},\qquad\boldsymbol j\in\prod_s\{0,\ldots,d_s\}.`}
+  tex={String.raw`\mathcal E_{\vect d}[\vect j]:=\prod_{s=1}^{\ell}\binom{d_s}{j_s},\qquad\vect j\in\prod_s\{0,\ldots,d_s\}.`}
 />
 
 The complete elevation is the normalized $\ell$-dimensional convolution
@@ -66,14 +66,14 @@ of the original coefficient tensor with that kernel:
 
 <KaTeXMath
   class="formula-block formula-one-line"
-  tex={String.raw`\left\{\left(\prod_{s=1}^{\ell}\binom{M_s}{k_s}\right)\hat C^{(\boldsymbol c)}[\boldsymbol k]\right\}_{\boldsymbol k}=\left\{\left(\prod_{s=1}^{\ell}\binom{m_s}{i_s}\right)C^{(\boldsymbol c)}[\boldsymbol i]\right\}_{\boldsymbol i}\ast_{\ell}\left\{\mathcal E_{\boldsymbol d}[\boldsymbol j]\right\}_{\boldsymbol j}.`}
+  tex={String.raw`\left\{\left(\prod_{s=1}^{\ell}\binom{M_s}{k_s}\right)\hat C^{(\vect c)}[\vect k]\right\}_{\vect k}=\left\{\left(\prod_{s=1}^{\ell}\binom{m_s}{i_s}\right)C^{(\vect c)}[\vect i]\right\}_{\vect i}\ast_{\ell}\left\{\mathcal E_{\vect d}[\vect j]\right\}_{\vect j}.`}
 />
 
 </Aside>
 
-This unique degree-$\boldsymbol M$ coefficient tensor represents exactly the
+This unique degree-$\vect M$ coefficient tensor represents exactly the
 same polynomial. A cell grows from $\prod_s(m_s+1)$ to
-$\prod_s(M_s+1)$ local labels; only the representation changes.
+$\prod_s(M_s+1)$ local labels. only the representation changes.
 
 Relative to the [`pdmat Storage` figure](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/),
 `cells(A)`, the physical grid, and shared cell interfaces stay fixed.
@@ -88,14 +88,14 @@ then assigns `out = obj` and updates only `out.Degree` and
 `out.LocalValues`. Copying the existing dynamic object preserves its concrete
 class, physical grid, matrix and continuity metadata, `SourceSummary`,
 `FunctionHandle`, rate-row ordering, and any YALMIP variables already stored
-in subclass state. Elevation therefore replaces coefficient evidence without
+in subclass state. Elevation therefore replaces coefficient evidence while preserving
 reconstructing either a `pdmat` or a `pdvar`.
 
 </Aside>
 
 Degree elevation is therefore useful when two Bernstein operands need a common
 degree or when a finite certificate requests additional coefficient evidence.
-It is not grid refinement, interpolation, or an approximation step.
+It is an exact representation change on a fixed grid and fixed polynomial.
 
 ## <span id="pdmat-elevate"></span>`elevate`
 
@@ -107,7 +107,7 @@ B = A.elevate(degreeIncrement)
 Returns a `pdmat` with the same grid, matrix shape, continuity metadata,
 `SourceSummary`, and `FunctionHandle`, but with elevated degree and coefficient
 evidence. It packages the elevated `LocalValues` described above into a new
-object; evaluation is exactly preserved.
+object. evaluation is exactly preserved.
 
 ### One-dimensional coefficient rule and example
 
@@ -116,11 +116,11 @@ the familiar recurrence
 
 <KaTeXMath
   class="formula-block formula-one-line"
-  tex={String.raw`\mathbf m=(m_1),\qquad\tilde a_0=a_0,\qquad\tilde a_{m_1+1}=a_{m_1},\qquad\tilde a_{i_1}=\frac{i_1}{m_1+1}a_{i_1-1}+\left(1-\frac{i_1}{m_1+1}\right)a_{i_1},\quad 1\le i_1\le m_1.`}
+  tex={String.raw`\vect m=(m_1),\qquad\tilde a_0=a_0,\qquad\tilde a_{m_1+1}=a_{m_1},\qquad\tilde a_{i_1}=\frac{i_1}{m_1+1}a_{i_1-1}+\left(1-\frac{i_1}{m_1+1}\right)a_{i_1},\quad 1\le i_1\le m_1.`}
 />
 
-The following degree $\mathbf m=(1)$ row $[0,2]$ is elevated by
-$\mathbf d=(3)$ to degree $(4)$. The direct selected-cell output shows the
+The following degree $\vect m=(1)$ row $[0,2]$ is elevated by
+$\vect d=(3)$ to degree $(4)$. The direct selected-cell output shows the
 complete elevated representation.
 
 ```matlab
@@ -141,7 +141,7 @@ disp(bernTable(B, 1, "oneLine"))
 An increment is applied componentwise. This example starts from
 `Degree=[1 0]`, so the second parameter is present in the tensor grid but the
 represented function is constant along that axis. Elevating by `[1 2]`
-produces `Degree=[2 2]` and nine local tensor-product labels per cell without
+produces `Degree=[2 2]` and nine local tensor-product labels per cell while
 changing any evaluated value.
 
 ```matlab
@@ -158,10 +158,10 @@ disp(bernTable(B2, [1 1], "oneLine"))
 ```
 
 An invalid increment raises `pdbase:InvalidDegreeIncrement`. A function-only
-object constructed without explicit `Degree` raises
+object constructed with omitted explicit `Degree` raises
 `pdbase:MissingCoefficientEvidence` for both elevation methods. Elevation is
-representation-only: it does not refine the physical grid or sample a
-function-only source.
+representation-only. It preserves the physical grid and derives coefficients
+from the stored tensor. Function-only sources require explicit coefficient evidence.
 
 ## Numerical degree-elevation explorer
 

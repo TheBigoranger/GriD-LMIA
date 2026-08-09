@@ -6,6 +6,7 @@ description: Cell-local YALMIP constraints for PD-LMI expressions.
 import CertificateChooser from "../../../../../components/CertificateChooser.astro";
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
 import CallGraph from "../../../../../components/CallGraph.astro";
+import ApiInventory from "../../../../../components/ApiInventory.astro";
 
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
@@ -14,16 +15,16 @@ import CallGraph from "../../../../../components/CallGraph.astro";
 </nav>
 
 Throughout this reference,
-$S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$ and $\mathbf M$ is the assembled
-residual degree; see the
+$S^{(\vect c)}=-\mathcal F^{(\vect c)}$ and $\vect M$ is the assembled
+residual degree. see the
 [global notation](/GriD-LMIA/documents/math/notation/#residual-and-positive-target).
 
 `pdlmi` stores finite certificates generated from `pdvar` residuals or
 coefficient-backed `pdmat` inequalities. Inequalities use semidefinite meaning
 only when every original
-coefficient is square Hermitian; otherwise the whole inequality is entry-wise.
+coefficient is square Hermitian. otherwise the whole inequality is entry-wise.
 Equality is direct coefficient equality and may be rectangular. Direct
-coefficient assembly is the default; Pólya degree elevation, fixed-order
+coefficient assembly is the default. Pólya degree elevation, fixed-order
 Putinar box assembly, tensor-window SparsePutinar assembly, tensor-window
 SparseFullBox assembly, and fixed-order
 FullBox Bernstein-Gram preordering are explicit alternatives.
@@ -42,7 +43,7 @@ The six paths begin with the same stored residual. **Direct** tests every
 local coefficient and is the default. **Pólya** exactly elevates that residual
 before repeating the direct test. In one parameter, **Putinar** and
 **FullBox** dispatch to the same parity-specific Markov–Lukács form with
-minimum order `floor(M1/2)` for $\mathbf M=(M_1)$. In two or more parameters, Putinar uses an
+minimum order `floor(M1/2)` for $\vect M=(M_1)$. In two or more parameters, Putinar uses an
 unweighted Gram term plus one generator-weighted term per axis at minimum
 componentwise `ceil(Degree/2)`, while FullBox includes every generator-subset product.
 **SparsePutinar** retains the Putinar parity or singleton-generator terms and
@@ -56,7 +57,7 @@ canonicalizes to Direct, and a side at least
   `max(order + 1)` canonicalizes to FullBox. Every Gram path matches exact
 box-polynomial identities. The
 [SOS certificate chapter](/GriD-LMIA/documents/math/sos-certificates/)
-derives these ideas; the API pages below stay focused on callable syntax.
+derives these ideas. the API pages below stay focused on callable syntax.
 
 ## Reference Index
 
@@ -65,7 +66,7 @@ derives these ideas; the API pages below stay focused on callable syntax.
 | Reference | Task |
 | :--- | :--- |
 | [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) | Select Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox assembly. |
-| [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) | Create known-data inequalities with `<=`/`>=`; logical `pdmat == pdmat` remains separate. |
+| [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) | Create known-data inequalities with `<=`/`>=`. logical `pdmat == pdmat` remains separate. |
 | [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) | Create semidefinite or entry-wise inequalities with `<=`/`>=`, and direct equalities with `==`. |
 | [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) | Rebuild the original residual with a selected Pólya degree increment. |
 | [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) | Rebuild the original residual with the minimum or a selected absolute Putinar order. |
@@ -115,7 +116,7 @@ The constructor exposes private-set, read-only properties through dot access:
 | `UsePolya`, `PolyaDegree` | `C.UsePolya`, `C.PolyaDegree` | Pólya selector and degree increment. |
 | `UsePutinar`, `PutinarOrder` | `C.UsePutinar`, `C.PutinarOrder` | Putinar selector and absolute order. |
 | `UseSparsePutinar`, `SparsePutinarOrder`, `CliqueSize` | `C.UseSparsePutinar`, `C.SparsePutinarOrder`, `C.CliqueSize` | SparsePutinar selector, direction-wise absolute order, and scalar tensor-window side `b`. |
-| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar tensor-window side `w`. Side one normalizes to Direct; a side at least `max(order + 1)` normalizes to FullBox. |
+| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar tensor-window side `w`. Side one normalizes to Direct. a side at least `max(order + 1)` normalizes to FullBox. |
 | `UseFullBoxPreorder`, `FullBoxOrder` | `C.UseFullBoxPreorder`, `C.FullBoxOrder` | Full-box selector and absolute order. |
 
 Certificate selectors apply only to inequalities. Any selector on equality raises `pdlmi:UnsupportedEqualityCertificate`.
@@ -128,3 +129,5 @@ higher dimensions.
 ## See Also
 
 [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`certificate map`](/GriD-LMIA/documents/math/sos-certificates/) · [`SparsePutinar mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) · [`SparseFullBox and FullBox mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)
+
+<ApiInventory owner="pdlmi" />

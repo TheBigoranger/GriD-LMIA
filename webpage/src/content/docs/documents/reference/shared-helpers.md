@@ -6,7 +6,7 @@ description: Current backend-only +helper utilities shared across the package.
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><span>shared helpers</span></nav>
 
 The `+helper` namespace contains validation, grid, tensor-order, degree, rate-row, and Bernstein-convolution utilities.
-They are documented for maintainers, not as primary modeling API. `bernTbl`,
+They are documented as maintainer-facing support APIs. `bernTbl`,
 `mapVals`, and `matSubs` are protected `pdbase` methods and therefore belong
 on the [protected backend utilities](/GriD-LMIA/documents/reference/bernstein-utilities/)
 page.
@@ -16,7 +16,7 @@ page.
 **Syntax:** `leaf = helper.cellGet(values,cellSubscripts)`.
 
 Returns one nested physical-cell leaf. The caller supplies a validated tree and
-one subscript per parameter axis; ordinary MATLAB cell-access errors surface
+one subscript per parameter axis. ordinary MATLAB cell-access errors surface
 for malformed internal use.
 
 ## <span id="helper-chk"></span>`helper.chk`
@@ -25,7 +25,7 @@ for malformed internal use.
 
 Returns the unchanged value after common predicates pass. Supported tags cover
 numeric/real/cell/struct type, emptiness, scalar/vector/matrix shape, finite
-integer sign, strict increase, and row bounds; size/count/range options add
+integer sign, strict increase, and row bounds. size/count/range options add
 exact constraints. A failed predicate raises the caller-owned identifier.
 Malformed validator syntax raises `helper:InvalidValidatorCall`.
 
@@ -43,7 +43,7 @@ and rate vertices. Callers validate the axis values.
 
 Modes `"num"`, `"add"`, `"vals"`, and `"obj"` apply the package's numeric,
 additive, coefficient-tree, and object evidence rules. A function-only
-`pdmat` placeholder is not coefficient zero evidence. Bad modes and arity use
+`pdmat` placeholder remains distinct from coefficient zero evidence. Bad modes and arity use
 `helper:InvalidZeroMode` or `helper:InvalidZeroCall`.
 
 ## <span id="helper-mkgrid"></span>`helper.mkGrid`
@@ -54,14 +54,14 @@ additive, coefficient-tree, and object evidence rules. A function-only
 Validates a nonempty cell array of finite, real, strictly increasing vectors
 with at least two nodes. Returns `Vectors`, tensor-product `Points`, `Bounds`,
 and `NumNodes`. Errors use `<owner>:InvalidGrid` or
-`<owner>:InvalidGridVector`; the default owner is `pdbase`.
+`<owner>:InvalidGridVector`. the default owner is `pdbase`.
 
 ## <span id="helper-mknest"></span>`helper.mkNest`
 
 **Syntax:** `values = helper.mkNest(cellCounts,makeLeaf)`.
 
 Constructs `values{i1}{i2}...{i_npar}` and calls `makeLeaf` once for each
-physical-cell subscript row. Inputs are internal validated values; allocation
+physical-cell subscript row. Inputs are internal validated values. allocation
 or callback failures propagate.
 
 ## <span id="helper-normdeg"></span>`helper.normDeg`
@@ -72,7 +72,7 @@ Accepts one finite nonnegative integer scalar shorthand or an `nPar`-element
 direction-wise vector. A scalar expands uniformly, a column vector is reshaped,
 and every accepted result is a `1 × nPar` double row. Empty, nonnumeric,
 complex, nonfinite, noninteger, negative, or incorrectly sized input raises the
-caller-owned `errorId`; `label` supplies the public option name in the message
+caller-owned `errorId`. `label` supplies the public option name in the message
 and defaults to `"Degree"`.
 
 ```matlab
@@ -98,8 +98,8 @@ degree =
 **Validation:** Other text, missing strings, nonscalar text, and nontext input
 raise `<owner>:InvalidValidationMode`.
 
-**Limitations:** The mode is transient internal validation policy. It is not
-stored on an object and does not change mathematical meaning.
+**Limitations:** The mode is transient internal validation policy for one call
+and preserves mathematical meaning.
 
 **See Also:** [`pdbase constructor`](/GriD-LMIA/documents/reference/pdbase/constructor/) · [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/)
 
@@ -118,8 +118,8 @@ return an empty row table.
 **Validation:** This backend helper assumes its caller has validated the bounds
 shape, finiteness, and lower/upper order.
 
-**Limitations:** It enumerates box vertices only. It does not validate a rate
-model or create coefficient storage.
+**Limitations:** It enumerates box vertices. Rate-model validation and
+coefficient storage belong to the owning APIs.
 
 **See Also:** [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) · [`pdbase storage`](/GriD-LMIA/documents/reference/pdbase/storage-inspection/)
 
@@ -141,7 +141,7 @@ out-of-range labels, or nonfinite values raise
 `helper:InvalidBernConvRatios`.
 
 **Limitations:** Inputs must already be paired in the intended plan order. The
-helper does not enumerate label pairs or multiply coefficient payloads.
+helper receives pre-enumerated pairs and returns their plan weights. Owning kernels multiply coefficient payloads.
 
 **See Also:** [`helper.bernConvWeights`](#helper-bernconvweights) · [Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/)
 
@@ -151,7 +151,7 @@ helper does not enumerate label pairs or multiply coefficient payloads.
 
 **Arguments:** `labels` is an `N × ell` table of nonnegative integer Bernstein
 labels. `degree` is a normalized `1 × ell` nonnegative integer row, and every
-label component must not exceed its degree component.
+each label component is less than or equal to its degree component.
 
 **Output and shape:** `weights` is `N × 1`. Row `q` contains the normalized
 product binomial weight
@@ -161,7 +161,7 @@ product binomial weight
 out-of-range inputs raise `helper:InvalidBernConvWeights`.
 
 **Limitations:** The recurrence is designed to keep high-degree normalized
-weights finite. It returns weights only and does not perform convolution.
+weights finite. It returns weights for the owning convolution kernel.
 
 **See Also:** [`helper.bernConvRatios`](#helper-bernconvratios) · [`pdbase prodVals`](/GriD-LMIA/documents/reference/bernstein-utilities/#pdbase-prodvals)
 
@@ -176,14 +176,14 @@ weights finite. It returns weights only and does not perform convolution.
 pair of neighboring physical cells has matching coefficients on the complete
 shared face and on every stored row.
 
-**Validation:** The helper classifies existing internal storage without
-repairing it. Numeric faces use the scale-aware tolerance
+**Validation:** The helper classifies and preserves existing internal storage.
+Numeric faces use the scale-aware tolerance
 `1e-9*max(1,norm(lhs,'fro'),norm(rhs,'fro'))`. Affine `sdpvar` faces compare
 their complete bases exactly.
 
 **Limitations:** Inputs are assumed structurally valid. The function returns
-false at the first mismatch and does not impose continuity constraints or
-alter coefficients.
+false at the first mismatch and preserves the input coefficients. Constructors
+own continuity enforcement.
 
 **See Also:** [`pdmat constructor`](/GriD-LMIA/documents/reference/pdmat/constructor/) · [`pdvar value`](/GriD-LMIA/documents/reference/pdvar/value/)
 
@@ -207,8 +207,8 @@ metadata, callback output, or matrix shape surfaces through the caller's
 construction and arithmetic checks.
 
 **Limitations:** The helper fits samples on the tensor Bernstein nodes and
-does not certify an arbitrary function as an exact polynomial. Callers own
-representability checks and public diagnostics.
+provides fitted coefficient evidence. Callers own exact representability checks
+and public diagnostics.
 
 **See Also:** [`helper.normDeg`](#helper-normdeg) · [`pdmat constructor`](/GriD-LMIA/documents/reference/pdmat/constructor/) · [`helper.mkNest`](#helper-mknest)
 

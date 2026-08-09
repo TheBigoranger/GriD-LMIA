@@ -20,7 +20,7 @@ differentiation, convolution, subdivision, and traversal formulas now live in
 
 ## Local Coordinates And The Tensor Representation
 
-Each physical cell $\mathcal H_{\mathbf c}$ is the product of the grid
+Each physical cell $\mathcal H_{\vect c}$ is the product of the grid
 intervals $[\rho_s^{(c_s)},\rho_s^{(c_s+1)}]$. It is pulled back to the same
 reference box $[0,1]^\ell$ by
 
@@ -31,18 +31,18 @@ $$
 $$
 
 This separation is the organizing idea: physical knot locations and cell
-widths belong to the map $\phi_{\mathbf c}$, while coefficient algebra uses a
-fixed local coordinate. In one direction, write $\mathbf m=(m_1)$ and use
+widths belong to the map $\phi_{\vect c}$, while coefficient algebra uses a
+fixed local coordinate. In one direction, write $\vect m=(m_1)$ and use
 $B_{i_1}^{m_1}(\alpha)=\binom{m_1}{i_1}\alpha^{i_1}(1-\alpha)^{m_1-i_1}$ for
 $i_1=0,\ldots,m_1$. After residual assembly the target degree is
-$\mathbf M=(M_1)$, with basis $B_{i_1}^{M_1}$. The multivariate basis is its
+$\vect M=(M_1)$, with basis $B_{i_1}^{M_1}$. The multivariate basis is its
 tensor product,
 
 $$
 \begin{aligned}
-B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)
+B_{\vect i}^{\vect M}(\vect\alpha)
 &=\prod_{s=1}^{\ell}B_{i_s}^{M_s}(\alpha_s),\\
-\mathbf i&\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}.
+\vect i&\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}.
 \end{aligned}
 $$
 
@@ -50,12 +50,12 @@ A cell-local matrix polynomial therefore has one matrix coefficient for each
 tensor label:
 
 $$
-A^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{\mathbf i}C^{(\mathbf c)}[\mathbf i]\,
-B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha).
+A^{(\vect c)}(\vect\alpha)
+=\sum_{\vect i}C^{(\vect c)}[\vect i]\,
+B_{\vect i}^{\vect M}(\vect\alpha).
 $$
 
-Local coefficient labels are zero-based; physical grid nodes and cell indices
+Local coefficient labels are zero-based. physical grid nodes and cell indices
 are one-based. Different physical cell sizes can still use the same tensor
 rules because every cell is represented on the reference box.
 
@@ -65,53 +65,52 @@ rules because every cell is represented on the reference box.
 
 Every Bernstein basis function is nonnegative on the reference box and the
 complete tensor basis sums to one. Consequently,
-$A^{(\mathbf c)}(\boldsymbol\alpha)$ is a convex combination of its
+$A^{(\vect c)}(\vect\alpha)$ is a convex combination of its
 coefficient matrices. Endpoint and face values are exposed by the
 corresponding boundary coefficients, while interior values remain inside the
 coefficient hull.
 
 <BernsteinConceptDiagram kind="convex" />
 
-For a residual $\mathcal F^{(\mathbf c)}$, `pdlmi` uses the sign-normalized
-positive target $S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$. Requiring every
+For a residual $\mathcal F^{(\vect c)}$, `pdlmi` uses the sign-normalized
+positive target $S^{(\vect c)}=-\mathcal F^{(\vect c)}$. Requiring every
 Bernstein coefficient
-$C^{(\mathbf c)}[\mathbf i]\succeq0$ is therefore a finite sufficient
-condition for $S^{(\mathbf c)}(\boldsymbol\alpha)\succeq0$ throughout the
-cell. This is the Direct certificate: inexpensive and transparent, but not
-necessary in general. A strict theoretical target must be represented in
+$C^{(\vect c)}[\vect i]\succeq0$ is therefore a finite sufficient
+condition for $S^{(\vect c)}(\vect\alpha)\succeq0$ throughout the
+cell. This is the Direct certificate. It gives an inexpensive and transparent
+sufficient condition. A strict theoretical target must be represented in
 software with an explicit margin such as
-$S^{(\mathbf c)}-\varepsilon I\succeq0$.
+$S^{(\vect c)}-\varepsilon I\succeq0$.
 
 ## `LocalValues`, Face Continuity, And Cell-Local Differentiation
 
 `LocalValues` mirrors the tensor geometry. Its outer nesting selects a
-physical cell; the leaf row follows the local label order returned by
+physical cell. the leaf row follows the local label order returned by
 `lbls()`. There are $\prod_s(k_s-1)$ physical cells and
 $\prod_s(M_s+1)$ coefficient labels per ordinary residual row. Explicit
-scheduling-rate dependence adds rows at each leaf rather than new cells or
-new coefficient labels.
+scheduling-rate dependence adds rows at each leaf while preserving cells and
+coefficient labels.
 
 <CellStorageDiagram />
 
 A constructor-created continuous `pdvar` shares the complete Bernstein
 control face between adjacent cells. The shared handles enforce equality of
-face values without a separate list of continuity constraints. They do not
-impose derivative continuity: neighboring cells may have different one-sided
+face values through shared handles. Neighboring cells may have different one-sided
 gradients at the same interface.
 
 Differentiation is therefore deliberately cell-local. Along direction $s$,
 forward coefficient differences are multiplied by $M_s$ and divided by the
-physical width $h_s^{\mathbf c}$. `rhodiff` elevates the directional partials
+physical width $h_s^{\vect c}$. `rhodiff` elevates the directional partials
 to a common tensor degree, combines them with rate-box vertices in a
 deterministic order, and stores one row per vertex. The interface interpretation
-is developed in [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/);
+is developed in [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/).
 the exact coefficient formulas are in
 [Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-rows).
 
 ## Exact Algebra, Finite Certificates, And Independent Refinements
 
-The coefficient representation supports exact transformations rather than
-sampled approximations. Degree elevation changes only the Bernstein
+The coefficient representation supports exact transformations directly from
+stored coefficients. Degree elevation changes only the Bernstein
 representation. Refining the physical grid re-expresses the same polynomial on
 smaller cells. Multiplication adds direction-wise degrees and uses an ordered,
 binomially normalized convolution, so matrix-factor order is preserved.
@@ -124,7 +123,7 @@ applies the same coefficient test. Putinar uses positive-semidefinite Gram
 blocks with an unweighted term and box-generator terms. SparsePutinar retains
 the Putinar terms while splitting dense Gram bases into overlapping tensor
 windows whose side is the `CliqueSize` value $b$. FullBox uses every
-square-free generator product; SparseFullBox retains those identities while
+square-free generator product. SparseFullBox retains those identities while
 replacing each dense tensor basis by overlapping sliding-window Gram blocks
 $Q_J^{(w)}$ over sliding tensor windows of scalar side $w$. The
 [Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/)
@@ -132,16 +131,17 @@ states the exact one- and multi-parameter forms.
 
 <span id="fixed-order-full-box-preordering"></span>
 
-The refinement knobs are independent: decision degree $\mathbf m$, assembled
-residual degree $\mathbf M$, Pólya increment $\mathbf d$, absolute Gram order
-$\mathbf r$, SparsePutinar `CliqueSize` value $b$, SparseFullBox window side $w$, and physical-grid refinement do not
-mean the same thing. Increasing one does not silently increase the others.
+The refinement knobs are independent: decision degree $\vect m$, assembled
+residual degree $\vect M$, Pólya increment $\vect d$, absolute Gram order
+$\vect r$, SparsePutinar `CliqueSize` value $b$, SparseFullBox window side $w$,
+and physical-grid refinement are distinct controls. Increasing one preserves
+the others.
 
 <span id="limitations"></span>
 
-The package remains limited to tensor-product box cells; Direct positivity is
-only sufficient; continuous `pdvar` gradients need not match across faces;
-function-backed `pdmat` objects have no coefficient table; and no single
+The package remains limited to tensor-product box cells. Direct positivity is
+only a sufficient condition. Continuous `pdvar` gradients may differ across faces.
+Function-backed `pdmat` objects lack a coefficient table. Each
 fixed grid, degree, or certificate is claimed to solve the original continuum
 problem exactly.
 

@@ -30,20 +30,20 @@ Cpolya = C.usePolya(..., ValidationMode=mode)
 
 ## Description
 
-The no-argument form selects uniform increment one. An explicit increment is a
+Omitting the increment selects uniform increment one. An explicit increment is a
 finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise
 vector. It elevates the residual componentwise before `pdlmi` constrains every
 elevated coefficient and every active rate-vertex row. The method is
 value-like: it returns a new object and leaves `C` unchanged.
 
-Each call rebuilds from `C.Residual`, rather than compounding a previous
+Each call rebuilds from `C.Residual` and replaces a previous
 elevation. Thus `C.usePolya(2)` and `C.usePolya().usePolya(2)` both use
 an increment of two from the original residual. A prior Putinar or full-box
 selection is replaced in the same way.
 
 The diagram's first and second boxes represent the same residual polynomial.
 Only its Bernstein coefficient row is longer. The final arrow is the ordinary
-direct sign test. No multiplier search occurs.
+direct sign test. Pólya uses degree elevation and coefficient tests.
 
 ## Example
 
@@ -66,11 +66,11 @@ ans =
 
 ## Anisotropic Assembly Output
 
-For an assembled target degree $\mathbf M=(2,1)$ and increment
-$\mathbf d=(1,2)$, exact elevation gives
+For an assembled target degree $\vect M=(2,1)$ and increment
+$\vect d=(1,2)$, exact elevation gives
 
 $$
-\mathbf M+\mathbf d=(3,3).
+\vect M+\vect d=(3,3).
 $$
 
 $$
@@ -94,8 +94,9 @@ direct-only, so calling this method on relation `"=="` raises
 `pdlmi:UnsupportedEqualityCertificate` before degree validation.
 
 Pólya elevation is an exact re-expression of the stored residual followed by
-the direct coefficient test. It does not search for a successful exponent,
-insert a strict margin, or create SOS multipliers. See the
+the direct coefficient test. The caller selects the exponent and writes every
+strict margin explicitly. This certificate uses coefficient tests in place of
+SOS multipliers. See the
 [certificate map](/GriD-LMIA/documents/math/sos-certificates/#polya-type-coefficient-relaxation)
 for the theorem's strict-positivity setting and the narrower runtime contract.
 

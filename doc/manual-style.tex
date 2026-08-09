@@ -21,6 +21,7 @@
 \usepackage{cleveref}
 \usepackage{makeidx}
 \makeindex
+\input{terminology}
 
 \crefname{equation}{}{}
 \crefname{figure}{Fig}{Figs}
@@ -170,6 +171,10 @@
 
 \newcommand{\pkg}{GriD-LMIA}
 \newcommand{\matlab}{MATLAB}
+% Semantic vector notation. \boldsymbol gives visible weight to both Latin and
+% Greek symbols, while scalars and ordinary uppercase matrix symbols keep their
+% native mathematical shape.
+\newcommand{\vect}[1]{\boldsymbol{#1}}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\codeerr}[2]{\code{#1:}\allowbreak\code{#2}}
 \newcommand{\refhead}[1]{%

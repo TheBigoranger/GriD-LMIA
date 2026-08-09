@@ -4,7 +4,7 @@
 \section{Deterministic Putinar, SparsePutinar, SparseFullBox, And FullBox Selection}
 \label{sec:full-box-example}
 
-This example selects default Putinar and FullBox certificates, an explicit FullBox order, one intermediate SparsePutinar certificate, and the three canonical SparseFullBox outcomes without solving an optimization problem. The reported values depend only on the public assembly contract, not on incidental YALMIP decision-variable identifiers.
+This example selects default Putinar and FullBox certificates, an explicit FullBox order, one intermediate SparsePutinar certificate, and the three canonical SparseFullBox outcomes before any optimization solve. The reported values follow the public assembly contract and remain independent of incidental YALMIP decision-variable identifiers.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -30,7 +30,7 @@ elevatedDegree = 1×2 double
 constraintCount = 6
 \end{lstlisting}
 
-This anisotropic example has three original labels and six labels after direction-wise elevation: \((2+1)(0+1)=3\) and \((2+1)(1+1)=6\). The zero second component of \code{Pa.Degree} makes the decision constant in the second parameter; \code{PolyaDegree=[0 1]} changes only its certificate representation.
+This anisotropic example has three original labels and six labels after direction-wise elevation: \((2+1)(0+1)=3\) and \((2+1)(1+1)=6\). The zero second component of \code{Pa.Degree} makes the decision constant in the second parameter. \code{PolyaDegree=[0 1]} changes only its certificate representation.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -74,7 +74,7 @@ putinarReplacementState = 1×3 double
 exportedConstraintCount = 5
 \end{lstlisting}
 
-For this one-dimensional degree-two scalar residual, order one uses two PSD Gram blocks followed by three exact coefficient identities. Order two matches a degree-four target and stores two PSD blocks followed by five identities. The original \code{direct} object remains unchanged, and the selection made from \code{polya} replaces P\'olya rather than elevating its already assembled constraints. Likewise, selecting Putinar from \code{boxHigher} rebuilds from the original residual and clears the full-box selection.
+For this one-dimensional degree-two scalar residual, order one uses two \term{psd} Gram blocks followed by three exact coefficient identities. Order two matches a degree-four target and stores two \term{psd} blocks followed by five identities. The original \code{direct} object remains unchanged, and the selection made from \code{polya} replaces P\'olya by rebuilding the FullBox constraints from the original residual. Likewise, selecting Putinar from \code{boxHigher} rebuilds from the original residual and clears the full-box selection.
 
 The next degree-four residual makes clique size two an intermediate SparsePutinar certificate. It also makes width two an intermediate SparseFullBox certificate, while SparseFullBox widths one and three expose its canonical endpoints.
 
@@ -116,7 +116,7 @@ The intermediate SparsePutinar wrapper stores three independent clique-size-two 
 \section{Solve for a Parameter-Dependent Lyapunov Matrix}
 \label{sec:parameter-dependent-lyapunov-smoke}
 
-The first solver smoke test in \code{+tests/+pdlmi/test_solver_smoke.m} contrasts a constant Lyapunov matrix with a degree-one, parameter-dependent one.  It solves the same decay and positivity constraints in both cases.  The degree-one solution is then materialized as known \code{pdmat} data and plotted.  \code{pdvar} is a decision-expression class and does not itself provide \code{plot}; applying \code{value} to its local YALMIP payloads after a successful solve supplies the numeric Bernstein coefficients for \code{pdmat}.
+The first solver smoke test in \code{+tests/+pdlmi/test_solver_smoke.m} contrasts a constant Lyapunov matrix with a degree-one, parameter-dependent one. It solves the same decay and positivity constraints in both cases. The degree-one solution is then materialized as known \code{pdmat} data and plotted. \code{pdvar} owns symbolic decision expressions, while the valued \code{pdmat} owns \code{plot}. Applying \code{value} to the local YALMIP payloads after a successful solve supplies the numeric Bernstein coefficients for \code{pdmat}.
 
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
@@ -141,7 +141,7 @@ plot(Pplot, SamplesPerCell=40, LineWidth=1.5)
 title("Solved parameter-dependent Lyapunov matrix")
 \end{lstlisting}
 
-The figure contains one curve for each entry of the solved \(2\)-by-\(2\) matrix \(P(\rho)\), sampled on the parameter interval.  It is a diagnostic visualization of the feasible solution, not a certificate beyond the coefficient-wise constraints supplied to the solver.  The constant-case result is retained to exercise the comparison in the smoke test; only a MOSEK solve is used there to certify its intended infeasibility distinction.
+The figure contains one curve for each entry of the solved \(2\)-by-\(2\) matrix \(P(\rho)\), sampled on the parameter interval. It is a diagnostic visualization of the feasible solution, while the coefficient-wise constraints supplied to the solver remain the certificate. The constant-case result is retained to exercise the comparison in the smoke test. A MOSEK solve certifies its intended infeasibility distinction.
 
 \needspace{14\baselineskip}
 \section{Solve a Rate-Dependent Block LMI}
@@ -229,7 +229,7 @@ The constraint counts above follow directly from the three independent assembly 
     degree-two local labels: \(i\in\{0,1,2\}\) \hfill (3)};
   \node[axes,below=of e2] (a2) {
     physical cells: \(c\in\{1\}\) \hfill (1)\\
-    ordinary row (no rate enumeration) \hfill (1)\\
+    ordinary row (one stored row) \hfill (1)\\
     degree-one local labels: \(i\in\{0,1\}\) \hfill (2)};
 
   \node[count,below=of a1] (n1)
@@ -253,4 +253,4 @@ The constraint counts above follow directly from the three independent assembly 
 \end{tikzpicture}
 \end{center}
 
-The numbers (6) and (2) are certificate-assembly counts: they state how many finite semidefinite constraints represent \code{E1} and \code{E2}. They are not evidence that the optimization succeeds.  Feasibility is checked separately by \code{sol.problem}, and the finite objective is checked after the shared \code{optimize} call.
+The numbers (6) and (2) are certificate-assembly counts that state how many finite semidefinite constraints represent \code{E1} and \code{E2}. Solver success requires the separate \code{sol.problem} check, and the finite objective is checked after the shared \code{optimize} call.

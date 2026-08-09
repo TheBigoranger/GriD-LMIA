@@ -23,7 +23,7 @@ import { historyPolicy, versionHistory } from "../../data/version-history.js";
 
 ## Version History
 
-Documentation v1.3.1 is the current manual. Version v1.3.0 remains the latest
+Documentation v1.3.2 is the current manual. Version v1.3.0 remains the latest
 tagged GitHub Release. The retained v1.2.4 row is the final documentation
 snapshot from the completed v1.2 line. Earlier rows retain the final patch
 release from each older minor line, while a commit suffix identifies
@@ -62,5 +62,4 @@ Keep the documentation snapshot and latest Release as distinct rows whenever
 their versions differ. When a later tagged patch becomes the final release of
 an older minor line, replace that line's retained row in
 `webpage/src/data/version-history.js`. Keep the displayed current-version
-number synchronized from the TeX manual rather than editing generated version
-data manually.
+number synchronized from the TeX manual. The build generates the displayed data.

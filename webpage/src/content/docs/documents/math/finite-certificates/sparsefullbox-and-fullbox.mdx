@@ -17,7 +17,7 @@ FullBox uses every square-free product of the box generators. SparseFullBox keep
 For $J\subseteq\{1,\ldots,\ell\}$, define
 
 $$
-g_J(\boldsymbol\alpha)
+g_J(\vect\alpha)
 =\prod_{s\in J}\alpha_s(1-\alpha_s),
 \qquad g_{\varnothing}=1.
 $$
@@ -25,16 +25,16 @@ $$
 The FullBox certificate has the form
 
 $$
-S^{(\mathbf c)}(\boldsymbol\alpha)
+S^{(\vect c)}(\vect\alpha)
 =\sum_{J\subseteq[\ell]}
-g_J(\boldsymbol\alpha)T_J(\boldsymbol\alpha).
+g_J(\vect\alpha)T_J(\vect\alpha).
 $$
 
 Here each subset contributes
 
 $$
-T_J(\boldsymbol\alpha)
-=Z_J(\boldsymbol\alpha)^{\mathsf T}Q_JZ_J(\boldsymbol\alpha),
+T_J(\vect\alpha)
+=Z_J(\vect\alpha)^{\mathsf T}Q_JZ_J(\vect\alpha),
 $$
 
 with
@@ -52,42 +52,45 @@ selected = L.useFullBox(r);
 
 ## Sliding Tensor Windows
 
-Let the Gram basis for one active generator term have degree $\mathbf d$. For side length $w$, define the side on axis $s$ by
+Let the Gram basis for one active generator term have degree $\vect d$. For side length $w$, define the side on axis $s$ by
 
 $$
 h_s=\min(w,d_s+1).
 $$
 
-Each start tuple $\mathbf u$ satisfies $0\le u_s\le d_s-h_s+1$ and selects the tensor label window
+Each start tuple $\vect u$ satisfies $0\le u_s\le d_s-h_s+1$ and selects the tensor label window
 
 $$
-\mathcal W_{\mathbf u}
-=\left\{\mathbf a:u_s\le a_s<u_s+h_s\right\}.
+\mathcal W_{\vect u}
+=\left\{\vect a:u_s\le a_s<u_s+h_s\right\}.
 $$
 
-The window basis $Z_{J,\mathbf u}$ contains only those labels. SparseFullBox assembles
+The window basis $Z_{J,\vect u}$ contains only those labels. SparseFullBox assembles
 
 $$
-S^{(\mathbf c)}(\boldsymbol\alpha)
-=\sum_{J\subseteq[\ell]}g_J(\boldsymbol\alpha)
-\sum_{\mathbf u}T_{J,\mathbf u}(\boldsymbol\alpha).
+S^{(\vect c)}(\vect\alpha)
+=\sum_{J\subseteq[\ell]}g_J(\vect\alpha)
+\sum_{\vect u}T_{J,\vect u}(\vect\alpha).
 $$
 
 Each window contribution is
 
 $$
-T_{J,\mathbf u}(\boldsymbol\alpha)
-=Z_{J,\mathbf u}(\boldsymbol\alpha)^{\mathsf T}
-Q_{J,\mathbf u}Z_{J,\mathbf u}(\boldsymbol\alpha),
+T_{J,\vect u}(\vect\alpha)
+=Z_{J,\vect u}(\vect\alpha)^{\mathsf T}
+Q_{J,\vect u}Z_{J,\vect u}(\vect\alpha),
 $$
 
 with a separate positive semidefinite condition
 
 $$
-Q_{J,\mathbf u}\succeq0.
+Q_{J,\vect u}\succeq0.
 $$
 
-The construction uses sliding windows in the tensor label lattice. It is not a bandwidth constraint on one flattened Gram matrix. Overlapping windows contribute to the same target labels, and the exact coefficient identities accumulate every contribution.
+The construction uses sliding windows in the tensor label lattice. This tensor
+support differs from a bandwidth constraint on one flattened Gram matrix.
+Overlapping windows contribute to the same target labels, and the exact
+coefficient identities accumulate every contribution.
 
 For a matrix inequality of size $n$, the PSD dimension of one window is
 
@@ -109,7 +112,7 @@ selected = L.useSpBox(w, r);
 - An intermediate $w$ stores a SparseFullBox certificate with overlapping tensor windows.
 - When $w$ spans every active basis axis, the request normalizes to FullBox.
 
-These are stored selector states, not timing comparisons. Inspect the read-only `pdlmi` state when code must report the selected family.
+These are stored selector states. Inspect the read-only `pdlmi` state when code must report the selected family.
 
 ## Reusable Maps And Fresh Variables
 
@@ -119,7 +122,10 @@ The optimized path preserves represented functions, existing YALMIP variables, c
 
 ## Failure Interpretation And Limits
 
-A fixed order or window size is a sufficient certificate choice. Failure is inconclusive for the continuous inequality. SparseFullBox does not search tensor windows, infer a chordal graph, choose a solver, or insert a positivity margin.
+A fixed order or window size is a sufficient certificate choice. Failure is
+inconclusive for the continuous inequality. The caller selects tensor windows,
+the solver, and every positivity margin. SparseFullBox uses tensor-label
+windows as its fixed support model.
 
 ## See Also
 

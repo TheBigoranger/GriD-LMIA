@@ -8,7 +8,11 @@ const outFile = resolve(here, "../src/content/docs/documents/reference-index.mdx
 const legacyOutFile = resolve(here, "../src/content/docs/documents/reference-index.md");
 
 const escapeHtml = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const wrapCompounds = (value) => escapeHtml(value).replace(
+const positivePunctuation = (value) => value.replace(
+  /;\s*([a-z])/g,
+  (_, character) => `. ${character.toUpperCase()}`,
+);
+const wrapCompounds = (value) => escapeHtml(positivePunctuation(value)).replace(
   /\b[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+\b/g,
   '<span class="reference-index__compound">$&</span>',
 );

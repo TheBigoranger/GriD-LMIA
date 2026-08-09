@@ -17,8 +17,8 @@ import DiagramFrame from "../../../../../components/DiagramFrame.astro";
 
 Inspect a `pdvar` object's local Bernstein coefficient rows. This is a diagnostic
 view for checking tensor labels, symbolic payloads, and the rate rows produced
-by [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/). It does not
-change the decision expression or send anything to YALMIP's optimizer.
+by [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/). The view
+preserves the decision expression, and solver handoff remains a separate step.
 
 ## Syntax
 
@@ -58,7 +58,7 @@ rejected by the current validation path.
 
 `T` is a MATLAB `table`. Use `disp(T)` for a stable command-window view, or
 select the metadata columns when comparing adjacent cells. The table is a
-snapshot of the object state. Editing it does not edit `P`.
+snapshot of the object state. Editing the table preserves `P`.
 
 <span id="example"></span>
 
@@ -96,11 +96,11 @@ T =
         4           {[2 1]}          {[3 2]}         {[1 1]}      "alpha1 * alpha2"                true          {["internal(8)"]}
 ```
 
-These blocks reproduce one clean MATLAB session without editorial
-reformatting. The `internal(4)`, `internal(5)`, `internal(7)`, and
+These blocks reproduce one clean MATLAB session in its original command-window
+format. The `internal(4)`, `internal(5)`, `internal(7)`, and
 `internal(8)` identifiers are session-local YALMIP names. The stable contract
-is the four-slot storage order and its table metadata, not those identifier
-numbers.
+is the four-slot storage order and its table metadata, independently of those
+identifier numbers.
 
 <DiagramFrame caption="The four LocalValues slots and the four table rows use the same last-axis-fastest tensor order." label="LocalValues slots compared with bernTable rows">
   <div class="coefficient-row-map" role="img" aria-label="Four LocalValues slots map in order to local labels zero zero, zero one, one zero, and one one in table rows one through four">
@@ -111,7 +111,9 @@ numbers.
   </div>
 </DiagramFrame>
 
-### Rate-vertex metadata without unstable symbolic names
+<span id="rate-vertex-metadata-without-unstable-symbolic-names"></span>
+
+### Stable Rate-Vertex Metadata
 
 ```matlab
 yalmip('clear')
@@ -133,7 +135,7 @@ ans =
 ```
 
 The derivative has degree zero, so each rate vertex contributes one local
-label. Selecting metadata columns makes the ordering reproducible without
+label. Selecting metadata columns makes the ordering reproducible while
 promising the workspace-dependent YALMIP text in `Value`.
 
 ## Validation And Errors
@@ -142,13 +144,13 @@ promising the workspace-dependent YALMIP text in `Value`.
 - A requested cell must exist in the tensor grid.
 - Rate-row inspection requires the derivative object's rate metadata to be
   present and internally consistent.
-- The table helper is diagnostic. It does not enable unsupported products or
-  relaxation modes.
+- The table helper is diagnostic. Product and relaxation support follows the
+  owning APIs.
 
 `pdvar` accepts any nonnegative constructor degree, and products may elevate
 coefficient degree further. `bernTable` reports the resulting stored rows.
-it is an inspection aid, not a serialization format for the internal
-coefficient tree.
+It is an inspection aid. Serialization uses the documented object state and
+constructor contracts.
 
 ## See Also
 

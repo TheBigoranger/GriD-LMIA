@@ -3,6 +3,10 @@ title: pdvar
 description: Continuous YALMIP-backed Bernstein decision expressions.
 ---
 
+import ApiInventory from "../../../../../components/ApiInventory.astro";
+
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference-index/">Reference</a><span>/</span><span>pdvar</span></nav>
+
 `pdvar` creates gridded YALMIP-backed Bernstein decision expressions. It is method-superior to `pdmat` and `sdpvar`, so mixed known, numeric, symbolic, and decision algebra dispatches through `pdvar`.
 
 ## Reference Index
@@ -17,7 +21,7 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 
 | Reference | Task |
 | :--- | :--- |
-| [`Storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) | Traverse symbolic/rate rows, elevate them independently, and evaluate without consulting assignments. |
+| [`Storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) | Traverse symbolic and rate rows, elevate them independently, and evaluate the stored symbolic expressions directly. |
 | [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) | Build discontinuous rate-vertex derivative expressions. |
 | [`bernTable`](/GriD-LMIA/documents/reference/pdvar/berntable/) | Inspect symbolic coefficient rows and rate vertices. |
 | [`value`](/GriD-LMIA/documents/reference/pdvar/value/) | Convert assigned coefficients to known `pdmat` data. |
@@ -39,7 +43,9 @@ description: Continuous YALMIP-backed Bernstein decision expressions.
 
 ## Scope Boundary
 
-`pdvar` represents expressions. It does not choose solvers or call `optimize`; solver handoff begins with [`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/).
+`pdvar` represents expressions. Solver handoff begins with
+[`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/), followed by the caller's
+solver choice and `optimize` call.
 Its common matrix operations are centralized in `pdbase`, but every inherited
 operation remains documented here with `pdvar` symbolic and rate-aware
 behavior.
@@ -47,3 +53,5 @@ behavior.
 ## See Also
 
 [`pdvar constructor`](/GriD-LMIA/documents/reference/pdvar/constructor/) · [`storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/) · [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) · [`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/)
+
+<ApiInventory owner="pdvar" />

@@ -28,7 +28,7 @@ export default function DegreeElevationExplorer() {
           <p className="explorer-error" role="alert">{error}</p>
         </div>
         <section className="explorer-readout" aria-live="polite">
-          <p><strong>Degree {model.original.length - 1} → {model.elevated.length - 1}</strong>; physical grid unchanged.</p>
+          <p><strong>Degree {model.original.length - 1} → {model.elevated.length - 1}</strong>. The physical grid stays fixed.</p>
           <p><code>[{model.original.map((value) => Number(value.toPrecision(6))).join(", ")}]</code></p>
           <p><code>[{model.elevated.map((value) => Number(value.toPrecision(6))).join(", ")}]</code></p>
           <p>Maximum sampled difference: <code>{model.maximumSampleError.toExponential(2)}</code></p>
@@ -38,7 +38,7 @@ export default function DegreeElevationExplorer() {
           { label: "Elevated representation", points: sampleBernstein(model.elevated), tone: "result" },
         ]} />
       </div>
-      <figcaption>Degree elevation changes coefficient evidence, not the polynomial or physical grid. The two sampled curves coincide.</figcaption>
+      <figcaption>Degree elevation changes coefficient evidence while preserving the polynomial and physical grid. The two sampled curves coincide.</figcaption>
     </figure>
   );
 }

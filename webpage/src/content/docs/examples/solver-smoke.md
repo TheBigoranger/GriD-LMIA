@@ -9,10 +9,12 @@ description: Two solver-facing examples mirrored from +tests/+pdlmi/test_solver_
   <span>Solver Smoke Cases</span>
 </nav>
 
-These examples mirror the tested solver-facing workflows in `+tests/+pdlmi/test_solver_smoke.m`. They use the package to assemble YALMIP constraints; solver selection and execution still happen through ordinary YALMIP calls.
-They are non-strict regression constraints; strict analysis requires an
+These examples mirror the tested solver-facing workflows in `+tests/+pdlmi/test_solver_smoke.m`. They use the package to assemble YALMIP constraints. solver selection and execution still happen through ordinary YALMIP calls.
+They are non-strict regression constraints. strict analysis requires an
 explicit $\varepsilon I$ margin as described in the
 [global notation](/GriD-LMIA/documents/math/notation/#strict-theory-and-software-constraints).
+
+<span id="parameter-dependent-lyapunov-feasibility"></span>
 
 ## Parameter-Dependent Lyapunov Variable
 
@@ -70,9 +72,13 @@ plot(Pplot, SamplesPerCell=40, LineWidth=1.5);
 title("Solved parameter-dependent Lyapunov matrix");
 ```
 
-In the regression, MOSEK reports the constant case as infeasible and the parameter-dependent case as feasible. `lmilab` is used only as a fallback smoke path, not as the certificate for the infeasibility distinction.
+In the regression, MOSEK reports the constant case as infeasible and the
+parameter-dependent case as feasible. `lmilab` supplies a fallback execution
+path, while MOSEK provides the stated infeasibility distinction.
 
 After the feasible solve, the smoke test opens **Parameter-dependent Lyapunov matrix** and plots the four entries of the solved $2\times2$ matrix $P(\rho)$ across $[0,1]$. `Pd` is symbolic decision data, so its cell-local Bernstein coefficients are evaluated with `value` and used to construct a known `pdmat` (`Pplot`) before calling [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/). The plot uses 40 samples per cell and a line width of 1.5.
+
+<span id="induced-l2-gain-with-rate-vertex-derivatives"></span>
 
 ## Block PD-LMI Objective
 
@@ -163,7 +169,7 @@ The solver smoke path checks `sol.problem == 0`, verifies that `gammaValue` is f
 Optimal H-infinity gamma: <solver result>
 ```
 
-The numeric value is solver- and tolerance-dependent, so the manual does not present a fixed value as a regression target.
+The numeric value is solver- and tolerance-dependent, so the regression target uses solver status and finite recovered values.
 
 The release-gate smoke suite also exports one representative inequality from
 each implemented family—Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and
@@ -171,7 +177,7 @@ FullBox—through the same solver policy, which prefers MOSEK when available.
 
 ## Boundary
 
-These examples do not call a package-owned solver wrapper. They document the
+These examples call YALMIP directly for solver selection and optimization. They document the
 current boundary: GriD-LMIA builds direct, Pólya-elevated,
 [`Putinar box`](/GriD-LMIA/documents/reference/pdlmi/useputinar/), or
 [`SparsePutinar`](/GriD-LMIA/documents/reference/pdlmi/usespput/), or

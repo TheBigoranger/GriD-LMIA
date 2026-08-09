@@ -6,6 +6,7 @@ import {
   updateLastValid,
   type GramFamily,
 } from "../lib/assembly-plans.ts";
+import { TermText } from "./TermText.tsx";
 
 const initial = buildGramAssembly({
   family: "fullbox", residualDegree: [2], order: [1], windowSize: 2, matrixSize: 1,
@@ -80,7 +81,7 @@ export default function GramAssemblyExplorer() {
             <section className="gram-plan-block" key={`${block.generator}-${block.windowStart.join("-")}-${index}`}>
               <h4>{block.generator}, window [{block.windowStart.join(", ")}]</h4>
               <p>Generator powers: alpha [{block.generatorPowers.alpha.join(", ")}], one-minus-alpha [{block.generatorPowers.oneMinusAlpha.join(", ")}]</p>
-              <p>Shape [{block.windowShape.join(" × ")}], PSD dimension {block.psdDimension}</p>
+              <p><TermText>Shape and PSD dimension</TermText>: [{block.windowShape.join(" × ")}], {block.psdDimension}</p>
               <ul>{block.map.map((entry, mapIndex) => <li key={`${entry.target.join("-")}-${mapIndex}`}>
                 <code>[{entry.target.join(", ")}]</code>: {entry.kind}, weight {Number(entry.weight.toPrecision(6))}
               </li>)}</ul>
@@ -88,7 +89,7 @@ export default function GramAssemblyExplorer() {
           ))}
         </div>
       </div>
-      <figcaption>Sliding tensor windows select local basis labels. They do not impose a band on a flattened Gram matrix.</figcaption>
+      <figcaption>Sliding tensor windows select local basis labels. Their support lies in the tensor label lattice and differs from a band on a flattened Gram matrix.</figcaption>
     </figure>
   );
 }

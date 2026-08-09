@@ -20,7 +20,7 @@ metadata and coefficients consistent.
 | `GridInfo` | `Vectors`, tensor-product `Points`, per-axis `Bounds`, and `NumNodes`. |
 | `MatrixSize` | Always-two-dimensional `[rows columns]` payload size. |
 | `Degree` | Direction-wise Bernstein degree stored as a `1 × npar` row. |
-| `LocalValues` | Nested physical-cell tree; each leaf is an ordinary coefficient row or a derivative rate-row table. |
+| `LocalValues` | Nested physical-cell tree. each leaf is an ordinary coefficient row or a derivative rate-row table. |
 | `IsContinuous` | Whether adjacent physical cells represent continuous data. |
 | `ContainsDecision` | Whether payloads contain YALMIP decision dependence. |
 | `NumRateRows` | Exact number of explicit stored rate rows. Ordinary data, including `RateBounds`-only metadata, reports `0`. |
@@ -62,7 +62,7 @@ labels = lbls(obj)
 ```
 
 Returns `ncoeff(obj) × npar(obj)` integer multi-indices. Coordinate `s` runs
-from zero through `Degree(s)`; earlier axes vary more slowly. The row order is the
+from zero through `Degree(s)`. earlier axes vary more slowly. The row order is the
 coefficient-column order returned by `coeffs`.
 
 ```matlab
@@ -103,8 +103,8 @@ Returns `prod(GridInfo.NumNodes - 1)`.
 count = ncoeff(obj)
 ```
 
-Returns `prod(Degree + 1)`, the coefficient columns in each cell. Rate rows do
-not multiply this result.
+Returns `prod(Degree + 1)`, the coefficient columns in each cell. The result is
+independent of the rate-row count.
 
 ### <span id="pdbase-npar"></span>`npar`
 
@@ -181,7 +181,7 @@ summary =
 
 ## Limitations and See Also
 
-The storage tree is not an extra matrix dimension. Use
+The storage tree records cells and coefficient labels independently of the two matrix payload dimensions. Use
 [`evaluate`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-evaluate)
 to reconstruct a point, and use the class-specific
 [`pdmat storage`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/)

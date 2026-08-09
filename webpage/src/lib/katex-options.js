@@ -4,4 +4,7 @@ export const katexOptions = Object.freeze({
   throwOnError: true,
   strict: "error",
   trust: false,
+  macros: {
+    "\\vect": "\\boldsymbol{#1}",
+  },
 });

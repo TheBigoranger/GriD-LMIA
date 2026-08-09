@@ -14,21 +14,21 @@ import RhodiffDiagram from "../../../../../components/RhodiffDiagram.astro";
 </nav>
 
 Two distinct reductions occur in the workflow. Affinity in
-$\boldsymbol\nu$ makes rate-box vertex reduction exact. Bernstein, Pólya, or
-Gram conditions over $\boldsymbol\rho$ are finite sufficient certificates.
+$\vect\nu$ makes rate-box vertex reduction exact. Bernstein, Pólya, or
+Gram conditions over $\vect\rho$ are finite sufficient certificates.
 
 ## Exact Rate-Box Vertex Reduction
 
-For fixed $\boldsymbol\rho$, write the residual as
+For fixed $\vect\rho$, write the residual as
 
 $$
-\mathcal F(\boldsymbol\rho,\boldsymbol\nu)
-=\mathcal F_0(\boldsymbol\rho)
-+\sum_{s=1}^{\ell}\nu_s\mathcal F_s(\boldsymbol\rho).
+\mathcal F(\vect\rho,\vect\nu)
+=\mathcal F_0(\vect\rho)
++\sum_{s=1}^{\ell}\nu_s\mathcal F_s(\vect\rho).
 $$
 
 Because $\mathcal R$ is a box and the residual is affine in
-$\boldsymbol\nu$, requiring the matrix inequality at every vertex of
+$\vect\nu$, requiring the matrix inequality at every vertex of
 $\mathcal R$ is equivalent to requiring it throughout $\mathcal R$. The
 runtime stores one row per distinct vertex, ordered by lower/upper
 Cartesian-product choices with the last axis varying fastest. An axis whose
@@ -44,16 +44,16 @@ formulas suppress it.
 
 ## Cellwise Derivatives
 
-Within physical cell $\mathcal H_{\mathbf c}$, let
-$\boldsymbol\rho=\phi_{\mathbf c}(\boldsymbol\alpha)$ and
-$P^{(\mathbf c)}=P\circ\phi_{\mathbf c}$. Then
+Within physical cell $\mathcal H_{\vect c}$, let
+$\vect\rho=\phi_{\vect c}(\vect\alpha)$ and
+$P^{(\vect c)}=P\circ\phi_{\vect c}$. Then
 
 $$
 \frac{\partial P}{\partial\rho_s}
-(\phi_{\mathbf c}(\boldsymbol\alpha))
-=\frac{1}{h_s^{\mathbf c}}
-\frac{\partial P^{(\mathbf c)}}{\partial\alpha_s}
-(\boldsymbol\alpha).
+(\phi_{\vect c}(\vect\alpha))
+=\frac{1}{h_s^{\vect c}}
+\frac{\partial P^{(\vect c)}}{\partial\alpha_s}
+(\vect\alpha).
 $$
 
 `rhodiff(P, rateBounds)` differentiates cell-local Bernstein data, aligns the
@@ -66,20 +66,20 @@ and output contract.
 
 A continuous piecewise-polynomial `pdvar` shares full face-control handles
 between neighboring cells. Therefore its values agree on each face. The
-normal derivative need not agree:
+normal derivatives may differ:
 
 $$
 \begin{aligned}
-P_{\mathbf c^-}|_{\text{face}}
-&=P_{\mathbf c^+}|_{\text{face}},\\
-\nabla P_{\mathbf c^-}|_{\text{face}}
-&\ne\nabla P_{\mathbf c^+}|_{\text{face}}
+P_{\vect c^-}|_{\text{face}}
+&=P_{\vect c^+}|_{\text{face}},\\
+\nabla P_{\vect c^-}|_{\text{face}}
+&\ne\nabla P_{\vect c^+}|_{\text{face}}
 \quad\text{is allowed}.
 \end{aligned}
 $$
 
-This is $C^0$ piecewise-polynomial storage, not a claim of global $C^1$
-smoothness.
+This is $C^0$ piecewise-polynomial storage with cellwise derivatives that may
+differ across faces.
 
 ## Clarke Interface Coverage
 
@@ -89,25 +89,25 @@ derivative lies in the convex hull of the limiting cell-side derivatives.
 Because the DPD-LMI is affine in those derivatives, imposing the inequality
 for every adjacent cell-side limit covers that convex hull.
 
-This argument closes the interface gap without requiring derivative
-continuity. It applies to the continuous decision $P$, not automatically to
-discontinuous coefficient-backed `pdmat` data.
+This argument closes the interface gap through value continuity and one-sided
+cell derivatives. It applies to the continuous decision $P$. Discontinuous
+coefficient-backed `pdmat` data follow their stored one-sided values.
 
 ## Exact Versus Sufficient
 
 | Step | Logical status | What remains |
 | :--- | :--- | :--- |
-| Rate-box vertices | Exact for affine $\boldsymbol\nu$-dependence | Continuous $\boldsymbol\rho$-domain |
+| Rate-box vertices | Exact for affine $\vect\nu$-dependence | Continuous $\vect\rho$-domain |
 | Cell-side interface checks | Covers Clarke convex hull under continuity and affinity | Positivity on each cell |
 | Direct, Pólya, or Gram certificate | Finite sufficient condition | Possible conservatism at fixed settings |
 
-A failed certificate does not undo exact rate reduction, and it does not prove
-that the original continuous inequality fails.
+Exact rate reduction remains valid after a failed certificate. The certificate
+failure remains inconclusive about the original continuous inequality.
 
 ## Limitations
 
 The exact vertex statement requires affine dependence on
-$\boldsymbol\nu$ over a hyperrectangle. The interface argument requires
+$\vect\nu$ over a hyperrectangle. The interface argument requires
 value continuity and local Lipschitz regularity of the decision function.
 Discontinuous known data must be analyzed cellwise, and nonlinear rate
 dependence would need a different treatment.

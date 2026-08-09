@@ -5,7 +5,7 @@
 \index{installation}\index{path conflict}\index{YALMIP dependency}
 \label{sec:installation}
 
-Start \matlab{} in the checked-out repository and run the root-level installer once. The installer adds only the repository root to the end of the MATLAB path; MATLAB resolves the package's class, package, and private directories from that root. It does not recursively scan the checkout, download dependencies, or edit \code{startup.m}.
+Start \matlab{} in the checked-out repository and run the root-level installer once. The installer adds only the repository root to the end of the MATLAB path. MATLAB resolves the package's class, package, and private directories from that root. Dependency installation and \code{startup.m} configuration remain user-managed operations.
 
 \begin{lstlisting}[style=dpmatlab]
 report = install_pd_lmi();
@@ -21,7 +21,7 @@ report.AddedPaths
 report.Persisted
 \end{lstlisting}
 
-YALMIP must already be on the active MATLAB path.  The installer validates \code{yalmip}, \code{sdpvar}, \code{sdpsettings}, \code{optimize}, and \code{getavailablesolvers}; it then probes available SDP solvers in the fixed commercial-first order MOSEK, COPT, SeDuMi, SDPT3, and LMILAB using a tiny bounded SDP.  A failed probe falls through to the next candidate.  If any precondition, shadow check, solver probe, or path persistence operation fails, the installer restores the original MATLAB path and stops with one of these stable errors:
+YALMIP must already be on the active MATLAB path.  The installer validates \code{yalmip}, \code{sdpvar}, \code{sdpsettings}, \code{optimize}, and \code{getavailablesolvers}. It then probes available SDP solvers in the fixed commercial-first order MOSEK, COPT, SeDuMi, SDPT3, and LMILAB using a tiny bounded SDP.  A failed probe falls through to the next candidate.  If any precondition, shadow check, solver probe, or path persistence operation fails, the installer restores the original MATLAB path and stops with one of these stable errors:
 
 \begin{lstlisting}[style=dpsyntax]
 install_pd_lmi:MissingYALMIP
@@ -31,7 +31,7 @@ install_pd_lmi:PathConflict
 install_pd_lmi:PathSaveFailed
 \end{lstlisting}
 
-Repeated successful calls are idempotent: when the repository root is already present, the installer adds no duplicate path entry and returns an empty \code{AddedPaths}.
+Repeated successful calls are idempotent. When the repository root is already present, the installer preserves the single path entry and returns an empty \code{AddedPaths}.
 
 \section{Validate the Installation}
 \index{validation}\index{solver probe}
@@ -43,7 +43,7 @@ After the installer has selected and recorded a working solver, run the current 
 results = tests.run_all();
 \end{lstlisting}
 
-The entry point covers installer rollback and persistence behavior, helper utilities, \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}. YALMIP-backed tests and the solver smoke tests use the same automatic commercial-first solver policy as the installer; their diagnostics identify the actual solver used.
+The entry point covers installer rollback and persistence behavior, helper utilities, \code{pdbase}, \code{pdmat}, \code{pdvar}, and \code{pdlmi}. YALMIP-backed tests and the solver smoke tests use the same automatic commercial-first solver policy as the installer. Their diagnostics identify the actual solver used.
 
 \section{Run a Minimal Solver Example}
 \label{sec:quick-start}
@@ -161,5 +161,98 @@ LMIs &
   \hyperref[sec:pdlmi-full-box]{\code{useFullBox}},
 \hyperref[sec:pdlmi-toyalmip]{\code{toYalmip}},
 \hyperref[sec:examples]{solver examples} \\
+\bottomrule
+\end{tabularx}
+
+\section{Choose an API from a Task}
+\label{sec:task-api-lookup}
+
+The table below begins with a reader goal and points to the smallest public entry that owns it. The class chapters then give the complete syntax, validation boundary, executable example, and related mathematics.
+
+\begin{tabularx}{\textwidth}{@{}p{0.31\textwidth}p{0.27\textwidth}Y@{}}
+\toprule
+Goal & Start with & Continue with \\
+\midrule
+Represent known parameter data & \hyperref[sec:pdmat-construction]{\code{pdmat}} & \hyperref[sec:pdmat-evaluate]{\code{evaluate}}, \hyperref[sec:pdmat-table]{\code{bernTable}}, and \hyperref[sec:pdmat-plot]{\code{plot}} \\
+Create a polynomial decision & \hyperref[sec:pdvar-construction]{\code{pdvar}} & \hyperref[sec:pdvar-algebra]{affine algebra} and \hyperref[sec:pdvar-matrix-ops]{matrix operations} \\
+Add scheduling-rate terms & \hyperref[sec:pdvar-rhodiff]{\code{rhodiff}} & \hyperref[sec:bernstein-differentiation]{differentiation} and \hyperref[sec:bernstein-rate-vertex-storage]{rate rows} \\
+Build a finite certificate & \hyperref[sec:pdlmi-construction]{comparison operators} & \hyperref[sec:pdlmi-direct]{Direct} or an \hyperref[sec:pdlmi-lookup]{opt-in selector} \\
+Export solver constraints & \hyperref[sec:pdlmi-toyalmip]{\code{toYalmip}} & \hyperref[sec:pdlmi-solver-use]{solver-status checks} \\
+Inspect cell-local storage & \hyperref[sec:pdbase-inspection]{\code{cells}, \code{lbls}, \code{coeffs}} & \hyperref[sec:pdbase-fields]{read-only metadata} \\
+Extend package internals & \hyperref[sec:helpers]{\code{helper.*}} & \hyperref[app:bernstein-math]{exact Bernstein operations} \\
+\bottomrule
+\end{tabularx}
+
+\section{Find a Representative Example}
+\label{sec:example-map}
+
+Each row identifies the object type, parameter dimension, certificate family, and result that the example demonstrates. The reference chapters contain smaller per-function examples, while \cref{sec:examples} develops complete solver-facing workflows.
+
+\begin{tabularx}{\textwidth}{@{}p{0.23\textwidth}p{0.16\textwidth}p{0.22\textwidth}Y@{}}
+\toprule
+Example & Object and dimension & Certificate & Demonstrated result \\
+\midrule
+Quick start in \cref{sec:quick-start} & scalar \code{pdmat} and matrix \code{pdvar}, one parameter & Direct and four Gram alternatives & coefficient inspection, selected state, and exported constraints \\
+\hyperref[sec:pdmat-construction]{Known-data construction} & scalar \code{pdmat}, two parameters & certificate-free & anisotropic degree and a selected-cell expression \\
+\hyperref[sec:pdvar-rhodiff]{Rate differentiation} & matrix \code{pdvar}, one and two parameters & certificate-free & derivative degree, exact re-elevation, and rate-row order \\
+\hyperref[sec:full-box-example]{Certificate selection} & scalar \code{pdvar}, one and two parameters & P\'olya, Putinar, SparsePutinar, SparseFullBox, FullBox & canonical selector state and deterministic constraint counts \\
+\hyperref[sec:parameter-dependent-lyapunov-smoke]{Lyapunov model} & matrix \code{pdvar}, one parameter & Direct & solver-status validation and recovered \code{pdmat} coefficients \\
+\hyperref[sec:solver-example]{Rate-dependent block model} & matrix and scalar \code{pdvar}, one parameter & Direct with two rate rows & assembly counts, finite solve, and recovered objective \\
+\bottomrule
+\end{tabularx}
+
+\section{Locate Diagnostics and Boundaries}
+\label{sec:diagnostic-lookup}
+
+Stable error identifiers preserve the owning API in their prefix. This index routes each common failure class to the detailed explanation beside the call that raises it.
+
+\begin{tabularx}{\textwidth}{@{}p{0.29\textwidth}p{0.26\textwidth}Y@{}}
+\toprule
+Diagnostic family & Typical identifier & Owning explanation \\
+\midrule
+Installation and solver probe & \codeerr{install_pd_lmi}{MissingYALMIP}, \codeerr{install_pd_lmi}{NoWorkingSDPSolver} & \cref{sec:installation} \\
+Grid, degree, storage, and rate metadata & \codeerr{pdbase}{InvalidGrid}, \codeerr{pdbase}{InvalidDegree}, \codeerr{pdbase}{InvalidRateBounds} & \cref{sec:pdbase-constructor} \\
+Known-data source and coefficient evidence & \codeerr{pdmat}{InvalidSource}, \codeerr{pdmat}{FunctionOnlyAlgebra} & \cref{sec:pdmat-construction,sec:pdmat-limits} \\
+Decision-affinity and multiplication & \codeerr{pdvar}{InvalidAddition}, \codeerr{pdvar}{InvalidMultiplication} & \cref{sec:pdvar-algebra,sec:pdvar-limits} \\
+Matrix indexing and assignment & \codeerr{pdmat}{InvalidSubscript}, \codeerr{pdvar}{InvalidAssignment} & \cref{sec:pdmat-indexing,sec:pdvar-indexing} \\
+Certificate order and selector state & \codeerr{pdlmi}{InvalidOrder}, \codeerr{pdlmi}{InvalidCliqueSize}, \codeerr{pdlmi}{InvalidBandWidth} & \cref{sec:pdlmi-polya,sec:pdlmi-putinar,sec:pdlmi-sparse-putinar,sec:pdlmi-sparse-full-box,sec:pdlmi-full-box} \\
+Solver result interpretation & \code{sol.problem}, \code{sol.info} & \cref{sec:pdlmi-solver-use,sec:solver-example} \\
+\bottomrule
+\end{tabularx}
+
+\section{Compare Object Capabilities}
+\label{sec:capability-matrix}
+
+This matrix distinguishes accepted operands, decision dependence, rate-row behavior, certificate ownership, and returned objects before the detailed reference entries introduce their local cases.
+
+\begin{tabularx}{\textwidth}{@{}p{0.13\textwidth}p{0.22\textwidth}p{0.16\textwidth}p{0.16\textwidth}Y@{}}
+\toprule
+Owner & Accepted data or operands & Decision dependence & Rate rows & Main returns \\
+\midrule
+\code{pdbase} & normalized coefficient storage & numeric or affine payload metadata & preserved or constructed by \code{rhodiff} & backend value objects and inspection data \\
+\code{pdmat} & function, global grid, nested local data, numeric and compatible \code{pdmat} operands & known data & preserved through compatible algebra & \code{pdmat}, numeric matrices, tables, and plots \\
+\code{pdvar} & decision construction, numeric constants, affine \code{sdpvar}, coefficient-backed \code{pdmat} & affine decisions & ordinary rows or derivative vertex rows & \code{pdvar}, \code{pdlmi}, symbolic tables, and valued \code{pdmat} \\
+\code{pdlmi} & compatible residual and relation plus one certificate selector & affine residual required & each row receives an independent certificate & value-semantic wrapper and YALMIP constraints \\
+\code{helper.*} & normalized developer data for the named utility & utility-specific & enumeration and storage support & numeric plans, normalized metadata, or nested data \\
+\bottomrule
+\end{tabularx}
+
+\section{Choose a Modeling or Certificate Control}
+\label{sec:control-comparison}
+
+The controls below act at different stages. Their separation helps a reader choose the parameter that matches the intended change.
+
+\begin{tabularx}{\textwidth}{@{}p{0.22\textwidth}p{0.31\textwidth}Y@{}}
+\toprule
+Control & Changes & Preserves \\
+\midrule
+Grid refinement & physical-cell partition and available piecewise decision freedom & represented known data under exact subdivision and the physical parameter box \\
+Modeled Bernstein degree & polynomial decision space and local coefficient count & chosen physical grid \\
+Degree elevation & coefficient representation and target label count & represented polynomial and existing decisions \\
+P\'olya increment & elevated coefficient test used by the selected certificate & original residual, decision space, physical cells, and rate rows \\
+Absolute Gram order & Gram basis sizes, matched target degree, and block dimensions & original residual and certificate family \\
+SparsePutinar clique size & overlapping Putinar tensor-window basis blocks & active Putinar terms and exact target-coefficient identities \\
+SparseFullBox window size & overlapping FullBox tensor-window basis blocks & active FullBox masks and exact target-coefficient identities \\
+Rate-vertex reduction & number of distinct affine rate rows after equal-bound directions are collapsed & complete rate-box condition through exact convex reduction \\
 \bottomrule
 \end{tabularx}

@@ -3,6 +3,10 @@ title: pdmat
 description: Known finite real matrix data on a parameter grid.
 ---
 
+import ApiInventory from "../../../../../components/ApiInventory.astro";
+
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference-index/">Reference</a><span>/</span><span>pdmat</span></nav>
+
 `pdmat` represents known finite real matrix data on a parameter grid. Use it
 for exact function-backed data, coefficient-backed Bernstein data, optional
 rate-box metadata and explicit rate rows, differentiation, plotting
@@ -21,7 +25,7 @@ diagnostics, known-data certificates, and coefficient-wise matrix operations.
 | Reference | Task |
 | :--- | :--- |
 | [`Storage`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) | Traverse known coefficient evidence and inspect its cell-local labels and counts. |
-| [`elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) | Exactly elevate the Bernstein representation without changing the represented function. |
+| [`elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) | Exactly elevate the Bernstein representation while preserving the represented function. |
 | [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) | Evaluate known data at one parameter point. |
 | [`rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) | Differentiate coefficient-backed data into numeric rate-vertex rows. |
 | [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/) | Sample one- or two-dimensional diagnostic plots. |
@@ -48,14 +52,14 @@ and behavior.
 
 ## Current Boundaries
 
-- Function-only `pdmat` objects without explicit Bernstein evidence evaluate
-  exactly but do not enter coefficient algebra, differentiation, tables, or
-  inequalities.
+- Function-only `pdmat` objects that omit explicit Bernstein evidence evaluate
+  exactly and remain in function-evaluation workflows. Coefficient-backed
+  objects support coefficient algebra, differentiation, tables, and inequalities.
 - Ordinary one-row operands broadcast over explicit rate rows. Two rate-row
   operands require matching grids and rate boxes. Multiplication supports
   rate rows on at most one side.
-- `pdmat` stores known numeric data only; decision variables belong to [`pdvar`](/GriD-LMIA/documents/reference/pdvar/).
-- Plotting and `bernTable` output are diagnostics, not solver-facing behavior.
+- `pdmat` stores known numeric data only. Decision variables belong to [`pdvar`](/GriD-LMIA/documents/reference/pdvar/).
+- Plotting and `bernTable` output are diagnostics. Solver-facing behavior begins with comparison assembly.
 
 ## See Also
 
@@ -67,3 +71,5 @@ and behavior.
 [`plot`](/GriD-LMIA/documents/reference/pdmat/plot/) ·
 [`bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/) ·
 [`comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/)
+
+<ApiInventory owner="pdmat" />

@@ -19,17 +19,17 @@ Both methods use the sign-normalized positive target
 
 $$
 \begin{aligned}
-S^{(\mathbf c)}(\boldsymbol\alpha)
-&=-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha),\\
-S^{(\mathbf c)}(\boldsymbol\alpha)
-&=\sum_{\mathbf i}C^{(\mathbf c)}[\mathbf i]
-B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha),\\
-C^{(\mathbf c)}&=-\mathcal C^{(\mathbf c)}.
+S^{(\vect c)}(\vect\alpha)
+&=-\mathcal F^{(\vect c)}(\vect\alpha),\\
+S^{(\vect c)}(\vect\alpha)
+&=\sum_{\vect i}C^{(\vect c)}[\vect i]
+B_{\vect i}^{\vect M}(\vect\alpha),\\
+C^{(\vect c)}&=-\mathcal C^{(\vect c)}.
 \end{aligned}
 $$
 
 The stored rate rows have already been stacked, so the certificate notation
-does not carry a rate-vertex index.
+uses the stored-row index directly.
 
 ## Direct
 
@@ -37,25 +37,25 @@ Direct enforces
 
 $$
 \begin{aligned}
-C^{(\mathbf c)}[\mathbf i]&\succeq0,\\
+C^{(\vect c)}[\vect i]&\succeq0,\\
 &\text{for every cell and label}.
 \end{aligned}
 $$
 
 Nonnegative Bernstein basis functions sum to one, so this condition implies
-$S^{(\mathbf c)}(\boldsymbol\alpha)\succeq0$ on the unit cell. It is the
+$S^{(\vect c)}(\vect\alpha)\succeq0$ on the unit cell. It is the
 default `pdlmi` state.
 The theoretical target is strict,
-$S^{(\mathbf c)}(\boldsymbol\alpha)\succ0$. The software constraints are
+$S^{(\vect c)}(\vect\alpha)\succ0$. The software constraints are
 non-strict and require an explicit
-$S^{(\mathbf c)}-\varepsilon I\succeq0$ margin when strictness is needed.
+$S^{(\vect c)}-\varepsilon I\succeq0$ margin when strictness is needed.
 
 ```matlab
 L = residual <= 0;
 constraints = L.toYalmip();
 ```
 
-No Gram matrices, margin, or solver call are added.
+This path uses coefficient tests. The caller writes every margin and solver call.
 
 ## Pólya Elevation
 
@@ -66,10 +66,10 @@ $$
 [\alpha_s+(1-\alpha_s)]^{d_s}=1.
 $$
 
-This produces exact degree elevation from $\mathbf M$ to
-$\mathbf M+\mathbf d$. Pólya then applies
+This produces exact degree elevation from $\vect M$ to
+$\vect M+\vect d$. Pólya then applies
 the same coefficient test to the elevated matrices
-$\tilde C^{(\mathbf c)}[\mathbf i]$.
+$\tilde C^{(\vect c)}[\vect i]$.
 
 ```matlab
 selected = L.usePolya(d);
@@ -77,33 +77,37 @@ constraints = selected.toYalmip();
 ```
 
 The residual polynomial is unchanged. Reapplying a selector rebuilds from the
-stored original residual $\mathcal F$. Certificate choices do not compound.
+stored original residual $\mathcal F$. Each certificate choice replaces the previous state.
 
 ## Ordered Preallocation And Assembly
 
 Direct and Pólya first determine the target tensor degree and the exact number of coefficient constraints. The implementation preallocates that many cells, then fills them in physical-cell, rate-row, and local-label order. Pólya builds one numeric elevation plan for each compatible degree pair and applies it before the sign constraints are stored. This removes repeated structural discovery while retaining the established order seen by `toYalmip`.
 
-The optimized path preserves represented functions, existing YALMIP variables, certificate families, constraint order, PSD block dimensions, and cone partition, apart from ordinary floating-point summation differences. Direct and Pólya create no Gram variables, so their reusable data consist only of numeric label and elevation maps.
+The optimized path preserves represented functions, existing YALMIP variables,
+certificate families, constraint order, PSD block dimensions, and cone
+partition, apart from ordinary floating-point summation differences. Direct
+and Pólya use coefficient tests, so their reusable data consist of numeric
+label and elevation maps.
 
 ## When To Use Each
 
 Start with Direct. If a coarse representation has an unfavorable coefficient
 even though the target appears positive, try a modest direction-wise
-$\mathbf d$, refine a sensitive grid axis, or enlarge decision degree
-$\mathbf m$. These are separate operations and
+$\vect d$, refine a sensitive grid axis, or enlarge decision degree
+$\vect m$. These are separate operations and
 should be recorded separately.
 
 ## Failure Interpretation
 
 Failure at one coefficient degree or Pólya increment is inconclusive for the
-continuous inequality. Likewise, `diagnostics.problem ~= 0` supplies no valid
-objective and does not prove infeasibility.
+continuous inequality. Likewise, `diagnostics.problem ~= 0` makes the objective
+unavailable and remains inconclusive about infeasibility.
 
 ## Limitations
 
 Both methods remain sufficient coefficient tests. Pólya can increase the number
-of coefficient constraints quickly with dimension, and the package does not
-search increments adaptively. Equality assembly is direct-only.
+of coefficient constraints quickly with dimension. The caller selects the
+increment. Equality assembly is direct-only.
 
 ## Further Reading
 

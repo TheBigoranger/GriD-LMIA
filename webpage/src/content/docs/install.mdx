@@ -19,8 +19,8 @@ The online and printable manuals describe documentation version
 | Version history | [Open version history](/GriD-LMIA/version-history/) |
 | Previous v1.0.0 release | [Open the completed 1.0 line](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.0.0) |
 
-The project does not publish the PDF manual as a separately named release
-asset. The manual link is the synchronized {versionInfo.current} site
+The synchronized {versionInfo.current} site publishes the PDF manual at its
+stable manual route. The manual link is the current site
 artifact, while the
 Release link targets the immutable v1.3.0 package snapshot.
 
@@ -28,8 +28,8 @@ Release link targets the immutable v1.3.0 package snapshot.
 
 - MATLAB.
 - YALMIP already on the current MATLAB path. The installer requires its `yalmip`,
-  `sdpvar`, `sdpsettings`, `optimize`, and `getavailablesolvers` entry points;
-  it does not download YALMIP or scan disks for it.
+  `sdpvar`, `sdpsettings`, `optimize`, and `getavailablesolvers` entry points.
+  The caller installs YALMIP and exposes it on the MATLAB path.
 - A working SDP solver exposed by YALMIP. The installer probes MOSEK, COPT,
   SeDuMi, SDPT3, then LMILAB, accepting the first candidate that solves a
   small bounded SDP successfully.
@@ -41,25 +41,25 @@ report = install_pd_lmi();
 ```
 
 Run the command from the package root. It adds only that repository root at
-the end of the MATLAB path. It deliberately does not call `genpath` or add
-`doc`, `webpage`, test, metadata, or generated directories recursively.
-Exact-path idempotence means a second call leaves the root in place without
-duplicating it. The installer checks for class shadowing before saving the
+the end of the MATLAB path. It adds the repository root directly and keeps
+`doc`, `webpage`, test, metadata, and generated directories as ordinary
+subdirectories. Exact-path idempotence means a second call keeps one root
+entry. The installer checks for class shadowing before saving the
 MATLAB path, so a failure restores the previous path instead of leaving a
 partial installation.
 
 `report` contains `PackageRoot`, `YALMIPRoot`, the working `Solver`, the
 `AddedPaths`, and whether the path was `Persisted`. Calling `install_pd_lmi()`
-without an output performs the same idempotent installation.
+with an omitted output performs the same idempotent installation.
 
 ## Failure Behavior
 
-The installer stops with a stable error identifier rather than guessing a
+The installer stops with a stable error identifier for an unsupported
 configuration. Typical failures are `install_pd_lmi:MissingYALMIP`,
 `install_pd_lmi:IncompleteYALMIP`, `install_pd_lmi:NoWorkingSDPSolver`,
 `install_pd_lmi:PathConflict`, and `install_pd_lmi:PathSaveFailed`. Resolve
 the reported dependency, solver, or path conflict and run the one command
-again; do not add package paths manually or edit `startup.m` for this setup.
+again. The installer owns the package-path setup and persistence step.
 
 ## Verify
 

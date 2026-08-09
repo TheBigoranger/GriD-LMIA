@@ -81,7 +81,7 @@ export default function CertificateFlow({
           <a href={option.href}>Open the {option.label} reference →</a>
         </section>
       </div>
-      <figcaption>Select a certificate to reveal one representative formula and selector; the linked reference contains the complete construction.</figcaption>
+      <figcaption>Select a certificate to reveal one representative formula and selector. The linked reference contains the complete construction.</figcaption>
     </figure>
   );
 }

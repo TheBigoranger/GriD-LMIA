@@ -1,43 +1,61 @@
 ---
 title: Documents
-description: Reference-first entry point for GriD-LMIA classes, methods, and mathematical background.
+description: Learn and Reference entry point for GriD-LMIA mathematics, workflows, APIs, examples, and diagnostics.
 ---
 
 import ReferenceCategoryHub from "../../../components/ReferenceCategoryHub.astro";
 
-Use this page as the lookup entry for current GriD-LMIA behavior. The reference
-pages document implemented code only, including Direct, opt-in Pólya,
-fixed-order Putinar, tensor-window SparsePutinar, tensor-window SparseFullBox, and fixed-order FullBox
-assembly. Supported inputs and validation errors appear beside the constructor
-or method they affect.
+Choose a reading path that matches the current task. **Learn** develops the
+mathematics and workflow in dependency order. **Reference** provides direct
+API, option, example, and diagnostic lookup for implemented behavior.
 
-Start mathematical reading with the
-[global notation dictionary](/GriD-LMIA/documents/math/notation/).
+## Learn
 
-PD-LMI means **parameter-dependent LMI**. The package represents continuous piecewise-polynomial matrix functions on physical grid cells in a cell-local tensor-product Bernstein basis. `pdvar` shares complete face values between adjacent cells; differentiation remains cell-local, so the representation is not a B-spline and does not assert global differentiability. Use **DPD-LMI** only for a differentiable PD-LMI with explicit derivative and rate terms.
+Begin with the [notation dictionary](/GriD-LMIA/documents/math/notation/), then
+follow modeling, tensor grids, Bernstein coordinates and algebra, rate
+vertices, and finite certificates. Each guide defines its prerequisites and
+connects the mathematics to a verified package operation.
 
-## Documentation v1.3.0 Supported Scope
+The package represents continuous piecewise-polynomial matrix functions on
+physical grid cells in a cell-local tensor-product Bernstein basis. `pdvar`
+shares complete face values between adjacent cells. Differentiation remains
+cell-local, which gives a continuous piecewise-polynomial representation with
+cellwise derivatives. A DPD-LMI contains explicit derivative and rate terms.
 
-Version 1.3.0 documents the implemented package workflow after shared matrix
+## Documentation v1.3.2 Supported Scope
+
+Version 1.3.2 documents the implemented package workflow after shared matrix
 protocols, unary transformations, and reductions were centralized in
 `pdbase`. The inherited operations remain complete public `pdmat` and `pdvar`
 interfaces, with class-specific examples and validation. The supported
 surface also includes function-backed and coefficient-backed `pdmat` known
-data; degree-zero or continuous arbitrary-degree `pdvar` decisions;
-discontinuous rate-vertex data produced by `rhodiff`; Direct `pdlmi`
-constraints; opt-in Pólya degree increments; fixed-order Putinar,
+data, degree-zero or continuous arbitrary-degree `pdvar` decisions,
+discontinuous rate-vertex data produced by `rhodiff`, Direct `pdlmi`
+constraints, opt-in Pólya degree increments, and fixed-order Putinar,
 SparsePutinar, SparseFullBox, and FullBox Bernstein–Gram certificates. The
 public surface also includes thirteen shared `+helper` functions.
 
-The package remains intentionally bounded to tensor-product box grids and affine decision expressions. Products with decision dependence on both sides, including decision-by-decision and decision-by-rate products, are rejected. Equality assembly is direct-only. Certificate failure does not prove the original continuum inequality infeasible, no assembly mode inserts a positivity margin, and YALMIP continues to own objectives, solver choice, optimization, and diagnostics. General-domain or general-generator SOS hierarchies are mathematical context rather than implemented APIs.
+The supported domain uses tensor-product box grids and affine decision
+expressions. Products accept decision dependence on one side. Equality assembly
+uses direct coefficient identities. A failed finite certificate remains
+inconclusive for the original continuum inequality. Every requested positivity
+margin appears explicitly in the model. YALMIP owns objectives, solver choice,
+optimization, and diagnostics. General-domain and general-generator SOS
+hierarchies provide mathematical context beyond the implemented API.
 
-Start with [Install And Download](/GriD-LMIA/install/), verify the checkout with `tests.run_all()`, and use the generated lookup for the accepted forms, returned shapes, validation rules, and limitations of all 181 indexed entries.
+Start with [Install And Download](/GriD-LMIA/install/), verify the checkout with
+`tests.run_all()`, and use the generated lookup for accepted forms, returned
+shapes, validation rules, and supported scope across all 192 indexed records.
 
-## Reference Index
+## Reference
 
 <ReferenceCategoryHub />
 
-The generated [categorized lookup](/GriD-LMIA/documents/reference-index/) uses the same source inventory and gives every public class, method, backend utility, and shared helper a direct route or stable anchor.
+The generated [categorized lookup](/GriD-LMIA/documents/reference-index/) uses
+the accepted source inventory and gives every public constructor, method,
+overload, operator, read-only property, shared helper, and installer a direct
+route or stable anchor. The [task, example, and diagnostic lookup](/GriD-LMIA/documents/reader-aids/)
+supports workflow-oriented search.
 
 ## Mathematical Guide
 

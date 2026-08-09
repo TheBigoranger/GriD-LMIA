@@ -14,7 +14,7 @@ import ConstraintAssemblyDiagram from "../../../../../components/ConstraintAssem
 </nav>
 
 Any strict positivity margin must already be present in the residual before
-export; see the
+export. See the
 [theory/software distinction](/GriD-LMIA/documents/math/notation/#strict-theory-and-software-constraints).
 
 ## Purpose
@@ -62,18 +62,18 @@ PSD Gram condition and exact coefficient identity across those cells and rows.
 
 The known-data logical test uses the wrapper’s single global inequality
 classification and inclusive absolute tolerance `1e-10`. Semidefinite mode
-symmetrizes each coefficient matrix and tests its eigenvalues; only
+symmetrizes each coefficient matrix and tests its eigenvalues. Only
 entry-wise mode tests individual scalar entries. A false result warns with
 `pdlmi:InconclusiveCertificate` because failure of this sufficient coefficient
-test does not prove a continuous violation or matrix indefiniteness.
+test remains inconclusive about a continuous violation or matrix indefiniteness.
 
 Known-data Putinar, SparsePutinar, SparseFullBox, and FullBox wrappers still export YALMIP
-constraints and may contain auxiliary Gram variables. `toYalmip` does not
-choose a solver, create an objective, apply relaxation margins, or run
+constraints and may contain auxiliary Gram variables. The caller chooses a
+solver, creates an objective, applies every relaxation margin, and runs
 `optimize`.
 
 For equality, direct coefficient groups are concatenated in MATLAB
-column-major entry order. Proven zero groups are omitted; consequently
+column-major entry order. Proven zero groups are omitted. Consequently
 `toYalmip(P == P)` returns `[]`.
 
 <ConstraintAssemblyDiagram />
@@ -139,7 +139,7 @@ F =
      []
 ```
 
-`toYalmip` does not select solvers, add objectives, apply relaxation margins, or run `optimize`.
+`toYalmip` exports stored constraints for the caller's solver, objective, margins, and `optimize` call.
 
 ### Known-data logical export
 

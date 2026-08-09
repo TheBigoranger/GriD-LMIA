@@ -7,6 +7,7 @@ import CertificateChooser from "../../../../components/CertificateChooser.astro"
 import CertificateFlow from "../../../../components/CertificateFlow.astro";
 import ConstraintAssemblyDiagram from "../../../../components/ConstraintAssemblyDiagram.astro";
 import CallGraph from "../../../../components/CallGraph.astro";
+import Term from "../../../../components/Term.astro";
 
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
@@ -18,18 +19,20 @@ import CallGraph from "../../../../components/CallGraph.astro";
 
 `pdlmi` exposes exactly six certificate states: **Direct**, **Pólya**,
 **Putinar**, **SparsePutinar**, **SparseFullBox**, and **FullBox**. One-parameter
-Markov–Lukács is the interval form used by Putinar and FullBox, not a sixth
-software state.
+Markov–Lukács supplies the one-parameter interval form inside the Putinar and
+FullBox software states.
+
+A <Term id="psd" definition /> matrix has nonnegative quadratic forms. A <Term id="sos" definition /> representation writes a polynomial target through squared polynomial factors or an equivalent Gram form. The coefficient identities and PSD Gram constraints form a finite <Term id="sdp" definition /> for YALMIP.
 
 ## Certificate Map
 
 <CertificateFlow />
 
 All six paths start from the same cell-local original residual
-$\mathcal F^{(\mathbf c)}$. The comparison relation determines
-$S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$ and
-$C^{(\mathbf c)}=-\mathcal C^{(\mathbf c)}$.
-Alternative selectors rebuild from $\mathcal F$; they do not compound.
+$\mathcal F^{(\vect c)}$. The comparison relation determines
+$S^{(\vect c)}=-\mathcal F^{(\vect c)}$ and
+$C^{(\vect c)}=-\mathcal C^{(\vect c)}$.
+Alternative selectors rebuild from $\mathcal F$ and replace the previous state.
 
 <CertificateChooser />
 
@@ -37,7 +40,7 @@ Alternative selectors rebuild from $\mathcal F$; they do not compound.
 
 Each `use*` selector validates its order or window, rebuilds the `pdlmi` from
 the original residual, and stores coefficient or Gram constraints. `toYalmip`
-returns those stored constraints without rebuilding the certificate.
+returns and preserves those stored constraints.
 
 <CallGraph family="certificates" caption="Certificate selection and finite-constraint assembly." links={[
   { href: "/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/", label: "Direct and Pólya mathematics" },
@@ -60,13 +63,13 @@ selects a solver nor calls `optimize`.
 ## A Tiny Example: Positive Polynomial, Failed Direct Test
 
 A polynomial may be positive on $[0,1]$ even when one Bernstein coefficient
-is negative. Failure of Direct therefore does not prove negativity. Pólya or a
-Gram certificate may certify the same target without changing the underlying
+is negative. Failure of Direct therefore remains inconclusive about negativity. Pólya or a
+Gram certificate may certify the same target while preserving the underlying
 continuous inequality.
 
 ## Full-Space SOS
 
-Full-space SOS is useful background but is not a selectable `pdlmi` state.
+Full-space SOS is useful background. The selectable `pdlmi` states use box-specific certificates.
 The implemented Gram paths use interval or box generators and exact Bernstein
 coefficient matching on $[0,1]^\ell$.
 
@@ -75,15 +78,16 @@ coefficient matching on $[0,1]^\ell$.
 Direct requires
 
 $$
-C^{(\mathbf c)}[\mathbf i]\succeq0
+C^{(\vect c)}[\vect i]\succeq0
 $$
 
 for every physical cell, stored rate row, and local label. It is the default,
-has no Gram variables, and inserts no hidden positivity margin.
+uses coefficient tests, and applies exactly the positivity margin written by
+the modeler.
 
 ## <span id="polya-type-coefficient-relaxation"></span>Pólya-Type Coefficient Relaxation
 
-Pólya applies exact degree elevation by direction-wise increment $\mathbf d$,
+Pólya applies exact degree elevation by direction-wise increment $\vect d$,
 then runs the Direct
 test on the elevated coefficients. Read
 [Direct And Pólya](/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/)
@@ -91,11 +95,11 @@ for the formula and selection boundary.
 
 ## Putinar Quadratic Modules
 
-For one parameter, write $\mathbf M=(M_1)$ and $\mathbf r=(r_1)$; the minimum
+For one parameter, write $\vect M=(M_1)$ and $\vect r=(r_1)$. the minimum
 component is $r_1=\lfloor M_1/2\rfloor$. For two or more parameters
 $(\ell\ge2)$, Putinar uses an unweighted Gram/SOS term plus the singleton
 generators $g_s=\alpha_s(1-\alpha_s)$, with componentwise minimum
-$\mathbf r=\lceil\mathbf M/2\rceil$.
+$\vect r=\lceil\vect M/2\rceil$.
 
 ### Implemented Putinar selector
 
@@ -112,7 +116,7 @@ Markov–Lukács interval form. See
 
 SparsePutinar keeps the Putinar parity or singleton-generator terms, but it
 splits each dense Bernstein Gram basis into overlapping tensor windows. For a
-Gram degree vector $\mathbf d$ and `CliqueSize` value $b$, the side length is
+Gram degree vector $\vect d$ and `CliqueSize` value $b$, the side length is
 $w_s=\min(b,d_s+1)$. Each window has an independent PSD block, while every
 target coefficient identity accumulates all overlapping contributions.
 
@@ -142,10 +146,10 @@ The software state is `SparseFullBox`. Each dense tensor Bernstein basis is repl
 
 <span id="worked-full-box-example-two-parameters-degree-three"></span>
 
-For a two-parameter target with assembled degree $\mathbf M=(3,1)$, FullBox introduces
+For a two-parameter target with assembled degree $\vect M=(3,1)$, FullBox introduces
 Gram terms for the empty subset, both singleton generator subsets, and their
 two-axis product. Each term is mapped into the Bernstein basis and the sum is
-matched exactly to every $C^{(\mathbf c)}[\mathbf i]$. SparseFullBox retains
+matched exactly to every $C^{(\vect c)}[\vect i]$. SparseFullBox retains
 those term families and exact identities but replaces each dense basis by
 overlapping tensor-window blocks of side length $w$.
 The detailed basis-order boundary is documented in
@@ -157,23 +161,25 @@ Even and odd assembled degrees use different endpoint weights. The package
 implements those parity forms through Putinar, SparsePutinar, SparseFullBox, and FullBox
 selectors in one parameter.
 
-## Five Operations That Are Not Interchangeable
+<span id="five-operations-that-are-not-interchangeable"></span>
+
+## Five Distinct Operations
 
 - Refine $\mathcal G_s$ to change physical cells.
-- Raise decision degree $\mathbf m$ to enlarge the decision family.
-- Raise Pólya increment $\mathbf d$ to elevate the representation.
-- Raise absolute Gram order $\mathbf r$ to change a Gram certificate.
+- Raise decision degree $\vect m$ to enlarge the decision family.
+- Raise Pólya increment $\vect d$ to elevate the representation.
+- Raise absolute Gram order $\vect r$ to change a Gram certificate.
 - Change SparsePutinar `CliqueSize` value $b$ or SparseFullBox window side $w$ to
   change the sparse Gram support.
 
-Assembled residual degree $\mathbf M$ is determined after algebra and alignment; it
-is not another user-selected certificate knob.
+Assembled residual degree $\vect M$ is determined after algebra and alignment. it
+is derived from the assembled residual and stays independent of the user-selected certificate controls.
 
 ## Exact Software Boundary
 
-The package implements six finite states only. It does not implement a
-general-domain Putinar parser, an adaptive sparse-pattern search, or a
-solver-owned hierarchy loop. A failed fixed $\mathbf d$, $\mathbf r$, or $w$, a nonzero
+The package implements six finite states for tensor-product boxes. A
+general-domain Putinar parser and adaptive sparse-pattern search lie outside the
+solver-owned hierarchy loop. A failed fixed $\vect d$, $\vect r$, or $w$, a nonzero
 `diagnostics.problem`, or an aborted solve is inconclusive for the original
 continuous feasibility question.
 
@@ -181,9 +187,9 @@ continuous feasibility question.
 
 Every certificate is sufficient over a tensor-product cell. Gram blocks can
 grow quickly with dimension and order. Equality assembly is direct-only, and
-no certificate adds a strict margin automatically.
-The mathematical target is $S^{(\mathbf c)}\succ0$; encode strictness
-explicitly as $S^{(\mathbf c)}-\varepsilon I\succeq0$ before exporting the
+every strict margin is written explicitly by the modeler.
+The mathematical target is $S^{(\vect c)}\succ0$. encode strictness
+explicitly as $S^{(\vect c)}-\varepsilon I\succeq0$ before exporting the
 non-strict software constraints.
 
 ## Further Reading

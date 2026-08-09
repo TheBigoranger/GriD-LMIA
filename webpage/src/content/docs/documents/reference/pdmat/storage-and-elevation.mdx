@@ -9,7 +9,7 @@ import CellStorageDiagram from "../../../../../components/CellStorageDiagram.ast
 
 The implementation is inherited from `pdbase`, but these methods are complete
 public `pdmat` behavior. They expose known numeric coefficient evidence and
-return `pdmat` values rather than generic backend objects.
+return `pdmat` values in place of generic backend objects.
 
 The physical grid, shared boundary handles, global coefficient controls, and
 cell-local `LocalValues` leaves are related as follows:
@@ -19,11 +19,11 @@ cell-local `LocalValues` leaves are related as follows:
 Read the figure from geometry to coefficient evidence:
 
 1. [`cells(A)`](#pdmat-cells) enumerates the physical-cell address
-   $\mathbf c$ shown by the grid.
+   $\vect c$ shown by the grid.
 2. [`coeffs(A,cellSubscript)`](#pdmat-coeffs) follows that address into
    `LocalValues{c₁}...{cₙ}` and returns the cell-local coefficient leaves.
 3. [`lbls(A)`](#pdmat-lbls) supplies the local Bernstein multi-index
-   $\mathbf i$ attached to each coefficient column in the tensor lattice.
+   $\vect i$ attached to each coefficient column in the tensor lattice.
 4. [`ncell`, `ncoeff`, and `npar`](#pdmat-ncell) report, respectively, the
    number of physical cells, local labels per cell, and parameter axes visible
    in the same picture.
@@ -36,7 +36,7 @@ cellSubscripts = cells(A)
 
 Returns `A.ncell() × A.npar()` physical-cell subscript rows, with earlier axes
 varying more slowly. These rows are addresses of the physical cells highlighted
-in the left and right grids above; they do not enumerate Bernstein labels.
+in the left and right grids above. Bernstein-label enumeration uses `labels()`.
 
 ## <span id="pdmat-coeffs"></span>`coeffs`
 
@@ -48,12 +48,12 @@ entryCoefficients = coeffs(A(rowIndex,columnIndex),cellSubscript)
 Returns the known numeric coefficient row for one physical cell. `cellSubscript`
 must contain one finite, in-range positive integer per parameter. Failures use
 `pdbase:InvalidCellSubs`. A function-only `pdmat` has an empty placeholder
-rather than coefficient evidence; use [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/)
+in place of coefficient evidence. Use [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/)
 for that source.
 
 In the figure, this call selects one `LocalValues{c₁}...{cₙ}` branch. A shared
 boundary handle such as $P_2$ may therefore appear in the coefficient rows of
-two adjacent cells without becoming two independent values.
+two adjacent cells as one shared value.
 
 For matrix-valued data, index the `pdmat` first and then call `coeffs` to obtain
 the Bernstein coefficients of one matrix entry. The returned row keeps the same
@@ -67,7 +67,7 @@ labels = lbls(A)
 
 Returns the tensor Bernstein multi-index row associated with every coefficient
 column. It is the programmatic version of the 3 × 3 label lattice in the
-right-hand panel; row $j$ labels the same coefficient column returned at
+right-hand panel. row $j$ labels the same coefficient column returned at
 position $j$ by `coeffs`.
 
 ## <span id="pdmat-ncell"></span>`ncell`, <span id="pdmat-ncoeff"></span>`ncoeff`, and <span id="pdmat-npar"></span>`npar`

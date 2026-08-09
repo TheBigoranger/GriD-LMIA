@@ -17,16 +17,15 @@ import GramAssemblyExplorer from "../../../../../components/GramAssemblyExplorer
 <CertificateSpectrum selected="putinar" />
 
 The software state is `Putinar`. In one parameter its implementation uses the
-parity-specific Markov–Lukács interval form. Markov–Lukács is not a separate
-selector. The Gram notation below uses
-$Z_a=\mathbf b_a\otimes I_n$ for matrix size $n$, where $\mathbf b_a$ is the
-degree-$\mathbf a=(a_1)$ Bernstein basis vector and every Gram matrix $Q$ satisfies
+parity-specific Markov–Lukács interval form within that selector. The Gram notation below uses
+$Z_a=\vect b_a\otimes I_n$ for matrix size $n$, where $\vect b_a$ is the
+degree-$\vect a=(a_1)$ Bernstein basis vector and every Gram matrix $Q$ satisfies
 $Q\succeq0$.
 
 ## One-Parameter Even Degree
 
-For assembled degree $\mathbf M=(M_1)$ with $M_1=2r_1$, where
-$\mathbf r=(r_1)$, represent the target as
+For assembled degree $\vect M=(M_1)$ with $M_1=2r_1$, where
+$\vect r=(r_1)$, represent the target as
 
 $$
 \begin{aligned}
@@ -40,16 +39,16 @@ Thus
 
 $$
 \begin{aligned}
-S^{(\mathbf c)}(\alpha)
-&=-\mathcal F^{(\mathbf c)}(\alpha),\\
-S^{(\mathbf c)}(\alpha)
+S^{(\vect c)}(\alpha)
+&=-\mathcal F^{(\vect c)}(\alpha),\\
+S^{(\vect c)}(\alpha)
 &=G_0(\alpha)+\alpha(1-\alpha)G_1(\alpha).
 \end{aligned}
 $$
 
 with $Q_0,Q_1\succeq0$. The basis-to-coefficient Gram map is affine, and
 every resulting Bernstein coefficient is matched exactly to
-$C^{(\mathbf c)}[i]$.
+$C^{(\vect c)}[i]$.
 
 ## One-Parameter Odd Degree
 
@@ -58,28 +57,28 @@ For $M_1=2r_1+1$, use endpoint weights:
 $$
 \begin{aligned}
 G_j(\alpha)&:=Z_r(\alpha)^{\mathsf T}Q_jZ_r(\alpha),\\
-S^{(\mathbf c)}(\alpha)
+S^{(\vect c)}(\alpha)
 &=(1-\alpha)G_0(\alpha)+\alpha G_1(\alpha),\\
 Q_0&\succeq0,\qquad Q_1\succeq0.
 \end{aligned}
 $$
 
-The minimum absolute order is $\mathbf r=(r_1)$ with
+The minimum absolute order is $\vect r=(r_1)$ with
 $r_1=\lfloor M_1/2\rfloor$ in one parameter.
 
 ## Multivariate Putinar Module
 
 For $\ell\ge2$, define
-$g_s(\boldsymbol\alpha)=\alpha_s(1-\alpha_s)$. The implemented module is
+$g_s(\vect\alpha)=\alpha_s(1-\alpha_s)$. The implemented module is
 
 $$
-S^{(\mathbf c)}
+S^{(\vect c)}
 =S_0+\sum_{s=1}^{\ell}g_sS_s,
 $$
 
 where each $S_s$ has a free positive-semidefinite Gram representation and the
 sum matches every target coefficient exactly. The minimum absolute order is
-$\mathbf r=\lceil\mathbf M/2\rceil$ componentwise.
+$\vect r=\lceil\vect M/2\rceil$ componentwise.
 
 ```matlab
 selected = L.usePutinar();
@@ -90,24 +89,24 @@ constraints = selected.toYalmip();
 Each cell, stored rate row, and column-major matrix entry receives independent
 Gram blocks.
 These are non-strict software constraints. The theoretical
-$S^{(\mathbf c)}\succ0$ condition requires an explicit
-$S^{(\mathbf c)}-\varepsilon I\succeq0$ margin in the modeled residual.
+$S^{(\vect c)}\succ0$ condition requires an explicit
+$S^{(\vect c)}-\varepsilon I\succeq0$ margin in the modeled residual.
 
 ## Reusable Bernstein–Gram Map
 
-Let $\mathbf b_{\mathbf r}$ collect the tensor Bernstein basis labels of degree $\mathbf r$, and set $Z_{\mathbf r}=\mathbf b_{\mathbf r}\otimes I_n$. For two basis labels $\mathbf a$ and $\mathbf b$, their product is
+Let $\vect b_{\vect r}$ collect the tensor Bernstein basis labels of degree $\vect r$, and set $Z_{\vect r}=\vect b_{\vect r}\otimes I_n$. For two basis labels $\vect a$ and $\vect b$, their product is
 
 $$
-B_{\mathbf a}^{\mathbf r}B_{\mathbf b}^{\mathbf r}
+B_{\vect a}^{\vect r}B_{\vect b}^{\vect r}
 =\left[
 \prod_{s=1}^{\ell}
 \frac{\binom{r_s}{a_s}\binom{r_s}{b_s}}
 {\binom{2r_s}{a_s+b_s}}
 \right]
-B_{\mathbf a+\mathbf b}^{2\mathbf r}.
+B_{\vect a+\vect b}^{2\vect r}.
 $$
 
-The bracketed factor is numeric. For a symmetric Gram matrix $Q$, a diagonal term $Q_{\mathbf a,\mathbf a}$ contributes once, while an off-diagonal pair contributes $Q_{\mathbf a,\mathbf b}+Q_{\mathbf b,\mathbf a}=2Q_{\mathbf a,\mathbf b}$. The coefficient at target label $\mathbf k$ is therefore the sum of all diagonal and paired off-diagonal contributions whose labels satisfy $\mathbf a+\mathbf b=\mathbf k$. Generator multiplication adds a second numeric Bernstein product map before the exact coefficient identity is stored.
+The bracketed factor is numeric. For a symmetric Gram matrix $Q$, a diagonal term $Q_{\vect a,\vect a}$ contributes once, while an off-diagonal pair contributes $Q_{\vect a,\vect b}+Q_{\vect b,\vect a}=2Q_{\vect a,\vect b}$. The coefficient at target label $\vect k$ is therefore the sum of all diagonal and paired off-diagonal contributions whose labels satisfy $\vect a+\vect b=\vect k$. Generator multiplication adds a second numeric Bernstein product map before the exact coefficient identity is stored.
 
 For the small scalar basis $z=[B_0^1,B_1^1]^{\mathsf T}$ and $Q=Q^{\mathsf T}$,
 
@@ -118,7 +117,11 @@ $$
 
 The middle identity follows because $B_0^1B_1^1=\tfrac12B_1^2$ and the two symmetric off-diagonal entries contribute together.
 
-`gramCons` builds the target-label groups, diagonal groups, paired off-diagonal groups, generator maps, and tensor-window incidence once as numeric plan data. It then allocates fresh Gram variables for every matrix entry when the inequality is entrywise, every physical cell, every rate row, and every certificate block. Reusing a numeric map is valid because it contains no YALMIP decision variable. Reusing a Gram matrix would couple independent certificates and is not allowed.
+`gramCons` builds the target-label groups, diagonal groups, paired off-diagonal
+groups, generator maps, and tensor-window incidence once as fixed numeric plan
+data. It then allocates fresh Gram variables for every matrix entry when the
+inequality is entrywise, every physical cell, every rate row, and every
+certificate block. Fresh Gram variables preserve certificate independence.
 
 <GramAssemblyExplorer client:visible />
 
@@ -134,13 +137,13 @@ generator terms. FullBox includes every generator-subset product.
 
 A fixed-order Gram model is a sufficient certificate. Failure may reflect
 certificate order, numerical conditioning, memory pressure, grid choice, or
-decision degree. It does not prove that $S$ becomes indefinite somewhere.
+decision degree. It remains inconclusive about whether $S$ becomes indefinite somewhere.
 
 ## Limitations
 
 The implementation is specialized to box generators and fixed absolute order.
-It is not a general semialgebraic-domain parser and does not choose an order or
-solver automatically. Large Gram programs can be memory- or numerically
+Its supported scope is the box-generator module at a caller-selected order and
+solver. Large Gram programs can be memory- or numerically
 limited.
 
 ## Further Reading

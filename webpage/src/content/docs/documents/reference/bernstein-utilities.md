@@ -5,7 +5,11 @@ description: Current protected elevation, product, storage, rate-row, indexing, 
 
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdbase/">pdbase</a><span>/</span><span>protected backend utilities</span></nav>
 
-These methods are protected implementation utilities, not public modeling APIs. The current implementation consolidates elevation in `elevData` and `elevRow`, multiplication in `prodVals`, and shared unary reconstruction in `mapUnary` and `mkUnOp`.
+These methods are protected implementation utilities for maintainers. The public
+modeling API enters them through the owning class methods. The current
+implementation consolidates elevation in `elevData` and `elevRow`,
+multiplication in `prodVals`, and shared unary reconstruction in `mapUnary` and
+`mkUnOp`.
 
 ## <span id="pdbase-elevrow"></span>`elevRow`
 
@@ -41,7 +45,7 @@ Checks compatible parameter bounds and constructs the sorted union of interior g
 
 ## <span id="pdbase-joinraterows"></span>`joinRateRows` And <span id="pdbase-zipraterows"></span>`zipRateRows`
 
-These methods align ordinary and rate-dependent payloads without changing the deterministic rate-row order.
+These methods align ordinary and rate-dependent payloads while preserving the deterministic rate-row order.
 
 ## Public-Path Example
 
@@ -52,7 +56,8 @@ C = A + B;
 D = A * A;
 ```
 
-The example reaches grid merging, elevation alignment, planned multiplication, and class-preserving reconstruction without calling a protected method.
+The example reaches grid merging, elevation alignment, planned multiplication,
+and class-preserving reconstruction through the public owning-class methods.
 
 ## See Also
 

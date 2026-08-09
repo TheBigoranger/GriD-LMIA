@@ -15,7 +15,7 @@ import { Aside } from "@astrojs/starlight/components";
 </nav>
 
 Certificate pages use
-$S^{(\mathbf c)}=-\mathcal F^{(\mathbf c)}$ and the
+$S^{(\vect c)}=-\mathcal F^{(\vect c)}$ and the
 [global residual and strictness notation](/GriD-LMIA/documents/math/notation/#residual-and-positive-target).
 
 <CertificateNavigation selected="direct" showSections={false} />
@@ -62,7 +62,7 @@ C = lhs == rhs
 
 Direct coefficient-wise assembly is the default. For `<=` and `>=`, one scan
 of every original coefficient selects semidefinite mode only when all are
-square Hermitian (numeric tolerance `1e-10` inclusive); otherwise the entire
+square Hermitian (numeric tolerance `1e-10` inclusive). otherwise the entire
 inequality is entry-wise and warns once with `pdlmi:ElementwiseInequality`.
 For `==`, direct column-major coefficient equality accepts rectangular and
 non-Hermitian residuals. `UsePolya` selects exact
@@ -100,26 +100,26 @@ certificate order, see
 | `expr` | `pdvar` residual expression, or coefficient-backed `pdmat` residual for `"<="`/`">="`. A known `pdmat` equality is instead scalar logical `A == B`. |
 | `relation` | `"<="`, `">="`, or `"=="`. |
 | `UsePolya` | Logical option. Default `false`. The bare flag `"UsePolya"` enables Pólya assembly with increment one. |
-| `PolyaDegree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise increment. Default `zeros(1,ell)`. Supplying it without `UsePolya` enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
+| `PolyaDegree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise increment. Default `zeros(1,ell)`. Supplying it by itself enables Pólya and warns `pdlmi:ImplicitUsePolya`. |
 | `UseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select full-box assembly at the minimum admissible order. |
-| `FullBoxOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables full-box assembly without a warning. |
+| `FullBoxOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables full-box assembly silently. |
 | `UsePutinar` | Logical scalar. Default `false`. The bare flag and explicit `true` select Putinar box assembly at the minimum admissible order. |
-| `PutinarOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables Putinar assembly without a warning. |
+| `PutinarOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables Putinar assembly silently. |
 | `UseSparsePutinar` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparsePutinar assembly. |
 | `SparsePutinarOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables SparsePutinar assembly. |
 | `CliqueSize` | Finite positive integer scalar `b` used as the tensor-window side on each axis. Default `2` when SparsePutinar is enabled. Supplying it alone enables SparsePutinar assembly. |
 | `UseSparseFullBoxPreorder` | Logical scalar. Default `false`. The bare flag and explicit `true` select SparseFullBox assembly. |
 | `SparseFullBoxOrder` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute order. Supplying it alone enables SparseFullBox assembly. |
 | `BandWidth` | Finite positive integer `w` used as the SparseFullBox tensor-window side on each axis. Default `2` when SparseFullBox is enabled. Supplying it alone enables SparseFullBox assembly. |
-| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"`; transient, not stored, and not inherited by later selection calls. |
+| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"` and transient for the current construction. Later selector calls use their own mode. |
 
 When full-box assembly is active, the minimum order is
 `floor(expr.Degree/2)` for one parameter and componentwise
 `ceil(expr.Degree/2)` for two or more parameters. Explicitly pairing
 `UseFullBoxPreorder=false` with
 `FullBoxOrder=r` keeps direct assembly active while retaining `r` as
-inspectable metadata. This combination is valid and is not a relaxation
-conflict.
+inspectable metadata. This valid combination keeps Direct as the selected
+certificate.
 
 When Putinar assembly is active, the minimum and default order are
 `floor(expr.Degree/2)` in one parameter and componentwise
@@ -137,7 +137,7 @@ least `max(SparsePutinarOrder + 1)` returns dense Putinar.
 
 SparseFullBox uses the same dimension-dependent minimum and default order.
 `BandWidth` remains one scalar width interpreted on every tensor axis. Width one
-returns actual Direct state after order validation; width at least
+returns actual Direct state after order validation. width at least
 `max(SparseFullBoxOrder + 1)` returns actual FullBox state.
 
 ## Returned Object
@@ -151,7 +151,7 @@ coefficient inequalities, Pólya-elevated coefficient inequalities, or the PSD
 blocks and exact identities for the selected Gram mode.
 
 Equality stores direct coefficient equalities only. A proven identity may have
-empty `Constraints`; inspect properties with dot access such as `C.Relation`,
+empty `Constraints`. inspect properties with dot access such as `C.Relation`,
 `C.Residual`, and `C.Constraints`.
 
 ## Examples
@@ -210,15 +210,15 @@ implicit = pdlmi(P, "<=", PolyaDegree=2);
 `one` uses an increment of one. `two` uses two, while `implicit` also uses two
 and emits `pdlmi:ImplicitUsePolya`. Pólya assembly rebuilds the stored residual
 at the selected degree, constraining every elevated coefficient and active
-rate-vertex row. It does not mutate the input expression or source `pdlmi`:
+rate-vertex row. It returns a new value and preserves the input expression and source `pdlmi`:
 `one = direct.usePolya()` leaves `direct.UsePolya` false and returns
 `one.UsePolya` true. Reapplying another selector likewise rebuilds a new
-object from `Residual`; it never accumulates certificate constraints in the
+object from `Residual`. it never accumulates certificate constraints in the
 existing object.
 
 <Aside type="note" title="Implementation remark: rebuild, do not stack">
 Every certificate selector constructs a new object from the stored original
-`Residual` and relation; it never transforms an earlier selector's finite
+`Residual` and relation. it never transforms an earlier selector's finite
 constraints. Direct and Pólya coefficient constraints follow `cells()` order,
 then stored rate-row order, then `lbls()` coefficient order. Entry-wise
 inequalities and equalities use MATLAB column-major vectorization within each
@@ -247,7 +247,7 @@ directWithMetadata.FullBoxOrder
 numel(directWithMetadata.Constraints)
 ```
 
-`FullBoxOrder` alone selects full-box assembly without a warning. The final
+`FullBoxOrder` alone selects full-box assembly silently. The final
 form deliberately suppresses that implicit selection: it records order two,
 but its three constraints are the direct degree-two coefficient conditions.
 
@@ -275,10 +275,10 @@ paired.PutinarOrder
 numel(paired.Constraints)
 ```
 
-`PutinarOrder` alone selects Putinar assembly without a warning. Name-value
+`PutinarOrder` alone selects Putinar assembly silently. Name-value
 syntax and paired string/value syntax select the same implemented mode. Each
-object uses independent Gram blocks and exact coefficient identities;
-construction does not call a solver or add a positivity margin.
+object uses independent Gram blocks and exact coefficient identities.
+construction stores constraints for the caller's solver and explicit positivity margin.
 
 ### SparseFullBox option forms
 
@@ -303,8 +303,8 @@ denseEndpoint.UseFullBoxPreorder
 ```
 
 `BandWidth` or `SparseFullBoxOrder` alone selects SparseFullBox. The
-returned endpoint objects expose their canonical Direct or FullBox state,
-not a sparse selector with a special width.
+returned endpoint objects expose their canonical Direct or FullBox state. The
+sparse width saturates to those endpoints.
 
 ### SparsePutinar option forms
 
@@ -335,9 +335,9 @@ more parameters, `CliqueSize=1` remains SparsePutinar.
 - Nonsquare or non-Hermitian inequality coefficients select supported entry-wise mode and warn once with `pdlmi:ElementwiseInequality`.
 - Rectangular and non-Hermitian equality coefficients are supported.
 - A residual outside supported `pdvar`/coefficient-backed `pdmat` forms raises
-  `pdlmi:InvalidExpression`; function-only `pdmat` raises
-  `pdlmi:MissingCoefficientEvidence`; `pdlmi(A,"==")` for `pdmat` raises
-  `pdlmi:UnsupportedPdmatEquality`; an unsupported relation raises
+  `pdlmi:InvalidExpression`. function-only `pdmat` raises
+  `pdlmi:MissingCoefficientEvidence`. `pdlmi(A,"==")` for `pdmat` raises
+  `pdlmi:UnsupportedPdmatEquality`. an unsupported relation raises
   `pdlmi:InvalidRelation`.
 - Nonlogical selectors raise the matching `pdlmi:InvalidUse...` identifier, including `pdlmi:InvalidUseSparsePutinar`.
 - Invalid Pólya increments, Gram orders, clique sizes, or widths raise their matching validation identifiers, including `pdlmi:InvalidSparsePutinarOrder` and `pdlmi:InvalidCliqueSize`.
@@ -355,8 +355,8 @@ In one parameter, Putinar and full-box assembly share the exact
 parity-specific Markov–Lukács form. In two or more parameters, Putinar is
 limited to the local hypercube generators $\alpha_s(1-\alpha_s)$ and full-box
 assembly uses every generator-subset product. Neither is a general-domain or
-general-generator interface or an automatic hierarchy selector. No assembly
-mode adds an implicit positivity margin or calls a solver.
+general-generator interface or an automatic hierarchy selector. Every assembly
+mode leaves the positivity margin and solver call to the modeler.
 
 ## See Also
 

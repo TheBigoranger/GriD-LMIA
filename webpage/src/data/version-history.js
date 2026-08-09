@@ -1,8 +1,15 @@
 export const versionHistory = [
   {
-    version: "v1.3.1",
+    version: "v1.3.2",
     date: "2026-08-08",
     status: "current documentation",
+    summary:
+      "Synchronizes 192 public API records and eight governed terms, adds Learn and Reference paths with task, example, capability, certificate, and diagnostic lookup, and enforces semantic vector notation and affirmative prose across the Web manual.",
+  },
+  {
+    version: "v1.3.1",
+    date: "2026-08-08",
+    status: "previous documentation snapshot",
     summary:
       "Uses vector degree notation throughout, adds independent anisotropic examples and direct selected-cell bernTable outputs, and connects six complex operation families to their implementation call paths and mathematical derivations.",
   },

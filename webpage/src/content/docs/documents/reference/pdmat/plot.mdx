@@ -44,7 +44,7 @@ h = plot(A, ..., Name, Value)
 | `A` | A `pdmat` object. |
 | `dims` | One or two positive parameter indices. Defaults to `1` for scalar objects and `[1 2]` for multi-parameter objects. |
 | `SamplesPerCell` | Positive integer scalar. Default is `15`. |
-| `RateVertex` | One-based stored rate row. Rate-row objects default to row one; ordinary data reject this option. |
+| `RateVertex` | One-based stored rate row. Rate-row objects default to row one. ordinary data reject this option. |
 | `Name, Value` | Additional plotting arguments passed to MATLAB `plot` or `surf`. |
 
 ## Output
@@ -145,8 +145,8 @@ handleCount =
 The two entries are equal for every $\rho_2$ along $\rho_1=0$. Their ordering
 reverses on opposite sides: the first entry is lower for $\rho_1<0$ and higher
 for $\rho_1>0$. The intersection is therefore part of the represented matrix
-function rather than a visual offset. The legend stays outside the axes so it
-cannot cover either surface.
+function in place of a visual offset. The legend stays outside the axes and
+keeps both surfaces visible.
 
 ## Validation And Errors
 

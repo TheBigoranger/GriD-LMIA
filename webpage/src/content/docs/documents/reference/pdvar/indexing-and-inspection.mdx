@@ -104,15 +104,15 @@ disp(P)
 P
 ```
 
-Display prints a concise object summary. It does not promise workspace-dependent
-YALMIP variable names; use
+Display prints a concise object summary with deterministic fields. Workspace-dependent
+YALMIP variable names. use
 [`bernTable`](/GriD-LMIA/documents/reference/pdvar/berntable/)
 for stable row-oriented diagnostics.
 
 ## <span id="pdvar-numArgumentsFromSubscript"></span>`numArgumentsFromSubscript`
 
 The inherited MATLAB protocol returns one so an indexed `pdvar` stays a scalar
-object for chained dot access. Users do not call it for modeling.
+object for chained dot access. Modeling uses the documented public operations.
 
 ## Validation, limitations, and See Also
 

@@ -8,13 +8,15 @@ import KaTeXMath from "./KaTeXMath.astro";
 import { versionInfo } from "../data/version.js";
 import { pdmatCellData } from "../lib/cell-bernstein.ts";
 import { renderMath } from "../lib/katex-renderer.js";
+import Term from "./Term.astro";
 
 const base = import.meta.env.BASE_URL;
 const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}`;
 
 const primaryLinks = [
-  { href: local("documents/"), label: "Open manual" },
-  { href: local("documents/reference-index/"), label: "Function lookup" },
+  { href: local("documents/#learn"), label: "Learn" },
+  { href: local("documents/#reference"), label: "Reference" },
+  { href: local("documents/reader-aids/"), label: "Task lookup" },
   { href: local("install/"), label: "Install" },
   { href: local("examples/solver-smoke/"), label: "Solver examples" },
 ];
@@ -23,20 +25,20 @@ const lmiSteps = [
   {
     number: "01",
     title: "Model the general DPD-LMI problem",
-    inlineMath: "\\boldsymbol\\rho\\in\\mathcal P,\\qquad\\dot{\\boldsymbol\\rho}\\in\\mathcal R,\\qquad\\boldsymbol y:\\mathcal P\\to\\mathbb R^N.",
+    inlineMath: "\\vect\\rho\\in\\mathcal P,\\qquad\\dot{\\vect\\rho}\\in\\mathcal R,\\qquad\\vect y:\\mathcal P\\to\\mathbb R^N.",
     inlineNoteParts: [
       { tex: "\\mathcal P" },
       " is the supported parameter domain, ",
       { tex: "\\mathcal R" },
       " is the supported scheduling-rate domain, and ",
-      { tex: "\\boldsymbol y" },
+      { tex: "\\vect y" },
       " is the decision function, assumed locally Lipschitz continuous on ",
       { tex: "\\mathcal P" },
       ". All coefficient functions in the residual are evaluated at ",
-      { tex: "\\boldsymbol\\rho" },
+      { tex: "\\vect\\rho" },
       ".",
     ],
-    math: "\\mathcal F(\\boldsymbol\\rho,\\dot{\\boldsymbol\\rho};y)=F_0+\\sum_{k=1}^{N}F_ky_k+\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}\\frac{\\partial y_k}{\\partial\\rho_s}\\preceq0.",
+    math: "\\mathcal F(\\vect\\rho,\\dot{\\vect\\rho};y)=F_0+\\sum_{k=1}^{N}F_ky_k+\\sum_{k=1}^{N}\\sum_{s=1}^{\\ell}\\dot\\rho_sT_{k,s}\\frac{\\partial y_k}{\\partial\\rho_s}\\preceq0.",
     oneLine: true,
     manual: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/",
     manualLabel: "Open the induced-L₂-gain specialization ↗",
@@ -46,8 +48,8 @@ const lmiSteps = [
     title: "Partition the supported parameter box",
     textParts: [
       "Axis ", { tex: "s" }, " uses ", { tex: "k_s" }, " physical nodes in ",
-      { tex: "\\mathcal G_s" }, "; the one-based vector ", { tex: "\\mathbf c" },
-      " selects ", { tex: "\\mathcal H_{\\mathbf c}" },
+      { tex: "\\mathcal G_s" }, "; the one-based vector ", { tex: "\\vect c" },
+      " selects ", { tex: "\\mathcal H_{\\vect c}" },
       ". The tensor grid partitions ", { tex: "\\mathcal P" },
       " exactly. Approximation comes only from restricting the decision-function space; affine rate-vertex reduction remains exact.",
     ],
@@ -60,8 +62,8 @@ const lmiSteps = [
         label: ["axis-", { tex: "s" }, " physical nodes"],
       },
       {
-        tex: "\\mathcal H_{\\mathbf c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}]",
-        label: ["physical cell selected by ", { tex: "\\mathbf c" }],
+        tex: "\\mathcal H_{\\vect c}=\\prod_{s=1}^{\\ell}[\\rho_s^{(c_s)},\\rho_s^{(c_s+1)}]",
+        label: ["physical cell selected by ", { tex: "\\vect c" }],
       },
     ],
     oneLine: true,
@@ -73,13 +75,13 @@ const lmiSteps = [
     number: "03",
     title: "Fix one cell and use the Bernstein basis",
     textParts: [
-      "Pull one physical cell back to ", { tex: "\\boldsymbol\\alpha\\in[0,1]^\\ell" },
+      "Pull one physical cell back to ", { tex: "\\vect\\alpha\\in[0,1]^\\ell" },
       ". The normalized basis is nonnegative and sums to one, exposes endpoint and face coefficients, and supports cell-local coefficient algebra.",
     ],
     math: [
-      "\\boldsymbol\\alpha=\\phi_{\\mathbf c}^{-1}(\\boldsymbol\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{\\mathbf c}}.",
-      "B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad\\sum_{\\mathbf i}B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=1.",
-      "A^{(\\mathbf c)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i}C^{(\\mathbf c)}[\\mathbf i]B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha).",
+      "\\vect\\alpha=\\phi_{\\vect c}^{-1}(\\vect\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{\\vect c}}.",
+      "B_{\\vect i}^{\\vect m}(\\vect\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad\\sum_{\\vect i}B_{\\vect i}^{\\vect m}(\\vect\\alpha)=1.",
+      "A^{(\\vect c)}(\\vect\\alpha)=\\sum_{\\vect i}C^{(\\vect c)}[\\vect i]B_{\\vect i}^{\\vect m}(\\vect\\alpha).",
     ],
     storageMath: "A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
     visual: "storage",
@@ -90,13 +92,13 @@ const lmiSteps = [
     number: "04",
     title: "Select a finite certificate for the positive target",
     textParts: [
-      "The theoretical cell target is ", { tex: "S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0" },
+      "The theoretical cell target is ", { tex: "S^{(\\vect c)}(\\vect\\alpha)\\succ0" },
       ". YALMIP uses non-strict semidefinite constraints, so a required numerical margin must be written explicitly as ",
-      { tex: "S^{(\\mathbf c)}-\\varepsilon I\\succeq0" },
+      { tex: "S^{(\\vect c)}-\\varepsilon I\\succeq0" },
       ". Expand any method below to see one representative identity, its notation, the MATLAB selector, and the detailed reference.",
     ],
     math: [
-      "S^{(\\mathbf c)}(\\boldsymbol\\alpha)=-\\mathcal F^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0.",
+      "S^{(\\vect c)}(\\vect\\alpha)=-\\mathcal F^{(\\vect c)}(\\vect\\alpha)\\succ0.",
     ],
     visual: "certificate",
     fullCode: "selected = L;  % or select Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox",
@@ -119,7 +121,7 @@ const storageAxisTex = {
 };
 const storageMathMarkup = {
   formula: renderMath(lmiSteps[2].storageMath),
-  basis: renderMath("B_{\\mathbf i}^{\\mathbf m}(\\boldsymbol\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s}"),
+  basis: renderMath("B_{\\vect i}^{\\vect m}(\\vect\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s}"),
   axis: {
     x: storageAxisTex.x.map((tex) => renderMath(tex)),
     y: storageAxisTex.y.map((tex) => renderMath(tex)),
@@ -132,7 +134,7 @@ const storageMathMarkup = {
       label: renderMath(`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`),
       value: renderMath(coefficient.tex),
     })),
-    bernstein: renderMath(`A^{(${cell.c1},1)}(\\boldsymbol\\alpha)=\\sum_{\\mathbf i\\in\\{0,1,2\\}^{\\ell}}C_{\\mathbf i}^{(${cell.c1},1)}B_{\\mathbf i}^{2}(\\boldsymbol\\alpha)`),
+    bernstein: renderMath(`A^{(${cell.c1},1)}(\\vect\\alpha)=\\sum_{\\vect i\\in\\{0,1,2\\}^{\\ell}}C_{\\vect i}^{(${cell.c1},1)}B_{\\vect i}^{2}(\\vect\\alpha)`),
   })),
 };
 
@@ -156,7 +158,7 @@ const gridPartitionMathMarkup = {
     <div class="home-copy">
       <p class="home-kicker">MATLAB / YALMIP</p>
       <p class="home-wordmark">GriD-LMIA</p>
-      <p class="home-subtitle">Gridding-based DPD-LMI Assembler</p>
+      <p class="home-subtitle"><Term id="grid-lmia" definition /></p>
       <p class="home-summary">
         Model general symmetric residual inequalities with continuous
         piecewise-polynomial decisions, optional exact scheduling-rate vertex

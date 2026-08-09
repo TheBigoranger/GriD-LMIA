@@ -6,12 +6,12 @@ import { renderMath } from "../lib/katex-renderer.js";
 const { compact = false, eager = false } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const cardNotation = {
-  direct: "\\begin{gathered}C^{(\\mathbf c)}[\\mathbf i]:\\text{ target coefficient matrix}\\\\\\mathbf i\\in\\mathcal I_{\\mathbf M}=\\prod_s\\{0,\\ldots,M_s\\}:\\text{ local label}\\end{gathered}",
-  polya: "\\begin{gathered}\\tilde C^{(\\mathbf c)}[\\mathbf i]\\succeq0,\\quad\\mathbf i\\in\\mathcal I_{\\mathbf M+\\mathbf d}\\\\\\mathcal I_{\\mathbf M+\\mathbf d}=\\prod_{s=1}^{\\ell}\\{0,\\ldots,M_s+d_s\\}\\end{gathered}",
+  direct: "\\begin{gathered}C^{(\\vect c)}[\\vect i]:\\text{ target coefficient matrix}\\\\\\vect i\\in\\mathcal I_{\\vect M}=\\prod_s\\{0,\\ldots,M_s\\}:\\text{ local label}\\end{gathered}",
+  polya: "\\begin{gathered}\\tilde C^{(\\vect c)}[\\vect i]\\succeq0,\\quad\\vect i\\in\\mathcal I_{\\vect M+\\vect d}\\\\\\mathcal I_{\\vect M+\\vect d}=\\prod_{s=1}^{\\ell}\\{0,\\ldots,M_s+d_s\\}\\end{gathered}",
   putinar: "\\begin{gathered}S_0,S_s\\succeq0:\\text{ PSD Gram/SOS polynomial matrices}\\\\g_s=\\alpha_s(1-\\alpha_s):\\text{ box generator};\\quad r:\\text{ absolute Gram order}\\end{gathered}",
-  sparseputinar: "\\begin{gathered}\\mathcal Q_{\\mathrm P}:\\text{ active Putinar specifications, including the 1D parity blocks}\\\\w_s=\\min(b,d_s+1):\\text{ tensor-window side}\\\\Q_{q,\\mathbf u}\\succeq0:\\text{ independent tensor-window block};\\quad b:\\text{ CliqueSize value}\\end{gathered}",
-  sparsefullbox: "\\mathcal W_{\\mathbf u}:\\text{ sliding tensor-label window};\\quad Q_{J,\\mathbf u}:\\text{ independent PSD Gram block};\\quad w:\\text{ window side};\\quad w=1:\\text{ Direct};\\quad w\\ge\\max_s(r_s+1):\\text{ FullBox}",
-  fullbox: "Z_J=\\mathbf b_{r\\mathbf 1-\\boldsymbol\\chi_J}\\otimes I_n;\\quad Q_J:\\text{ dense PSD Gram};\\quad J\\subseteq[\\ell];\\quad r:\\text{ absolute Gram order}",
+  sparseputinar: "\\begin{gathered}\\mathcal Q_{\\mathrm P}:\\text{ active Putinar specifications, including the 1D parity blocks}\\\\w_s=\\min(b,d_s+1):\\text{ tensor-window side}\\\\Q_{q,\\vect u}\\succeq0:\\text{ independent tensor-window block};\\quad b:\\text{ CliqueSize value}\\end{gathered}",
+  sparsefullbox: "\\mathcal W_{\\vect u}:\\text{ sliding tensor-label window};\\quad Q_{J,\\vect u}:\\text{ independent PSD Gram block};\\quad w:\\text{ window side};\\quad w=1:\\text{ Direct};\\quad w\\ge\\max_s(r_s+1):\\text{ FullBox}",
+  fullbox: "Z_J=\\vect b_{r\\vect 1-\\vect\\chi_J}\\otimes I_n;\\quad Q_J:\\text{ dense PSD Gram};\\quad J\\subseteq[\\ell];\\quad r:\\text{ absolute Gram order}",
 } as const;
 const options = certificateSources.map((item) => ({
   key: item.key,
@@ -22,18 +22,18 @@ const options = certificateSources.map((item) => ({
   notationRows: item.key === "direct"
     ? [
         {
-          formulaMarkup: renderMath("C^{(\\mathbf c)}[\\mathbf i]"),
+          formulaMarkup: renderMath("C^{(\\vect c)}[\\vect i]"),
           label: "target coefficient matrix",
         },
         {
-          formulaMarkup: renderMath("\\mathbf i\\in\\mathcal I_{\\mathbf M}=\\prod_s\\{0,\\ldots,M_s\\}"),
+          formulaMarkup: renderMath("\\vect i\\in\\mathcal I_{\\vect M}=\\prod_s\\{0,\\ldots,M_s\\}"),
           label: "local label",
         },
       ]
     : undefined,
   href: `${base}${item.detailRoute}`,
 }));
-const residualMarkup = renderMath("S^{(\\mathbf c)}(\\boldsymbol\\alpha)\\succ0");
+const residualMarkup = renderMath("S^{(\\vect c)}(\\vect\\alpha)\\succ0");
 ---
 
 {eager

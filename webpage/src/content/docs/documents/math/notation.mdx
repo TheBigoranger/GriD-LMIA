@@ -27,13 +27,13 @@ $$
 \end{aligned}
 $$
 
-- $\boldsymbol\rho\in\mathcal P$ is the scheduling parameter and
-  $\boldsymbol\nu=\dot{\boldsymbol\rho}\in\mathcal R$ is its admissible rate.
+- $\vect\rho\in\mathcal P$ is the scheduling parameter and
+  $\vect\nu=\dot{\vect\rho}\in\mathcal R$ is its admissible rate.
 - $\ell$ is the number of parameter axes.
 - $\mathcal V_{\mathcal R}$ is the set of distinct lower/upper rate vertices.
   Its size is $\prod_s(1+\mathbb 1_{\underline\nu_s<\overline\nu_s})$, which
   equals $2^\ell$ when every axis varies. Reduction to these vertices is exact
-  when the residual is affine in $\boldsymbol\nu$.
+  when the residual is affine in $\vect\nu$.
 
 <span id="grids-cells-and-local-coordinates"></span>
 
@@ -47,14 +47,14 @@ $$
 $$
 
 Here $k_s$ is the number of nodes on axis $s$. The one-based physical-cell
-index $\mathbf c=(c_1,\ldots,c_\ell)$ selects
+index $\vect c=(c_1,\ldots,c_\ell)$ selects
 
 $$
 \begin{aligned}
-\mathcal H_{\mathbf c}
+\mathcal H_{\vect c}
 &=\prod_{s=1}^{\ell}
 [\rho_s^{(c_s)},\rho_s^{(c_s+1)}],\\
-h_s^{\mathbf c}
+h_s^{\vect c}
 &=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
 \end{aligned}
 $$
@@ -64,18 +64,18 @@ approximation only when it restricts the admissible decision-function space.
 
 ## <span id="local-coordinates"></span>Local Coordinates And Labels
 
-The physical map $\phi_{\mathbf c}:[0,1]^\ell\to\mathcal H_{\mathbf c}$ and
+The physical map $\phi_{\vect c}:[0,1]^\ell\to\mathcal H_{\vect c}$ and
 its inverse are
 
 $$
 \begin{aligned}
-\rho_s&=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,\\
-\boldsymbol\alpha&=\phi_{\mathbf c}^{-1}(\boldsymbol\rho).
+\rho_s&=\rho_s^{(c_s)}+h_s^{\vect c}\alpha_s,\\
+\vect\alpha&=\phi_{\vect c}^{-1}(\vect\rho).
 \end{aligned}
 $$
 
-Physical nodes and $\mathbf c$ are one-based. A local Bernstein label
-$\mathbf i=(i_1,\ldots,i_\ell)$ is zero-based.
+Physical nodes and $\vect c$ are one-based. A local Bernstein label
+$\vect i=(i_1,\ldots,i_\ell)$ is zero-based.
 
 <span id="bernstein-labels-and-degrees"></span>
 
@@ -83,10 +83,10 @@ $\mathbf i=(i_1,\ldots,i_\ell)$ is zero-based.
 
 | Symbol | Meaning |
 | :--- | :--- |
-| $\mathbf m$ | Direction-wise modeled Bernstein degree of a decision function. |
-| $\mathbf M$ | Direction-wise assembled Bernstein degree of the residual or sign-normalized target. |
-| $\mathbf d$ | Direction-wise Pólya degree-elevation increment. |
-| $\mathbf r$ | Direction-wise absolute Gram order; it is not an increment from $\mathbf M$. |
+| $\vect m$ | Direction-wise modeled Bernstein degree of a decision function. |
+| $\vect M$ | Direction-wise assembled Bernstein degree of the residual or sign-normalized target. |
+| $\vect d$ | Direction-wise Pólya degree-elevation increment. |
+| $\vect r$ | Direction-wise absolute Gram order, specified independently of $\vect M$. |
 | $b$ | Scalar SparsePutinar tensor-window side stored by `CliqueSize`. |
 | $w$ | Scalar SparseFullBox tensor-window side stored by `BandWidth`. |
 
@@ -97,18 +97,18 @@ independent of the number of physical grid cells.
 The direction-wise label set, tensor basis, and coefficient count are
 
 $$
-\mathcal I_{\mathbf m}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}.
+\mathcal I_{\vect m}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}.
 $$
 
 $$
-B_{\mathbf i}^{\mathbf m}(\boldsymbol\alpha)=\prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
+B_{\vect i}^{\vect m}(\vect\alpha)=\prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
 $$
 
 $$
-|\mathcal I_{\mathbf m}|=\prod_{s=1}^{\ell}(m_s+1).
+|\mathcal I_{\vect m}|=\prod_{s=1}^{\ell}(m_s+1).
 $$
 
-Even when $\ell=1$, the degree is written $\mathbf m=(m_1)$. Parity,
+Even when $\ell=1$, the degree is written $\vect m=(m_1)$. Parity,
 differentiation, and endpoint statements then refer to the component $m_1$.
 
 <span id="residual-and-positive-target"></span>
@@ -119,10 +119,10 @@ On one physical cell,
 
 $$
 \begin{aligned}
-\mathcal F^{(\mathbf c)}(\boldsymbol\alpha)
-&=\sum_{\mathbf i\in\mathcal I_{\mathbf M}}
-B_{\mathbf i}^{\mathbf M}(\boldsymbol\alpha)\\
-&\qquad{}\cdot\mathcal C^{(\mathbf c)}[\mathbf i].
+\mathcal F^{(\vect c)}(\vect\alpha)
+&=\sum_{\vect i\in\mathcal I_{\vect M}}
+B_{\vect i}^{\vect M}(\vect\alpha)\\
+&\qquad{}\cdot\mathcal C^{(\vect c)}[\vect i].
 \end{aligned}
 $$
 
@@ -130,35 +130,35 @@ and a negative-semidefinite residual is sign-normalized as
 
 $$
 \begin{aligned}
-S^{(\mathbf c)}&=-\mathcal F^{(\mathbf c)},\\
-C^{(\mathbf c)}&=-\mathcal C^{(\mathbf c)}.
+S^{(\vect c)}&=-\mathcal F^{(\vect c)},\\
+C^{(\vect c)}&=-\mathcal C^{(\vect c)}.
 \end{aligned}
 $$
 
 The theoretical target is
-$S^{(\mathbf c)}(\boldsymbol\alpha)\succ0$. YALMIP models non-strict
-semidefinite constraints; encode a chosen margin explicitly as
-$S^{(\mathbf c)}(\boldsymbol\alpha)-\varepsilon I\succeq0$.
+$S^{(\vect c)}(\vect\alpha)\succ0$. YALMIP models non-strict
+semidefinite constraints. encode a chosen margin explicitly as
+$S^{(\vect c)}(\vect\alpha)-\varepsilon I\succeq0$.
 
 <span id="strict-theory-and-software-constraints"></span>
 <span id="gram-basis-and-certificate-parameters"></span>
 
 ## <span id="gram"></span>Gram Representation
 
-For tensor Bernstein basis vector $\mathbf b_{\mathbf a}$, define
+For tensor Bernstein basis vector $\vect b_{\vect a}$, define
 
 $$
 \begin{aligned}
-Z_{\mathbf a}&=\mathbf b_{\mathbf a}\otimes I_n,\\
-G_{\mathbf a}&:=Z_{\mathbf a}^{\mathsf T}QZ_{\mathbf a},\\
+Z_{\vect a}&=\vect b_{\vect a}\otimes I_n,\\
+G_{\vect a}&:=Z_{\vect a}^{\mathsf T}QZ_{\vect a},\\
 Q&\succeq0.
 \end{aligned}
 $$
 
-The multi-index $\mathbf a$ specifies the basis degree, $I_n$ matches the
+The multi-index $\vect a$ specifies the basis degree, $I_n$ matches the
 matrix-polynomial size, and $Q$ is a positive-semidefinite Gram matrix.
 Weighted interval or box-generator terms change the coefficient-matching
-degree without changing these symbol roles.
+degree while preserving these symbol roles.
 
 ## See Also
 

@@ -49,7 +49,7 @@ leaf = helper.cellGet(vals, subs)
 \end{lstlisting}
 
 \descriptionhead
-\code{vals} is addressed as \code{vals{i1}{i2}...{i_ell}} and \code{subs} supplies one index per level. The returned \code{leaf} is the selected flat coefficient cell or rate-row table; no copy, reshaping, or multi-index cell interpretation is introduced.
+\code{vals} is addressed as \code{vals{i1}{i2}...{i_ell}} and \code{subs} supplies one index per level. The returned \code{leaf} is the selected flat coefficient cell or rate-row table. Selection preserves the stored payload, shape, and index interpretation.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -88,7 +88,7 @@ validated = 1×2 double
 \end{lstlisting}
 
 \remarkshead
-A failed data predicate raises \code{errId}.  An unknown predicate, or a named test without a value, raises \codeerr{helper}{InvalidValidatorCall}; these errors signal a validator-programming defect rather than bad caller data.
+A failed data predicate raises \code{errId}. An unknown predicate or a named test that omits its value raises \codeerr{helper}{InvalidValidatorCall}. These errors identify a validator-programming defect, while \code{errId} identifies rejected caller data.
 
 \section{\texorpdfstring{\code{helper.combRows}}{helper.combRows}}
 
@@ -130,7 +130,7 @@ tf = helper.isZero(obj, "obj")
 \end{lstlisting}
 
 \descriptionhead
-\code{"num"} requires a nonempty finite real numeric zero; \code{"add"} additionally enforces scalar expansion or the supplied matrix shape; \code{"vals"} recursively checks nested, symbolic, and rate-structured payloads; and \code{"obj"} accepts coefficient-backed \code{pdmat} or \code{pdvar} evidence.
+\code{"num"} requires a nonempty finite real numeric zero. \code{"add"} additionally enforces scalar expansion or the supplied matrix shape. \code{"vals"} recursively checks nested, symbolic, and rate-structured payloads. And \code{"obj"} accepts coefficient-backed \code{pdmat} or \code{pdvar} evidence.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -148,7 +148,7 @@ objectZero =
 \end{lstlisting}
 
 \remarkshead
-Function-only \code{pdmat} placeholders are not coefficient evidence and therefore do not prove object zero.  Invalid modes raise \codeerr{helper}{InvalidZeroMode}; the wrong mode-specific arity raises \codeerr{helper}{InvalidZeroCall}.
+Function-only \code{pdmat} placeholders contain handle evaluation exclusively, so their zero status remains inconclusive. Invalid modes raise \codeerr{helper}{InvalidZeroMode}. The wrong mode-specific arity raises \codeerr{helper}{InvalidZeroCall}.
 
 \section{\texorpdfstring{\code{helper.mkGrid}}{helper.mkGrid}}
 
@@ -182,7 +182,7 @@ points = 4×2 double
 \end{lstlisting}
 
 \remarkshead
-Malformed containers use \code{owner + ":InvalidGrid"}; malformed individual axes use \code{owner + ":InvalidGridVector"}.  Cell counts are derived by consumers and are not duplicated in \code{GridInfo}.
+Malformed containers use \code{owner + ":InvalidGrid"}. Malformed individual axes use \code{owner + ":InvalidGridVector"}. Consumers derive cell counts directly from \code{GridInfo.NumNodes}.
 
 \section{\texorpdfstring{\code{helper.mkNest}}{helper.mkNest}}
 
@@ -195,7 +195,7 @@ vals = helper.mkNest(nCell, mkLeaf, prefix)
 \end{lstlisting}
 
 \descriptionhead
-\code{nCell} gives the positive cell count per parameter direction and \code{mkLeaf} receives one completed one-based subscript row.  \code{prefix} is recursion state used internally; ordinary callers omit it.  The result is addressed as \code{vals{i1}{i2}...{i_ell}}.
+\code{nCell} gives the positive cell count per parameter direction and \code{mkLeaf} receives one completed one-based subscript row.  \code{prefix} is recursion state used internally. Ordinary callers omit it.  The result is addressed as \code{vals{i1}{i2}...{i_ell}}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -207,7 +207,7 @@ secondLeaf = 3
 \end{lstlisting}
 
 \remarkshead
-\code{mkLeaf} owns the leaf payload.  The helper supplies deterministic physical-cell subscripts but does not infer coefficient count, matrix size, or rate semantics.
+\code{mkLeaf} owns the leaf payload. The helper supplies deterministic physical-cell subscripts, while the caller supplies coefficient count, matrix size, and rate semantics.
 
 \section{\texorpdfstring{\code{helper.normDeg}}{helper.normDeg}}
 
@@ -219,7 +219,7 @@ degree = helper.normDeg(value, nPar, errId, label)
 \end{lstlisting}
 
 \descriptionhead
-\code{value} must be one finite nonnegative integer scalar or an \code{nPar}-element vector. A scalar expands uniformly, a column vector is reshaped, and every accepted result is a \code{1}-by-\code{nPar} double row. \code{errId} is raised for empty, nonnumeric, complex, nonfinite, noninteger, negative, or incorrectly sized input; \code{label} supplies the public option name in the error message and defaults to \code{"Degree"}.
+\code{value} must be one finite nonnegative integer scalar or an \code{nPar}-element vector. A scalar expands uniformly, a column vector is reshaped, and every accepted result is a \code{1}-by-\code{nPar} double row. \code{errId} is raised for empty, nonnumeric, complex, nonfinite, noninteger, negative, or incorrectly sized input. \code{label} supplies the public option name in the error message and defaults to \code{"Degree"}.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -247,7 +247,7 @@ tf = helper.chkCont(vals, nCell, degree)
 \end{lstlisting}
 
 \descriptionhead
-\code{vals} is a normalized nested coefficient tree, while \code{nCell} and \code{degree} are direction-wise row vectors. The logical scalar \code{tf} is true only when every row of each neighboring leaf has matching boundary coefficients on every shared face. Numeric faces use a scale-aware tolerance, while affine YALMIP faces require identical coefficient bases. The helper only classifies existing storage and does not change coefficients or impose continuity constraints. It expects the normalized internal storage contract, so malformed trees, row counts, or payloads are rejected by the underlying indexing or matrix operations rather than a separate \code{chkCont} error namespace.
+\code{vals} is a normalized nested coefficient tree, while \code{nCell} and \code{degree} are direction-wise row vectors. The logical scalar \code{tf} is true only when every row of each neighboring leaf has matching boundary coefficients on every shared face. Numeric faces use a scale-aware tolerance, while affine YALMIP faces require identical coefficient bases. The helper classifies existing storage and preserves every coefficient. It expects the normalized internal storage contract, so malformed trees, row counts, or payloads use the underlying indexing or matrix-operation error namespace.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -308,7 +308,7 @@ mode = helper.normMode(value, owner)
 \end{lstlisting}
 
 \descriptionhead
-\code{value} must be scalar text equal to \code{"fast"} or \code{"strict"}, case-insensitively, and \code{owner} is the class or package stem used in diagnostics. The returned \code{mode} is the lowercase string scalar \code{"fast"} or \code{"strict"}. Invalid or missing text raises \code{owner + ":InvalidValidationMode"}. The result controls operation-local consistency checks and is not stored as object or certificate state.
+\code{value} must be scalar text equal to \code{"fast"} or \code{"strict"}, case-insensitively, and \code{owner} is the class or package stem used in diagnostics. The returned \code{mode} is the lowercase string scalar \code{"fast"} or \code{"strict"}. Invalid or missing text raises \code{owner + ":InvalidValidationMode"}. The result controls operation-local consistency checks and remains transient call state.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -330,7 +330,7 @@ vertices = helper.rateVerts(rateBounds)
 \end{lstlisting}
 
 \descriptionhead
-\code{rateBounds} is an $\ell$-by-2 matrix that has already passed the package rate-bound checks. Each varying direction contributes its lower value and then its upper value, while a direction with equal bounds contributes one value. The rows of \code{vertices} follow \code{helper.combRows} order, and empty bounds return a zero-row matrix. This helper performs enumeration rather than public input validation, so constructors and \code{rhodiff} own malformed-bound errors.
+\code{rateBounds} is an $\ell$-by-2 matrix that has already passed the package rate-bound checks. Each varying direction contributes its lower value and then its upper value, while a direction with equal bounds contributes one value. The rows of \code{vertices} follow \code{helper.combRows} order, and empty bounds return a zero-row matrix. This helper performs enumeration, while constructors and \code{rhodiff} own public input validation and malformed-bound errors.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]

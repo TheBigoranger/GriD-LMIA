@@ -37,39 +37,39 @@ $\mathcal P=\prod_s[\underline\rho_s,\overline\rho_s]$ into
 $\prod_s(k_s-1)$ physical cells.
 
 The one-based physical cell index
-$\mathbf c=(c_1,\ldots,c_\ell)$ selects
+$\vect c=(c_1,\ldots,c_\ell)$ selects
 
 $$
 \begin{aligned}
-\mathcal H_{\mathbf c}
+\mathcal H_{\vect c}
 &=\prod_{s=1}^{\ell}
 [\rho_s^{(c_s)},\rho_s^{(c_s+1)}],\\
-h_s^{\mathbf c}
+h_s^{\vect c}
 &=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
 \end{aligned}
 $$
 
-The grid determines where cells begin and end. The decision degree $\mathbf m$
+The grid determines where cells begin and end. The decision degree $\vect m$
 determines how many Bernstein labels live inside each cell. Refining
-$\mathcal G_s$ does not raise $\mathbf m$, and raising one component of
-$\mathbf m$ does not add physical
-cells.
+$\mathcal G_s$ changes the physical partition while preserving $\vect m$.
+Raising one component of $\vect m$ changes the local decision space while
+preserving the physical cells.
 
 ## One-Dimensional Input
 
 For $\mathcal G_1=\{0,0.5,1\}$, there are two cells. The physical map
-$\phi_{\mathbf c}:[0,1]^\ell\to\mathcal H_{\mathbf c}$ and its inverse are
+$\phi_{\vect c}:[0,1]^\ell\to\mathcal H_{\vect c}$ and its inverse are
 
 $$
 \begin{aligned}
 \rho_s
-&=\phi_{\mathbf c,s}(\boldsymbol\alpha),\\
+&=\phi_{\vect c,s}(\vect\alpha),\\
 \rho_s
-&=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,\\
-\boldsymbol\alpha
-&=\phi_{\mathbf c}^{-1}(\boldsymbol\rho),\\
+&=\rho_s^{(c_s)}+h_s^{\vect c}\alpha_s,\\
+\vect\alpha
+&=\phi_{\vect c}^{-1}(\vect\rho),\\
 \alpha_s
-&=\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{\mathbf c}}
+&=\frac{\rho_s-\rho_s^{(c_s)}}{h_s^{\vect c}}
 \in[0,1].
 \end{aligned}
 $$
@@ -78,11 +78,11 @@ Consequently,
 
 $$
 \frac{\partial}{\partial\rho_s}
-=\frac{1}{h_s^{\mathbf c}}
+=\frac{1}{h_s^{\vect c}}
 \frac{\partial}{\partial\alpha_s}.
 $$
 
-For one-parameter degree $\mathbf m=(2)$, each cell has labels
+For one-parameter degree $\vect m=(2)$, each cell has labels
 $i_1=0,1,2$, but a continuous
 `pdvar` shares the endpoint handle across the interface.
 
@@ -98,9 +98,9 @@ A = pdmat(grid, @(rho1,rho2) [1+rho1 rho1*rho2; rho1*rho2 2+rho2^2], ...
 
 The first axis has two physical intervals and the second has one. Every cell
 still uses local coordinates
-$\boldsymbol\alpha=(\alpha_1,\alpha_2)\in[0,1]^2$.
-For direction-wise degree $\mathbf m=(3,1)$, each local coefficient array has
-$\prod_s(m_s+1)=8$ labels $\mathbf i=(i_1,i_2)$. This anisotropic choice
+$\vect\alpha=(\alpha_1,\alpha_2)\in[0,1]^2$.
+For direction-wise degree $\vect m=(3,1)$, each local coefficient array has
+$\prod_s(m_s+1)=8$ labels $\vect i=(i_1,i_2)$. This anisotropic choice
 allows a cubic first-parameter dependence and only a linear second-parameter
 dependence inside each cell.
 
@@ -112,7 +112,7 @@ dependence inside each cell.
 
 The number of physical cells is
 $\prod_{s=1}^{\ell}(k_s-1)$. For direction-wise degree
-$\mathbf m=(m_1,\ldots,m_\ell)$, each cell has
+$\vect m=(m_1,\ldots,m_\ell)$, each cell has
 $\prod_s(m_s+1)$ local labels. A scalar input is uniform shorthand for this
 row vector. The two products measure different things:
 physical partition size and local polynomial representation size.
@@ -122,27 +122,29 @@ zero-based Bernstein labels. `LocalValues` stores the corresponding nested
 cell structure. See [pdbase storage and inspection](/GriD-LMIA/documents/reference/pdbase/storage-inspection/)
 for the exact traversal contract.
 
-## Do Not Conflate These Operations
+<span id="do-not-conflate-these-operations"></span>
+
+## Distinct Grid, Degree, And Certificate Controls
 
 - Grid refinement changes the physical partition and may localize
   conservatism.
 - Degree elevation changes only the Bernstein representation of the same
   polynomial.
-- Increasing one or more components of decision degree $\mathbf m$ enlarges
+- Increasing one or more components of decision degree $\vect m$ enlarges
   the decision-function family in those directions.
-- Increasing residual degree $\mathbf M$ can result from products and
-  componentwise common-degree alignment even when $\mathbf m$ is unchanged.
-- Increasing Pólya increment $\mathbf d$ or Gram order $\mathbf r$ changes the
+- Increasing residual degree $\vect M$ can result from products and
+  componentwise common-degree alignment even when $\vect m$ is unchanged.
+- Increasing Pólya increment $\vect d$ or Gram order $\vect r$ changes the
   selected finite certificate. SparsePutinar `CliqueSize` value $b$ and
   SparseFullBox window side $w$ change their respective tensor-window supports.
 
 ## Limitations
 
 The implemented geometry is a tensor-product box grid. Grid knots must be
-ordered, cell widths must be positive, and the package does not infer adaptive
-or simplex partitions. Discontinuous coefficient-backed `pdmat` data are
-supported, but the shared-face continuity argument for decisions does not
-extend to such known data automatically.
+ordered and cell widths must be positive. The implemented partition is a
+caller-specified tensor grid. Discontinuous coefficient-backed `pdmat` data are
+supported, while the shared-face continuity argument applies to continuous
+decisions.
 
 ## Further Reading
 

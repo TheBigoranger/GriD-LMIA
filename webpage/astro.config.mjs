@@ -7,6 +7,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { katexOptions } from "./src/lib/katex-options.js";
 import rehypeKatexStrict from "./src/lib/rehype-katex-strict.js";
+import remarkTerminologyLinks from "./src/lib/remark-terminology-links.js";
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,7 +15,7 @@ export default defineConfig({
   base: "/GriD-LMIA",
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath],
+      remarkPlugins: [remarkTerminologyLinks, remarkMath],
       rehypePlugins: [[rehypeKatex, katexOptions], rehypeKatexStrict],
     }),
   },
@@ -42,10 +43,22 @@ export default defineConfig({
         { label: "Citing GriD-LMIA", slug: "citing" },
         { label: "Version History", slug: "version-history" },
         {
-          label: "Documents",
+          label: "Learn",
           items: [
-            { label: "Manual Index", slug: "documents" },
-            { label: "Reference Lookup", slug: "documents/reference-index" },
+            { label: "Learn And Reference Portal", slug: "documents" },
+            { label: "Task And Example Lookup", slug: "documents/reader-aids" },
+            { label: "Notation", slug: "documents/math/notation" },
+            { label: "Modeling Foundations", slug: "documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain" },
+            { label: "Tensor Grids", slug: "documents/math/gridding-and-degree" },
+            { label: "Bernstein Basis", slug: "documents/math/bernstein-polynomial" },
+            { label: "Certificate Selection", slug: "documents/math/sos-certificates" },
+          ],
+        },
+        {
+          label: "Reference",
+          items: [
+            { label: "Generated API Lookup", slug: "documents/reference-index" },
+            { label: "Task And Diagnostic Lookup", slug: "documents/reader-aids" },
             {
               label: "pdmat",
               items: [

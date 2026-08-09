@@ -8,7 +8,9 @@ import { Aside } from "@astrojs/starlight/components";
 
 <nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/">pdvar</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdvar/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
 
-`pdvar` stores affine YALMIP expressions at cell-local Bernstein labels. The examples use deterministic metadata rather than unstable YALMIP variable names.
+`pdvar` stores affine YALMIP expressions at cell-local Bernstein labels. The
+examples use deterministic metadata in place of session-dependent YALMIP
+variable names.
 
 ## <span id="pdvar-plus"></span><span id="pdvar-minus"></span><span id="pdvar-uplus"></span><span id="pdvar-uminus"></span>Build affine sums and differences
 
@@ -19,7 +21,7 @@ R = P + Q; D = P - Q; U = +P; N = -P;
 Compatible grids are aligned and direction-wise degrees are elevated to their
 componentwise maximum before coefficient rows are combined. Numeric constants,
 affine `sdpvar`, and coefficient-backed `pdmat` operands are promoted. `uplus`
-preserves the expression; `uminus` negates every symbolic coefficient.
+preserves the expression. `uminus` negates every symbolic coefficient.
 
 ```matlab
 yalmip('clear')
@@ -38,13 +40,13 @@ R=1-by-1, S=1-by-1, uplus=1-by-1
 
 The same exact degree alignment applies to symbolic rows and numeric rows. Use
 the [`pdmat` numerical addition explorer](/GriD-LMIA/documents/reference/pdmat/algebra/#numerical-addition-explorer)
-to inspect the coefficient transformation; `pdvar` replaces those numeric
+to inspect the coefficient transformation. `pdvar` replaces those numeric
 entries with affine YALMIP expressions.
 
 <Aside type="note" title="Implementation remark: exact addition alignment">
 `plus` and `minus` use the same sorted-union grid refinement and componentwise
 degree elevation as `pdmat`, then combine aligned affine coefficients. Shared
-YALMIP decision handles are re-expressed rather than recreated, so the result
+YALMIP decision handles are re-expressed and preserved, so the result
 remains the exact sum or difference of the original decision expressions.
 </Aside>
 
@@ -68,7 +70,8 @@ k&=0,1,2,3.
 \end{aligned}
 $$
 
-Written matrix order is preserved; $P[i]A[j]$ is not exchanged with $A[j]P[i]$.
+Written matrix order is preserved. $P[i]A[j]$ stays in that order and remains
+distinct from $A[j]P[i]$.
 For tensor operands, the output degree is the componentwise sum of the two
 degree rows.
 
@@ -87,7 +90,7 @@ converted operand may carry decision dependence.
 `mtimes` applies the planned normalized Bernstein convolution cell by cell,
 adds the operand degrees componentwise, and preserves the written
 matrix-factor order. The route is accepted only when decision dependence
-occurs on at most one converted operand; two decision-bearing sides would
+occurs on at most one converted operand. two decision-bearing sides would
 leave the package's affine YALMIP layer.
 </Aside>
 
@@ -95,7 +98,7 @@ leave the package's affine YALMIP layer.
 
 - Products with decision dependence on both sides are rejected as nonlinear.
 - Products with rate dependence on both sides are rejected.
-- Affine `sdpvar` multiplication requires the `pdvar` side to contain no decision dependence.
+- Affine `sdpvar` multiplication requires decision-free data on the `pdvar` side.
 - Numeric and `pdmat` promotion still requires compatible physical bounds and matrix dimensions.
 - Numeric or known data may multiply a derivative object while preserving its rate rows.
 

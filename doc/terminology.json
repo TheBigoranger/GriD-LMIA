@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "terms": [
+    {
+      "id": "grid-lmia",
+      "abbreviation": "GriD-LMIA",
+      "expansion": "Gridding-based DPD-LMI Assembler",
+      "aliases": ["Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities"],
+      "tex_index_key": "GriD-LMIA",
+      "web_definition_anchor": "/#term-grid-lmia",
+      "auto_link": false
+    },
+    {
+      "id": "lmi",
+      "abbreviation": "LMI",
+      "expansion": "linear matrix inequality",
+      "aliases": ["linear matrix inequalities"],
+      "tex_index_key": "linear matrix inequality (LMI)",
+      "web_definition_anchor": "/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#term-lmi",
+      "auto_link": true
+    },
+    {
+      "id": "pd-lmi",
+      "abbreviation": "PD-LMI",
+      "expansion": "parameter-dependent linear matrix inequality",
+      "aliases": ["parameter-dependent LMI", "parameter-dependent linear matrix inequalities"],
+      "tex_index_key": "parameter-dependent linear matrix inequality (PD-LMI)",
+      "web_definition_anchor": "/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#term-pd-lmi",
+      "auto_link": true
+    },
+    {
+      "id": "dpd-lmi",
+      "abbreviation": "DPD-LMI",
+      "expansion": "differentiable parameter-dependent linear matrix inequality",
+      "aliases": ["differentiable parameter-dependent LMI", "differentiable parameter-dependent linear matrix inequalities"],
+      "tex_index_key": "differentiable parameter-dependent linear matrix inequality (DPD-LMI)",
+      "web_definition_anchor": "/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#term-dpd-lmi",
+      "auto_link": true
+    },
+    {
+      "id": "lpv",
+      "abbreviation": "LPV",
+      "expansion": "linear parameter-varying",
+      "aliases": ["linear parametrically varying"],
+      "tex_index_key": "linear parameter-varying (LPV)",
+      "web_definition_anchor": "/documents/math/modeling-and-analysis/dpd-lmi-and-lpv-l2-gain/#term-lpv",
+      "auto_link": true
+    },
+    {
+      "id": "psd",
+      "abbreviation": "PSD",
+      "expansion": "positive semidefinite",
+      "aliases": ["positive-semidefinite"],
+      "tex_index_key": "positive semidefinite (PSD)",
+      "web_definition_anchor": "/documents/math/sos-certificates/#term-psd",
+      "auto_link": true
+    },
+    {
+      "id": "sos",
+      "abbreviation": "SOS",
+      "expansion": "sum-of-squares",
+      "aliases": ["sum of squares", "matrix sum-of-squares"],
+      "tex_index_key": "sum-of-squares (SOS)",
+      "web_definition_anchor": "/documents/math/sos-certificates/#term-sos",
+      "auto_link": true
+    },
+    {
+      "id": "sdp",
+      "abbreviation": "SDP",
+      "expansion": "semidefinite program",
+      "aliases": ["semidefinite programming", "semidefinite programs"],
+      "tex_index_key": "semidefinite program (SDP)",
+      "web_definition_anchor": "/documents/math/sos-certificates/#term-sdp",
+      "auto_link": true
+    }
+  ],
+  "excluded_general_abbreviations": ["API", "HTML", "PDF", "SVG"]
+}

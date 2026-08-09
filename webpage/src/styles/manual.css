@@ -1892,3 +1892,73 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.term-link {
+  text-decoration-style: dotted;
+  text-underline-offset: 0.16em;
+}
+
+dfn[data-term] {
+  font-style: normal;
+  font-weight: 650;
+}
+
+.api-inventory {
+  margin-block-start: 2.4rem;
+}
+
+.api-inventory__records {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.api-inventory__record {
+  min-width: 0;
+  border: 1px solid var(--diagram-border);
+  border-radius: 0.65rem;
+  background: var(--sl-color-bg-nav);
+}
+
+.api-inventory__record > summary {
+  display: flex;
+  gap: 0.8rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+}
+
+.api-inventory__record > summary span {
+  color: var(--sl-color-gray-2);
+  font-size: 0.82rem;
+}
+
+.api-inventory__body {
+  min-width: 0;
+  padding: 0 0.9rem 0.9rem;
+}
+
+.api-inventory__body dl {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.36fr) minmax(0, 1fr);
+  gap: 0.45rem 0.8rem;
+}
+
+.api-inventory__body dt {
+  font-weight: 700;
+}
+
+.api-inventory__body dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.api-inventory__body dd code + code {
+  margin-inline-start: 0.35rem;
+}
+
+@media (max-width: 44rem) {
+  .api-inventory__body dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

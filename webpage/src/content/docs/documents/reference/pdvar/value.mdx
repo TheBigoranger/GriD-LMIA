@@ -38,7 +38,7 @@ grid, matrix size, Bernstein degree, local coefficient order, and continuity
 metadata. For a derivative expression with rate rows, `rows` is a
 `1 × P.NumRateRows` cell array of `pdmat` objects, in distinct lower/upper
 Cartesian vertex order after fixed axes collapse. Returned `pdmat` objects do
-not retain rate metadata.
+returns ordinary known data and discards rate metadata.
 
 ## Example
 
@@ -63,7 +63,7 @@ Every symbolic coefficient must have an assigned finite real numeric value.
 Unassigned, nonnumeric, nonreal, nonfinite, or unavailable values raise
 `pdvar:UnassignedValue`.
 
-`value` evaluates stored coefficients, not an arbitrary parameter point. Use
+`value` evaluates stored coefficients. Use
 [`pdmat evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) after
 conversion when an exact point evaluation is needed.
 

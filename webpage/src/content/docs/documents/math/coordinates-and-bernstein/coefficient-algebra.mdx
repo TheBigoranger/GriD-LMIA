@@ -26,27 +26,27 @@ Only then does it assemble the cell result.
 
 ## Sparse Tensor Elevation
 
-Let $\mathbf m$ be the source degree and let $\mathbf M\ge\mathbf m$ be the target degree. For a source label $\mathbf i$ and a target label $\mathbf k$, define the sparse elevation operator by
+Let $\vect m$ be the source degree and let $\vect M\ge\vect m$ be the target degree. For a source label $\vect i$ and a target label $\vect k$, define the sparse elevation operator by
 
 $$
-E_{\mathbf M\leftarrow\mathbf m}[\mathbf k,\mathbf i]
+E_{\vect M\leftarrow\vect m}[\vect k,\vect i]
 =\prod_{s=1}^{\ell}
 \frac{\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}}
 {\binom{M_s}{k_s}}.
 $$
 
-The binomial factor is zero unless $i_s\le k_s\le i_s+M_s-m_s$ on every axis. Therefore only those source and target labels form stored entries. If $C[\mathbf i]$ denotes a scalar or matrix coefficient, then
+The binomial factor is zero unless $i_s\le k_s\le i_s+M_s-m_s$ on every axis. Therefore only those source and target labels form stored entries. If $C[\vect i]$ denotes a scalar or matrix coefficient, then
 
 $$
-C^{\mathrm{elv}}[\mathbf k]
-=\sum_{\mathbf i}E_{\mathbf M\leftarrow\mathbf m}[\mathbf k,\mathbf i]C[\mathbf i].
+C^{\mathrm{elv}}[\vect k]
+=\sum_{\vect i}E_{\vect M\leftarrow\vect m}[\vect k,\vect i]C[\vect i].
 $$
 
 The implementation packs the coefficient matrices into one row and applies the operator as a sparse matrix multiplication. With $q$ scalar entries per coefficient matrix, this has the form
 
 $$
-\mathbf c^{\mathrm{elv}}
-=\mathbf c\left(E_{\mathbf M\leftarrow\mathbf m}^{\mathsf T}\otimes I_q\right).
+\vect c^{\mathrm{elv}}
+=\vect c\left(E_{\vect M\leftarrow\vect m}^{\mathsf T}\otimes I_q\right).
 $$
 
 `elevRow` builds this operator for one source and target degree pair. `elevData` reuses the plan for every coefficient row with the same source degree, including repeated physical cells and rate rows. The public [`elevate`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-elevate) method rebuilds the same dynamic class with the elevated data.
@@ -61,20 +61,25 @@ $$
 
 ## Normalized Product Identity
 
-For tensor Bernstein expansions $P$ of degree $\mathbf m$ and $Q$ of degree $\mathbf n$, the product degree is $\mathbf m+\mathbf n$. Its coefficient at label $\mathbf k$ is
+For tensor Bernstein expansions $P$ of degree $\vect m$ and $Q$ of degree $\vect n$, the product degree is $\vect m+\vect n$. Define the normalized product weight by
 
 $$
-R[\mathbf k]
-=\sum_{\mathbf i+\mathbf j=\mathbf k}
-\left[
+w_{\vect i,\vect j}
+=
 \prod_{s=1}^{\ell}
 \frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
-{\binom{m_s+n_s}{i_s+j_s}}
-\right]
-P[\mathbf i]Q[\mathbf j].
+{\binom{m_s+n_s}{i_s+j_s}}.
 $$
 
-Matrix order is preserved. The coefficient pair $P[\mathbf i]Q[\mathbf j]$ is never exchanged with $Q[\mathbf j]P[\mathbf i]$.
+The coefficient at label $\vect k$ is then
+
+$$
+R[\vect k]
+=\sum_{\vect i+\vect j=\vect k}
+w_{\vect i,\vect j}P[\vect i]Q[\vect j].
+$$
+
+Matrix order is preserved. Each coefficient pair is evaluated in the written order $P[\vect i]Q[\vect j]$.
 
 ## Three Product Kernels
 
@@ -112,7 +117,10 @@ $$
 
 The known blocks multiply the affine blocks directly, so the result remains affine when the public multiplication rules allow it. The generic fallback uses the same planned pairs and weights, but it accumulates each compatible payload product in repository order.
 
-YALMIP `sdpvar` data must not enter `convn` because MATLAB convolution expects numeric arrays and cannot preserve affine symbolic block structure. `prodVals` therefore dispatches numeric data to tensor convolution and keeps symbolic data on the planned contraction paths.
+MATLAB `convn` accepts numeric arrays and its output lacks the affine symbolic
+block structure required for YALMIP `sdpvar` data. `prodVals` therefore sends
+numeric data to tensor convolution and keeps symbolic data on the planned
+contraction paths.
 
 <CallGraph family="multiplication" caption="Multiplication selects one of three coefficient kernels after shared alignment." links={[
   { href: "#normalized-product-identity", label: "Product derivation" },
@@ -127,15 +135,15 @@ YALMIP `sdpvar` data must not enter `convn` because MATLAB convolution expects n
 Along local axis $s$, define
 
 $$
-\Delta_sP[\mathbf i]=P[\mathbf i+\mathbf e_s]-P[\mathbf i].
+\Delta_sP[\vect i]=P[\vect i+\vect e_s]-P[\vect i].
 $$
 
 Then
 
 $$
-\frac{\partial P^{(\mathbf c)}}{\partial\rho_s}
-=\frac{m_s}{h_s^{\mathbf c}}
-\sum_{\mathbf i}\Delta_sP[\mathbf i]B_{\mathbf i}^{\mathbf m-\mathbf e_s}.
+\frac{\partial P^{(\vect c)}}{\partial\rho_s}
+=\frac{m_s}{h_s^{\vect c}}
+\sum_{\vect i}\Delta_sP[\vect i]B_{\vect i}^{\vect m-\vect e_s}.
 $$
 
 Each nonzero partial is elevated to a common tensor degree before rate weighting. A zero-degree axis contributes zero. The resulting lower and upper rate combinations are stored as separate rate rows in deterministic tensor order.
@@ -150,7 +158,11 @@ Each nonzero partial is elevated to a common tensor degree before rate weighting
 
 ## Equivalence Boundary
 
-The optimized kernels preserve represented functions, existing YALMIP variables, certificate families, constraint order, PSD block dimensions, and cone partition, apart from ordinary floating-point summation differences. Numeric plan data may be reused. No execution-time comparison is reported. The optimization does not change an unsupported decision-by-decision product into a supported operation.
+The optimized kernels preserve represented functions, existing YALMIP
+variables, certificate families, constraint order, PSD block dimensions, and
+cone partition, apart from ordinary floating-point summation differences.
+Numeric plan data may be reused. This manual reports semantic equivalence.
+Decision-by-decision products remain outside the supported affine operation set.
 
 ## Limitations
 

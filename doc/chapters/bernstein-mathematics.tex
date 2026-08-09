@@ -1,7 +1,7 @@
 \chapter{Bernstein Representation and Exact Operations}
 \label{app:bernstein-math}
 
-This appendix develops the representation used by the package from the one-dimensional degree-one case to cell-local tensor polynomials.  The reader needs only scalar polynomials, matrices, and elementary calculus.  Every conversion, elevation, product, derivative, and subdivision below is exact; none is a sampling approximation.  Farouki gives a broader historical and numerical account \cite{farouki2012}.
+This appendix develops the representation used by the package from the one-dimensional degree-one case to cell-local tensor polynomials.  The reader needs only scalar polynomials, matrices, and elementary calculus.  Every conversion, elevation, product, derivative, and subdivision below is exact. None is a sampling approximation.  Farouki gives a broader historical and numerical account \cite{farouki2012}.
 
 Each main construction follows the same reading path: \emph{Basic idea}, \emph{Formula}, \emph{Worked example}, and \emph{Visual conclusion}.  The extra staging is intentional: first identify what the operation means, then read its indices, and only afterward connect it to package storage.
 
@@ -38,7 +38,7 @@ For scalars, \(X\) lies between the smallest and largest \(X_i\).  For symmetric
 \end{tikzpicture}
 \end{center}
 
-The implication is one-way.  A polynomial may be positive everywhere while one Bernstein coefficient is negative; Appendix~\ref{app:certificates} uses that fact to motivate stronger certificates.
+The implication is one-way.  A polynomial may be positive everywhere while one Bernstein coefficient is negative. Appendix~\ref{app:certificates} uses that fact to motivate stronger certificates.
 
 \section{Degree-One Interpolation On One Physical Cell}
 
@@ -57,7 +57,7 @@ Therefore
 \[
 C^{(c)}(\alpha)=(1-\alpha)C^{(c)}[0]+\alpha C^{(c)}[1].
 \]
-At the lower physical face, \(\alpha=0\) and the value is \(C^{(c)}[0]\); at the upper face, \(\alpha=1\) and the value is \(C^{(c)}[1]\).  Between them the matrix follows the straight segment joining those two coefficient matrices.
+At the lower physical face, \(\alpha=0\) and the value is \(C^{(c)}[0]\). At the upper face, \(\alpha=1\) and the value is \(C^{(c)}[1]\).  Between them the matrix follows the straight segment joining those two coefficient matrices.
 
 \ideastep{Worked example} For example, \(C^{(c)}[0]=2\) and \(C^{(c)}[1]=4\) give \(C^{(c)}(0.25)=0.75(2)+0.25(4)=2.5\), exactly as in \cref{sec:pdmat-evaluate}.
 
@@ -86,9 +86,9 @@ At the lower physical face, \(\alpha=0\) and the value is \(C^{(c)}[0]\); at the
 \label{sec:bernstein-higher-degree}
 \index{Bernstein basis}\index{Bernstein coefficient}\index{degree reduction}
 
-\ideastep{Basic idea} Higher degree adds interior shape controls while keeping the same physical cell.  It does not add physical grid nodes.
+\ideastep{Basic idea} Higher degree adds interior shape controls while keeping the same physical cell and the same physical grid nodes.
 
-\ideastep{Formula} In one parameter, write the degree vector as $\mathbf m=(m_1)$ and define
+\ideastep{Formula} In one parameter, write the degree vector as $\vect{m}=(m_1)$ and define
 \[
   B_i^{m_1}(\alpha)=\binom{m_1}{i}(1-\alpha)^{m_1-i}\alpha^i,
   \qquad i=0,\ldots,m_1.
@@ -138,7 +138,7 @@ B_0^2=(1-\alpha)^2,\qquad B_1^2=2(1-\alpha)\alpha,\qquad B_2^2=\alpha^2.
 \textit{At every \(\alpha\), the three plotted heights are nonnegative and sum to one.}
 \end{center}
 
-The label \(i\) identifies a basis position inside the selected physical cell. It is not a physical grid-node subscript.
+The label \(i\) identifies a basis position inside the selected physical cell and is distinct from a physical grid-node subscript.
 
 \section{Worked Conversion: \texorpdfstring{\(1+2\alpha+3\alpha^2\)}
 {1+2 alpha+3 alpha squared}}
@@ -160,7 +160,7 @@ Indeed,
 \[
 1B_0^2+2B_1^2+6B_2^2 =(1-2\alpha+\alpha^2)+(4\alpha-4\alpha^2)+6\alpha^2 =1+2\alpha+3\alpha^2.
 \]
-The three values \(1,2,6\) are coefficients of basis functions, not samples at three equally spaced physical points.  Only the two endpoint coefficients are endpoint values.  At \(\alpha=1/2\),
+The three values \(1,2,6\) are basis-function coefficients and are distinct from samples at three equally spaced physical points. Only the two endpoint coefficients are endpoint values. At \(\alpha=1/2\),
 \[
 p(1/2)=\tfrac14(1)+\tfrac12(2)+\tfrac14(6)=2.75.
 \]
@@ -205,7 +205,7 @@ These are changes of basis inside the same degree-\(n\) polynomial space. For ma
 \label{sec:bernstein-degree-elevation}
 \index{degree elevation}
 
-In one parameter, a polynomial on physical cell $c$ with degree vector $\mathbf m=(m_1)$ has a Bernstein representation of every higher degree. One elevation step gives
+In one parameter, a polynomial on physical cell $c$ with degree vector $\vect{m}=(m_1)$ has a Bernstein representation of every higher degree. One elevation step gives
 \[
 \begin{aligned}
   \widehat C^{(c)}[0]&=C^{(c)}[0],
@@ -238,7 +238,7 @@ For the worked coefficients \([1,2,6]\), elevation from degree two to degree thr
 \end{tikzpicture}
 \end{center}
 
-Direct elevation from $\mathbf m=(m_1)$ to $\mathbf M=(M_1)\ge\mathbf m$ is
+Direct elevation from $\vect{m}=(m_1)$ to $\vect{M}=(M_1)\ge\vect{m}$ is
 \[
   \widehat C^{(c)}[k]=
   \sum_{i=\max(0,k-M_1+m_1)}^{\min(m_1,k)}
@@ -259,43 +259,43 @@ Then
   \widehat C^{(c)}[k]
   =\frac{(U_{m_1}^{(c)}*E_{M_1-m_1})[k]}{\binom{M_1}{k}},
 \]
-where $*$ is ordinary one-dimensional discrete convolution and out-of-range entries are zero. Thus elevation first binomially scales the coefficient row, convolves it with the fixed binomial kernel of component gap $M_1-m_1$, and divides by the degree-component $M_1$ binomial weight. The new coefficients are fixed convex combinations of the old ones. Elevation therefore changes representation but adds no decision freedom. Constructing a new higher-degree \code{pdvar} does enlarge the decision parameterization.
+where $*$ is ordinary one-dimensional discrete convolution and out-of-range entries are zero. Thus elevation first binomially scales the coefficient row, convolves it with the fixed binomial kernel of component gap $M_1-m_1$, and divides by the degree-component $M_1$ binomial weight. The new coefficients are fixed convex combinations of the old ones. Elevation therefore changes representation with zero added decision freedom. Constructing a new higher-degree \code{pdvar} enlarges the decision parameterization.
 
-For a tensor coefficient array of degree $\mathbf m=(m_1,\ldots,m_\ell)$, elevate independently to any componentwise target $\mathbf M\ge\mathbf m$. With
+For a tensor coefficient array of degree $\vect{m}=(m_1,\ldots,m_\ell)$, elevate independently to any componentwise target $\vect{M}\ge\vect{m}$. With
 \[
-  U_{\mathbf m}^{(\mathbf c)}[\mathbf i]
+  U_{\vect{m}}^{(\vect{c})}[\vect{i}]
   =\left(\prod_{s=1}^{\ell}\binom {m_s}{i_s}\right)
-  C^{(\mathbf c)}[\mathbf i],
+  C^{(\vect{c})}[\vect{i}],
   \qquad
-  E_{\mathbf M-\mathbf m}[\mathbf j]
+  E_{\vect{M}-\vect{m}}[\vect{j}]
   =\prod_{s=1}^{\ell}\binom{M_s-m_s}{j_s},
 \]
 the elevated array satisfies
 \[
   \left(\prod_{s=1}^{\ell}\binom {M_s}{k_s}\right)
-  \widehat C^{(\mathbf c)}[\mathbf k]
+  \widehat C^{(\vect{c})}[\vect{k}]
   =
-  \bigl(U_{\mathbf m}^{(\mathbf c)}*_{\ell}E_{\mathbf M-\mathbf m}\bigr)[\mathbf k],
+  \bigl(U_{\vect{m}}^{(\vect{c})}*_{\ell}E_{\vect{M}-\vect{m}}\bigr)[\vect{k}],
 \]
-where $*_{\ell}$ denotes $\ell$-dimensional discrete convolution. The same identity defines a sparse linear operator without materializing zeros. Enumerate source labels $\mathbf i$ and target labels $\mathbf k$ in repository order, and define $E_{\mathbf M\leftarrow\mathbf m}\in\mathbb R^{N_{\mathbf M}\times N_{\mathbf m}}$ by
+where $*_{\ell}$ denotes $\ell$-dimensional discrete convolution. The same identity defines a sparse linear operator with zeros represented implicitly. Enumerate source labels $\vect{i}$ and target labels $\vect{k}$ in repository order, and define $E_{\vect{M}\leftarrow\vect{m}}\in\mathbb R^{N_{\vect{M}}\times N_{\vect{m}}}$ by
 \[
-\left[E_{\mathbf M\leftarrow\mathbf m}\right]_{\mathbf k,\mathbf i}=
+\left[E_{\vect{M}\leftarrow\vect{m}}\right]_{\vect{k},\vect{i}}=
 \begin{cases}
 \displaystyle\prod_{s=1}^{\ell}\frac{\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}}{\binom{M_s}{k_s}}, & 0\le k_s-i_s\le M_s-m_s\text{ for every }s,\\[8pt]
 0, & \text{otherwise}.
 \end{cases}
 \]
-Here $N_{\mathbf d}=\prod_s(d_s+1)$. Each source label contributes to the target labels in the translated gap box $\mathbf i+\prod_s\{0,\ldots,M_s-m_s\}$, so the operator has exactly $N_{\mathbf m}\prod_s(M_s-m_s+1)$ positive entries. All remaining entries are zero.
+Here $N_{\vect{d}}=\prod_s(d_s+1)$. Each source label contributes to the target labels in the translated gap box $\vect{i}+\prod_s\{0,\ldots,M_s-m_s\}$, so the operator has exactly $N_{\vect{m}}\prod_s(M_s-m_s+1)$ positive entries. All remaining entries are zero.
 
-If each coefficient is an $a$-by-$b$ matrix, pack one cell and rate row horizontally as $C_{\mathrm{pack}}=[C[\mathbf i_1]\ \cdots\ C[\mathbf i_{N_{\mathbf m}}]]$. The elevated payload is then
+If each coefficient is an $a$-by-$b$ matrix, pack one cell and rate row horizontally as $C_{\mathrm{pack}}=[C[\vect{i}_1]\ \cdots\ C[\vect{i}_{N_{\vect{m}}}]]$. The elevated payload is then
 \[
-\widehat C_{\mathrm{pack}}=C_{\mathrm{pack}}\left(E_{\mathbf M\leftarrow\mathbf m}^{\mathsf T}\otimes I_b\right).
+\widehat C_{\mathrm{pack}}=C_{\mathrm{pack}}\left(E_{\vect{M}\leftarrow\vect{m}}^{\mathsf T}\otimes I_b\right).
 \]
-This right multiplication preserves the $a$ rows and separates the $b$ columns of each target coefficient. It also applies to affine \code{sdpvar} payloads because the operator and Kronecker factor are numeric sparse matrices. Public \code{elevate} delegates complete tree alignment to the protected \code{elevData} kernel and packed row application to \code{elevRow}. These kernels group temporary operands by source degree, build one operator for each pair $(\mathbf m,\mathbf M)$, and reuse it across every physical cell and stored rate row with that shape. The returned object keeps the same represented function, existing YALMIP variables, metadata, physical-cell order, and rate-row order.
+This right multiplication preserves the $a$ rows and separates the $b$ columns of each target coefficient. It also applies to affine \code{sdpvar} payloads because the operator and Kronecker factor are numeric sparse matrices. Public \code{elevate} delegates complete tree alignment to the protected \code{elevData} kernel and packed row application to \code{elevRow}. These kernels group temporary operands by source degree, build one operator for each pair $(\vect{m},\vect{M})$, and reuse it across every physical cell and stored rate row with that shape. The returned object keeps the same represented function, existing YALMIP variables, metadata, physical-cell order, and rate-row order.
 
-For example, take the one-component vectors $\mathbf m=(m_1)=(1)$ and $\mathbf M=(M_1)=(3)$. The corresponding operator is
+For example, take the one-component vectors $\vect{m}=(m_1)=(1)$ and $\vect{M}=(M_1)=(3)$. The corresponding operator is
 \[
-E_{\mathbf M\leftarrow\mathbf m}=E_{(3)\leftarrow(1)}=
+E_{\vect{M}\leftarrow\vect{m}}=E_{(3)\leftarrow(1)}=
 \begin{bmatrix}
 1&0\\
 2/3&1/3\\
@@ -321,30 +321,30 @@ Suppose direction \(s\) has the axis grid
   \qquad
   \rho_s^{(1)}<\rho_s^{(2)}<\cdots<\rho_s^{(k_s)}.
 \]
-The counts \(k_s\) may differ. Thus \(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\) has \(\prod_s k_s\) physical nodes. A physical hypercube is identified separately by the one-based multi-index \(\mathbf c=(c_1,\ldots,c_\ell)\), with \(\mathcal H_{\mathbf c}=\prod_s[\rho_s^{(c_s)},\rho_s^{(c_s+1)}]\). Define its directional width and forward affine map by
+The counts \(k_s\) may differ. Thus \(\mathcal G=\mathcal G_1\times\cdots\times\mathcal G_\ell\) has \(\prod_s k_s\) physical nodes. A physical hypercube is identified separately by the one-based multi-index \(\vect{c}=(c_1,\ldots,c_\ell)\), with \(\mathcal H_{\vect{c}}=\prod_s[\rho_s^{(c_s)},\rho_s^{(c_s+1)}]\). Define its directional width and forward affine map by
 \[
 \begin{aligned}
-  h_s^{\mathbf c}
+  h_s^{\vect{c}}
     &=\rho_s^{(c_s+1)}-\rho_s^{(c_s)},\\
-  \phi_{\mathbf c}&:[0,1]^\ell\longrightarrow\mathcal H_{\mathbf c},\\
-  \phi_{\mathbf c,s}(\alpha_s)
-    &=\rho_s^{(c_s)}+h_s^{\mathbf c}\alpha_s,\\
-  \boldsymbol\alpha
-    &=\phi_{\mathbf c}^{-1}(\boldsymbol\rho),
+  \phi_{\vect{c}}&:[0,1]^\ell\longrightarrow\mathcal H_{\vect{c}},\\
+  \phi_{\vect{c},s}(\alpha_s)
+    &=\rho_s^{(c_s)}+h_s^{\vect{c}}\alpha_s,\\
+  \vect{\alpha}
+    &=\phi_{\vect{c}}^{-1}(\vect{\rho}),
     \qquad s=1,\ldots,\ell.
 \end{aligned}
 \]
-For any cellwise quantity \(C\), write \(C^{(\mathbf c)}=C\circ\phi_{\mathbf c}\) for its pullback to the unit box. For direction-wise degree \(\mathbf m=(m_1,\ldots,m_\ell)\),
+For any cellwise quantity \(C\), write \(C^{(\vect{c})}=C\circ\phi_{\vect{c}}\) for its pullback to the unit box. For direction-wise degree \(\vect{m}=(m_1,\ldots,m_\ell)\),
 \[
-C^{(\mathbf c)}(\boldsymbol\alpha)=
-  \sum_{\mathbf i\in\prod_s\{0,\ldots,m_s\}}
-B_{\mathbf i}^{\mathbf m}(\boldsymbol\alpha)
-  C^{(\mathbf c)}[\mathbf i],
+C^{(\vect{c})}(\vect{\alpha})=
+  \sum_{\vect{i}\in\prod_s\{0,\ldots,m_s\}}
+B_{\vect{i}}^{\vect{m}}(\vect{\alpha})
+  C^{(\vect{c})}[\vect{i}],
   \qquad
-B_{\mathbf i}^{\mathbf m}=
+B_{\vect{i}}^{\vect{m}}=
   \prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
 \]
-There are $\prod_s(k_s-1)$ physical hypercubes and $\prod_s(m_s+1)$ zero-based local Bernstein labels per hypercube. A zero component $m_s=0$ leaves only label $i_s=0$, so the polynomial is constant in direction $s$. Physical node and hypercube indices remain one-based. If every component is the common scalar $\bar m$, then $\mathbf m=\bar m\boldsymbol1$ and the label count specializes to $(\bar m+1)^\ell$.
+There are $\prod_s(k_s-1)$ physical hypercubes and $\prod_s(m_s+1)$ zero-based local Bernstein labels per hypercube. A zero component $m_s=0$ leaves only label $i_s=0$, so the polynomial is constant in direction $s$. Physical node and hypercube indices remain one-based. If every component is the common scalar $\bar m$, then $\vect{m}=\bar m\vect{1}$ and the label count specializes to $(\bar m+1)^\ell$.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20 30 40]}, [1 1], 1);
@@ -380,7 +380,7 @@ The nested tree \code{LocalValues{c1}{c2}...{cell}} follows physical-cell coordi
   \draw[dp/arrow] (tree) -- (leaf);
 \end{tikzpicture}
 
-\textit{Select the physical-cell leaf first; only then read the flat local coefficient labels in \code{lbls} order.}
+\textit{Select the physical-cell leaf first. Only then read the flat local coefficient labels in \code{lbls} order.}
 \end{center}
 
 \needspace{14\baselineskip}
@@ -389,7 +389,7 @@ The nested tree \code{LocalValues{c1}{c2}...{cell}} follows physical-cell coordi
 
 \ideastep{Basic idea} Multiplying two Bernstein polynomials creates every ordered pair of input coefficients.  Pairs with the same label sum contribute to the same output. For matrix payloads, ``ordered'' matters: the left factor stays on the left.
 
-\ideastep{Formula} First consider one parameter, write the two degree vectors as $\mathbf m=(m_1)$ and $\mathbf n=(n_1)$, and fix the one-based physical cell $c$. Let
+\ideastep{Formula} First consider one parameter, write the two degree vectors as $\vect{m}=(m_1)$ and $\vect{n}=(n_1)$, and fix the one-based physical cell $c$. Let
 \[
 P=\sum_{i=0}^{m_1}B_i^{m_1}P^{(c)}[i],\qquad Q=\sum_{j=0}^{n_1}B_j^{n_1}Q^{(c)}[j].
 \]
@@ -446,7 +446,7 @@ productCoefficients = 1×4 double
     2.0000    4.0000    9.3333   24.0000
 \end{lstlisting}
 
-The product degree in the transcript is three: degrees add, so \(2+1=3\).  The four outputs are coefficients in that cubic Bernstein basis, not values sampled at four points.
+The product degree in the transcript is three: degrees add, so \(2+1=3\). The four outputs are coefficients in that cubic Bernstein basis and are distinct from values sampled at four points.
 
 The same calculation can be checked as a function identity.  On \(\alpha\in[0,1]\),
 \[
@@ -503,7 +503,7 @@ P(\alpha)Q(\alpha) =2+6\alpha+10\alpha^2+6\alpha^3.
   \end{scope}
 \end{tikzpicture}
 
-\textit{Direct formula labels sit outside the plot regions.  Solid/circle, dashed/square, and dotted/triangle treatments distinguish the three functions without relying on color.}
+\textit{Direct formula labels sit outside the plot regions. Solid/circle, dashed/square, and dotted/triangle treatments distinguish the three functions and remain legible in monochrome.}
 \end{center}
 
 \newpage
@@ -530,14 +530,14 @@ P(\alpha)Q(\alpha) =2+6\alpha+10\alpha^2+6\alpha^3.
   \draw[dp/arrow] (groups)--node[above,font=\tiny]{binomial weights}(output);
 \end{tikzpicture}
 
-\textit{Only the panel-to-panel arrows encode flow.  Contributions are listed inside their anti-diagonal group, so no edges cross labels or equations.}
+\textit{Only the panel-to-panel arrows encode flow. Contributions are listed inside their anti-diagonal group, so every edge stays clear of labels and equations.}
 \end{center}
 
-\needspace{14\baselineskip} For tensor degrees $\mathbf m$ and $\mathbf n$, labels add componentwise and the product has degree $\mathbf m+\mathbf n$:
+\needspace{14\baselineskip} For tensor degrees $\vect{m}$ and $\vect{n}$, labels add componentwise and the product has degree $\vect{m}+\vect{n}$:
 \[
-(PQ)^{(\mathbf c)}[\mathbf k]=
-  \sum_{\mathbf i+\mathbf j=\mathbf k}
-P^{(\mathbf c)}[\mathbf i] Q^{(\mathbf c)}[\mathbf j]
+(PQ)^{(\vect{c})}[\vect{k}]=
+  \sum_{\vect{i}+\vect{j}=\vect{k}}
+P^{(\vect{c})}[\vect{i}] Q^{(\vect{c})}[\vect{j}]
   \prod_{s=1}^{\ell}
   \frac{\binom {m_s}{i_s}\binom {n_s}{j_s}}
        {\binom{m_s+n_s}{k_s}}.
@@ -545,44 +545,44 @@ P^{(\mathbf c)}[\mathbf i] Q^{(\mathbf c)}[\mathbf j]
 In binomially scaled form, the tensor rule is the \(\ell\)-dimensional discrete convolution
 \[
   \left(\prod_{s=1}^{\ell}\binom{m_s+n_s}{k_s}\right)
-  (PQ)^{(\mathbf c)}[\mathbf k]
+  (PQ)^{(\vect{c})}[\vect{k}]
   =
   \left(
   \left\{\left(\prod_{s=1}^{\ell}\binom {m_s}{i_s}\right)
-  P^{(\mathbf c)}[\mathbf i]\right\}_{\mathbf i}
+  P^{(\vect{c})}[\vect{i}]\right\}_{\vect{i}}
   *_{\ell}
   \left\{\left(\prod_{s=1}^{\ell}\binom {n_s}{j_s}\right)
-  Q^{(\mathbf c)}[\mathbf j]\right\}_{\mathbf j}
-  \right)[\mathbf k].
+  Q^{(\vect{c})}[\vect{j}]\right\}_{\vect{j}}
+  \right)[\vect{k}].
 \]
-Labels add componentwise, physical-cell identity does not change, and every matrix product retains the written left-to-right factor order. The implementation uses this identity through three payload-specific kernels that share the same planned degrees, output labels, and coefficient weights.
+Labels add componentwise, physical-cell identity remains fixed, and every matrix product retains the written left-to-right factor order. The implementation uses this identity through three payload-specific kernels that share the same planned degrees, output labels, and coefficient weights.
 
 \subsection{Numeric Tensor Convolution}
 
-When both operands are numeric, each matrix entry is packed into a tensor whose coefficient at label $\mathbf i$ is multiplied by the normalized weight $w_{\mathbf m}(\mathbf i)=2^{-\sum_s m_s}\prod_s\binom{m_s}{i_s}$. For output entry $(a,b)$, the matrix inner index $q$ gives
+When both operands are numeric, each matrix entry is packed into a tensor whose coefficient at label $\vect{i}$ is multiplied by the normalized weight $w_{\vect{m}}(\vect{i})=2^{-\sum_s m_s}\prod_s\binom{m_s}{i_s}$. For output entry $(a,b)$, the matrix inner index $q$ gives
 \[
 \widetilde R_{ab}=\sum_q \widetilde P_{aq}*_{\ell}\widetilde Q_{qb}.
 \]
-The planned tensor shapes map repository label order to MATLAB tensor indices, and division by $w_{\mathbf m+\mathbf n}(\mathbf k)$ returns the Bernstein coefficients because the powers of two cancel. The normalized tables are generated without first forming large raw binomial coefficients. MATLAB \code{conv} handles one parameter and \code{convn} handles two or more parameters. This route is used only when every payload is numeric. An affine \code{sdpvar} must not enter \code{convn} because \code{convn} does not implement YALMIP's affine symbolic payload semantics, and treating symbolic data as a numeric tensor would either fail dispatch or lose the required linear expression structure.
+The planned tensor shapes map repository label order to MATLAB tensor indices, and division by $w_{\vect{m}+\vect{n}}(\vect{k})$ returns the Bernstein coefficients because the powers of two cancel. The normalized tables are generated directly from normalized weights, which keeps large raw binomial coefficients outside the computation. MATLAB \code{conv} handles one parameter and \code{convn} handles two or more parameters. This route requires numeric payloads. Affine \code{sdpvar} payloads use the generic or block-contraction route because \code{convn} implements numeric tensor semantics, while the other routes preserve YALMIP's affine expression structure.
 
 \subsection{Known--Affine Block Contraction}
 
-Suppose the left coefficients $A[\mathbf i]$ are numeric matrices and the right coefficients $X[\mathbf j]$ are affine \code{sdpvar} matrices. For each output label $\mathbf k$, precompute the pair table
+Suppose the left coefficients $A[\vect{i}]$ are numeric matrices and the right coefficients $X[\vect{j}]$ are affine \code{sdpvar} matrices. For each output label $\vect{k}$, precompute the pair table
 \[
-\mathcal P_{\mathbf k}=\{(\mathbf i,\mathbf j):\mathbf i+\mathbf j=\mathbf k\}
+\mathcal P_{\vect{k}}=\{(\vect{i},\vect{j}):\vect{i}+\vect{j}=\vect{k}\}
 \]
-and its numeric weights $\omega_{\mathbf i,\mathbf j}$. Stack the affine blocks vertically in repository order. The output can then be evaluated as one ordinary matrix product
+and its numeric weights $\omega_{\vect{i},\vect{j}}$. Stack the affine blocks vertically in repository order. The output can then be evaluated as one ordinary matrix product
 \[
-R[\mathbf k]=
+R[\vect{k}]=
 \begin{bmatrix}
-\omega_1 A[\mathbf i_1]&\cdots&\omega_t A[\mathbf i_t]
+\omega_1 A[\vect{i}_1]&\cdots&\omega_t A[\vect{i}_t]
 \end{bmatrix}
 \begin{bmatrix}
-X[\mathbf j_1]\\ \vdots\\ X[\mathbf j_t]
+X[\vect{j}_1]\\ \vdots\\ X[\vect{j}_t]
 \end{bmatrix},
-\qquad t=|\mathcal P_{\mathbf k}|.
+\qquad t=|\mathcal P_{\vect{k}}|.
 \]
-The symmetric implementation for an affine left operand and known right operand stacks the affine blocks horizontally and the weighted known blocks vertically, which preserves the written order $X[\mathbf i]A[\mathbf j]$. The pair labels and weights are numeric plan data and are reused across physical cells and rate rows.
+The symmetric implementation for an affine left operand and known right operand stacks the affine blocks horizontally and the weighted known blocks vertically, which preserves the written order $X[\vect{i}]A[\vect{j}]$. The pair labels and weights are numeric plan data and are reused across physical cells and rate rows.
 
 For a one-parameter degree-one known factor $A$ and degree-one affine factor $X$, the middle coefficient is
 \[
@@ -597,51 +597,51 @@ A[0]=\begin{bmatrix}1&0\\0&2\end{bmatrix},
 \qquad
 A[1]=\begin{bmatrix}2&1\\0&1\end{bmatrix},
 \]
-the contraction multiplies one stacked affine vector of matrix blocks by the fixed numeric block row $\tfrac12[A[1]\ A[0]]$. It creates the same affine YALMIP expression as the two-term sum and introduces no new decision variable.
+the contraction multiplies one stacked affine vector of matrix blocks by the fixed numeric block row $\tfrac12[A[1]\ A[0]]$. It creates the same affine YALMIP expression as the two-term sum and introduces zero new decision variables.
 
 \subsection{Planned Generic Fallback}
 
-Scalar broadcasting and other supported payload shapes use the same precomputed pair table without a block contraction. For every output label, the generic route accumulates
+Scalar broadcasting and other supported payload shapes use the same precomputed pair table through direct term accumulation. For every output label, the generic route computes
 \[
-R[\mathbf k]=\sum_{r=1}^{|\mathcal P_{\mathbf k}|}\omega_r P[\mathbf i_r]Q[\mathbf j_r]
+R[\vect{k}]=\sum_{r=1}^{|\mathcal P_{\vect{k}}|}\omega_r P[\vect{i}_r]Q[\vect{j}_r]
 \]
 in deterministic pair order. This fallback keeps MATLAB scalar and matrix multiplication rules visible, while avoiding repeated label enumeration and repeated binomial-ratio construction. Ordinary coefficient rows may broadcast over one rate-row operand, but two actual rate-row operands are rejected because their product would be quadratic in the scheduling rates.
 
-The protected \code{prodVals} kernel owns the three routes and reuses their numeric plans across the complete cell-local trees. All routes preserve the same product polynomial and output degree. Numeric tensor shapes, pair tables, and weights may be reused because they contain no YALMIP variables. The input coefficient payloads and their existing decision variables remain attached to their own physical cells and rate rows.
+The protected \code{prodVals} kernel owns the three routes and reuses their numeric plans across the complete cell-local trees. All routes preserve the same product polynomial and output degree. Numeric tensor shapes, pair tables, and weights may be reused because they are purely numeric. The input coefficient payloads and their existing decision variables remain attached to their own physical cells and rate rows.
 
 \needspace{14\baselineskip}
 \section{Differentiation And Rate Vertices}
 \label{sec:bernstein-differentiation}
 
-\ideastep{Basic idea} Differentiate inside each physical cell.  Adjacent control differences produce the derivative coefficients; multiplying by a bounded rate then creates one stored row per rate-box vertex.  Value continuity of \(P\) does not force the cell-local derivatives to match across a face.
+\ideastep{Basic idea} Differentiate inside each physical cell. Adjacent control differences produce the derivative coefficients. Multiplying by a bounded rate then creates one stored row per rate-box vertex. Value continuity of \(P\) permits distinct cell-local derivatives across a shared face.
 
-\ideastep{Formula} For one parameter, write $\mathbf m=(m_1)$ and consider physical cell $c$ of width $h_1^c$:
+\ideastep{Formula} For one parameter, write $\vect{m}=(m_1)$ and consider physical cell $c$ of width $h_1^c$:
 \[
   \frac{\partial P}{\partial\rho}
 =\frac{m_1}{h_1^c}\sum_{i=0}^{m_1-1}
     \bigl(C^{(c)}[i+1]-C^{(c)}[i]\bigr)B_i^{m_1-1}(\alpha).
 \]
-\ideastep{Worked example} For the worked polynomial $[1,2,6]$ on $[0,2]$, $\mathbf m=(2)$ and $h_1^c=2$, so the derivative coefficients are
+\ideastep{Worked example} For the worked polynomial $[1,2,6]$ on $[0,2]$, $\vect{m}=(2)$ and $h_1^c=2$, so the derivative coefficients are
 \[
   \left[\frac{2}{2}(2-1),\frac{2}{2}(6-2)\right]=[1,4].
 \]
 This represents \(dp/d\rho=1+3\alpha\).
 
-In \(\ell\) dimensions with tensor degree \(\mathbf m\), differentiation with respect to \(\rho_s\) replaces each coefficient by
+In \(\ell\) dimensions with tensor degree \(\vect{m}\), differentiation with respect to \(\rho_s\) replaces each coefficient by
 \[
-  \frac{m_s}{h_s^{\mathbf c}}
-  \left(C^{(\mathbf c)}[\mathbf i+\mathbf e_s]
-       -C^{(\mathbf c)}[\mathbf i]\right),
+  \frac{m_s}{h_s^{\vect{c}}}
+  \left(C^{(\vect{c})}[\vect{i}+\vect{e}_s]
+       -C^{(\vect{c})}[\vect{i}]\right),
 \]
-when \(m_s>0\), reduces only that component to \(m_s-1\), and leaves the other label components unchanged. A zero-degree axis has identically zero partial derivative. For two or more parameters, the implementation elevates every nonzero partial exactly from \(\mathbf m-\mathbf e_s\) back to the common tensor degree \(\mathbf m\) before adding them; in one parameter it retains the established reduced-degree result. If every component is zero, \code{rhodiff} stores a complete zero coefficient row for every rate vertex.
+when \(m_s>0\), reduces only that component to \(m_s-1\), and leaves the other label components unchanged. A zero-degree axis has identically zero partial derivative. For two or more parameters, the implementation elevates every nonzero partial exactly from \(\vect{m}-\vect{e}_s\) back to the common tensor degree \(\vect{m}\) before adding them. In one parameter it retains the established reduced-degree result. If every component is zero, \code{rhodiff} stores a complete zero coefficient row for every rate vertex.
 
 Finally,
 \[
   \dot P=\sum_{s=1}^{\ell}
   \nu_s\frac{\partial P}{\partial\rho_s},
-  \qquad \boldsymbol\nu=\dot{\boldsymbol\rho}.
+  \qquad \vect{\nu}=\dot{\vect{\rho}}.
 \]
-This matrix expression is affine in \(\boldsymbol\nu\). Every value inside the rate box \(\mathcal R\) is therefore a convex combination of the distinct vertex matrices in \(\mathcal V_{\mathcal R}\). Because the positive- and negative-semidefinite cones are convex, the requested semidefinite sign holds on all of \(\mathcal R\) whenever it holds at every distinct vertex. \code{rhodiff} stores one row for each of these vertices.
+This matrix expression is affine in \(\vect{\nu}\). Every value inside the rate box \(\mathcal R\) is therefore a convex combination of the distinct vertex matrices in \(\mathcal V_{\mathcal R}\). Because the positive- and negative-semidefinite cones are convex, the requested semidefinite sign holds on all of \(\mathcal R\) whenever it holds at every distinct vertex. \code{rhodiff} stores one row for each of these vertices.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -669,10 +669,10 @@ Let \(\code{RateBounds}(s,:)=[\underline\nu_s\ \overline\nu_s]\). The rate box \
   \mathcal V_{\mathcal R}
   =\prod_{s=1}^{\ell}\{\underline\nu_s,\overline\nu_s\},
   \qquad N_v:=|\mathcal V_{\mathcal R}|
-  =\prod_{s=1}^{\ell}\left(1+\mathbf 1_{\{\underline\nu_s<\overline\nu_s\}}\right)
+  =\prod_{s=1}^{\ell}\left(1+\vect{1}_{\{\underline\nu_s<\overline\nu_s\}}\right)
   \le 2^\ell.
 \]
-Here a varying direction contributes its lower and upper values, while a fixed direction contributes its single value. For a derivative object \(D=\code{rhodiff}(P,\code{RateBounds})\) and one physical hypercube \(\mathbf c=(c_1,\ldots,c_\ell)\), the leaf \(\code{D.LocalValues}\{c_1\}\cdots\{c_\ell\}\) is an \(N_v\)-by-\(\prod_s(\code{D.Degree}(s)+1)\) cell array. Its rows enumerate vertices \(\boldsymbol\nu^{(q)}\in\mathcal V_{\mathcal R}\); its columns enumerate local Bernstein labels in \code{combRows} order. Each entry already contains \(\sum_s\nu_s^{(q)}\,\partial P^{(\mathbf c)}/\partial\rho_s\). The rows add rate alternatives inside one existing hypercube; they do not add physical cells.
+Here a varying direction contributes its lower and upper values, while a fixed direction contributes its single value. For a derivative object \(D=\code{rhodiff}(P,\code{RateBounds})\) and one physical hypercube \(\vect{c}=(c_1,\ldots,c_\ell)\), the leaf \(\code{D.LocalValues}\{c_1\}\cdots\{c_\ell\}\) is an \(N_v\)-by-\(\prod_s(\code{D.Degree}(s)+1)\) cell array. Its rows enumerate vertices \(\vect{\nu}^{(q)}\in\mathcal V_{\mathcal R}\). Its columns enumerate local Bernstein labels in \code{combRows} order. Each entry already contains \(\sum_s\nu_s^{(q)}\,\partial P^{(\vect{c})}/\partial\rho_s\). The rows add rate alternatives inside one existing hypercube while preserving the physical-cell count.
 
 For \(\ell=2\) when both rate directions vary, the lower/upper tensor order is
 \[
@@ -685,12 +685,12 @@ For \(\ell=2\) when both rate directions vary, the lower/upper tensor order is
 4 & \overline\nu_1 & \overline\nu_2
 \end{array}
 \]
-The last parameter direction changes fastest.  This is the same tensor ordering used by the package's coefficient and cell traversal, so \code{pdlmi} can constrain every rate row without reconstructing the rate box.
+The last parameter direction changes fastest. This is the same tensor ordering used by the package's coefficient and cell traversal, so \code{pdlmi} can constrain every rate row directly from the stored rate-box representation.
 
 \section{de Casteljau Evaluation And Exact Subdivision}
 \index{de Casteljau evaluation}\index{subdivision}
 
-de Casteljau recursion evaluates a Bernstein polynomial using only affine combinations. For one parameter, write the degree as $\mathbf m=(m_1)$. On a fixed physical cell $c$, begin with $C^{(c,0)}[i]=C^{(c)}[i]$ and define
+de Casteljau recursion evaluates a Bernstein polynomial using only affine combinations. For one parameter, write the degree as $\vect{m}=(m_1)$. On a fixed physical cell $c$, begin with $C^{(c,0)}[i]=C^{(c)}[i]$ and define
 \[
 C^{(c,r)}[i]=(1-\tau)C^{(c,r-1)}[i]
     +\tau C^{(c,r-1)}[i+1],
@@ -702,7 +702,7 @@ For \([1,2,6]\) and \(\tau=1/2\), the recursion is
 \[
 [1,2,6]\ \longrightarrow\ [1.5,4]\ \longrightarrow\ [2.75].
 \]
-The left edge of this triangle gives exact coefficients \([1,1.5,2.75]\) on the left subinterval; the right edge gives \([2.75,4,6]\) on the right.
+The left edge of this triangle gives exact coefficients \([1,1.5,2.75]\) on the left subinterval. The right edge gives \([2.75,4,6]\) on the right.
 
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=7mm and 11mm,
@@ -722,9 +722,9 @@ The left edge of this triangle gives exact coefficients \([1,1.5,2.75]\) on the 
 \medskip \textit{One recursion triangle supplies both the evaluation and the two child-cell coefficient lists.}
 \end{center}
 
-Tensor evaluation or subdivision applies the same recursion along one parameter direction at a time.  Subdivision changes the physical-cell partition and can tighten coefficient hulls while preserving the polynomial.  The package uses exact coefficient transformations internally where documented, but it does not currently expose a public de Casteljau, subdivision, or adaptive-refinement API.
+Tensor evaluation or subdivision applies the same recursion along one parameter direction at a time. Subdivision changes the physical-cell partition and can tighten coefficient hulls while preserving the polynomial. The package uses exact coefficient transformations internally where documented. Its current public transformation API exposes evaluation, degree elevation, and differentiation, while de Casteljau subdivision and adaptive refinement remain implementation concepts.
 
-\section{What Changes, And What Does Not}
+\section{Changed and Preserved Quantities}
 
 The following distinctions prevent several common modeling mistakes.
 
@@ -741,7 +741,7 @@ Differentiation & degree and coefficient values & physical-cell partition before
 \bottomrule
 \end{tabularx}
 
-These representation facts support the finite certificates in the next appendix.  They do not by themselves select a solver or prove that one certificate is necessary.
+These representation facts support the finite certificates in the next appendix. Solver selection belongs to the caller, and each implemented certificate supplies a sufficient condition.
 
 \section{Further Reading}
 For a concise orientation before the primary paper by Farouki \cite{farouki2012}, see the \href{https://en.wikipedia.org/wiki/Bernstein_polynomial}{Bernstein polynomial overview} and the \href{https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm}{de Casteljau overview}. They are background references for the basis and recursion; the package's cell-local storage and certificate behavior are defined by this manual and the source implementation.

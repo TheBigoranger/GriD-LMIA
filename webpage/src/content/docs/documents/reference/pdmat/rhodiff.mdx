@@ -33,19 +33,19 @@ D = rhodiff(A, rateBounds)
 
 ## Arguments And Returned Object
 
-`A` must have Bernstein coefficient evidence. The no-argument form uses
-`A.RateBounds`; explicit `rateBounds` supplies missing metadata, but must match
+`A` must have Bernstein coefficient evidence. Omitting explicit bounds uses
+`A.RateBounds`. explicit `rateBounds` supplies missing metadata, but must match
 stored bounds when both are present.
 
-For one parameter, $\mathbf m=(m_1)$ with $m_1>0$ returns degree
-$(m_1-1)$; degree $(0)$ remains zero. For several parameters, the partial along axis `s` has degree
+For one parameter, $\vect m=(m_1)$ with $m_1>0$ returns degree
+$(m_1-1)$. degree $(0)$ remains zero. For several parameters, the partial along axis `s` has degree
 `A.Degree-e_s` when `A.Degree(s)>0`, then is elevated exactly back to the common
 vector `A.Degree` before the rate-weighted sum is formed. A zero-degree axis
 contributes the zero partial, so multivariate `rhodiff` preserves the complete
 direction-wise degree row.
 `D` is a `pdmat` with `IsContinuous=false` and one numeric coefficient row per
 distinct rate-box vertex in `helper.combRows` order. `D.NumRateRows` is the
-exact stored-row count. A fixed axis contributes one value rather than two.
+exact stored-row count. A fixed axis contributes one value in place of two endpoints.
 
 ## MATLAB Transcript
 
@@ -73,7 +73,7 @@ The two rows evaluate the constant physical derivative `2` at rates `-1` and
   `pdmat:MissingRateBounds`, `pdmat:InvalidRateBounds`, or
   `pdmat:RateBoundsMismatch`.
 - Existing explicit rate rows, including a previous derivative, raise
-  `pdmat:InvalidDiff`; repeated differentiation is unsupported.
+  `pdmat:InvalidDiff`. repeated differentiation is unsupported.
 - The output is cell-local and generally discontinuous at shared faces.
 
 ## See Also

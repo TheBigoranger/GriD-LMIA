@@ -7,7 +7,10 @@ description: Create semidefinite or entry-wise inequalities with <= and >=, and 
 
 ## Purpose
 
-Overloaded `<=`, `>=`, and `==` promote compatible operands, store `lhs-rhs` as a `pdvar` residual, and return a [`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/) wrapper. They assemble finite constraints; they do not choose a solver or call `optimize`.
+Overloaded `<=`, `>=`, and `==` promote compatible operands, store `lhs-rhs`
+as a `pdvar` residual, and return a [`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/)
+wrapper. They assemble finite constraints for a later caller-selected solver and
+`optimize` call.
 
 ## Syntax
 
@@ -44,7 +47,9 @@ numel(C.Constraints)   % 2 coefficient groups; each contains 6 scalar entries
 
 ## <span id="pdvar-comparison-eq"></span>Equality: `eq`/`==`
 
-Equality is direct coefficient equality by definition. It accepts rectangular and non-Hermitian residuals, vectorizes each coefficient in column-major order, and emits no inequality warning.
+Equality is direct coefficient equality by definition. It accepts rectangular
+and non-Hermitian residuals, vectorizes each coefficient in column-major order,
+and reserves the inequality warning for inequalities.
 
 Ordinary value rows may equal ordinary value rows, and derivative-row objects
 may equal derivative-row objects. `pdvar:InvalidEqualityRows` is reserved for
@@ -77,16 +82,16 @@ C.Residual
 C.Constraints
 ```
 
-`Relation` is `"<="`, `">="`, or `"=="`; `Residual` is the promoted `lhs-rhs`; `Constraints` is the already assembled finite cell array.
+`Relation` is `"<="`, `">="`, or `"=="`. `Residual` is the promoted `lhs-rhs`. `Constraints` is the already assembled finite cell array.
 
 ## Validation and errors
 
 - Incompatible operand promotion raises the owning `pdvar` grid, degree, matrix-size, or rate-row error.
-- Entry-wise inequality fallback is supported behavior and warns once with `pdlmi:ElementwiseInequality`; it is not an invalid-matrix error.
+- Entry-wise inequality fallback is supported behavior and warns once with `pdlmi:ElementwiseInequality`. The warning reports the selected scalar certificate path.
 - Ordinary-versus-derivative operands, or one operand mixing row kinds across cells, raise `pdvar:InvalidEqualityRows`.
 - When both operands are derivative-row objects, incompatible grids, `RateBounds`, or shapes retain subtraction-owned errors such as `pdvar:MixedGrid` or `pdvar:InvalidSubtraction`.
 - Equality certificate selection raises `pdlmi:UnsupportedEqualityCertificate`.
-- No comparison adds strictness, a positivity margin, or a solver call.
+- Every comparison preserves the written strictness policy and leaves positivity margins and solver calls explicit.
 
 ## See Also
 

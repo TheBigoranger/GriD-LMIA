@@ -41,12 +41,12 @@ export default function TensorTraversalExplorer() {
           <select id={`${id}-label`} value={labelIndex} onChange={(event) => setLabelIndex(Number(event.target.value))}>{model.labels.map((value, index) => <option value={index} key={value.join(",")}>{index + 1}: [{value.join(", ")}]</option>)}</select>
         </div>
         <section className="explorer-readout" aria-live="polite">
-          <p><strong>Selected cell:</strong> c = ({cell.join(", ")}); <strong>label:</strong> [{label.join(", ")}]</p>
+          <p><strong>Selected cell:</strong> c = ({cell.join(", ")}). <strong>Label:</strong> [{label.join(", ")}]</p>
           <p><strong>MATLAB path:</strong> <code>A.LocalValues{cell.map((value) => `{${value}}`).join("")}{`{${labelIndex + 1}}`}</code> <span>(flat coefficient column {labelIndex + 1})</span></p>
           <p>The last axis varies fastest in both lists.</p>
         </section>
       </div>
-      <figcaption>Physical nodes, cells, and local Bernstein labels are separate tensor products; changing degree does not add grid nodes.</figcaption>
+      <figcaption>Physical nodes, cells, and local Bernstein labels are separate tensor products. Changing degree preserves the grid nodes.</figcaption>
     </figure>
   );
 }

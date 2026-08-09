@@ -16,8 +16,13 @@ This package and manual are built around MATLAB and YALMIP workflows. The public
 
 ## Comparison References
 
-ROLmip, LPVTools, ROMULOC, MATLAB documentation, YALMIP examples, and TikZ-style manuals are useful reference points for documentation structure, examples, and notation. They are not runtime dependencies of GriD-LMIA unless a future implementation explicitly adds such an adapter.
+ROLmip, LPVTools, ROMULOC, MATLAB documentation, YALMIP examples, and TikZ-style
+manuals are useful reference points for documentation structure, examples, and
+notation. GriD-LMIA currently uses MATLAB, YALMIP, and a compatible solver at
+runtime. Future adapters will appear explicitly in the implementation and installation contract.
 
 ## Source Boundary
 
-The website documents behavior from the repository code, tests, project memory, and `doc/manual.tex`. It does not publish internal writer prompts, agent workflows, or private maintenance notes.
+The website documents public behavior from the repository code, tests, project
+memory, and `doc/manual.tex`. Public source, mathematics, examples, and
+maintenance history define its scope.

@@ -18,7 +18,7 @@ property = A.Degree
 Two-dimensional parentheses indexing selects the same matrix block from every
 known coefficient. `rows` and `columns` may be `:`, matching logical vectors,
 or finite in-range positive integers. `end` resolves against matrix-payload
-dimensions, not cells. A function-only source has no coefficient blocks and
+dimensions and preserve the cells. A function-only source lacks coefficient blocks and
 raises `pdmat:FunctionOnlyAlgebra`.
 
 ## <span id="pdmat-subsasgn"></span>`subsasgn`
@@ -30,7 +30,7 @@ A(rows,columns) = compatiblePdmat
 
 Assignment replaces the same block coefficient-wise. Numeric values must fit
 the indexed shape. A `pdmat` value must have compatible physical bounds and
-coefficient evidence; alignment preserves the destination grid contract.
+coefficient evidence. alignment preserves the destination grid contract.
 Unsupported dot/brace assignment uses `pdmat:UnsupportedAssignment`.
 
 ```matlab
@@ -72,7 +72,7 @@ rows = height(A)
 columns = width(A)
 ```
 
-All describe one numeric payload. `ndims` is always two; use `ncell`,
+All describe one numeric payload. `ndims` is always two. use `ncell`,
 `ncoeff`, and `npar` for storage axes.
 
 ## <span id="pdmat-isequal"></span>`isequal`
@@ -82,7 +82,7 @@ tf = isequal(A,B)
 ```
 
 Returns a MATLAB logical after comparing normalized grid, payload, degree,
-metadata, and known coefficient/source evidence. It does not create a modeling
+metadata, and known coefficient/source evidence. It preserves the existing modeling
 constraint.
 
 ```matlab
@@ -114,14 +114,14 @@ is the stable coefficient-row diagnostic.
 ## <span id="pdmat-numArgumentsFromSubscript"></span>`numArgumentsFromSubscript`
 
 MATLAB calls this inherited protocol internally. It returns one so indexed
-`pdmat` values remain scalar objects for chained dot access. It has no modeling
+`pdmat` values remain scalar objects for chained dot access. The method has an internal indexing role and zero modeling
 options or separate output workflow.
 
 ## Validation, limitations, and See Also
 
 Malformed matrix subscripts and incompatible assignments use `pdmat`-owned
 errors. Indexing never selects physical cells or coefficient labels and does
-not evaluate the function.
+preserve the function state for later evaluation.
 
 [`storage`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) ·
 [`structural operations`](/GriD-LMIA/documents/reference/pdmat/structural-operations/) ·

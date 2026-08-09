@@ -32,7 +32,7 @@ C = A >= M
 
 For two `pdmat` operands, `A == B` returns one scalar logical. Subtraction
 performs the normal grid compatibility, common-grid refinement, and exact
-degree elevation; the result is true exactly when the aligned coefficient
+degree elevation. the result is true exactly when the aligned coefficient
 difference is provably zero. This operator never creates a `pdlmi`.
 
 <span id="pdmat-le"></span>
@@ -43,7 +43,7 @@ difference is provably zero. This operator never creates a `pdlmi`.
 `<=` and `>=` create a `pdlmi` from compatible coefficient-backed known data.
 Finite real numeric operands follow the ordinary size and scalar-broadcast
 rules. Direct and Pólya assembly scan the complete coefficient family and
-store one logical certificate cell; `toYalmip` exports that state as one scalar
+store one logical certificate cell. `toYalmip` exports that state as one scalar
 logical.
 
 ```matlab
@@ -79,17 +79,18 @@ entry-wise mode tests individual scalar entries.
 
 ## Validation And Limitations
 
-- `pdmat:InvalidEquality` applies only when either `==` operand is not a
-  `pdmat`. Incompatible `pdmat` operands delegate through subtraction and
+- `pdmat:InvalidEquality` applies when either `==` operand lies outside the
+  `pdmat` type. Incompatible `pdmat` operands delegate through subtraction and
   alignment, then propagate the applicable subtraction, grid, or rate-bound
   compatibility error.
-- Function-only data have no finite coefficient evidence and cannot enter
-  equality or inequality certification.
-- A known `pdmat` equality is deliberately not a `pdlmi` residual;
+- Function-only data lack finite coefficient evidence and therefore stay in
+  evaluation workflows.
+- A known `pdmat` equality returns a logical result, while a decision-dependent
+  equality returns a `pdlmi` residual.
   `pdlmi(A,"==")` raises `pdlmi:UnsupportedPdmatEquality`.
 - A false Direct or Pólya export warns with
-  `pdlmi:InconclusiveCertificate`; failure of this sufficient coefficient
-  test does not prove a continuous violation or matrix indefiniteness.
+  `pdlmi:InconclusiveCertificate`. Failure of this sufficient coefficient
+  test remains inconclusive about a continuous violation or matrix indefiniteness.
 - Known-data Putinar, SparsePutinar, SparseFullBox, and FullBox paths still return YALMIP
   constraints and may introduce auxiliary Gram variables.
 

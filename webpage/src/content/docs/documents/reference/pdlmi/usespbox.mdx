@@ -11,7 +11,9 @@ import CertificateNavigation from "../../../../../components/CertificateNavigati
 
 # `useSpBox`
 
-`useSpBox` rebuilds an inequality from its stored `Residual` with SparseFullBox sliding tensor-window Gram blocks. It is a value-semantic selector and does not modify the source object.
+`useSpBox` rebuilds an inequality from its stored `Residual` with SparseFullBox
+sliding tensor-window Gram blocks. It is a value-semantic selector that
+preserves the source object.
 
 ## Syntax
 
@@ -28,7 +30,7 @@ selected = C.useSpBox(..., ValidationMode=mode)
 | --- | --- |
 | `windowSize` | Positive integer tensor-window side. Default `2`. |
 | `order` | Nonnegative scalar or one entry per parameter axis. The default is the minimum admissible absolute order. |
-| `ValidationMode` | Current supported transient validation mode. It changes validation work, not certificate meaning. |
+| `ValidationMode` | Current supported transient validation mode. It changes validation work while preserving certificate meaning. |
 
 ## Returned Object
 
@@ -50,7 +52,7 @@ The selector creates fresh Gram variables for every entrywise copy when applicab
 
 ## Anisotropic Assembly Output
 
-For $\mathbf M=(4,2)$, $\mathbf r=(2,1)$, and `BandWidth=2`, the four
+For $\vect M=(4,2)$, $\vect r=(2,1)$, and `BandWidth=2`, the four
 full-box generator subsets have basis degrees $(2,1)$, $(1,1)$, $(2,0)$,
 and $(1,0)$. Their sliding-window diagrams contain $2+1+2+1=6$ independent
 PSD blocks. The blocks contribute to one $5\times3$ tensor of 15 exact target
@@ -61,7 +63,7 @@ coefficient identities.
 - Equality residuals reject every non-Direct selector.
 - Window size and order must be finite nonnegative integers in the implemented ranges.
 - A fixed order and window size give a sufficient certificate. Failure is inconclusive.
-- The construction uses sliding windows in tensor-label space. It is not a band constraint on a flattened Gram matrix.
+- The construction uses sliding windows in tensor-label space, a support pattern distinct from a band constraint on a flattened Gram matrix.
 
 The full derivation, PSD dimensions, coefficient identities, and canonical endpoints are in [SparseFullBox And FullBox](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/).
 

@@ -3,7 +3,7 @@ title: Examples
 description: Runnable GriD-LMIA workflows using current public APIs.
 ---
 
-These examples are intentionally small and deterministic. They complement the reference pages without replacing them.
+These examples are intentionally small and deterministic. They complement the reference pages with executable workflows.
 
 ## Setup And Verification
 
@@ -14,10 +14,12 @@ report = install_pd_lmi();
 results = tests.run_all();
 ```
 
-The installer adds only `projectRoot` at the end of the MATLAB path; it does
-not use `genpath`. The test entry point runs installation, helper, `pdbase`,
+The installer adds `projectRoot` directly at the end of the MATLAB path. The
+test entry point runs installation, helper, `pdbase`,
 `pdmat`, `pdvar`, and `pdlmi` tests. `pdvar` and `pdlmi` workflows require
 YALMIP on the MATLAB path.
+
+<span id="known-scalar-data"></span>
 
 ## Scalar `pdmat`
 
@@ -30,6 +32,8 @@ val = A.evaluate(0.25)
 val =
     1.5000
 ```
+
+<span id="known-matrix-data"></span>
 
 ## Tensor-Grid `pdmat`
 
@@ -58,7 +62,10 @@ ans =
      1
 ```
 
-Function-backed objects without explicit `Degree` preserve the exact function handle and are not coefficient evidence for algebra.
+Function-backed objects that omit explicit `Degree` preserve the exact function
+handle and stay in evaluation workflows.
+
+<span id="rate-derivative"></span>
 
 ## `pdvar` And `rhodiff`
 
@@ -78,6 +85,8 @@ ans =
 ans =
     -1     1
 ```
+
+<span id="direct-constraint"></span>
 
 ## `pdlmi.toYalmip`
 
@@ -139,8 +148,7 @@ The solver-facing smoke examples from [`+tests/+pdlmi/test_solver_smoke.m`](http
 
 The package currently assembles direct or Pólya-elevated coefficient-wise
 constraints and the opt-in fixed-order Putinar, SparsePutinar, SparseFullBox, and FullBox
-Gram certificates. It does not provide a package-owned solver wrapper or
-residual diagnostic layer.
+Gram certificates. Solver calls and residual diagnostics use YALMIP's public interfaces.
 
 ## See Also
 

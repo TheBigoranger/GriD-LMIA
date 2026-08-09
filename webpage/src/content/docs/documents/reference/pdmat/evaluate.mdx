@@ -53,10 +53,10 @@ For coefficient-backed data, let the evaluation point lie in the physical cell
 
 $$
 \begin{aligned}
-\mathcal H_{\boldsymbol c}
+\mathcal H_{\vect c}
 &:=\prod_{s=1}^{\ell}
 \left[\rho_s^{(c_s)},\rho_s^{(c_s+1)}\right],\\
-\boldsymbol\rho&\in\mathcal H_{\boldsymbol c},\\
+\vect\rho&\in\mathcal H_{\vect c},\\
 \alpha_s
 &:=\frac{\rho_s-\rho_s^{(c_s)}}
 {\rho_s^{(c_s+1)}-\rho_s^{(c_s)}},\\
@@ -65,18 +65,18 @@ s&=1,\ldots,\ell.
 $$
 
 For direction-wise Bernstein degree
-$\boldsymbol m=(m_1,\ldots,m_\ell)$, `evaluate` computes the tensor expansion
+$\vect m=(m_1,\ldots,m_\ell)$, `evaluate` computes the tensor expansion
 
 $$
 \begin{aligned}
-\mathcal I_{\boldsymbol m}
+\mathcal I_{\vect m}
 &:=\prod_{s=1}^{\ell}\{0,\ldots,m_s\},\\
-A(\boldsymbol\rho)
-&=A^{(\boldsymbol c)}(\boldsymbol\alpha),\\
-A^{(\boldsymbol c)}(\boldsymbol\alpha)
-&=\sum_{\boldsymbol i\in\mathcal I_{\boldsymbol m}}
-C^{(\boldsymbol c)}[\boldsymbol i]\,
-B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha).
+A(\vect\rho)
+&=A^{(\vect c)}(\vect\alpha),\\
+A^{(\vect c)}(\vect\alpha)
+&=\sum_{\vect i\in\mathcal I_{\vect m}}
+C^{(\vect c)}[\vect i]\,
+B_{\vect i}^{\vect m}(\vect\alpha).
 \end{aligned}
 $$
 
@@ -87,25 +87,25 @@ $$
 b_s(i_s,\alpha_s)
 &:=\binom{m_s}{i_s}
 \alpha_s^{i_s}(1-\alpha_s)^{m_s-i_s},\\
-B_{\boldsymbol i}^{\boldsymbol m}(\boldsymbol\alpha)
+B_{\vect i}^{\vect m}(\vect\alpha)
 &:=\prod_{s=1}^{\ell}b_s(i_s,\alpha_s).
 \end{aligned}
 $$
 
-Each $C^{(\boldsymbol c)}[\boldsymbol i]$ is the stored scalar or matrix
-coefficient at local label $\boldsymbol i$; the scalar basis weight multiplies
+Each $C^{(\vect c)}[\vect i]$ is the stored scalar or matrix
+coefficient at local label $\vect i$. the scalar basis weight multiplies
 the entire coefficient matrix. Function-backed objects keep the exact MATLAB
 function handle and call it directly.
 
 <Aside type="note" title="Implementation remark: boundary ownership and row reconstruction">
-At an interior grid node, `evaluate` selects the cell on the right; only the
+At an interior grid node, `evaluate` selects the cell on the right. only the
 global upper endpoint belongs to the final cell. It forms every tensor
 Bernstein weight explicitly from the local coordinates and reconstructs each
 stored ordinary or rate-vertex row independently in storage order. This path
-does not use de Casteljau recursion or merge rate alternatives.
+uses the stored tensor-product Bernstein sum directly and preserves each rate alternative.
 </Aside>
 
-Explicit rate rows are interpolated independently; `evaluate` does not merge
+Explicit rate rows are interpolated independently. `evaluate` preserves
 the alternatives:
 
 ```matlab

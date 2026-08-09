@@ -3,6 +3,7 @@ import { useId, useState } from "react";
 import type { CertificateKey } from "../data/certificate-data.ts";
 import { buildCertificateShape, parseRateBounds, type CertificateMode } from "../lib/manual-explorers.ts";
 import { DisplayMath } from "./RenderedMath.tsx";
+import { TermText } from "./TermText.tsx";
 
 export interface CertificateOption {
   key: CertificateKey;
@@ -103,7 +104,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
         </div>
         <section aria-labelledby={`${panelId}-tab-${selected}`} id={`${panelId}-panel`} role="tabpanel">
           <h3>{option.label}: <code>selected = {option.command}</code></h3>
-          <p>{option.description}</p>
+          <p><TermText>{option.description}</TermText></p>
           <p><strong>Calculator scope:</strong> uniform residual degree and
             uniform certificate order across all parameter axes. The MATLAB API
             also accepts direction-wise degree and order vectors.</p>
@@ -152,7 +153,7 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             <p><strong>Target tensor degree:</strong> {Array.isArray(shape.targetDegree) ? `[${shape.targetDegree.join(", ")}]` : shape.targetDegree}</p>
             <p><strong>Coefficient sign tests:</strong> {shape.coefficientTests}</p>
             <p><strong>Coefficient identities:</strong> {shape.coefficientIdentities}</p>
-            <p><strong>PSD blocks:</strong> {shape.psdBlocks}</p>
+            <p><strong><TermText>PSD blocks:</TermText></strong> {shape.psdBlocks}</p>
             <p><strong>Total stored constraints:</strong> {shape.totalConstraints}</p>
             {option.key === "sparseputinar" || option.key === "sparsefullbox" ? <p><strong>Effective endpoint:</strong> {shape.effectiveSelector}</p> : null}
           </div>
@@ -161,8 +162,8 @@ export default function CertificateChooser({ options }: { options: CertificateOp
             <pre><code>{`yalmip('clear')\nE = pdvar(2, {[0 0.5 1]}, "symmetric", Degree=2);\nL = E >= 0;\n${option.exportCommand}\nnumel(C)`}</code></pre>
           </details>
           {shape.blocks.length ? <div className="gram-block-list"><strong>One certificate copy uses:</strong><ul>{shape.blocks.map((block) => <li key={block.label}><code>{block.label}</code>: Gram degree [{block.gramDegree.join(", ")}], block {block.dimension} × {block.dimension}</li>)}</ul></div> : null}
-          <p><strong>Source-verified fixture:</strong> {option.constraintCount}</p>
-          <p><strong>At the cell boundary:</strong> {option.boundaryNote}</p>
+          <p><strong>Source-verified fixture:</strong> <TermText>{option.constraintCount}</TermText></p>
+          <p><strong>At the cell boundary:</strong> <TermText>{option.boundaryNote}</TermText></p>
           <div className="certificate-export" aria-label="Selected certificate exported as YALMIP constraints">
             <code>selected</code><span aria-hidden="true">→</span><code>selected.toYalmip()</code><span aria-hidden="true">→</span><strong>YALMIP Constraint</strong>
           </div>

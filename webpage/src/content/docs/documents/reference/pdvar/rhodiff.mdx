@@ -34,7 +34,7 @@ D = rhodiff(P)
 
 | Argument | Description |
 | :--- | :--- |
-| `P` | A `pdvar` expression that is not already a rate-vertex derivative expression. |
+| `P` | An ordinary `pdvar` expression before rate-vertex differentiation. |
 | `rb` | Finite $\ell\times2$ rate-bound table, such as `[-1 1]` or `[-1 2; -3 5]`. Required unless `P` already carries matching `RateBounds`. |
 
 ## Output
@@ -56,8 +56,8 @@ follow the Bernstein label order returned by `D.lbls()`.
 <RateVertexExplorer client:load />
 
 The forward differences stay inside physical cell $c$. Rate rows are neither
-new cells nor new local Bernstein labels; they enumerate the vertices needed
-because the derivative expression is affine in $\dot{\boldsymbol\rho}$.
+new cells nor new local Bernstein labels. they enumerate the vertices needed
+because the derivative expression is affine in $\dot{\vect\rho}$.
 For several parameters, the partial along each nonconstant axis is elevated
 exactly to `P.Degree` before the rate-weighted rows are added. A zero-degree
 axis contributes the zero partial. Consequently, multivariate `rhodiff`
@@ -103,7 +103,7 @@ ans =
 ```
 
 The `2 x 1` coefficient table has two rate rows because the scalar rate box
-has two vertices, `-1` and `1`; it has one coefficient column because scalar
+has two vertices, `-1` and `1`. it has one coefficient column because scalar
 degree-1 derivatives become degree-0 coefficient rows.
 
 For multiple parameters, the rate vertices are ordered as the same
@@ -133,7 +133,7 @@ ans =
 ```
 
 The first `8` is the number of rate vertices. The second `8` is
-`prod(D.Degree+1)`; multivariate derivatives are elevated into a common tensor
+`prod(D.Degree+1)`. multivariate derivatives are elevated into a common tensor
 degree basis before the rate-weighted sum is stored. This design keeps
 derivative evidence cell-local and lets `pdlmi` later check affine
 `rho_dot` dependence by finite rate-box vertices.
@@ -143,13 +143,13 @@ always `1`, the second rate has two endpoints, and `D.NumRateRows` is `2`.
 
 ## Validation And Errors
 
-- `rhodiff(P)` without stored rate bounds raises `pdvar:MissingRateBounds`.
+- `rhodiff(P)` requires stored rate bounds and raises `pdvar:MissingRateBounds` when they are absent.
 - Explicit bounds with the wrong shape or invalid lower/upper order raise `pdvar:InvalidRateBounds`.
-- Explicit bounds that do not match existing object bounds raise `pdvar:RateBoundsMismatch`.
+- Explicit bounds that differ from existing object bounds raise `pdvar:RateBoundsMismatch`.
 - Re-differentiating an existing rate-vertex expression raises `pdvar:InvalidDiff`.
 
 - Products with rate dependence on both sides raise the documented product-validation error.
-- A rate-dependent expression can multiply known data; multiplication by another decision expression is rejected to preserve affine YALMIP dependence.
+- A rate-dependent expression can multiply known data. multiplication by another decision expression is rejected to preserve affine YALMIP dependence.
 
 ## See Also
 

@@ -18,29 +18,29 @@ import { Aside } from "@astrojs/starlight/components";
 
 # SparsePutinar Tensor Windows
 
-SparsePutinar starts from the same local positive target $S^{(\mathbf c)}(\boldsymbol\alpha)$ as dense Putinar. It keeps the Putinar generator family and exact coefficient identities, but it replaces each dense Bernstein Gram basis by overlapping tensor windows. We first define the SOS and Gram objects, then give the dense Putinar form, the window decomposition, and the resulting dimension tradeoff.
+SparsePutinar starts from the same local positive target $S^{(\vect c)}(\vect\alpha)$ as dense Putinar. It keeps the Putinar generator family and exact coefficient identities, but it replaces each dense Bernstein Gram basis by overlapping tensor windows. We first define the SOS and Gram objects, then give the dense Putinar form, the window decomposition, and the resulting dimension tradeoff.
 
 ## Scalar And Matrix SOS
 
-A scalar polynomial $s(\boldsymbol\alpha)$ is a sum of squares when there are polynomial functions $h_j$ such that
+A scalar polynomial $s(\vect\alpha)$ is a sum of squares when there are polynomial functions $h_j$ such that
 
 $$
-s(\boldsymbol\alpha)=\sum_j h_j(\boldsymbol\alpha)^2.
+s(\vect\alpha)=\sum_j h_j(\vect\alpha)^2.
 $$
 
-A symmetric polynomial matrix $S(\boldsymbol\alpha)$ is a matrix SOS when there is a polynomial matrix $H(\boldsymbol\alpha)$ such that $S=H^{\mathsf T}H$. Both definitions admit a Gram representation. If $\mathbf b_{\mathbf d}$ is the tensor Bernstein basis indexed by $\mathcal I_{\mathbf d}=\prod_s\{0,\ldots,d_s\}$, define $Z_{\mathbf d}=\mathbf b_{\mathbf d}\otimes I_n$. Then
+A symmetric polynomial matrix $S(\vect\alpha)$ is a matrix SOS when there is a polynomial matrix $H(\vect\alpha)$ such that $S=H^{\mathsf T}H$. Both definitions admit a Gram representation. If $\vect b_{\vect d}$ is the tensor Bernstein basis indexed by $\mathcal I_{\vect d}=\prod_s\{0,\ldots,d_s\}$, define $Z_{\vect d}=\vect b_{\vect d}\otimes I_n$. Then
 
 $$
-S(\boldsymbol\alpha)=Z_{\mathbf d}(\boldsymbol\alpha)^{\mathsf T}QZ_{\mathbf d}(\boldsymbol\alpha),
+S(\vect\alpha)=Z_{\vect d}(\vect\alpha)^{\mathsf T}QZ_{\vect d}(\vect\alpha),
 \qquad Q\succeq0.
 $$
 
-The PSD condition makes the represented matrix positive semidefinite at every $\boldsymbol\alpha$. However, the representation equals the target only after coefficient matching. The assembler therefore converts the Gram expression to the normalized Bernstein basis and equates every resulting coefficient matrix with the corresponding target coefficient.
+The PSD condition makes the represented matrix positive semidefinite at every $\vect\alpha$. However, the representation equals the target only after coefficient matching. The assembler therefore converts the Gram expression to the normalized Bernstein basis and equates every resulting coefficient matrix with the corresponding target coefficient.
 
 ## Dense Putinar Terms
 
 In one parameter, the package keeps the parity-specific Markov–Lukács form.
-Write $\mathbf M=(M_1)$ and $\mathbf r=(r_1)$. For
+Write $\vect M=(M_1)$ and $\vect r=(r_1)$. For
 $M_1=2r_1$, define the two Gram terms
 
 $$
@@ -76,30 +76,30 @@ $$
 S(\alpha)=(1-\alpha)H_0(\alpha)+\alpha H_1(\alpha).
 $$
 
-In two or more parameters, define $g_0=1$ and $g_s=\alpha_s(1-\alpha_s)$ for $s=1,\ldots,\ell$. Let $\mathcal Q_{\mathrm P}\subseteq\{0,1,\ldots,\ell\}$ index the empty and singleton Putinar specifications whose Gram degrees are nonnegative. For each active specification, suppress the common argument $\boldsymbol\alpha$ and define the dense Gram term by
+In two or more parameters, define $g_0=1$ and $g_s=\alpha_s(1-\alpha_s)$ for $s=1,\ldots,\ell$. Let $\mathcal Q_{\mathrm P}\subseteq\{0,1,\ldots,\ell\}$ index the empty and singleton Putinar specifications whose Gram degrees are nonnegative. For each active specification, suppress the common argument $\vect\alpha$ and define the dense Gram term by
 
 $$
-D_q=Z_{\mathbf d_q}^{\mathsf T}Q_qZ_{\mathbf d_q},
+D_q=Z_{\vect d_q}^{\mathsf T}Q_qZ_{\vect d_q},
 $$
 
 where $Q_q\succeq0$. Putinar uses only these active terms, so
 
 $$
-S^{(\mathbf c)}=\sum_{q\in\mathcal Q_{\mathrm P}}g_qD_q.
+S^{(\vect c)}=\sum_{q\in\mathcal Q_{\mathrm P}}g_qD_q.
 $$
 
-Here, $\mathbf d_0=\mathbf r$ and $\mathbf d_s=\mathbf r-\mathbf e_s$. Terms with a negative degree component are omitted. This singleton family distinguishes Putinar from FullBox, which includes every square-free product of the axis generators.
+Here, $\vect d_0=\vect r$ and $\vect d_s=\vect r-\vect e_s$. Terms with a negative degree component are omitted. This singleton family distinguishes Putinar from FullBox, which includes every square-free product of the axis generators.
 
 ## Tensor-Window Label Sets
 
-Fix one active Gram specification with degree vector $\mathbf d$. For the
+Fix one active Gram specification with degree vector $\vect d$. For the
 implemented `CliqueSize` value $b$, the window side on axis $s$ is
 
 $$
 w_s=\min(b,d_s+1).
 $$
 
-The start index satisfies $u_s\in\{0,\ldots,d_s-w_s+1\}$. For $\mathbf u=(u_1,\ldots,u_\ell)$, define the label set on axis $s$ by
+The start index satisfies $u_s\in\{0,\ldots,d_s-w_s+1\}$. For $\vect u=(u_1,\ldots,u_\ell)$, define the label set on axis $s$ by
 
 $$
 \mathcal W_s=\{u_s,\ldots,u_s+w_s-1\}.
@@ -108,48 +108,52 @@ $$
 The tensor-window label set is the Cartesian product
 
 $$
-\mathcal W(\mathbf d,\mathbf u,b)=\prod_{s=1}^{\ell}\mathcal W_s.
+\mathcal W(\vect d,\vect u,b)=\prod_{s=1}^{\ell}\mathcal W_s.
 $$
 
-For the multidimensional empty and singleton family, let $\mathbf b_{\mathbf d,\mathbf u}$ contain only the Bernstein basis functions whose labels lie in $\mathcal W(\mathbf d,\mathbf u,b)$, and define $Z_{q,\mathbf u}=\mathbf b_{\mathbf d_q,\mathbf u}\otimes I_n$. SparsePutinar replaces the dense block $Q_q$ by one independent PSD block $Q_{q,\mathbf u}$ for each start vector. Suppressing the common argument $\boldsymbol\alpha$, define the contribution from one window by
+For the multidimensional empty and singleton family, let $\vect b_{\vect d,\vect u}$ contain only the Bernstein basis functions whose labels lie in $\mathcal W(\vect d,\vect u,b)$, and define $Z_{q,\vect u}=\vect b_{\vect d_q,\vect u}\otimes I_n$. SparsePutinar replaces the dense block $Q_q$ by one independent PSD block $Q_{q,\vect u}$ for each start vector. Suppressing the common argument $\vect\alpha$, define the contribution from one window by
 
 $$
-T_{q,\mathbf u}
-=Z_{q,\mathbf u}^{\mathsf T}Q_{q,\mathbf u}Z_{q,\mathbf u},
+T_{q,\vect u}
+=Z_{q,\vect u}^{\mathsf T}Q_{q,\vect u}Z_{q,\vect u},
 $$
 
-where $Q_{q,\mathbf u}\succeq0$. Accumulating all windows for one active specification gives
+where $Q_{q,\vect u}\succeq0$. Accumulating all windows for one active specification gives
 
 $$
-T_q=\sum_{\mathbf u}T_{q,\mathbf u}.
+T_q=\sum_{\vect u}T_{q,\vect u}.
 $$
 
 The complete representation is therefore
 
 $$
-S^{(\mathbf c)}=\sum_{q\in\mathcal Q_{\mathrm P}}g_qT_q.
+S^{(\vect c)}=\sum_{q\in\mathcal Q_{\mathrm P}}g_qT_q.
 $$
 
-In one parameter, the package applies the same tensor-window split to the two Markov–Lukács parity blocks shown above. Their weights are $1$ and $\alpha(1-\alpha)$ for even target degree, or $1-\alpha$ and $\alpha$ for odd target degree. Thus, the multidimensional definition of $g_q$ is not reused for the one-dimensional odd form.
+In one parameter, the package applies the same tensor-window split to the two
+Markov–Lukács parity blocks shown above. Their weights are $1$ and
+$\alpha(1-\alpha)$ for even target degree, or $1-\alpha$ and $\alpha$ for odd
+target degree. The one-dimensional odd form therefore uses its parity-specific
+generator in place of the multidimensional $g_q$ definition.
 
 ## Overlapping Coefficient Accumulation
 
-Windows overlap, so one target Bernstein coefficient may receive contributions from several blocks. For the displayed multidimensional empty and singleton family, let $\mathcal A_{q,\mathbf u}(Q_{q,\mathbf u})[\mathbf k]$ denote the normalized Bernstein coefficient at target label $\mathbf k$ contributed by one weighted window, and write this quantity as $a_{q,\mathbf u}[\mathbf k]$. First accumulate all windows for one active specification:
+Windows overlap, so one target Bernstein coefficient may receive contributions from several blocks. For the displayed multidimensional empty and singleton family, let $\mathcal A_{q,\vect u}(Q_{q,\vect u})[\vect k]$ denote the normalized Bernstein coefficient at target label $\vect k$ contributed by one weighted window, and write this quantity as $a_{q,\vect u}[\vect k]$. First accumulate all windows for one active specification:
 
 $$
-a_q[\mathbf k]=\sum_{\mathbf u}a_{q,\mathbf u}[\mathbf k].
+a_q[\vect k]=\sum_{\vect u}a_{q,\vect u}[\vect k].
 $$
 
 The exact accumulated equality is then
 
 $$
-C^{(\mathbf c)}[\mathbf k]
-=\sum_{q\in\mathcal Q_{\mathrm P}}a_q[\mathbf k].
+C^{(\vect c)}[\vect k]
+=\sum_{q\in\mathcal Q_{\mathrm P}}a_q[\vect k].
 $$
 
-This equality holds for every $\mathbf k\in\mathcal I_{\mathrm{targetDegree}}$.
+This equality holds for every $\vect k\in\mathcal I_{\mathrm{targetDegree}}$.
 
-This is an accumulated equality, not a separate equality for each window. Therefore, each certificate copy keeps exactly
+This accumulated equality combines every window contribution. Therefore, each certificate copy keeps exactly
 
 $$
 \prod_{s=1}^{\ell}(\mathrm{targetDegree}_s+1)
@@ -177,7 +181,10 @@ $$
 \prod_{s=1}^{\ell}(d_s-w_s+2).
 $$
 
-Thus, reducing $b$ lowers the maximum PSD-block dimension but usually increases the block count. It does not guarantee a smaller total SDP or shorter solve time. The coefficient-identity count is unchanged because the assembled polynomial must still match the full target tensor.
+Thus, reducing $b$ lowers the maximum PSD-block dimension but usually increases
+the block count. Total SDP size and solve time depend on the complete block and
+equality structure. The coefficient-identity count stays fixed because the
+assembled polynomial must still match the full target tensor.
 
 For example, a scalar two-parameter degree-$[4,4]$ target at order $[2,2]$ has three Putinar specifications. At $b=1$, the specifications contribute $9+6+6=21$ scalar PSD windows and 25 identities. At $b=2$, they contribute $4+2+2=8$ PSD windows of dimension four and the same 25 identities. At $b=3$, every basis saturates and the request normalizes to dense Putinar, whose Gram dimensions are $9$, $6$, and $6$.
 
@@ -187,7 +194,7 @@ $$
 4,4,4,2,2,2,4,4.
 $$
 
-The two axes therefore need not have equal degrees or equal numbers of window starts.
+The two axes may have different degrees and different numbers of window starts.
 
 ## Endpoint Interpretation
 
@@ -198,8 +205,8 @@ In one parameter, `CliqueSize=1` normalizes to Direct after order validation. In
 This tensor-window construction is distinct from the graph-chordal method of
 [Zheng and Fantuzzi](https://arxiv.org/abs/2007.11410). Their method starts
 from a polynomial-matrix sparsity graph. SparsePutinar instead uses
-user-selected sliding windows over Bernstein Gram-basis labels and does not
-infer a graph, compute graph cliques, or perform chordal completion.
+user-selected sliding windows over Bernstein Gram-basis labels. Graph-derived
+cliques and chordal completion belong to the distinct structural-matrix method.
 
 ## Software Selection
 
@@ -212,7 +219,11 @@ F = selected.toYalmip();
 
 ## Limitations
 
-SparsePutinar is a fixed-order sufficient certificate. A failure may reflect the selected order, `CliqueSize` value, grid, or numerical conditioning, so it does not prove that the continuous inequality is infeasible. The package does not search orders, add a strict margin, choose a solver, or promise that sparse blocks solve faster.
+SparsePutinar is a fixed-order sufficient certificate. A failure may reflect
+the selected order, `CliqueSize` value, grid, or numerical conditioning, so it
+remains inconclusive about the continuous inequality. The caller selects the
+order, strict margin, and solver. Sparse blocks trade maximum dimension against
+block count, which makes solve time problem dependent.
 
 ## See Also
 

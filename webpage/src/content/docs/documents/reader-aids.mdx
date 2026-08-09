@@ -1,0 +1,84 @@
+---
+title: Task, Example, And Diagnostic Lookup
+description: Route-native task, example, capability, certificate, and diagnostic lookup for GriD-LMIA.
+---
+
+import DiagnosticIndex from "../../../components/DiagnosticIndex.astro";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/">Welcome</a>
+  <span>/</span>
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <span>Reader Aids</span>
+</nav>
+
+This page supports direct lookup after a reader has identified a modeling task.
+The [Learn path](/GriD-LMIA/documents/#learn) supplies prerequisites and the
+[Reference path](/GriD-LMIA/documents/#reference) supplies per-symbol contracts.
+
+## Task To API
+
+| Task | Primary API | Result |
+|---|---|---|
+| Represent known parameter data | [`pdmat`](/GriD-LMIA/documents/reference/pdmat/) | Numeric matrix function with function or Bernstein evidence |
+| Create a decision function | [`pdvar`](/GriD-LMIA/documents/reference/pdvar/) | Affine YALMIP coefficient expression on a tensor grid |
+| Add scheduling-rate vertices | [`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) | One derivative row for each distinct rate-box vertex |
+| Form an equality or inequality | [`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/) | Stored residual with a selected finite certificate |
+| Select a finite certificate | [certificate methods](/GriD-LMIA/documents/reference/pdlmi/#api-usepolya) | Rebuilt value object with Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox state |
+| Export solver constraints | [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) | YALMIP constraint array |
+| Inspect normalized metadata | [`pdbase`](/GriD-LMIA/documents/reference/pdbase/) | Grid, degree, storage, continuity, decision, and rate metadata |
+| Validate package setup | [`install_pd_lmi`](/GriD-LMIA/documents/getting-started/installation/) | Installation report and verified MATLAB path setup |
+
+## Example Map
+
+| Example | Object | Parameter dimension | Certificate | Demonstrated result |
+|---|---|---:|---|---|
+| [Known scalar data](/GriD-LMIA/examples/#known-scalar-data) | `pdmat` | 1 | — | Exact Bernstein interpolation |
+| [Known matrix data](/GriD-LMIA/examples/#known-matrix-data) | `pdmat` | 2 | — | Tensor-cell storage and evaluation |
+| [Rate derivative](/GriD-LMIA/examples/#rate-derivative) | `pdvar` | 1 | — | Rate-vertex rows from `rhodiff` |
+| [Direct constraint](/GriD-LMIA/examples/#direct-constraint) | `pdlmi` | 1 | Direct | Coefficientwise YALMIP constraints |
+| [Lyapunov feasibility](/GriD-LMIA/examples/solver-smoke/#parameter-dependent-lyapunov-feasibility) | `pdvar`, `pdlmi` | 1 | Direct | Feasible parameter-dependent Lyapunov matrix |
+| [Induced gain](/GriD-LMIA/examples/solver-smoke/#induced-l2-gain-with-rate-vertex-derivatives) | `pdvar`, `pdlmi` | 1 | Direct | Rate-aware gain objective and recovered decision |
+
+The [generated reference lookup](/GriD-LMIA/documents/reference-index/) exposes
+all 192 public records. Each owner overview includes executable example evidence
+for every constructor, method, overload, operator, property, helper, and installer entry.
+
+## Capability Matrix
+
+| Family | Known data | Affine decision data | Rate rows | Returned object |
+|---|---:|---:|---:|---|
+| `pdbase` inspection and storage | Yes | Yes | Yes | `pdbase` family value or MATLAB metadata |
+| `pdmat` coefficient algebra | Yes | — | Yes | `pdmat` |
+| `pdvar` affine algebra | Yes | Yes | Yes | `pdvar` |
+| `pdvar` comparisons | Yes | Yes | Yes | `pdlmi` |
+| `pdlmi` certificate selection | Residual evidence | Affine residual | Independent rows | `pdlmi` |
+| `pdlmi.toYalmip` | Residual evidence | Affine residual | Independent rows | YALMIP `constraint` |
+
+Decision dependence remains affine. Supported products contain decision
+dependence on one operand. Equality uses direct coefficient identities.
+
+## Certificate Selection
+
+| Method | Main control | Matrix positivity representation | Useful starting point |
+|---|---|---|---|
+| Direct | Bernstein degree and grid | Coefficientwise semidefinite tests | Low cost and transparent coefficient evidence |
+| Pólya | Degree-elevation increment | Elevated coefficientwise tests | Direct leaves inconclusive coefficient evidence |
+| Putinar | Absolute Gram order | Singleton-generator Gram module | Moderate dimension and fixed-order Gram certificate |
+| SparsePutinar | Window side and absolute order | Overlapping local Gram blocks | Smaller maximum Gram blocks with more blocks |
+| SparseFullBox | Window side and absolute order | Windowed square-free generator products | Local preordering blocks |
+| FullBox | Absolute Gram order | Complete square-free generator products | Canonical dense endpoint |
+
+Grid refinement changes physical cells. Bernstein degree changes the local
+decision space. Degree elevation preserves the represented polynomial. A Pólya
+increment raises coefficient-test degree. Gram order controls basis size.
+Window or clique size controls local block extent. Rate-vertex reduction is exact
+for affine rate dependence and stores one row per distinct vertex.
+
+## Generated Diagnostic And Error Index
+
+Each entry retains detailed interpretation beside its owning API. Use this index
+to locate that contract by symbol.
+
+<DiagnosticIndex />

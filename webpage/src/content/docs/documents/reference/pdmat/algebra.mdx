@@ -23,7 +23,7 @@ S = A + B; D = A - B; U = +A; N = -A;
 `plus` and `minus` align compatible physical grids and exactly elevate each
 operand to the componentwise maximum of their direction-wise degrees before
 combining corresponding coefficients. Numeric constants are promoted to the
-payload size. `uplus` preserves the object; `uminus` negates every stored
+payload size. `uplus` preserves the object. `uminus` negates every stored
 coefficient.
 
 <CallGraph family="alignment" caption="Binary algebra aligns grids, rate bounds, and every degree component before cell-row assembly." links={[
@@ -95,8 +95,8 @@ ans =
 ```
 
 The represented functions are re-expressed exactly on the sorted-union grid,
-then elevated to the componentwise maximum degree `[1 2]`. No sampling or
-approximate interpolation is used. See
+then elevated to the componentwise maximum degree `[1 2]`. The operation uses
+exact coefficient transformations. See
 [Gridding and local coordinates](/GriD-LMIA/documents/math/gridding-and-degree/)
 for physical-cell refinement and
 [`elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) for the
@@ -121,7 +121,8 @@ to their common degree, then displays and plots the aligned operands and sum.
 K = A * B;
 ```
 
-`mtimes` multiplies coefficient-backed functions exactly rather than at sample points. On one cell,
+`mtimes` multiplies coefficient-backed functions exactly through their
+Bernstein coefficients. On one cell,
 
 $$
 \omega_s(i_s,j_s)
@@ -132,7 +133,7 @@ $$
 and let the tensor-product weight be
 
 $$
-\Omega(\mathbf i,\mathbf j)
+\Omega(\vect i,\vect j)
 :=\prod_{s=1}^{\ell}\omega_s(i_s,j_s).
 $$
 
@@ -140,11 +141,11 @@ The ordered coefficient convolution is then
 
 $$
 \begin{aligned}
-R^{(c)}[\mathbf k]
-&=\sum_{\mathbf i+\mathbf j=\mathbf k}
-  \Omega(\mathbf i,\mathbf j)\\
+R^{(c)}[\vect k]
+&=\sum_{\vect i+\vect j=\vect k}
+  \Omega(\vect i,\vect j)\\
 &\qquad{}\cdot
-  P^{(c)}[\mathbf i]Q^{(c)}[\mathbf j].
+  P^{(c)}[\vect i]Q^{(c)}[\vect j].
 \end{aligned}
 $$
 
@@ -155,7 +156,7 @@ Matrix order is preserved. Numeric scalars and matrices use the corresponding MA
 direction-wise degree rows. On each common-refinement cell it accumulates
 left-label/right-label pairs in written matrix-factor order, and stores the
 result at their summed tensor label. The output degree is the componentwise
-sum, not a fitted degree inferred from samples.
+sum, with its value derived from exact coefficient algebra.
 </Aside>
 
 The implementation visits contribution pairs in increasing left label, with
@@ -176,8 +177,8 @@ disp(bernTable(K, 1, "oneLine"))
         {[1]}        "(1-α)^2*6 + 2(1-α)α*11 + α^2*20"
 ```
 
-Here the middle Bernstein coefficient is `11 = 0.5*(2*5 + 4*3)`; this is an ordered coefficient
-convolution, not a pointwise product of sampled rows.
+Here the middle Bernstein coefficient is `11 = 0.5*(2*5 + 4*3)`. this is an ordered coefficient
+convolution, which represents the exact polynomial product.
 
 ```matlab
 grid = {[0 1], [10 20]};
@@ -194,7 +195,7 @@ disp(bernTable(K, [1 1], "oneLine"))
        {[1 1]}       "(1-α1)^2 * (1-α2)^2*5 + (1-α1)^2 * 2(1-α2)α2*8 + (1-α1)^2 * α2^2*12 + 2(1-α1)α1 * (1-α2)^2*11 + 2(1-α1)α1 * 2(1-α2)α2*15 + 2(1-α1)α1 * α2^2*20 + α1^2 * (1-α2)^2*21 + α1^2 * 2(1-α2)α2*26 + α1^2 * α2^2*32"
 ```
 
-The degrees need not match or be positive on every axis:
+The operands may have different degrees and may use degree zero on any axis:
 
 ```matlab
 A = pdmat({[0 1], [0 2]}, @(r1,r2) 1 + r1, Degree=[1 0]);
@@ -210,8 +211,8 @@ disp(bernTable(K, [1 1], "oneLine"))
        {[1 1]}       "(1-α1) * (1-α2)^2*2 + (1-α1) * 2(1-α2)α2*2 + (1-α1) * α2^2*6 + α1 * (1-α2)^2*4 + α1 * 2(1-α2)α2*4 + α1 * α2^2*12"
 ```
 
-The tensor convolution adds degrees componentwise, so `[1 0]+[0 2]=[1 2]`;
-the zero-degree axes remain valid inputs rather than being promoted before
+The tensor convolution adds degrees componentwise, so `[1 0]+[0 2]=[1 2]`.
+the zero-degree axes remain valid inputs and enter the planned contraction directly before
 multiplication. The complete coefficient rule is derived in
 [Coefficient algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
 
@@ -226,16 +227,16 @@ The weighted convolution below uses the same normalized Bernstein rule as
 
 ## Validation and operation boundaries
 
-- Function-only objects without Bernstein evidence are rejected by coefficient algebra.
+- Coefficient algebra requires Bernstein evidence and rejects function-only objects.
 - Physical bounds and matrix dimensions must be compatible before refinement or multiplication.
-- `mtimes` is matrix multiplication; element-wise parameter-dependent products are not a public substitute.
+- `mtimes` implements matrix multiplication. The public product follows written matrix order.
 - Ordinary one-row operands broadcast across explicit rate rows. Two
   rate-row operands must have exactly matching grids and nonempty matching
-  rate boxes; they are not automatically refined.
+  rate boxes. Explicit preprocessing aligns any chosen rate boxes.
 - Multiplication preserves rate rows when only one side has them. Rate-row by
   rate-row products, rate-row by ordinary decision products, and
   metadata-only rate dependence in a product are rejected.
-- These methods return known `pdmat` data and do not introduce YALMIP decisions.
+- These methods return known `pdmat` data with `ContainsDecision=false`.
 
 ## See Also
 

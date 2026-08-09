@@ -2,7 +2,7 @@
 
 \input{manual-style}
 
-\title{\pkg\\User Manual} \author{Version v1.3.1} \date{August 8, 2026}
+\title{\pkg\\User Manual} \author{Version v1.3.2} \date{August 8, 2026}
 
 % \includeonly{chapters/workflow-introduction}
 % \includeonly{chapters/installation}
@@ -17,11 +17,11 @@
 \maketitle
 
 \begin{abstract}
-\pkg{} (Gridding-based DPD-LMI Assembler) is a MATLAB/YALMIP package for modelling and certifying parameter-dependent and differentiable parameter-dependent linear matrix inequalities (PD-LMIs and DPD-LMIs) over axis-aligned parameter and rate boxes. It represents coefficient-backed known matrices and continuous decision matrices as cell-wise tensor-product Bernstein polynomials on an independently partitioned physical parameter grid. This finite representation supports exact cellwise coefficient algebra and differentiation, while Direct, P\'olya, Putinar, SparsePutinar, SparseFullBox, and FullBox constructions turn the remaining continuum sign condition into inspectable YALMIP constraints.
+\pkg{} is a MATLAB/YALMIP package for modelling and certifying a \termdef{lmi} whose data vary over axis-aligned parameter and rate boxes. A parameter-dependent condition is a \termdef{pd-lmi}, and a condition that contains decision-function derivatives is a \termdef{dpd-lmi}. The package name expands to Gridding-based \term{dpd-lmi} Assembler. The package represents coefficient-backed known matrices and continuous decision matrices as cellwise tensor-product Bernstein polynomials on an independently partitioned physical parameter grid. This finite representation supports exact cellwise coefficient algebra and differentiation, while Direct, P\'olya, Putinar, SparsePutinar, SparseFullBox, and FullBox constructions turn the remaining continuum sign condition into inspectable YALMIP constraints.
 
-The intended workflow is: define the tensor grid and coefficient-backed known data with \code{pdmat}, create continuous polynomial decisions with \code{pdvar}, use \code{rhodiff} when scheduling-rate terms are present, form an affine residual comparison, and optionally replace the default Direct certificate by one of the five supported alternatives. Then call \code{toYalmip}, solve with YALMIP, and recover values only after checking the solver status. The manual develops each step from runnable examples through the underlying tensor convolution, degree alignment, rate-row, and Gram-assembly mathematics.
+The intended workflow is to define the tensor grid and coefficient-backed known data with \code{pdmat}, create continuous polynomial decisions with \code{pdvar}, use \code{rhodiff} when scheduling-rate terms are present, form an affine residual comparison, and optionally replace the default Direct certificate by one of the five supported alternatives. The user then calls \code{toYalmip}, solves with YALMIP, and recovers values after checking the solver status. A \termdef{lpv} model provides the opening example. The Gram-based alternatives use \termdef{psd} blocks in a \termdef{sdp} and connect to \termdef{sos} certificates. The manual develops each step from runnable examples through the underlying tensor convolution, degree alignment, rate-row, and Gram-assembly mathematics.
 
-The representation keeps four ideas distinct: the tensor grid exactly partitions the parameter box; the chosen piecewise-polynomial decision space is a finite modelling restriction; rate-vertex reduction is exact because rate dependence is affine; and each finite certificate is a sufficient condition over the parameter continuum.
+The representation keeps four ideas distinct. The tensor grid exactly partitions the parameter box. The chosen piecewise-polynomial decision space is a finite modelling restriction. Rate-vertex reduction is exact because rate dependence is affine. Each finite certificate is a sufficient condition over the parameter continuum.
 \end{abstract}
 
 \clearpage
@@ -110,6 +110,7 @@ Y.~Xu and F.~Jabbari, ``GriD-LMIA: A Gridding-Based Assembler for Solving Differ
 % Keep the final Index entry with the preceding TOC page after the expanded v1.1 reference surface.
 \addtocontents{toc}{\protect\enlargethispage{2\baselineskip}}
 \addcontentsline{toc}{chapter}{Index}
+\input{api-index}
 \printindex
 
 \end{document}

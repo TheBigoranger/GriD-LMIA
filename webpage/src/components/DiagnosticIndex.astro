@@ -1,0 +1,24 @@
+---
+import { documentationRecords } from "../data/documentation-contracts.js";
+
+const entries = documentationRecords
+  .filter((record) => record.validation_errors)
+  .map((record) => ({
+    ...record,
+    href: `/GriD-LMIA${record.web_route_or_anchor}`,
+    diagnosticId: `diagnostic-${record.id.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+  }));
+---
+
+<section class="diagnostic-index" aria-label="Generated diagnostic and error index">
+  <p>{entries.length} public symbols provide validation or error guidance in the accepted API contract.</p>
+  <div class="diagnostic-index__list">
+    {entries.map((entry) => (
+      <details id={entry.diagnosticId}>
+        <summary><code>{entry.owner}.{entry.symbol}</code> <span>{entry.kind}</span></summary>
+        <p>{entry.validation_errors}</p>
+        <a href={entry.href}>Open the owning API entry</a>
+      </details>
+    ))}
+  </div>
+</section>
