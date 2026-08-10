@@ -1,22 +1,24 @@
+\titlespacing*{\chapter}{0pt}{0pt}{1.2\baselineskip}
 \chapter{\texorpdfstring{Polynomial-Matrix Certificates on \mbox{Hypercubes}}{Polynomial-Matrix Certificates on Hypercubes}}
+\titlespacing*{\chapter}{0pt}{-1.5\baselineskip}{1.2\baselineskip}
 \label{app:certificates}
 
 This appendix starts with positive semidefinite matrices, builds scalar and matrix sum-of-squares representations, and then explains the six certificate paths implemented by \code{pdlmi}: Direct, P\'olya, Putinar, SparsePutinar, SparseFullBox, and FullBox. Background constructions place these APIs in their mathematical context, while the implementation boundary is stated explicitly near the end.
 
 As in the preceding appendix, each major certificate follows the order \emph{Basic idea} $\rightarrow$ \emph{Formula} $\rightarrow$ \emph{Worked example} $\rightarrow$ \emph{Visual conclusion}. Keep two questions separate while reading. The first asks which polynomial matrix is represented, and the second asks which finite cone certifies its sign.
 
-Fix one physical cell $\mathcal H_{\vect{c}}$ and one stored rate row. Write the theoretical cell residual as $\mathcal F^{(\vect{c})}\prec0$ and define the sign-normalized positive target $S^{(\vect{c})}=-\mathcal F^{(\vect{c})}$. The theoretical problem is
+Fix one physical cell $\mathcal H_{\vect{c}}$ and one stored rate row. In the non-strict package formulation of \cref{eq:general-pdlmi}, write the cell residual as $\mathcal F^{(\vect{c})}\preceq0$ and define the sign-normalized positive target $S^{(\vect{c})}=-\mathcal F^{(\vect{c})}$. The package target is
 \begin{gather*}
- S^{(\vect{c})}(\vect{\alpha})\succ0
+ S^{(\vect{c})}(\vect{\alpha})\succeq0
   \quad\text{for every }\vect{\alpha}\in[0,1]^\ell.
 \end{gather*}
-The package's Direct and Gram constraints prove non-strict inequalities. A strict model must state its own margin, for example $S^{(\vect{c})}-\varepsilon I\succeq0$. The package uses a zero implicit margin.
+The Direct and Gram constraints prove this non-strict inequality. A strict analysis condition such as the induced-$\mathcal L_2$-gain condition in Chapter~\ref{sec:bernstein-motivation} must state its own margin, for example $S^{(\vect{c})}-\varepsilon I\succeq0$. The package uses a zero implicit margin.
 
 \section{Positive Semidefinite Matrices And LMIs}
 \label{sec:certificate-psd}
 \index{positive semidefinite}
 
-\ideastep{Basic idea} A real symmetric matrix $Q$ is positive semidefinite when
+\ideastep{Basic idea} A real symmetric matrix $Q$ belongs to the \termdef{psd} cone when
 \begin{gather*}
   u^\top Qu\ge0\qquad\text{for every vector }u.
 \end{gather*}
@@ -24,7 +26,7 @@ The package's Direct and Gram constraints prove non-strict inequalities. A stric
 \begin{gather*}
 Q(\vect{y})=Q_0+\sum_{k=1}^{N}y_kQ_k\succeq0.
 \end{gather*}
-The unknowns enter affinely, so this is a semidefinite program.  A polynomial matrix sign condition appears infinite because it asks for one PSD matrix at every point.  A certificate replaces those pointwise conditions by finitely many PSD matrices and affine coefficient identities.
+The unknowns enter affinely, so this is a \termdef{sdp}. A polynomial matrix sign condition appears infinite because it asks for one PSD matrix at every point. A certificate replaces those pointwise conditions by finitely many PSD matrices and affine coefficient identities.
 
 \ideastep{Visual conclusion}
 \begin{center}
@@ -52,7 +54,7 @@ The unknowns enter affinely, so this is a semidefinite program.  A polynomial ma
   \vect{\xi}^{\vect{\eta}}
   =\prod_{s=1}^{\ell}\xi_s^{\eta_s},
 \end{gather*}
-with only finitely many nonzero coefficients. Its total degree is $\deg p=\max\{|\vect{\eta}|:p_{\vect{\eta}}\ne0\}$, where $|\vect{\eta}|=\sum_{s=1}^{\ell}\eta_s$. A scalar polynomial is a sum of squares (SOS) if $p=q_1^2+\cdots+q_t^2$, which immediately implies $p\ge0$.
+with only finitely many nonzero coefficients. Its total degree is $\deg p=\max\{|\vect{\eta}|:p_{\vect{\eta}}\ne0\}$, where $|\vect{\eta}|=\sum_{s=1}^{\ell}\eta_s$. A scalar polynomial is \termdef{sos} if $p=q_1^2+\cdots+q_t^2$, which immediately implies $p\ge0$.
 
 \ideastep{Formula} Suppose $\deg p\le2d$. Collect every monomial of total degree at most $d$ into
 \begin{gather*}
@@ -173,10 +175,10 @@ An unweighted monomial Gram form proves $S^{(\vect{c})}(\vect{\xi})\succeq0$ on 
 
 \ideastep{Basic idea} If every local coefficient matrix has the requested sign, every convex combination of those coefficients has the same sign.  This yields a small, transparent sufficient certificate.
 
-\ideastep{Formula} After any rate rows have been stacked, write the residual and target coefficients on physical cell $\vect{c}$ as $\mathcal F^{(\vect{c})}=\sum_{\vect{i}\in\mathcal I_{\vect{M}}=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}\mathcal C^{(\vect{c})}[\vect{i}]$ and $C^{(\vect{c})}[\vect{i}]=-\mathcal C^{(\vect{c})}[\vect{i}]$. Then
+\ideastep{Formula} After any rate rows have been stacked, write the residual and target coefficients on physical cell $\vect{c}$ as $\mathcal F^{(\vect{c})}=\sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}\mathcal C^{(\vect{c})}[\vect{i}]$ and $C^{(\vect{c})}[\vect{i}]=-\mathcal C^{(\vect{c})}[\vect{i}]$. Then
 \begin{gather*}
  S^{(\vect{c})}(\vect{\alpha})=
-  \sum_{\vect{i}\in\mathcal I_{\vect{M}}=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
+  \sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
 C^{(\vect{c})}[\vect{i}].
 \end{gather*}
 Because the basis weights are nonnegative and sum to one,

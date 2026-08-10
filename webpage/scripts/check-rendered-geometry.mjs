@@ -1512,6 +1512,46 @@ try {
         for (const failure of result.failures) {
           failures.push({ width, route: currentRoute, ...failure });
         }
+        if (
+          width === 320 &&
+          route.endsWith("/documents/reference/pdvar/constructor/")
+        ) {
+          const transcript = page.locator(".expressive-code pre").filter({
+            hasText: "CellSubscript",
+          }).first();
+          await transcript.evaluate((node) => {
+            node.scrollLeft = 0;
+          });
+          await transcript.focus();
+          await page.keyboard.press("ArrowRight");
+          await page.waitForTimeout(100);
+          const scrollState = await transcript.evaluate((node) => ({
+            focused: document.activeElement === node,
+            overflowX: getComputedStyle(node).overflowX,
+            rootClientWidth: document.documentElement.clientWidth,
+            rootScrollWidth: document.documentElement.scrollWidth,
+            scrollLeft: node.scrollLeft,
+            scrollerClientWidth: node.clientWidth,
+            scrollerScrollWidth: node.scrollWidth,
+          }));
+          if (
+            !scrollState.focused ||
+            !["auto", "scroll"].includes(scrollState.overflowX) ||
+            scrollState.scrollerScrollWidth <= scrollState.scrollerClientWidth ||
+            scrollState.scrollLeft <= 0 ||
+            scrollState.rootScrollWidth !== scrollState.rootClientWidth
+          ) {
+            failures.push({
+              width,
+              route: currentRoute,
+              type: "constructor-transcript-scroll",
+              selector: ".expressive-code pre",
+              actual: scrollState.scrollerScrollWidth,
+              allowed: scrollState.scrollerClientWidth,
+              context: JSON.stringify(scrollState),
+            });
+          }
+        }
       }
     }
   }

@@ -14,8 +14,8 @@ const base = import.meta.env.BASE_URL;
 const local = (path) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}`;
 
 const primaryLinks = [
-  { href: local("documents/#learn"), label: "Learn" },
   { href: local("documents/#reference"), label: "Reference" },
+  { href: local("documents/#learn"), label: "Learn" },
   { href: local("documents/reader-aids/"), label: "Task lookup" },
   { href: local("install/"), label: "Install" },
   { href: local("examples/solver-smoke/"), label: "Solver examples" },
@@ -80,8 +80,8 @@ const lmiSteps = [
     ],
     math: [
       "\\vect\\alpha=\\phi_{\\vect c}^{-1}(\\vect\\rho),\\qquad\\alpha_s=\\frac{\\rho_s-\\rho_s^{(c_s)}}{h_s^{\\vect c}}.",
-      "B_{\\vect i}^{\\vect m}(\\vect\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad\\sum_{\\vect i\\in\\mathcal I_{\\vect m}=\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}B_{\\vect i}^{\\vect m}(\\vect\\alpha)=1.",
-      "A^{(\\vect c)}(\\vect\\alpha)=\\sum_{\\vect i\\in\\mathcal I_{\\vect m}=\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}C^{(\\vect c)}[\\vect i]B_{\\vect i}^{\\vect m}(\\vect\\alpha).",
+      "B_{\\vect i}^{\\vect m}(\\vect\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s},\\qquad\\sum_{\\vect i\\in\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}B_{\\vect i}^{\\vect m}(\\vect\\alpha)=1.",
+      "A^{(\\vect c)}(\\vect\\alpha)=\\sum_{\\vect i\\in\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}C^{(\\vect c)}[\\vect i]B_{\\vect i}^{\\vect m}(\\vect\\alpha).",
     ],
     storageMath: "A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}.",
     visual: "storage",
@@ -134,7 +134,7 @@ const storageMathMarkup = {
       label: renderMath(`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`),
       value: renderMath(coefficient.tex),
     })),
-    bernstein: renderMath(`\\vect m=(2,2),\\qquad A^{(${cell.c1},1)}(\\vect\\alpha)=\\sum_{\\vect i\\in\\mathcal I_{\\vect m}=\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}C_{\\vect i}^{(${cell.c1},1)}B_{\\vect i}^{\\vect m}(\\vect\\alpha)`),
+    bernstein: renderMath(`\\begin{aligned}\\vect m&=(2,2),\\\\A^{(${cell.c1},1)}(\\vect\\alpha)&=\\sum_{\\vect i\\in\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}}\\\\&\\quad C_{\\vect i}^{(${cell.c1},1)}B_{\\vect i}^{\\vect m}(\\vect\\alpha)\\end{aligned}`),
   })),
 };
 

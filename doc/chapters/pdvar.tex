@@ -1,4 +1,4 @@
-\chapter{\texorpdfstring{\code{pdvar}}{pdvar}: Decision Matrix Functions}
+\chapter{\texorpdfstring{\codeplain{pdvar}}{pdvar}: Decision Matrix Functions}
 \label{sec:pdvar}
 
 \code{pdvar} creates continuous cell-wise Bernstein decision expressions backed by YALMIP \code{sdpvar} coefficients. It participates in supported affine and known-data algebra. Solver selection and the call to \code{optimize} belong to the caller's optimization workflow. Comparison overloads create \code{pdlmi} objects, whose \code{toYalmip} method later converts them to YALMIP constraints. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdvar} behavior. This chapter documents their decision-expression syntax, stable shape examples, validations, and rate-aware boundaries.
@@ -13,29 +13,37 @@ A \code{pdvar} with direction-wise degree $\vect{m}=(m_1,\ldots,m_\ell)$ represe
 Task & Entry \\
 \midrule
 Construct decisions &
-\hyperref[sec:pdvar-construction]{\code{pdvar}} \\
-Inspect coefficients &
-\hyperref[sec:pdvar-table]{\code{bernTable}},
-\hyperref[sec:pdvar-backend-inheritance]{shared storage/evaluation/elevation} \\
-Convert assigned coefficients &
-\hyperref[sec:pdvar-value]{\code{value}} \\
+\hyperref[sec:pdvar-construction]{\codeplain{pdvar}} \\
+Public properties &
+\hyperref[sec:pdvar-properties]{\codeplain{GridInfo}/\codeplain{MatrixSize}/\codeplain{Degree}/\codeplain{LocalValues} and metadata} \\
+Inspect backend storage &
+\hyperref[sec:pdvar-backend-inheritance]{\codeplain{cells}/\codeplain{lbls}/\codeplain{coeffs} and counts} \\
+Evaluate &
+\hyperref[sec:pdvar-evaluate]{\codeplain{evaluate}} \\
 Differentiate rates &
-\hyperref[sec:pdvar-rhodiff]{\code{rhodiff}} \\
+\hyperref[sec:pdvar-rhodiff]{\codeplain{rhodiff}} \\
+Inspect coefficient table &
+\hyperref[sec:pdvar-table]{\codeplain{bernTable}} \\
 Affine/mixed algebra &
-\hyperref[sec:pdvar-algebra]{\code{+}},
-\hyperref[sec:pdvar-algebra]{\code{-}},
-\hyperref[sec:pdvar-algebra]{\code{*}} with known data \\
-Matrix/index methods &
-\hyperref[sec:pdvar-matrix-ops]{structural methods},
+\hyperref[sec:pdvar-algebra]{\codeplain{+}},
+\hyperref[sec:pdvar-algebra]{\codeplain{-}},
+\hyperref[sec:pdvar-algebra]{\codeplain{*}} with known data \\
+Matrix methods &
+\hyperref[sec:pdvar-matrix-ops]{structural methods} \\
+Elevate Bernstein storage &
+\hyperref[sec:pdvar-elevate]{\codeplain{elevate}} \\
+Index/assign entries &
 \hyperref[sec:pdvar-indexing]{indexing and assignment} \\
+Convert assigned coefficients &
+\hyperref[sec:pdvar-value]{\codeplain{value}} \\
 Build LMIs &
-\hyperref[sec:pdvar-comparison]{\code{<=}},
-\hyperref[sec:pdvar-comparison]{\code{>=}},
-\hyperref[sec:pdvar-comparison]{\code{==}} \\
+\hyperref[sec:pdvar-comparison]{\codeplain{<=}},
+\hyperref[sec:pdvar-comparison]{\codeplain{>=}},
+\hyperref[sec:pdvar-comparison]{\codeplain{==}} \\
 \bottomrule
 \end{tabularx}
 
-\section{Construct \texorpdfstring{\code{pdvar}}{pdvar} Decisions}
+\section{Construct \texorpdfstring{\codeplain{pdvar}}{pdvar} Decisions}
 \index{affine decision expression}\index{decision matrix}
 \label{sec:pdvar-construction}
 
@@ -206,57 +214,100 @@ rateBounds = 2×2 double
   \item Missing or misplaced dimensions and grids raise \codeerr{pdvar}{InvalidInput}. Invalid sizes and degrees raise \codeerr{pdvar}{Invalid}\allowbreak\code{MatrixSize} or \codeerr{pdvar}{InvalidDegree}. Explicit multidimensional scalar degree expansion is accepted with warning \codeerr{pdvar}{ScalarDegreeExpansion}. \item Option failures use \codeerr{pdvar}{Invalid}\allowbreak\code{Options}, \codeerr{pdvar}{Unknown}\allowbreak\code{Option}, or \codeerr{pdvar}{Unsupported}\allowbreak\code{Option}. Invalid modes raise \codeerr{pdvar}{Invalid}\allowbreak\code{ValidationMode}. \item A symmetric nonsquare request raises \codeerr{pdvar}{InvalidStructure}. Grid failures use \codeerr{pdvar}{InvalidGrid} or \codeerr{pdvar}{Invalid}\allowbreak\code{GridVector}. \item \code{RateBounds} must be a finite $\ell$-by-2 matrix with each lower bound at most its upper bound. Violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}.
 \end{itemize}
 
-\section{Inspect Object Properties}
+\section{Public Properties}\index{GridInfo@\texttt{GridInfo}}\index{MatrixSize@\texttt{MatrixSize}}\index{Degree@\texttt{Degree}}\index{LocalValues@\texttt{LocalValues}}\index{IsContinuous@\texttt{IsContinuous}}\index{ContainsDecision@\texttt{ContainsDecision}}\index{NumRateRows@\texttt{NumRateRows}}\index{RateBounds@\texttt{RateBounds}}\index{SourceSummary@\texttt{SourceSummary}}
+\label{sec:pdvar-properties}
 
-\code{pdvar} exposes the complete read-only inherited \code{pdbase} property set listed in \cref{sec:pdbase-fields}. Their private set access rejects user assignment. In particular, decision coefficients are inspected through \code{P.LocalValues}, while \code{P.Degree}, \code{P.IsContinuous}, and \code{P.RateBounds} describe their representation and rate metadata.
+Every \code{pdvar} property is public and read-only with private set access. Dot access exposes the decision-expression representation, while constructors and public algebra return new values when stored information changes.
 
+\begin{tabularx}{\textwidth}{@{}p{0.20\textwidth}Y@{}}
+\toprule
+Property & Stored information \\
+\midrule
+\code{GridInfo} & A scalar tensor-grid structure. \code{Vectors} is a $1$-by-$\ell$ cell row of axis grids, \code{Points} is a $\prod_{s=1}^{\ell}k_s$-by-$\ell$ numeric matrix of physical grid nodes in combination order, \code{Bounds} is the $\ell$-by-$2$ parameter box, and \code{NumNodes} is the $1$-by-$\ell$ row $[k_1,\ldots,k_\ell]$. \\
+\code{MatrixSize} & The two-element row $[n_r,n_c]$ giving the size of every symbolic coefficient payload and every evaluated matrix expression. \\
+\code{Degree} & The $1$-by-$\ell$ row $[m_1,\ldots,m_\ell]$ of local Bernstein degrees used in every physical cell. A zero component denotes a decision that is constant along that parameter direction. \\
+\code{LocalValues} & The $\ell$-level nested physical-cell tree with $k_s-1$ cells along direction $s$, storing symbolic or affine matrix coefficients in \code{lbls(P)} order. Each ordinary leaf is a $1$-by-$\prod_{s=1}^{\ell}(m_s+1)$ cell row. A derivative or explicit-rate leaf is \code{NumRateRows}-by-$\prod_{s=1}^{\ell}(m_s+1)$, with rows in the stored distinct-rate-vertex order. \\
+\code{IsContinuous} & A logical scalar owned by the operation that constructs the expression. Constructor decisions are continuous because adjacent cells reuse shared YALMIP handles, while \code{rhodiff} returns a cell-wise rate expression with this flag false. \\
+\code{ContainsDecision} & A logical scalar that is true when at least one coefficient payload contains a YALMIP decision variable. Affine algebra records the actual decision presence for every result. \\
+\code{NumRateRows} & A nonnegative integer scalar giving the number of explicit rate-vertex rows in every leaf. Zero denotes an ordinary decision or affine expression, including one that stores \code{RateBounds} only as metadata. \\
+\code{RateBounds} & Empty or an $\ell$-by-$2$ matrix whose row $s$ gives the lower and upper bounds for $\dot{\rho}_s$. Distinct rate rows follow the package-wide lower-then-upper combination order. \\
+\code{SourceSummary} & Scalar origin text describing the current expression, such as \code{"decision"} for a constructor-created object or \code{"derivative"} after \code{rhodiff}. \\
+\bottomrule
+\end{tabularx}
+
+An ordinary constructor-created \code{pdvar} has one coefficient row. It is continuous, contains decisions, has zero explicit rate rows, and records \code{"decision"} as its source summary. Algebra may produce a general affine state and updates the continuity and decision flags according to the result. A derivative has one row per distinct rate vertex, stores the associated rate box and row order, and records \code{"derivative"} as its source summary.
+
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
-P = pdvar(2, {[0 1]}, "symmetric", Degree=2, RateBounds=[-1 1]);
+P = pdvar(2, {[0 1 2], [10 20]}, "symmetric", ...
+    Degree=[1 0], RateBounds=[-1 1; -2 2]);
+gridBounds = P.GridInfo.Bounds
+nodeCounts = P.GridInfo.NumNodes
+matrixSize = P.MatrixSize
 degree = P.Degree
+firstLeafSize = size(P.LocalValues{1}{1})
 isContinuous = P.IsContinuous
+containsDecision = P.ContainsDecision
+rateRowCount = P.NumRateRows
 rateBounds = P.RateBounds
-firstCellCoefficientCount = numel(P.coeffs(1))
+sourceSummary = P.SourceSummary
 \end{lstlisting}
-
 \begin{lstlisting}[style=dpoutput]
-degree = 2
-
+gridBounds = 2×2 double
+     0     2
+    10    20
+nodeCounts = 1×2 double
+     3     2
+matrixSize = 1×2 double
+     2     2
+degree = 1×2 double
+     1     0
+firstLeafSize = 1×2 double
+     1     2
 isContinuous =
   logical
    1
-
-rateBounds = 1×2 double
-     -1     1
-
-firstCellCoefficientCount = 3
+containsDecision =
+  logical
+   1
+rateRowCount = 0
+rateBounds = 2×2 double
+    -1     1
+    -2     2
+sourceSummary = "decision"
 \end{lstlisting}
 
-Use public algebra to create a modified value. Direct assignments such as \code{P.Degree = 1} raise MATLAB's private-set property error.
+Direct assignments such as \code{P.Degree = 1} or \code{P.LocalValues = vals} raise MATLAB's private-set property error. Use the constructor or public algebra to create a modified value.
 
-\section{Inspect, Evaluate, And Elevate Inherited Storage}
+\paragraph{Related APIs.}
+Use \cref{sec:pdvar-backend-inheritance} to traverse \code{LocalValues}, \cref{sec:pdvar-evaluate} to reconstruct an affine matrix, and \cref{sec:pdbase-fields} for the backend implementation contract.
+
+\section{Inspect Inherited Bernstein Storage}\index{cells@\texttt{cells}}\index{lbls@\texttt{lbls}}\index{coeffs@\texttt{coeffs}}\index{ncell@\texttt{ncell}}\index{ncoeff@\texttt{ncoeff}}\index{npar@\texttt{npar}}
 \label{sec:pdvar-backend-inheritance}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 cellSubs = cells(P)
+cellSubs = P.cells()
 labels = lbls(P)
+labels = P.lbls()
 coefficients = coeffs(P, cellSubs)
+coefficients = P.coeffs(cellSubs)
 n = ncell(P)
+n = P.ncell()
 n = ncoeff(P)
+n = P.ncoeff()
 n = npar(P)
-X = evaluate(P, point)
-X = P.evaluate(point)
-Q = P.elevate(degreeIncrement)
-Q = P.elevate(degreeIncrement, validationMode)
+n = P.npar()
 \end{lstlisting}
 
 \descriptionhead
-The storage queries use the shared \code{pdbase} cell and label order and return the symbolic \code{sdpvar} coefficient payloads of the selected decision expression. \code{evaluate} reconstructs the affine symbolic matrix at one in-bounds parameter point, while a derivative or rate-row object returns a $1$-by-$N_v$ cell row in stored distinct-vertex order, where $N_v=\code{P.NumRateRows}$. \code{elevate} returns a new \code{pdvar} of the same dynamic class with the same represented expression, physical cells, YALMIP variables, metadata, rate-row order, and decision freedom at the higher degree. The original \code{P} remains unchanged. The optional positional validation mode and its errors follow the canonical contract in \cref{sec:pdbase-elevate}. \Cref{sec:bernstein-degree-elevation} derives the sparse elevation map used for this exact representation change.
+The inherited implementation follows the shared \code{pdbase} traversal order. \code{cells} returns an \code{ncell(P)}-by-$\ell$ numeric matrix with one physical-cell subscript per row and component $c_s\in\left\{1,\ldots,k_s-1\right\}$, where $k_s=\code{P.GridInfo.NumNodes}(s)$. \code{lbls} returns an \code{ncoeff(P)}-by-$\ell$ numeric matrix of tensor labels with component $i_s\in\left\{0,\ldots,m_s\right\}$. Both use the package-wide combination order. \code{coeffs} returns the selected leaf in that label order: an ordinary decision or affine leaf is a $1$-by-\code{ncoeff(P)} cell row of symbolic matrix payloads, while a derivative or explicit-rate leaf is \code{P.NumRateRows}-by-\code{ncoeff(P)} in stored rate-vertex order.
+
+The counts are \code{ncell(P)}$=\prod_{s=1}^{\ell}(\code{P.GridInfo.NumNodes}(s)-1)$, \code{ncoeff(P)}$=\prod_{s=1}^{\ell}(\code{P.Degree}(s)+1)$, and \code{npar(P)}$=\ell=\code{numel(P.GridInfo.Vectors)}$.
 
 \examplehead
-The one-line examples in this chapter print the \code{Expression} column returned by \code{bernTable(...,}\allowbreak\code{"oneLine")} so long symbolic formulas can wrap while preserving their terms. YALMIP's \code{internal(...)} identifiers are local to the clean MATLAB session and may differ in another session.
-
 \begin{lstlisting}[style=dpmatlab]
 yalmip('clear')
 P = pdvar(2, {[0 1]}, "full", Degree=1);
@@ -264,17 +315,8 @@ physicalCells = P.cells()
 labels = P.lbls()
 coefficientTableSize = size(P.coeffs(1))
 counts = [P.ncell(), P.ncoeff(), P.npar()]
-X = P.evaluate(0.25);
-Q = P.elevate(2);
-sampleClass = class(X)
-sampleSize = size(X)
-elevatedClass = class(Q)
-degrees = [P.Degree, Q.Degree]
-elevatedCoefficientTableSize = size(Q.coeffs(1))
-T = bernTable(Q, 1, "oneLine");
-disp(T.Expression)
 \end{lstlisting}
-\begin{lstlisting}[style=dpwideoutput]
+\begin{lstlisting}[style=dpoutput]
 physicalCells = 1
 labels = 2×1 double
      0
@@ -283,43 +325,48 @@ coefficientTableSize = 1×2 double
      1     2
 counts = 1×3 double
      1     2     1
-sampleClass = 'sdpvar'
-sampleSize = 1×2 double
-     2     2
-elevatedClass = 'pdvar'
-degrees = 1×2 double
-     1     3
-elevatedCoefficientTableSize = 1×2 double
-     1     4
-    "(1-α)^3*[internal(1), internal(3)] + 3(1-α)^2α*[0.666666666667*internal(1)+0.333333333333*internal(5), 0.666666666667*internal(3)+0.333333333333*internal(7)] + 3(1-α)α^2*[0.333333333333*internal(1)+0.666666666667*internal(5), 0.333333333333*internal(3)+0.666666666667*internal(7)] + α^3*[internal(5), internal(7)]"
-    "(1-α)^3*[internal(2), internal(4)] + 3(1-α)^2α*[0.666666666667*internal(2)+0.333333333333*internal(6), 0.666666666667*internal(4)+0.333333333333*internal(8)] + 3(1-α)α^2*[0.333333333333*internal(2)+0.666666666667*internal(6), 0.333333333333*internal(4)+0.666666666667*internal(8)] + α^3*[internal(6), internal(8)]"
-\end{lstlisting}
-
-Vector increments may elevate different axes by different amounts, including an axis on which the original decision is constant.
-
-\begin{lstlisting}[style=dpmatlab]
-yalmip('clear')
-P = pdvar(1, {[0 1], [0 1]}, Degree=[1 0]);
-Q = P.elevate([1 2]);
-sourceDegree = P.Degree
-elevatedDegree = Q.Degree
-T = bernTable(Q, [1 1], "oneLine");
-disp(T.Expression)
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpwideoutput]
-sourceDegree = 1×2 double
-     1     0
-
-elevatedDegree = 1×2 double
-     2     2
-(1-α1)^2 * (1-α2)^2*[internal(1)] + (1-α1)^2 * 2(1-α2)α2*[internal(1)] + (1-α1)^2 * α2^2*[internal(1)] + 2(1-α1)α1 * (1-α2)^2*[0.5*internal(1)+0.5*internal(2)] + 2(1-α1)α1 * 2(1-α2)α2*[0.5*internal(1)+0.5*internal(2)] + 2(1-α1)α1 * α2^2*[0.5*internal(1)+0.5*internal(2)] + α1^2 * (1-α2)^2*[internal(2)] + α1^2 * 2(1-α2)α2*[internal(2)] + α1^2 * α2^2*[internal(2)]
 \end{lstlisting}
 
 \remarkshead
-Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}. Malformed points raise \codeerr{pdvar}{InvalidPoint}. Out-of-bounds points raise \codeerr{pdvar}{PointOutOfBounds}. Invalid elevation increments raise \codeerr{pdbase}{InvalidDegreeIncrement}. Evaluation returns symbolic expressions until the user assigns or solves the underlying YALMIP variables. Use \code{value} for the post-assignment numeric conversion documented in \cref{sec:pdvar-value}.
+Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}.
 
-\section{\texorpdfstring{\code{rhodiff}}{rhodiff}}
+\paragraph{Related APIs.}
+Use \cref{sec:pdvar-properties} for the stored tree and metadata, \cref{sec:pdvar-table} for formatted symbolic coefficients, and \cref{sec:pdbase-inspection,sec:pdbase-counts} for the backend implementation details.
+
+\section{Evaluate \texorpdfstring{\codeplain{pdvar}}{pdvar} Expressions}
+\index{evaluate@\texttt{evaluate}}
+\label{sec:pdvar-evaluate}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+X = evaluate(P, point)
+X = P.evaluate(point)
+\end{lstlisting}
+
+\descriptionhead
+\code{point} is a finite real scalar for a one-parameter object or a finite real vector with one coordinate per parameter, and every coordinate must lie in \code{P.GridInfo.Bounds}. For ordinary storage, \code{X} is one affine \code{sdpvar} matrix with size \code{P.MatrixSize}. For derivative or explicit-rate storage, \code{X} is a $1$-by-$N_v$ cell row of affine matrices in stored distinct-rate-vertex order, where $N_v=\code{P.NumRateRows}$. Evaluation reconstructs the symbolic expression and does not require an assignment or solver call.
+
+\par\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(2, {[0 1]}, "full", Degree=1);
+X = P.evaluate(0.25);
+sampleClass = class(X)
+sampleSize = size(X)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+sampleClass = 'sdpvar'
+sampleSize = 1×2 double
+     2     2
+\end{lstlisting}
+
+\remarkshead
+Malformed points raise \codeerr{pdvar}{InvalidPoint}, and out-of-bounds points raise \codeerr{pdvar}{PointOutOfBounds}. Evaluation remains symbolic until the user assigns or solves the underlying YALMIP variables. Use \code{value} for the post-assignment numeric conversion documented in \cref{sec:pdvar-value}.
+
+\paragraph{Related APIs.}
+Use \cref{sec:pdvar-backend-inheritance} to inspect the contributing coefficients, \cref{sec:pdvar-rhodiff} for rate-row expressions, and \cref{sec:pdbase-evaluate} for the inherited reconstruction algorithm.
+
+\section{\texorpdfstring{\codeplain{rhodiff}}{rhodiff}}
 \index{rhodiff@\texttt{rhodiff}}
 \label{sec:pdvar-rhodiff}
 
@@ -350,8 +397,9 @@ For a one-parameter degree-one coefficient pair $P^{(c)}[0],P^{(c)}[1]$, the rat
 \end{gather*}
 This is the one-dimensional special case: the two rows correspond to the lower and upper allowed scheduling rates.
 
-\begin{center}
-\begin{tikzpicture}[>=Latex,node distance=7mm and 10mm,
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=7mm and 10mm,
   box/.style={dp/neutral,font=\scriptsize,
     align=center,minimum width=33mm,minimum height=10mm},
   result/.style={dp/result,
@@ -361,13 +409,13 @@ This is the one-dimensional special case: the two rows correspond to the lower a
     {$(P^{(c)}[1]-P^{(c)}[0])/h_1^c$\\local derivative};
   \node[result,right=of d,yshift=8mm] (lo) {$\underline\nu$ row};
   \node[result,right=of d,yshift=-8mm] (hi) {$\overline\nu$ row};
-  \draw[->,thick,dpblue] (p) -- (d);
-  \draw[->,thick,dpblue] (d) -- (lo);
-  \draw[->,thick,dpblue] (d) -- (hi);
+  \draw[dp/arrow] (p) -- (d);
+  \draw[dp/arrow] (d) -- (lo);
+  \draw[dp/arrow] (d) -- (hi);
 \end{tikzpicture}
-
-\textit{Differentiation changes local coefficients. Rate substitution creates rows. Both operations preserve the physical-cell count.}
-\end{center}
+\caption{One-parameter rate-row construction. Differentiation replaces the local coefficient pair by its scaled forward difference, and the lower and upper rate values create two stored rows. Both operations preserve the physical-cell count.}
+\label{fig:pdvar-rate-row-construction}
+\end{figure}
 
 For $\ell$ parameters, let $\vect{\nu}\in\mathcal V_{\mathcal R}$ denote one rate vertex. Nonuniform grids use a distinct step length in every direction and cell:
 \begin{gather*}
@@ -512,7 +560,7 @@ expressions =
     "(1-α1)^2 * 1*[-2*internal(1)+2*internal(2)] + 2(1-α1)α1 * 1*[-internal(1)+internal(3)] + α1^2 * 1*[-2*internal(2)+2*internal(3)]"
 \end{lstlisting}
 
-\section{\texorpdfstring{\code{bernTable}}{bernTable}}
+\section{\texorpdfstring{\codeplain{bernTable}}{bernTable}}
 \label{sec:pdvar-table}
 
 \syntaxhead
@@ -682,6 +730,8 @@ resultDegree = 2
 \label{sec:pdvar-operator-entries}
 
 The \code{mtimes} overload supports multiplication only when decision dependence occurs on at most one side. A coefficient-backed \code{pdmat} or finite real numeric matrix may multiply a \code{pdvar} from either side. A scalar \code{pdvar} may scale a known matrix. Two decision-bearing factors, including \code{P*Q} and \code{P*eta} for a decision \code{sdpvar eta}, are nonlinear and rejected.
+
+\Cref{fig:pdvar-affine-to-pdlmi} summarizes the supported path from a known-data product to a finite comparison. The same affine-safety check applies before grid alignment or coefficient convolution, so an unsupported decision product cannot enter certificate assembly.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -1149,7 +1199,92 @@ containsDecision =
 
 Invalid repetition shapes raise \codeerr{pdvar}{InvalidRepmat}.
 
-\section{Index and Assign \texorpdfstring{\code{pdvar}}{pdvar} Entries}
+\section{Elevate \texorpdfstring{\codeplain{pdvar}}{pdvar} Bernstein Storage}
+\index{elevate@\texttt{elevate}}
+\label{sec:pdvar-elevate}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+Q = elevate(P, degreeIncrement)
+Q = P.elevate(degreeIncrement)
+Q = elevate(P, degreeIncrement, validationMode)
+Q = P.elevate(degreeIncrement, validationMode)
+\end{lstlisting}
+
+\descriptionhead
+\code{degreeIncrement} is a finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector. A scalar expands uniformly, while a vector adds componentwise to \code{P.Degree}. \code{elevate} returns a new \code{pdvar} of the same dynamic class with the same represented expression, physical cells, YALMIP variables, metadata, rate-row order, and decision freedom at the higher degree. The original \code{P} remains unchanged. The optional positional \code{validationMode} is the case-insensitive scalar text \code{"fast"} or \code{"strict"}. Its call-local checks follow the canonical contract in \cref{sec:pdbase-elevate}.
+
+The sparse change of Bernstein basis is exact. It raises the source degree $\vect{m}$ to $\vect{M}=\vect{m}+\vect{d}$ while preserving the existing decision variables and represented affine expression. \Cref{sec:bernstein-degree-elevation} derives the shared elevation operator.
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(2, {[0 1]}, "full", Degree=1);
+Q = P.elevate(2);
+elevatedClass = class(Q)
+degrees = [P.Degree, Q.Degree]
+elevatedCoefficientTableSize = size(Q.coeffs(1))
+sourceCoefficients = P.coeffs(1);
+elevatedCoefficients = Q.coeffs(1);
+sourceVariables = unique(getvariables([sourceCoefficients{:}]));
+elevatedVariables = unique(getvariables([elevatedCoefficients{:}]));
+variableCounts = [numel(sourceVariables), numel(elevatedVariables)]
+reusesVariables = isequal(sourceVariables, elevatedVariables)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+elevatedClass = 'pdvar'
+degrees = 1×2 double
+     1     3
+elevatedCoefficientTableSize = 1×2 double
+     1     4
+variableCounts = 1×2 double
+     8     8
+reusesVariables =
+  logical
+   1
+\end{lstlisting}
+
+Vector increments may elevate different axes by different amounts, including an axis on which the original decision is constant.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+P = pdvar(1, {[0 1], [0 1]}, Degree=[1 0]);
+Q = P.elevate([1 2]);
+elevatedClass = class(Q)
+sourceDegree = P.Degree
+elevatedDegree = Q.Degree
+elevatedCoefficientTableSize = size(Q.coeffs([1 1]))
+sourceCoefficients = P.coeffs([1 1]);
+elevatedCoefficients = Q.coeffs([1 1]);
+sourceVariables = unique(getvariables([sourceCoefficients{:}]));
+elevatedVariables = unique(getvariables([elevatedCoefficients{:}]));
+variableCounts = [numel(sourceVariables), numel(elevatedVariables)]
+reusesVariables = isequal(sourceVariables, elevatedVariables)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+elevatedClass = 'pdvar'
+sourceDegree = 1×2 double
+     1     0
+
+elevatedDegree = 1×2 double
+     2     2
+elevatedCoefficientTableSize = 1×2 double
+     1     9
+variableCounts = 1×2 double
+     2     2
+reusesVariables =
+  logical
+   1
+\end{lstlisting}
+
+\remarkshead
+Invalid increments raise \codeerr{pdbase}{InvalidDegreeIncrement}, and invalid validation modes raise \codeerr{pdbase}{InvalidValidationMode}. Strict validation reports malformed leaf structure through \codeerr{pdbase}{InvalidCoefficientCell} and malformed or inconsistent payloads through \codeerr{pdbase}{InvalidCoefficientPayload}.
+
+\paragraph{Related APIs.}
+Use \cref{sec:pdvar-properties} to inspect the preserved metadata, \cref{sec:pdvar-table} to view the elevated coefficients, and \cref{sec:pdbase-elevate,sec:bernstein-degree-elevation} for the backend contract and operator derivation.
+
+\section{Index and Assign \texorpdfstring{\codeplain{pdvar}}{pdvar} Entries}
 \label{sec:pdvar-indexing}
 
 Parenthesis indexing selects a matrix block from every symbolic coefficient. Assignment writes a compatible numeric, \code{pdvar}, coefficient-backed \code{pdmat}, or affine \code{sdpvar} block into that position after the same common-grid refinement and componentwise maximum-degree elevation used by affine addition. The left object and parameter-dependent right-hand side are exactly re-expressed on the sorted union grid before the selected payload block is replaced at every aligned label. Physical-cell selection belongs to \code{cells} and \code{coeffs}. See \cref{sec:pdbase-mergegrid,sec:bernstein-degree-elevation}.
@@ -1221,7 +1356,7 @@ containsDecision =
 \end{lstlisting}
 
 Invalid selectors raise \codeerr{pdvar}{InvalidSubscript}.  Linear indexing, deletion, or non-parenthesis assignment raises \codeerr{pdvar}{UnsupportedAssignment}. Incompatible or nonlinear right-hand sides raise \codeerr{pdvar}{InvalidAssignment}.
-\section{\texorpdfstring{\code{value}}{value}}
+\section{\texorpdfstring{\codeplain{value}}{value}}
 \index{value@\texttt{value}}
 \label{sec:pdvar-value}
 
@@ -1272,7 +1407,7 @@ lowerRateCoefficients = -2
 upperRateCoefficients = 2
 \end{lstlisting}
 
-\section{Comparisons To \texorpdfstring{\code{pdlmi}}{pdlmi}}
+\section{Comparisons To \texorpdfstring{\codeplain{pdlmi}}{pdlmi}}
 \label{sec:pdvar-comparison}
 
 The \code{le}, \code{ge}, and \code{eq} overloads implement \code{<=}, \code{>=}, and \code{==}.  Inequalities select either semidefinite or entry-wise meaning once for the complete original residual. Equality is always direct coefficient equality.
@@ -1340,28 +1475,26 @@ identityConstraints =
 
 Each group above corresponds to one local coefficient and contains six scalar entries in MATLAB column-major order. Under P\'olya, Putinar, SparsePutinar, SparseFullBox, or FullBox, each entry of an entry-wise inequality receives an independent scalar certificate. Equality is direct-only. Constructor certificate options and \code{usePolya}, \code{usePutinar}, \code{useSpPut}, \code{useSpBox}, or \code{useFullBox} raise \codeerr{pdlmi}{Unsupported}\allowbreak\code{EqualityCertificate} before validating an increment, clique size, width, or order. Mixed ordinary and derivative row kinds raise \codeerr{pdvar}{InvalidEqualityRows}. Use overloaded \code{==} to build a modeling equality, and use \code{isequal} only for MATLAB structural comparison.
 
-\begin{center}
-\begin{tikzpicture}[node distance=7mm and 12mm]
-  \node[dp/decision,align=center,font=\scriptsize,text width=34mm,
-    minimum height=11mm] (lhs) {\code{lhs}\\affine \code{pdvar}};
-  \node[dp/known,align=center,font=\scriptsize,text width=34mm,
-    minimum height=11mm,below=of lhs] (rhs)
-    {\code{rhs}\\one or more compatible terms};
-  \node[dp/contribution,right=of lhs,yshift=-7mm,align=center,
-    font=\scriptsize,text width=30mm,minimum height=15mm] (res)
-    {\code{lhs-rhs}\\stored residual};
-  \node[dp/certificate,right=of res,align=center,font=\scriptsize,
-    text width=27mm,minimum height=15mm] (relation)
-    {relation\\\code{<=}, \code{>=}, or \code{==}};
-  \node[dp/result,right=of relation,align=center,font=\scriptsize,
-    text width=25mm,minimum height=15mm] (c)
-    {\code{pdlmi}\\direct by default};
-  \draw[dp/arrow] (lhs.east) -- ++(5mm,0) |- (res.west);
-  \draw[dp/arrow] (rhs.east) -- ++(5mm,0) |- (res.west);
-  \draw[dp/arrow] (res) -- (relation);
-  \draw[dp/arrow] (relation) -- (c);
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm and 7mm]
+  \node[dp/known,align=center,font=\scriptsize,text width=22mm,minimum height=11mm] (known) {known \code{A} or \code{M}};
+  \node[dp/decision,align=center,font=\scriptsize,text width=22mm,minimum height=11mm,below=of known] (decision) {affine decision \code{P}};
+  \node[dp/contribution,right=of known,yshift=-6mm,align=center,font=\scriptsize,text width=24mm,minimum height=15mm] (product) {\code{A*P}, \code{P*A},\\\code{M*P}, or \code{P*M}};
+  \node[dp/decision,right=of product,align=center,font=\scriptsize,text width=24mm,minimum height=15mm] (affine) {affine \code{pdvar}\\expression};
+  \node[dp/certificate,right=of affine,align=center,font=\scriptsize,text width=23mm,minimum height=15mm] (relation) {comparison\\\code{<=}, \code{>=}, or \code{==}};
+  \node[dp/result,right=of relation,align=center,font=\scriptsize,text width=22mm,minimum height=15mm] (wrapper) {\code{pdlmi}\\direct by default};
+  \node[dp/contribution,below=8mm of affine,align=center,font=\scriptsize,text width=28mm,minimum height=10mm] (reject) {unsupported product\\\code{P*Q} or \code{P*eta}};
+  \draw[dp/arrow] (known.east) -- ++(3mm,0) |- (product.west);
+  \draw[dp/arrow] (decision.east) -- ++(3mm,0) |- (product.west);
+  \draw[dp/arrow] (product) -- (affine);
+  \draw[dp/arrow] (affine) -- (relation);
+  \draw[dp/arrow] (relation) -- (wrapper);
+  \draw[dp/arrow] (decision.east) -- ++(11mm,0) |- (reject.west);
 \end{tikzpicture}
-\end{center}
+\caption{Supported affine path from known-data multiplication to a \code{pdlmi} comparison. Decision dependence occurs on one product side, so the result remains affine and can form a residual. A product with decisions on both sides is rejected before comparison.}
+\label{fig:pdvar-affine-to-pdlmi}
+\end{figure}
 
 \section{Boundaries and Related APIs}
 \label{sec:pdvar-limits}

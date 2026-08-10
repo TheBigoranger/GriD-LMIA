@@ -1,17 +1,10 @@
 export const versionHistory = [
   {
-    version: "v1.3.3",
-    date: "2026-08-09",
+    version: "v1.3.7",
+    date: "2026-08-10",
     status: "current documentation",
     summary:
-      "Aligns the TeX and Web manuals at v1.3.3, standardizes mathematical notation and cell-wise terminology, consolidates Learn and Reference navigation, and retains 192 public API records and eight governed terms.",
-  },
-  {
-    version: "v1.3.1",
-    date: "2026-08-08",
-    status: "previous documentation snapshot",
-    summary:
-      "Uses vector degree notation throughout, adds independent anisotropic examples and direct selected-cell bernTable outputs, and connects six complex operation families to their implementation call paths and mathematical derivations.",
+      "Aligns the printable and Web manuals with the source-indexed 192-symbol public API, restores their shared generated inventory contract, and uses explicit Cartesian-product traversal for every complete local-label sum. It retains the example-led class chapters, solver-status boundaries, and mathematical appendices of v1.3.6. The MATLAB API is unchanged, and v1.3.0 remains the latest tagged GitHub Release.",
   },
   {
     version: "v1.3.0",

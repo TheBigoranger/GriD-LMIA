@@ -533,17 +533,29 @@
 .sl-markdown-content .expressive-code,
 .sl-markdown-content .expressive-code .frame,
 .sl-markdown-content pre {
+  box-sizing: border-box;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
+}
+
+.sl-markdown-content .expressive-code .frame > pre {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.sl-markdown-content .expressive-code .frame > pre > code {
+  display: block;
+  flex: none;
+  width: max-content;
+  min-width: 100%;
 }
 
 .sl-markdown-content pre {
   overflow-x: auto;
   white-space: pre;
-}
-
-.sl-markdown-content .expressive-code pre > code {
-  min-width: 0;
 }
 
 .sl-markdown-content .mobile-stack-table {

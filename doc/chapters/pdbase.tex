@@ -1,48 +1,50 @@
-\chapter{\texorpdfstring{\code{pdbase}}{pdbase}: Grid and Storage Backend}
+\chapter{\texorpdfstring{\codeplain{pdbase}}{pdbase}: Grid and Storage Backend}
 \index{pdbase@\texttt{pdbase}}
 \label{sec:pdbase}
 
 \code{pdbase} is the developer-facing backend parent for \code{pdmat} and \code{pdvar}. Ordinary users should model known data with \code{pdmat} and decision expressions with \code{pdvar}. This section documents \code{pdbase} because it owns the shared storage, traversal, inspection, matrix-shape, unary-transformation, reduction, and reordering implementations inherited by both public modeling classes. Central implementation preserves these methods as public \code{pdmat} and \code{pdvar} behavior. Their class-specific syntax, examples, validation, and limitations remain documented in \cref{sec:pdmat-matrix-ops,sec:pdvar-matrix-ops}.
 
-Its traversal contract is the concrete form of the notation in \cref{sec:bernstein-tensor-grids}: \code{cells()} enumerates one-based physical indices $\vect{c}$, \code{lbls()} enumerates zero-based local labels $\vect{i}$, and \code{coeffs(c)} returns $C^{(\vect{c})}[\vect{i}]$ in that label order. If a leaf contains derivative data, its rows enumerate the constructed vertices of $\mathcal R$, while the physical cell and local label remain fixed. Public \code{elevate} and coefficient algebra preserve this separation. The consolidated sparse elevation and planned product kernels are derived in \cref{sec:bernstein-degree-elevation,sec:bernstein-product-math}, while this chapter keeps public calls and the protected table, mapping, indexing, and grid-refinement context needed to understand their behavior.
+Its traversal contract is the concrete form of the notation in \cref{sec:bernstein-tensor-grids}: \code{cells()} enumerates physical indices $\vect{c}$, \code{lbls()} enumerates local labels $\vect{i}$, and \code{coeffs(c)} returns $C^{(\vect{c})}[\vect{i}]$ in that label order. If a cell contains derivative data, its rows enumerate the constructed vertices of $\mathcal R$, while the physical cell and local label remain fixed. Public \code{elevate} and coefficient algebra preserve this separation. The consolidated sparse elevation and planned product kernels are derived in \cref{sec:bernstein-degree-elevation,sec:bernstein-product-math}, while this chapter keeps public calls and the protected table, mapping, indexing, and grid-refinement context needed to understand their behavior.
 
 \section{API Map}
 \label{sec:pdbase-lookup}
 
 \begin{tabularx}{\textwidth}{@{}lY@{}}
     \toprule
-    Task                        & Function or field   \\
+    Task                        & Function or field                                                                                             \\
     \midrule
     Create backend object       &
-    \hyperref[sec:pdbase-constructor]{\code{pdbase}}  \\
+    \hyperref[sec:pdbase-constructor]{\codeplain{pdbase}}                                                                                       \\
     Inspect cells/labels        &
-    \hyperref[sec:pdbase-inspection]{\code{cells}},
-    \hyperref[sec:pdbase-inspection]{\code{lbls}},
-    \hyperref[sec:pdbase-inspection]{\code{coeffs}}   \\
+    \hyperref[sec:pdbase-inspection]{\codeplain{cells}},
+    \hyperref[sec:pdbase-inspection]{\codeplain{lbls}},
+    \hyperref[sec:pdbase-inspection]{\codeplain{coeffs}}                                                                                        \\
     Evaluate a stored function  &
-    \hyperref[sec:pdbase-evaluate]{\code{evaluate}}   \\
+    \hyperref[sec:pdbase-evaluate]{\codeplain{evaluate}}                                                                                        \\
     Differentiate a rate box    &
-    \hyperref[sec:pdbase-rhodiff]{\code{rhodiff}}     \\
-    Count sizes and query shape &
-    \hyperref[sec:pdbase-counts]{\code{ncell}},
-    \hyperref[sec:pdbase-counts]{\code{ncoeff}},
-    \hyperref[sec:pdbase-counts]{\code{npar}},
-    \hyperref[sec:pdbase-counts]{\code{size}/\code{height}/\code{width}/\code{length}/\code{ndims}/\code{numel}} \\
+    \hyperref[sec:pdbase-rhodiff]{\codeplain{rhodiff}}                                                                                          \\
+    Inspect traversal counts    &
+    \hyperref[sec:pdbase-counts]{\codeplain{ncell}},
+    \hyperref[sec:pdbase-counts]{\codeplain{ncoeff}},
+    \hyperref[sec:pdbase-counts]{\codeplain{npar}}                                                                                              \\
+    Inspect matrix shape        &
+    \hyperref[sec:pdbase-shape]{\codeplain{size}/\codeplain{height}/\codeplain{width}/\codeplain{length}/\codeplain{ndims}/\codeplain{numel}} \\
     Transform matrix payloads   &
     \hyperref[sec:pdbase-matrix-ops]{unary signs, transpose, diagonal, reshape, reductions, reordering, repetition, and concatenation dispatch} \\
     Elevate stored coefficients &
-    \hyperref[sec:pdbase-elevate]{\code{elevate}}   \\
+    \hyperref[sec:pdbase-elevate]{\codeplain{elevate}}                                                                                          \\
     Backend algebra mechanisms  &
-    \hyperref[sec:pdbase-backend-utilities]{\code{bernTbl}/\code{mapVals}/\code{matSubs}},
-    \hyperref[sec:pdbase-mergegrid]{\code{mergeGrid}} \\
+    \hyperref[sec:pdbase-backend-utilities]{\codeplain{bernTbl}/\codeplain{mapVals}/\codeplain{matSubs}},
+    \hyperref[sec:pdbase-mergegrid]{\codeplain{mergeGrid}}                                                                                      \\
     Read storage fields         &
-    \hyperref[sec:pdbase-fields]{\code{GridInfo}},
-    \hyperref[sec:pdbase-fields]{\code{LocalValues}},
-    \hyperref[sec:pdbase-fields]{metadata fields}     \\
+    \hyperref[sec:pdbase-fields]{\codeplain{GridInfo}},
+    \hyperref[sec:pdbase-fields]{\codeplain{LocalValues}},
+    \hyperref[sec:pdbase-fields]{metadata fields}                                                                                               \\
     \bottomrule
 \end{tabularx}
 
-\section{Construct \texorpdfstring{\code{pdbase}}{pdbase} Objects}
+\clearpage
+\section{Construct \texorpdfstring{\codeplain{pdbase}}{pdbase} Objects}
 \label{sec:pdbase-constructor}
 
 \syntaxhead
@@ -59,11 +61,13 @@ obj = pdbase(..., ValidationMode=mode)
 
 \arghead
 \begin{itemize}[leftmargin=*]
-    \item \code{gridVectors} is a cell vector with one strictly increasing node vector per parameter, such as \code{{[0 1 2], [10 20]}}. \item \code{matrixSize} is a positive two-element matrix size, such as \code{[2 2]}. \item \code{degree} is one finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector. It is stored as a $1$-by-$\ell$ row $\vect{m}=(m_1,\ldots,m_\ell)$, and a scalar expands uniformly. \item \code{localValues} is the nested physical-cell storage. When omitted, \code{pdbase} creates a zero coefficient-backed object. \item \code{IsContinuous} and \code{ContainsDecision} are logical metadata scalars. They default to false, and subclasses set them to describe their payload contract. \item \code{NumRateRows} is a nonnegative integer that declares explicit rate-vertex rows in each supplied coefficient leaf. Zero selects ordinary one-row storage. A positive value must equal the number of distinct vertices generated by \code{RateBounds}. \item \code{RateBounds} is empty or an $\ell\times2$ matrix of finite lower and upper rate bounds, such as \code{RateBounds=[-1 1; -2 2]}. Bounds may be stored as metadata while \code{NumRateRows} remains zero. \item \code{SourceSummary} is inspectable origin text and defaults to \code{"coefficient-backed"}. \item \code{ValidationMode} is transient scalar text \code{"fast"} or \code{"strict"}, case-insensitively, with default \code{"fast"}. For a raw public \code{pdbase} construction in fast mode, repeated coefficient structure is checked only in the first supplied physical cell, so malformed coefficient counts, payloads, or rate-row layouts in later supplied cells can remain undetected. Strict mode audits every supplied cell. Grid, metadata, and options are validated globally in both modes, and the mode remains transient call state. The public \code{pdmat} and \code{pdvar} constructors normalize their source data before applying their class-specific guarantees, so their fast-mode contracts follow the class-specific descriptions in their constructor sections.
+    \item \code{gridVectors} is a cell vector with one strictly increasing node vector per parameter, such as \code{{[0 1 2], [10 20]}}. \item \code{matrixSize} is a positive two-element matrix size, such as \code{[2 2]}. \item \code{degree} is one finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector. It is stored as a $1$-by-$\ell$ row $\vect{m}=\begin{bmatrix}
+                  m_1 & \ldots & m_\ell
+              \end{bmatrix}$, and a scalar expands uniformly. \item \code{localValues} is the nested physical-cell storage. When omitted, \code{pdbase} creates a zero coefficient-backed object. \item \code{IsContinuous} and \code{ContainsDecision} are logical metadata scalars. They default to false, and subclasses set them to describe their payload contract. \item \code{NumRateRows} is a nonnegative integer that declares explicit rate-vertex rows in each supplied coefficient cell. Zero selects ordinary one-row storage. A positive value must equal the number of distinct vertices generated by \code{RateBounds}. \item \code{RateBounds} is empty or an $\ell\times2$ matrix of finite lower and upper rate bounds, such as \code{RateBounds=[-1 1; -2 2]}. Bounds may be stored as metadata while \code{NumRateRows} remains zero. \item \code{SourceSummary} is inspectable origin text and defaults to \code{"coefficient-backed"}. \item \code{ValidationMode} is transient scalar text \code{"fast"} or \code{"strict"}, case-insensitively, with default \code{"fast"}. For a raw public \code{pdbase} construction in fast mode, repeated coefficient structure is checked only in the first supplied physical cell, so malformed coefficient counts, payloads, or rate-row layouts in later supplied cells can remain undetected. Strict mode audits every supplied cell. Grid, metadata, and options are validated globally in both modes, and the mode remains transient call state. The public \code{pdmat} and \code{pdvar} constructors normalize their source data before applying their class-specific guarantees, so their fast-mode contracts follow the class-specific descriptions in their constructor sections.
 \end{itemize}
 
 \examplehead
-This backend example constructs a three-parameter parent object with the anisotropic degree $\vect{m}=(1,3,0)$. The first direction has two physical intervals, the other directions have one interval, and the zero third component makes every local polynomial constant along the third parameter.
+The following example constructs a three-parameter parent object with anisotropic degree $\vect{m}=(1,3,0)$. The grid has two physical intervals in the first parameter direction and one interval in each remaining direction.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20], [5 9]}, [2 2], [1 3 0]);
@@ -90,86 +94,169 @@ objectSize = 1×2 double
      2     2
 \end{lstlisting}
 
-The printed \code{ncoeff} value is $\prod_{s=1}^{\ell}(m_s+1)=(1+1)(3+1)(0+1)=8$, one local Bernstein coefficient for each label in $\mathcal I_{\vect{m}}$. This count is part of the backend inspection contract and appears directly as an operation result.
+The printed \code{ncoeff} value is $\prod_{s=1}^{\ell}(m_s+1)=(1+1)(3+1)(0+1)=8$. The printed \code{npar} value is $3$, which means $\ell=3$. This count is part of the backend inspection contract and appears directly as an operation result.
 
 \remarkshead
 \begin{itemize}[leftmargin=*]
-    \item Malformed grids and node vectors raise \codeerr{pdbase}{InvalidGrid} or \codeerr{pdbase}{Invalid}\allowbreak\code{GridVector}. \item Invalid matrix sizes, degrees, rate bounds, rate-row counts, or validation modes raise \codeerr{pdbase}{Invalid}\allowbreak\code{MatrixSize}, \codeerr{pdbase}{InvalidDegree}, \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}, \codeerr{pdbase}{Invalid}\allowbreak\code{Options}, or \codeerr{pdbase}{Invalid}\allowbreak\code{ValidationMode}. \item The nested tree must contain one leaf per physical cell and $\prod_{s=1}^{\ell}(m_s+1)$ coefficient columns per leaf. Violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{LocalValues} or \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientCell}. \item Payload matrices must have the declared size and be finite, real, and numeric or supported real YALMIP expressions. Malformed payloads raise \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientPayload}. \item A positive \code{NumRateRows} requires nonempty \code{RateBounds}, must match the number of distinct rate-box vertices, and requires every supplied leaf to use that many rows.
+    \item Malformed grids and node vectors raise \codeerr{pdbase}{InvalidGrid} or \codeerr{pdbase}{Invalid}\allowbreak\code{GridVector}. \item Invalid matrix sizes, degrees, rate bounds, rate-row counts, or validation modes raise \codeerr{pdbase}{Invalid}\allowbreak\code{MatrixSize}, \codeerr{pdbase}{InvalidDegree}, \codeerr{pdbase}{Invalid}\allowbreak\code{RateBounds}, \codeerr{pdbase}{Invalid}\allowbreak\code{Options}, or \codeerr{pdbase}{Invalid}\allowbreak\code{ValidationMode}. \item The nested tree must contain one cell per physical cell and $\prod_{s=1}^{\ell}(m_s+1)$ coefficient columns per cell. Violations raise \codeerr{pdbase}{Invalid}\allowbreak\code{LocalValues} or \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientCell}. \item Payload matrices must have the declared size and be finite, real, and numeric or supported real YALMIP expressions. Malformed payloads raise \codeerr{pdbase}{Invalid}\allowbreak\code{CoefficientPayload}. \item A positive \code{NumRateRows} requires nonempty \code{RateBounds}, must match the number of distinct rate-box vertices, and requires every supplied cell to use that many rows.
 \end{itemize}
 
-\section{Inspect Grid and Storage Properties}\index{GridInfo@\texttt{GridInfo}}\index{LocalValues@\texttt{LocalValues}}\index{Degree@\texttt{Degree}}\index{IsContinuous@\texttt{IsContinuous}}\index{ContainsDecision@\texttt{ContainsDecision}}
+\section{Public Properties}\index{GridInfo@\texttt{GridInfo}}\index{LocalValues@\texttt{LocalValues}}\index{Degree@\texttt{Degree}}\index{IsContinuous@\texttt{IsContinuous}}\index{ContainsDecision@\texttt{ContainsDecision}}
 \label{sec:pdbase-fields}
 
-Every \code{pdbase} property below is publicly readable through dot access but has private set access.  Users inspect \code{obj.Degree} or \code{obj.GridInfo.Vectors}. Construction and package algebra create new objects instead of assigning these properties.
+The members of \code{pdbase} are public, read-only properties. Users inspect them through dot access, such as \code{obj.Degree} or \code{obj.GridInfo.Vectors}, but cannot assign new values to them because their set access is private. Constructors and package operations return new objects when stored information must change.
 
-\begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}Y@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.20\textwidth}Y@{}}
     \toprule
-    Property                 & Meaning                                                                                      \\
+    Property & Stored information \\
     \midrule
-    \code{GridInfo}          & Grid vectors, node counts, and grid bounds.                                                  \\
-    \code{MatrixSize}        & Size of each matrix coefficient or matrix expression.                                        \\
-    \code{Degree}            & Direction-wise local Bernstein degree stored as a $1$-by-$\ell$ row.                    \\
-    \code{LocalValues}       & Nested cell tree indexed by physical-cell subscript. Each leaf stores coefficient cells.     \\
-    \code{IsContinuous}      & Metadata flag. Subclasses are responsible for boundary sharing if continuity is true.        \\
-    \code{ContainsDecision}  & True when coefficient payloads include YALMIP decision variables.                            \\
-    \code{NumRateRows}       & Number of explicit rate-vertex rows in each leaf. Zero denotes ordinary storage, even when rate bounds are stored. \\
-    \code{RateBounds}        & Parameter-rate lower and upper bounds used by \code{rhodiff} and \code{pdlmi}.               \\
-    \code{SourceSummary}     & Short origin label such as \code{coefficient-backed}, \code{decision}, or \code{derivative}. \\
+    \code{GridInfo} & Stores the tensor-grid geometry in a scalar structure.
+    \begin{itemize}
+        \item \code{Vectors} contains one axis grid vector per parameter
+        \item \code{Points} contains all physical grid nodes in combination order.
+        \item \code{Bounds} stores the lower and upper endpoint of each parameter range
+        \item \code{NumNodes} stores the number of axis grid nodes in each parameter direction for traversal and validation
+    \end{itemize}
+    \\
+    \code{MatrixSize} & Stores the two-element row $[n_r,n_c]$ that gives the row and column dimensions of every matrix coefficient or matrix expression in the object. \\
+    \code{Degree} & Stores the local Bernstein degree as $[m_1,\ldots,m_\ell]$. Its $s$-th entry is the degree used inside every physical cell along parameter direction $s$. \\
+    \code{LocalValues} & Stores the cell-wise coefficient data as an $\ell$-level nested cell tree. The indices $i_1,i_2,\ldots,i_\ell$ select physical cell $[i_1,i_2,\ldots,i_\ell]$. Its cell stores coefficients in \code{lbls(obj)} order. An ordinary cell is one flat row, while a derivative cell can contain one row per rate vertex. \\
+    \code{IsContinuous} & Stores a logical continuity flag. A true value records that adjacent physical cells represent matching values on their shared faces. At the \code{pdbase} level this is metadata. The subclass that constructs the object owns the corresponding boundary-sharing guarantee. \\
+    \code{ContainsDecision} & Stores a logical flag that is true when at least one coefficient payload contains YALMIP decision variables and false for known coefficient data. \\
+    \code{NumRateRows} & Stores the number of explicit rate-vertex rows in each \code{LocalValues} cell. Zero denotes ordinary coefficient storage, including objects that store \code{RateBounds} only as metadata. \\
+    \code{RateBounds} & Stores the parameter-rate box as an $\ell$-by-$2$ matrix. Row $s$ contains the lower and upper bounds for $\dot{\rho}_s$. These bounds are stored separately from \code{LocalValues} and are used by \code{rhodiff} and \code{pdlmi}. \\
+    \code{SourceSummary} & Stores a short text label describing how the coefficient data originated, such as \code{coefficient-backed}, \code{decision}, or \code{derivative}. \\
     \bottomrule
 \end{tabularx}
 
+\needspace{12\baselineskip}
+The following object has three physical cells in the first parameter direction, two in the second, and four local coefficients for vector degree $\vect{m}=(1,1)$ in every cell. Its coefficients are the four corner values of
+$$p(\rho_1,\rho_2)=\rho_1+\rho_2$$
+in \code{lbls(obj)} order. Adjacent cells reuse the coefficients on their shared edge, so the stored piecewise polynomial is continuous.
+
 \begin{lstlisting}[style=dpmatlab]
-obj = pdbase({[0 1 2], [10 20]}, [2 3], 1);
-degree = obj.Degree
-matrixSize = obj.MatrixSize
-firstGrid = obj.GridInfo.Vectors{1}
-source = obj.SourceSummary
+localValues = { ...
+    {{10, 20, 11, 21}, {20, 30, 21, 31}}, ...
+    {{11, 21, 12, 22}, {21, 31, 22, 32}}, ...
+    {{12, 22, 13, 23}, {22, 32, 23, 33}}};
+
+obj = pdbase({[0 1 2 3], [10 20 30]}, ...
+    [1 1], [1 1], localValues, IsContinuous=true);
 \end{lstlisting}
 
 \begin{figure}[H]
     \centering
-    \begin{tikzpicture}[node distance=7mm and 12mm,
-            store/.style={dp/known,align=center,font=\scriptsize,
-                    minimum width=33mm,minimum height=10mm,inner sep=4pt},
-            leaf/.style={dp/result,align=left,font=\scriptsize,
-                    text width=58mm,minimum height=18mm,inner sep=5pt}]
-        \node[store] (root) {\texttt{LocalValues}\\nested root};
-        \node[store,below left=of root] (first)
-        {first index \texttt{\{1\}}\\cell path $[1,\cdot]$};
-        \node[store,below right=of root] (second)
-        {first index \texttt{\{2\}}\\cell path $[2,\cdot]$};
-        \node[leaf,below=of first] (leafone)
-        {\texttt{LocalValues\{1\}\{1\}}\\
-            labels $[0,0],[0,1],[1,0],[1,1]$\\
-            values $C^{(1,1)}[\vect{i}]$};
-        \node[leaf,below=of second] (leaftwo)
-        {\texttt{LocalValues\{2\}\{1\}}\\
-            labels $[0,0],[0,1],[1,0],[1,1]$\\
-            values $C^{(2,1)}[\vect{i}]$};
-        \draw[dp/arrow] (root.south) -- ++(0,-3mm) -| (first.north);
-        \draw[dp/arrow] (root.south) -- ++(0,-3mm) -| (second.north);
-        \draw[dp/arrow] (first.south) -- (leafone.north);
-        \draw[dp/arrow] (second.south) -- (leaftwo.north);
-        \node[dp/label,above=3pt of root]
-        {second physical index is \texttt{\{1\}} on both paths};
+    \begin{tikzpicture}
+        \node[dp/known,align=center,font=\scriptsize,minimum width=24mm,minimum height=10mm] (root) {\texttt{obj.LocalValues}\\nested root};
+
+        \node[dp/known,align=center,font=\scriptsize,minimum width=25mm,minimum height=9mm,on grid,right=33mm of root] (outer2) {\texttt{LocalValues\{2\}}\\second-index cells};
+        \node[dp/known,align=center,font=\scriptsize,minimum width=25mm,minimum height=9mm,on grid,above=24mm of outer2] (outer1) {\texttt{LocalValues\{1\}}\\second-index cells};
+        \node[dp/known,align=center,font=\scriptsize,minimum width=25mm,minimum height=9mm,on grid,below=24mm of outer2] (outer3) {\texttt{LocalValues\{3\}}\\second-index cells};
+
+        \node[dp/result,align=left,font=\scriptsize,text width=49mm,minimum height=9mm,inner sep=3pt,on grid,above right=6mm and 52mm of outer1] (cell11) {\texttt{LocalValues\{1\}\{1\}} $=\{10,20,11,21\}$};
+        \node[dp/result,align=left,font=\scriptsize,text width=49mm,minimum height=9mm,inner sep=3pt,on grid,below right=6mm and 52mm of outer1] (cell12) {\texttt{LocalValues\{1\}\{2\}} $=\{20,30,21,31\}$};
+        \node[dp/result,align=left,font=\scriptsize,text width=49mm,minimum height=9mm,inner sep=3pt,on grid,above right=6mm and 52mm of outer2] (cell21) {\texttt{LocalValues\{2\}\{1\}} $=\{11,21,12,22\}$};
+        \node[dp/result,align=left,font=\scriptsize,text width=49mm,minimum height=9mm,inner sep=3pt,on grid,below right=6mm and 52mm of outer2] (cell22) {\texttt{LocalValues\{2\}\{2\}} $=\{21,31,22,32\}$};
+        \node[dp/result,align=left,font=\scriptsize,text width=49mm,minimum height=9mm,inner sep=3pt,on grid,above right=6mm and 52mm of outer3] (cell31) {\texttt{LocalValues\{3\}\{1\}} $=\{12,22,13,23\}$};
+        \node[dp/result,align=left,font=\scriptsize,text width=49mm,minimum height=9mm,inner sep=3pt,on grid,below right=6mm and 52mm of outer3] (cell32) {\texttt{LocalValues\{3\}\{2\}} $=\{22,32,23,33\}$};
+
+        \draw[dp/arrow] (root.east) -- ++(2.5mm,0) |- (outer1.west);
+        \draw[dp/arrow] (root.east) -- (outer2.west);
+        \draw[dp/arrow] (root.east) -- ++(2.5mm,0) |- (outer3.west);
+        \draw[dp/arrow] (outer1.east) -- ++(6mm,0) |- (cell11.west);
+        \draw[dp/arrow] (outer1.east) -- ++(6mm,0) |- (cell12.west);
+        \draw[dp/arrow] (outer2.east) -- ++(6mm,0) |- (cell21.west);
+        \draw[dp/arrow] (outer2.east) -- ++(6mm,0) |- (cell22.west);
+        \draw[dp/arrow] (outer3.east) -- ++(6mm,0) |- (cell31.west);
+        \draw[dp/arrow] (outer3.east) -- ++(6mm,0) |- (cell32.west);
+
+        \node[dp/label,above=3pt of root] {object property};
+        \node[dp/label,above=3pt of outer1] {first physical index};
+        \node[dp/label,above=3pt of cell11] {second physical index and flat coefficient cell};
     \end{tikzpicture}
-    \caption{Nested cell-wise storage for a two-parameter, degree-one object on \code{{[0 1 2], [10 20]}}.  There are two physical cells, $[1,1]$ and $[2,1]$.  Each leaf is a flat local coefficient cell in \code{lbls} order: $[0,0]$, $[0,1]$, $[1,0]$, $[1,1]$.}
+    \caption{Concrete nested \code{LocalValues} storage for the $3\times2$ physical-cell grid in the example. The first cell index selects one of the three outer entries, and the second selects one of its two cells. Every cell contains four coefficients in the \code{lbls(obj)} order $[0,0]$, $[0,1]$, $[1,0]$, $[1,1]$. Repeated values on adjacent cells are the shared-edge coefficients.}
     \label{fig:localvalues-tree}
 \end{figure}
 
-The nesting follows physical-cell subscripts, while the flat leaf follows Bernstein labels. Start with \code{LocalValues{i1}}, then take one cell index per remaining parameter. This selects physical cell $[i_1,i_2,\ldots,i_\ell]$. After that selection, the leaf's flat cell array enumerates the $\prod_{s=1}^{\ell}(m_s+1)$ local Bernstein coefficients. Thus \code{coeffs(obj, [2 1])} returns the lower leaf in \cref{fig:localvalues-tree}, while \code{lbls(obj)} explains the order inside that leaf.
+Within physical cell $[i_1,i_2]$, let $\alpha_s$ be the normalized local coordinate in parameter direction $s$, and write $B_{(r_1,r_2)}^{(1,1)}=B_{r_1}^{1}(\alpha_1)B_{r_2}^{1}(\alpha_2)$. The next diagram rearranges the four terms from the \code{Expression} column of \code{bernsteinTable(...,}\allowbreak\code{"oneLine")} into their physical $2\times2$ corner layout. The upper row contains labels $(0,1)$ and $(1,1)$, and the lower row contains $(0,0)$ and $(1,0)$. This spatial display differs from the flat \code{lbls(obj)} storage order $[0,0]$, $[0,1]$, $[1,0]$, $[1,1]$, but represents the same polynomial. Every cell resets $(\alpha_1,\alpha_2)$ to $[0,1]^2$.
 
-\section{Inspect \texorpdfstring{\code{cells}}{cells}, \texorpdfstring{\code{lbls}}{lbls}, and \texorpdfstring{\code{coeffs}}{coeffs}}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+            physical cell/.style={dp/result,rounded corners=0pt,align=center,font=\scriptsize,minimum width=48mm,minimum height=25mm,text width=44mm,inner sep=2pt}]
+        \node[physical cell] (cell11) {\texttt{cell [1,1]}\\[1mm]
+            $\begin{alignedat}{2}
+                p^{(1,1)}={}&20B_{(0,1)}^{(1,1)} \quad &{}+{}&21B_{(1,1)}^{(1,1)}\\
+                &{}+10B_{(0,0)}^{(1,1)} &{}+{}&11B_{(1,0)}^{(1,1)}
+            \end{alignedat}$};
+        \node[physical cell,right=0pt of cell11] (cell21) {\texttt{cell [2,1]}\\[1mm]
+            $\begin{alignedat}{2}
+                p^{(2,1)}={}&21B_{(0,1)}^{(1,1)} \quad &{}+{}&22B_{(1,1)}^{(1,1)}\\
+                &{}+11B_{(0,0)}^{(1,1)} &{}+{}&12B_{(1,0)}^{(1,1)}
+            \end{alignedat}$};
+        \node[physical cell,right=0pt of cell21] (cell31) {\texttt{cell [3,1]}\\[1mm]
+            $\begin{alignedat}{2}
+                p^{(3,1)}={}&22B_{(0,1)}^{(1,1)} \quad &{}+{}&23B_{(1,1)}^{(1,1)}\\
+                &{}+12B_{(0,0)}^{(1,1)} &{}+{}&13B_{(1,0)}^{(1,1)}
+            \end{alignedat}$};
+        \node[physical cell,above=0pt of cell11] (cell12) {\texttt{cell [1,2]}\\[1mm]
+            $\begin{alignedat}{2}
+                p^{(1,2)}={}&30B_{(0,1)}^{(1,1)} \quad &{}+{}&31B_{(1,1)}^{(1,1)}\\
+                &{}+20B_{(0,0)}^{(1,1)} &{}+{}&21B_{(1,0)}^{(1,1)}
+            \end{alignedat}$};
+        \node[physical cell,right=0pt of cell12] (cell22) {\texttt{cell [2,2]}\\[1mm]
+            $\begin{alignedat}{2}
+                p^{(2,2)}={}&31B_{(0,1)}^{(1,1)} \quad &{}+{}&32B_{(1,1)}^{(1,1)}\\
+                &{}+21B_{(0,0)}^{(1,1)} &{}+{}&22B_{(1,0)}^{(1,1)}
+            \end{alignedat}$};
+        \node[physical cell,right=0pt of cell22] (cell32) {\texttt{cell [3,2]}\\[1mm]
+            $\begin{alignedat}{2}
+                p^{(3,2)}={}&32B_{(0,1)}^{(1,1)} \quad &{}+{}&33B_{(1,1)}^{(1,1)}\\
+                &{}+22B_{(0,0)}^{(1,1)} &{}+{}&23B_{(1,0)}^{(1,1)}
+            \end{alignedat}$};
+
+        \draw[dp/arrow] ([yshift=-6mm]cell11.south west) -- node[below,dp/label] {$\rho_1$} ([yshift=-6mm]cell31.south east);
+        \draw[dp/arrow] ([xshift=-6mm]cell11.south west) -- node[left,dp/label] {$\rho_2$} ([xshift=-6mm]cell12.north west);
+        \node[dp/label,below=2pt of cell11.south west] {$0$};
+        \node[dp/label,below=2pt of cell11.south east] {$1$};
+        \node[dp/label,below=2pt of cell21.south east] {$2$};
+        \node[dp/label,below=2pt of cell31.south east] {$3$};
+        \node[dp/label,left=2pt of cell11.south west] {$10$};
+        \node[dp/label,left=2pt of cell12.south west] {$20$};
+        \node[dp/label,left=2pt of cell12.north west] {$30$};
+    \end{tikzpicture}
+    \caption{The six physical cells and their stored Bernstein polynomials of vector degree $\vect{m}=(1,1)$, with the four terms placed according to their physical corners. Cells $[1,1]$ and $[2,1]$ both use $11$ and $21$ on their common vertical edge, while cells $[1,1]$ and $[1,2]$ both use $20$ and $21$ on their common horizontal edge.}
+    \label{fig:localvalues-physical-grid}
+\end{figure}
+
+The shared coefficients give identical edge polynomials. For example,
+\begin{gather*}
+    p^{(1,1)}(1,\alpha_2)=11(1-\alpha_2)+21\alpha_2=p^{(2,1)}(0,\alpha_2),\\
+    p^{(1,1)}(\alpha_1,1)=20(1-\alpha_1)+21\alpha_1=p^{(1,2)}(\alpha_1,0).
+\end{gather*}
+The same check applies to the remaining shared edges, so the object represents the continuous function $p(\rho_1,\rho_2)=\rho_1+\rho_2$.
+
+\code{LocalValues} uses cell-wise access, and direct nested access is equivalent to \code{coeffs}. For any valid physical-cell subscript,
+\begin{gather*}
+    \texttt{obj.LocalValues\{i1\}\{i2\}}\cdots\texttt{\{i}{\ell}\texttt{\}}
+    =\texttt{obj.coeffs([i1, i2, }\ldots\texttt{, i}{\ell}\texttt{])}.
+\end{gather*}
+For example, \code{obj.LocalValues{3}{2}} and \code{obj.coeffs([3, 2])} both return \code{{22, 32, 23, 33}} in \cref{fig:localvalues-tree}.
+
+% \clearpage
+\section{Inspect \texorpdfstring{\codeplain{cells}}{cells}, \texorpdfstring{\codeplain{lbls}}{lbls}, and \texorpdfstring{\codeplain{coeffs}}{coeffs}}
 \index{cells@\texttt{cells}}\index{lbls@\texttt{lbls}}\index{coeffs@\texttt{coeffs}}
 \label{sec:pdbase-inspection}
+
+These three methods expose the two traversal levels in \code{LocalValues}. The pair \code{cells} and \code{coeffs} locates a physical-cell cell in the nested cell array, while \code{lbls} identifies the local Bernstein coordinate attached to each coefficient column in that cell.
+
+\needspace{10\baselineskip}
+\subsection{Physical-Cell Traversal with \texorpdfstring{\codeplain{cells}}{cells} and \texorpdfstring{\codeplain{coeffs}}{coeffs}}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 subs = cells(obj)
 subs = obj.cells()
-
-labels = lbls(obj)
-labels = obj.lbls()
 
 c = coeffs(obj, cellSubs)
 c = obj.coeffs(cellSubs)
@@ -179,23 +266,59 @@ c = obj.coeffs(cellSubs)
 \begin{itemize}[leftmargin=*]
     \item \code{obj} is a \code{pdbase} object or a \code{pdmat}/\code{pdvar} subclass instance using the shared cell-wise storage convention.
     \item \code{cellSubs} selects one physical cell for \code{coeffs}.  Supply a numeric row vector such as \code{[2 1]} or a cell array of scalar subscripts such as \code{{2,1}}.
-    \item \code{cells} returns physical hypercube subscripts in the shared traversal order.
-    \item \code{lbls} returns local Bernstein labels in the shared coefficient order.
-    \item \code{c} is the flat coefficient cell array for the selected physical cell, ordered consistently with \code{lbls(obj)}.  Rate-dependent leaves return one row per active rate vertex in the stored row order.
+    \item \code{subs} has one row for each physical cell and one column for each parameter. Row \code{subs(k,:)} is the physical-cell coordinate used at traversal step \code{k}.
+    \item \code{c} is the coefficient cell stored at the selected physical cell. An ordinary cell is a flat cell row, while a rate-dependent cell has one row per active rate vertex.
 \end{itemize}
+
+Each row of \code{subs} gives the complete path into the nested storage. If \code{cellSubs = subs(k,:)}, its entries are applied from left to right as successive indices of \code{obj.LocalValues}, and \code{coeffs(obj,cellSubs)} returns the cell at the end of that path. Thus \code{cells} supplies the physical-cell coordinates for traversal, and \code{coeffs} follows one coordinate to its stored cell.
 
 \remarkshead
 \code{coeffs} requires one positive integer physical-cell index per parameter, within the corresponding cell count.  Invalid numeric or cell-array selectors raise \codeerr{pdbase}{InvalidCellSubs}.
 
 \examplehead
-The label order is shared by \code{pdmat}, \code{pdvar}, and \code{pdlmi}.  In this two-parameter degree-one object, each physical cell stores four coefficient entries with labels $[0,0]$, $[0,1]$, $[1,0]$, and $[1,1]$.
+This object has two physical cells. The second row returned by \code{cells} gives the path \code{[2 1]}, so passing that row to \code{coeffs} returns \code{obj.LocalValues{2}{1}}.
 
 \begin{lstlisting}[style=dpmatlab]
-obj = pdbase({[0 1 2], [10 20]}, [1 1], 1);
-labels = lbls(obj)
+localValues = {{{10, 20, 11, 21}}, ...
+    {{11, 21, 12, 22}}};
+obj = pdbase({[0 1 2], [10 20]}, [1 1], ...
+    [1 1], localValues);
 physicalCells = cells(obj)
-c = coeffs(obj, [2 1]);
-coefficientCount = numel(c)
+cellSubs = physicalCells(2, :)
+selectedcell = coeffs(obj, cellSubs);
+selectedCoefficients = cell2mat(selectedcell)
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+physicalCells = 2×2 double
+     1     1
+     2     1
+
+cellSubs = 1×2 double
+     2     1
+
+selectedCoefficients = 1×4 double
+    11    21    12    22
+\end{lstlisting}
+
+\subsection{Local Bernstein Coordinates with \texorpdfstring{\codeplain{lbls}}{lbls}}
+
+\label{subsec:pdbase-lbls}
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+labels = lbls(obj)
+labels = obj.lbls()
+\end{lstlisting}
+
+\arghead
+\code{lbls(obj)} returns the local Bernstein labels in lexicographical order. Row \code{j} gives the local multi-index for coefficient column \code{j} of every cell returned by \code{coeffs}.
+
+\examplehead
+Each row of \code{labelToCoefficient} pairs one local Bernstein label with the coefficient stored at the same position in \code{selectedcell}.
+
+\begin{lstlisting}[style=dpmatlab]
+labels = lbls(obj)
+labelToCoefficient = [labels, cell2mat(selectedcell(:))]
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
@@ -205,14 +328,52 @@ labels = 4×2 double
      1     0
      1     1
 
-physicalCells = 2×2 double
-     1     1
-     2     1
-
-coefficientCount = 4
+labelToCoefficient = 4×3 double
+     0     0    11
+     0     1    21
+     1     0    12
+     1     1    22
 \end{lstlisting}
 
-\section{\texorpdfstring{\code{evaluate}}{evaluate} Stored Coefficients}
+\needspace{12\baselineskip}
+\subsection{Traversal Counts with \texorpdfstring{\codeplain{ncell}}{ncell}, \texorpdfstring{\codeplain{ncoeff}}{ncoeff}, and \texorpdfstring{\codeplain{npar}}{npar}}
+\label{sec:pdbase-counts}
+\index{ncell@\texttt{ncell}}\index{ncoeff@\texttt{ncoeff}}\index{npar@\texttt{npar}}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+n = ncell(obj)
+n = obj.ncell()
+n = ncoeff(obj)
+n = obj.ncoeff()
+n = npar(obj)
+n = obj.npar()
+\end{lstlisting}
+
+\arghead
+\begin{itemize}
+    \item \code{ncell(obj)} returns the number of physical cells traversed by \code{cells}, which is the number of rows in the array returned by \code{cells}, i.e., $\prod_{s=1}^{\ell}(k_s-1)$.
+    \item \code{ncoeff(obj)} returns the number of local Bernstein coefficient positions listed by \code{lbls}, which is the number of columns in the array returned by \code{lbls}, i.e., $\prod_{s=1}^{\ell} m_s$.
+    \item \code{npar(obj)} returns the number of parameter coordinates in each traversal row or local label, which is the number of columns in the arrays returned by \code{cells} and \code{lbls}, i.e., $\ell$.
+\end{itemize}
+
+\examplehead
+For the same result in \cref{subsec:pdbase-lbls}, \code{cells} has two rows, \code{lbls} has four rows, and both arrays have two columns.
+
+\begin{lstlisting}[style=dpmatlab]
+physicalCellCount = obj.ncell()
+coefficientCount = obj.ncoeff()
+parameterCount = obj.npar()
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+physicalCellCount = 2
+coefficientCount = 4
+parameterCount = 2
+\end{lstlisting}
+
+\needspace{10\baselineskip}
+\section{\texorpdfstring{\codeplain{evaluate}}{evaluate} Stored Coefficients}
 \label{sec:pdbase-evaluate}
 \index{evaluate@\texttt{evaluate}}
 
@@ -223,7 +384,10 @@ val = obj.evaluate(point)
 \end{lstlisting}
 
 \arghead
-\code{point} is a finite real scalar for one parameter or a finite real vector with one coordinate per parameter, inside the physical grid bounds. The method locates one physical cell using right-cell ownership at interior grid nodes, converts the point to local coordinates, and reconstructs the tensor-product Bernstein polynomial. One ordinary coefficient row returns one numeric matrix or symbolic YALMIP expression with \code{size(obj)}. Rate-row storage returns a $1$-by-$N$ cell array in stored row order.
+\begin{itemize}
+\item \code{point} is a finite real vector that has $\ell$ entries and lies within the grid bounds.
+\item \code{val} is the evaluated value of \code{obj} at that point. It has the same size as \code{obj.MatrixSize}. If \code{obj.NumRateRows>0}, then \code{val} is a $1$-by-$N$ cell array in stored row order, where $N$ is the number of rate rows.
+\end{itemize}
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -244,7 +408,7 @@ rateRows = 1×2 double
 Malformed points raise \code{class(obj) + ":InvalidPoint"} and out-of-bounds points raise \code{class(obj) + ":PointOutOfBounds"}. \code{pdmat} overrides the function-backed path so exact stored handles remain exact, while coefficient-backed \code{pdmat} and all \code{pdvar} data use this row-aware backend reconstruction. Evaluation preserves the object, certificate state, and YALMIP assignments.
 
 \needspace{18\baselineskip}
-\section{Differentiate Stored Coefficients with \texorpdfstring{\code{rhodiff}}{rhodiff}}
+\section{Differentiate Stored Coefficients with \texorpdfstring{\codeplain{rhodiff}}{rhodiff}}
 \label{sec:pdbase-rhodiff}
 \index{rhodiff@\texttt{rhodiff}}\index{rate row}
 
@@ -255,14 +419,14 @@ D = rhodiff(A, rateBounds)
 \end{lstlisting}
 
 \arghead
-\code{rhodiff} differentiates coefficient-backed storage cell by cell and returns the same dynamic class as \code{A}. The form \code{rhodiff(A)} uses \code{A.RateBounds}. Empty stored bounds require explicit \code{rateBounds}. Explicit bounds supply missing metadata, but when \code{A.RateBounds} is already stored they must match it exactly. On physical cell $\vect{c}$, the partial coefficient along a nonzero-degree axis $s$ is
+\code{rhodiff} differentiates coefficient-backed storage cell by cell and returns the same dynamic class as \code{A}. The form \code{rhodiff(A)} uses \code{A.RateBounds}. Empty stored bounds require explicit \code{rateBounds}. Explicit bounds supply missing metadata, but when \code{A.RateBounds} is already stored they must match it exactly. Let $\vect{e}_s\in\mathbb{R}^{\ell}$ denote an indicator vector, in which the $s$-th entry is one and zero otherwise. On physical cell $\vect{c}$, the partial coefficient along a nonzero-degree axis $s$ is
 \begin{gather*}
-\left(\partial_s A^{(\vect{c})}\right)[\vect{i}]
-=\frac{m_s}{h_s^{\vect{c}}}
-\left(A^{(\vect{c})}[\vect{i}+\vect{e}_s]-A^{(\vect{c})}[\vect{i}]\right),
-\qquad i_s=0,\ldots,m_s-1.
+    \left(\partial_s A^{(\vect{c})}\right)[\vect{i}]
+    =\frac{m_s}{h_s^{\vect{c}}}
+    \left(A^{(\vect{c})}[\vect{i}+\vect{e}_s]-A^{(\vect{c})}[\vect{i}]\right),
+    \qquad i_s=0,\ldots,m_s-1.
 \end{gather*}
-For one parameter, an input degree $\vect{m}=(m_1)$ with $m_1>0$ returns $(m_1-1)$, while $(0)$ remains $(0)$. For more than one parameter, a nonzero-axis partial first has degree $\vect{m}-\vect{e}_s$, then is elevated exactly to the common tensor degree $\vect{m}=\code{A.Degree}$ before the rate-weighted partials are added, so \code{D.Degree=A.Degree}. A zero-degree axis contributes the zero partial and still remains part of that common degree vector. Each physical-cell leaf has \code{D.NumRateRows} rows, one per distinct rate-box vertex in \code{helper.rateVerts(D.RateBounds)} order. The result has \code{IsContinuous=false} and derivative source metadata. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the degree reduction, common-degree restoration, and row ordering.
+\code{rhodiff} processes the parameter directions in increasing order $s=1,\ldots,\ell$. For every direction with $m_s>0$, it forms the cell-wise partial above, which has degree $\vect{m}-\vect{e}_s$, while a direction with $m_s=0$ contributes the zero partial. In one parameter, this reduced degree is retained, so $\vect{m}=(m_1)$ returns $(m_1-1)$ when $m_1>0$, while $(0)$ remains $(0)$. In two or more parameters, each nonzero partial is elevated exactly to the common tensor degree $\vect{m}=\code{A.Degree}$ before the directions are combined, so \code{D.Degree=A.Degree}. Next, \code{rhodiff} applies \code{helper.rateVerts} to the selected rate bounds. This helper enumerates the distinct rate vertices in lower-then-upper \code{combRows} order, with a fixed-bound direction contributing only one value. \code{rhodiff} then processes the returned vertices row by row. For each rate vertex $\vect{\nu}$, it multiplies the $s$-th partial by $\nu_s$, adds the direction contributions in increasing $s$ order, and stores the result as the corresponding coefficient row in each physical-cell cell. If every degree component is zero, each stored rate-vertex row is a complete zero row. The result has \code{IsContinuous=false} and derivative source metadata. \Cref{sec:bernstein-differentiation,sec:bernstein-rate-vertex-storage} derive the degree reduction, common-degree restoration, and row ordering.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -291,21 +455,12 @@ derivativeRows = 2×1 double
 \paragraph{See also.} Class-specific \code{pdmat} and \code{pdvar} differentiation is documented in \cref{sec:pdmat-rhodiff,sec:pdvar-rhodiff}.
 
 \needspace{16\baselineskip}
-\section{Inspect Counts and Shape}
-\index{ncell@\texttt{ncell}}\index{ncoeff@\texttt{ncoeff}}\index{npar@\texttt{npar}}
-\label{sec:pdbase-counts}
+\section{Inspect Matrix Shape}
+\index{size@\texttt{size}}\index{height@\texttt{height}}\index{width@\texttt{width}}\index{length@\texttt{length}}\index{ndims@\texttt{ndims}}\index{numel@\texttt{numel}}
+\label{sec:pdbase-shape}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
-n = ncell(obj)
-n = obj.ncell()
-
-n = ncoeff(obj)
-n = obj.ncoeff()
-
-n = npar(obj)
-n = obj.npar()
-
 sz = size(obj)
 d = size(obj, dim)
 [m, n] = size(obj)
@@ -314,23 +469,22 @@ n = width(obj)
 n = length(obj)
 n = ndims(obj)
 n = numel(obj)
-idx = end(obj, k, n)
-n = numArgumentsFromSubscript(obj, S, ctx)
 \end{lstlisting}
 
 \arghead
 \begin{itemize}[leftmargin=*]
-    \item \code{obj} is a \code{pdbase} object or subclass instance. \item \code{dim} is a positive integer matrix dimension for \code{size}. Dimensions after row and column are singleton, and multiple outputs split the stored two-dimensional shape with trailing outputs equal to one. \item \code{ncell} returns $\prod_{s=1}^{\ell}(k_s-1)$, the number of physical hypercube cells. \item \code{ncoeff} returns $\prod_{s=1}^{\ell}(\code{obj.Degree}(s)+1)$, the number of local Bernstein coefficients stored per physical cell. \item \code{npar} returns the parameter dimension $\ell$. \item \code{size}, \code{height}, \code{width}, \code{length}, \code{ndims}, and one-argument \code{numel} report the matrix payload: respectively its two-element shape, row count, column count, largest dimension, the value two, and the product of the two dimensions. \item \code{end} reports the payload boundary used by inherited two-index syntax. One-index use returns the product of the dimensions, dimensions after two return one. \item \code{numArgumentsFromSubscript} always returns one, which keeps dot access and subclass indexing as one-output operations while \code{numel} follows payload semantics.
+    \item \code{obj} is a \code{pdbase} object or subclass instance.\par
+
+    \item \code{dim} is a positive integer matrix dimension for \code{size}. Dimensions after row and column are singleton, and multiple outputs split the stored two-dimensional shape with trailing outputs equal to one.\par
+
+    \item \code{size}, \code{height}, \code{width}, \code{length}, \code{ndims}, and \code{numel} report the matrix payload: respectively its two-element shape, row count, column count, largest dimension, the value two, and the product of the two dimensions.
 \end{itemize}
 
 \examplehead
-For a two-parameter ($\ell=2$) degree-one backend object, the first grid has two physical intervals and the second has one.  The matrix payload is $2$-by-$3$, independently of the grid shape.  Thus $n_{\mathrm{cell}}=(3-1)(2-1)=2$ and each cell stores $n_{\mathrm{coeff}}=(1+1)^2=4$ entries, ordered by the explicit labels $[0,0],[0,1],[1,0],[1,1]$.
+The object below has a $2$-by-$3$ matrix payload.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20]}, [2 3], 1);
-physicalCellCount = obj.ncell()
-coefficientCount = obj.ncoeff()
-parameterCount = obj.npar()
 matrixSize = size(obj)
 rowCount = size(obj, 1)
 columnCount = size(obj, 2)
@@ -343,9 +497,6 @@ dimensionCount = ndims(obj)
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-physicalCellCount = 2
-coefficientCount = 4
-parameterCount = 2
 matrixSize = 1×2 double
      2     3
 
@@ -360,7 +511,7 @@ dimensionCount = 2
 \end{lstlisting}
 
 \remarkshead
-\code{pdbase} is a scalar value container whose overloaded \code{numel(obj)} describes the matrix payload. MATLAB may call \code{numel} with subscripts while resolving indexing. That internal form returns one. Matrix \code{subsref}/\code{subsasgn} belongs to the derived \code{pdmat} and \code{pdvar} classes. \code{end} and \code{numArgumentsFromSubscript} support those implementations as documented in \cref{sec:pdmat-indexing,sec:pdvar-indexing}.
+These methods describe the stored matrix payload rather than the traversal counts in \cref{sec:pdbase-counts}.
 
 \section{Apply Shared Matrix Operations}
 \label{sec:pdbase-matrix-ops}
@@ -368,7 +519,7 @@ dimensionCount = 2
 
 The methods in this section are implemented once by \code{pdbase}. Each operation maps the same MATLAB matrix transformation over every local coefficient, every active rate row, and both terms of legacy rate-affine payloads while preserving the physical grid, degree, cell/label order, and metadata. A direct backend input returns a direct \code{pdbase}. The \code{pdmat} and \code{pdvar} reconstruction hooks retain their respective classes and class-specific semantics. Function-only \code{pdmat} data contain handle evaluation exclusively and therefore raise \code{pdmat:FunctionOnlyAlgebra} for coefficient mapping.
 
-\subsection{Unary Signs, Transpose, Vectorization, Diagonals, And Reshape}
+\subsection{Unary Operations, Transpose, Vectorization, Diagonals, And Reshape}
 \label{sec:pdbase-unary-matrix-ops}
 
 \syntaxhead
@@ -391,7 +542,15 @@ S = squeeze(A)
 \end{lstlisting}
 
 \descriptionhead
-Unary plus returns the same value. Unary minus, transpose, conjugate transpose, vectorization, diagonal extraction/construction, trace, reshape, and squeeze map coefficient payloads while preserving the parameter representation. \code{vec} uses MATLAB column-major order. \code{trace} returns a $1$-by-$1$ object and sums the main diagonal even for a row or column vector. \code{diag} accepts a finite integer offset and requires a nonempty selected diagonal because every package payload has positive dimensions. \code{reshape} supports exactly two positive dimensions, permits at most one inferred \code{[]} dimension, and preserves the element count. \code{squeeze} is the identity because the storage contract remains two-dimensional.
+Unary plus returns the same value. Unary minus, transpose, conjugate transpose, vectorization, diagonal extraction or construction, trace, reshape, and squeeze map coefficient payloads while preserving the parameter representation.
+\begin{itemize}
+    \item \code{vec} uses MATLAB column-major order.
+    \item \code{trace} returns a $1$-by-$1$ object and sums the main diagonal even for a row or column vector.
+    \item \code{diag} follows MATLAB's built-in behavior. The offset \code{k} is a finite integer and defaults to zero. For a nonvector matrix, including a nonsquare matrix, \code{diag(A, k)} extracts the diagonal at offset \code{k} and returns it as a column vector. For a row or column vector, \code{diag(v, k)} constructs a square matrix whose diagonal at offset \code{k} contains the elements of \code{v}.
+    \item \code{reshape} supports exactly two positive dimensions, permits at most one inferred \code{[]} dimension, and preserves the element count.
+    \item \code{squeeze} is the identity because the storage contract remains two-dimensional.
+\end{itemize}
+%  \code{trace} returns a $1$-by-$1$ object and sums the main diagonal even for a row or column vector. \code{diag} accepts a finite integer offset and requires a nonempty selected diagonal because every package payload has positive dimensions. \code{reshape} supports exactly two positive dimensions, permits at most one inferred \code{[]} dimension, and preserves the element count. \code{squeeze} is the identity because the storage contract remains two-dimensional.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -435,8 +594,9 @@ reshapeSize = 1×2 double
 \remarkshead
 Malformed or empty diagonal selections raise \code{class(A) + ":InvalidDiag"}. Unsupported reshape forms, multiple inferred dimensions, nonpositive dimensions, or an element-count mismatch raise \code{class(A) + ":InvalidReshape"}. These identifiers therefore appear as \code{pdbase:*}, \code{pdmat:*}, or \code{pdvar:*} according to the public input class.
 
-\subsection{Triangular Parts And Reductions}
-\label{sec:pdbase-matrix-reductions}
+\needspace{10\baselineskip}
+\subsection{Triangular Parts}
+\label{sec:pdbase-matrix-triangular}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -444,6 +604,38 @@ L = tril(A)
 L = tril(A, k)
 U = triu(A)
 U = triu(A, k)
+\end{lstlisting}
+
+\descriptionhead
+\code{tril} and \code{triu} follow MATLAB's diagonal-offset convention. For an entry in row $i$ and column $j$, its diagonal offset is $j-i$. Therefore, \code{k=0} selects the main diagonal, a positive \code{k} shifts the boundary upward to a superdiagonal, and a negative \code{k} shifts it downward to a subdiagonal. The default is \code{k=0}.
+\begin{itemize}[leftmargin=*]
+    \item \code{tril(A, k)} retains entries with $j-i\leq k$. Thus, \code{k=1} includes the first superdiagonal together with the main diagonal and all entries below it, while \code{k=-1} excludes the main diagonal and retains the first subdiagonal and all entries below it.
+    \item \code{triu(A, k)} retains entries with $j-i\geq k$. Thus, \code{k=1} excludes the main diagonal and retains the first superdiagonal and all entries above it, while \code{k=-1} includes the first subdiagonal together with the main diagonal and all entries above it.
+\end{itemize}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdbase({[0 1]}, [2 2], 1, ...
+    {{[1 2; 3 4], [10 20; 30 40]}});
+L = tril(A);
+lowerCoefficients = L.coeffs(1);
+lowerFirst = lowerCoefficients{1}
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+lowerFirst = 2×2 double
+     1     0
+     3     4
+\end{lstlisting}
+
+\remarkshead
+Invalid triangular offsets raise \code{class(A) + ":InvalidTriangularPart"}.
+
+\needspace{18\baselineskip}
+\subsection{Reductions}
+\label{sec:pdbase-matrix-reductions}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
 S = sum(A)
 S = sum(A, dim)
 S = sum(A, vecdim)
@@ -459,29 +651,29 @@ C = cumsum(A, dim, direction)
 \end{lstlisting}
 
 \descriptionhead
-\code{tril} and \code{triu} retain entries on and below or above the finite integer offset \code{k}. \code{sum} and \code{mean} accept one nonempty vector of unique positive integer dimensions or the case-insensitive text \code{"all"}. Dimensions above two are identity operations. The default dimension is the first nonsingleton matrix dimension. \code{cumsum} accepts an optional positive integer scalar dimension and an optional case-insensitive \code{"forward"} or \code{"reverse"} direction. A direction supplied by itself uses the first nonsingleton matrix dimension. A dimension above two leaves every matrix payload unchanged.
+\begin{itemize}[leftmargin=*]
+    \item \code{sum} and \code{mean} accept a positive integer scalar \code{dim}, a nonempty vector \code{vecdim} of unique positive integer dimensions, or the case-insensitive text \code{"all"}.
+    \item A scalar \code{dim} reduces each coefficient matrix along that dimension. A \code{vecdim} reduces it along every listed dimension, so \code{sum(A, [1 2])} sums over both rows and columns. The option \code{"all"} reduces over both matrix dimensions and returns a scalar coefficient for each basis term.
+    \item \code{cumsum} accepts an optional positive integer scalar dimension and an optional case-insensitive \code{direction}. The default direction is \code{"forward"}, which accumulates entries from the first index to the last index along the selected dimension. The option \code{"reverse"} accumulates from the last index to the first index.
+    \item A \code{direction} supplied by itself uses the default dimension. When the dimension is omitted, these methods use the first nonsingleton matrix dimension, or dimension one when the coefficient matrix is scalar. A dimension above two cells every matrix payload unchanged.
+\end{itemize}
 
+% \needspace{24\baselineskip}
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
 A = pdbase({[0 1]}, [2 2], 1, ...
     {{[1 2; 3 4], [10 20; 30 40]}});
-L = tril(A);
 S = sum(A, [1 2]);
 M = mean(A, "all");
 C = cumsum(A, 2, "reverse");
-lowerCoefficients = L.coeffs(1);
 sumCoefficients = S.coeffs(1);
 meanCoefficients = M.coeffs(1);
 cumsumCoefficients = C.coeffs(1);
-lowerFirst = lowerCoefficients{1}
 sumFirst = sumCoefficients{1}
 meanFirst = meanCoefficients{1}
 reverseCumsumFirst = cumsumCoefficients{1}
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
-lowerFirst = 2×2 double
-     1     0
-     3     4
 sumFirst = 10
 meanFirst = 2.5000
 reverseCumsumFirst = 2×2 double
@@ -490,7 +682,7 @@ reverseCumsumFirst = 2×2 double
 \end{lstlisting}
 
 \remarkshead
-Invalid triangular offsets raise \code{class(A) + ":InvalidTriangularPart"}. Malformed reduction forms raise \code{class(A) + ":InvalidSum"}, \code{class(A) + ":InvalidMean"}, or \code{class(A) + ":InvalidCumsum"}. The supported reduction flags are exactly the dimension, \code{"all"}, and cumulative-direction forms listed above.
+Malformed reduction forms raise \code{class(A) + ":InvalidSum"}, \code{class(A) + ":InvalidMean"}, or \code{class(A) + ":InvalidCumsum"}. The supported reduction flags are exactly the dimension, \code{"all"}, and cumulative-direction forms listed above.
 
 \subsection{Reordering, Rotation, And Repetition}
 \label{sec:pdbase-matrix-reordering}
@@ -509,7 +701,11 @@ Q = repmat(A, [m n])
 \end{lstlisting}
 
 \descriptionhead
-\code{flip}, \code{flipud}, and \code{fliplr} reverse entries inside each coefficient matrix and never reverse a physical parameter grid. \code{flip(A)} follows MATLAB's first-nonsingleton behavior. \code{flip(A,dim)} requires a positive integer scalar dimension. \code{rot90} applies a finite integer number of counterclockwise quarter-turns, reducing the count modulo four. \code{repmat} supports a positive scalar interpreted as \code{[m m]}, two positive counts, or a two-element count vector. Only the payload shape changes.
+\begin{itemize}[leftmargin=*]
+    \item \code{flip}, \code{flipud}, and \code{fliplr} reverse entries inside each coefficient matrix and never reverse the physical parameter grid. \code{flip(A)} uses the first nonsingleton dimension, while \code{flip(A, dim)} requires a positive integer scalar dimension.
+    \item \code{rot90} applies a finite integer number of counterclockwise quarter-turns and reduces the count modulo four.
+    \item \code{repmat} accepts a positive scalar interpreted as \code{[m m]}, two positive counts, or a two-element count vector. It changes only the payload shape and cells the physical parameter grid unchanged.
+\end{itemize}
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -551,7 +747,11 @@ C = cat(dim, A, B, ...)
 \end{lstlisting}
 
 \descriptionhead
-\code{pdbase} owns the inherited \code{horzcat}/\code{vertcat} entry points, which dispatch compatible derived objects to the class-specific \code{cat} implementation. \code{pdmat} and \code{pdvar} therefore retain coefficient-wise concatenation, grid/degree alignment, numeric promotion, validation, and result construction as documented in \cref{sec:pdmat-matrix-assembly,sec:pdvar-matrix-assembly}. Direct \code{pdbase} operands are scalar backend containers and reject concatenation with \codeerr{pdbase}{UnsupportedConcatenation}.
+\begin{itemize}[leftmargin=*]
+    \item The inherited \code{horzcat} and \code{vertcat} entry points dispatch compatible derived objects to the class-specific \code{cat} implementation. Horizontal concatenation uses matrix dimension two, while vertical concatenation uses matrix dimension one.
+    \item The \code{pdmat} and \code{pdvar} implementations perform coefficient-wise concatenation, grid and degree alignment, numeric promotion, validation, and result construction as documented in \cref{sec:pdmat-matrix-assembly,sec:pdvar-matrix-assembly}.
+    \item A direct \code{pdbase} operand represents a scalar backend container and cannot be concatenated. The operation raises \codeerr{pdbase}{UnsupportedConcatenation}.
+\end{itemize}
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -573,7 +773,7 @@ Any direct \code{pdbase} operand in \code{cat}, \code{horzcat}, or \code{vertcat
 
 Whole-object elevation changes the coefficient representation while preserving the represented function and object metadata. Grid refinement and other protected storage transformations remain backend context, and their use preserves the meanings of \code{ncell}, \code{ncoeff}, \code{npar}, and \code{size} described above.
 
-\subsection{\texorpdfstring{\code{elevate}}{elevate}}
+\subsection{\texorpdfstring{\codeplain{elevate}}{elevate}}
 \index{elevate@\texttt{elevate}}
 \label{sec:pdbase-elevate}
 
@@ -584,7 +784,12 @@ out = obj.elevate(degreeIncrement, validationMode)
 \end{lstlisting}
 
 \descriptionhead
-\code{degreeIncrement} is one finite nonnegative integer scalar shorthand or an $\ell$-element vector. A scalar expands uniformly, while a vector adds direction-wise. The optional positional \code{validationMode} is case-insensitive scalar text \code{"fast"} or \code{"strict"}. The default \code{"fast"} checks one representative coefficient leaf before applying the shared plan, while \code{"strict"} checks every leaf. The mode is call-local and remains transient. \code{out} is the same dynamic class and has degree \code{obj.Degree + degreeIncrement}. It preserves the represented polynomial, physical cells, metadata, existing YALMIP variables, rate-row order, subclass properties, and decision freedom. \Cref{sec:bernstein-degree-elevation} derives the sparse operator and packed application.
+\code{degreeIncrement} is one finite nonnegative integer scalar shorthand or an $\ell$-element vector. A scalar expands uniformly, while a vector adds direction-wise. \code{out} is the same dynamic class and has degree \code{obj.Degree + degreeIncrement}. It preserves the represented polynomial, physical cells, metadata, existing YALMIP variables, rate-row order, subclass properties, and decision freedom. The optional positional \code{validationMode} controls the coefficient checks performed before the shared elevation plan is applied. It accepts the following case-insensitive scalar text options, and the selected mode is call-local and remains transient.
+\begin{itemize}[leftmargin=*]
+    \item \code{"fast"} is the default and checks one representative coefficient cell.
+    \item \code{"strict"} checks every coefficient cell.
+\end{itemize}
+\Cref{sec:bernstein-degree-elevation} derives the sparse operator and packed application.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -605,13 +810,13 @@ sameValue = 1×2 double
 \end{lstlisting}
 
 \remarkshead
-Invalid increments raise \codeerr{pdbase}{InvalidDegreeIncrement}, and invalid validation modes raise \codeerr{pdbase}{InvalidValidationMode}. A strict check reports malformed leaf structure through \codeerr{pdbase}{InvalidCoefficientCell} and malformed or inconsistent payloads through \codeerr{pdbase}{InvalidCoefficientPayload}. Function-only \code{pdmat} data contain handle evaluation exclusively and raise \codeerr{pdbase}{MissingCoefficientEvidence}. Constructing the function with a verified explicit \code{Degree} supplies the needed evidence. \code{elevate} returns a new object and preserves the source.
+Invalid increments raise \codeerr{pdbase}{InvalidDegreeIncrement}, and invalid validation modes raise \codeerr{pdbase}{InvalidValidationMode}. A strict check reports malformed cell structure through \codeerr{pdbase}{InvalidCoefficientCell} and malformed or inconsistent payloads through \codeerr{pdbase}{InvalidCoefficientPayload}. Function-only \code{pdmat} data contain handle evaluation exclusively and raise \codeerr{pdbase}{MissingCoefficientEvidence}. Constructing the function with a verified explicit \code{Degree} supplies the needed evidence. \code{elevate} returns a new object and preserves the source.
 
-\subsection{\texorpdfstring{\code{bernTbl}, \code{mapVals}, and \code{matSubs}}{bernTbl, mapVals, and matSubs}}
+\subsection{\texorpdfstring{\codeplain{bernTbl}, \codeplain{mapVals}, and \codeplain{matSubs}}{bernTbl, mapVals, and matSubs}}
 \label{sec:pdbase-backend-utilities}
 \index{bernTbl@\texttt{bernTbl}}\index{mapVals@\texttt{mapVals}}\index{matSubs@\texttt{matSubs}}
 
-\textit{Internal/protected mechanisms.} These object-aware utilities belong to \code{pdbase} protected implementation context. The public \code{+helper} namespace and supported user call forms are listed separately in \cref{sec:helpers}.
+\textit{Internal/protected mechanisms.} These utilities belong to \code{pdbase} protected implementation context. The public \code{+helper} namespace and supported user call forms are listed separately in \cref{sec:helpers}.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -621,7 +826,12 @@ mapped = mapVals(vals, fcn, grid)
 \end{lstlisting}
 
 \descriptionhead
-\code{bernTbl} builds the detailed and one-line inspection tables used by \code{pdmat.bernTable} and \code{pdvar.bernTable}. It traverses \code{cells}, \code{lbls}, and \code{coeffs}, accepts at most one physical-cell selector and the case-insensitive \code{"oneLine"} option, and preserves the caller's error namespace. \code{mapVals} applies a coefficient mapping to every payload in every nested physical-cell leaf while preserving tree and label order, while the owning class still validates matrix, symbolic, and rate semantics. \code{matSubs} normalizes exactly two row/column selectors, accepting \code{:}, finite positive integer vectors, or matching logical vectors, and rejects linear indexing, empty/out-of-range numeric indices, mismatched logical selectors, and array growth.
+These protected utilities provide the shared backend operations for coefficient inspection, payload mapping, and matrix subscripting.
+\begin{itemize}[leftmargin=*]
+    \item \code{bernTbl} builds the detailed and one-line inspection tables used by \code{pdmat.bernTable} and \code{pdvar.bernTable}. It traverses \code{cells}, \code{lbls}, and \code{coeffs}, accepts at most one physical-cell selector and the case-insensitive \code{"oneLine"} option, and preserves the caller's error namespace.
+    \item \code{mapVals} applies a coefficient mapping to every payload in every nested physical-cell cell while preserving the tree and label order. The owning class remains responsible for validating matrix, symbolic, and rate semantics.
+    \item \code{matSubs} normalizes exactly two row and column selectors. It accepts \code{:}, finite positive integer vectors, or matching logical vectors, and rejects linear indexing, empty or out-of-range numeric indices, mismatched logical selectors, and array growth.
+\end{itemize}
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -640,7 +850,7 @@ columnSize = 1×2 double
 \remarkshead
 Users reach \code{bernTbl} through \code{bernTable}, \code{mapVals} through inherited unary operations, and \code{matSubs} through \code{pdmat}/\code{pdvar} indexing and assignment. Invalid table selectors and rate-row mismatches raise the caller-owned \code{errId}, while indexing uses the class-specific identifier supplied by \code{subsref} or \code{subsasgn}. Shared helper utilities are documented in \cref{sec:helpers}.
 
-\subsection{\texorpdfstring{\code{mergeGrid}}{mergeGrid}}\index{mergeGrid@\texttt{mergeGrid}}
+\subsection{\texorpdfstring{\codeplain{mergeGrid}}{mergeGrid}}\index{mergeGrid@\texttt{mergeGrid}}
 \label{sec:pdbase-mergegrid}
 
 \textit{Internal/protected mechanism.} This signature documents the backend grid-refinement algorithm used by public algebra. User calls enter through the public algebra methods.
@@ -675,16 +885,16 @@ rho2Grid = 1×3 double
          0    0.5000    1.0000
 \end{lstlisting}
 
-The example invokes the protected helper through public addition, which is the supported user entry point. Here $\ell=2$. The physical-cell index $\vect{c}=(c_1,c_2)$ is one-based, while the degree-one local Bernstein label $\vect{i}=(i_1,i_2)\in\{0,1\}^2$ is zero-based inside every cell.
+The example invokes the protected helper through public addition, which is the supported user entry point. Here $\ell=2$, the physical-cell index is $\vect{c}=(c_1,c_2)$ with $c_s\in\{1,2\}$, and the degree-one local Bernstein label is $\vect{i}=(i_1,i_2)\in\{0,1\}^2$ inside every cell.
 
 \begin{center}
     \begin{tikzpicture}[x=1.25cm,y=1.25cm]
-    \node[dp/label,font=\scriptsize\bfseries] at (0.9,2.30)
-    {$\mathcal G_A=\{[0,1],[0,0.5,1]\}$};
-    \draw[dp/grid-line] (0,0)--(1.8,0)--(1.8,1.8)--(0,1.8)--cycle;
-    \draw[dp/grid-line] (0,0.9)--(1.8,0.9);
-    \node[dp/label] at (0.9,0.45) {$\vect{c}=(1,1)$};
-    \node[dp/label] at (0.9,1.35) {$\vect{c}=(1,2)$};
+        \node[dp/label,font=\scriptsize\bfseries] at (0.9,2.30)
+        {$\mathcal G_A=\{[0,1],[0,0.5,1]\}$};
+        \draw[dp/grid-line] (0,0)--(1.8,0)--(1.8,1.8)--(0,1.8)--cycle;
+        \draw[dp/grid-line] (0,0.9)--(1.8,0.9);
+        \node[dp/label] at (0.9,0.45) {$\vect{c}=(1,1)$};
+        \node[dp/label] at (0.9,1.35) {$\vect{c}=(1,2)$};
 
         \node[dp/label,font=\scriptsize\bfseries] at (3.5,2.30)
         {$\mathcal G_B=\{[0,0.5,1],[0,1]\}$};
@@ -708,10 +918,10 @@ The example invokes the protected helper through public addition, which is the s
         \node[dp/label] at (6.80,1.35) {$(2,2)$};
         \node[dp/label,text width=45mm] at (6.35,-0.55)
         {four physical cells; local labels in each cell:\\
-            $\vect{i}\in\{0,1\}^2$ (zero-based)};
-        \end{tikzpicture}
+            $\vect{i}\in\{0,1\}^2$};
+    \end{tikzpicture}
 
-    \textit{Each axis uses the sorted union of its input nodes.  The result is the unique minimal same-bound tensor grid containing both inputs.}
+    \textit{Each axis uses the sorted union of its input nodes. The result is the unique minimal same-bound tensor grid containing both inputs.}
 \end{center}
 
 \section{Boundaries and Related APIs}

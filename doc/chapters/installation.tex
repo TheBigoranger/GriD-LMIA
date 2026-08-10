@@ -5,13 +5,13 @@
 \index{installation}\index{path conflict}\index{YALMIP dependency}
 \label{sec:installation}
 
-Start \matlab{} in the checked-out repository and run the root-level installer once. The installer adds only the repository root to the end of the MATLAB path. MATLAB resolves the package's class, package, and private directories from that root. Dependency installation and \code{startup.m} configuration remain user-managed operations.
+Start \matlab{} in the downloaded repository and run command \code{install_pd_lmi} once. The installer adds only the repository root to the end of the MATLAB path. MATLAB resolves the package's class, package, and private directories from that root. Dependency installation and \code{startup.m} configuration remain user-managed operations.
 
 \begin{lstlisting}[style=dpmatlab]
 report = install_pd_lmi();
 \end{lstlisting}
 
-The returned structure records the package root, the YALMIP root discovered on the current MATLAB path, the working SDP solver, the paths added by this run, and whether the path was persisted:
+The returned structure records the package root, the YALMIP root discovered on the current MATLAB path, the working \termdef{sdp} solver, the paths added by this run, and whether the path was persisted:
 
 \begin{lstlisting}[style=dpsyntax]
 report.PackageRoot
@@ -21,7 +21,7 @@ report.AddedPaths
 report.Persisted
 \end{lstlisting}
 
-YALMIP must already be on the active MATLAB path.  The installer validates \code{yalmip}, \code{sdpvar}, \code{sdpsettings}, \code{optimize}, and \code{getavailablesolvers}. It then probes available SDP solvers in the fixed commercial-first order MOSEK, COPT, SeDuMi, SDPT3, and LMILAB using a tiny bounded SDP.  A failed probe falls through to the next candidate.  If any precondition, shadow check, solver probe, or path persistence operation fails, the installer restores the original MATLAB path and stops with one of these stable errors:
+YALMIP must already be on the active MATLAB path. The installer validates \code{yalmip}, \code{sdpvar}, \code{sdpsettings}, \code{optimize}, and \code{getavailablesolvers}. It then probes available SDP solvers in the fixed commercial-first order MOSEK, COPT, SeDuMi, SDPT3, and LMILAB using a tiny bounded SDP. A failed probe falls through to the next candidate. If any precondition, shadow check, solver probe, or path persistence operation fails, the installer restores the original MATLAB path and stops with one of these stable errors:
 
 \begin{lstlisting}[style=dpsyntax]
 install_pd_lmi:MissingYALMIP
@@ -48,7 +48,7 @@ The entry point covers installer rollback and persistence behavior, helper utili
 \section{Run a Minimal Solver Example}
 \label{sec:quick-start}
 
-The installer already rejects shadowed package classes before it persists the path.  To inspect the selected solver and exercise the solver-facing assembly boundary, use the report together with a small known-data example:
+The installer already rejects shadowed package classes before it persists the path. To inspect the selected solver and exercise the solver-facing assembly boundary, use the report together with a small known-data example:
 
 \begin{lstlisting}[style=dpmatlab]
 report.Solver
@@ -83,7 +83,7 @@ Fbox = toYalmip(Cbox);
 \end{lstlisting}
 
 \begin{lstlisting}[style=dpoutput]
-sparsePutinarState = 1×4 double
+sparsePutinarState = 1x4 double
      1     2     2     8
 \end{lstlisting}
 
@@ -124,42 +124,42 @@ The corresponding reusable BibTeX entry uses citation key \code{xu2026gridlmia}:
 Category & Entries \\
 \midrule
 Backend &
-\hyperref[sec:pdbase]{\code{pdbase}},
+\hyperref[sec:pdbase]{\codeplain{pdbase}},
 \hyperref[sec:pdbase-constructor]{constructor},
-\hyperref[sec:pdbase-inspection]{\code{cells}},
-\hyperref[sec:pdbase-inspection]{\code{lbls}},
-\hyperref[sec:pdbase-inspection]{\code{coeffs}},
-\hyperref[sec:pdbase-counts]{\code{ncell}},
-\hyperref[sec:pdbase-counts]{\code{ncoeff}},
-\hyperref[sec:pdbase-counts]{\code{npar}},
-\hyperref[sec:pdbase-counts]{shape protocols},
+\hyperref[sec:pdbase-inspection]{\codeplain{cells}},
+\hyperref[sec:pdbase-inspection]{\codeplain{lbls}},
+\hyperref[sec:pdbase-inspection]{\codeplain{coeffs}},
+\hyperref[sec:pdbase-counts]{\codeplain{ncell}},
+\hyperref[sec:pdbase-counts]{\codeplain{ncoeff}},
+\hyperref[sec:pdbase-counts]{\codeplain{npar}},
+\hyperref[sec:pdbase-shape]{shape protocols},
 \hyperref[sec:pdbase-matrix-ops]{shared matrix operations} \\
 Known data &
-\hyperref[sec:pdmat]{\code{pdmat}},
+\hyperref[sec:pdmat]{\codeplain{pdmat}},
 \hyperref[sec:pdmat-construction]{construction},
-\hyperref[sec:pdmat-evaluate]{\code{evaluate}},
-\hyperref[sec:pdmat-table]{\code{bernTable}},
-\hyperref[sec:pdmat-display]{\code{disp}/\code{display}},
-\hyperref[sec:pdmat-plot]{\code{plot}},
+\hyperref[sec:pdmat-evaluate]{\codeplain{evaluate}},
+\hyperref[sec:pdmat-table]{\codeplain{bernTable}},
+\hyperref[sec:pdmat-display]{\codeplain{disp}/\codeplain{display}},
+\hyperref[sec:pdmat-plot]{\codeplain{plot}},
 \hyperref[sec:pdmat-algebra]{operators},
 \hyperref[sec:pdmat-matrix-ops]{matrix methods} \\
 Decision variables &
-\hyperref[sec:pdvar]{\code{pdvar}},
+\hyperref[sec:pdvar]{\codeplain{pdvar}},
 \hyperref[sec:pdvar-construction]{construction},
-\hyperref[sec:pdvar-rhodiff]{\code{rhodiff}},
+\hyperref[sec:pdvar-rhodiff]{\codeplain{rhodiff}},
 \hyperref[sec:pdvar-algebra]{affine/mixed algebra},
 \hyperref[sec:pdvar-matrix-ops]{matrix methods},
 \hyperref[sec:pdvar-comparison]{comparisons} \\
 LMIs &
-\hyperref[sec:pdlmi]{\code{pdlmi}},
+\hyperref[sec:pdlmi]{\codeplain{pdlmi}},
 \hyperref[sec:pdlmi-construction]{construction},
   \hyperref[sec:pdlmi-direct]{direct coefficient assembly},
-  \hyperref[sec:pdlmi-polya]{\code{usePolya}},
-  \hyperref[sec:pdlmi-putinar]{\code{usePutinar}},
-  \hyperref[sec:pdlmi-sparse-putinar]{\code{useSpPut}},
-  \hyperref[sec:pdlmi-sparse-full-box]{\code{useSpBox}},
-  \hyperref[sec:pdlmi-full-box]{\code{useFullBox}},
-\hyperref[sec:pdlmi-toyalmip]{\code{toYalmip}},
+  \hyperref[sec:pdlmi-polya]{\codeplain{usePolya}},
+  \hyperref[sec:pdlmi-putinar]{\codeplain{usePutinar}},
+  \hyperref[sec:pdlmi-sparse-putinar]{\codeplain{useSpPut}},
+  \hyperref[sec:pdlmi-sparse-full-box]{\codeplain{useSpBox}},
+  \hyperref[sec:pdlmi-full-box]{\codeplain{useFullBox}},
+\hyperref[sec:pdlmi-toyalmip]{\codeplain{toYalmip}},
 \hyperref[sec:examples]{solver examples} \\
 \bottomrule
 \end{tabularx}

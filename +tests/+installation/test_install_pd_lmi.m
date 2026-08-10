@@ -32,6 +32,38 @@ function testFalRepAndRepRun(testCase)
     testCase.verifyEmpty(state.SaveCalls{2});
 end
 
+function testSucRunPriAllSte(testCase)
+%TESTSUCRUNPRIALLSTE Report every installation stage and final success.
+    setMock("fallback", 0);
+
+    output = evalc('install_pd_lmi();');
+
+    expected = ["Step 1/5: Validating YALMIP", ...
+        "Step 2/5: Finding a working SDP solver", ...
+        "Step 3/5: Adding GriD-LMIA to the MATLAB path", ...
+        "Step 4/5: Verifying GriD-LMIA class resolution", ...
+        "Step 5/5: Persisting the MATLAB path", ...
+        "Installation completed successfully"];
+    for k = 1:numel(expected)
+        testCase.verifySubstring(output, expected(k));
+    end
+end
+
+function testFaiRunPriSteAndCau(testCase)
+%TESTFAIRUNPRISTEANDCAU Print the active stage and original error details.
+    setMock("no-solver", 0);
+    before = path;
+
+    output = evalc(['testCase.verifyError(@() install_pd_lmi(), ' ...
+        '"install_pd_lmi:NoWorkingSDPSolver");']);
+
+    testCase.verifySubstring(output, ...
+        "Installation failed during step 2/5: Finding a working SDP solver");
+    testCase.verifySubstring(output, "install_pd_lmi:NoWorkingSDPSolver");
+    testCase.verifySubstring(output, "No working SDP solver was found");
+    testCase.verifyEqual(path, before);
+end
+
 function testFaiProRolBacPat(testCase)
     setMock("no-solver", 0);
     before = path;

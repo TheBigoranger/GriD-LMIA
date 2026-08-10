@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const terminologyPath = resolve(here, "../../../doc/terminology.json");
+const terminologyPath = resolve(here, "../../../doc/support/terminology.json");
 const { terms } = JSON.parse(readFileSync(terminologyPath, "utf8"));
 const linkedTerms = terms.filter((term) => term.auto_link);
 const expression = new RegExp(

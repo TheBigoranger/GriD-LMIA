@@ -123,19 +123,24 @@ yalmip('clear')
 grid = {[0 1]};
 A = pdmat(grid, @(rho) (1 - rho) * [-1 -1; 1 -1] + ...
     rho * [-1 -10; 0.1 -1], Degree=1);
-solver = 'lmilab';
-if exist('mosekopt', 'file') ~= 0
-    solver = 'mosek';
-end
+solver = tests.select_sdp_solver();
 opts = sdpsettings('solver', solver, 'verbose', 0);
 
-Pc = pdvar(2, grid, Degree=0); CconstantDecay = Pc * A + A' * Pc <= -1e-10 * eye(2); CconstantPositive = Pc >= eye(2); solConstant = optimize([CconstantDecay.toYalmip, ... CconstantPositive.toYalmip], [], opts);
+Pc = pdvar(2, grid, Degree=0);
+CconstantDecay = Pc * A + A' * Pc <= -1e-10 * eye(2);
+CconstantPositive = Pc >= eye(2);
+solConstant = optimize([CconstantDecay.toYalmip, ...
+    CconstantPositive.toYalmip], [], opts);
+assert(solConstant.problem == 1, solConstant.info)
 
-Pd = pdvar(2, grid); CdependentDecay = Pd * A + A' * Pd <= -1e-10 * eye(2); CdependentPositive = Pd >= eye(2); solDependent = optimize([CdependentDecay.toYalmip, ... CdependentPositive.toYalmip], [], opts); assert(solDependent.problem == 0, solDependent.info)
+Pd = pdvar(2, grid);
+CdependentDecay = Pd * A + A' * Pd <= -1e-10 * eye(2);
+CdependentPositive = Pd >= eye(2);
+solDependent = optimize([CdependentDecay.toYalmip, ...
+    CdependentPositive.toYalmip], [], opts);
+assert(solDependent.problem == 0, solDependent.info)
 
-Pplot = pdmat(grid, ...
-    {cellfun(@value, Pd.LocalValues{1}, UniformOutput=false)}, ...
-    Degree=Pd.Degree);
+Pplot = value(Pd);
 figure(Name="Parameter-dependent Lyapunov matrix")
 plot(Pplot, SamplesPerCell=40, LineWidth=1.5)
 title("Solved parameter-dependent Lyapunov matrix")
@@ -190,10 +195,7 @@ positivityConstraintCount = 2
   style=dpmatlab,
 ]
 objective = gamma.LocalValues{1}{1};
-solver = 'lmilab';
-if exist('mosekopt', 'file') ~= 0
-    solver = 'mosek';
-end
+solver = tests.select_sdp_solver();
 opts = sdpsettings('solver', solver, 'verbose', 0);
 sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
 assert(sol.problem == 0, sol.info)

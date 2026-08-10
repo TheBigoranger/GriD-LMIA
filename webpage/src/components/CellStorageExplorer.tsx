@@ -116,7 +116,7 @@ export default function CellStorageExplorer({ mathMarkup }: Props) {
             </header>
             <aside className="cell-bernstein-readout" aria-label="Bernstein representation of the selected matrix">
               <InlineMath
-                className="cell-bernstein-formula formula-block formula-one-line"
+                className="cell-bernstein-formula formula-block"
                 markup={cellMath.bernstein}
               />
             </aside>

@@ -39,9 +39,9 @@ ratios = 2×1 double
 
 \paragraph{See also.} \Cref{sec:bernstein-product-math,sec:bernstein-degree-elevation,sec:certificate-gram-map} derive the operations that use these ratios.
 
-\section{\texorpdfstring{\code{helper.cellGet}}{helper.cellGet}}
+\section{\texorpdfstring{\codeplain{helper.cellGet}}{helper.cellGet}}
 
-\textit{Purpose.} Read one flat coefficient leaf from a nested physical-cell tree.
+\textit{Purpose.} \code{helper.cellGet} reads one flat coefficient leaf from a nested physical-cell tree.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
@@ -64,7 +64,7 @@ leaf = 1×2 double
 \remarkshead
 The helper deliberately relies on ordinary MATLAB cell indexing.  Callers validate the subscript length and bounds before traversal.
 
-\section{\texorpdfstring{\code{helper.chk}}{helper.chk}}
+\section{\texorpdfstring{\codeplain{helper.chk}}{helper.chk}}
 
 \textit{Purpose.} Apply shared validation predicates while retaining a caller-owned error identifier and message.
 
@@ -90,7 +90,7 @@ validated = 1×2 double
 \remarkshead
 A failed data predicate raises \code{errId}. An unknown predicate or a named test that omits its value raises \codeerr{helper}{InvalidValidatorCall}. These errors identify a validator-programming defect, while \code{errId} identifies rejected caller data.
 
-\section{\texorpdfstring{\code{helper.combRows}}{helper.combRows}}
+\section{\texorpdfstring{\codeplain{helper.combRows}}{helper.combRows}}
 
 \textit{Purpose.} Enumerate Cartesian combinations in the ordering shared by physical cells, local labels, and rate vertices.
 
@@ -117,7 +117,7 @@ rows = 4×2 double
 \remarkshead
 This ordering is part of the storage contract.  Reordering the rows would misalign tensor labels, physical-cell traversal, and derivative rate vertices.
 
-\section{\texorpdfstring{\code{helper.isZero}}{helper.isZero}}
+\section{\texorpdfstring{\codeplain{helper.isZero}}{helper.isZero}}
 
 \textit{Purpose.} Prove the distinct zero notions used by known-data and affine algebra fast paths.
 
@@ -150,7 +150,7 @@ objectZero =
 \remarkshead
 Function-only \code{pdmat} placeholders contain handle evaluation exclusively, so their zero status remains inconclusive. Invalid modes raise \codeerr{helper}{InvalidZeroMode}. The wrong mode-specific arity raises \codeerr{helper}{InvalidZeroCall}.
 
-\section{\texorpdfstring{\code{helper.mkGrid}}{helper.mkGrid}}
+\section{\texorpdfstring{\codeplain{helper.mkGrid}}{helper.mkGrid}}
 
 \textit{Purpose.} Validate tensor-grid vectors and construct the shared \code{GridInfo} record.
 
@@ -184,7 +184,7 @@ points = 4×2 double
 \remarkshead
 Malformed containers use \code{owner + ":InvalidGrid"}. Malformed individual axes use \code{owner + ":InvalidGridVector"}. Consumers derive cell counts directly from \code{GridInfo.NumNodes}.
 
-\section{\texorpdfstring{\code{helper.mkNest}}{helper.mkNest}}
+\section{\texorpdfstring{\codeplain{helper.mkNest}}{helper.mkNest}}
 
 \textit{Purpose.} Allocate recursive physical-cell storage and construct each leaf from its complete cell subscript.
 
@@ -209,7 +209,7 @@ secondLeaf = 3
 \remarkshead
 \code{mkLeaf} owns the leaf payload. The helper supplies deterministic physical-cell subscripts, while the caller supplies coefficient count, matrix size, and rate semantics.
 
-\section{\texorpdfstring{\code{helper.normDeg}}{helper.normDeg}}
+\section{\texorpdfstring{\codeplain{helper.normDeg}}{helper.normDeg}}
 
 \textit{Purpose.} Validate scalar shorthand or direction-wise Bernstein degrees while preserving the caller's error namespace.
 
@@ -237,7 +237,7 @@ The helper performs normalization only. Constructors and certificate selectors o
 \section{Continuity Classification and Coefficient Fitting}
 \index{chkCont@\texttt{chkCont}}\index{fitVals@\texttt{fitVals}}
 
-\subsection{\texorpdfstring{\code{helper.chkCont}}{helper.chkCont}}
+\subsection{\texorpdfstring{\codeplain{helper.chkCont}}{helper.chkCont}}
 
 \textit{Purpose.} Classify whether stored coefficients agree on every shared physical-cell face.
 
@@ -262,7 +262,7 @@ isContinuous =
 
 \paragraph{See also.} \code{pdbase.IsContinuous}, the \code{pdmat} constructor in \cref{sec:pdmat-construction}, and the shared-face convention in \cref{sec:bernstein-tensor-grids}.
 
-\subsection{\texorpdfstring{\code{helper.fitVals}}{helper.fitVals}}
+\subsection{\texorpdfstring{\codeplain{helper.fitVals}}{helper.fitVals}}
 
 \textit{Purpose.} Fit cell-wise Bernstein coefficients from values sampled at the local tensor Bernstein nodes.
 
@@ -298,7 +298,7 @@ localCoefficients = 1×3 double
 \section{Validation Modes and Rate Vertices}
 \index{normMode@\texttt{normMode}}\index{rateVerts@\texttt{rateVerts}}
 
-\subsection{\texorpdfstring{\code{helper.normMode}}{helper.normMode}}
+\subsection{\texorpdfstring{\codeplain{helper.normMode}}{helper.normMode}}
 
 \textit{Purpose.} Normalize a transient validation mode while preserving the caller's error namespace.
 
@@ -320,7 +320,7 @@ mode = "strict"
 
 \paragraph{See also.} \code{ValidationMode} in \cref{sec:pdbase-constructor,sec:pdmat-construction,sec:pdvar-construction}.
 
-\subsection{\texorpdfstring{\code{helper.rateVerts}}{helper.rateVerts}}
+\subsection{\texorpdfstring{\codeplain{helper.rateVerts}}{helper.rateVerts}}
 
 \textit{Purpose.} Enumerate the distinct vertices of a normalized parameter-rate box.
 

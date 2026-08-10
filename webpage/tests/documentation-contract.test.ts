@@ -25,6 +25,17 @@ test("projects the accepted shared documentation contracts", () => {
   });
   assert.ok(documentationRecords.every((record) => record.executable_example));
   assert.ok(referenceEntries.every((entry) => entry.href.startsWith("/GriD-LMIA/")));
+  const webTargets = documentationRecords.flatMap((record) => [
+    record.web_route_or_anchor,
+    record.web_example_evidence,
+  ]);
+  assert.equal(webTargets.length, 384);
+  assert.equal(new Set(webTargets).size, 384);
+});
+
+test("uses record kind when generating diagnostic IDs", () => {
+  const diagnosticIndex = read("src/components/DiagnosticIndex.astro");
+  assert.match(diagnosticIndex, /slug\(`\$\{record\.id\}-\$\{record\.kind\}`\)/);
 });
 
 test("links Markdown prose terms while preserving excluded AST nodes", () => {

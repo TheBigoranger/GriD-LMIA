@@ -9,6 +9,9 @@ import { katexOptions } from "./src/lib/katex-options.js";
 import rehypeKatexStrict from "./src/lib/rehype-katex-strict.js";
 import remarkTerminologyLinks from "./src/lib/remark-terminology-links.js";
 
+// Keep the rendered top-level manual navigation independent of nested group size.
+const sidebarOrder = ["Reference", "Learn", "Examples", "Welcome", "Install", "Citing", "Version History", "About", "Thanks"];
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://thebigoranger.github.io",
@@ -40,7 +43,7 @@ export default defineConfig({
       sidebar: [
         { label: "Welcome", link: "/" },
         { label: "Install", slug: "install" },
-        { label: "Citing GriD-LMIA", slug: "citing" },
+        { label: "Citing", slug: "citing" },
         { label: "Version History", slug: "version-history" },
         {
           label: "Learn",
@@ -146,12 +149,13 @@ export default defineConfig({
           label: "Examples",
           items: [
             { label: "Workflow Index", slug: "examples" },
+            { label: "Certificate Selection", slug: "examples/certificate-selection" },
             { label: "Solver Smoke Cases", slug: "examples/solver-smoke" },
           ],
         },
         { label: "About", slug: "about" },
         { label: "Thanks", link: "/thanks/" },
-      ],
+      ].sort((left, right) => sidebarOrder.indexOf(left.label) - sidebarOrder.indexOf(right.label)),
     }),
   ],
 });

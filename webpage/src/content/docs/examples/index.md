@@ -112,6 +112,10 @@ ans =
 
 ## Deterministic Full-Box Selection
 
+Start with the [certificate-selection workflow](/GriD-LMIA/examples/certificate-selection/)
+for a complete Direct-to-Pólya selection, stable six-constraint export, and the
+boundary between deterministic assembly and solver execution.
+
 The [`useFullBox` reference](/GriD-LMIA/documents/reference/pdlmi/usefullbox/#deterministic-transcript-example)
 contains a solver-independent transcript that compares direct assembly, the
 minimum full-box order, an explicit higher order, replacement of a Pólya

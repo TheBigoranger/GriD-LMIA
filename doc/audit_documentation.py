@@ -18,6 +18,7 @@ import generate_terminology
 
 DOC = Path(__file__).resolve().parent
 ROOT = DOC.parent
+SUPPORT = DOC / "support"
 
 CHAPTER_ORDER = [
     "release-history.tex", "workflow-introduction.tex", "workflow-constraints.tex",
@@ -37,6 +38,7 @@ NEGATIVE = re.compile(
     re.IGNORECASE,
 )
 BANNED = re.compile(r"\b(?:delve|tapestry|myriad|groundbreaking|game-changing|seamless|seamlessly|transformative|intricate|multifaceted|holistic|revolutionary|unlock|unlocks|unlocking)\b", re.IGNORECASE)
+NONCANONICAL_CELLWISE = re.compile(r"\b(?:cellwise|cell-local|cell-locally)\b", re.IGNORECASE)
 ACRONYM = re.compile(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b|\b[A-Z]{2,}\b")
 BOUNDARY_HEADING = re.compile(
     r"\b(?:remarks?|boundaries|validation|errors?|diagnostics?|limitations?|status|failure)\b",
@@ -180,12 +182,72 @@ def manual_files() -> list[Path]:
 
 
 def audit_generated(errors: list[str]) -> None:
-    if (DOC / "terminology.tex").read_text(encoding="utf-8") != generate_terminology.render():
-        errors.append("terminology.tex is stale")
+    if (SUPPORT / "terminology.tex").read_text(encoding="utf-8") != generate_terminology.render():
+        errors.append("support/terminology.tex is stale")
     if (DOC / "documentation-inventory.json").read_text(encoding="utf-8") != generate_inventory.render():
         errors.append("documentation-inventory.json is stale")
-    if (DOC / "api-index.tex").read_text(encoding="utf-8") != generate_inventory.render_index():
-        errors.append("api-index.tex is stale")
+    if (SUPPORT / "api-index.tex").read_text(encoding="utf-8") != generate_inventory.render_index():
+        errors.append("support/api-index.tex is stale")
+    if (SUPPORT / "api-code-links.tex").read_text(encoding="utf-8") != generate_inventory.render_code_links():
+        errors.append("support/api-code-links.tex is stale")
+
+
+def braced_argument(source: str, start: int) -> tuple[str, int] | None:
+    """Read one balanced TeX argument whose opening brace is at start."""
+    if start >= len(source) or source[start] != "{":
+        return None
+    depth = 0
+    for position in range(start, len(source)):
+        if source[position] == "{" and (position == 0 or source[position - 1] != "\\"):
+            depth += 1
+        elif source[position] == "}" and (position == 0 or source[position - 1] != "\\"):
+            depth -= 1
+            if depth == 0:
+                return source[start + 1:position], position + 1
+    return None
+
+
+def audit_code_linking(errors: list[str]) -> None:
+    """Check exact API dispatch, reference labels, and outer-link safety."""
+    style = (SUPPORT / "manual-style.tex").read_text(encoding="utf-8")
+    for required in (
+        r"\DeclareRobustCommand{\codeplain}",
+        r"\DeclareRobustCommand{\code}",
+        r"\input{support/api-code-links}",
+    ):
+        if required not in style:
+            errors.append(f"support/manual-style.tex misses code-link contract: {required}")
+
+    records = generate_inventory.expand()["records"]
+    expected_aliases = generate_inventory.code_link_aliases(records)
+    link_source = (SUPPORT / "api-code-links.tex").read_text(encoding="utf-8")
+    actual_aliases = dict(re.findall(r"\\DeclareApiCodeLink\{([^{}]+)\}\{([^{}]+)\}", link_source))
+    if actual_aliases != expected_aliases:
+        errors.append("support/api-code-links.tex does not map every exact public symbol to its canonical reference label")
+
+    all_tex = "\n".join(path.read_text(encoding="utf-8") for path in manual_files())
+    for literal, destination in actual_aliases.items():
+        if f"\\label{{{destination}}}" not in all_tex:
+            errors.append(f"support/api-code-links.tex maps {literal} to absent reference label {destination}")
+
+    index_source = (SUPPORT / "api-index.tex").read_text(encoding="utf-8")
+    if r"\DeclareApiIndexAnchor" in link_source or "api-index-" in link_source:
+        errors.append("support/api-code-links.tex still depends on final-Index destinations")
+    if "ApiIndexAnchor" in index_source or "ApiIndexAnchor" in style:
+        errors.append("the TeX manual still contains special final-Index anchor machinery")
+
+    for path in manual_files():
+        source = path.read_text(encoding="utf-8")
+        relative = path.relative_to(ROOT)
+        direct_heading_link = re.search(r"\\texorpdfstring\{\\code\{", source)
+        if direct_heading_link:
+            line = source.count("\n", 0, direct_heading_link.start()) + 1
+            errors.append(f"{relative}:{line} uses auto-linking code inside texorpdfstring; use codeplain")
+        for match in re.finditer(r"\\hyperref\[[^\]]*\]\s*", source):
+            argument = braced_argument(source, match.end())
+            if argument and r"\code{" in argument[0]:
+                line = source.count("\n", 0, match.start()) + 1
+                errors.append(f"{relative}:{line} nests auto-linking code inside hyperref; use codeplain")
 
 
 def audit_inventory(errors: list[str]) -> Counter:
@@ -200,7 +262,7 @@ def audit_inventory(errors: list[str]) -> Counter:
     if extra_ids:
         errors.append(f"inventory has unexpected public ids: {extra_ids}")
     all_tex = "\n".join(path.read_text(encoding="utf-8") for path in manual_files())
-    index_text = (DOC / "api-index.tex").read_text(encoding="utf-8")
+    index_text = (SUPPORT / "api-index.tex").read_text(encoding="utf-8")
     for record in records:
         absent = sorted(field for field in required if field not in record or record[field] in (None, "", []))
         if absent:
@@ -220,7 +282,7 @@ def audit_inventory(errors: list[str]) -> Counter:
             str(record[field])
             for field in ("call_forms_options", "inputs", "return_type_shape", "validation_errors", "supported_scope")
         )
-        if re.search(r"\b(?:cellwise|cell-local|cell-locally)\b", record_prose, re.IGNORECASE):
+        if NONCANONICAL_CELLWISE.search(record_prose):
             errors.append(f"{record['id']} uses noncanonical cell-wise terminology")
         if "{member}" in record["tex_index"]:
             errors.append(f"{record['id']} has a templated TeX index")
@@ -231,7 +293,7 @@ def audit_inventory(errors: list[str]) -> Counter:
 
 
 def audit_terminology(errors: list[str]) -> None:
-    registry = json.loads((DOC / "terminology.json").read_text(encoding="utf-8"))
+    registry = json.loads((SUPPORT / "terminology.json").read_text(encoding="utf-8"))
     required = {"id", "abbreviation", "expansion", "aliases", "tex_index_key", "web_definition_anchor", "auto_link"}
     terms = registry["terms"]
     for term in terms:
@@ -289,15 +351,15 @@ def audit_tex(errors: list[str]) -> None:
         if incomplete_operator:
             line = source.count("\n", 0, incomplete_operator.start()) + 1
             errors.append(f"{relative}:{line} has a scalar-indexed sum or product without explicit bounds")
-        for forbidden in (
-            r"\\sum_\{\\vect\{i\}\}",
-            r"\\sum_\{\\vect\{i\}\\in\s*\\prod",
-            r"\\sum_\{\\vect\{i\}\\in\\mathcal I_\{\\vect\{[mM]\}\}\}",
-        ):
+        for forbidden in (r"\\sum_\{\\vect\{i\}\}",):
             match = re.search(forbidden, source)
             if match:
                 line = source.count("\n", 0, match.start()) + 1
                 errors.append(f"{relative}:{line} shortens the complete local-label summation domain")
+        banned_index_set = re.search(r"\\mathcal\s*\{?I\}?", source)
+        if banned_index_set:
+            line = source.count("\n", 0, banned_index_set.start()) + 1
+            errors.append(f"{relative}:{line} uses the banned complete-label index-set notation")
         for command in (r"\mathbf", r"\boldsymbol", r"\vec"):
             if re.search(re.escape(command) + r"(?![A-Za-z])", source):
                 errors.append(f"{relative} uses legacy semantic vector command {command}")
@@ -307,12 +369,11 @@ def audit_tex(errors: list[str]) -> None:
             errors.append(f"{relative}:{line} uses unbraced semantic vector command")
         prose_lines = author_prose(path)
         negative_allowed = negative_context_lines(path)
-        protected_anchor = None
-        if path.name == "workflow-introduction.tex":
-            for number, raw in enumerate(source.splitlines(), 1):
-                if "On this common unit box" in raw:
-                    protected_anchor = number
-                    break
+        for index_entry in re.finditer(r"\\index\{([^{}]*)\}", source):
+            noncanonical = NONCANONICAL_CELLWISE.search(index_entry.group(1))
+            if noncanonical:
+                line = source.count("\n", 0, index_entry.start()) + 1
+                errors.append(f"{relative}:{line} uses noncanonical cell-wise terminology in an Index entry")
         for number, text in prose_lines:
             negative = NEGATIVE.search(text)
             if negative and number not in negative_allowed:
@@ -322,10 +383,8 @@ def audit_tex(errors: list[str]) -> None:
                 errors.append(f"{relative}:{number} banned promotional term `{banned.group(0)}`")
             if ";" in text:
                 errors.append(f"{relative}:{number} semicolon in author prose")
-            if re.search(r"\b(?:cellwise|cell-local|cell-locally)\b", text, re.IGNORECASE):
-                protected = protected_anchor is not None and number < protected_anchor
-                if not protected:
-                    errors.append(f"{relative}:{number} uses noncanonical cell-wise terminology")
+            if NONCANONICAL_CELLWISE.search(text):
+                errors.append(f"{relative}:{number} uses noncanonical cell-wise terminology")
         prose_numbers = {number for number, _ in prose_lines}
         source_lines = source.splitlines()
         for number in sorted(prose_numbers):
@@ -336,15 +395,15 @@ def audit_tex(errors: list[str]) -> None:
                 plain_second = bool(re.match(r"^[A-Z][^\\{}&]*", second))
                 if plain_first and plain_second:
                     errors.append(f"{relative}:{number}-{number + 1} prose paragraph spans physical source lines")
-    style = (DOC / "manual-style.tex").read_text(encoding="utf-8")
+    style = (SUPPORT / "manual-style.tex").read_text(encoding="utf-8")
     if r"\newcommand{\vect}[1]{\boldsymbol{#1}}" not in style:
-        errors.append("manual-style.tex misses the semantic vector definition")
+        errors.append("support/manual-style.tex misses the semantic vector definition")
     manual = (DOC / "manual.tex").read_text(encoding="utf-8")
-    if "Version v1.3.3" not in manual or r"\date{August 9, 2026}" not in manual:
-        errors.append("manual metadata is not v1.3.3 dated August 9, 2026")
+    if "Version v1.3.7" not in manual or r"\date{August 10, 2026}" not in manual:
+        errors.append("manual metadata is not v1.3.7 dated August 10, 2026")
     history = (DOC / "chapters" / "release-history.tex").read_text(encoding="utf-8")
-    if "v1.3.3" not in history or "August 9, 2026" not in history:
-        errors.append("release history misses v1.3.3 dated August 9, 2026")
+    if "v1.3.7" not in history or "August 10, 2026" not in history:
+        errors.append("release history misses v1.3.7 dated August 10, 2026")
 
 
 def main() -> int:
@@ -355,6 +414,7 @@ def main() -> int:
     errors: list[str] = []
     audit_generated(errors)
     counts = audit_inventory(errors)
+    audit_code_linking(errors)
     audit_terminology(errors)
     audit_tex(errors)
     if errors:
@@ -365,7 +425,7 @@ def main() -> int:
     total = sum(counts.values())
     summary = ", ".join(f"{owner}={count}" for owner, count in sorted(counts.items()))
     print(f"documentation audit passed: {total} per-symbol API records ({summary})")
-    print("terminology, first-use definitions, generated index evidence, semantic vectors, contextual boundary prose, and style checks passed")
+    print("terminology, first-use definitions, generated reference links, semantic vectors, contextual boundary prose, and style checks passed")
     return 0
 
 

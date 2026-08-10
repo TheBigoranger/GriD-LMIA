@@ -21,7 +21,7 @@
 \usepackage{cleveref}
 \usepackage{makeidx}
 \makeindex
-\input{terminology}
+\input{support/terminology}
 
 \crefname{equation}{}{}
 \crefname{figure}{Fig}{Figs}
@@ -175,7 +175,21 @@
 % Greek symbols, while scalars and ordinary uppercase matrix symbols keep their
 % native mathematical shape.
 \newcommand{\vect}[1]{\boldsymbol{#1}}
-\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\DeclareRobustCommand{\codeplain}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\DeclareApiCodeLink}[2]{%
+  \expandafter\def\csname api@code@link@\detokenize{#1}\endcsname##1{%
+    \hyperref[#2]{\codeplain{##1}}}}
+\DeclareRobustCommand{\code}[1]{%
+  \texorpdfstring{%
+    \ifcsname api@code@link@\detokenize{#1}\endcsname
+      \csname api@code@link@\detokenize{#1}\endcsname{#1}%
+    \else
+      \codeplain{#1}%
+    \fi}{\detokenize{#1}}}
+\pdfstringdefDisableCommands{%
+  \def\code#1{#1}%
+  \def\codeplain#1{#1}}
+\input{support/api-code-links}
 \newcommand{\codeerr}[2]{\code{#1:}\allowbreak\code{#2}}
 \newcommand{\refhead}[1]{%
   \noindent\textcolor{black!75}{\sffamily\bfseries\normalsize #1}\par

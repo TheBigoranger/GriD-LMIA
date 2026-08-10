@@ -14,6 +14,12 @@ import {
 
 const root = resolve(import.meta.dirname, "..");
 const failures = [];
+// Assemble the forbidden token so the validator does not reproduce it verbatim.
+const calligraphicCommand = String.raw`\math` + "cal";
+const completeLabelName = "I";
+const bannedIndexSetPattern = new RegExp(
+  `${calligraphicCommand}\\s*(?:${completeLabelName}|\\{${completeLabelName}\\})(?:_|\\b)`,
+);
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -89,10 +95,66 @@ if (terminologyTerms.length !== 8) failures.push(`Expected 8 governed terms, fou
 if (documentationRecords.some((record) => /protected|private/i.test(record.kind))) failures.push("Protected or private symbols entered the public inventory.");
 if (documentationRecords.some((record) => !record.executable_example)) failures.push("Every public record must carry executable example evidence.");
 
+const declaredWebTargets = documentationRecords.flatMap((record) => [
+  [record.web_route_or_anchor, `${record.id}.web_route_or_anchor`],
+  [record.web_example_evidence, `${record.id}.web_example_evidence`],
+]);
+const declaredTargetOwners = new Map();
+for (const [target, owner] of declaredWebTargets) {
+  const owners = declaredTargetOwners.get(target) ?? [];
+  owners.push(owner);
+  declaredTargetOwners.set(target, owners);
+}
+const duplicateDeclaredTargets = [...declaredTargetOwners]
+  .filter(([, owners]) => owners.length > 1)
+  .map(([target, owners]) => `${target} (${owners.join(", ")})`);
+if (declaredWebTargets.length !== 384 || declaredTargetOwners.size !== 384) {
+  failures.push(
+    `Expected 384 unique API and example targets, found ${declaredTargetOwners.size}: ${duplicateDeclaredTargets.join(" | ")}`,
+  );
+}
+
+// Resolve inventory evidence against authored routes, not only against JSON shape.
+const docsRoot = join(root, "src/content/docs");
+const routeSources = new Map(
+  walk(docsRoot)
+    .filter((file) => [".md", ".mdx"].includes(extname(file)))
+    .map((file) => {
+      const relativePath = relative(docsRoot, file).replace(/\\/g, "/");
+      const stem = relativePath.slice(0, -extname(file).length);
+      const route = stem === "index"
+        ? "/"
+        : stem.endsWith("/index")
+          ? `/${stem.slice(0, -"/index".length)}/`
+          : `/${stem}/`;
+      return [route, readFileSync(file, "utf8")];
+    }),
+);
+const apiInventorySource = readFileSync(join(root, "src/components/ApiInventory.astro"), "utf8");
+const dynamicInventoryContract = apiInventorySource.includes("id={anchor}")
+  && apiInventorySource.includes("id={exampleAnchor}")
+  && apiInventorySource.includes("record.web_route_or_anchor.split")
+  && apiInventorySource.includes("record.web_example_evidence.split");
+for (const record of documentationRecords) {
+  for (const field of ["web_route_or_anchor", "web_example_evidence"]) {
+    const [route, anchor] = record[field].split("#");
+    const source = routeSources.get(route);
+    const dynamicOwnerInventory = dynamicInventoryContract
+      && source?.includes(`<ApiInventory owner="${record.owner}" />`);
+    if (!source) failures.push(`${record.id} points ${field} to missing route ${route}.`);
+    else if (!anchor || (!source.includes(`id="${anchor}"`) && !dynamicOwnerInventory)) {
+      failures.push(`${record.id} points ${field} to missing anchor ${record[field]}.`);
+    }
+  }
+}
+
 const sourceFiles = walk(join(root, "src")).filter((file) => [".md", ".mdx", ".astro", ".tsx", ".ts", ".js"].includes(extname(file)));
 for (const file of sourceFiles) {
   if (file.endsWith("documentation-contracts.js") || file.endsWith("katex-options.js")) continue;
   const source = readFileSync(file, "utf8");
+  if (bannedIndexSetPattern.test(source)) {
+    failures.push(`${relative(root, file)} uses the banned named complete-label set.`);
+  }
   const legacy = source.match(/\\(?:mathbf|boldsymbol)\b/g);
   if (legacy) failures.push(`${relative(root, file)} uses legacy vector commands: ${[...new Set(legacy)].join(", ")}.`);
 }

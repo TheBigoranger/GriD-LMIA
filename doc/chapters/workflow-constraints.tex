@@ -2,37 +2,35 @@
 \label{sec:cellwise-solver-path}
 \index{residual}\index{Direct certificate}\index{finite certificate}
 
-Fix any physical cell $\mathcal H_{\vect{c}}$ and suppress the already enumerated rate-row index. After all local operations have been aligned to the assembled residual degree $\vect{M}$, the pullback of the residual has the general form
+Fix any physical cell $\mathcal H_{\vect{c}}$. After all local operations have been aligned to the assembled residual degree $\vect{M}$, the pullback of the \cref{eq:general-pdlmi} has the general form on each cell:
 \begin{gather*}
     \mathcal F^{(\vect{c})}(\vect{\alpha})
-    =\sum_{\vect{i}\in\mathcal I_{\vect{M}}=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}
+    =\sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}
     B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
     \mathcal C^{(\vect{c})}[\vect{i}]
-    \prec0.
+    \preceq0.
 \end{gather*}
-Here $\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})$, $B_{\vect{i}}^{\vect{M}}$ is the direction-wise degree-$\vect{M}$ tensor-product Bernstein basis, $\vect{i}$ is a zero-based local label, and $\mathcal C^{(\vect{c})}[\vect{i}]$ is the corresponding residual coefficient. Define the sign-normalized positive target and its coefficients by
+Here $\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})$, $B_{\vect{i}}^{\vect{M}}$ is the direction-wise degree-$\vect{M}$ tensor-product Bernstein basis, and $\mathcal C^{(\vect{c})}[\vect{i}]$ is the corresponding residual coefficient. Define the sign-normalized target by
 \begin{gather*}
     S^{(\vect{c})}(\vect{\alpha})
     =-\mathcal F^{(\vect{c})}(\vect{\alpha})
-    =\sum_{\vect{i}\in\mathcal I_{\vect{M}}=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}
+    =-\sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}
     B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
-    C^{(\vect{c})}[\vect{i}],
-    \qquad
-    C^{(\vect{c})}[\vect{i}]=-\mathcal C^{(\vect{c})}[\vect{i}].
+    \mathcal C^{(\vect{c})}[\vect{i}].
 \end{gather*}
-The theoretical target is $S^{(\vect{c})}(\vect{\alpha})\succ0$ on the unit box. The Direct certificate imposes the finite non-strict family
+The theoretical target is $S^{(\vect{c})}(\vect{\alpha})\succeq0$ on the unit box. The Direct certificate imposes
 \begin{gather*}
-    C^{(\vect{c})}[\vect{i}]\succeq0
-    \qquad\text{for every local Bernstein label }\vect{i}.
+    -\mathcal C^{(\vect{c})}[\vect{i}]\succeq0
+    \quad \forall \vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}.
 \end{gather*}
 Because every $B_{\vect{i}}^{\vect{M}}$ is nonnegative on the unit box and the basis functions sum to one,
 \begin{gather*}
-    \bigl[C^{(\vect{c})}[\vect{i}]\succeq0\ \text{for all }\vect{i}\bigr]
+    \bigl[-\mathcal C^{(\vect{c})}[\vect{i}]\succeq0\ \text{for all }\vect{i}\bigr]
     \quad\Longrightarrow\quad
     S^{(\vect{c})}(\vect{\alpha})\succeq0
     \quad\text{for all }\vect{\alpha}\in[0,1]^\ell.
 \end{gather*}
-Repeating this implication for every physical cell and every stored rate row produces finitely many YALMIP constraints that suffice for the continuous sign condition. The implication is one-way because a positive matrix polynomial may have an indefinite Bernstein coefficient. Failure of Direct therefore leaves feasibility of the continuous condition inconclusive. MATLAB and YALMIP comparisons are non-strict. A strict theoretical target requires a user-selected margin such as $S^{(\vect{c})}-\varepsilon I\succeq0$.
+Repeating this implication for every physical cell and every stored rate row produces finitely many YALMIP constraints that suffice for the continuous-domain condition. The implication is only sufficient because a positive semidefinite matrix polynomial may have an indefinite Bernstein coefficient. Therefore, failure of Direct is inconclusive. The following alternatives provide additional sufficient certificates that may succeed when Direct fails.
 
 \subsection{Opt-in alternatives}
 
@@ -41,21 +39,26 @@ Direct is the default finite certificate. The package also provides opt-in \hype
 \section{The Complete Path to YALMIP}
 \index{YALMIP}\index{solver status}\index{rhodiff@\texttt{rhodiff}}
 
-The full workflow now fits in one panorama: represent known data, create continuous decision functions, differentiate them cell by cell when rate terms are present, assemble and compare a residual, select a finite certificate, export it, solve, validate the status, and only then recover numerical values.
+The full workflow is as follows: represent known data, create continuous decision functions, differentiate them cell by cell when rate terms are present, assemble and compare a residual, select a finite certificate, export it, solve, validate the status, and only then recover numerical values.
 
 \begin{center}
-    \begin{tikzpicture}[node distance=4mm,font=\scriptsize]
-        \node[dp/stage] (objects) {known data and\\decisions};
-        \node[dp/stage,right=of objects] (differentiate) {optional cell-wise\\\code{rhodiff}};
-        \node[dp/stage,right=of differentiate] (residual) {residual\\comparison};
-        \node[dp/stage,right=of residual] (certificate) {finite\\certificate};
-        \node[dp/stage,right=of certificate] (export) {\code{toYalmip}\\and \code{optimize}};
-        \draw[dp/arrow] (objects)--(differentiate);
-        \draw[dp/arrow] (differentiate)--(residual);
+    \begin{tikzpicture}[node distance=5mm and 4mm,font=\scriptsize]
+        \node[dp/known,align=center,minimum width=28mm,minimum height=12mm] (known) {known data};
+        \node[dp/decision,below=of known,align=center,minimum width=28mm,minimum height=12mm] (decision) {decision variables\\with given degree};
+        \node[dp/stage,right=15mm of known,minimum width=20mm] (assemble) {assemble};
+        \node[dp/contribution,below=of assemble,align=center,minimum width=28mm,minimum height=12mm] (differentiate) {optional cell-wise\\\code{rhodiff}};
+        \node[dp/stage,right=of assemble,minimum width=24mm] (residual) {residual\\comparison};
+        \node[dp/stage,right=of residual,minimum width=23mm] (certificate) {finite\\certificate};
+        \node[dp/stage,right=of certificate,minimum width=27mm] (export) {\code{toYalmip}\\and \code{optimize}};
+        \draw[dp/arrow] (known)--(assemble);
+        \draw[dp/arrow] (decision)--(differentiate);
+        \draw[dp/arrow] (decision.east) to[out=20,in=200] (assemble.south west);
+        \draw[dp/arrow] (differentiate.north) to (assemble.south);
+        \draw[dp/arrow] (assemble)--(residual);
         \draw[dp/arrow] (residual)--(certificate);
         \draw[dp/arrow] (certificate)--(export);
         \node[dp/result,below=7mm of export,minimum width=29mm,minimum height=12mm,align=center,font=\scriptsize] (recover) {status $=0$, then\\recover values};
-        \draw[dp/arrow] (export)--(recover);
+        \draw[dp/arrow] (export.south) to (recover.north);
     \end{tikzpicture}
 \end{center}
 

@@ -1,9 +1,16 @@
-\chapter{\texorpdfstring{\code{pdmat}}{pdmat}: Known Parameter-Dependent Matrices}
+\chapter{\texorpdfstring{\codeplain{pdmat}}{pdmat}: Known Parameter-Dependent Matrices}
 \label{sec:pdmat}
 
 \code{pdmat} stores known finite real matrix data on a tensor grid. Objects can be coefficient-backed, function-only, or function-backed with explicit Bernstein coefficient evidence. Coefficient-backed objects participate in algebra. Function-only objects evaluate exactly through the stored handle and reserve \code{bernTable} and coefficient algebra for objects with coefficient evidence. Shared matrix-shape, unary, structural, reduction, reordering, and repetition methods are implemented centrally by \code{pdbase} and remain complete public \code{pdmat} behavior. This chapter documents their known-data syntax, numeric examples, validations, and boundaries.
 
-For coefficient-backed data, one storage leaf is the pullback $A^{(\vect{c})}=A\circ\phi_{\vect{c}}$, with local expansion $A^{(\vect{c})}(\vect{\alpha})=\sum_{\vect{i}\in\mathcal I_{\vect{m}}=\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}B_{\vect{i}}^{\vect{m}}(\vect{\alpha})A^{(\vect{c})}[\vect{i}]$ and $\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})$. Construction chooses the source of those coefficients. \code{evaluate} reconstructs the matrix value. \code{elevate} changes the coefficient representation while preserving the polynomial. Ordered multiplication applies the binomial-weighted convolution in \cref{sec:bernstein-product-math}. A function-backed object keeps exact handle evaluation separate from its finite coefficient evidence, while a function-only object supports exact evaluation exclusively.
+For coefficient-backed data, one storage cell is the pullback $A^{(\vect{c})}=A\circ\phi_{\vect{c}}$, with local expansion
+\begin{gather}
+    \label{eq:bernstein-coeffs}
+    A^{(\vect{c})}(\vect{\alpha})=\displaystyle\sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}B_{\vect{i}}^{\vect{m}}(\vect{\alpha})A^{(\vect{c})}[\vect{i}]
+\end{gather}
+with $\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})$. Construction chooses the source of those coefficients. \code{evaluate} reconstructs the matrix value. \code{elevate} changes the coefficient representation while preserving the polynomial. Matrix multiplication applies the binomial-weighted convolution, with details given in \cref{sec:bernstein-product-math}. A function-backed object keeps exact handle evaluation separate from its finite coefficient evidence, while a function-only object supports exact evaluation exclusively.
+
+The chapter follows these three source families through one common question: which operations are justified by the stored evidence? A global or nested coefficient source supports coefficient inspection and algebra, a function with an explicit degree retains both exact evaluation and validated coefficient evidence, and a function constructed with the degree omitted supports exact evaluation only. The examples therefore inspect the source state before using elevation, plotting, algebra, or comparison.
 
 \section{API Map}
 \label{sec:pdmat-lookup}
@@ -13,33 +20,38 @@ For coefficient-backed data, one storage leaf is the pullback $A^{(\vect{c})}=A\
 Task & Entry \\
 \midrule
 Construct data &
-\hyperref[sec:pdmat-construction]{\code{pdmat}} \\
+\hyperref[sec:pdmat-construction]{\codeplain{pdmat}} \\
+Public properties &
+\hyperref[sec:pdmat-properties]{\codeplain{GridInfo}/\codeplain{MatrixSize}/\codeplain{Degree}/\codeplain{LocalValues} and metadata} \\
+Inspect backend storage &
+\hyperref[sec:pdmat-backend-inheritance]{\codeplain{cells}/\codeplain{lbls}/\codeplain{coeffs} and counts} \\
 Evaluate &
-\hyperref[sec:pdmat-evaluate]{\code{evaluate}} \\
-Inspect/display &
-\hyperref[sec:pdmat-table]{\code{bernTable}},
-\hyperref[sec:pdmat-display]{\code{disp}},
-\hyperref[sec:pdmat-display]{\code{display}} \\
-Inspect/elevate backend storage &
-\hyperref[sec:pdmat-backend-inheritance]{\code{cells}/\code{lbls}/\code{coeffs}, counts, and \code{elevate}} \\
-Plot &
-\hyperref[sec:pdmat-plot]{\code{plot}} \\
+\hyperref[sec:pdmat-evaluate]{\codeplain{evaluate}} \\
 Differentiate &
-\hyperref[sec:pdmat-rhodiff]{\code{rhodiff}} \\
+\hyperref[sec:pdmat-rhodiff]{\codeplain{rhodiff}} \\
+Inspect/display &
+\hyperref[sec:pdmat-table]{\codeplain{bernTable}},
+\hyperref[sec:pdmat-display]{\codeplain{disp}},
+\hyperref[sec:pdmat-display]{\codeplain{display}} \\
+Plot &
+\hyperref[sec:pdmat-plot]{\codeplain{plot}} \\
 Arithmetic &
-\hyperref[sec:pdmat-algebra]{\code{+}},
-\hyperref[sec:pdmat-algebra]{\code{-}},
-\hyperref[sec:pdmat-algebra]{unary \code{+}/\code{-}},
-\hyperref[sec:pdmat-algebra]{\code{*}} \\
-Matrix/index methods &
-\hyperref[sec:pdmat-matrix-ops]{shape and structural methods},
-\hyperref[sec:pdmat-indexing]{indexing and assignment} \\
+\hyperref[sec:pdmat-algebra]{\codeplain{+}},
+\hyperref[sec:pdmat-algebra]{\codeplain{-}},
+\hyperref[sec:pdmat-algebra]{unary \codeplain{+}/\codeplain{-}},
+\hyperref[sec:pdmat-algebra]{\codeplain{*}} \\
 Compare/certify &
-\hyperref[sec:pdmat-comparison]{logical \code{==} and known-data \code{<=}/\code{>=}} \\
+\hyperref[sec:pdmat-comparison]{logical \codeplain{==} and known-data \codeplain{<=}/\codeplain{>=}} \\
+Matrix methods &
+\hyperref[sec:pdmat-matrix-ops]{shape and structural methods} \\
+Elevate Bernstein storage &
+\hyperref[sec:pdmat-elevate]{\codeplain{elevate}} \\
+Index/assign entries &
+\hyperref[sec:pdmat-indexing]{indexing and assignment} \\
 \bottomrule
 \end{tabularx}
 
-\section{Construct \texorpdfstring{\code{pdmat}}{pdmat} Objects}
+\section{Construct \texorpdfstring{\codeplain{pdmat}}{pdmat} Objects}
 \label{sec:pdmat-construction}
 
 \syntaxhead
@@ -58,7 +70,7 @@ A = pdmat(..., ValidationMode=mode)
   \item \code{gridVectors} is a cell vector with one numeric grid vector per parameter, such as \code{{[0 1], [10 20]}}.
   \item \code{source} may be:
   \begin{enumerate}
-      \item A function handle, e.g., \code{@(rho) [rho rho^2]} is a one-parameter function with two matrix entries.
+      \item A function handle, e.g., \code{@(rho) [rho rho^2]} is a one-parameter $2\times 1$ matrix function
       \item A global cell grid of numeric Bernstein coefficients, e.g., \code{{[1 2], [3 4]}} is a two-cell degree-one grid with two $1\times1$ coefficients per cell.
       \item A explicit nested \code{LocalValues}, e.g., \code{{1, 2, 3}} is scalar degree-two data on one cell.
   \end{enumerate}
@@ -67,20 +79,20 @@ A = pdmat(..., ValidationMode=mode)
   \item \code{ValidationMode=mode} accepts scalar text \code{"fast"} or \code{"strict"}, case-insensitively, and defaults to \code{"fast"}. It controls only repeated post-normalization structural checks and remains transient call state. Public source validation remains complete in both modes.
 \end{itemize}
 
-The two public constructors share the same normalization boundary. A \code{pdmat} validates known source data, while a \code{pdvar} creates and shares YALMIP control matrices. Both paths store a normalized grid and vector degree in \code{pdbase}. The basis and storage mathematics are given in \cref{sec:bernstein-tensor-grids}.
+Both \code{pdmat} and \code{pdvar} constructors share the same normalization expression as in \cref{eq:bernstein-coeffs}, which inherited from \code{pdbase}. A \code{pdmat} validates known source data, while a \code{pdvar} creates and shares YALMIP control matrices. The basis and storage mathematics are given in \cref{sec:bernstein-tensor-grids}.
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=7mm and 7mm,
   choice/.style={dp/call-branch,diamond,aspect=2,text width=15mm,
     minimum height=9mm,inner sep=1pt}]
-  \node[dp/call-entry] (entry) {\hyperref[sec:pdmat-construction]{\code{pdmat}} or\\\hyperref[sec:pdvar-construction]{\code{pdvar}}};
+  \node[dp/call-entry] (entry) {\hyperref[sec:pdmat-construction]{\codeplain{pdmat}} or\\\hyperref[sec:pdvar-construction]{\codeplain{pdvar}}};
   \node[dp/call-step,right=of entry] (parse) {parse dimensions, source,\\and options};
   \node[dp/call-step,right=of parse] (normal) {\code{mkGrid} and \code{normDeg}\\normalize $\mathcal G$ and $\vect{m}$};
   \node[choice,below=of normal] (fork) {constructor\\kind};
   \node[dp/call-branch,below left=9mm and 18mm of fork] (source) {\code{pdmat}: source conversion\\or function validation};
   \node[dp/call-branch,below right=9mm and 18mm of fork] (control) {\code{pdvar}: control lattice\\and shared-face handles};
-  \node[dp/call-result,below=25mm of fork] (store) {\hyperref[sec:pdbase-constructor]{\code{pdbase}}\\cell-wise storage};
+  \node[dp/call-result,below=25mm of fork] (store) {\hyperref[sec:pdbase-constructor]{\codeplain{pdbase}}\\cell-wise storage};
   \draw[dp/call-arrow] (entry) -- (parse);
   \draw[dp/call-arrow] (parse) -- (normal);
   \draw[dp/call-arrow] (normal) -- (fork);
@@ -114,7 +126,7 @@ degree = 1
 sourceSummary = "coefficient-backed"
 \end{lstlisting}
 
-For tensor grids, pass one grid vector per parameter. This independent example uses $\vect{m}=(2,1)$, so the first parameter has quadratic Bernstein variation and the second has linear variation. The selected-cell \code{oneLine} table prints the represented expression directly.
+For tensor grids, pass one grid vector per parameter. This independent example uses $\vect{m}=(2,1)$, so the first parameter has quadratic Bernstein basis and the second has linear basis. The selected-cell \code{oneLine} table prints the represented expression directly.
 
 \begin{lstlisting}[style=dpmatlab]
 B = pdmat({[0 1], [0 1]}, ...
@@ -192,26 +204,6 @@ firstCellCoefficients = 1×3 double
 
 These forms all create finite known-data objects, but only the coefficient- backed and function-Bernstein forms can participate in coefficient algebra.
 
-Explicit rate rows attach one complete coefficient row to each vertex of the rate box. This one-parameter example has two rate vertices and therefore two rows in its only physical-cell leaf.
-
-\begin{lstlisting}[style=dpmatlab]
-A = pdmat([0 1], {{1, 3; 10, 14}}, ...
-    Degree=1, RateBounds=[-1 2]);
-disp("rateBounds =")
-disp(A.RateBounds)
-disp("rateRowValues =")
-disp(cell2mat(A.coeffs(1)))
-\end{lstlisting}
-
-\begin{lstlisting}[style=dpoutput]
-rateBounds =
-    -1     2
-
-rateRowValues =
-     1     3
-    10    14
-\end{lstlisting}
-
 \remarkshead
 \code{FunctionHandle} retains the supplied function handle for function-only and function-Bernstein sources. It is empty for cell-backed sources. Its set access is private.
 \begin{itemize}[leftmargin=*]
@@ -222,58 +214,97 @@ rateRowValues =
   \item Mismatched shared faces are retained as discontinuous local data and emit warning \codeerr{pdmat}{Discontinuous}\allowbreak\code{LocalValues}.
 \end{itemize}
 
-\section{Inspect Object Properties}
+\section{Public Properties}\index{GridInfo@\texttt{GridInfo}}\index{MatrixSize@\texttt{MatrixSize}}\index{Degree@\texttt{Degree}}\index{LocalValues@\texttt{LocalValues}}\index{IsContinuous@\texttt{IsContinuous}}\index{ContainsDecision@\texttt{ContainsDecision}}\index{NumRateRows@\texttt{NumRateRows}}\index{RateBounds@\texttt{RateBounds}}\index{SourceSummary@\texttt{SourceSummary}}\index{FunctionHandle@\texttt{FunctionHandle}}
+\label{sec:pdmat-properties}
 
-\code{pdmat} adds the read-only \code{FunctionHandle} property to the inherited \code{pdbase} properties in \cref{sec:pdbase-fields}.  All use private set access.  \code{FunctionHandle} contains the supplied handle for function and function-Bernstein sources and is empty for cell-backed sources. The inherited properties describe the grid, matrix size, Bernstein degree, cell-wise evidence, continuity, and origin.
+Every \code{pdmat} property is public and read-only with private set access. Dot access exposes the known-data representation, while constructors and algebra return new values when stored information changes.
 
+\begin{tabularx}{\textwidth}{@{}p{0.20\textwidth}Y@{}}
+\toprule
+Property & Stored information \\
+\midrule
+\code{GridInfo} & A scalar tensor-grid structure. \code{Vectors} is a $1$-by-$\ell$ cell row of axis grids, \code{Points} is a $\prod_{s=1}^{\ell}k_s$-by-$\ell$ numeric matrix of physical grid nodes in combination order, \code{Bounds} is the $\ell$-by-$2$ parameter box, and \code{NumNodes} is the $1$-by-$\ell$ row $[k_1,\ldots,k_\ell]$. \\
+\code{MatrixSize} & The two-element row $[n_r,n_c]$ giving the size of every known matrix coefficient and every evaluated matrix. \\
+\code{Degree} & The $1$-by-$\ell$ row $[m_1,\ldots,m_\ell]$ of local Bernstein degrees used in every physical cell. \\
+\code{LocalValues} & The $\ell$-level nested physical-cell tree with $k_s-1$ cells along direction $s$. Each ordinary leaf is a $1$-by-$\prod_{s=1}^{\ell}(m_s+1)$ cell row of finite real numeric matrices in \code{lbls(A)} order. An explicit-rate leaf is \code{NumRateRows}-by-$\prod_{s=1}^{\ell}(m_s+1)$ in stored rate-vertex order. Function-only objects contain placeholder storage that provides zero Bernstein coefficient evidence. \\
+\code{IsContinuous} & A logical scalar recording whether adjacent coefficient-backed cells match on shared faces. Function-backed data with verified Bernstein evidence are continuous, while accepted mismatched nested local values set this flag false. \\
+\code{ContainsDecision} & Always false for \code{pdmat}, because its stored coefficient payloads are known numeric data. \\
+\code{NumRateRows} & A nonnegative integer scalar giving the number of explicit rate-vertex rows in each leaf. Zero denotes ordinary one-row storage even when \code{RateBounds} is present only as metadata. \\
+\code{RateBounds} & Empty or an $\ell$-by-$2$ matrix whose row $s$ gives the lower and upper bounds for $\dot{\rho}_s$. Distinct rate vertices use the package-wide lower-then-upper combination order. \\
+\code{SourceSummary} & Scalar origin text such as \code{"coefficient-backed"}, \code{"function"}, \code{"function-bernstein"}, or \code{"derivative"}. \\
+\code{FunctionHandle} & The supplied function handle for function-only and function-Bernstein sources. It is empty for cell-backed sources and for numeric results whose construction clears exact function state. \\
+\bottomrule
+\end{tabularx}
+
+\examplehead
 \begin{lstlisting}[style=dpmatlab]
-A = pdmat({[0 1]}, @(rho) rho.^2, Degree=2);
+A = pdmat({[0 1]}, @(rho) [rho.^2, 1+rho], ...
+    Degree=2, RateBounds=[-1 1]);
+gridBounds = A.GridInfo.Bounds
+nodeCounts = A.GridInfo.NumNodes
+matrixSize = A.MatrixSize
 degree = A.Degree
-source = A.SourceSummary
+firstLeafSize = size(A.LocalValues{1})
+isContinuous = A.IsContinuous
+containsDecision = A.ContainsDecision
+rateRowCount = A.NumRateRows
+rateBounds = A.RateBounds
+sourceSummary = A.SourceSummary
 hasFunction = ~isempty(A.FunctionHandle)
-firstCell = A.LocalValues{1}
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+gridBounds = 1×2 double
+     0     1
+nodeCounts = 2
+matrixSize = 1×2 double
+     1     2
+degree = 2
+firstLeafSize = 1×2 double
+     1     3
+isContinuous =
+  logical
+   1
+containsDecision =
+  logical
+   0
+rateRowCount = 0
+rateBounds = 1×2 double
+    -1     1
+sourceSummary = "function-bernstein"
+hasFunction =
+  logical
+   1
 \end{lstlisting}
 
-Read-only properties reject assignment. Construct a new \code{pdmat} to update \code{A.Degree}, \code{A.LocalValues}, or \code{A.FunctionHandle}.
+Direct assignments such as \code{A.Degree = 1} or \code{A.FunctionHandle = []} raise MATLAB's private-set property error. Construct a new \code{pdmat}, or use a public operation that returns one, to change the represented value.
 
-\section{Inspect And Elevate Inherited Bernstein Storage}
+\paragraph{Related APIs.}
+Use \cref{sec:pdmat-backend-inheritance} to traverse \code{LocalValues}, \cref{sec:pdmat-evaluate} to reconstruct a matrix, and \cref{sec:pdbase-fields} for the backend implementation contract.
+
+
+\section{Inspect Inherited Bernstein Storage}\index{cells@\texttt{cells}}\index{lbls@\texttt{lbls}}\index{coeffs@\texttt{coeffs}}\index{ncell@\texttt{ncell}}\index{ncoeff@\texttt{ncoeff}}\index{npar@\texttt{npar}}
 \label{sec:pdmat-backend-inheritance}
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 cellSubs = cells(A)
+cellSubs = A.cells()
 labels = lbls(A)
+labels = A.lbls()
 coefficients = coeffs(A, cellSubs)
+coefficients = A.coeffs(cellSubs)
 n = ncell(A)
+n = A.ncell()
 n = ncoeff(A)
+n = A.ncoeff()
 n = npar(A)
-B = A.elevate(degreeIncrement)
-B = A.elevate(degreeIncrement, validationMode)
+n = A.npar()
 \end{lstlisting}
 
 \descriptionhead
-The storage queries use the shared \code{pdbase} cell and label order. \code{cells} returns one one-based physical-cell subscript per row, \code{lbls} returns the zero-based tensor labels $\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}$, and \code{coeffs} returns the selected flat coefficient leaf. \code{ncell}, \code{ncoeff}, and \code{npar} count physical cells, $\prod_{s=1}^{\ell}(m_s+1)$ coefficients per cell, and parameter directions. \code{elevate} accepts a scalar shorthand or direction-wise increment and returns a new \code{pdmat} at the componentwise degree sum while preserving the represented known function, metadata, physical cells, and stored rate-row order. The optional positional validation mode and its errors follow the canonical contract in \cref{sec:pdbase-elevate}. The sparse elevation map and its reuse are derived in \cref{sec:bernstein-degree-elevation}.
+The inherited implementation follows the shared \code{pdbase} traversal order. \code{cells} returns an \code{ncell(A)}-by-$\ell$ numeric matrix with one physical-cell subscript per row and component $c_s\in\left\{1,\ldots,k_s-1\right\}$, where $k_s=\code{A.GridInfo.NumNodes}(s)$. \code{lbls} returns an \code{ncoeff(A)}-by-$\ell$ numeric matrix of tensor labels with component $i_s\in\left\{0,\ldots,m_s\right\}$. Both use the package-wide combination order. \code{coeffs} returns the selected flat leaf in that label order: an ordinary known-data leaf is a $1$-by-\code{ncoeff(A)} cell row of numeric matrices, while an explicit-rate leaf is \code{A.NumRateRows}-by-\code{ncoeff(A)} in stored rate-vertex order.
 
-For a source degree $\vect{m}$ and increment $\vect{d}$, \code{elevate} forms the target $\vect{M}=\vect{m}+\vect{d}$. The numeric ratios in \code{bernConvRatios} define a sparse exact change of Bernstein basis, so the returned coefficients preserve the represented function and decision freedom. See \cref{sec:bernstein-degree-elevation} for the operator formula.
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[node distance=6mm]
-  \node[dp/call-entry] (entry) {\code{elevate}};
-  \node[dp/call-step,right=of entry] (norm) {\code{normDeg}};
-  \node[dp/call-step,right=of norm] (data) {\code{elevData}};
-  \node[dp/call-step,right=of data] (row) {\code{elevRow}};
-  \node[dp/call-step,right=of row] (ratio) {\code{bernConvRatios}};
-  \node[dp/call-result,below=of row] (result) {value-class copy\\with $\vect{M}$};
-  \draw[dp/call-arrow] (entry) -- (norm);
-  \draw[dp/call-arrow] (norm) -- (data);
-  \draw[dp/call-arrow] (data) -- (row);
-  \draw[dp/call-arrow] (row) -- (ratio);
-  \draw[dp/call-arrow] (ratio.south) |- (result.east);
-\end{tikzpicture}
-\caption{Elevation call path. The row kernel reuses exact binomial ratios for every matching source-target degree pair.}
-\label{fig:elevation-call-path}
-\end{figure}
+The counts are \code{ncell(A)}$=\prod_{s=1}^{\ell}(\code{A.GridInfo.NumNodes}(s)-1)$, \code{ncoeff(A)}$=\prod_{s=1}^{\ell}(\code{A.Degree}(s)+1)$, and \code{npar(A)}$=\ell=\code{numel(A.GridInfo.Vectors)}$. Function-only data still expose their grid, labels, counts, and placeholder leaf. Coefficient-dependent operations such as \code{bernTable}, elevation, and algebra require actual coefficient evidence.
 
 \examplehead
 \begin{lstlisting}[style=dpmatlab]
@@ -282,9 +313,6 @@ physicalCells = A.cells()
 labels = A.lbls()
 sourceCoefficients = cell2mat(A.coeffs(1))
 counts = [A.ncell(), A.ncoeff(), A.npar()]
-B = A.elevate(1);
-T = bernTable(B, 1, "oneLine");
-disp(T)
 \end{lstlisting}
 \begin{lstlisting}[style=dpoutput]
 physicalCells = 1
@@ -295,42 +323,15 @@ sourceCoefficients = 1×2 double
      1     2
 counts = 1×3 double
      1     2     1
-
-    CellSubscript                 Expression
-    _____________    ____________________________________
-
-        {[1]}        "(1-α)^2*1 + 2(1-α)α*1.5000 + α^2*2"
-\end{lstlisting}
-
-A direction-wise increment changes only the requested axes. This two-parameter example elevates the first axis while retaining the second.
-
-\begin{lstlisting}[style=dpmatlab]
-A = pdmat({[0 1], [0 1]}, ...
-    @(rho1, rho2) rho1 + 2*rho2, Degree=[1 1]);
-B = A.elevate([1 0]);
-T = bernTable(B, [1 1], "oneLine");
-disp(T)
-\end{lstlisting}
-
-The exact output table is split at its column boundary so the expression can wrap while preserving its text.
-
-\begin{lstlisting}[style=dpoutput]
-    CellSubscript
-    _____________
-
-       {[1 1]}
-\end{lstlisting}
-\begin{lstlisting}[style=dpwideoutput]
-    Expression
-    __________________________________________________________________________________________________________________
-
-    "(1-α1)^2 * (1-α2)*0 + (1-α1)^2 * α2*2 + 2(1-α1)α1 * (1-α2)*0.5000 + 2(1-α1)α1 * α2*2.5000 + α1^2 * (1-α2)*1 + α1^2 * α2*3"
 \end{lstlisting}
 
 \remarkshead
-Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}. Invalid increments raise \codeerr{pdbase}{InvalidDegreeIncrement}. Function-only data support exact \code{evaluate} exclusively. Calls to \code{elevate}, algebra, or \code{bernTable} reject their placeholder storage as coefficient evidence, and the elevation path raises \codeerr{pdbase}{MissingCoefficientEvidence}. A function constructed with an explicit verified \code{Degree} retains both its exact handle and Bernstein evidence.
+Invalid physical-cell selectors raise \codeerr{pdbase}{InvalidCellSubs}.
 
-\section{\texorpdfstring{\code{evaluate}}{evaluate}}
+\paragraph{Related APIs.}
+Use \cref{sec:pdmat-properties} for the stored tree and metadata, \cref{sec:pdmat-table} for formatted coefficient inspection, and \cref{sec:pdbase-inspection,sec:pdbase-counts} for the backend implementation details.
+
+\section{\texorpdfstring{\codeplain{evaluate}}{evaluate}}
 \index{evaluate@\texttt{evaluate}}
 \label{sec:pdmat-evaluate}
 
@@ -417,7 +418,7 @@ val = F.evaluate(pi/2)
 val = 1
 \end{lstlisting}
 
-\section{Differentiate Known Data with \texorpdfstring{\code{rhodiff}}{rhodiff}}
+\section{Differentiate Known Data with \texorpdfstring{\codeplain{rhodiff}}{rhodiff}}
 \index{rhodiff@\texttt{rhodiff}}\index{rate row}
 \label{sec:pdmat-rhodiff}
 
@@ -490,7 +491,7 @@ disp(T)
 \section{Inspect Coefficients and Plot Values}
 \label{sec:pdmat-visualization}
 
-\subsection{\texorpdfstring{\code{bernTable}}{bernTable}}
+\subsection{\texorpdfstring{\codeplain{bernTable}}{bernTable}}
 \index{bernTable@\texttt{bernTable}}
 \label{sec:pdmat-table}
 
@@ -599,7 +600,7 @@ expressionCount =
      2
 \end{lstlisting}
 
-\subsection{\texorpdfstring{\code{disp}}{disp} And \texorpdfstring{\code{display}}{display}}
+\subsection{\texorpdfstring{\codeplain{disp}}{disp} And \texorpdfstring{\codeplain{display}}{display}}
 \index{disp@\texttt{disp}}\index{display@\texttt{display}}
 \label{sec:pdmat-display}
 
@@ -635,7 +636,7 @@ A =
   Function handle: false
 \end{lstlisting}
 
-\subsection{\texorpdfstring{\code{plot}}{plot}}\index{plot@\texttt{plot}}
+\subsection{\texorpdfstring{\codeplain{plot}}{plot}}\index{plot@\texttt{plot}}
 \label{sec:pdmat-plot}
 
 \syntaxhead
@@ -752,7 +753,7 @@ Addition, subtraction, concatenation, block assembly, indexing assignment, and r
 \centering
 \begin{tikzpicture}[node distance=6mm]
   \node[dp/call-entry] (entry) {algebra or\\concatenation};
-  \node[dp/call-step,right=of entry] (grid) {\hyperref[sec:pdbase-mergegrid]{\code{mergeGrid}} and\\\code{pickRateBounds}};
+  \node[dp/call-step,right=of entry] (grid) {\hyperref[sec:pdbase-mergegrid]{\codeplain{mergeGrid}} and\\\code{pickRateBounds}};
   \node[dp/call-step,right=of grid] (norm) {\code{normOperand}};
   \node[dp/call-step,right=of norm] (elev) {\code{elevData} and\\\code{elevRow}};
   \node[dp/call-result,right=of elev] (result) {aligned cell-row\\assembly};
@@ -1335,7 +1336,85 @@ repeatedAtZero = 2×4 double
 
 Invalid repetition shapes raise \codeerr{pdmat}{InvalidRepmat}.
 
-\section{Index and Assign \texorpdfstring{\code{pdmat}}{pdmat} Entries}
+\section{\texorpdfstring{\hspace{0.5em}Elevate \codeplain{pdmat} Bernstein Storage}{Elevate pdmat Bernstein Storage}}
+\index{elevate@\texttt{elevate}}
+\label{sec:pdmat-elevate}
+
+\syntaxhead
+\begin{lstlisting}[style=dpsyntax]
+B = elevate(A, degreeIncrement)
+B = A.elevate(degreeIncrement)
+B = elevate(A, degreeIncrement, validationMode)
+B = A.elevate(degreeIncrement, validationMode)
+\end{lstlisting}
+
+\descriptionhead
+\code{elevate} accepts a scalar shorthand or direction-wise increment and returns a new \code{pdmat} at the componentwise degree sum while preserving the represented known function, metadata, physical cells, and stored rate-row order. The optional positional validation mode and its errors follow the canonical contract in \cref{sec:pdbase-elevate}. The sparse elevation map and its reuse are derived in \cref{sec:bernstein-degree-elevation}.
+
+For a source degree $\vect{m}$ and increment $\vect{d}$, \code{elevate} forms the target $\vect{M}=\vect{m}+\vect{d}$. The numeric ratios in \code{bernConvRatios} define a sparse exact change of Bernstein basis, so the returned coefficients preserve the represented known function exactly. See \cref{sec:bernstein-degree-elevation} for the operator formula.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm]
+  \node[dp/call-entry] (entry) {\code{elevate}};
+  \node[dp/call-step,right=of entry] (norm) {\code{normDeg}};
+  \node[dp/call-step,right=of norm] (data) {\code{elevData}};
+  \node[dp/call-step,right=of data] (row) {\code{elevRow}};
+  \node[dp/call-step,right=of row] (ratio) {\code{bernConvRatios}};
+  \node[dp/call-result,below=of row] (result) {value-class copy\\with $\vect{M}$};
+  \draw[dp/call-arrow] (entry) -- (norm);
+  \draw[dp/call-arrow] (norm) -- (data);
+  \draw[dp/call-arrow] (data) -- (row);
+  \draw[dp/call-arrow] (row) -- (ratio);
+  \draw[dp/call-arrow] (ratio.south) |- (result.east);
+\end{tikzpicture}
+\caption{Elevation call path. The row kernel reuses exact binomial ratios for every matching source-target degree pair.}
+\label{fig:elevation-call-path}
+\end{figure}
+
+\examplehead
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1]}, {1, 2}, Degree=1);
+B = A.elevate(1);
+T = bernTable(B, 1, "oneLine");
+disp(T)
+\end{lstlisting}
+\begin{lstlisting}[style=dpoutput]
+    CellSubscript                 Expression
+    _____________    ____________________________________
+
+        {[1]}        "(1-α)^2*1 + 2(1-α)α*1.5000 + α^2*2"
+\end{lstlisting}
+
+A direction-wise increment changes only the requested axes. This two-parameter example elevates the first axis while retaining the second.
+
+\begin{lstlisting}[style=dpmatlab]
+A = pdmat({[0 1], [0 1]}, ...
+    @(rho1, rho2) rho1 + 2*rho2, Degree=[1 1]);
+B = A.elevate([1 0]);
+T = bernTable(B, [1 1], "oneLine");
+disp(T)
+\end{lstlisting}
+
+The exact output table is split at its column boundary so the expression can wrap while preserving its text.
+
+\begin{lstlisting}[style=dpoutput]
+    CellSubscript
+    _____________
+
+       {[1 1]}
+\end{lstlisting}
+\begin{lstlisting}[style=dpwideoutput]
+    Expression
+    __________________________________________________________________________________________________________________
+
+    "(1-α1)^2 * (1-α2)*0 + (1-α1)^2 * α2*2 + 2(1-α1)α1 * (1-α2)*0.5000 + 2(1-α1)α1 * α2*2.5000 + α1^2 * (1-α2)*1 + α1^2 * α2*3"
+\end{lstlisting}
+
+\remarkshead
+Invalid increments raise \codeerr{pdbase}{InvalidDegreeIncrement}, and invalid validation modes raise \codeerr{pdbase}{InvalidValidationMode}. Function-only data support exact \code{evaluate} exclusively. Calls to \code{elevate}, algebra, or \code{bernTable} reject their placeholder storage as coefficient evidence, and the elevation path raises \codeerr{pdbase}{MissingCoefficientEvidence}. A function constructed with an explicit verified \code{Degree} retains both its exact handle and Bernstein evidence.
+
+\section{\texorpdfstring{\hspace{0.5em}Index and Assign \codeplain{pdmat} Entries}{Index and Assign pdmat Entries}}
 \index{subsref@\texttt{subsref}}\index{subsasgn@\texttt{subsasgn}}\index{end@\texttt{end}}\index{numArgumentsFromSubscript@\texttt{numArgumentsFromSubscript}}
 \label{sec:pdmat-indexing}
 

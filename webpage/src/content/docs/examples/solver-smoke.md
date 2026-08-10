@@ -64,9 +64,12 @@ Cdecay = Pd * A + A' * Pd <= -1e-10 * eye(2);
 Cpos = Pd >= eye(2);
 solDp = optimize([Cdecay.toYalmip, Cpos.toYalmip], [], opts);
 
-% Convert the solved symbolic Bernstein coefficients into known data for plotting.
-Pplot = pdmat(grid, {cellfun(@value, Pd.LocalValues{1}, ...
-    UniformOutput=false)}, Degree=Pd.Degree);
+if solDp.problem ~= 0
+    error("GriD-LMIA:ExampleSolveFailed", "%s", solDp.info)
+end
+
+% Convert the solved decision object into known data for plotting.
+Pplot = value(Pd);
 figure(Name="Parameter-dependent Lyapunov matrix");
 plot(Pplot, SamplesPerCell=40, LineWidth=1.5);
 title("Solved parameter-dependent Lyapunov matrix");
@@ -144,6 +147,10 @@ if exist("mosekopt", "file") ~= 0
 end
 opts = sdpsettings("solver", solver, "verbose", 0);
 sol = optimize([E1.toYalmip, E2.toYalmip], objective, opts);
+
+if sol.problem ~= 0
+    error("GriD-LMIA:ExampleSolveFailed", "%s", sol.info)
+end
 
 gammaValue = value(objective)
 ```

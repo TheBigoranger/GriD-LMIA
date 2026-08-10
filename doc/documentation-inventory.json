@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "version": "v1.3.3",
+  "version": "v1.3.7",
   "authority": "Current MATLAB source and tests in the repository root",
   "record_contract": "Every public symbol is one complete record. Shared family evidence is copied into every applicable record.",
   "exclusions": [
@@ -5452,8 +5452,8 @@
       "tex_anchor": "sec:pdlmi-construction",
       "tex_index": "UsePolya",
       "tex_example_evidence": "doc/chapters/pdlmi.tex#sec:pdlmi-construction,sec:pdlmi-lookup",
-      "web_route_or_anchor": "/documents/reference/pdlmi/#api-usepolya",
-      "web_example_evidence": "/documents/reference/pdlmi/#api-usepolya-example",
+      "web_route_or_anchor": "/documents/reference/pdlmi/#api-usepolya-property",
+      "web_example_evidence": "/documents/reference/pdlmi/#api-usepolya-property-example",
       "executable_example": true
     },
     {
@@ -5588,8 +5588,8 @@
       "tex_anchor": "sec:pdlmi-construction",
       "tex_index": "UsePutinar",
       "tex_example_evidence": "doc/chapters/pdlmi.tex#sec:pdlmi-construction,sec:pdlmi-lookup",
-      "web_route_or_anchor": "/documents/reference/pdlmi/#api-useputinar",
-      "web_example_evidence": "/documents/reference/pdlmi/#api-useputinar-example",
+      "web_route_or_anchor": "/documents/reference/pdlmi/#api-useputinar-property",
+      "web_example_evidence": "/documents/reference/pdlmi/#api-useputinar-property-example",
       "executable_example": true
     },
     {

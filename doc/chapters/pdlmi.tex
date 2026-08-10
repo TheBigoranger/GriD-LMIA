@@ -1,20 +1,21 @@
-\chapter{\texorpdfstring{\code{pdlmi}}{pdlmi}: Finite Certificate Assembly}\index{pdlmi@\texttt{pdlmi}}
+\chapter{\texorpdfstring{\codeplain{pdlmi}}{pdlmi}: Finite Certificate Assembly}\index{pdlmi@\texttt{pdlmi}}
 \label{sec:pdlmi}
 
 \code{pdlmi} stores finite certificates assembled from \code{pdvar} expressions or coefficient-backed \code{pdmat} inequalities. Square Hermitian inequality families use semidefinite constraints, other inequalities use entry-wise scalar constraints, and \code{pdvar} equality uses direct coefficient equations. Direct assembly is the default. The five explicit inequality alternatives are cell-wise P\'olya elevation, dense Putinar, tensor-window SparsePutinar, tensor-window SparseFullBox, and the dense full-box preordering. This class is the package boundary between Bernstein objects and ordinary YALMIP solver calls.
 
-\begin{center}
+\begin{figure}[H]
+\centering
 \begin{tikzpicture}[node distance=4mm and 4mm]
   \node[dp/card,text width=21.5mm,minimum height=17mm] (direct)
     {\textbf{Direct}\\coefficient signs};
   \node[dp/card,text width=21.5mm,minimum height=17mm,right=of direct] (polya)
     {\textbf{P\'olya}\\lossless elevation};
   \node[dp/card,text width=21.5mm,minimum height=17mm,right=of polya] (putinar)
-    {\textbf{Putinar}\\1-D parity;\\multi-D singletons};
+    {\textbf{Putinar}\\1-D parity,\\multi-D singletons};
   \node[dp/card,text width=21.5mm,minimum height=17mm,below=of direct] (sparseputinar)
-    {\textbf{SparsePutinar}\\tensor windows};
+    {\textbf{SparsePutinar}\\tensor windows\\\scriptsize 1-D $b=1$: Direct};
   \node[dp/card,text width=21.5mm,minimum height=17mm,right=of sparseputinar] (sparse)
-    {\textbf{SparseFullBox}\\tensor windows};
+    {\textbf{SparseFullBox}\\tensor windows\\\scriptsize $w=1$: Direct};
   \node[dp/card,text width=21.5mm,minimum height=17mm,right=of sparse] (box)
     {\textbf{FullBox}\\all generator products};
   \node[dp/panel,fit=(direct)(polya)(putinar)(sparseputinar)(sparse)(box),inner sep=4mm] (options) {};
@@ -30,9 +31,9 @@
   \draw[dp/arrow] (options.east) -- (export.west);
   \draw[dp/arrow] (export)--(yal);
 \end{tikzpicture}
-
-\textit{The six certificate paths are alternatives. Selecting P\'olya, Putinar, SparsePutinar, SparseFullBox, or FullBox rebuilds from the original comparison and replaces the previous selection.}
-\end{center}
+\caption{Certificate-family state and export path. The six paths are alternatives, and every selector rebuilds from the original comparison. SparsePutinar becomes dense Putinar when a nontrivial window covers every active Putinar basis. SparseFullBox becomes FullBox when its window covers every order axis.}
+\label{fig:pdlmi-certificate-family-state}
+\end{figure}
 
 \section{API Map}
 \label{sec:pdlmi-lookup}
@@ -42,24 +43,24 @@
 Task & Entry \\
 \midrule
 Construct wrapper &
-\hyperref[sec:pdlmi-construction]{\code{pdlmi}},
-\hyperref[sec:pdvar-comparison]{\code{<=}/\code{>=}/\code{==}} \\
+\hyperref[sec:pdlmi-construction]{\codeplain{pdlmi}},
+\hyperref[sec:pdvar-comparison]{\codeplain{<=}/\codeplain{>=}/\codeplain{==}} \\
 Count constraints &
 \hyperref[sec:pdlmi-direct]{direct coefficient constraints} \\
 Select P\'olya elevation &
-\hyperref[sec:pdlmi-polya]{\code{UsePolya}, \code{PolyaDegree}, and \code{usePolya}} \\
+\hyperref[sec:pdlmi-polya]{\codeplain{UsePolya}, \codeplain{PolyaDegree}, and \codeplain{usePolya}} \\
 Select Putinar certificate &
-\hyperref[sec:pdlmi-putinar]{\code{UsePutinar}, \code{PutinarOrder}, and
-\code{usePutinar}} \\
+\hyperref[sec:pdlmi-putinar]{\codeplain{UsePutinar}, \codeplain{PutinarOrder}, and
+\codeplain{usePutinar}} \\
 Select SparsePutinar &
-\hyperref[sec:pdlmi-sparse-putinar]{\code{UseSparsePutinar}, \code{SparsePutinarOrder}, \code{CliqueSize}, and \code{useSpPut}} \\
+\hyperref[sec:pdlmi-sparse-putinar]{\codeplain{UseSparsePutinar}, \codeplain{SparsePutinarOrder}, \codeplain{CliqueSize}, and \codeplain{useSpPut}} \\
 Select SparseFullBox &
-\hyperref[sec:pdlmi-sparse-full-box]{\code{UseSparseFullBoxPreorder}, \code{SparseFullBoxOrder}, \code{BandWidth}, and \code{useSpBox}} \\
+\hyperref[sec:pdlmi-sparse-full-box]{\codeplain{UseSparseFullBoxPreorder}, \codeplain{SparseFullBoxOrder}, \codeplain{BandWidth}, and \codeplain{useSpBox}} \\
 Select FullBox &
-\hyperref[sec:pdlmi-full-box]{\code{UseFullBoxPreorder}, \code{FullBoxOrder},
-and \code{useFullBox}} \\
+\hyperref[sec:pdlmi-full-box]{\codeplain{UseFullBoxPreorder}, \codeplain{FullBoxOrder},
+and \codeplain{useFullBox}} \\
 Export to YALMIP &
-\hyperref[sec:pdlmi-toyalmip]{\code{toYalmip}} \\
+\hyperref[sec:pdlmi-toyalmip]{\codeplain{toYalmip}} \\
 Solve &
 \hyperref[sec:pdlmi-solver-use]{solver-facing use},
 \hyperref[sec:examples]{Examples} \\
@@ -88,7 +89,7 @@ Property & Meaning \\
 For example, \code{C.Relation}, \code{C.Residual.Degree}, and \code{C.UseSparsePutinar} inspect a wrapper. Selector methods return a rebuilt value, while assigning these properties is unsupported. Selected P\'olya and Gram parameters are stored as $1$-by-$\ell$ rows. An intermediate SparsePutinar result stores \code{UseSparsePutinar=true}, its order row, and its clique size. In one parameter, clique size one becomes actual Direct state. In several parameters, clique size one remains SparsePutinar. Any clique size greater than one that covers every active Gram basis becomes dense Putinar state. SparseFullBox separately uses \code{SparseFullBoxOrder} and the historically named \code{BandWidth} property to store its common tensor-window side length, with Direct and FullBox endpoints as described in \cref{sec:pdlmi-sparse-full-box}.
 
 \needspace{12\baselineskip}
-\section{Construct \texorpdfstring{\code{pdlmi}}{pdlmi} Comparisons}
+\section{Construct \texorpdfstring{\codeplain{pdlmi}}{pdlmi} Comparisons}
 \label{sec:pdlmi-construction}
 
 \syntaxhead
@@ -214,7 +215,7 @@ Every certificate selector rebuilds the wrapper from its original residual and r
   \node[dp/call-step,right=of valid] (rebuild) {rebuilt \code{pdlmi}};
   \node[dp/call-branch,right=of rebuild] (spec) {\code{coeffCons}, or\\\code{putSpec}/\code{boxSpec}};
   \node[dp/call-step,right=of spec] (gram) {optional\\\code{gramCons}};
-  \node[dp/call-result,below=of spec] (result) {stored constraints\\and \hyperref[sec:pdlmi-toyalmip]{\code{toYalmip}}};
+  \node[dp/call-result,below=of spec] (result) {stored constraints\\and \hyperref[sec:pdlmi-toyalmip]{\codeplain{toYalmip}}};
   \draw[dp/call-arrow] (entry) -- (valid);
   \draw[dp/call-arrow] (valid) -- (rebuild);
   \draw[dp/call-arrow] (rebuild) -- (spec);
@@ -234,7 +235,7 @@ For a \code{pdvar} residual, including equality behavior, each physical cell, lo
 The idea is the Bernstein convex-hull property. After orienting the cell residual $\mathcal F^{(\vect{c})}$ as the sign-normalized positive target $S^{(\vect{c})}$, suppress the already-stacked rate-row index and write
 \begin{gather*}
 S^{(\vect{c})}(\vect{\alpha})=
-  \sum_{\vect{i}\in\mathcal I_{\vect{M}}=\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
+  \sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
   C^{(\vect{c})}[\vect{i}],
 \end{gather*}
 where $\vect{M}$ is the assembled residual tensor degree and $\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}$. The semidefinite direct certificate requires $C^{(\vect{c})}[\vect{i}]\succeq0$ for every physical cell $\vect{c}$ and local label $\vect{i}$, repeated independently for every stored rate row. This condition is sufficient, and feasible residuals may lie outside its certificate set.
@@ -307,7 +308,7 @@ useFullBox =
 
 Here the degree-two, one-parameter residual has three local Bernstein coefficients, so direct assembly stores three coefficient constraints. The wrapper remains direct because every certificate selector retains its false default. A call such as \code{C.usePolya(1)} returns a new wrapper with an elevated coefficient family and leaves \code{C} unchanged.
 
-\section{Select P\'olya Assembly with \texorpdfstring{\code{usePolya}}{usePolya}}
+\section{Select P\'olya Assembly with \texorpdfstring{\codeplain{usePolya}}{usePolya}}
 \index{Polya@P\'olya}\index{usePolya@\texttt{usePolya}}\index{P\'olya certificate}\index{P\'olya elevation}
 \label{sec:pdlmi-polya}
 
@@ -356,7 +357,7 @@ constraintCount = 4
 \end{center}
 
 \section{Select Putinar Assembly with
-\texorpdfstring{\code{usePutinar}}{usePutinar}}
+\texorpdfstring{\codeplain{usePutinar}}{usePutinar}}
 \index{Putinar}\index{usePutinar@\texttt{usePutinar}}
 \index{Putinar certificate}\index{Putinar order}
 \label{sec:pdlmi-putinar}
@@ -418,8 +419,8 @@ For this one-parameter scalar degree-two cell, order one uses the exact even Mar
   \item Malformed scalar or vector orders raise \codeerr{pdlmi}{InvalidPutinarOrder}. An order below $(\lfloor M_1/2\rfloor)$ for $\vect{M}=(M_1)$, or below componentwise $\lceil\vect{M}/2\rceil$ in two or more parameters, raises \codeerr{pdlmi}{PutinarOrderTooLow}. \item A malformed selector raises \codeerr{pdlmi}{InvalidUsePutinar}. Explicit false plus any supplied order raises \codeerr{pdlmi}{ConflictingPutinarOptions}. \item Simultaneous relaxation families raise \codeerr{pdlmi}{ConflictingRelaxations}. Expression, relation, and option validation in \cref{sec:pdlmi-construction} still applies. Global inequality classification is unchanged: the family is semidefinite only when every original coefficient across all cells and rate rows is square Hermitian. Otherwise the complete family uses independent entry-wise scalar Putinar certificates in MATLAB column-major order.
 \end{enumerate}
 
-\section[Select SparsePutinar with \texorpdfstring{\code{useSpPut}}{useSpPut}]{%
-Select SparsePutinar with\\[-0.15em] \texorpdfstring{\code{useSpPut}}{useSpPut}}
+\section[Select SparsePutinar with \texorpdfstring{\codeplain{useSpPut}}{useSpPut}]{%
+Select SparsePutinar with\\[-0.15em] \texorpdfstring{\codeplain{useSpPut}}{useSpPut}}
 \index{SparsePutinar}\index{axis-aligned tensor window}\index{tensor window}\index{useSpPut@\texttt{useSpPut}}\index{CliqueSize@\texttt{CliqueSize}}
 \label{sec:pdlmi-sparse-putinar}
 
@@ -496,10 +497,10 @@ The intermediate result has three independent clique-size-two PSD blocks of dime
   \item The tensor windows group Bernstein Gram-basis labels. Sparsity-graph inference, chordal completion, and the structural-matrix chordal decomposition of Zheng and Fantuzzi \cite{zhengfantuzzi2023} are separate constructions.
 \end{enumerate}
 
-\noindent\textbf{See also.} \hyperref[sec:pdlmi-putinar]{\code{usePutinar}}, \hyperref[sec:pdlmi-sparse-full-box]{\code{useSpBox}}, \hyperref[sec:pdlmi-full-box]{\code{useFullBox}}, \hyperref[sec:pdlmi-toyalmip]{\code{toYalmip}}, and \hyperref[sec:certificate-sparse-putinar]{SparsePutinar mathematics}.
+\noindent\textbf{See also.} \hyperref[sec:pdlmi-putinar]{\codeplain{usePutinar}}, \hyperref[sec:pdlmi-sparse-full-box]{\codeplain{useSpBox}}, \hyperref[sec:pdlmi-full-box]{\codeplain{useFullBox}}, \hyperref[sec:pdlmi-toyalmip]{\codeplain{toYalmip}}, and \hyperref[sec:certificate-sparse-putinar]{SparsePutinar mathematics}.
 
-\section[Select SparseFullBox with \texorpdfstring{\code{useSpBox}}{useSpBox}]{%
-Select SparseFullBox with\\[-0.15em] \texorpdfstring{\code{useSpBox}}{useSpBox}}
+\section[Select SparseFullBox with \texorpdfstring{\codeplain{useSpBox}}{useSpBox}]{%
+Select SparseFullBox with\\[-0.15em] \texorpdfstring{\codeplain{useSpBox}}{useSpBox}}
 \index{SparseFullBox}\index{tensor window}\index{useSpBox@\texttt{useSpBox}}\index{BandWidth@\texttt{BandWidth}}
 \label{sec:pdlmi-sparse-full-box}
 
@@ -568,8 +569,8 @@ The intermediate result retains SparseFullBox state with $r=2$ and $w=2$. Its th
   \item Constructor selector conflicts use \codeerr{pdlmi}{ConflictingSparse}\allowbreak\code{FullBoxOptions} or \codeerr{pdlmi}{ConflictingRelaxations}. Equality raises \codeerr{pdlmi}{UnsupportedEquality}\allowbreak\code{Certificate} before width or order validation.
 \end{enumerate}
 
-\section[Select FullBox with \texorpdfstring{\code{useFullBox}}{useFullBox}]{%
-Select FullBox with\\[-0.15em] \texorpdfstring{\code{useFullBox}}{useFullBox}}
+\section[Select FullBox with \texorpdfstring{\codeplain{useFullBox}}{useFullBox}]{%
+Select FullBox with\\[-0.15em] \texorpdfstring{\codeplain{useFullBox}}{useFullBox}}
 \index{FullBox}\index{full-box preordering}\index{useFullBox@\texttt{useFullBox}}
 \label{sec:pdlmi-full-box}
 
@@ -628,7 +629,7 @@ FullBox retains all box-generator products, which distinguishes it from the mult
   \item Global inequality classification is unchanged. The family is semidefinite only when every original coefficient across all cells and rate rows is square Hermitian. Otherwise the complete family uses independent entry-wise scalar FullBox certificates in MATLAB column-major order.
 \end{enumerate}
 
-\section{Export with \texorpdfstring{\code{toYalmip}}{toYalmip}}
+\section{Export with \texorpdfstring{\codeplain{toYalmip}}{toYalmip}}
 \index{toYalmip@\texttt{toYalmip}}\index{YALMIP}
 \label{sec:pdlmi-toyalmip}
 

@@ -14,19 +14,38 @@ function report = install_pd_lmi()
     %
     %   The installer adds the repository root to the end of the current
     %   MATLAB path, verifies the existing YALMIP installation and a working
-    %   SDP solver, then persists the path with a user-level fallback.
+    %   SDP solver, then persists the path with a user-level fallback. It
+    %   prints each installation stage and reports the active stage if an
+    %   error occurs.
 
     originalPath = path;
     report = emptyReport();
+    stepNames = ["Validating YALMIP", ...
+        "Finding a working SDP solver", ...
+        "Adding GriD-LMIA to the MATLAB path", ...
+        "Verifying GriD-LMIA class resolution", ...
+        "Persisting the MATLAB path"];
+    step = 1;
     try
+        printStep(step, stepNames);
         [yalmipRoot, ~] = validateYalmip();
+
+        step = 2;
+        printStep(step, stepNames);
         solver = findWorkingSolver();
 
+        step = 3;
+        printStep(step, stepNames);
         packageRoot = fileparts(mfilename("fullpath"));
         addedPaths = addPackagePaths(packageRoot);
+
+        step = 4;
+        printStep(step, stepNames);
         verifyPackageClasses(packageRoot);
 
         % Persist only after every dependency, solver, and shadowing check.
+        step = 5;
+        printStep(step, stepNames);
         persistPath();
 
         report = struct( ...
@@ -35,10 +54,26 @@ function report = install_pd_lmi()
             "Solver", solver, ...
             "AddedPaths", {addedPaths}, ...
             "Persisted", true);
+        fprintf(1, '[GriD-LMIA] Installation completed successfully.\n');
     catch cause
+        fprintf(1, '[GriD-LMIA] Installation failed during step %d/%d: %s.\n', ...
+            step, numel(stepNames), stepNames(step));
+        if isempty(cause.identifier)
+            fprintf(1, '[GriD-LMIA] Error: %s\n', cause.message);
+        else
+            fprintf(1, '[GriD-LMIA] Error [%s]: %s\n', ...
+                cause.identifier, cause.message);
+        end
         path(originalPath);
         rethrow(cause);
     end
+end
+
+function printStep(step, stepNames)
+%PRINTSTEP Show and flush the active installation stage immediately.
+    fprintf(1, '[GriD-LMIA] Step %d/%d: %s...\n', ...
+        step, numel(stepNames), stepNames(step));
+    drawnow;
 end
 
 function report = emptyReport()

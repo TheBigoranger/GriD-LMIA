@@ -1,12 +1,17 @@
 ---
 import { documentationRecords } from "../data/documentation-contracts.js";
 
+const slug = (value) => value
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-|-$/g, "");
+
 const entries = documentationRecords
   .filter((record) => record.validation_errors)
   .map((record) => ({
     ...record,
     href: `/GriD-LMIA${record.web_route_or_anchor}`,
-    diagnosticId: `diagnostic-${record.id.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+    diagnosticId: `diagnostic-${slug(`${record.id}-${record.kind}`)}`,
   }));
 ---
 
