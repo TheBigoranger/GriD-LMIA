@@ -1,11 +1,9 @@
-\titlespacing*{\chapter}{0pt}{0pt}{1.2\baselineskip}
 \chapter{\texorpdfstring{Polynomial-Matrix Certificates on \mbox{Hypercubes}}{Polynomial-Matrix Certificates on Hypercubes}}
-\titlespacing*{\chapter}{0pt}{-1.5\baselineskip}{1.2\baselineskip}
 \label{app:certificates}
 
 This appendix starts with positive semidefinite matrices, builds scalar and matrix sum-of-squares representations, and then explains the six certificate paths implemented by \code{pdlmi}: Direct, P\'olya, Putinar, SparsePutinar, SparseFullBox, and FullBox. Background constructions place these APIs in their mathematical context, while the implementation boundary is stated explicitly near the end.
 
-As in the preceding appendix, each major certificate follows the order \emph{Basic idea} $\rightarrow$ \emph{Formula} $\rightarrow$ \emph{Worked example} $\rightarrow$ \emph{Visual conclusion}. Keep two questions separate while reading. The first asks which polynomial matrix is represented, and the second asks which finite cone certifies its sign.
+The discussion keeps two questions separate. The first asks which polynomial matrix is represented, and the second asks which finite cone certifies its sign.
 
 Fix one physical cell $\mathcal H_{\vect{c}}$ and one stored rate row. In the non-strict package formulation of \cref{eq:general-pdlmi}, write the cell residual as $\mathcal F^{(\vect{c})}\preceq0$ and define the sign-normalized positive target $S^{(\vect{c})}=-\mathcal F^{(\vect{c})}$. The package target is
 \begin{gather*}
@@ -18,17 +16,18 @@ The Direct and Gram constraints prove this non-strict inequality. A strict analy
 \label{sec:certificate-psd}
 \index{positive semidefinite}
 
-\ideastep{Basic idea} A real symmetric matrix $Q$ belongs to the \termdef{psd} cone when
+A real symmetric matrix $Q$ belongs to the \termdef{psd} cone when
 \begin{gather*}
   u^\top Qu\ge0\qquad\text{for every vector }u.
 \end{gather*}
-\ideastep{Formula} Let $\vect{y}=(y_1,\ldots,y_N)$ collect the scalar decision coordinates. An LMI is an affine matrix expression constrained to the PSD cone:
+Let $\vect{y}=(y_1,\ldots,y_N)$ collect the scalar decision coordinates. An LMI is an affine matrix expression constrained to the PSD cone:
 \begin{gather*}
 Q(\vect{y})=Q_0+\sum_{k=1}^{N}y_kQ_k\succeq0.
 \end{gather*}
 The unknowns enter affinely, so this is a \termdef{sdp}. A polynomial matrix sign condition appears infinite because it asks for one PSD matrix at every point. A certificate replaces those pointwise conditions by finitely many PSD matrices and affine coefficient identities.
 
-\ideastep{Visual conclusion}
+The following flow shows how a finite decision vector defines one affine matrix in the PSD cone.
+
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=8mm,
   box/.style={dp/result,
@@ -41,11 +40,10 @@ The unknowns enter affinely, so this is a \termdef{sdp}. A polynomial matrix sig
 \end{tikzpicture}
 \end{center}
 
-\needspace{14\baselineskip}
 \section{SOS And Gram Matrices}
 \index{sum of squares}\index{Gram matrix}
 
-\ideastep{Basic idea} A polynomial in $\vect{\xi}=(\xi_1,\ldots,\xi_\ell)$ is a finite sum
+A polynomial in $\vect{\xi}=(\xi_1,\ldots,\xi_\ell)$ is a finite sum
 \begin{gather*}
   p(\vect{\xi})=
   \sum_{\vect{\eta}\in\mathbb N^\ell}
@@ -56,7 +54,7 @@ The unknowns enter affinely, so this is a \termdef{sdp}. A polynomial matrix sig
 \end{gather*}
 with only finitely many nonzero coefficients. Its total degree is $\deg p=\max\{|\vect{\eta}|:p_{\vect{\eta}}\ne0\}$, where $|\vect{\eta}|=\sum_{s=1}^{\ell}\eta_s$. A scalar polynomial is \termdef{sos} if $p=q_1^2+\cdots+q_t^2$, which immediately implies $p\ge0$.
 
-\ideastep{Formula} Suppose $\deg p\le2d$. Collect every monomial of total degree at most $d$ into
+Suppose $\deg p\le2d$. Collect every monomial of total degree at most $d$ into
 \begin{gather*}
   v_d(\vect{\xi})
   =\bigl(\vect{\xi}^{\vect{\beta}}\bigr)_{|\vect{\beta}|\le d}
@@ -116,7 +114,8 @@ The vector $\vect{b}_{\vect{a}}$ has $\prod_{s=1}^{\ell}(a_s+1)$ entries. Theref
 \end{gather*}
 adds $2\vect{\chi}_J$ to that coordinatewise degree. Consequently, a box-weighted term matched at direction-wise degree $2\vect{r}$ uses $\vect{a}=\vect{r}-\vect{\chi}_J$. The uniform choice $\vect{r}=r\vect{1}$ is a specialization. In the odd one-dimensional interval form, the endpoint weights $\alpha$ and $1-\alpha$ instead add degree one. Expanding each weighted Bernstein Gram form and equating it to the target Bernstein array produces affine coefficient identities, just as in the monomial example.
 
-\ideastep{Visual conclusion}
+The Gram construction therefore proceeds from a chosen polynomial basis to a PSD matrix and exact coefficient identities.
+
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=7mm,
   box/.style={dp/result,
@@ -164,7 +163,6 @@ Thus the exact degree-two coefficient identities are $C[0]=Q_{00}$, $C[1]=(Q_{01
 
 The label pairs, output labels, binomial ratios, diagonal groups, and off-diagonal groups are numeric. The consolidated protected \code{gramCons} kernel builds these maps once for every distinct term and window shape, then reuses them while assembling all compatible certificates. However, it allocates a fresh symmetric Gram variable for every matrix entry in entry-wise mode or every semidefinite block in matrix mode, for every physical cell, stored rate row, active term, and tensor window. Reusing a Gram variable across any of those axes would couple independent certificates and change the cone partition, so only the numeric maps are reusable. For each local certificate, all PSD cone constraints are stored first in term and window order, followed by the exact coefficient identities in target-label order. Physical cells, rate rows, and matrix entries retain their established outer traversal order.
 
-\needspace{14\baselineskip}
 \section{Full-Space SOS}
 
 An unweighted monomial Gram form proves $S^{(\vect{c})}(\vect{\xi})\succeq0$ on all of $\mathbb R^\ell$. That can be much stronger than positivity only on a box. For example, $\alpha(1-\alpha)$ is nonnegative on $[0,1]$ but negative outside it. The package exposes weighted box-certificate selectors, while a general full-space SOS parser lies outside its public scope. This construction is background for understanding weighted certificates.
@@ -173,9 +171,9 @@ An unweighted monomial Gram form proves $S^{(\vect{c})}(\vect{\xi})\succeq0$ on 
 \label{sec:certificate-direct}
 \index{coefficient matching}
 
-\ideastep{Basic idea} If every local coefficient matrix has the requested sign, every convex combination of those coefficients has the same sign.  This yields a small, transparent sufficient certificate.
+If every local coefficient matrix has the requested sign, every convex combination of those coefficients has the same sign. This yields a small, transparent sufficient certificate.
 
-\ideastep{Formula} After any rate rows have been stacked, write the residual and target coefficients on physical cell $\vect{c}$ as $\mathcal F^{(\vect{c})}=\sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}\mathcal C^{(\vect{c})}[\vect{i}]$ and $C^{(\vect{c})}[\vect{i}]=-\mathcal C^{(\vect{c})}[\vect{i}]$. Then
+After any rate rows have been stacked, write the residual and target coefficients on physical cell $\vect{c}$ as $\mathcal F^{(\vect{c})}=\sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}\mathcal C^{(\vect{c})}[\vect{i}]$ and $C^{(\vect{c})}[\vect{i}]=-\mathcal C^{(\vect{c})}[\vect{i}]$. Then
 \begin{gather*}
  S^{(\vect{c})}(\vect{\alpha})=
   \sum_{\vect{i}\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect{i}}^{\vect{M}}(\vect{\alpha})
@@ -188,7 +186,7 @@ C^{(\vect{c})}[\vect{i}]\succeq0\ \forall\vect{i}
 \end{gather*}
 This is the package default. It introduces zero Gram variables and creates one constraint per physical cell, rate row, and local label. Feasible residuals may lie outside this sufficient certificate set.
 
-\ideastep{Worked example} Consider
+For example, consider
 \begin{gather*}
 p(\alpha)=\alpha^2-\alpha+0.35=(\alpha-0.5)^2+0.10.
 \end{gather*}
@@ -198,7 +196,6 @@ It is strictly positive, with minimum $0.10$, but its degree-two Bernstein coeff
 \end{gather*}
 The polynomial remains positive despite its negative middle coefficient, so the direct certificate fails on this representation.
 
-\ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[x=5.2cm,y=4.0cm,>=Latex,
   coeff/.style={dp/known,
@@ -228,9 +225,9 @@ The eigenvalues of $Q$ are $0.20$ and $0.50$.  A complete Gram certificate can t
 \section{P\'olya As Lossless Elevation}
 \label{sec:certificate-polya}
 
-\ideastep{Basic idea} P\'olya selection preserves the residual polynomial. It rewrites that same polynomial at a higher Bernstein degree and then retries the direct coefficient test.
+P\'olya selection preserves the residual polynomial. It rewrites that same polynomial at a higher Bernstein degree and then retries the direct coefficient test.
 
-\ideastep{Formula} Classical P\'olya theory concerns homogeneous polynomials strictly positive on a simplex \cite{powersreznick2001}.  For one box coordinate,
+Classical P\'olya theory concerns homogeneous polynomials strictly positive on a simplex \cite{powersreznick2001}. For one box coordinate,
 \begin{gather*}
   \lambda_0=1-\alpha,\quad \lambda_1=\alpha,\quad
   \lambda_0+\lambda_1=1.
@@ -242,7 +239,7 @@ For $\ell$ coordinates, the implemented multiplier is
 \end{gather*}
 Regrouping is exactly Bernstein degree elevation: the represented residual remains unchanged.
 
-\ideastep{Worked example} For the worked coefficients,
+For the worked coefficients,
 \begin{gather*}
 [\,0.35,-0.15,0.35\,]
   \longrightarrow
@@ -250,7 +247,6 @@ Regrouping is exactly Bernstein degree elevation: the represented residual remai
 \end{gather*}
 after one elevation.  Every new coefficient is positive, so the elevated coefficient test succeeds.
 
-\ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
   box/.style={dp/neutral,font=\scriptsize,
@@ -283,9 +279,9 @@ For P\'olya, the sparse elevation operator first produces degree $\vect{H}=\vect
 \label{sec:certificate-markov-lukacs}
 \index{Markov--Luk\'acs form}
 
-\ideastep{Basic idea} On one interval, endpoint factors can encode the domain exactly. Even and odd target degrees require different weighted Gram patterns, so parity is a structural choice with distinct coefficient maps.
+On one interval, endpoint factors can encode the domain exactly. Even and odd target degrees require different weighted Gram patterns, so parity is a structural choice with distinct coefficient maps.
 
-\ideastep{Formula} In one variable, write the Gram order as $\vect{r}=(r_1)$. Interval nonnegativity has exact parity-specific descriptions \cite{lukacs1918,deklerkhesslaurent2017}. If $\deg p\le2r_1$,
+In one variable, write the Gram order as $\vect{r}=(r_1)$. Interval nonnegativity has exact parity-specific descriptions \cite{lukacs1918,deklerkhesslaurent2017}. If $\deg p\le2r_1$,
 \begin{gather*}
 p\ge0\text{ on }[0,1]
   \Longleftrightarrow
@@ -318,9 +314,8 @@ and
 \end{gather*}
 The second even block is absent at $r_1=0$. See \cite{aylwarditaniparrilo2007,schererhol2006} for polynomial-matrix context.
 
-\ideastep{Worked example} A cubic residual has component degree $2r_1+1$ with $\vect{r}=(1)$. It therefore uses two degree-one Gram bases, one multiplied by $1-\alpha$ and one by $\alpha$. This is the generic one-dimensional odd-degree full-box pattern.
+For example, a cubic residual has component degree $2r_1+1$ with $\vect{r}=(1)$. It therefore uses two degree-one Gram bases, one multiplied by $1-\alpha$ and one by $\alpha$. This is the generic one-dimensional odd-degree full-box pattern.
 
-\ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=9mm,
   box/.style={dp/result,
@@ -385,9 +380,9 @@ Strict positivity on a compact basic closed semialgebraic set has such a represe
 \label{sec:certificate-sparse-putinar}
 \index{SparsePutinar}\index{tensor window}\index{axis-aligned tensor window}\index{overlapping-window accumulation}
 
-\ideastep{Basic idea} Dense Putinar assigns one PSD Gram matrix to each active parity term or generator mask. SparsePutinar covers that term's tensor Bernstein Gram basis by overlapping axis-aligned windows and assigns an independent PSD matrix to every window. The coefficient identity then adds all contributions from all windows and all active terms. This windowed construction can reduce the maximum basis cardinality in one PSD block while preserving the target polynomial and the exact coefficient-matching degree.
+Dense Putinar assigns one PSD Gram matrix to each active parity term or generator mask. SparsePutinar covers that term's tensor Bernstein Gram basis by overlapping axis-aligned windows and assigns an independent PSD matrix to every window. The coefficient identity then adds all contributions from all windows and all active terms. This windowed construction can reduce the maximum basis cardinality in one PSD block while preserving the target polynomial and the exact coefficient-matching degree.
 
-\ideastep{Window construction} Fix one active weighted Putinar term with Gram degree $\vect{d}$, weight $\vect{\alpha}^{\vect{p}}(\vect{1}-\vect{\alpha})^{\vect{q}}$, and common target degree
+To construct the windows, fix one active weighted Putinar term with Gram degree $\vect{d}$, weight $\vect{\alpha}^{\vect{p}}(\vect{1}-\vect{\alpha})^{\vect{q}}$, and common target degree
 \begin{gather*}
   \vect{h}=2\vect{d}+\vect{p}+\vect{q}.
 \end{gather*}
@@ -407,7 +402,7 @@ The number of windows for this term is
 \begin{gather*}
   \prod_{s=1}^{\ell}(d_s-w_s+2).
 \end{gather*}
-\ideastep{Exact accumulated identity} For multi-indices, write $\binom{\vect{a}}{\vect{k}}=\prod_{s=1}^{\ell}\binom{a_s}{k_s}$. The contribution of one window to target label $\vect{k}$ is
+For multi-indices, write $\binom{\vect{a}}{\vect{k}}=\prod_{s=1}^{\ell}\binom{a_s}{k_s}$. The exact contribution of one window to target label $\vect{k}$ is
 \begin{gather*}
   \mathcal A_{\vect{k},\vect{u}}(Q_{\vect{u}})
   =\sum_{\substack{\vect{\eta},\vect{\zeta}\in\mathcal W_{\vect{u}}\\
@@ -426,7 +421,7 @@ Let $\mathcal T$ be the finite set of active Putinar terms, and let $\widetilde 
 \end{gather*}
 The sum is literal. If two windows contain the same ordered pair $(\vect{\eta},\vect{\zeta})$, their independent Gram blocks both contribute to the same target coefficient. For a symmetric scalar Gram matrix, an off-diagonal entry represents both ordered pairs. For a polynomial matrix, the two ordered block terms $Q[\vect{\eta},\vect{\zeta}]$ and $Q[\vect{\zeta},\vect{\eta}]$ provide the corresponding symmetry accounting. The implementation assembles every local PSD block first and then creates exactly $\prod_{s=1}^{\ell}(h_s+1)$ coefficient identities.
 
-\ideastep{Worked example} Consider one scalar parameter, target degree $\vect{M}=(4)$, absolute order $\vect{r}=(2)$, and clique size $b=2$. The unweighted Putinar term has component Gram degree $d_1=2$, window size two, and the two windows $\{0,1\}$ and $\{1,2\}$. The weighted term has component Gram degree $d_1=1$ and one window $\{0,1\}$. SparsePutinar therefore has three PSD blocks of dimension two and five exact coefficient identities. The label pair $(1,1)$ belongs to both unweighted windows, so both independent blocks contribute to target label two.
+For example, consider one scalar parameter, target degree $\vect{M}=(4)$, absolute order $\vect{r}=(2)$, and clique size $b=2$. The unweighted Putinar term has component Gram degree $d_1=2$, window size two, and the two windows $\{0,1\}$ and $\{1,2\}$. The weighted term has component Gram degree $d_1=1$ and one window $\{0,1\}$. SparsePutinar therefore has three PSD blocks of dimension two and five exact coefficient identities. The label pair $(1,1)$ belongs to both unweighted windows, so both independent blocks contribute to target label two.
 
 \begin{center}
 \begin{tikzpicture}[node distance=6mm and 7mm,
@@ -455,16 +450,15 @@ The word \emph{clique} refers only to a tensor window of Bernstein Gram-basis la
 \section{The Implemented Multivariate FullBox State}
 \label{sec:certificate-full-box}
 
-\ideastep{Basic idea} The mathematical construction is a full-box preordering: for several parameters, use every square-free product of the box generators. Each subset selects one weighted Gram block, and exact coefficient identities make the sum equal the sign-normalized target $S^{(\vect{c})}$ on one physical cell and stored rate row. The software state is \code{FullBox}.
+The mathematical construction is a full-box preordering. For several parameters, it uses every square-free product of the box generators. Each subset selects one weighted Gram block, and exact coefficient identities make the sum equal the sign-normalized target $S^{(\vect{c})}$ on one physical cell and stored rate row. The software state is \code{FullBox}.
 
-\ideastep{Formula} For the hypercube, use
+For the hypercube, use
 \begin{gather*}
   g_s(\vect{\alpha})=\alpha_s(1-\alpha_s),
   \qquad s=1,\ldots,\ell.
 \end{gather*}
-\ideastep{Worked example} For two parameters, the four subset products are $1,g_1,g_2,g_1g_2$.
+For example, the four subset products for two parameters are $1,g_1,g_2,g_1g_2$.
 
-\ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=6mm and 7mm,
   box/.style={dp/result,
@@ -492,7 +486,7 @@ Terms with negative tensor degree are omitted.  A present block has dimension
 \end{gather*}
 Every physical cell and stored rate row gets independent dense Gram blocks and exact coefficient identities. The minimum order is componentwise $\lceil\vect{M}/2\rceil$ for $\ell\ge2$. This is a specific dense Bernstein realization of the full-box preordering. Full-space SOS, Putinar-only, sparse, and general-domain parsers are distinct constructions. A fixed multivariate order supplies a sufficient certificate and may remain inconclusive.
 
-\ideastep{Finite SDP example: $\ell=2$, $\vect{M}=(3,3)$} Let $(\alpha_1,\alpha_2)\in[0,1]^2$ be the local coordinates of one cell, and suppose the sign-normalized target is
+For a finite SDP example, let $\ell=2$ and $\vect{M}=(3,3)$. Let $(\alpha_1,\alpha_2)\in[0,1]^2$ be the local coordinates of one cell, and suppose the sign-normalized target is
 \begin{gather*}
   S^{(\vect{c})}(\vect{\alpha})=
   \sum_{i_1=0}^3\sum_{i_2=0}^3
@@ -560,9 +554,9 @@ Selections rebuild from the stored original \code{Residual} and \code{Relation}.
 \label{sec:certificate-sparse-full-box}
 \index{SparseFullBox}\index{tensor window}\index{overlapping-window accumulation}
 
-\ideastep{Basic idea} SparseFullBox retains every FullBox parity or generator-mask term and every exact target-coefficient identity, but it covers each term's tensor Bernstein Gram basis by overlapping axis-aligned windows. Every window owns an independent PSD Gram matrix, and all window contributions are added before matching the target coefficients.
+SparseFullBox retains every FullBox parity or generator-mask term and every exact target-coefficient identity, but it covers each term's tensor Bernstein Gram basis by overlapping axis-aligned windows. Every window owns an independent PSD Gram matrix, and all window contributions are added before matching the target coefficients.
 
-\ideastep{Formula} Let $\mathcal J$ be the finite set of active FullBox terms. For $J\in\mathcal J$ with Gram degree $\vect{a}_J$, choose the scalar side length $w$, set $q_{J,s}=\min\{w,a_{J,s}+1\}$, and define the complete start set $\mathcal U_J=\prod_{s=1}^{\ell}\{0,\ldots,a_{J,s}-q_{J,s}+1\}$. Every start $\vect{u}\in\mathcal U_J$ defines the basis window
+Let $\mathcal J$ be the finite set of active FullBox terms. For $J\in\mathcal J$ with Gram degree $\vect{a}_J$, choose the scalar side length $w$, set $q_{J,s}=\min\{w,a_{J,s}+1\}$, and define the complete start set $\mathcal U_J=\prod_{s=1}^{\ell}\{0,\ldots,a_{J,s}-q_{J,s}+1\}$. Every start $\vect{u}\in\mathcal U_J$ defines the basis window
 \begin{gather*}
 \mathcal W_{J,\vect{u}}=\vect{u}+\prod_{s=1}^{\ell}\{0,\ldots,q_{J,s}-1\}.
 \end{gather*}
@@ -577,9 +571,8 @@ Q_{J,\vect{u}}
 \end{gather*}
 The one-parameter parity terms use the same window rule. A window for an $n$-by-$n$ semidefinite target has PSD dimension $n\prod_{s=1}^{\ell} q_{J,s}$, and term $J$ contains $\prod_{s=1}^{\ell}(a_{J,s}-q_{J,s}+2)$ independent windows. The reusable Bernstein--Gram map in \cref{sec:certificate-gram-map} expands each window through its diagonal and paired off-diagonal label contributions, then all active terms and windows are summed into the common target coefficients.
 
-\ideastep{Worked example} For one parameter, take the even assembled residual degree $\vect{M}=(4)$ and absolute order $\vect{r}=(2)$. The unweighted term has basis labels $\{0,1,2\}$ and the weighted term has labels $\{0,1\}$. At $w=2$, the unweighted windows are $\{0,1\}$ and $\{1,2\}$, while the weighted term has one window $\{0,1\}$. The certificate therefore has three independent PSD blocks of dimension two and five exact coefficient identities. The pair $(1,1)$ appears in both unweighted windows, so both diagonal Gram entries contribute to target label two.
+For example, take the even one-parameter assembled residual degree $\vect{M}=(4)$ and absolute order $\vect{r}=(2)$. The unweighted term has basis labels $\{0,1,2\}$ and the weighted term has labels $\{0,1\}$. At $w=2$, the unweighted windows are $\{0,1\}$ and $\{1,2\}$, while the weighted term has one window $\{0,1\}$. The certificate therefore has three independent PSD blocks of dimension two and five exact coefficient identities. The pair $(1,1)$ appears in both unweighted windows, so both diagonal Gram entries contribute to target label two.
 
-\ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[node distance=6mm and 7mm,
   box/.style={dp/result,font=\scriptsize,align=center,minimum width=31mm,minimum height=11mm},

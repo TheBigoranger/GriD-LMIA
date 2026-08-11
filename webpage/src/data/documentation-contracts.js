@@ -2,7 +2,7 @@
 // Sources: doc/documentation-inventory.json and doc/support/terminology.json.
 // Do not edit by hand.
 
-export const documentationVersion = "v1.3.7";
+export const documentationVersion = "v1.3.8";
 export const documentationRecords = [
   {
     "id": "pdbase.pdbase",

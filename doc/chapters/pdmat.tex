@@ -10,7 +10,7 @@ For coefficient-backed data, one storage cell is the pullback $A^{(\vect{c})}=A\
 \end{gather}
 with $\vect{\alpha}=\phi_{\vect{c}}^{-1}(\vect{\rho})$. Construction chooses the source of those coefficients. \code{evaluate} reconstructs the matrix value. \code{elevate} changes the coefficient representation while preserving the polynomial. Matrix multiplication applies the binomial-weighted convolution, with details given in \cref{sec:bernstein-product-math}. A function-backed object keeps exact handle evaluation separate from its finite coefficient evidence, while a function-only object supports exact evaluation exclusively.
 
-The chapter follows these three source families through one common question: which operations are justified by the stored evidence? A global or nested coefficient source supports coefficient inspection and algebra, a function with an explicit degree retains both exact evaluation and validated coefficient evidence, and a function constructed with the degree omitted supports exact evaluation only. The examples therefore inspect the source state before using elevation, plotting, algebra, or comparison.
+The chapter follows these three source families. A global or nested coefficient source supports coefficient inspection and algebra, a function with an explicit degree retains both exact evaluation and validated coefficient evidence, and a function constructed with the degree omitted supports exact evaluation only. The examples therefore inspect the source state before using elevation, plotting, algebra, or comparison.
 
 \section{API Map}
 \label{sec:pdmat-lookup}
@@ -418,6 +418,7 @@ val = F.evaluate(pi/2)
 val = 1
 \end{lstlisting}
 
+\enlargethispage{3\baselineskip}
 \section{Differentiate Known Data with \texorpdfstring{\codeplain{rhodiff}}{rhodiff}}
 \index{rhodiff@\texttt{rhodiff}}\index{rate row}
 \label{sec:pdmat-rhodiff}

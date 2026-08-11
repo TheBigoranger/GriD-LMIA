@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "v1.3.7",
+  "version": "v1.3.8",
   "authority": "Current MATLAB source and tests in the repository root",
   "expansion_rule": "Every object in a group's members array is one public inventory item. All remaining group fields apply to each member. A shared executable example may cover a simple family when every member remains named and directly discoverable.",
   "exclusions": ["private local functions", "methods declared with Access = protected", "static protected kernels", "test-only utilities"],

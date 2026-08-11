@@ -2,9 +2,9 @@
 \index{pdbase@\texttt{pdbase}}
 \label{sec:pdbase}
 
-\code{pdbase} is the developer-facing backend parent for \code{pdmat} and \code{pdvar}. Ordinary users should model known data with \code{pdmat} and decision expressions with \code{pdvar}. This section documents \code{pdbase} because it owns the shared storage, traversal, inspection, matrix-shape, unary-transformation, reduction, and reordering implementations inherited by both public modeling classes. Central implementation preserves these methods as public \code{pdmat} and \code{pdvar} behavior. Their class-specific syntax, examples, validation, and limitations remain documented in \cref{sec:pdmat-matrix-ops,sec:pdvar-matrix-ops}.
+\code{pdbase} is the developer-facing backend parent for \code{pdmat} and \code{pdvar}. Ordinary users should model known data with \code{pdmat} and decision expressions with \code{pdvar}. This section documents \code{pdbase} as it owns the shared storage, traversal, inspection, matrix-shape, unary-transformation, reduction, and reordering implementations inherited by both public modeling classes. Central implementation preserves these methods as public \code{pdmat} and \code{pdvar} behavior. Their class-specific syntax, examples, validation, and limitations remain documented in \cref{sec:pdmat-matrix-ops,sec:pdvar-matrix-ops}.
 
-Its traversal contract is the concrete form of the notation in \cref{sec:bernstein-tensor-grids}: \code{cells()} enumerates physical indices $\vect{c}$, \code{lbls()} enumerates local labels $\vect{i}$, and \code{coeffs(c)} returns $C^{(\vect{c})}[\vect{i}]$ in that label order. If a cell contains derivative data, its rows enumerate the constructed vertices of $\mathcal R$, while the physical cell and local label remain fixed. Public \code{elevate} and coefficient algebra preserve this separation. The consolidated sparse elevation and planned product kernels are derived in \cref{sec:bernstein-degree-elevation,sec:bernstein-product-math}, while this chapter keeps public calls and the protected table, mapping, indexing, and grid-refinement context needed to understand their behavior.
+Its traversal contract is the concrete form of the notation in \cref{sec:bernstein-tensor-grids}: \code{cells()} enumerates physical indices $\vect{c}$, \code{lbls()} enumerates local labels $\vect{i}$, and \code{coeffs(c)} returns a vector $C^{(\vect{c})}[\vect{i}]$ in the order of \code{lbls()}. If a cell contains derivative data, its rows enumerate the constructed vertices of $\mathcal R$, while the physical cell and local label remain fixed. Public \code{elevate} and coefficient algebra preserve this separation. The consolidated sparse elevation and planned product kernels are derived in \cref{sec:bernstein-degree-elevation,sec:bernstein-product-math}, while this chapter keeps public calls and the protected table, mapping, indexing, and grid-refinement context needed to understand their behavior.
 
 \section{API Map}
 \label{sec:pdbase-lookup}
@@ -43,7 +43,6 @@ Its traversal contract is the concrete form of the notation in \cref{sec:bernste
     \bottomrule
 \end{tabularx}
 
-\clearpage
 \section{Construct \texorpdfstring{\codeplain{pdbase}}{pdbase} Objects}
 \label{sec:pdbase-constructor}
 
@@ -67,7 +66,7 @@ obj = pdbase(..., ValidationMode=mode)
 \end{itemize}
 
 \examplehead
-The following example constructs a three-parameter parent object with anisotropic degree $\vect{m}=(1,3,0)$. The grid has two physical intervals in the first parameter direction and one interval in each remaining direction.
+The following example constructs a three-parameter parent object with non-uniform degree $\vect{m}=[1,3,0]$. The grid has two physical intervals in the first parameter direction and one interval in each remaining direction.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20], [5 9]}, [2 2], [1 3 0]);
@@ -250,7 +249,6 @@ For example, \code{obj.LocalValues{3}{2}} and \code{obj.coeffs([3, 2])} both ret
 
 These three methods expose the two traversal levels in \code{LocalValues}. The pair \code{cells} and \code{coeffs} locates a physical-cell cell in the nested cell array, while \code{lbls} identifies the local Bernstein coordinate attached to each coefficient column in that cell.
 
-\needspace{10\baselineskip}
 \subsection{Physical-Cell Traversal with \texorpdfstring{\codeplain{cells}}{cells} and \texorpdfstring{\codeplain{coeffs}}{coeffs}}
 
 \syntaxhead
@@ -335,7 +333,7 @@ labelToCoefficient = 4×3 double
      1     1    22
 \end{lstlisting}
 
-\needspace{12\baselineskip}
+\needspace{8\baselineskip}
 \subsection{Traversal Counts with \texorpdfstring{\codeplain{ncell}}{ncell}, \texorpdfstring{\codeplain{ncoeff}}{ncoeff}, and \texorpdfstring{\codeplain{npar}}{npar}}
 \label{sec:pdbase-counts}
 \index{ncell@\texttt{ncell}}\index{ncoeff@\texttt{ncoeff}}\index{npar@\texttt{npar}}
@@ -372,7 +370,6 @@ coefficientCount = 4
 parameterCount = 2
 \end{lstlisting}
 
-\needspace{10\baselineskip}
 \section{\texorpdfstring{\codeplain{evaluate}}{evaluate} Stored Coefficients}
 \label{sec:pdbase-evaluate}
 \index{evaluate@\texttt{evaluate}}
@@ -407,7 +404,6 @@ rateRows = 1×2 double
 \remarkshead
 Malformed points raise \code{class(obj) + ":InvalidPoint"} and out-of-bounds points raise \code{class(obj) + ":PointOutOfBounds"}. \code{pdmat} overrides the function-backed path so exact stored handles remain exact, while coefficient-backed \code{pdmat} and all \code{pdvar} data use this row-aware backend reconstruction. Evaluation preserves the object, certificate state, and YALMIP assignments.
 
-\needspace{18\baselineskip}
 \section{Differentiate Stored Coefficients with \texorpdfstring{\codeplain{rhodiff}}{rhodiff}}
 \label{sec:pdbase-rhodiff}
 \index{rhodiff@\texttt{rhodiff}}\index{rate row}
@@ -454,7 +450,7 @@ derivativeRows = 2×1 double
 
 \paragraph{See also.} Class-specific \code{pdmat} and \code{pdvar} differentiation is documented in \cref{sec:pdmat-rhodiff,sec:pdvar-rhodiff}.
 
-\needspace{16\baselineskip}
+\needspace{10\baselineskip}
 \section{Inspect Matrix Shape}
 \index{size@\texttt{size}}\index{height@\texttt{height}}\index{width@\texttt{width}}\index{length@\texttt{length}}\index{ndims@\texttt{ndims}}\index{numel@\texttt{numel}}
 \label{sec:pdbase-shape}
@@ -496,6 +492,7 @@ elementCount = numel(obj)
 dimensionCount = ndims(obj)
 \end{lstlisting}
 
+\needspace{14\baselineskip}
 \begin{lstlisting}[style=dpoutput]
 matrixSize = 1×2 double
      2     3
@@ -594,7 +591,7 @@ reshapeSize = 1×2 double
 \remarkshead
 Malformed or empty diagonal selections raise \code{class(A) + ":InvalidDiag"}. Unsupported reshape forms, multiple inferred dimensions, nonpositive dimensions, or an element-count mismatch raise \code{class(A) + ":InvalidReshape"}. These identifiers therefore appear as \code{pdbase:*}, \code{pdmat:*}, or \code{pdvar:*} according to the public input class.
 
-\needspace{10\baselineskip}
+\needspace{8\baselineskip}
 \subsection{Triangular Parts}
 \label{sec:pdbase-matrix-triangular}
 
@@ -630,7 +627,7 @@ lowerFirst = 2×2 double
 \remarkshead
 Invalid triangular offsets raise \code{class(A) + ":InvalidTriangularPart"}.
 
-\needspace{18\baselineskip}
+\needspace{12\baselineskip}
 \subsection{Reductions}
 \label{sec:pdbase-matrix-reductions}
 

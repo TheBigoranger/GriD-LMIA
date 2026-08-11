@@ -3,11 +3,9 @@
 
 This appendix develops the representation used by the package from the one-dimensional degree-one case to cell-wise tensor polynomials. The reader needs only scalar polynomials, matrices, and elementary calculus. Every conversion, elevation, product, derivative, and subdivision below is exact. Sampling approximation is a separate operation. Farouki gives a broader historical and numerical account \cite{farouki2012}.
 
-Each main construction follows the same reading path: \emph{Basic idea}, \emph{Formula}, \emph{Worked example}, and \emph{Visual conclusion}.  The extra staging is intentional: first identify what the operation means, then read its indices, and only afterward connect it to package storage.
-
 \section{Convex Combinations Before Polynomials}
 
-\ideastep{Basic idea} A convex combination of numbers or matrices has the form
+A convex combination of numbers or matrices has the form
 \begin{gather*}
 X=\sum_{i=0}^{q}w_iX_i,\qquad w_i\ge0,\qquad \sum_{i=0}^{q}w_i=1.
 \end{gather*}
@@ -16,11 +14,9 @@ For scalars, $X$ lies between the smallest and largest $X_i$.  For symmetric mat
   u^\top Xu=\sum_{i=0}^{q}w_i\,u^\top X_i u\ge0
   \quad\text{for every }u.
 \end{gather*}
-\ideastep{Formula} Bernstein bases are useful because their basis values are precisely such weights at every point of a cell.
+Bernstein bases are useful because their basis values are precisely such weights at every point of a cell.
 
-\ideastep{Worked example} Take $X_0=1$, $X_1=4$, and weights $0.75$ and $0.25$.  Their combination is $1.75$, which remains between the two inputs.
-
-\ideastep{Visual conclusion}
+For example, take $X_0=1$, $X_1=4$, and weights $0.75$ and $0.25$. Their combination is $1.75$, which remains between the two inputs.
 
 \begin{center}
 \begin{tikzpicture}[x=1.25cm,y=1cm,>=Latex,
@@ -42,14 +38,14 @@ The implication is one-way.  A polynomial may be positive everywhere while one B
 
 \section{Degree-One Interpolation On One Physical Cell}
 
-\ideastep{Basic idea} Let $\mathcal H_c=[\rho_1^{(c)},\rho_1^{(c+1)}]$, with width $h_1^{c}=\rho_1^{(c+1)}-\rho_1^{(c)}>0$. Its forward map and inverse coordinate are
+Let $\mathcal H_c=[\rho_1^{(c)},\rho_1^{(c+1)}]$, with width $h_1^{c}=\rho_1^{(c+1)}-\rho_1^{(c)}>0$. Its forward map and inverse coordinate are
 \begin{gather*}
   \phi_c(\alpha)=\rho_1^{(c)}+h_1^c\alpha,
   \qquad
   \alpha=\phi_c^{-1}(\rho_1)
   =\frac{\rho_1-\rho_1^{(c)}}{h_1^c}\in[0,1].
 \end{gather*}
-\ideastep{Formula} The degree-one Bernstein basis is
+The degree-one Bernstein basis is
 \begin{gather*}
 B_0^1(\alpha)=1-\alpha,\qquad B_1^1(\alpha)=\alpha.
 \end{gather*}
@@ -59,9 +55,7 @@ C^{(c)}(\alpha)=(1-\alpha)C^{(c)}[0]+\alpha C^{(c)}[1].
 \end{gather*}
 At the lower physical face, $\alpha=0$ and the value is $C^{(c)}[0]$. At the upper face, $\alpha=1$ and the value is $C^{(c)}[1]$.  Between them the matrix follows the straight segment joining those two coefficient matrices.
 
-\ideastep{Worked example} For example, $C^{(c)}[0]=2$ and $C^{(c)}[1]=4$ give $C^{(c)}(0.25)=0.75(2)+0.25(4)=2.5$, exactly as in \cref{sec:pdmat-evaluate}.
-
-\ideastep{Visual conclusion}
+For example, $C^{(c)}[0]=2$ and $C^{(c)}[1]=4$ give $C^{(c)}(0.25)=0.75(2)+0.25(4)=2.5$, exactly as in \cref{sec:pdmat-evaluate}.
 \begin{center}
 \begin{tikzpicture}[x=5.3cm,y=1.1cm]
   \draw[dp/axis] (-0.05,0) -- (1.08,0) node[right,font=\scriptsize]{$\alpha$};
@@ -86,9 +80,9 @@ At the lower physical face, $\alpha=0$ and the value is $C^{(c)}[0]$. At the upp
 \label{sec:bernstein-higher-degree}
 \index{Bernstein basis}\index{Bernstein coefficient}\index{degree reduction}
 
-\ideastep{Basic idea} Higher degree adds interior shape controls while keeping the same physical cell and the same physical grid nodes.
+Higher degree adds interior shape controls while keeping the same physical cell and the same physical grid nodes.
 
-\ideastep{Formula} In one parameter, write the degree vector as $\vect{m}=(m_1)$ and define
+In one parameter, write the degree vector as $\vect{m}=(m_1)$ and define
 \begin{gather*}
   B_i^{m_1}(\alpha)=\binom{m_1}{i}(1-\alpha)^{m_1-i}\alpha^i,
   \qquad i=0,\ldots,m_1.
@@ -104,11 +98,10 @@ Thus
 \end{gather*}
 is a convex combination of its local coefficient matrices.
 
-\ideastep{Worked example} For degree two,
+For degree two,
 \begin{gather*}
 B_0^2=(1-\alpha)^2,\qquad B_1^2=2(1-\alpha)\alpha,\qquad B_2^2=\alpha^2.
 \end{gather*}
-\ideastep{Visual conclusion}
 \begin{center}
 \begin{tikzpicture}[x=5.3cm,y=2.0cm]
   \draw[dp/axis] (-0.05,0) -- (1.08,0) node[right,font=\scriptsize]{$\alpha$};
@@ -303,7 +296,7 @@ E_{\vect{M}\leftarrow\vect{m}}=E_{(3)\leftarrow(1)}=
 E_{(3)\leftarrow(1)}
 \begin{bmatrix}c_0\\c_1\end{bmatrix}
 =
-\begin{bmatrix}c_0\$2c_0+c_1)/3\$c_0+2c_1)/3\\c_1\end{bmatrix}.
+\begin{bmatrix}c_0\\ (2c_0+c_1)/3\\ (c_0+2c_1)/3\\ c_1\end{bmatrix}.
 \end{gather*}
 The sparse operator is a different application form of the same Bernstein identity, so it preserves both the represented polynomial and the decision freedom.
 
@@ -341,7 +334,7 @@ B_{\vect{i}}^{\vect{m}}(\vect{\alpha})
 B_{\vect{i}}^{\vect{m}}=
   \prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
 \end{gather*}
-There are $\prod_{s=1}^{\ell}(k_s-1)$ physical hypercubes and $\prod_{s=1}^{\ell}(m_s+1)$ zero-based local Bernstein labels per hypercube. A zero component $m_s=0$ leaves only label $i_s=0$, so the polynomial is constant in direction $s$. Physical node and hypercube indices remain one-based. If every component is the common scalar $\bar m$, then $\vect{m}=\bar m\vect{1}$ and the label count specializes to $(\bar m+1)^\ell$.
+There are $\prod_{s=1}^{\ell}(k_s-1)$ physical hypercubes and $\prod_{s=1}^{\ell}(m_s+1)$ local Bernstein labels per hypercube, with $i_s=0,\ldots,m_s$. A zero component $m_s=0$ leaves only label $i_s=0$, so the polynomial is constant in direction $s$. Physical node and hypercube indices remain one-based. If every component is the common scalar $\bar m$, then $\vect{m}=\bar m\vect{1}$ and the label count specializes to $(\bar m+1)^\ell$.
 
 \begin{lstlisting}[style=dpmatlab]
 obj = pdbase({[0 1 2], [10 20 30 40]}, [1 1], 1);
@@ -380,13 +373,12 @@ The nested tree \code{LocalValues{c1}{c2}...{cell}} follows physical-cell coordi
 \textit{Select the physical-cell leaf first. Only then read the flat local coefficient labels in \code{lbls} order.}
 \end{center}
 
-\needspace{14\baselineskip}
 \section{Products As Ordered Weighted Convolution}
 \label{sec:bernstein-product-math}
 
-\ideastep{Basic idea} Multiplying two Bernstein polynomials creates every ordered pair of input coefficients.  Pairs with the same label sum contribute to the same output. For matrix payloads, ``ordered'' matters: the left factor stays on the left.
+Multiplying two Bernstein polynomials creates every ordered pair of input coefficients. Pairs with the same label sum contribute to the same output. For matrix payloads, ``ordered'' matters because the left factor stays on the left.
 
-\ideastep{Formula} First consider one parameter, write the two degree vectors as $\vect{m}=(m_1)$ and $\vect{n}=(n_1)$, and fix the one-based physical cell $c$. Let
+First consider one parameter, write the two degree vectors as $\vect{m}=(m_1)$ and $\vect{n}=(n_1)$, and fix the one-based physical cell $c$. Let
 \begin{gather*}
 P=\sum_{i=0}^{m_1}B_i^{m_1}P^{(c)}[i],\qquad Q=\sum_{j=0}^{n_1}B_j^{n_1}Q^{(c)}[j].
 \end{gather*}
@@ -417,8 +409,7 @@ Then
 \end{gather*}
 The convolution remains ordered for matrix payloads, with the written factor order $\widetilde P^{(c)}[i]\widetilde Q^{(c)}[j]$ in every summand.
 
-\newpage
-\ideastep{Worked example} Take quadratic coefficients $P=[1,2,6]$ and affine coefficients $Q=[2,4]$.  The anti-diagonals give
+For example, take quadratic coefficients $P=[1,2,6]$ and affine coefficients $Q=[2,4]$. The anti-diagonals give
 \begin{gather*}
 \begin{aligned}
   R[0]&=1(2)=2,\\
@@ -427,7 +418,6 @@ The convolution remains ordered for matrix payloads, with the written factor ord
   R[3]&=6(4)=24.
 \end{aligned}
 \end{gather*}
-\needspace{22\baselineskip}
 \begin{lstlisting}[style=dpmatlab]
 P = pdmat({[0 1]}, {1, 2, 6}, Degree=2);
 Q = pdmat({[0 1]}, {2, 4}, Degree=1);
@@ -501,8 +491,8 @@ P(\alpha)Q(\alpha) =2+6\alpha+10\alpha^2+6\alpha^3.
 \textit{Direct formula labels sit outside the plot regions. Solid/circle, dashed/square, and dotted/triangle treatments distinguish the three functions and remain legible in monochrome.}
 \end{center}
 
-\newpage
-\ideastep{Visual conclusion}
+The following coefficient-flow diagram summarizes the same calculation with panel-to-panel arrows that keep its labels clear.
+
 \begin{center}
 \begin{tikzpicture}[node distance=11mm]
   \node[dp/figure-panel,dp/neutral,minimum width=42mm,minimum height=34mm]
@@ -528,7 +518,7 @@ P(\alpha)Q(\alpha) =2+6\alpha+10\alpha^2+6\alpha^3.
 \textit{Only the panel-to-panel arrows encode flow. Contributions are listed inside their anti-diagonal group, so every edge stays clear of labels and equations.}
 \end{center}
 
-\needspace{14\baselineskip} For tensor degrees $\vect{m}$ and $\vect{n}$, labels add componentwise and the product has degree $\vect{m}+\vect{n}$:
+For tensor degrees $\vect{m}$ and $\vect{n}$, labels add componentwise and the product has degree $\vect{m}+\vect{n}$:
 \begin{gather*}
 (PQ)^{(\vect{c})}[\vect{k}]=
   \sum_{\vect{i}+\vect{j}=\vect{k}}
@@ -604,19 +594,18 @@ in deterministic pair order. This fallback keeps MATLAB scalar and matrix multip
 
 The protected \code{prodVals} kernel owns the three routes and reuses their numeric plans across the complete cell-wise trees. All routes preserve the same product polynomial and output degree. Numeric tensor shapes, pair tables, and weights may be reused because they are purely numeric. The input coefficient payloads and their existing decision variables remain attached to their own physical cells and rate rows.
 
-\needspace{14\baselineskip}
 \section{Differentiation And Rate Vertices}
 \label{sec:bernstein-differentiation}
 
-\ideastep{Basic idea} Differentiate inside each physical cell. Adjacent control differences produce the derivative coefficients. Multiplying by a bounded rate then creates one stored row per rate-box vertex. Value continuity of $P$ permits distinct cell-wise derivatives across a shared face.
+Differentiate inside each physical cell. Adjacent control differences produce the derivative coefficients. Multiplying by a bounded rate then creates one stored row per rate-box vertex. Value continuity of $P$ permits distinct cell-wise derivatives across a shared face.
 
-\ideastep{Formula} For one parameter, write $\vect{m}=(m_1)$ and consider physical cell $c$ of width $h_1^c$:
+For one parameter, write $\vect{m}=(m_1)$ and consider physical cell $c$ of width $h_1^c$:
 \begin{gather*}
   \frac{\partial P}{\partial\rho}
 =\frac{m_1}{h_1^c}\sum_{i=0}^{m_1-1}
     \bigl(C^{(c)}[i+1]-C^{(c)}[i]\bigr)B_i^{m_1-1}(\alpha).
 \end{gather*}
-\ideastep{Worked example} For the worked polynomial $[1,2,6]$ on $[0,2]$, $\vect{m}=(2)$ and $h_1^c=2$, so the derivative coefficients are
+For the worked polynomial $[1,2,6]$ on $[0,2]$, $\vect{m}=(2)$ and $h_1^c=2$, so the derivative coefficients are
 \begin{gather*}
   \left[\frac{2}{2}(2-1),\frac{2}{2}(6-2)\right]=[1,4].
 \end{gather*}
@@ -637,7 +626,8 @@ Finally, let $\vect{\nu}\in\mathcal V_{\mathcal R}$ denote one rate vertex. At t
 \end{gather*}
 The corresponding matrix expression is affine in the scheduling rate $\dot{\vect{\rho}}$. Every value inside the rate box $\mathcal R$ is therefore a convex combination of the distinct vertex matrices in $\mathcal V_{\mathcal R}$. Because the positive- and negative-semidefinite cones are convex, the requested semidefinite sign holds on all of $\mathcal R$ whenever it holds at every distinct vertex. \code{rhodiff} stores one row for each of these vertices.
 
-\ideastep{Visual conclusion}
+The two-parameter flow below shows how the partial derivatives generate one stored expression for each rate vertex.
+
 \begin{center}
 \begin{tikzpicture}[>=Latex,node distance=7mm and 9mm,
   box/.style={dp/result,

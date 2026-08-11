@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "version": "v1.3.7",
+  "version": "v1.3.8",
   "authority": "Current MATLAB source and tests in the repository root",
   "record_contract": "Every public symbol is one complete record. Shared family evidence is copied into every applicable record.",
   "exclusions": [

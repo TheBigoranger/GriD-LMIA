@@ -1,10 +1,10 @@
 export const versionHistory = [
   {
-    version: "v1.3.7",
+    version: "v1.3.8",
     date: "2026-08-10",
     status: "current documentation",
     summary:
-      "Aligns the printable and Web manuals with the source-indexed 192-symbol public API, restores their shared generated inventory contract, and uses explicit Cartesian-product traversal for every complete local-label sum. It retains the example-led class chapters, solver-status boundaries, and mathematical appendices of v1.3.6. The MATLAB API is unchanged, and v1.3.0 remains the latest tagged GitHub Release.",
+      "Repairs page flow and figure placement in the printable manual, aligns both appendices with the main text, and keeps the GriD-LMIA Welcome wordmark on one line from 320 px upward. The TeX and Web layouts passed rendered visual checks. The MATLAB API is unchanged, and v1.3.0 remains the latest tagged GitHub Release.",
   },
   {
     version: "v1.3.0",

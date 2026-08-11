@@ -1512,6 +1512,60 @@ try {
         for (const failure of result.failures) {
           failures.push({ width, route: currentRoute, ...failure });
         }
+        if (route === `${base}/`) {
+          const wordmark = await page.locator(".home-wordmark").evaluate((node) => {
+            // A text range exposes hyphen wrapping that the paragraph's block rectangle hides.
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            const textRects = [...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0);
+            const lineTops = textRects.reduce((tops, rect) => {
+              if (!tops.some((top) => Math.abs(top - rect.top) <= 1)) tops.push(rect.top);
+              return tops;
+            }, []);
+            const nodeRect = node.getBoundingClientRect();
+            const textLeft = Math.min(...textRects.map((rect) => rect.left));
+            const textRight = Math.max(...textRects.map((rect) => rect.right));
+            return {
+              lineCount: lineTops.length,
+              textRectCount: textRects.length,
+              textLeft,
+              textRight,
+              nodeLeft: nodeRect.left,
+              nodeRight: nodeRect.right,
+              nodeClientWidth: node.clientWidth,
+              nodeScrollWidth: node.scrollWidth,
+              rootClientWidth: document.documentElement.clientWidth,
+              rootScrollWidth: document.documentElement.scrollWidth,
+            };
+          });
+          if (wordmark.lineCount !== 1) {
+            failures.push({
+              width,
+              route: currentRoute,
+              type: "home-wordmark-line",
+              selector: ".home-wordmark",
+              actual: wordmark.lineCount,
+              allowed: 1,
+              context: JSON.stringify(wordmark),
+            });
+          }
+          if (
+            wordmark.textLeft < wordmark.nodeLeft - tolerance ||
+            wordmark.textRight > wordmark.nodeRight + tolerance ||
+            wordmark.nodeScrollWidth > wordmark.nodeClientWidth + tolerance ||
+            wordmark.rootScrollWidth > wordmark.rootClientWidth + tolerance
+          ) {
+            failures.push({
+              width,
+              route: currentRoute,
+              type: "home-wordmark-bounds",
+              selector: ".home-wordmark",
+              actual: Math.max(wordmark.textRight, wordmark.nodeScrollWidth, wordmark.rootScrollWidth),
+              allowed: Math.max(wordmark.nodeRight, wordmark.nodeClientWidth, wordmark.rootClientWidth),
+              context: JSON.stringify(wordmark),
+            });
+          }
+        }
         if (
           width === 320 &&
           route.endsWith("/documents/reference/pdvar/constructor/")

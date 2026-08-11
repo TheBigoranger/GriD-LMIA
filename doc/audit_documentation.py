@@ -399,11 +399,29 @@ def audit_tex(errors: list[str]) -> None:
     if r"\newcommand{\vect}[1]{\boldsymbol{#1}}" not in style:
         errors.append("support/manual-style.tex misses the semantic vector definition")
     manual = (DOC / "manual.tex").read_text(encoding="utf-8")
-    if "Version v1.3.7" not in manual or r"\date{August 10, 2026}" not in manual:
-        errors.append("manual metadata is not v1.3.7 dated August 10, 2026")
+    if "Version v1.3.8" not in manual or r"\date{August 10, 2026}" not in manual:
+        errors.append("manual metadata is not v1.3.8 dated August 10, 2026")
     history = (DOC / "chapters" / "release-history.tex").read_text(encoding="utf-8")
-    if "v1.3.7" not in history or "August 10, 2026" not in history:
-        errors.append("release history misses v1.3.7 dated August 10, 2026")
+    if "v1.3.8" not in history or "August 10, 2026" not in history:
+        errors.append("release history misses v1.3.8 dated August 10, 2026")
+
+    # Keep the appendices in the main narrative style and prevent the two page-gap regressions fixed in v1.3.8.
+    appendix_paths = [
+        DOC / "chapters" / "bernstein-mathematics.tex",
+        DOC / "chapters" / "certificate-mathematics.tex",
+    ]
+    scaffold = re.compile(r"\\ideastep\{(?:Basic idea|Formula|Worked example|Visual conclusion)\}")
+    for path in appendix_paths:
+        source = path.read_text(encoding="utf-8")
+        if scaffold.search(source):
+            errors.append(f"{path.relative_to(DOC)} retains an appendix presentation scaffold")
+    bernstein = appendix_paths[0].read_text(encoding="utf-8")
+    if r"\newpage" in bernstein or r"\needspace{22\baselineskip}" in bernstein:
+        errors.append("chapters/bernstein-mathematics.tex restores a forced product-example page gap")
+    pdmat = (DOC / "chapters" / "pdmat.tex").read_text(encoding="utf-8")
+    rhodiff_gap = r"\needspace{12\baselineskip}" + "\n" + r"\section{Differentiate Known Data"
+    if rhodiff_gap in pdmat:
+        errors.append("chapters/pdmat.tex restores the forced rhodiff section page gap")
 
 
 def main() -> int:
