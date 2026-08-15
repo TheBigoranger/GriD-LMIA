@@ -83,6 +83,10 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
         out = mkRhodiff(obj, deg, vals, rb, hasDec, numRateRows)
     end
 
+    methods (Static, Hidden, Access = ?pdmat)
+        out = fromKnownProduct(lhs, rhs)
+    end
+
 end
 
 function [grid, sz, deg, vals, rb, validationMode] = ctorArgs(varargin)

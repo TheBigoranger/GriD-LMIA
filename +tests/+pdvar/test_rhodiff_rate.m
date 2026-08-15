@@ -337,7 +337,7 @@ function testDerProWitKnoDat(testCase)
 end
 
 function testDerMatProAndRej(testCase)
-    % Numeric matrix products should work while unsafe rate products fail.
+    % Numeric products preserve metadata-only bounds while active rows stay safe.
     V = pdvar(2, 1, {[0 1]}, "full");
     D = rhodiff(V, [-1 1]);
     cd = D.coeffs(1);
@@ -346,6 +346,7 @@ function testDerMatProAndRej(testCase)
 
     L = [1 2] * D;
     M = D * [4 5];
+    T = R * 2;
 
     verifyCoeffTable(testCase, L.coeffs(1), {
         [1 2] * cd{1, 1}
@@ -355,9 +356,11 @@ function testDerMatProAndRej(testCase)
         cd{1, 1} * [4 5]
         cd{2, 1} * [4 5]
     });
+    testCase.verifyEqual(T.RateBounds, [-1 1]);
+    testCase.verifyEqual(T.NumRateRows, 0);
+    testCase.verifyEqual(objectVariables(T), objectVariables(R));
     testCase.verifyError(@() D * D, "pdvar:InvalidMultiplication");
     testCase.verifyError(@() D * P, "pdvar:InvalidMultiplication");
-    testCase.verifyError(@() R * 2, "pdvar:InvalidMultiplication");
 end
 
 function row = tensorDiffExpected(vals, deg, h, rate, sz)

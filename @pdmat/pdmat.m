@@ -1,4 +1,4 @@
-classdef pdmat < pdbase
+classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
     %PDMAT Known matrix data on a parameter grid.
     %
     %   Syntax:

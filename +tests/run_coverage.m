@@ -39,8 +39,8 @@ function [results, coverage] = run_coverage
     assertSuccess(results);
     coverage = summarizeCoverage(coverageOutputs);
 
-    statementBaseline = struct("Covered", 3292, "Total", 3408);
-    decisionBaseline = struct("Covered", 1652, "Total", 1762);
+    statementBaseline = struct("Covered", 3325, "Total", 3442);
+    decisionBaseline = struct("Covered", 1671, "Total", 1782);
     coverage.Statement.Baseline = statementBaseline;
     coverage.Decision.Baseline = decisionBaseline;
 

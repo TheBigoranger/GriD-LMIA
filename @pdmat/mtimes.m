@@ -7,16 +7,25 @@ function out = mtimes(lhs, rhs)
     %     C = M * A
     %
     %   Arguments:
-    %     lhs, rhs - Compatible coefficient-backed pdmat or numeric operands.
+    %     lhs, rhs - Compatible coefficient-backed pdmat, numeric, or affine
+    %                sdpvar operands.
     %
     %   Output:
-    %     C - Cell-local Bernstein matrix product on the common grid.
+    %     C - Cell-wise Bernstein matrix product on the common grid.
     %         A 1-by-1 pdmat acts as a scalar multiplier in either order.
+    %         A mixed pdmat/sdpvar product returns pdvar.
     %
     %   Example:
     %     A = pdmat({[0 1]}, {[1 0; 0 1], [2 0; 0 2]}, Degree=1);
     %     B = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     %     C = A * B;
+
+    if isa(lhs, "sdpvar") || isa(rhs, "sdpvar")
+        % pdmat is method-superior to sdpvar so both operand orders reach
+        % the affine expression layer through one matrix-product bridge.
+        out = pdvar.fromKnownProduct(lhs, rhs);
+        return
+    end
 
     if isa(lhs, "pdmat")
         anchor = lhs;

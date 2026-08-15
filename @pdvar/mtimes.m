@@ -131,10 +131,6 @@ function out = scalarProd(lhs, rhs)
         leftScale = true;
     end
 
-    if ~isempty(obj.RateBounds) && obj.NumRateRows == 0
-        error("pdvar:InvalidMultiplication", ...
-            "Products involving metadata-only rate-dependent pdvar expressions are unsupported in this slice.");
-    end
     if helper.isZero(obj, "obj")
         out = zeroObj(obj.GridInfo.Vectors, obj.MatrixSize);
     elseif leftScale
@@ -165,11 +161,11 @@ function out = genProd(lhs, rhs)
         error("pdvar:InvalidMultiplication", ...
             "Products may contain decision variables on at most one side.");
     end
-    % Allow rate-vertex rows from only one operand.
-    if ~isempty(rb) && ...
-            ~xor(ld.NumRateRows ~= 0, rd.NumRateRows ~= 0)
+    % RateBounds alone is metadata; only stored vertex rows make a factor
+    % rate-dependent. Two active row tables would be quadratic in rho_dot.
+    if ld.NumRateRows ~= 0 && rd.NumRateRows ~= 0
         error("pdvar:InvalidMultiplication", ...
-            "Products may contain derivative rate vertices on exactly one known-data side.");
+            "Products may contain derivative rate vertices on at most one side.");
     end
 
     sz = prodSz(ld.MatrixSize, rd.MatrixSize);
