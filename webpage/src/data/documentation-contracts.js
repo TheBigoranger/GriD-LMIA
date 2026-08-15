@@ -2,7 +2,7 @@
 // Sources: doc/documentation-inventory.json and doc/support/terminology.json.
 // Do not edit by hand.
 
-export const documentationVersion = "v1.3.8";
+export const documentationVersion = "v1.4.0";
 export const documentationRecords = [
   {
     "id": "pdbase.pdbase",
@@ -1724,19 +1724,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "pdmat",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1762,19 +1764,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "FunctionHandle",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1800,19 +1804,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "bernTable",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1838,19 +1844,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "disp",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1876,19 +1884,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "display",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1914,19 +1924,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "plot",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1952,19 +1964,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "evaluate",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1990,19 +2004,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "plus",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2028,19 +2044,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "minus",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2066,19 +2084,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "mtimes",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2104,19 +2124,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "eq",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2142,19 +2164,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "ge",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2180,19 +2204,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "le",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2218,19 +2244,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "isequal",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2256,19 +2284,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "blkdiag",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2294,19 +2324,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "cat",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2332,19 +2364,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "subsref",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2370,19 +2404,21 @@ export const documentationRecords = [
       "+tests/+pdmat/test_display_plot.m",
       "+tests/+pdmat/test_algebra.m",
       "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m"
+      "+tests/+pdmat/test_validation.m",
+      "+tests/+pdvar/test_multiplication.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
       "bernTable(A[,cell][,oneLine])",
       "evaluate(A,rho)",
       "plot(A,name=value)",
-      "documented algebra, comparison, block, and two-subscript forms"
+      "documented algebra, comparison, block, and two-subscript forms",
+      "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric or pdmat operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, or coefficient-backed pdmat objects.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, invalid multiplication, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct, and coefficient algebra requires coefficient-backed sources.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "subsasgn",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -3601,7 +3637,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "pdvar",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3636,7 +3672,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "bernTable",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3671,7 +3707,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "blkdiag",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3706,7 +3742,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "cat",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3741,7 +3777,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "eq",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3776,7 +3812,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "ge",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3811,7 +3847,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "le",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3846,7 +3882,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "isequal",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3881,7 +3917,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "minus",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3916,7 +3952,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "mtimes",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3951,7 +3987,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "plus",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3986,7 +4022,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "subsasgn",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -4021,7 +4057,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "subsref",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -4056,7 +4092,7 @@ export const documentationRecords = [
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication requires the other factor to be known and compatible.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "value",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",

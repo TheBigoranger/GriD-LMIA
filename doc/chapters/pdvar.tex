@@ -729,7 +729,7 @@ resultDegree = 2
 \subsection{Multiplication By Known Or Numeric Data}
 \label{sec:pdvar-operator-entries}
 
-The \code{mtimes} overload supports multiplication only when decision dependence occurs on at most one side. A coefficient-backed \code{pdmat} or finite real numeric matrix may multiply a \code{pdvar} from either side. A scalar \code{pdvar} may scale a known matrix. Two decision-bearing factors, including \code{P*Q} and \code{P*eta} for a decision \code{sdpvar eta}, are nonlinear and rejected.
+The \code{mtimes} overload supports multiplication only when decision dependence occurs on at most one side. A coefficient-backed \code{pdmat} or finite real numeric matrix may multiply a \code{pdvar} from either side. A compatible real affine two-dimensional \code{sdpvar} may also multiply a coefficient-backed \code{pdmat} in either order, and that mixed product returns \code{pdvar}. A scalar decision expression may scale a known matrix. Two decision-bearing factors, including \code{P*Q} and \code{P*eta} for a decision \code{sdpvar eta}, are nonlinear and rejected.
 
 \Cref{fig:pdvar-affine-to-pdlmi} summarizes the supported path from a known-data product to a finite comparison. The same affine-safety check applies before grid alignment or coefficient convolution, so an unsupported decision product cannot enter certificate assembly.
 
@@ -739,6 +739,8 @@ R = A * P
 R = P * A
 R = M * P
 R = P * M
+R = A * X
+R = X * A
 \end{lstlisting}
 
 The first example shows numeric left and right matrix products while keeping incidental YALMIP variable identifiers outside the transcript.
@@ -772,6 +774,34 @@ degrees = 1×3 double
 (1-α)*[internal(1)+2*internal(2)] + α*[internal(3)+2*internal(4)]
     "(1-α)*[4*internal(1), 5*internal(1)] + α*[4*internal(3), 5*internal(3)]"
     "(1-α)*[4*internal(2), 5*internal(2)] + α*[4*internal(4), 5*internal(4)]"
+\end{lstlisting}
+
+A bare \code{sdpvar} is parameter independent, so multiplying it by coefficient-backed known data preserves the known degree and maps each coefficient in written matrix order. The following rectangular products return \code{pdvar} and retain only the decisions already present in \code{X} or \code{Y}.
+
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+X = sdpvar(2, 3, 'full');
+Y = sdpvar(4, 2, 'full');
+A0 = reshape(1:12, 3, 4);
+A = pdmat([0 1], {A0, A0 + 12}, Degree=1);
+L = X * A;
+R = A * Y;
+leftClass = class(L)
+rightClass = class(R)
+leftSize = size(L)
+rightSize = size(R)
+mixedDegrees = [L.Degree R.Degree]
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+leftClass = 'pdvar'
+rightClass = 'pdvar'
+leftSize = 1×2 double
+     2     4
+rightSize = 1×2 double
+     3     2
+mixedDegrees = 1×2 double
+     1     1
 \end{lstlisting}
 
 A known parameter-dependent factor adds its Bernstein degree componentwise and preserves the written matrix order. The three planned backend routes are derived in \cref{sec:bernstein-product-math}.
@@ -831,12 +861,12 @@ rightDegree = 1×2 double
 (1-α1)^2 * (1-α2)*[internal(1)] + (1-α1)^2 * α2*[2*internal(1)] + 2(1-α1)α1 * (1-α2)*[internal(2)] + 2(1-α1)α1 * α2*[2*internal(2)] + α1^2 * (1-α2)*[internal(3)] + α1^2 * α2*[2*internal(3)]
 \end{lstlisting}
 
-A derivative object may be multiplied by numeric data or a matching-grid known object while preserving every rate row.  Products with rate dependence on both sides, products of a derivative with an ordinary decision expression, and products involving metadata-only rate dependence are rejected.
+A derivative object may be multiplied by numeric data or a matching-grid known object while preserving every active rate row. Products with active rate-row tables on both sides and products of a derivative with an ordinary decision expression are rejected. Compatible \code{RateBounds} with zero stored rows is metadata, so preserving it keeps the product ordinary and rate independent.
 
-Two decision-bearing factors are also rejected: their product would be quadratic in YALMIP decision coefficients.  The supported boundary is numeric or known \code{pdmat} data multiplying one affine \code{pdvar} expression on either side, with the written matrix order preserved.
+Two decision-bearing factors are also rejected because their product would be quadratic in YALMIP decision coefficients. The supported boundary is one affine decision factor multiplied by compatible numeric or coefficient-backed known data, including a bare affine \code{sdpvar} multiplied directly by \code{pdmat}, with the written matrix order preserved.
 
 \remarkshead
-Incompatible affine operands raise \codeerr{pdvar}{InvalidAddition} or \codeerr{pdvar}{InvalidSubtraction}.  Bad dimensions, two decision-bearing factors, nonlinear symbolic data, or unsupported rate combinations raise \codeerr{pdvar}{InvalidMultiplication}.  Incompatible parameter bounds raise \codeerr{pdvar}{MixedGrid}. A function-only \code{pdmat} operand raises \codeerr{pdvar}{FunctionOnlyAlgebra}.
+Incompatible affine operands raise \codeerr{pdvar}{InvalidAddition} or \codeerr{pdvar}{InvalidSubtraction}. Bad dimensions, two decision-bearing factors, nonlinear or complex symbolic data, or two active rate-row tables raise an owning-class \code{InvalidMultiplication} error. Incompatible parameter bounds raise \codeerr{pdvar}{MixedGrid}. A function-only \code{pdmat} operand raises the owning-class \code{FunctionOnlyAlgebra} error.
 
 \section{Reshape and Transform Decision Matrices}
 \label{sec:pdvar-matrix-ops}

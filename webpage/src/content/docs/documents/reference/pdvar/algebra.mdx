@@ -54,9 +54,10 @@ remains the exact sum or difference of the original decision expressions.
 
 ```matlab
 L = A * P; R = P * A;
+U = X * A; V = A * X;
 ```
 
-`mtimes` is allowed when decision dependence occurs on at most one converted operand. Numeric and coefficient-backed `pdmat` data may multiply a decision-bearing `pdvar` on a dimensionally valid side. An affine `sdpvar` also carries decision dependence after conversion.
+`mtimes` is allowed when decision dependence occurs on at most one operand. Numeric and coefficient-backed `pdmat` data may multiply a decision-bearing `pdvar` on a dimensionally valid side. A compatible real affine two-dimensional `sdpvar` may also multiply coefficient-backed `pdmat` directly in either order. The mixed result is `pdvar`, and the bare symbolic factor contributes degree zero.
 
 For a quadratic decision and affine known factor on one cell,
 
@@ -86,6 +87,19 @@ shows the same ordered Bernstein convolution with numeric coefficients.
 For `pdvar`, the additional boundary is decision linearity: at most one
 converted operand may carry decision dependence.
 
+```matlab
+yalmip('clear')
+X = sdpvar(2, 3, 'full');
+Y = sdpvar(4, 2, 'full');
+A0 = reshape(1:12, 3, 4);
+A = pdmat([0 1], {A0, A0 + 12}, Degree=1);
+L = X * A;
+R = A * Y;
+assert(isa(L, 'pdvar') && isequal(size(L), [2 4]))
+assert(isa(R, 'pdvar') && isequal(size(R), [3 2]))
+assert(L.Degree == 1 && R.Degree == 1)
+```
+
 <Aside type="note" title="Implementation remark: ordered product convolution">
 `mtimes` applies the planned normalized Bernstein convolution cell by cell,
 adds the operand degrees componentwise, and preserves the written
@@ -97,10 +111,13 @@ leave the package's affine YALMIP layer.
 ## Validation and operation boundaries
 
 - Products with decision dependence on both sides are rejected as nonlinear.
-- Products with rate dependence on both sides are rejected.
+- Products with active rate-row tables on both sides are rejected.
 - Affine `sdpvar` multiplication requires decision-free data on the `pdvar` side.
+- A bare `sdpvar` multiplied by `pdmat` must be real, affine, two-dimensional,
+  and dimensionally compatible.
 - Numeric and `pdmat` promotion still requires compatible physical bounds and matrix dimensions.
 - Numeric or known data may multiply a derivative object while preserving its rate rows.
+- Compatible `RateBounds` with zero stored rows is metadata and remains valid in an ordinary product.
 
 ## See Also
 

@@ -866,33 +866,37 @@ mergedGrid = 1×3 double
 \index{ordered matrix multiplication}\index{Bernstein product}\index{known data}
 \label{sec:pdmat-operator-entries}
 
-Use \code{mtimes} for a matrix product. The inner payload dimensions must match. Two parameter-dependent factors produce the componentwise degree sum. A numeric factor is constant and contributes degree zero in every component.
+Use \code{mtimes} for a matrix product. The inner payload dimensions must match. Two parameter-dependent factors produce the componentwise degree sum. A numeric or bare affine \code{sdpvar} factor is parameter independent and contributes degree zero in every component. A mixed coefficient-backed \code{pdmat}/\code{sdpvar} product returns \code{pdvar} because it contains YALMIP decisions.
 
 \syntaxhead
 \begin{lstlisting}[style=dpsyntax]
 K = A * B
 K = A * M
 K = M * A
+P = A * X
+P = X * A
 \end{lstlisting}
 
-The result preserves the common physical grid and has componentwise degree \code{A.Degree + B.Degree}. Payload matrices multiply in the written order. \Cref{sec:bernstein-product-math} derives the numeric, known--affine, and generic planned kernels.
+Here \code{X} is a real affine two-dimensional \code{sdpvar}. Numeric and \code{pdmat} products return \code{pdmat}. A mixed \code{pdmat}/\code{sdpvar} product returns \code{pdvar}, preserves the known grid and degree, supports scalar broadcasting and ordinary rectangular matrix products, and reuses exactly the YALMIP decisions already present in \code{X}. Payload matrices multiply in the written order. \Cref{sec:bernstein-product-math} derives the parameter-dependent coefficient convolution.
 
-The multiplication backend first uses the shared alignment path in \cref{fig:alignment-call-path}. It then enumerates the ordered coefficient pairs whose labels sum to each output label and applies the matching numeric, known-affine, or generic kernel from \cref{sec:bernstein-product-math}.
+The multiplication backend selects one of two paths. A numeric or \code{pdmat} operand uses the shared alignment and \code{prodVals} path in \cref{fig:alignment-call-path}. A bare \code{sdpvar} uses a class-restricted affine bridge that validates the symbolic matrix and maps the existing known coefficient tree into \code{pdvar} storage.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=6mm]
+\begin{tikzpicture}[node distance=5mm and 7mm]
   \node[dp/call-entry] (entry) {\code{mtimes}};
-  \node[dp/call-step,right=of entry] (align) {shared grid and\\degree alignment};
-  \node[dp/call-step,right=of align] (prod) {\code{prodVals}};
-  \node[dp/call-branch,right=of prod] (kernel) {numeric, known-affine,\\or generic product kernel};
-  \node[dp/call-result,right=of kernel] (result) {reconstructed\\result};
-  \draw[dp/call-arrow] (entry) -- (align);
-  \draw[dp/call-arrow] (align) -- (prod);
-  \draw[dp/call-arrow] (prod) -- (kernel);
-  \draw[dp/call-arrow] (kernel) -- (result);
+  \node[dp/call-branch,right=of entry] (kind) {operand kind};
+  \node[dp/call-step,above right=of kind] (prod) {alignment and\\\code{prodVals}};
+  \node[dp/call-step,below right=of kind] (bridge) {affine \code{sdpvar}\\bridge};
+  \node[dp/call-result,right=of prod] (known) {\code{pdmat} result};
+  \node[dp/call-result,right=of bridge] (affine) {\code{pdvar} result};
+  \draw[dp/call-arrow] (entry) -- (kind);
+  \draw[dp/call-arrow] (kind) -- node[above left,font=\scriptsize]{numeric or \code{pdmat}} (prod);
+  \draw[dp/call-arrow] (kind) -- node[below left,font=\scriptsize]{\code{sdpvar}} (bridge);
+  \draw[dp/call-arrow] (prod) -- (known);
+  \draw[dp/call-arrow] (bridge) -- (affine);
 \end{tikzpicture}
-\caption{Multiplication call path. The kernel computes the ordered binomial-weighted convolution while preserving matrix multiplication order.}
+\caption{Multiplication call paths. Parameter-dependent factors use the ordered binomial-weighted convolution, while a bare affine \code{sdpvar} maps the known coefficient tree into \code{pdvar} and preserves matrix order.}
 \label{fig:multiplication-call-path}
 \end{figure}
 
@@ -912,10 +916,35 @@ disp(T)
         {[1]}        "(1-α)^3*10 + 3(1-α)^2α*20 + 3(1-α)α^2*36.6667 + α^3*60"
 \end{lstlisting}
 
+\begin{lstlisting}[style=dpmatlab]
+yalmip('clear')
+x = sdpvar(1, 1);
+A = pdmat([0 1], {eye(2), 2*eye(2)}, Degree=1);
+L = x * A;
+R = A * x;
+leftClass = class(L)
+rightClass = class(R)
+mixedSize = size(L)
+mixedDegrees = [L.Degree R.Degree]
+variableCounts = [numel(getvariables(L.evaluate(0))) ...
+    numel(getvariables(R.evaluate(0)))]
+\end{lstlisting}
+
+\begin{lstlisting}[style=dpoutput]
+leftClass = 'pdvar'
+rightClass = 'pdvar'
+mixedSize = 1×2 double
+     2     2
+mixedDegrees = 1×2 double
+     1     1
+variableCounts = 1×2 double
+     1     1
+\end{lstlisting}
+
 For tensor data, degrees add independently in each parameter direction. Two degree-one factors in two parameters therefore produce degree $[2,2]$ and nine coefficients per physical cell.
 
 \remarkshead
-Incompatible operands for \code{+}, \code{-}, and \code{*} raise \codeerr{pdmat}{InvalidAddition}, \codeerr{pdmat}{InvalidSubtraction}, or \codeerr{pdmat}{InvalidMultiplication}. Parameter counts or outer bounds that reject a common grid raise \codeerr{pdmat}{MixedGrid}. Coefficient algebra on a function-only object raises \code{pdmat:}\allowbreak\code{FunctionOnly}%
+Incompatible operands for \code{+}, \code{-}, and \code{*} raise \codeerr{pdmat}{InvalidAddition}, \codeerr{pdmat}{InvalidSubtraction}, or \codeerr{pdmat}{InvalidMultiplication}. A mixed symbolic product requires a real affine two-dimensional \code{sdpvar}. Parameter counts or outer bounds that reject a common grid raise \codeerr{pdmat}{MixedGrid}. Coefficient algebra on a function-only object raises \code{pdmat:}\allowbreak\code{FunctionOnly}%
   \allowbreak\code{Algebra}. Construct the function with an explicit verified \code{Degree} when coefficient evidence is required.
 
 \section{Compare and Certify Known Data}

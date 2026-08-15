@@ -6,23 +6,22 @@ description: Install GriD-LMIA, open the synchronized manual, and verify the MAT
 import { versionInfo } from "../../data/version.js";
 
 The online and printable manuals describe documentation version
-**{versionInfo.current}**. Package v1.3.0 is the latest tagged GitHub Release.
+**{versionInfo.current}**. Package v1.4.0 is the latest tagged GitHub Release.
 
 ## Downloads
 
 | Item | Link |
 | :--- | :--- |
 | {versionInfo.current} manual | [Open the synchronized printable manual](/GriD-LMIA/manual.pdf) |
-| Latest GitHub Release (v1.3.0) | [Open the GitHub Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.3.0) |
+| Latest GitHub Release (v1.4.0) | [Open the GitHub Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.4.0) |
 | {versionInfo.current} source snapshot | [Download `main` as ZIP](https://github.com/TheBigoranger/GriD-LMIA/archive/refs/heads/main.zip) |
 | GitHub repository | [TheBigoranger/GriD-LMIA](https://github.com/TheBigoranger/GriD-LMIA) |
 | Version history | [Open version history](/GriD-LMIA/version-history/) |
 | Previous v1.0.0 release | [Open the completed 1.0 line](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.0.0) |
 
 The synchronized {versionInfo.current} site publishes the PDF manual at its
-stable manual route. The manual link is the current site
-artifact, while the
-Release link targets the immutable v1.3.0 package snapshot.
+stable manual route. The manual link is the current site artifact, while the
+Release link targets the immutable v1.4.0 package snapshot.
 
 ## Requirements
 
@@ -67,8 +66,10 @@ again. The installer owns the package-path setup and persistence step.
 results = tests.run_all();
 ```
 
-The release gate is `tests.run_all()` with zero failed and zero incomplete
-results. The release notes record the exact v1.3.0 validation counts.
+The release gate is `tests.run_coverage()` with zero failed and zero incomplete
+results while meeting the production coverage baselines. The v1.4.0 gate passed 435
+runtime tests, including solver smoke tests whose accepted solves required
+`problem == 0`.
 
 ## First Lookup
 

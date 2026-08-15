@@ -1,17 +1,17 @@
 export const versionHistory = [
   {
-    version: "v1.3.8",
-    date: "2026-08-10",
-    status: "current documentation",
-    summary:
-      "Repairs page flow and figure placement in the printable manual, aligns both appendices with the main text, and keeps the GriD-LMIA Welcome wordmark on one line from 320 px upward. The TeX and Web layouts passed rendered visual checks. The MATLAB API is unchanged, and v1.3.0 remains the latest tagged GitHub Release.",
-  },
-  {
-    version: "v1.3.0",
-    date: "2026-08-08",
+    version: "v1.4.0",
+    date: "2026-08-14",
     status: "latest tagged GitHub Release",
     summary:
-      "Introduced the v1.3 public API documentation, sparse elevation and product-kernel explanations, reusable Bernstein–Gram maps, sliding tensor-window certificates, and three interactive assembly-plan explorers.",
+      "Adds dimension-compatible multiplication between a real affine two-dimensional sdpvar and coefficient-backed pdmat in either order. The mixed product returns pdvar and reuses the existing decisions, preserves known grid and rate metadata, and distinguishes metadata-only RateBounds from active rate rows. The synchronized printable and Web manuals retain the 192-symbol public inventory.",
+  },
+  {
+    version: "v1.3.8",
+    date: "2026-08-10",
+    status: "final v1.3 documentation snapshot",
+    summary:
+      "Consolidates the v1.3 public API, product and certificate-plan explanations, and sliding tensor-window certificates, then repairs printable and Web layout at narrow or page-boundary conditions and aligns both mathematical appendices with the main manual style.",
   },
   {
     version: "v1.2.4",

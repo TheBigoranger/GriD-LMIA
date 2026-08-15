@@ -122,7 +122,7 @@ block structure required for YALMIP `sdpvar` data. `prodVals` therefore sends
 numeric data to tensor convolution and keeps symbolic data on the planned
 contraction paths.
 
-<CallGraph family="multiplication" caption="Multiplication selects one of three coefficient kernels after shared alignment." links={[
+<CallGraph family="multiplication" caption="Multiplication selects a coefficient kernel after shared alignment or maps a bare affine sdpvar through the pdmat bridge." links={[
   { href: "#normalized-product-identity", label: "Product derivation" },
   { href: "/GriD-LMIA/documents/reference/pdmat/algebra/#pdmat-mtimes", label: "pdmat mtimes" },
   { href: "/GriD-LMIA/documents/reference/pdvar/algebra/#pdvar-mtimes", label: "pdvar mtimes" },

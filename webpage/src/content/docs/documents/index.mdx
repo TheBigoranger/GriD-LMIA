@@ -32,21 +32,26 @@ shares complete face values between adjacent cells. Differentiation remains
 cell-wise, which gives a continuous piecewise-polynomial representation with
 cell-wise derivatives. A DPD-LMI contains explicit derivative and rate terms.
 
-## Documentation v1.3.8 Supported Scope
+## Documentation v1.4.0 Supported Scope
 
-Version 1.3.8 documents the implemented package workflow after shared matrix
-protocols, unary transformations, and reductions were centralized in
-`pdbase`. The inherited operations remain complete public `pdmat` and `pdvar`
-interfaces, with class-specific examples and validation. The supported
-surface also includes function-backed and coefficient-backed `pdmat` known
-data, degree-zero or continuous arbitrary-degree `pdvar` decisions,
+Version 1.4.0 documents the complete implemented package workflow, including
+dimension-compatible products between a real affine two-dimensional `sdpvar`
+and coefficient-backed `pdmat` in either order. These mixed products return
+`pdvar` while reusing only the existing decisions, while metadata-only `RateBounds` remains
+distinct from active rate rows. Shared matrix protocols, unary
+transformations, and reductions remain centralized in `pdbase`, and the
+inherited operations remain complete public `pdmat` and `pdvar` interfaces
+with class-specific examples and validation. The supported surface also
+includes function-backed and coefficient-backed `pdmat` known data,
+degree-zero or continuous arbitrary-degree `pdvar` decisions,
 discontinuous rate-vertex data produced by `rhodiff`, Direct `pdlmi`
 constraints, opt-in Pólya degree increments, and fixed-order Putinar,
 SparsePutinar, SparseFullBox, and FullBox Bernstein–Gram certificates. The
 public surface also includes thirteen shared `+helper` functions.
 
 The supported domain uses tensor-product box grids and affine decision
-expressions. Products accept decision dependence on one side. Equality assembly
+expressions. Products accept decision dependence on one side and active
+rate-row dependence on at most one side. Equality assembly
 uses direct coefficient identities. A failed finite certificate remains
 inconclusive for the original continuum inequality. Every requested positivity
 margin appears explicitly in the model. YALMIP owns objectives, solver choice,

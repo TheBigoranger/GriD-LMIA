@@ -2,34 +2,32 @@
 
 **Gri**dding-based **D**PD-**LMI A**ssembler (GriD-LMIA) is a MATLAB/YALMIP
 research package for modeling parameter-dependent LMIs on tensor-product box
-grids. It represents known data (`pdmat`) and
-continuous decision matrices (`pdvar`) in cell-local Bernstein bases, forms
+grids. It represents known data (`pdmat`) and continuous decision matrices
+(`pdvar`) in cell-wise Bernstein bases, forms
 rate-vertex derivatives with `rhodiff`, and exports finite certificates to
 YALMIP through `pdlmi`.
 
-Current source, documentation, and tagged GitHub Release: **v1.3.0**.
+Current source, documentation, and tagged GitHub Release: **v1.4.0**.
 
-## What changed in v1.3.0
+## What changed in v1.4.0
 
-- Public method names now follow one compact vocabulary. Bernstein tables use
-  `bernTable`, degree elevation uses `elevate`, and certificate selectors use
-  the `use*` methods listed below.
-- Elevation and product assembly reuse numeric plans across compatible cells
-  and rate rows. Numeric products use tensor convolution after Bernstein
-  scaling. Known-by-affine products use a planned block contraction, while
-  other supported payloads use planned coefficient pairs.
-- Direct, Pólya, and Bernstein-Gram assembly preallocate ordered outputs and
-  reuse numeric coefficient maps. Each matrix entry, cell, rate row, and Gram
-  block still receives fresh YALMIP decision variables.
-- SparsePutinar and SparseFullBox use overlapping axis-aligned tensor-basis
-  windows with independent PSD blocks and accumulated coefficient identities.
+- A real affine two-dimensional `sdpvar` may multiply coefficient-backed
+  `pdmat` in either order when the matrix dimensions are compatible. The mixed
+  product returns `pdvar` and supports scalar broadcasting and rectangular
+  matrix products.
+- The mixed path preserves the known grid, Bernstein degree, continuity,
+  `RateBounds`, active known-data rate rows, and existing YALMIP variable
+  identities. It does not allocate additional decisions.
+- `RateBounds` without stored rate rows is ordinary metadata and no longer
+  causes a supported product to be rejected. Products with active rate rows on
+  both sides remain outside the affine rate model.
+- The printable and Web manuals document the new forms and failure boundaries
+  while retaining the existing 192-symbol public inventory.
 
-The optimized paths preserve represented functions, existing YALMIP variables,
-certificate families, constraint order, PSD block dimensions, and cone
-partition, apart from ordinary floating-point summation differences. This
-release does not make timing claims.
+This release adds no public conversion method. The class-restricted adapter at
+the MATLAB/YALMIP dispatch boundary remains an implementation detail.
 
-## Migration from v1.2
+## Historical migration from v1.2
 
 The removed names have no compatibility aliases.
 
@@ -61,9 +59,10 @@ may continue to use names such as `UsePolya`, `PutinarOrder`, and
 - `PolyaDegree`, `PutinarOrder`, `SparseFullBoxOrder`, and `FullBoxOrder`
   accept scalar shorthand or per-axis vectors. `BandWidth` remains scalar.
 
-See the [v1.3.0 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.3.0)
-for the complete migration and verification record. The v1.2.4 manual remains
-the final v1.2 documentation snapshot in the version history.
+See the [v1.4.0 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.4.0)
+for the current behavior and verification record. The v1.3.8 and v1.2.4
+manuals remain the final documentation snapshots of their completed minor
+lines in the version history.
 
 ## Requirements and installation
 
@@ -127,6 +126,10 @@ accept solver results or recovered objectives only after checking
 - Grids are tensor products of one-dimensional box partitions.
 - Decision expressions are affine in YALMIP variables. Products with decision
   dependence on both sides are rejected.
+- Coefficient-backed `pdmat` may multiply a compatible real affine
+  two-dimensional `sdpvar` in either order. The result is `pdvar`.
+- Active rate-row tables may occur on at most one product side. Compatible
+  metadata-only `RateBounds` does not create rate dependence.
 - Putinar, SparsePutinar, SparseFullBox, and FullBox are box-specific fixed-order
   constructions, not a general SOS parser.
 - SparsePutinar and SparseFullBox use tensor windows over Bernstein basis
@@ -145,8 +148,10 @@ results = tests.run_all();
 assert(all([results.Passed]) && ~any([results.Incomplete]))
 ```
 
-The v1.3.0 release gate passed 424 runtime tests, including solver smoke tests
-whose successful cases required `diagnostic.problem == 0`.
+The v1.4.0 release gate passed 435 runtime tests with zero failures and zero
+incompletes. Production coverage was 3325/3442 statements (96.60%) and
+1671/1782 decisions (93.77%). Solver smoke tests accepted results only when
+`diagnostic.problem == 0`.
 
 Run the independent MATLAB SOS validation from the repository root:
 

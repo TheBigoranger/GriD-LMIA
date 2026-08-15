@@ -80,11 +80,11 @@ def class_block_names(path: Path, block_pattern: str) -> set[str]:
 def public_method_files(owner: str) -> set[str]:
     class_dir = ROOT / f"@{owner}"
     methods = {path.stem for path in class_dir.glob("*.m")}
-    protected = class_block_names(
+    nonpublic = class_block_names(
         class_dir / f"{owner}.m",
-        r"methods\s*\([^)]*Access\s*=\s*protected[^)]*\)",
+        r"methods\s*\([^)]*(?:Access\s*=\s*(?:protected|private|\?[^,\s)]+)|\bHidden\b)[^)]*\)",
     )
-    return methods - protected
+    return methods - nonpublic
 
 
 def public_properties(owner: str) -> set[str]:
@@ -399,11 +399,11 @@ def audit_tex(errors: list[str]) -> None:
     if r"\newcommand{\vect}[1]{\boldsymbol{#1}}" not in style:
         errors.append("support/manual-style.tex misses the semantic vector definition")
     manual = (DOC / "manual.tex").read_text(encoding="utf-8")
-    if "Version v1.3.8" not in manual or r"\date{August 10, 2026}" not in manual:
-        errors.append("manual metadata is not v1.3.8 dated August 10, 2026")
+    if "Version v1.4.0" not in manual or r"\date{August 14, 2026}" not in manual:
+        errors.append("manual metadata is not v1.4.0 dated August 14, 2026")
     history = (DOC / "chapters" / "release-history.tex").read_text(encoding="utf-8")
-    if "v1.3.8" not in history or "August 10, 2026" not in history:
-        errors.append("release history misses v1.3.8 dated August 10, 2026")
+    if "v1.4.0" not in history or "August 14, 2026" not in history:
+        errors.append("release history misses v1.4.0 dated August 14, 2026")
 
     # Keep the appendices in the main narrative style and prevent the two page-gap regressions fixed in v1.3.8.
     appendix_paths = [

@@ -111,7 +111,7 @@ to their common degree, then displays and plots the aligned operands and sum.
 
 ## <span id="pdmat-mtimes"></span>Multiply in Bernstein coefficient space
 
-<CallGraph family="multiplication" caption="mtimes dispatches one of three ordered coefficient-product kernels after alignment." links={[
+<CallGraph family="multiplication" caption="mtimes selects coefficient convolution or the affine sdpvar bridge while preserving written matrix order." links={[
   { href: "/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#normalized-product-identity", label: "Product mathematics" },
   { href: "#pdmat-mtimes", label: "mtimes API" },
   { href: "/GriD-LMIA/documents/reference/pdvar/algebra/", label: "pdvar mtimes" },
@@ -119,10 +119,15 @@ to their common degree, then displays and plots the aligned operands and sum.
 
 ```matlab
 K = A * B;
+L = X * A;
+R = A * X;
 ```
 
 `mtimes` multiplies coefficient-backed functions exactly through their
-Bernstein coefficients. On one cell,
+Bernstein coefficients. A compatible real affine two-dimensional `sdpvar` may
+also multiply coefficient-backed `pdmat` in either order. That mixed path
+returns `pdvar`, treats the symbolic matrix as parameter independent, and adds
+and reuses exactly the YALMIP decisions already present. On one cell,
 
 $$
 \omega_s(i_s,j_s)
@@ -152,11 +157,12 @@ $$
 Matrix order is preserved. Numeric scalars and matrices use the corresponding MATLAB-compatible left or right product. Degrees and tensor labels add componentwise.
 
 <Aside type="note" title="Implementation remark: ordered product convolution">
-`mtimes` builds one normalized Bernstein product plan for the two
-direction-wise degree rows. On each common-refinement cell it accumulates
-left-label/right-label pairs in written matrix-factor order, and stores the
-result at their summed tensor label. The output degree is the componentwise
-sum, with its value derived from exact coefficient algebra.
+`mtimes` builds one normalized Bernstein product plan for two
+parameter-dependent factors. On each common-refinement cell it accumulates
+left-label/right-label pairs in written matrix-factor order and stores the
+result at their summed tensor label. For a bare affine `sdpvar`, a
+class-restricted bridge instead maps the existing known coefficient tree into
+`pdvar`. Both paths preserve written matrix order.
 </Aside>
 
 The implementation visits contribution pairs in increasing left label, with
@@ -216,6 +222,35 @@ The zero-degree axes remain valid inputs and enter the planned contraction direc
 multiplication. The complete coefficient rule is derived in
 [Coefficient algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
 
+A bare affine `sdpvar` contributes degree zero. Scalar broadcasting and
+ordinary rectangular matrix products follow the package's `mtimes` contract:
+
+```matlab
+yalmip('clear')
+X = sdpvar(2, 3, 'full');
+Y = sdpvar(4, 2, 'full');
+A0 = reshape(1:12, 3, 4);
+A = pdmat([0 1], {A0, A0 + 12}, Degree=1);
+L = X * A;
+R = A * Y;
+leftClass = class(L)
+rightClass = class(R)
+leftSize = size(L)
+rightSize = size(R)
+mixedDegrees = [L.Degree R.Degree]
+```
+
+```text
+leftClass = 'pdvar'
+rightClass = 'pdvar'
+leftSize =
+     2     4
+rightSize =
+     3     2
+mixedDegrees =
+     1     1
+```
+
 <MultiplicationDiagram />
 
 ### Numerical multiplication explorer
@@ -233,10 +268,13 @@ The weighted convolution below uses the same normalized Bernstein rule as
 - Ordinary one-row operands broadcast across explicit rate rows. Two
   rate-row operands must have exactly matching grids and nonempty matching
   rate boxes. Explicit preprocessing aligns any chosen rate boxes.
-- Multiplication preserves rate rows when only one side has them. Rate-row by
-  rate-row products, rate-row by ordinary decision products, and
-  metadata-only rate dependence in a product are rejected.
-- These methods return known `pdmat` data with `ContainsDecision=false`.
+- Multiplication preserves rate rows when only one side has them. Two active
+  rate-row tables and rate-row by ordinary decision products are rejected.
+  Compatible `RateBounds` with zero stored rows remains ordinary metadata.
+- Numeric and `pdmat` products return known `pdmat` data with
+  `ContainsDecision=false`. A mixed affine `sdpvar` product returns `pdvar`.
+- A symbolic operand must be real, affine, and two-dimensional. Nonlinear,
+  complex, incompatible, and function-only mixed products fail before mapping.
 
 ## See Also
 
