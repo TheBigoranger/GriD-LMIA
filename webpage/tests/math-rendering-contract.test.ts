@@ -117,51 +117,80 @@ test("preserves intrinsic fraction, script, and accent metrics", () => {
   );
 });
 
-test("authors the Welcome DPD-LMI as one unbroken centered display", () => {
+test("authors the approved lightweight Welcome copy, navigation, and notation", () => {
   const homePortal = read("src/components/HomePortal.astro");
-  const firstStep = homePortal.slice(
-    homePortal.indexOf('number: "01"'),
-    homePortal.indexOf('number: "02"'),
-  );
-  const css = read("src/styles/manual.css");
 
-  assert.match(
-    firstStep,
-    /math:\s*"\\\\mathcal F\(\\\\vect\\\\rho,\\\\dot\{\\\\vect\\\\rho\};\\\\vect y\)=F_0\+\\\\sum_\{k=1\}\^\{N\}F_ky_k\+\\\\sum_\{k=1\}\^\{N\}\\\\sum_\{s=1\}\^\{\\\\ell\}\\\\dot\\\\rho_sT_\{k,s\}\\\\frac\{\\\\partial y_k\}\{\\\\partial\\\\rho_s\}\\\\preceq0\."/,
-  );
-  assert.match(firstStep, /All coefficient functions in the residual are evaluated at/);
-  assert.match(firstStep, /oneLine:\s*true/);
-  assert.doesNotMatch(firstStep, /\\begin\{(?:aligned|gathered|split)\}|\\\\\\\\/);
-  assert.doesNotMatch(
-    css,
-    /\.katex(?:-[\w-]+)?[^{]*\{[^}]*(?:font-size|transform|zoom)\s*:/gis,
-  );
+  for (const copy of [
+    "MATLAB / YALMIP",
+    "GriD-LMIA",
+    "Gridding-based parameter-dependent LMI assembly for MATLAB and YALMIP",
+    "Model and solve parameter-dependent LMIs over tensor grids using Bernstein polynomial data and rigorous finite certificates.",
+    "Reference", "Learn", "Examples", "Install",
+    "Model the DPD-LMI", "Partition the parameter box", "Build Bernstein data",
+    "Select a certificate", "Assemble and solve with YALMIP",
+  ]) assert.ok(homePortal.includes(copy), `Welcome copy missing: ${copy}`);
+
+  assert.match(homePortal, /F\(ρ\) ≼ 0/);
+  assert.match(homePortal, /ρ ∈ 𝒫/);
+  assert.match(homePortal, />Σ<\/text>/);
+  assert.doesNotMatch(homePortal, /\\mu|\bmu\b|µ/i);
+  assert.doesNotMatch(homePortal, /KaTeXMath|renderMath|client:|JourneyCurve|ExportSolveFlow|CertificateFlow|GridPartitionExplorer|CellStorageExplorer/);
+  assert.doesNotMatch(homePortal, /Open the detailed mathematics/);
+  assert.match(homePortal, /--welcome-surface:\s*#fff/);
 });
 
-test("Welcome stages 02 and 03 keep semantic formulas paired through responsive reflow", () => {
+test("centered component formulas use display mode and keep the storage RHS intact", async () => {
+  const storageFigure = read("src/components/CellStorageFigure.astro");
+  const storage = read("src/components/CellStorageExplorer.tsx");
+  const centeredComponents = sourceEntries.flatMap(({ file, source }) =>
+    [...source.matchAll(/<KaTeXMath\b[\s\S]*?\/>/g)]
+      .filter(({ 0: tag }) => /class="[^"]*\bformula-block\b/.test(tag))
+      .map(({ 0: tag }) => ({ file, tag })),
+  );
+
+  assert.ok(centeredComponents.length >= 5, "expected the custom centered formula inventory");
+  for (const { file, tag } of centeredComponents) {
+    assert.match(tag, /\sdisplay(?:\s|\n|\/?>)/, `${file} must render centered math in display mode`);
+  }
+  assert.doesNotMatch(storage, /<InlineMath\b[^>]*className="[^"]*\bformula-block\b/);
+  assert.equal((storage.match(/<DisplayMath\b/g) ?? []).length, 4);
+  assert.match(storageFigure, /degree:\s*renderMath\("\\\\vect m=\(2,2\)",\s*\{ displayMode:\s*true \}\)/);
+  assert.match(
+    storageFigure,
+    /bernstein:\s*renderMath\(`A\^\{\(\$\{cell\.c1\},1\)\}\(\\\\vect\\\\alpha\)=\\\\sum_[^`]* C_[^`]*B_[^`]*`,\s*\{ displayMode:\s*true \}\)/,
+  );
+  assert.doesNotMatch(storageFigure, /bernstein:[^\n]*\\\\begin\{|bernstein:[^\n]*\\\\\\\\/);
+
+  const { renderMath } = await import("../src/lib/katex-renderer.js");
+  const markup = renderMath(String.raw`\sum_{k=1}^{N}x_k`, { displayMode: true });
+  assert.match(markup, /^<span class="katex-display">/);
+  assert.match(markup, /<math[^>]*display="block"/);
+});
+
+test("home-only interactive explorers migrate once to their detailed mathematics pages", () => {
   const home = read("src/components/HomePortal.astro");
   const explorer = read("src/components/CellStorageExplorer.tsx");
-  const secondStep = home.slice(home.indexOf('number: "02"'), home.indexOf('number: "03"'));
-  const thirdStep = home.slice(home.indexOf('number: "03"'), home.indexOf('number: "04"'));
+  const gridPage = read("src/content/docs/documents/math/gridding-and-degree.mdx");
+  const coefficientPage = read("src/content/docs/documents/math/coordinates-and-bernstein/coefficient-algebra.mdx");
+  const gridFigure = read("src/components/GridPartitionFigure.astro");
+  const storageFigure = read("src/components/CellStorageFigure.astro");
 
-  assert.match(secondStep, /annotatedMath:\s*\[/);
-  assert.match(secondStep, /label:\s*\["axis-",\s*\{\s*tex:\s*"s"\s*\},\s*" physical nodes"\]/);
-  assert.match(secondStep, /label:[^\n]*physical cell selected by[^\n]*vect c/);
-  assert.doesNotMatch(secondStep, /\\underbrace|\\begin\{(?:aligned|gathered|split)\}/);
-  assert.equal((home.match(/class="math-square-underbracket"/g) ?? []).length, 1);
-  assert.match(home, /math-square-underbracket__expression[\s\S]*math-square-underbracket__rule[\s\S]*math-square-underbracket__label/);
-  assert.match(home, /\.math-square-underbracket__rule\s*\{[^}]*border-block-end:\s*1\.5px solid currentColor/s);
-  assert.doesNotMatch(home, /\.math-square-underbracket__expression::(?:before|after)/);
-  assert.match(home, /\.math-strip--underbrackets\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*max-content\)/s);
-  assert.match(home, /@media \(max-width: 700px\)[\s\S]*\.math-strip--underbrackets\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
-
-  assert.doesNotMatch(thirdStep, /storageMath:[^\n]*\\begin\{gathered\}/);
+  assert.doesNotMatch(home, /client:|GridPartitionExplorer|CellStorageExplorer/);
+  assert.match(gridPage, /import GridPartitionFigure[\s\S]*<GridPartitionFigure\s*\/>/);
+  assert.match(coefficientPage, /import CellStorageFigure[\s\S]*<CellStorageFigure\s*\/>/);
+  assert.match(gridFigure, /<GridPartitionExplorer client:visible mathMarkup=\{mathMarkup\}\s*\/>/);
+  assert.match(storageFigure, /<CellStorageExplorer client:visible mathMarkup=\{mathMarkup\}\s*\/>/);
+  assert.equal((allSource.match(/<GridPartitionExplorer\b/g) ?? []).length, 1);
+  assert.equal((allSource.match(/<CellStorageExplorer\b/g) ?? []).length, 1);
+  assert.match(storageFigure, /&2\+\\\\rho_1\^2\\\\end\{bmatrix\}/);
+  assert.doesNotMatch(storageFigure, /2\+\\\\rho_1\^2\+\\\\rho_2\^2/);
   for (const stage of ["matrix", "coefficients", "basis"]) {
     assert.match(explorer, new RegExp(`data-cell-stage="${stage}"`));
   }
   assert.match(explorer, /Known matrix and cell selector[\s\S]*cell-grid-panel/);
   assert.match(explorer, /Selected cell and coefficient lattice[\s\S]*cell-coeffs/);
   assert.match(explorer, /Bernstein basis and final representation[\s\S]*cell-bernstein-readout/);
+  assert.match(explorer, /cell-bernstein-readout[\s\S]*cell-bernstein-formula-group[\s\S]*cellMath\.degree[\s\S]*cellMath\.bernstein/);
   assert.match(explorer, /ArrowLeft[\s\S]*ArrowRight[\s\S]*ArrowUp[\s\S]*ArrowDown/);
   assert.match(explorer, /A\.LocalValues[\s\S]*cell\.coefficients\.map/);
 });
@@ -171,23 +200,31 @@ test("only explicitly indivisible one-line formulas opt into local scrolling", (
   const solverSmoke = read("src/content/docs/examples/solver-smoke.md");
   const css = read("src/styles/manual.css");
   const geometry = read("scripts/check-rendered-geometry.mjs");
+  const elevateWrappers = [...elevate.matchAll(
+    /<div className="elevate-formula-one-line">([\s\S]*?)<\/div>/g,
+  )].map((match) => match[1]);
 
-  assert.equal(
-    (allSource.match(/className="elevate-direct-coefficient-scroll"/g) ?? []).length,
-    1,
-  );
+  assert.equal(elevateWrappers.length, 5);
+  for (const wrapper of elevateWrappers) {
+    assert.match(wrapper, /<KaTeXMath[\s\S]*class="formula-block formula-one-line"[\s\S]*\sdisplay\s/);
+    assert.doesNotMatch(wrapper, /\\begin\{(?:aligned|gathered|split)\}|\\\\/);
+  }
   assert.equal((solverSmoke.match(/className="solver-one-line"/g) ?? []).length, 3);
   assert.match(
     elevate,
-    /<div className="elevate-direct-coefficient-scroll">[\s\S]*\\hat C\^\{\(\\vect c\)\}\[\\vect k\][\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*<\/div>/,
+    /<div className="elevate-formula-one-line">[\s\S]*\\hat C\^\{\(\\vect c\)\}\[\\vect k\][\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*<\/div>/,
   );
   assert.match(
     css,
-    /\.elevate-direct-coefficient-scroll\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
+    /\.elevate-formula-one-line\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
   );
   assert.match(
     css,
     /\.solver-one-line\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
+  );
+  assert.match(
+    css,
+    /\.cell-formula-one-line\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
   );
   assert.doesNotMatch(
     allSource,
@@ -195,15 +232,27 @@ test("only explicitly indivisible one-line formulas opt into local scrolling", (
   );
   assert.match(
     geometry,
-    /closest\(\s*"\.elevate-direct-coefficient-scroll, \.solver-one-line",\s*\)/s,
+    /closest\(\s*"\.elevate-formula-one-line, \.solver-one-line, \.cell-formula-one-line",\s*\)/s,
   );
   assert.match(
     geometry,
-    /\["auto",\s*"scroll"\]\.includes\(localScrollerStyle\.overflowX\)[\s\S]*localScroller\.scrollWidth\s*>\s*localScroller\.clientWidth/,
+    /localNeedsScroll\s*=\s*Boolean\([\s\S]*localScroller\.scrollWidth\s*>\s*localScroller\.clientWidth\s*\+\s*tolerance/,
   );
+  assert.match(
+    geometry,
+    /localScrollerStyle\.overflowX\s*===\s*"auto"\s*&&\s*localNeedsScroll/,
+  );
+  assert.match(
+    geometry,
+    /localNeedsScroll\s*&&\s*!localScrollActive/,
+  );
+  assert.match(geometry, /localScrollerStyle\?\.overflowX\s*===\s*"scroll"\s*&&\s*!localNeedsScroll/);
+  assert.doesNotMatch(geometry, /isElevationScroller/);
   assert.match(geometry, /type:\s*"local-formula-scroll-bounds"/);
   assert.match(geometry, /type:\s*"local-formula-scroll-required"/);
   assert.match(geometry, /type:\s*"local-formula-scroll-unneeded"/);
+  assert.match(geometry, /querySelector\("\.cell-bernstein-formula-group"\)/);
+  assert.match(geometry, /basisOffset:[\s\S]*groupRect\.top \+ groupRect\.bottom/);
 });
 
 test("elevation kernel shorthand stays consistent with the direct coefficient rule", () => {
@@ -225,7 +274,7 @@ test("elevation kernel shorthand stays consistent with the direct coefficient ru
   assert.doesNotMatch(elevate, /\\mathcal E_\{\\vect M-\\vect m\}/);
   assert.match(
     elevate,
-    /<div className="elevate-direct-coefficient-scroll">[\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*\\binom\{M_s\}\{k_s\}[\s\S]*<\/div>/,
+    /<div className="elevate-formula-one-line">[\s\S]*\\binom\{m_s\}\{i_s\}\\binom\{M_s-m_s\}\{k_s-i_s\}[\s\S]*\\binom\{M_s\}\{k_s\}[\s\S]*<\/div>/,
   );
 });
 
@@ -254,9 +303,9 @@ test("the current production build contains local formula CSS and fonts", () => 
   assert.doesNotMatch(css, /url\((?:["'])?(?:https?:)?\/\//i);
 });
 
-test("all 28 binomials use two explicit braced arguments", () => {
+test("all 27 binomials use two explicit braced arguments", () => {
   const { count, failures } = unbracedBinomials();
-  assert.equal(count, 28, `expected the audited 28 binomials, found ${count}`);
+  assert.equal(count, 27, `expected the audited 27 binomials, found ${count}`);
   assert.deepEqual(failures, []);
 });
 
@@ -472,14 +521,16 @@ test("static math assets use the normal build graph without development middlewa
   assert.equal(existsSync(path.join(root, "public", "katex")), false);
 });
 
-test("only the root walkthroughs opt into eager React hydration", () => {
+test("the lightweight root has no React islands and detailed explorers hydrate lazily", () => {
   const home = read("src/components/HomePortal.astro");
+  const gridFigure = read("src/components/GridPartitionFigure.astro");
+  const storageFigure = read("src/components/CellStorageFigure.astro");
   const certificateWrapper = read("src/components/CertificateFlow.astro");
   const certificateConcept = read("src/content/docs/documents/math/sos-certificates.mdx");
 
-  assert.match(home, /<GridPartitionExplorer client:load mathMarkup=\{gridPartitionMathMarkup\}\s*\/>/);
-  assert.match(home, /<CellStorageExplorer client:load\b/);
-  assert.match(home, /<CertificateFlow compact eager\s*\/>/);
+  assert.doesNotMatch(home, /client:|GridPartitionExplorer|CellStorageExplorer|CertificateFlow/);
+  assert.match(gridFigure, /<GridPartitionExplorer client:visible mathMarkup=\{mathMarkup\}\s*\/>/);
+  assert.match(storageFigure, /<CellStorageExplorer client:visible mathMarkup=\{mathMarkup\}\s*\/>/);
   assert.match(
     certificateWrapper,
     /eager\s*\?\s*<CertificateFlow compact=\{compact\} options=\{options\} residualMarkup=\{residualMarkup\} client:load\s*\/>\s*:\s*<CertificateFlow compact=\{compact\} options=\{options\} residualMarkup=\{residualMarkup\} client:visible\s*\/>/,
@@ -488,7 +539,7 @@ test("only the root walkthroughs opt into eager React hydration", () => {
   assert.doesNotMatch(certificateConcept, /<CertificateFlow\b[^>]*\beager\b/);
 
   for (const { file, source } of sourceEntries) {
-    if (file === "src/components/HomePortal.astro" || file === "src/components/CertificateFlow.astro") {
+    if (file === "src/components/CertificateFlow.astro") {
       continue;
     }
     assert.doesNotMatch(

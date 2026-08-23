@@ -41,8 +41,8 @@ test("Astro renders formulas at build time and React islands never load the rend
     "the Astro wrapper must emit trusted shared-renderer markup",
   );
 
-  // Preserve the established default Astro consumer interface.
-  for (const file of ["HomePortal.astro", "JourneyCurve.astro"]) {
+  // Preserve the established default Astro consumer interface where formulas remain.
+  for (const file of ["JourneyCurve.astro"]) {
     const source = read(file);
     assert.match(
       source,
@@ -51,6 +51,13 @@ test("Astro renders formulas at build time and React islands never load the rend
     );
     assert.match(source, /<KaTeXMath\b/, `${file} must render formulas through KaTeXMath`);
   }
+
+  const home = read("HomePortal.astro");
+  assert.doesNotMatch(
+    home,
+    /KaTeXMath|renderMath|client:/,
+    "the lightweight Welcome page must remain free of math renderers and client islands",
+  );
 
   const reactFiles = readdirSync(components, { recursive: true })
     .map(String)

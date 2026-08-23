@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { pdmatCellData as cells } from "../lib/cell-bernstein.ts";
-import { InlineMath } from "./RenderedMath.tsx";
+import { DisplayMath, InlineMath } from "./RenderedMath.tsx";
 
 /** Select one of the two physical hypercubes that store A's degree-two data. */
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
       domain: string;
       button: string;
       coefficients: Array<{ label: string; value: string }>;
+      degree: string;
       bernstein: string;
     }>;
   };
@@ -43,7 +44,9 @@ export default function CellStorageExplorer({ mathMarkup }: Props) {
           >
             <header className="cell-stage__heading">
               <strong id={`${groupId}-matrix-heading`}>Known matrix and cell selector</strong>
-              <InlineMath className="formula-block formula-one-line" markup={mathMarkup.formula} />
+              <div className="cell-formula-one-line">
+                <DisplayMath className="formula-block formula-one-line" markup={mathMarkup.formula} />
+              </div>
             </header>
             <div className="cell-grid-panel">
               <div className="cell-grid-stage">
@@ -112,13 +115,20 @@ export default function CellStorageExplorer({ mathMarkup }: Props) {
           >
             <header className="cell-stage__heading">
               <a className="cell-basis-link" href="https://en.wikipedia.org/wiki/Bernstein_polynomial" id={`${groupId}-basis-heading`}>Bernstein basis and final representation</a>
-              <InlineMath className="formula-block formula-one-line" markup={mathMarkup.basis} />
+              <div className="cell-formula-one-line">
+                <DisplayMath className="formula-block formula-one-line" markup={mathMarkup.basis} />
+              </div>
             </header>
             <aside className="cell-bernstein-readout" aria-label="Bernstein representation of the selected matrix">
-              <InlineMath
-                className="cell-bernstein-formula formula-block"
-                markup={cellMath.bernstein}
-              />
+              <div className="cell-bernstein-formula-group">
+                <DisplayMath className="formula-block formula-one-line" markup={cellMath.degree} />
+                <div className="cell-formula-one-line">
+                  <DisplayMath
+                    className="cell-bernstein-formula formula-block formula-one-line"
+                    markup={cellMath.bernstein}
+                  />
+                </div>
+              </div>
             </aside>
           </section>
         </div>

@@ -100,7 +100,7 @@ test("acceptance scripts verify static local KaTeX rendering at every target wid
   );
 
   assert.ok(
-    geometry.includes(".elevate-direct-coefficient-scroll, .solver-one-line"),
+    geometry.includes(".elevate-formula-one-line, .solver-one-line"),
     "geometry acceptance must retain the two narrowly scoped formula scrollers",
   );
   assert.match(
@@ -125,7 +125,7 @@ test("acceptance scripts verify static local KaTeX rendering at every target wid
 test("geometry captures a pre-font formula snapshot before network idle and font readiness", () => {
   const geometry = read("scripts/check-rendered-geometry.mjs");
   const routeLoopAt = geometry.lastIndexOf("for (const width of viewports)");
-  const routeLoopEnd = geometry.indexOf("await auditRootWalkthroughs", routeLoopAt);
+  const routeLoopEnd = geometry.indexOf("await auditWelcomeRoot", routeLoopAt);
   assert.ok(routeLoopAt >= 0 && routeLoopEnd > routeLoopAt, "main route audit loop must remain present");
   const routeLoop = geometry.slice(routeLoopAt, routeLoopEnd);
 

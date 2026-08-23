@@ -1,0 +1,104 @@
+---
+import CellStorageExplorer from "./CellStorageExplorer.tsx";
+import { pdmatCellData } from "../lib/cell-bernstein.ts";
+import { renderMath } from "../lib/katex-renderer.js";
+
+const axisTex = {
+  x: ["\\rho_2^{(1)}", "\\rho_2^{(2)}"],
+  y: ["\\rho_1^{(1)}", "\\rho_1^{(2)}", "\\rho_1^{(3)}"],
+};
+
+// Build all display mathematics before hydration so the island never typesets in the browser.
+const mathMarkup = {
+  formula: renderMath("A(\\rho_1,\\rho_2)=\\begin{bmatrix}1+\\rho_1+\\rho_2&\\rho_1\\rho_2\\\\\\rho_1\\rho_2&2+\\rho_1^2\\end{bmatrix}", { displayMode: true }),
+  basis: renderMath("B_{\\vect i}^{\\vect m}(\\vect\\alpha)=\\prod_{s=1}^{\\ell}\\binom{m_s}{i_s}\\alpha_s^{i_s}(1-\\alpha_s)^{m_s-i_s}", { displayMode: true }),
+  axis: {
+    x: axisTex.x.map((tex) => renderMath(tex)),
+    y: axisTex.y.map((tex) => renderMath(tex)),
+  },
+  cells: pdmatCellData.map((cell) => ({
+    selection: renderMath(`c=(${cell.c1},1)`),
+    domain: renderMath(cell.domainTex),
+    button: renderMath(`c_1=${cell.c1}`),
+    coefficients: cell.coefficients.map((coefficient, index) => ({
+      label: renderMath(`C^{(${cell.c1},1)}_{${Math.floor(index / 3)},${index % 3}}`),
+      value: renderMath(coefficient.tex),
+    })),
+    degree: renderMath("\\vect m=(2,2)", { displayMode: true }),
+    bernstein: renderMath(`A^{(${cell.c1},1)}(\\vect\\alpha)=\\sum_{\\vect i\\in\\prod_{s=1}^{\\ell}\\{0,\\ldots,m_s\\}} C_{\\vect i}^{(${cell.c1},1)}B_{\\vect i}^{\\vect m}(\\vect\\alpha)`, { displayMode: true }),
+  })),
+};
+---
+
+<div class="cell-storage-detail">
+  <CellStorageExplorer client:visible mathMarkup={mathMarkup} />
+</div>
+
+<style>
+  .cell-storage-detail :global(.cell-stage-layout) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cell-storage-detail :global(.cell-grid-stage) {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 1.65rem;
+    column-gap: 0.2rem;
+    row-gap: 0.35rem;
+  }
+
+  .cell-storage-detail :global(.cell-axis-y-wrap) {
+    display: grid;
+    grid-column: 1;
+    grid-row: 1;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .cell-storage-detail :global(.cell-axis-ticks) {
+    color: var(--sl-color-gray-2);
+    font-family: "STIX Two Math", Cambria, serif;
+    font-size: 1.15rem;
+    font-weight: 750;
+  }
+
+  .cell-storage-detail :global(.cell-axis-ticks--y) {
+    position: relative;
+    block-size: 100%;
+  }
+
+  .cell-storage-detail :global(.cell-axis-ticks--y > .formula-inline) {
+    position: absolute;
+    inset-inline-end: 0;
+    width: max-content;
+    max-width: none;
+    transform: translateY(-50%);
+  }
+
+  .cell-storage-detail :global(.cell-axis-ticks--y > .formula-inline:nth-child(1)) { inset-block-start: 0; }
+  .cell-storage-detail :global(.cell-axis-ticks--y > .formula-inline:nth-child(2)) { inset-block-start: 50%; }
+  .cell-storage-detail :global(.cell-axis-ticks--y > .formula-inline:nth-child(3)) { inset-block-start: 100%; }
+
+  .cell-storage-detail :global(.cell-axis-ticks--x) {
+    display: flex;
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: space-between;
+    align-self: start;
+    padding-inline: 0.15rem;
+    transform: translateY(0.15rem);
+  }
+
+  .cell-storage-detail :global(.cell-grid) {
+    grid-column: 2;
+    grid-row: 1;
+    aspect-ratio: 1 / 1.8;
+  }
+
+  @media (max-width: 700px) {
+    .cell-storage-detail :global(.cell-grid-stage) {
+      inline-size: min(100%, 14rem);
+      justify-self: center;
+    }
+  }
+</style>

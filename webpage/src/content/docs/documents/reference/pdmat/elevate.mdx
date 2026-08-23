@@ -29,17 +29,23 @@ $C^{(\vect c)}[\vect i]$,
 $\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}$. Elevation to any
 $\vect M\ge\vect m$ componentwise is defined directly by
 
+<div className="elevate-formula-one-line">
+
 <KaTeXMath
   class="formula-block formula-one-line"
+  display
   tex={String.raw`A^{(\vect c)}(\vect\alpha)=\sum_{\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}C^{(\vect c)}[\vect i]B_{\vect i}^{\vect m}(\vect\alpha)=\sum_{\vect k\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}\hat C^{(\vect c)}[\vect k]B_{\vect k}^{\vect M}(\vect\alpha).`}
 />
 
+</div>
+
 The elevated coefficients are
 
-<div className="elevate-direct-coefficient-scroll">
+<div className="elevate-formula-one-line">
 
 <KaTeXMath
   class="formula-block formula-one-line"
+  display
   tex={String.raw`\hat C^{(\vect c)}[\vect k]=\sum_{\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}\left[\prod_{s=1}^{\ell}\frac{\binom{m_s}{i_s}\binom{M_s-m_s}{k_s-i_s}}{\binom{M_s}{k_s}}\right]\cdot C^{(\vect c)}[\vect i],\qquad \vect k\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}.`}
 />
 
@@ -56,18 +62,28 @@ The package evaluates the same direct rule as a normalized tensor convolution.
 Let $\vect d:=\vect M-\vect m$. Its direction-wise
 degree-$\vect d$ elevation kernel is
 
+<div className="elevate-formula-one-line">
+
 <KaTeXMath
   class="formula-block formula-one-line"
+  display
   tex={String.raw`\mathcal E_{\vect d}[\vect j]:=\prod_{s=1}^{\ell}\binom{d_s}{j_s},\qquad\vect j\in\prod_{s=1}^{\ell}\{0,\ldots,d_s\}.`}
 />
+
+</div>
 
 The complete elevation is the normalized $\ell$-dimensional convolution
 of the original coefficient tensor with that kernel:
 
+<div className="elevate-formula-one-line">
+
 <KaTeXMath
   class="formula-block formula-one-line"
+  display
   tex={String.raw`\left\{\left(\prod_{s=1}^{\ell}\binom{M_s}{k_s}\right)\hat C^{(\vect c)}[\vect k]\right\}_{\vect k}=\left\{\left(\prod_{s=1}^{\ell}\binom{m_s}{i_s}\right)C^{(\vect c)}[\vect i]\right\}_{\vect i}\ast_{\ell}\left\{\mathcal E_{\vect d}[\vect j]\right\}_{\vect j}.`}
 />
+
+</div>
 
 </Aside>
 
@@ -114,10 +130,15 @@ object. Evaluation is exactly preserved.
 For one coordinate and one elevation step, the tensor convolution reduces to
 the familiar recurrence
 
+<div className="elevate-formula-one-line">
+
 <KaTeXMath
   class="formula-block formula-one-line"
+  display
   tex={String.raw`\vect m=(m_1),\qquad\tilde a_0=a_0,\qquad\tilde a_{m_1+1}=a_{m_1},\qquad\tilde a_{i_1}=\frac{i_1}{m_1+1}a_{i_1-1}+\left(1-\frac{i_1}{m_1+1}\right)a_{i_1},\quad 1\le i_1\le m_1.`}
 />
+
+</div>
 
 The following degree $\vect m=(1)$ row $[0,2]$ is elevated by
 $\vect d=(3)$ to degree $(4)$. The direct selected-cell output shows the

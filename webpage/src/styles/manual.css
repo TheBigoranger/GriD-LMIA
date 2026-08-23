@@ -508,13 +508,13 @@
   border-inline-end: 1px solid currentColor;
 }
 
-.elevate-direct-coefficient-scroll {
+.elevate-formula-one-line {
   max-width: 100%;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
 }
 
-.elevate-direct-coefficient-scroll > .formula-display {
+.elevate-formula-one-line > .formula-display {
   width: max-content;
   min-width: 100%;
 }
@@ -790,6 +790,25 @@
 }
 
 .cell-bernstein-formula { min-width: 0; color: var(--sl-color-text); text-align: center; }
+
+.cell-bernstein-formula-group {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  align-content: center;
+}
+
+.cell-formula-one-line {
+  /* Preserve all three centered storage formulas and contain only genuinely narrow cards. */
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.cell-formula-one-line > .formula-display {
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+}
 
 .cell-stage--basis .cell-bernstein-readout {
   align-content: center;

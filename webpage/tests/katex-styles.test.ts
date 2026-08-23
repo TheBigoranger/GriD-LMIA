@@ -10,8 +10,6 @@ test("formula styles use stable fluid wrappers without changing KaTeX metrics", 
   const astro = read("src/components/KaTeXMath.astro");
   const react = read("src/components/RenderedMath.tsx");
   const manualCss = read("src/styles/manual.css");
-  const home = read("src/components/HomePortal.astro");
-  const welcomeCss = home.match(/<style>\s*([\s\S]*?)<\/style>/)?.[1] ?? "";
   const retiredSelectorPattern = new RegExp(
     `${["m", "jx"].join("")}|${["math", "jax"].join("")}|\\.tex-`,
     "i",
@@ -46,7 +44,7 @@ test("formula styles use stable fluid wrappers without changing KaTeX metrics", 
     "custom styles must not target KaTeX internals",
   );
 
-  const cssRules = [...`${manualCss}\n${welcomeCss}`.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+  const cssRules = [...manualCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
     .map((match) => ({ selector: match[1].trim(), body: match[2] }));
   for (const { selector, body } of cssRules.filter(({ selector }) => /\.katex\b/.test(selector))) {
     assert.doesNotMatch(
@@ -58,39 +56,13 @@ test("formula styles use stable fluid wrappers without changing KaTeX metrics", 
 
   const formulaScrollers = cssRules
     .filter(({ selector, body }) =>
-      /formula-|katex|math-strip|elevate-direct-coefficient-scroll|solver-one-line/.test(selector)
+      /formula-|katex|math-strip|elevate-formula-one-line|solver-one-line/.test(selector)
       && /overflow(?:-x|-inline)?\s*:\s*(?:auto|scroll)/i.test(body))
     .map(({ selector }) => selector);
   assert.deepEqual(
     formulaScrollers,
-    [".elevate-direct-coefficient-scroll", ".solver-one-line"],
-    "only indivisible elevation and solver one-line formulas may scroll horizontally",
+    [".elevate-formula-one-line", ".solver-one-line", ".cell-formula-one-line"],
+    "only explicitly indivisible one-line formulas may scroll horizontally",
   );
 
-  const welcomeFormulaRules = cssRules
-    .filter(({ selector }) => /\.math-strip(?:--stacked|__row)?\b/.test(selector))
-    .map(({ selector, body }) => `${selector}{${body}}`)
-    .join("\n");
-  assert.match(
-    welcomeFormulaRules,
-    /inline-size\s*:\s*(?:min|max|clamp)\([^;]*(?:%|vw|rem)/i,
-    "Welcome Step 01 must size against available width",
-  );
-  assert.match(
-    welcomeFormulaRules,
-    /font-size\s*:\s*clamp\(/i,
-    "Welcome Step 01 must scale formula size fluidly",
-  );
-  assert.match(
-    welcomeFormulaRules,
-    /display\s*:\s*(?:grid|flex)/i,
-    "Welcome one-line displays must remain centered in a fluid layout container",
-  );
-  const firstStep = home.slice(home.indexOf('number: "01"'), home.indexOf('number: "02"'));
-  assert.match(firstStep, /oneLine:\s*true/);
-  assert.doesNotMatch(
-    firstStep,
-    /\\begin\{(?:aligned|gathered|split)\}/,
-    "Welcome Step 01 must not author a multiline TeX table when the display fits",
-  );
 });

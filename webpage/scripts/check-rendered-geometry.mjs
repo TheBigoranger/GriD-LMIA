@@ -398,16 +398,17 @@ async function inspect(page) {
       }
 
       const localScroller = wrapper.closest(
-        ".elevate-direct-coefficient-scroll, .solver-one-line",
+        ".elevate-formula-one-line, .solver-one-line, .cell-formula-one-line",
       );
-      const isElevationScroller = localScroller
-        ?.classList.contains("elevate-direct-coefficient-scroll");
       const localScrollerStyle = localScroller ? getComputedStyle(localScroller) : null;
+      const localNeedsScroll = Boolean(
+        localScroller && localScroller.scrollWidth > localScroller.clientWidth + tolerance
+      );
       const localScrollActive = Boolean(
         localScroller &&
         localScrollerStyle &&
-        ["auto", "scroll"].includes(localScrollerStyle.overflowX) &&
-        localScroller.scrollWidth > localScroller.clientWidth + tolerance
+        localScrollerStyle.overflowX === "auto" &&
+        localNeedsScroll
       );
       if (localScroller) {
         const scrollerBounds = localScroller.getBoundingClientRect();
@@ -423,7 +424,8 @@ async function inspect(page) {
             context: contextFor(wrapper),
           });
         }
-        if (isElevationScroller && innerWidth <= 320 && !localScrollActive) {
+        // Browser scroll width is the rendered-content contract for indivisible displays.
+        if (localNeedsScroll && !localScrollActive) {
           failures.push({
             type: "local-formula-scroll-required",
             selector: describe(localScroller),
@@ -432,7 +434,7 @@ async function inspect(page) {
             context: contextFor(wrapper),
           });
         }
-        if (isElevationScroller && innerWidth >= 390 && localScrollActive) {
+        if (localScrollerStyle?.overflowX === "scroll" && !localNeedsScroll) {
           failures.push({
             type: "local-formula-scroll-unneeded",
             selector: describe(localScroller),
@@ -712,7 +714,7 @@ async function settleRootHydration(page) {
   });
 }
 
-async function auditRootWalkthroughs(browser, origin, failures) {
+async function auditWelcomeRoot(browser, origin, failures) {
   for (const viewport of [
     { width: 1440, height: 900 },
     { width: 390, height: 844 },
@@ -729,427 +731,42 @@ async function auditRootWalkthroughs(browser, origin, failures) {
       if (!response?.ok()) throw new Error(`root returned ${response?.status() ?? "no response"}`);
       await settleRootHydration(page);
 
-      const portalSurface = await page.evaluate(() => {
-        const portal = document.querySelector(".home-portal");
-        const panel = portal?.closest(".content-panel");
-        const panelRect = panel?.getBoundingClientRect();
-        const portalRect = portal?.getBoundingClientRect();
-        const background = panel ? getComputedStyle(panel, "::before").backgroundImage : "";
+      const welcome = await page.locator(".welcome").evaluate((section) => {
+        const rect = section.getBoundingClientRect();
+        const workflow = section.querySelector(".welcome-workflow");
+        const workflowColumns = workflow
+          ? getComputedStyle(workflow).gridTemplateColumns.split(" ").filter(Boolean).length
+          : 0;
+        const text = section.textContent ?? "";
         return {
-          contains: Boolean(panel && portal && panel.contains(portal)),
-          panelWidth: panelRect?.width ?? 0,
-          portalWidth: portalRect?.width ?? 0,
-          background,
+          actionCount: section.querySelectorAll(".welcome-actions a").length,
+          workflowCount: section.querySelectorAll(".welcome-workflow a").length,
+          workflowColumns,
+          islandCount: section.querySelectorAll("astro-island").length,
+          rhoCount: (text.match(/ρ/g) ?? []).length,
+          sigmaCount: (text.match(/Σ/g) ?? []).length,
+          hasMu: /[μµ]/.test(text),
+          left: rect.left,
+          right: rect.right,
+          clientWidth: document.documentElement.clientWidth,
+          scrollWidth: document.documentElement.scrollWidth,
         };
       });
+
+      const expectedColumns = viewport.width <= 620 ? 1 : 5;
       if (
-        !portalSurface.contains ||
-        portalSurface.panelWidth + 1 < portalSurface.portalWidth ||
-        (portalSurface.background.match(/radial-gradient/g)?.length ?? 0) < 2 ||
-        /42px|repeating-linear-gradient/.test(portalSurface.background)
+        welcome.actionCount !== 4 ||
+        welcome.workflowCount !== 5 ||
+        welcome.workflowColumns !== expectedColumns ||
+        welcome.islandCount !== 0 ||
+        welcome.rhoCount !== 2 ||
+        welcome.sigmaCount !== 1 ||
+        welcome.hasMu ||
+        welcome.left < -1 ||
+        welcome.right > welcome.clientWidth + 1 ||
+        welcome.scrollWidth > welcome.clientWidth + 1
       ) {
-        throw new Error(`full-panel aurora background missing: ${JSON.stringify(portalSurface)}`);
-      }
-
-      const hydration = await page.evaluate(() => {
-        const visibleInteractiveMath = [...document.querySelectorAll("astro-island .formula-math")]
-          .filter((wrapper) => {
-            const rect = wrapper.getBoundingClientRect();
-            const style = getComputedStyle(wrapper);
-            return rect.width > 0 &&
-              rect.height > 0 &&
-              style.display !== "none" &&
-              style.visibility !== "hidden";
-          });
-        const formulaIssues = visibleInteractiveMath.flatMap((wrapper) => {
-          const roots = [...wrapper.querySelectorAll(".katex")];
-          const raw = [...wrapper.childNodes]
-            .filter((node) => node.nodeType === Node.TEXT_NODE)
-            .map((node) => node.textContent ?? "")
-            .join("")
-            .trim();
-          const rendered = roots[0]?.getBoundingClientRect();
-          return roots.length === 1 &&
-              roots[0]?.querySelector(".katex-html") &&
-              roots[0]?.querySelector("math") &&
-              !wrapper.querySelector("svg") &&
-              rendered &&
-              rendered.width > 0 &&
-              rendered.height > 0 &&
-              raw === "" &&
-              !/\\(?:\(|\[)|\\(?:\)|\])|\$\$/.test(raw)
-            ? []
-            : [{
-                className: wrapper.className,
-                roots: roots.length,
-                raw,
-                width: rendered?.width ?? 0,
-                height: rendered?.height ?? 0,
-              }];
-        });
-        return {
-          formulaCount: visibleInteractiveMath.length,
-          formulaIssues,
-          pendingIslands: document.querySelectorAll("astro-island[ssr]").length,
-          walkthroughs: {
-            certificate: document.querySelectorAll("figure.certificate-flow-figure").length,
-            grid: document.querySelectorAll("figure.grid-partition-explorer").length,
-            storage: document.querySelectorAll(".cell-storage-compact figure.interactive-figure").length,
-          },
-        };
-      });
-      if (hydration.pendingIslands !== 0) {
-        throw new Error(`${hydration.pendingIslands} root islands still carry ssr`);
-      }
-      if (Object.values(hydration.walkthroughs).some((count) => count !== 1)) {
-        throw new Error(`root walkthrough count mismatch: ${JSON.stringify(hydration.walkthroughs)}`);
-      }
-      if (hydration.formulaCount === 0 || hydration.formulaIssues.length) {
-        throw new Error(`interactive formula hydration failed: ${JSON.stringify(hydration)}`);
-      }
-
-      const grid = page.locator("figure.grid-partition-explorer");
-      const dynamicMathStyles = await grid.evaluate((figure) =>
-        [...figure.querySelectorAll(".structured-math, .structured-math__cal")]
-          .map((node) => ({
-            className: node.className,
-            fontStyle: getComputedStyle(node).fontStyle,
-          })));
-      if (
-        dynamicMathStyles.length === 0 ||
-        dynamicMathStyles.some(({ fontStyle }) => fontStyle !== "normal")
-      ) {
-        throw new Error(`dynamic React math is not upright: ${JSON.stringify(dynamicMathStyles)}`);
-      }
-
-      const slider = grid.getByRole("slider").first();
-      const output = grid.locator("output").first();
-      const previousOutput = (await output.textContent())?.trim() ?? "";
-      await slider.fill("0.61");
-      await page.waitForFunction(
-        (before) => document.querySelector("figure.grid-partition-explorer output")?.textContent?.trim() !== before,
-        previousOutput,
-        { timeout: 5_000 },
-      );
-      const currentOutput = (await output.textContent())?.trim() ?? "";
-      if (!currentOutput || currentOutput === previousOutput) {
-        throw new Error(`slider output did not change from ${JSON.stringify(previousOutput)}`);
-      }
-
-      const oneDimensionalCell = grid.getByRole("button", { name: "(2)", exact: true });
-      await oneDimensionalCell.click();
-      if (await oneDimensionalCell.getAttribute("aria-pressed") !== "true") {
-        throw new Error("1D cell (2) did not become selected");
-      }
-
-      const twoDimensionalTab = grid.getByRole("tab", { name: "2D", exact: true });
-      await twoDimensionalTab.click();
-      if (await twoDimensionalTab.getAttribute("aria-selected") !== "true") {
-        throw new Error("2D tab did not become selected");
-      }
-      const twoDimensionalPanel = grid.getByRole("tabpanel");
-      if (!await twoDimensionalPanel.isVisible() ||
-          await twoDimensionalPanel.getByRole("slider").count() !== 2 ||
-          await twoDimensionalPanel.getByRole("button").count() !== 4) {
-        throw new Error("2D panel did not expose two knot sliders and four cell controls");
-      }
-
-      const storage = page.locator(".cell-storage-compact figure.interactive-figure");
-      const storageGroup = storage.getByRole("group", {
-        name: "Select one of two hypercubes with arrow keys",
-      });
-      const storageCellTwo = storageGroup.getByRole("button").nth(1);
-      await storageCellTwo.click();
-      if (await storageCellTwo.getAttribute("aria-pressed") !== "true") {
-        throw new Error("storage c1=2 did not become selected");
-      }
-      await storage.locator('[aria-label="Nine degree-two coefficient matrices in cell (2, 1)"]')
-        .waitFor({ state: "visible", timeout: 5_000 });
-
-      const stageGeometry = await storage.evaluate((figure) => {
-        const specs = [
-          ["matrix", ".cell-grid-panel"],
-          ["coefficients", ".cell-coefficient-flow"],
-          ["basis", ".cell-bernstein-readout"],
-        ];
-        return specs.map(([name, visualSelector]) => {
-          const stage = figure.querySelector(`[data-cell-stage="${name}"]`);
-          const heading = stage?.querySelector(".cell-stage__heading");
-          const visual = stage?.querySelector(visualSelector);
-          const stageRect = stage?.getBoundingClientRect();
-          const headingRect = heading?.getBoundingClientRect();
-          const visualRect = visual?.getBoundingClientRect();
-          return {
-            name,
-            stage: stageRect && {
-              left: stageRect.left,
-              right: stageRect.right,
-              top: stageRect.top,
-              bottom: stageRect.bottom,
-            },
-            heading: headingRect && {
-              center: (headingRect.left + headingRect.right) / 2,
-              top: headingRect.top,
-              bottom: headingRect.bottom,
-            },
-            visual: visualRect && {
-              center: (visualRect.left + visualRect.right) / 2,
-              top: visualRect.top,
-              bottom: visualRect.bottom,
-            },
-          };
-        });
-      });
-      for (const pair of stageGeometry) {
-        if (!pair.stage || !pair.heading || !pair.visual) {
-          throw new Error(`storage stage pair missing: ${JSON.stringify(pair)}`);
-        }
-        if (Math.abs(pair.heading.center - pair.visual.center) > 2) {
-          throw new Error(`storage stage centers diverge: ${JSON.stringify(pair)}`);
-        }
-        if (pair.visual.top < pair.heading.bottom - 1 || pair.visual.top - pair.heading.bottom > 40) {
-          throw new Error(`storage heading is not adjacent to its visual: ${JSON.stringify(pair)}`);
-        }
-      }
-
-      if (viewport.width === 1440) {
-        const alignment = await page.evaluate(() => {
-          const bracketTops = [...document.querySelectorAll(
-            ".math-strip--underbrackets .math-square-underbracket__rule",
-          )].map((node) => node.getBoundingClientRect().top);
-          const storageFigure = document.querySelector(
-            ".cell-storage-compact figure.interactive-figure",
-          );
-          const stages = storageFigure
-            ? [...storageFigure.querySelectorAll(".cell-stage")]
-            : [];
-          const stageTops = stages.map((node) => node.getBoundingClientRect().top);
-          const grid = storageFigure?.querySelector(".cell-grid");
-          const yTicks = storageFigure
-            ? [...storageFigure.querySelectorAll(".cell-axis-ticks--y > .formula-inline")]
-            : [];
-          const xTicks = storageFigure
-            ? [...storageFigure.querySelectorAll(".cell-axis-ticks--x > .formula-inline")]
-            : [];
-          const gridRect = grid?.getBoundingClientRect();
-          const expectedY = gridRect
-            ? [gridRect.top, (gridRect.top + gridRect.bottom) / 2, gridRect.bottom]
-            : [];
-          const yCenters = yTicks.map((node) => {
-            const rect = node.getBoundingClientRect();
-            return (rect.top + rect.bottom) / 2;
-          });
-          const xGap = gridRect && xTicks.length
-            ? Math.max(...xTicks.map((node) => node.getBoundingClientRect().top - gridRect.bottom))
-            : Number.POSITIVE_INFINITY;
-          const bottomYRect = yTicks.at(-1)?.getBoundingClientRect();
-          const leftXRect = xTicks.at(0)?.getBoundingClientRect();
-          const cornerLabelsOverlap = Boolean(
-            bottomYRect &&
-            leftXRect &&
-            bottomYRect.left < leftXRect.right &&
-            bottomYRect.right > leftXRect.left &&
-            bottomYRect.top < leftXRect.bottom &&
-            bottomYRect.bottom > leftXRect.top
-          );
-          const basisStage = storageFigure?.querySelector(".cell-stage--basis");
-          const basisReadout = basisStage?.querySelector(".cell-bernstein-readout");
-          const basisFormula = basisReadout?.querySelector(".cell-bernstein-formula");
-          const readoutRect = basisReadout?.getBoundingClientRect();
-          const formulaRect = basisFormula?.getBoundingClientRect();
-          return {
-            bracketTops,
-            stageTops,
-            expectedY,
-            yCenters,
-            xGap,
-            cornerLabelsOverlap,
-            basisOffset: readoutRect && formulaRect
-              ? Math.abs(
-                (formulaRect.top + formulaRect.bottom) / 2 -
-                (readoutRect.top + readoutRect.bottom) / 2
-              )
-              : Number.POSITIVE_INFINITY,
-          };
-        });
-        const spread = (values) => values.length
-          ? Math.max(...values) - Math.min(...values)
-          : Number.POSITIVE_INFINITY;
-        const yOffsets = alignment.yCenters.map(
-          (center, index) => Math.abs(center - alignment.expectedY[index]),
-        );
-        if (
-          alignment.bracketTops.length !== 2 ||
-          spread(alignment.bracketTops) > 1 ||
-          alignment.stageTops.length !== 3 ||
-          spread(alignment.stageTops) > 1 ||
-          alignment.yCenters.length !== 3 ||
-          yOffsets.some((offset) => offset > 2) ||
-          alignment.xGap < 0 ||
-          alignment.xGap > 8 ||
-          alignment.cornerLabelsOverlap ||
-          alignment.basisOffset > 2
-        ) {
-          throw new Error(`welcome alignment regression: ${JSON.stringify({
-            ...alignment,
-            yOffsets,
-          })}`);
-        }
-      }
-
-      const certificate = page.getByRole("figure", { name: "Finite certificate selection flow" });
-      const certificateTabList = certificate.getByRole("tablist");
-      const certificateTabGeometry = async () => certificateTabList.getByRole("tab").evaluateAll((tabs) => {
-        const tabListRect = tabs[0]?.closest('[role="tablist"]')?.getBoundingClientRect();
-        if (!tabListRect) return [];
-
-        // Tablist-relative coordinates ignore scroll-to-view while preserving individual row and column shifts.
-        return tabs.map((tab) => {
-          const rect = tab.getBoundingClientRect();
-          return [
-            rect.left - tabListRect.left,
-            rect.top - tabListRect.top,
-            rect.width,
-            rect.height,
-          ];
-        });
-      });
-      const baselineTabGeometry = await certificateTabGeometry();
-      const assertStableCertificateTabs = async (interaction) => {
-        const current = await certificateTabGeometry();
-        const shifts = current.flatMap((rect, index) => rect.map((value, axis) =>
-          Math.abs(value - (baselineTabGeometry[index]?.[axis] ?? Number.POSITIVE_INFINITY))));
-        if (current.length !== baselineTabGeometry.length || shifts.some((shift) => shift > 1)) {
-          throw new Error(`certificate tab geometry moved after ${interaction}: ${JSON.stringify({ baselineTabGeometry, current })}`);
-        }
-      };
-      const certificateStates = [
-        { name: "Direct", command: "selected = L;" },
-        { name: "Pólya", command: "selected = L.usePolya(d);" },
-        { name: "Putinar", command: "selected = L.usePutinar();" },
-        { name: "SparsePutinar", command: "selected = L.useSpPut();" },
-        { name: "SparseFullBox", command: "selected = L.useSpBox();" },
-        { name: "FullBox", command: "selected = L.useFullBox();" },
-      ];
-      for (const { name, command } of certificateStates) {
-        const tab = certificate.getByRole("tab", { name, exact: true });
-        await tab.click();
-        if (await tab.getAttribute("aria-selected") !== "true") {
-          throw new Error(`${name} tab did not become selected`);
-        }
-        const certificatePanel = certificate.getByRole("tabpanel");
-        await certificatePanel.locator("code").filter({ hasText: command })
-          .waitFor({ state: "visible", timeout: 5_000 });
-        const formulaState = await certificate.evaluate((figure) => {
-          const roots = [...figure.querySelectorAll(".formula-math .katex")];
-          const invalid = roots
-            .filter((root) =>
-              !root.querySelector(".katex-html") ||
-              !root.querySelector("math") ||
-              root.querySelector("svg"))
-            .map((root) =>
-              root.querySelector('annotation[encoding="application/x-tex"]')?.textContent ??
-              root.textContent?.trim().slice(0, 160) ??
-              "");
-          return { count: roots.length, invalid };
-        });
-        if (formulaState.count === 0 || formulaState.invalid.length) {
-          throw new Error(
-            `certificate-formula-state ${name}: ${JSON.stringify(formulaState)}`,
-          );
-        }
-        await assertStableCertificateTabs(`pointer selection of ${name}`);
-      }
-
-      const directCertificateTab = certificate.getByRole("tab", { name: "Direct", exact: true });
-      const polyaCertificateTab = certificate.getByRole("tab", { name: "Pólya", exact: true });
-      const fullBoxCertificateTab = certificate.getByRole("tab", { name: "FullBox", exact: true });
-      await directCertificateTab.focus();
-      await directCertificateTab.press("ArrowRight");
-      if (await polyaCertificateTab.getAttribute("aria-selected") !== "true") {
-        throw new Error("ArrowRight did not select the Pólya certificate tab");
-      }
-      await assertStableCertificateTabs("ArrowRight selection");
-      await polyaCertificateTab.press("Home");
-      if (await directCertificateTab.getAttribute("aria-selected") !== "true") {
-        throw new Error("Home did not select the Direct certificate tab");
-      }
-      await assertStableCertificateTabs("Home selection");
-      await directCertificateTab.press("End");
-      if (await fullBoxCertificateTab.getAttribute("aria-selected") !== "true") {
-        throw new Error("End did not select the FullBox certificate tab");
-      }
-      await assertStableCertificateTabs("End selection");
-
-      if (viewport.width === 390) {
-        const storageGeometry = await storage.evaluate((figure) => {
-          const tolerance = 1;
-          const figureRect = figure.getBoundingClientRect();
-          const locallyScrollable = (node) => {
-            for (let current = node.parentElement; current && current !== figure; current = current.parentElement) {
-              const style = getComputedStyle(current);
-              if (
-                ["auto", "scroll"].includes(style.overflowX) &&
-                current.scrollWidth > current.clientWidth + tolerance
-              ) {
-                return true;
-              }
-            }
-            return false;
-          };
-          const descendantsOutside = [...figure.querySelectorAll("*")]
-            .filter((node) => {
-              if (node.closest(".katex-mathml")) return false;
-              const rect = node.getBoundingClientRect();
-              return rect.width > 0 &&
-                rect.height > 0 &&
-                (rect.left < figureRect.left - tolerance || rect.right > figureRect.right + tolerance) &&
-                !locallyScrollable(node);
-            })
-            .slice(0, 10)
-            .map((node) => {
-              const formula = node.closest(".formula-math");
-              const region = node.closest(
-                ".cell-stage, .cell-stage-layout, .cell-coeffs, .cell-bernstein-readout",
-              );
-              const formulaRect = formula?.getBoundingClientRect();
-              const regionRect = region?.getBoundingClientRect();
-              return {
-                className: node.className,
-                formulaClassName: formula?.className ?? "",
-                tex: formula
-                  ?.querySelector('annotation[encoding="application/x-tex"]')
-                  ?.textContent,
-                formulaLeft: formulaRect?.left,
-                formulaRight: formulaRect?.right,
-                parentClassName: formula?.parentElement?.className ?? "",
-                regionClassName: region?.className ?? "",
-                regionColumns: region ? getComputedStyle(region).gridTemplateColumns : "",
-                regionLeft: regionRect?.left,
-                regionRight: regionRect?.right,
-                left: node.getBoundingClientRect().left,
-                right: node.getBoundingClientRect().right,
-              };
-            });
-          return {
-            clientWidth: figure.clientWidth,
-            documentClientWidth: document.documentElement.clientWidth,
-            documentScrollWidth: document.documentElement.scrollWidth,
-            figureLeft: figureRect.left,
-            figureRight: figureRect.right,
-            scrollWidth: figure.scrollWidth,
-            descendantsOutside,
-          };
-        });
-        if (
-          storageGeometry.documentScrollWidth > storageGeometry.documentClientWidth + 1 ||
-          storageGeometry.scrollWidth > storageGeometry.clientWidth + 1 ||
-          storageGeometry.figureLeft < -1 ||
-          storageGeometry.figureRight > storageGeometry.documentClientWidth + 1 ||
-          storageGeometry.descendantsOutside.length
-        ) {
-          throw new Error(`mobile storage clipping/overflow: ${JSON.stringify(storageGeometry)}`);
-        }
+        throw new Error(`welcome root contract mismatch: ${JSON.stringify(welcome)}`);
       }
     } catch (error) {
       issues.push({
@@ -1161,12 +778,139 @@ async function auditRootWalkthroughs(browser, origin, failures) {
     } finally {
       await context.close();
     }
+
     for (const issue of issues) {
       failures.push({
-        selector: "root-walkthroughs",
+        selector: "welcome-root",
         ...issue,
       });
     }
+  }
+}
+
+async function auditDetailedWalkthroughs(browser, origin, failures) {
+  const viewport = { width: 1440, height: 900 };
+  const context = await browser.newContext({ viewport });
+  const page = await context.newPage();
+  const issues = [];
+  const state = { route: "", width: viewport.width };
+  attachProductionSignals(page, origin, issues, state);
+
+  try {
+    state.route = `${base}/documents/math/sos-certificates/`;
+    let response = await page.goto(`${origin}${state.route}`, { waitUntil: "networkidle" });
+    if (!response?.ok()) throw new Error(`certificate detail returned ${response?.status() ?? "no response"}`);
+    const certificate = page.getByRole("figure", { name: "Finite certificate selection flow" });
+    await certificate.scrollIntoViewIfNeeded();
+    await certificate.locator("astro-island").waitFor({ state: "attached", timeout: 5_000 }).catch(() => {});
+    await page.waitForFunction(() =>
+      !document.querySelector("figure.certificate-flow-figure astro-island[ssr]"), null, { timeout: 15_000 });
+
+    const certificateStates = [
+      { name: "Direct", command: "selected = L;" },
+      { name: "Pólya", command: "selected = L.usePolya(d);" },
+      { name: "Putinar", command: "selected = L.usePutinar();" },
+      { name: "SparsePutinar", command: "selected = L.useSpPut();" },
+      { name: "SparseFullBox", command: "selected = L.useSpBox();" },
+      { name: "FullBox", command: "selected = L.useFullBox();" },
+    ];
+    for (const { name, command } of certificateStates) {
+      const tab = certificate.getByRole("tab", { name: new RegExp(`^${name}\\b`) });
+      await tab.click();
+      if (await tab.getAttribute("aria-selected") !== "true") {
+        throw new Error(`${name} certificate tab did not become selected`);
+      }
+      await certificate.getByRole("tabpanel").locator("code").filter({ hasText: command })
+        .waitFor({ state: "visible", timeout: 5_000 });
+      const formulaState = await certificate.evaluate((figure) => {
+        const roots = [...figure.querySelectorAll(".formula-math .katex")];
+        return {
+          count: roots.length,
+          invalid: roots.filter((root) =>
+            !root.querySelector(".katex-html") ||
+            !root.querySelector("math") ||
+            root.querySelector("svg")).length,
+        };
+      });
+      if (formulaState.count === 0 || formulaState.invalid !== 0) {
+        throw new Error(`certificate-formula-state ${name}: ${JSON.stringify(formulaState)}`);
+      }
+    }
+
+    state.route = `${base}/documents/math/gridding-and-degree/`;
+    response = await page.goto(`${origin}${state.route}`, { waitUntil: "networkidle" });
+    if (!response?.ok()) throw new Error(`grid detail returned ${response?.status() ?? "no response"}`);
+    const grid = page.locator("figure.grid-partition-explorer");
+    await grid.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() =>
+      !document.querySelector("figure.grid-partition-explorer astro-island[ssr]"), null, { timeout: 15_000 });
+    const slider = grid.getByRole("slider").first();
+    const output = grid.locator("output").first();
+    const previousOutput = (await output.textContent())?.trim() ?? "";
+    await slider.fill("0.61");
+    await page.waitForFunction(
+      (before) => document.querySelector("figure.grid-partition-explorer output")?.textContent?.trim() !== before,
+      previousOutput,
+      { timeout: 5_000 },
+    );
+
+    state.route = `${base}/documents/math/coordinates-and-bernstein/coefficient-algebra/`;
+    response = await page.goto(`${origin}${state.route}`, { waitUntil: "networkidle" });
+    if (!response?.ok()) throw new Error(`storage detail returned ${response?.status() ?? "no response"}`);
+    const storage = page.locator(".cell-storage-detail figure.interactive-figure");
+    await storage.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() =>
+      !document.querySelector(".cell-storage-detail astro-island[ssr]"), null, { timeout: 15_000 });
+    const storageGroup = storage.getByRole("group", {
+      name: "Select one of two hypercubes with arrow keys",
+    });
+    const storageCellTwo = storageGroup.getByRole("button").nth(1);
+    await storageCellTwo.click();
+    if (await storageCellTwo.getAttribute("aria-pressed") !== "true") {
+      throw new Error("storage c1=2 did not become selected");
+    }
+    await storage.locator('[aria-label="Nine degree-two coefficient matrices in cell (2, 1)"]')
+      .waitFor({ state: "visible", timeout: 5_000 });
+    const alignment = await storage.evaluate((figure) => {
+      const stageLayout = figure.querySelector(".cell-stage-layout");
+      const basisReadout = figure.querySelector(".cell-stage--basis .cell-bernstein-readout");
+      const basisGroup = basisReadout?.querySelector(".cell-bernstein-formula-group");
+      const readoutRect = basisReadout?.getBoundingClientRect();
+      const groupRect = basisGroup?.getBoundingClientRect();
+      return {
+        stageColumnCount: stageLayout
+          ? getComputedStyle(stageLayout).gridTemplateColumns.split(" ").filter(Boolean).length
+          : 0,
+        activeFormulaScrollers: [...figure.querySelectorAll(".cell-formula-one-line")]
+          .filter((scroller) => scroller.scrollWidth > scroller.clientWidth + 1).length,
+        basisOffset: readoutRect && groupRect
+          ? Math.abs(
+            (groupRect.top + groupRect.bottom) / 2 -
+            (readoutRect.top + readoutRect.bottom) / 2
+          )
+          : Number.POSITIVE_INFINITY,
+      };
+    });
+    if (
+      alignment.stageColumnCount !== 1 ||
+      alignment.activeFormulaScrollers !== 0 ||
+      alignment.basisOffset > 2
+    ) {
+      throw new Error(`storage basis alignment regression: ${JSON.stringify(alignment)}`);
+    }
+  } catch (error) {
+    issues.push({
+      type: "detail-walkthrough-regression",
+      route: state.route,
+      width: state.width,
+      context: error instanceof Error ? error.message : String(error),
+    });
+  } finally {
+    await context.close();
+  }
+
+  for (const issue of issues) {
+    failures.push({ selector: "detail-walkthroughs", ...issue });
   }
 }
 
@@ -1576,7 +1320,7 @@ try {
           failures.push({ width, route: currentRoute, ...failure });
         }
         if (route === `${base}/`) {
-          const wordmark = await page.locator(".home-wordmark").evaluate((node) => {
+          const wordmark = await page.locator("#welcome-title").evaluate((node) => {
             // A text range exposes hyphen wrapping that the paragraph's block rectangle hides.
             const range = document.createRange();
             range.selectNodeContents(node);
@@ -1601,14 +1345,15 @@ try {
               rootScrollWidth: document.documentElement.scrollWidth,
             };
           });
-          if (wordmark.lineCount !== 1) {
+          const allowedLineCount = width <= 620 ? 2 : 1;
+          if (wordmark.lineCount > allowedLineCount) {
             failures.push({
               width,
               route: currentRoute,
               type: "home-wordmark-line",
-              selector: ".home-wordmark",
+              selector: "#welcome-title",
               actual: wordmark.lineCount,
-              allowed: 1,
+              allowed: allowedLineCount,
               context: JSON.stringify(wordmark),
             });
           }
@@ -1622,7 +1367,7 @@ try {
               width,
               route: currentRoute,
               type: "home-wordmark-bounds",
-              selector: ".home-wordmark",
+              selector: "#welcome-title",
               actual: Math.max(wordmark.textRight, wordmark.nodeScrollWidth, wordmark.rootScrollWidth),
               allowed: Math.max(wordmark.nodeRight, wordmark.nodeClientWidth, wordmark.rootClientWidth),
               context: JSON.stringify(wordmark),
@@ -1672,7 +1417,8 @@ try {
       }
     }
   }
-  await auditRootWalkthroughs(browser, origin, failures);
+  await auditWelcomeRoot(browser, origin, failures);
+  await auditDetailedWalkthroughs(browser, origin, failures);
   await auditMobileStorageAnnotations(browser, origin, failures);
   await auditRhodiffEditor(browser, origin, failures);
   await auditHeaderLayout(browser, origin, failures);

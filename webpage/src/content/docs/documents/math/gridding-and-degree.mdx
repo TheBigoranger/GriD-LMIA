@@ -4,6 +4,7 @@ description: Tensor grids, physical cells, forward pullbacks, and the distinctio
 ---
 
 import CellStorageDiagram from "../../../../components/CellStorageDiagram.astro";
+import GridPartitionFigure from "../../../../components/GridPartitionFigure.astro";
 import TensorTraversalExplorer from "../../../../components/TensorTraversalExplorer.tsx";
 
 <nav class="manual-trail">
@@ -18,6 +19,13 @@ This overview keeps the original route while moving detailed coefficient
 operations to [Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
 The physical grid and the local Bernstein degree are independent modeling
 choices.
+
+## Interactive Parameter Partition
+
+Move one internal knot on each active scheduling axis, select a physical cell,
+and compare the resulting one-, two-, and three-parameter tensor partitions.
+
+<GridPartitionFigure />
 
 ## The Two Independent Choices
 
