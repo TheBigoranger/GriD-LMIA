@@ -5,6 +5,7 @@ import path from "node:path";
 import {
   expectedPublication,
   pdfPageCount,
+  sha256ArtifactBytes,
   sha256File,
   validatePublicationManifest,
   validateVersionHistorySource,
@@ -44,6 +45,13 @@ test("validates the committed publication manifest", async () => {
   assert.equal(manifest.documentationVersion, "v1.4.1");
   assert.equal(manifest.apiRecordCount, 194);
   assert.equal(manifest.manual.pageCount, 178);
+});
+
+test("normalizes generated text line endings without normalizing binary artifacts", () => {
+  const lf = Buffer.from("export const value = 1;\n");
+  const crlf = Buffer.from("export const value = 1;\r\n");
+  assert.equal(sha256ArtifactBytes(lf, ".js"), sha256ArtifactBytes(crlf, ".js"));
+  assert.notEqual(sha256ArtifactBytes(lf, ".png"), sha256ArtifactBytes(crlf, ".png"));
 });
 
 test("rejects stale visible version-history roles", () => {

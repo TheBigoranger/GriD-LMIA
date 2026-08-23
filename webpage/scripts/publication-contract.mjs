@@ -30,6 +30,19 @@ export async function sha256File(file) {
   return createHash("sha256").update(bytes).digest("hex").toUpperCase();
 }
 
+const normalizedTextExtensions = new Set([".js", ".mdx", ".svg"]);
+
+export function sha256ArtifactBytes(bytes, extension) {
+  const payload = normalizedTextExtensions.has(extension.toLowerCase())
+    ? Buffer.from(bytes.toString("utf8").replace(/\r\n?/g, "\n"), "utf8")
+    : bytes;
+  return createHash("sha256").update(payload).digest("hex").toUpperCase();
+}
+
+export async function sha256ArtifactFile(file) {
+  return sha256ArtifactBytes(await readFile(file), path.extname(file));
+}
+
 export async function pdfPageCount(file) {
   const bytes = await readFile(file);
   const fragments = [bytes.toString("latin1")];
@@ -127,7 +140,7 @@ export async function createPublicationManifest(webpageRoot) {
 
   const artifacts = {};
   for (const relativePath of await artifactPaths(webpageRoot)) {
-    artifacts[relativePath] = await sha256File(path.join(webpageRoot, relativePath));
+    artifacts[relativePath] = await sha256ArtifactFile(path.join(webpageRoot, relativePath));
   }
 
   return {
@@ -188,7 +201,7 @@ export async function validatePublicationManifest(webpageRoot) {
     fail("Manifest artifact list is missing, stale, or contains unexpected paths.");
   }
   for (const relativePath of requiredArtifacts) {
-    const actual = await sha256File(path.join(webpageRoot, relativePath));
+    const actual = await sha256ArtifactFile(path.join(webpageRoot, relativePath));
     if (actual !== manifest.artifacts[relativePath]) fail(`Artifact hash mismatch: ${relativePath}.`);
   }
   return manifest;
