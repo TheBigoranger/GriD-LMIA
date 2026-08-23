@@ -1,0 +1,57 @@
+---
+import DiagramFrame from "./DiagramFrame.astro";
+---
+
+<DiagramFrame
+  caption="Each scalar pdlmi wrapper is exported independently, then YALMIP combines every resulting list in the caller's original order. The returned list is terminal solver input."
+  label="pdlmi terminal concatenation flow"
+  class="pdlmi-concatenation-flow"
+>
+  <ol class="concatenation-flow">
+    <li>
+      <span>1</span>
+      <strong>Ordered operands</strong>
+      <small>Scalar pdlmi, constraint, or lmi values</small>
+    </li>
+    <li>
+      <span>2</span>
+      <strong>Per-wrapper export</strong>
+      <small>toYalmip converts each pdlmi operand</small>
+    </li>
+    <li>
+      <span>3</span>
+      <strong>YALMIP list merge</strong>
+      <small>Horizontal and vertical forms share list semantics</small>
+    </li>
+    <li>
+      <span>4</span>
+      <strong>Terminal solver input</strong>
+      <small>Use the returned constraint or lmi list with optimize</small>
+    </li>
+  </ol>
+</DiagramFrame>
+
+<style>
+  .concatenation-flow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    margin: 0;
+    border-block: 1px solid var(--diagram-border);
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+    padding: 0.9rem;
+  }
+  li + li { border-inline-start: 1px solid var(--diagram-border); }
+  li span { color: var(--sl-color-text-accent); font-size: 0.72rem; font-weight: 850; }
+  li small { color: var(--sl-color-gray-2); line-height: 1.35; }
+  @media (max-width: 620px) {
+    .concatenation-flow { grid-template-columns: minmax(0, 1fr); }
+    li + li { border-inline-start: 0; border-block-start: 1px solid var(--diagram-border); }
+  }
+</style>

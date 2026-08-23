@@ -7,6 +7,7 @@ import CertificateChooser from "../../../../../components/CertificateChooser.ast
 import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
 import CallGraph from "../../../../../components/CallGraph.astro";
 import ApiInventory from "../../../../../components/ApiInventory.astro";
+import PdlmiConcatenationFlow from "../../../../../components/PdlmiConcatenationFlow.astro";
 
 <nav class="manual-trail">
   <a href="/GriD-LMIA/documents/">Documents</a>
@@ -73,6 +74,7 @@ derives these ideas. The API pages below stay focused on callable syntax.
 | [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) | Rebuild the residual with sliding tensor windows of side length `b` (the `CliqueSize` option), an absolute order, and canonical Direct/Putinar endpoints. |
 | [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) | Rebuild the residual with sliding tensor-window Gram blocks of side length `w`, an absolute order, and canonical Direct/FullBox endpoints. |
 | [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
+| [`horzcat`](#api-horzcat) and [`vertcat`](#api-vertcat) | Export scalar wrappers and concatenate them with YALMIP constraint lists in operand order. |
 
 ### YALMIP export and solver use
 
@@ -80,9 +82,70 @@ derives these ideas. The API pages below stay focused on callable syntax.
 | :--- | :--- |
 | [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) | Concatenate stored constraints for ordinary YALMIP `optimize` calls. |
 
+<span id="pdlmi-concatenation"></span>
+
+## Terminal Constraint Concatenation
+
+The `horzcat` and `vertcat` overloads let a scalar `pdlmi` wrapper participate
+directly in an ordinary YALMIP constraint list. Both forms export every
+`pdlmi` operand with `toYalmip`, preserve the caller's operand order, and
+return a YALMIP `constraint` or `lmi` list.
+
+### Syntax
+
+```matlab
+F = [C1, C2, ...]
+F = [C1; C2; ...]
+```
+
+Each operand may be a scalar `pdlmi`, a YALMIP `constraint`, or a YALMIP `lmi`
+list. Horizontal and vertical forms have the same list semantics. An
+identity equality such as `P == P` exports an empty list, so it contributes
+the YALMIP empty-list identity and leaves adjacent constraints unchanged.
+
+<PdlmiConcatenationFlow />
+
+### Ordered Export Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]});
+x = sdpvar(1);
+
+positive = P >= 0;
+bounded = x <= 1;
+F = [positive.usePolya(1), x >= 0, bounded];
+
+diagnostic = optimize(F, [], sdpsettings('verbose', 0));
+```
+
+The selector is applied while `positive` is still a `pdlmi`. The bracketed
+expression then exports that selected wrapper and combines it with the two raw
+YALMIP constraints. Use [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)
+when explicit conversion is clearer than bracket syntax.
+
+> **Implementation remark: per-operand terminal export.** `horzcat` calls
+> `toYalmip` once for each scalar `pdlmi`, then delegates list ordering and
+> storage to YALMIP. `vertcat` reuses the same path because YALMIP constraint
+> lists assign the same list meaning to both bracket forms. This mechanism
+> changes the wrapper representation while preserving the selected finite
+> certificate and operand order.
+
+### Validation And Errors
+
+`pdlmi:InvalidConcatenation` identifies three rejected operand boundaries:
+
+- A logical known-data certificate produced by a `pdmat` comparison.
+- A MATLAB value outside the accepted `pdlmi`, `constraint`, and `lmi` classes.
+- A nonscalar `pdlmi` array.
+
+Concatenation is terminal: the returned value belongs to YALMIP rather than
+`pdlmi`. Apply `usePolya`, `usePutinar`, `useSpPut`, `useSpBox`, or
+`useFullBox` before forming the final list.
+
 ## Implemented Behavior
 
-Documentation v1.4.0 describes `<=`, `>=`, and `==` for affine `pdvar`
+Documentation v1.4.1 describes `<=`, `>=`, and `==` for affine `pdvar`
 residuals and `<=`/`>=` for coefficient-backed known `pdmat` residuals.
 Inequalities select
 one global semidefinite or entry-wise interpretation from all original
@@ -128,6 +191,6 @@ higher dimensions.
 
 ## See Also
 
-[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`certificate map`](/GriD-LMIA/documents/math/sos-certificates/) · [`SparsePutinar mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) · [`SparseFullBox and FullBox mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparsefullbox-and-fullbox/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`horzcat`](#api-horzcat) · [`vertcat`](#api-vertcat) · [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`certificate map`](/GriD-LMIA/documents/math/sos-certificates/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)
 
 <ApiInventory owner="pdlmi" />

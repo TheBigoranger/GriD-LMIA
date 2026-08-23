@@ -20,6 +20,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GRID_LMIA_DOC_BUILD_MODE: publish
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7

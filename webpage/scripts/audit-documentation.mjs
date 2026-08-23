@@ -89,8 +89,8 @@ function componentProse(source, file) {
 
 execFileSync(process.execPath, [join(root, "scripts/sync-documentation-contracts.mjs"), "--check"], { stdio: "inherit" });
 
-if (documentationRecords.length !== 192) failures.push(`Expected 192 public API records, found ${documentationRecords.length}.`);
-if (referenceEntries.length !== 192) failures.push(`Expected 192 reference entries, found ${referenceEntries.length}.`);
+if (documentationRecords.length !== 194) failures.push(`Expected 194 public API records, found ${documentationRecords.length}.`);
+if (referenceEntries.length !== 194) failures.push(`Expected 194 reference entries, found ${referenceEntries.length}.`);
 if (terminologyTerms.length !== 8) failures.push(`Expected 8 governed terms, found ${terminologyTerms.length}.`);
 if (documentationRecords.some((record) => /protected|private/i.test(record.kind))) failures.push("Protected or private symbols entered the public inventory.");
 if (documentationRecords.some((record) => !record.executable_example)) failures.push("Every public record must carry executable example evidence.");
@@ -108,9 +108,9 @@ for (const [target, owner] of declaredWebTargets) {
 const duplicateDeclaredTargets = [...declaredTargetOwners]
   .filter(([, owners]) => owners.length > 1)
   .map(([target, owners]) => `${target} (${owners.join(", ")})`);
-if (declaredWebTargets.length !== 384 || declaredTargetOwners.size !== 384) {
+if (declaredWebTargets.length !== 388 || declaredTargetOwners.size !== 388) {
   failures.push(
-    `Expected 384 unique API and example targets, found ${declaredTargetOwners.size}: ${duplicateDeclaredTargets.join(" | ")}`,
+    `Expected 388 unique API and example targets, found ${declaredTargetOwners.size}: ${duplicateDeclaredTargets.join(" | ")}`,
   );
 }
 
@@ -257,4 +257,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Documentation audit passed: 192 public API records, 8 governed terms, semantic vectors, canonical definitions, contextual boundary prose, and style checks.");
+console.log("Documentation audit passed: 194 public API records, 8 governed terms, semantic vectors, canonical definitions, contextual boundary prose, and style checks.");

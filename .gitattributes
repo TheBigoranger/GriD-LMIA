@@ -1,0 +1,7 @@
+# Publication-manifest hashes are byte identities. Keep generated text stable
+# across Windows and Linux checkouts so publish-mode validation is portable.
+webpage/src/data/documentation-contracts.js text eol=lf
+webpage/src/data/version.js text eol=lf
+webpage/src/data/version-history.js text eol=lf
+webpage/src/content/docs/documents/reference-index.mdx text eol=lf
+webpage/src/assets/call-graphs/*.svg text eol=lf

@@ -1,11 +1,6 @@
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { terminologyTerms } from "../data/documentation-contracts.js";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const terminologyPath = resolve(here, "../../../doc/support/terminology.json");
-const { terms } = JSON.parse(readFileSync(terminologyPath, "utf8"));
-const linkedTerms = terms.filter((term) => term.auto_link);
+const linkedTerms = terminologyTerms.filter((term) => term.auto_link);
 const expression = new RegExp(
   `\\b(${linkedTerms
     .map((term) => term.abbreviation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))

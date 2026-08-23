@@ -1,4 +1,4 @@
-classdef pdlmi
+classdef (InferiorClasses = {?constraint, ?lmi}) pdlmi
     %PDLMI Cell-local YALMIP constraints for PD-LMI expressions.
     %
     %   Syntax:
@@ -20,6 +20,8 @@ classdef pdlmi
     %     C = pdlmi(expr, relation, UseSparseFullBoxPreorder=true, BandWidth=b)
     %     C = pdlmi(expr, relation, BandWidth=b)
     %     C = pdlmi(expr, relation, BandWidth=b, SparseFullBoxOrder=r)
+    %     F = [C1, C2, ...]
+    %     F = [C1; C2; ...]
     %
     %   Arguments:
     %     expr     - pdvar residual, or pdmat residual for an inequality.
@@ -33,6 +35,8 @@ classdef pdlmi
     %   Output:
     %     C - Constraint wrapper retaining the residual and assembly settings;
     %         C.toYalmip() returns the assembled YALMIP constraints.
+    %     F - Terminal YALMIP constraint list formed after exporting each pdlmi
+    %         operand. Apply certificate selections before concatenation.
     %
     %   Direct assembly is the default. Inequality classification scans every
     %   coefficient of the original residual across all physical cells and

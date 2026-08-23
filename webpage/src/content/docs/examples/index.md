@@ -3,7 +3,9 @@ title: Examples
 description: Runnable GriD-LMIA workflows using current public APIs.
 ---
 
-These examples are intentionally small and deterministic. They complement the reference pages with executable workflows.
+These examples complement the reference pages with executable workflows. The
+root [`example/`](https://github.com/TheBigoranger/GriD-LMIA/tree/main/example)
+catalog contains seven independent, source-grounded reproduction scripts.
 
 ## Setup And Verification
 
@@ -18,6 +20,41 @@ The installer adds `projectRoot` directly at the end of the MATLAB path. The
 test entry point runs installation, helper, `pdbase`,
 `pdmat`, `pdvar`, and `pdlmi` tests. `pdvar` and `pdlmi` workflows require
 YALMIP on the MATLAB path.
+
+## Source-Grounded Reproduction Catalog
+
+Each script starts with its publication provenance, exact model setting,
+certificate choice, numerical target, comparison rule, measured runtime, and
+named parameters that users may tune. Run one script at a time after package
+installation.
+
+| Script and source | Default certificate setting | Expected outcome | Primary tunables |
+| :--- | :--- | :--- | :--- |
+| [`masubuchi1998_univariate_sos.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/example/masubuchi1998_univariate_sos.m), Masubuchi, Kume, and Shimemura (1998), Example 1 | One cell, degree-one $P$, univariate [`usePutinar(5)`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) | $gamma=6.05101324526206$ within $5\times10^{-4}$ | Grid nodes, decision degree, Gram order, solver, tolerance |
+| [`agulhari2019_three_parameter_direct.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/example/agulhari2019_three_parameter_direct.m), Agulhari et al. (2019) and ROLMIP manual §7.2 | One cell per axis, degree-one $P$, Direct | Rate-dependent bound $gamma=1.69895266198667$ within $5\times10^{-4}$ | Per-axis grid nodes, decision degree, solver, margin |
+| [`delay_case_a_theorem2_sos.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/example/delay_case_a_theorem2_sos.m), delay-system manuscript, Case A and Theorem 2 | Degree-two $P$, one cell, univariate [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) Markov–Lukács certificate | Accepted endpoint $3.68676263203714$ rounds to $3.687$ and the prescribed upper probes lose the accepted margin | Degree, rate bound, endpoint probes, solver, margins |
+| [`delay_case_a_theorem3_direct_10cell.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/example/delay_case_a_theorem3_direct_10cell.m), delay-system manuscript, Case A and Theorem 3 | $(N,d)=(3,3)$, ten cells, Direct | $h=5.151$ accepted and $h=5.152$ rejected or lacking the accepted margin | Integral order, degree, cells, rate bound, solver |
+| [`rolmip_manual_section_7_1_discrete_stability.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/example/rolmip_manual_section_7_1_discrete_stability.m), [ROLMIP manual §7.1](https://rolmip.github.io/) | Affine $P$, one cell, Direct | Positive optimized margin and strict-feasibility conclusion | Decision degree and solver |
+| [`yu_duan2013_example_4_9_affine_stability.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/example/yu_duan2013_example_4_9_affine_stability.m), Yu and Duan (2013), Example 4.9 | Constant $P$, one cell, Direct | Positive endpoint residual for the printed certificate | Parameter bounds, solver, normalization |
+| [`yu_duan2013_example_4_10_mass_spring_damper.m`](https://github.com/TheBigoranger/GriD-LMIA/blob/main/example/yu_duan2013_example_4_10_mass_spring_damper.m), Yu and Duan (2013), Example 4.10 | Constant $P$, one cell per axis, Direct | One parameter box certified and absence of a common quadratic certificate reported for the second | Parameter boxes, decision degree, solver |
+
+The first four scripts exercise the same terminal bracket composition described
+by [`pdlmi.horzcat`](/GriD-LMIA/documents/reference/pdlmi/#api-horzcat) and
+[`pdlmi.vertcat`](/GriD-LMIA/documents/reference/pdlmi/#api-vertcat). The full
+behavior contract is on the
+[`pdlmi` reference](/GriD-LMIA/documents/reference/pdlmi/#pdlmi-concatenation).
+The delay examples separate the matrix Markov–Lukács SOS path from a ten-cell
+Direct path, while the ROLMIP and textbook examples compare feasibility margins
+or residual signs because the decision matrices are nonunique.
+
+## Manual Reproduction Boundary
+
+The root examples are intentionally excluded from `+tests` and from
+`tests.run_all()`. Their solver-specific runs are manual reproduction checks.
+A nonzero YALMIP code is classified through `yalmiperror`. Resource and
+numerical outcomes retain the `unknown` classification.
+The scripts compare objectives, margins, or residual signs instead of requiring
+identical nonunique decision matrices.
 
 <span id="known-scalar-data"></span>
 

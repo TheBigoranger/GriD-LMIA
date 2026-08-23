@@ -384,6 +384,81 @@ function testToYalmip(testCase)
     testCase.verifyTrue(isa(F, "lmi") || isa(F, "constraint"));
 end
 
+function testCatWitYalCon(testCase)
+    % Raw YALMIP constraints dispatch through pdlmi in both operand orders.
+    P = pdvar(1, {[0 1]});
+    C = P >= 0;
+    x = sdpvar(1);
+    raw = x >= 0;
+    exported = toYalmip(C);
+
+    actual = {[C, raw], [raw, C], [C; raw], [raw; C]};
+    reference = {[exported, raw], [raw, exported], ...
+        [exported; raw], [raw; exported]};
+    for k = 1:numel(actual)
+        veriConCat(testCase, actual{k}, reference{k});
+    end
+end
+
+function testCatWitYalLis(testCase)
+    % Existing YALMIP lists remain composable before or after a pdlmi wrapper.
+    P = pdvar(1, {[0 1]});
+    C = P >= 0;
+    x = sdpvar(1);
+    list = [x >= 0, x <= 1];
+    exported = toYalmip(C);
+
+    actual = {[C, list], [list, C], [C; list], [list; C]};
+    reference = {[exported, list], [list, exported], ...
+        [exported; list], [list; exported]};
+    for k = 1:numel(actual)
+        veriConCat(testCase, actual{k}, reference{k});
+    end
+end
+
+function testCatTwoPdlmi(testCase)
+    % Each wrapper is exported independently before YALMIP merges the lists.
+    P = pdvar(1, {[0 1]});
+    Q = pdvar(1, {[0 1]});
+    lower = P >= 0;
+    upper = Q <= 0;
+    lowerExport = toYalmip(lower);
+    upperExport = toYalmip(upper);
+
+    veriConCat(testCase, [lower, upper], [lowerExport, upperExport]);
+    veriConCat(testCase, [lower; upper], [lowerExport; upperExport]);
+end
+
+function testCatEmpIde(testCase)
+    % An identity equality contributes the same empty list as toYalmip.
+    P = pdvar(1, {[0 1]});
+    identity = P == P;
+    x = sdpvar(1);
+    raw = x >= 0;
+
+    veriConCat(testCase, [identity, raw], [toYalmip(identity), raw]);
+    testCase.verifyEmpty([identity, identity]);
+end
+
+function testCatInvInp(testCase)
+    % Logical certificates and undeclared operand classes are rejected locally.
+    P = pdvar(1, {[0 1]});
+    C = P >= 0;
+    x = sdpvar(1);
+    raw = x >= 0;
+    known = pdmat([0 1], {1, 2}, Degree=1) >= 0;
+    array = cat(2, C, C);
+    errId = "pdlmi:InvalidConcatenation";
+
+    testCase.verifyError(@() horzcat(known, raw), errId);
+    testCase.verifyError(@() horzcat(raw, known), errId);
+    testCase.verifyError(@() vertcat(known, raw), errId);
+    testCase.verifyError(@() horzcat(C, true), errId);
+    testCase.verifyError(@() horzcat(1, C), errId);
+    testCase.verifyError(@() vertcat(C, false), errId);
+    testCase.verifyError(@() horzcat(array, raw), errId);
+end
+
 function testAniDirPolCouAnd(testCase)
     % Direction-wise increments use tensor counts and replace prior levels.
     grid = {[0 1], [10 20]};
@@ -482,6 +557,12 @@ function veriConCol(testCase, actual, reference)
     testCase.verifyEqual(actualModel.K.f, referenceModel.K.f);
     testCase.verifyEqual(actualModel.K.l, referenceModel.K.l);
     testCase.verifyEqual(actualModel.K.s, referenceModel.K.s);
+end
+
+function veriConCat(testCase, actual, reference)
+    % Concatenation is a terminal conversion to a YALMIP constraint list.
+    testCase.verifyTrue(isa(actual, "constraint") || isa(actual, "lmi"));
+    veriConCol(testCase, actual, reference);
 end
 
 function [actualModel, referenceModel] = exportSedumi(actual, reference)

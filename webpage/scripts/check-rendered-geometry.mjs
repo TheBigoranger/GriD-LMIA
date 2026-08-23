@@ -1379,6 +1379,69 @@ async function auditRhodiffEditor(browser, origin, failures) {
   }
 }
 
+async function auditHeaderLayout(browser, origin, failures) {
+  const route = `${base}/`;
+  const viewport = { width: 1280, height: 900 };
+  for (const theme of defaultThemes) {
+    const context = await browser.newContext({ viewport });
+    const page = await context.newPage();
+    try {
+      const response = await page.goto(`${origin}${route}`, { waitUntil: "networkidle" });
+      if (!response?.ok()) throw new Error(`header route returned ${response?.status() ?? "no response"}`);
+      await page.evaluate((activeTheme) => {
+        document.documentElement.dataset.theme = activeTheme;
+        document.documentElement.style.colorScheme = activeTheme;
+      }, theme);
+      await page.evaluate(() => document.fonts.ready);
+      const result = await page.evaluate(() => {
+        const selectors = [
+          ".site-header__brand",
+          ".site-header__search",
+          ".site-header__end",
+        ];
+        const regions = selectors.map((selector) => {
+          const node = document.querySelector(selector);
+          if (!node) return { selector, missing: true };
+          const style = getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return {
+            selector,
+            visible: style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0,
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+          };
+        });
+        const visible = regions.filter((region) => region.visible);
+        const overlaps = [];
+        for (let left = 0; left < visible.length; left += 1) {
+          for (let right = left + 1; right < visible.length; right += 1) {
+            const first = visible[left];
+            const second = visible[right];
+            if (first.left < second.right && first.right > second.left &&
+                first.top < second.bottom && first.bottom > second.top) {
+              overlaps.push([first.selector, second.selector]);
+            }
+          }
+        }
+        return { regions, overlaps };
+      });
+      if (result.regions.some((region) => region.missing) || result.overlaps.length) {
+        failures.push({
+          width: viewport.width,
+          route: `${route} [${theme}]`,
+          type: "header-region-overlap",
+          selector: ".site-header",
+          context: JSON.stringify(result),
+        });
+      }
+    } finally {
+      await context.close();
+    }
+  }
+}
+
 await access(join(root, "index.html"));
 const builtFiles = await walk(root);
 const builtCss = builtFiles.filter((file) => file.endsWith(".css"));
@@ -1612,6 +1675,7 @@ try {
   await auditRootWalkthroughs(browser, origin, failures);
   await auditMobileStorageAnnotations(browser, origin, failures);
   await auditRhodiffEditor(browser, origin, failures);
+  await auditHeaderLayout(browser, origin, failures);
 } catch (error) {
   primaryError = error;
 } finally {

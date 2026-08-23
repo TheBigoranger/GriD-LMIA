@@ -7,25 +7,26 @@ grids. It represents known data (`pdmat`) and continuous decision matrices
 rate-vertex derivatives with `rhodiff`, and exports finite certificates to
 YALMIP through `pdlmi`.
 
-Current source, documentation, and tagged GitHub Release: **v1.4.0**.
+Current source and documentation: **v1.4.1**. Latest tagged GitHub Release:
+**v1.4.0**.
 
-## What changed in v1.4.0
+## What changed in v1.4.1
 
-- A real affine two-dimensional `sdpvar` may multiply coefficient-backed
-  `pdmat` in either order when the matrix dimensions are compatible. The mixed
-  product returns `pdvar` and supports scalar broadcasting and rectangular
-  matrix products.
-- The mixed path preserves the known grid, Bernstein degree, continuity,
-  `RateBounds`, active known-data rate rows, and existing YALMIP variable
-  identities. It does not allocate additional decisions.
-- `RateBounds` without stored rate rows is ordinary metadata and no longer
-  causes a supported product to be rejected. Products with active rate rows on
-  both sides remain outside the affine rate model.
-- The printable and Web manuals document the new forms and failure boundaries
-  while retaining the existing 192-symbol public inventory.
+- Scalar `pdlmi` wrappers can be concatenated horizontally or vertically with
+  other wrappers and native YALMIP `constraint` or `lmi` lists. Concatenation
+  exports each wrapper in written order and returns a terminal YALMIP list.
+- Certificate selection remains a wrapper operation and must occur before
+  concatenation. Unsupported operands, logical known-data certificates, and
+  nonscalar wrapper arrays fail with `pdlmi:InvalidConcatenation`.
+- The root [`example/`](example/) catalog provides seven source-grounded cases
+  from the GriD-LMIA software paper, a delay-system paper, ROLMIP, and a control
+  systems textbook. Each script records its source, settings, tunable values,
+  solver diagnostics, and numerical comparison.
+- The printable and Web manuals document the new API and examples. The public
+  inventory now contains 194 symbols.
 
-This release adds no public conversion method. The class-restricted adapter at
-the MATLAB/YALMIP dispatch boundary remains an implementation detail.
+The latest tagged v1.4.0 release retains the mixed `sdpvar`/`pdmat`
+multiplication feature described in its release notes.
 
 ## Historical migration from v1.2
 
@@ -60,7 +61,7 @@ may continue to use names such as `UsePolya`, `PutinarOrder`, and
   accept scalar shorthand or per-axis vectors. `BandWidth` remains scalar.
 
 See the [v1.4.0 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.4.0)
-for the current behavior and verification record. The v1.3.8 and v1.2.4
+for the latest immutable package snapshot. The v1.3.8 and v1.2.4
 manuals remain the final documentation snapshots of their completed minor
 lines in the version history.
 
@@ -148,9 +149,9 @@ results = tests.run_all();
 assert(all([results.Passed]) && ~any([results.Incomplete]))
 ```
 
-The v1.4.0 release gate passed 435 runtime tests with zero failures and zero
-incompletes. Production coverage was 3325/3442 statements (96.60%) and
-1671/1782 decisions (93.77%). Solver smoke tests accepted results only when
+The v1.4.1 source gate passed 440 runtime tests with zero failures and zero
+incompletes. Production coverage was 3339/3456 statements (96.61%) and
+1681/1792 decisions (93.81%). Solver smoke tests accepted results only when
 `diagnostic.problem == 0`.
 
 Run the independent MATLAB SOS validation from the repository root:
@@ -178,8 +179,9 @@ with `--compiled-modules=no` after `julia`.
 - [Version history](https://thebigoranger.github.io/GriD-LMIA/version-history/)
 - [GitHub Releases](https://github.com/TheBigoranger/GriD-LMIA/releases)
 
-The printable manual source is in `doc/`. The Astro/Starlight Web manual is in
-`webpage/`.
+The public repository delivers the printable manual at `doc/manual.pdf`; its
+TeX sources remain in the local-complete development worktree. The
+Astro/Starlight Web manual source is in `webpage/`.
 
 ## Citing GriD-LMIA
 

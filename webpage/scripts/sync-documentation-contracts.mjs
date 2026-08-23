@@ -29,9 +29,9 @@ const inventory = JSON.parse(await readFile(inventoryPath, "utf8"));
 const terminology = JSON.parse(await readFile(terminologyPath, "utf8"));
 
 if (inventory.schema_version !== 2) fail("Expected documentation inventory schema_version 2.");
-if (inventory.version !== "v1.4.0") fail("Expected documentation inventory version v1.4.0.");
-if (!Array.isArray(inventory.records) || inventory.records.length !== 192) {
-  fail(`Expected 192 public API records, found ${inventory.records?.length ?? "none"}.`);
+if (inventory.version !== "v1.4.1") fail("Expected documentation inventory version v1.4.1.");
+if (!Array.isArray(inventory.records) || inventory.records.length !== 194) {
+  fail(`Expected 194 public API records, found ${inventory.records?.length ?? "none"}.`);
 }
 unique(inventory.records.map((record) => record.id), "Inventory record id");
 for (const record of inventory.records) {

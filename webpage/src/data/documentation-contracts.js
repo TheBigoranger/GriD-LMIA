@@ -2,7 +2,7 @@
 // Sources: doc/documentation-inventory.json and doc/support/terminology.json.
 // Do not edit by hand.
 
-export const documentationVersion = "v1.4.0";
+export const documentationVersion = "v1.4.1";
 export const documentationRecords = [
   {
     "id": "pdbase.pdbase",
@@ -6113,6 +6113,62 @@ export const documentationRecords = [
     "executable_example": true
   },
   {
+    "id": "pdlmi.horzcat",
+    "owner": "pdlmi",
+    "symbol": "horzcat",
+    "kind": "overload",
+    "category": "terminal concatenation overload",
+    "inherited_from": null,
+    "source_evidence": [
+      "@pdlmi/horzcat.m",
+      "@pdlmi/vertcat.m"
+    ],
+    "test_evidence": [
+      "+tests/+pdlmi/test_constraints.m"
+    ],
+    "call_forms_options": [
+      "F = [C1,C2,...]"
+    ],
+    "inputs": "Scalar pdlmi wrappers, YALMIP constraint objects, or YALMIP lmi lists in the requested horizontal order.",
+    "return_type_shape": "A terminal YALMIP constraint or lmi list after every pdlmi operand has been exported with toYalmip.",
+    "validation_errors": "Rejects logical known-data certificates, unsupported operand classes, and nonscalar pdlmi arrays with pdlmi:InvalidConcatenation.",
+    "supported_scope": "Preserves operand order and YALMIP empty-list identity. Certificate selectors must be applied before concatenation.",
+    "tex_anchor": "sec: pdlmi-concatenation",
+    "tex_index": "pdlmi!horzcat",
+    "tex_example_evidence": "doc/chapters/pdlmi.tex#sec: pdlmi-concatenation",
+    "web_route_or_anchor": "/documents/reference/pdlmi/#api-horzcat",
+    "web_example_evidence": "/documents/reference/pdlmi/#api-horzcat-example",
+    "executable_example": true
+  },
+  {
+    "id": "pdlmi.vertcat",
+    "owner": "pdlmi",
+    "symbol": "vertcat",
+    "kind": "overload",
+    "category": "terminal concatenation overload",
+    "inherited_from": null,
+    "source_evidence": [
+      "@pdlmi/vertcat.m",
+      "@pdlmi/horzcat.m"
+    ],
+    "test_evidence": [
+      "+tests/+pdlmi/test_constraints.m"
+    ],
+    "call_forms_options": [
+      "F = [C1;C2;...]"
+    ],
+    "inputs": "Scalar pdlmi wrappers, YALMIP constraint objects, or YALMIP lmi lists in the requested vertical order.",
+    "return_type_shape": "A terminal YALMIP constraint or lmi list with the same list semantics as horizontal concatenation.",
+    "validation_errors": "Rejects logical known-data certificates, unsupported operand classes, and nonscalar pdlmi arrays with pdlmi:InvalidConcatenation.",
+    "supported_scope": "Preserves operand order and YALMIP empty-list identity. Certificate selectors must be applied before concatenation.",
+    "tex_anchor": "sec: pdlmi-concatenation",
+    "tex_index": "pdlmi!vertcat",
+    "tex_example_evidence": "doc/chapters/pdlmi.tex#sec: pdlmi-concatenation",
+    "web_route_or_anchor": "/documents/reference/pdlmi/#api-vertcat",
+    "web_example_evidence": "/documents/reference/pdlmi/#api-vertcat-example",
+    "executable_example": true
+  },
+  {
     "id": "helper.bernConvRatios",
     "owner": "helper",
     "symbol": "bernConvRatios",
@@ -6840,6 +6896,20 @@ export const documentationPresentationGroups = [
     ]
   },
   {
+    "id": "pdlmi-horzcat",
+    "owner": "pdlmi",
+    "members": [
+      "horzcat"
+    ]
+  },
+  {
+    "id": "pdlmi-vertcat",
+    "owner": "pdlmi",
+    "members": [
+      "vertcat"
+    ]
+  },
+  {
     "id": "helper-public-functions",
     "owner": "helper",
     "members": [
@@ -6967,13 +7037,13 @@ export const excludedGeneralAbbreviations = [
   "SVG"
 ];
 export const documentationContractSummary = {
-  "records": 192,
+  "records": 194,
   "terms": 8,
   "ownerCounts": {
     "pdbase": 49,
     "pdmat": 55,
     "pdvar": 52,
-    "pdlmi": 22,
+    "pdlmi": 24,
     "helper": 13,
     "root": 1
   }

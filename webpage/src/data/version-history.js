@@ -1,5 +1,12 @@
 export const versionHistory = [
   {
+    version: "v1.4.1",
+    date: "2026-08-23",
+    status: "current documentation snapshot",
+    summary:
+      "Documents terminal pdlmi constraint concatenation, adds seven source-grounded reproduction scripts, and separates source-authoring builds from PDF-only publication builds. The synchronized manuals index 194 public API records.",
+  },
+  {
     version: "v1.4.0",
     date: "2026-08-14",
     status: "latest tagged GitHub Release",
@@ -66,7 +73,7 @@ export const versionHistory = [
 export const historyPolicy = {
   sourceOfTruth: "doc/manual.tex",
   updateRule:
-    "Change the TeX manual version first, then run npm --prefix webpage run sync:version or any webpage build.",
+    "Change the TeX manual version first, then run the source-mode webpage build to refresh generated publication data.",
   appendRule:
     "Keep the current documentation snapshot, the latest GitHub Release, and the final patch release for each earlier completed minor line, unless the user explicitly requests another history policy.",
 };
