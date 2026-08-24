@@ -398,7 +398,7 @@ async function inspect(page) {
       }
 
       const localScroller = wrapper.closest(
-        ".elevate-formula-one-line, .solver-one-line, .cell-formula-one-line",
+        ".elevate-formula-one-line, .solver-one-line, .cell-formula-one-line, .welcome-target",
       );
       const localScrollerStyle = localScroller ? getComputedStyle(localScroller) : null;
       const localNeedsScroll = Boolean(
@@ -734,6 +734,17 @@ async function auditWelcomeRoot(browser, origin, failures) {
       const welcome = await page.locator(".welcome").evaluate((section) => {
         const rect = section.getBoundingClientRect();
         const workflow = section.querySelector(".welcome-workflow");
+        const target = section.querySelector(".welcome-target");
+        const targetFormula = target?.querySelector(":scope > .formula-display > .katex-display");
+        const targetTex = targetFormula
+          ?.querySelector('annotation[encoding="application/x-tex"]')
+          ?.textContent ?? "";
+        const targetStyle = target ? getComputedStyle(target) : null;
+        const targetNeedsScroll = Boolean(
+          target && target.scrollWidth > target.clientWidth + 1
+        );
+        const diagramMath = [...section.querySelectorAll(".workflow-visual .diagram-math")]
+          .map((node) => node.textContent?.trim() ?? "");
         const workflowColumns = workflow
           ? getComputedStyle(workflow).gridTemplateColumns.split(" ").filter(Boolean).length
           : 0;
@@ -743,7 +754,14 @@ async function auditWelcomeRoot(browser, origin, failures) {
           workflowCount: section.querySelectorAll(".welcome-workflow a").length,
           workflowColumns,
           islandCount: section.querySelectorAll("astro-island").length,
-          rhoCount: (text.match(/ρ/g) ?? []).length,
+          targetCount: section.querySelectorAll(".welcome-target").length,
+          targetDisplayCount: section.querySelectorAll(".welcome-target > .formula-display > .katex-display").length,
+          targetMathCount: section.querySelectorAll(".welcome-target math[display='block']").length,
+          targetTex,
+          targetNeedsScroll,
+          targetScrollActive: targetStyle?.overflowX === "auto" && targetNeedsScroll,
+          modelShorthand: diagramMath[0] ?? "",
+          gridShorthand: diagramMath[1] ?? "",
           sigmaCount: (text.match(/Σ/g) ?? []).length,
           hasMu: /[μµ]/.test(text),
           left: rect.left,
@@ -759,7 +777,15 @@ async function auditWelcomeRoot(browser, origin, failures) {
         welcome.workflowCount !== 5 ||
         welcome.workflowColumns !== expectedColumns ||
         welcome.islandCount !== 0 ||
-        welcome.rhoCount !== 2 ||
+        welcome.targetCount !== 1 ||
+        welcome.targetDisplayCount !== 1 ||
+        welcome.targetMathCount !== 1 ||
+        !welcome.targetTex.includes("\\dot\\rho_s F_{k,s}(\\vect\\rho)") ||
+        !welcome.targetTex.includes("\\forall(\\vect\\rho,\\dot{\\vect\\rho})\\in\\mathcal P\\times\\mathcal R.") ||
+        (welcome.targetNeedsScroll && !welcome.targetScrollActive) ||
+        (viewport.width === 1440 && welcome.targetNeedsScroll) ||
+        welcome.modelShorthand !== "𝓕 ≼ 0" ||
+        welcome.gridShorthand !== "ρ ∈ 𝒫" ||
         welcome.sigmaCount !== 1 ||
         welcome.hasMu ||
         welcome.left < -1 ||

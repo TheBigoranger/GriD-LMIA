@@ -117,7 +117,7 @@ test("preserves intrinsic fraction, script, and accent metrics", () => {
   );
 });
 
-test("authors the approved lightweight Welcome copy, navigation, and notation", () => {
+test("authors the approved lightweight Welcome copy, target, navigation, and notation", () => {
   const homePortal = read("src/components/HomePortal.astro");
 
   for (const copy of [
@@ -130,11 +130,18 @@ test("authors the approved lightweight Welcome copy, navigation, and notation", 
     "Select a certificate", "Assemble and solve with YALMIP",
   ]) assert.ok(homePortal.includes(copy), `Welcome copy missing: ${copy}`);
 
-  assert.match(homePortal, /F\(ρ\) ≼ 0/);
+  assert.match(homePortal, /import KaTeXMath from "\.\/KaTeXMath\.astro"/);
+  assert.equal((homePortal.match(/<KaTeXMath\b/g) ?? []).length, 1);
+  assert.match(
+    homePortal,
+    /<KaTeXMath[\s\S]*class="welcome-target__math formula-block formula-one-line"[\s\S]*tex=\{targetTex\}[\s\S]*\sdisplay\s*\/>/,
+  );
+  assert.match(homePortal, /\\mathcal F\(\\vect\\rho,\\dot\{\\vect\\rho\};\\vect y\)=F_0\(\\vect\\rho\)[\s\S]*\\sum_\{k=1\}\^\{N\}F_k\(\\vect\\rho\)y_k\(\\vect\\rho\)[\s\S]*\\sum_\{k=1\}\^\{N\}\\sum_\{s=1\}\^\{\\ell\}\\dot\\rho_s F_\{k,s\}\(\\vect\\rho\)[\s\S]*\\frac\{\\partial y_k\}\{\\partial\\rho_s\}\(\\vect\\rho\)\\preceq0,\\quad\\forall\(\\vect\\rho,\\dot\{\\vect\\rho\}\)\\in\\mathcal P\\times\\mathcal R\./);
+  assert.match(homePortal, />𝓕 ≼ 0<\/text>/u);
   assert.match(homePortal, /ρ ∈ 𝒫/);
   assert.match(homePortal, />Σ<\/text>/);
   assert.doesNotMatch(homePortal, /\\mu|\bmu\b|µ/i);
-  assert.doesNotMatch(homePortal, /KaTeXMath|renderMath|client:|JourneyCurve|ExportSolveFlow|CertificateFlow|GridPartitionExplorer|CellStorageExplorer/);
+  assert.doesNotMatch(homePortal, /renderMath|client:|JourneyCurve|ExportSolveFlow|CertificateFlow|GridPartitionExplorer|CellStorageExplorer/);
   assert.doesNotMatch(homePortal, /Open the detailed mathematics/);
   assert.match(homePortal, /--welcome-surface:\s*#fff/);
 });
@@ -198,6 +205,7 @@ test("home-only interactive explorers migrate once to their detailed mathematics
 test("only explicitly indivisible one-line formulas opt into local scrolling", () => {
   const elevate = read("src/content/docs/documents/reference/pdmat/elevate.mdx");
   const solverSmoke = read("src/content/docs/examples/solver-smoke.md");
+  const home = read("src/components/HomePortal.astro");
   const css = read("src/styles/manual.css");
   const geometry = read("scripts/check-rendered-geometry.mjs");
   const elevateWrappers = [...elevate.matchAll(
@@ -226,13 +234,15 @@ test("only explicitly indivisible one-line formulas opt into local scrolling", (
     css,
     /\.cell-formula-one-line\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
   );
+  assert.match(home, /\.welcome-target\s*\{[^}]*max-width:100%[^}]*overflow-x:auto[^}]*overscroll-behavior-inline:contain[^}]*\}/);
+  assert.match(home, /welcome-target__math\.formula-display\)\s*\{[^}]*width:max-content[^}]*min-width:100%[^}]*max-width:none[^}]*\}/);
   assert.doesNotMatch(
     allSource,
     /(?:\.formula-display|\.math-strip(?:__row)?)\s*\{[^}]*overflow-x:\s*(?:auto|scroll)/si,
   );
   assert.match(
     geometry,
-    /closest\(\s*"\.elevate-formula-one-line, \.solver-one-line, \.cell-formula-one-line",\s*\)/s,
+    /closest\(\s*"\.elevate-formula-one-line, \.solver-one-line, \.cell-formula-one-line, \.welcome-target",\s*\)/s,
   );
   assert.match(
     geometry,

@@ -42,7 +42,7 @@ test("Astro renders formulas at build time and React islands never load the rend
   );
 
   // Preserve the established default Astro consumer interface where formulas remain.
-  for (const file of ["JourneyCurve.astro"]) {
+  for (const file of ["JourneyCurve.astro", "HomePortal.astro"]) {
     const source = read(file);
     assert.match(
       source,
@@ -53,11 +53,9 @@ test("Astro renders formulas at build time and React islands never load the rend
   }
 
   const home = read("HomePortal.astro");
-  assert.doesNotMatch(
-    home,
-    /KaTeXMath|renderMath|client:/,
-    "the lightweight Welcome page must remain free of math renderers and client islands",
-  );
+  assert.equal((home.match(/<KaTeXMath\b/g) ?? []).length, 1);
+  assert.match(home, /<KaTeXMath\b[\s\S]*\sdisplay\s*\/>/);
+  assert.doesNotMatch(home, /renderMath|client:/, "Welcome math must remain build-time and static");
 
   const reactFiles = readdirSync(components, { recursive: true })
     .map(String)

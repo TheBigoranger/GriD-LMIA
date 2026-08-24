@@ -1,6 +1,10 @@
 ---
+import KaTeXMath from "./KaTeXMath.astro";
+
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}`;
+
+const targetTex = String.raw`\mathcal F(\vect\rho,\dot{\vect\rho};\vect y)=F_0(\vect\rho)+\sum_{k=1}^{N}F_k(\vect\rho)y_k(\vect\rho)+\sum_{k=1}^{N}\sum_{s=1}^{\ell}\dot\rho_s F_{k,s}(\vect\rho)\frac{\partial y_k}{\partial\rho_s}(\vect\rho)\preceq0,\quad\forall(\vect\rho,\dot{\vect\rho})\in\mathcal P\times\mathcal R.`;
 
 const primaryLinks = [
   { key: "reference", href: local("documents/#reference"), label: "Reference" },
@@ -24,6 +28,11 @@ const workflow = [
     <h1 id="welcome-title">GriD-LMIA</h1>
     <p class="welcome-subtitle">Gridding-based parameter-dependent LMI assembly for MATLAB and YALMIP</p>
     <p class="welcome-summary">Model and solve parameter-dependent LMIs over tensor grids using Bernstein polynomial data and rigorous finite certificates.</p>
+
+    <figure class="welcome-target" aria-labelledby="welcome-target-caption">
+      <figcaption id="welcome-target-caption">General DPD-LMI target</figcaption>
+      <KaTeXMath class="welcome-target__math formula-block formula-one-line" tex={targetTex} display />
+    </figure>
 
     <nav class="welcome-actions" aria-label="Primary documentation links">
       {primaryLinks.map((link, index) => (
@@ -52,7 +61,7 @@ const workflow = [
             {step.key === "model" && (
               <svg viewBox="0 0 180 190">
                 <path class="diagram-line diagram-strong" d="M45 18h62l28 28v111H45Z"/><path class="diagram-line" d="M107 18v28h28M62 66h56M62 82h45M62 111h56M62 127h42"/>
-                <rect class="diagram-accent" x="61" y="91" width="57" height="29" rx="5"/><text class="diagram-label" x="90" y="111">LMI</text><text class="diagram-math" x="90" y="181">F(ρ) ≼ 0</text>
+                <rect class="diagram-accent" x="61" y="91" width="57" height="29" rx="5"/><text class="diagram-label" x="90" y="111">LMI</text><text class="diagram-math" x="90" y="181">𝓕 ≼ 0</text>
               </svg>
             )}
             {step.key === "grid" && (
@@ -97,6 +106,9 @@ const workflow = [
   .welcome h1 { margin:0; color:var(--welcome-ink); font-size:clamp(3.25rem,6vw,5.8rem); font-weight:850; letter-spacing:-.055em; line-height:.98; }
   .welcome-subtitle { max-width:70rem; margin:clamp(.65rem,1.2vw,.9rem) 0 0; color:var(--welcome-ink); font-size:clamp(1.12rem,1.75vw,1.55rem); font-weight:750; line-height:1.25; }
   .welcome-summary { max-width:50rem; margin:clamp(.6rem,1vw,.8rem) 0 0; color:var(--welcome-muted); font-size:clamp(.96rem,1.2vw,1.1rem); line-height:1.5; }
+  .welcome-target { max-width:100%; margin:clamp(.7rem,1.2vw,.95rem) 0 0; overflow-x:auto; overscroll-behavior-inline:contain; }
+  .welcome-target figcaption { margin:0; color:var(--welcome-muted); font-size:.78rem; font-weight:800; letter-spacing:.06em; text-align:center; text-transform:uppercase; }
+  :global(.welcome-target__math.formula-display) { width:max-content; min-width:100%; max-width:none; padding-block:.1rem; }
   .welcome-actions { display:flex; flex-wrap:wrap; gap:.75rem 1.15rem; margin-block-start:clamp(.9rem,1.5vw,1.2rem); }
   .welcome-action { display:inline-flex; min-width:9.25rem; align-items:center; justify-content:center; gap:.6rem; border:2px solid var(--welcome-accent); border-radius:7px; padding:.68rem 1.1rem; color:var(--welcome-accent); background:var(--welcome-surface); font-size:.95rem; font-weight:750; line-height:1; text-decoration:none; transition:border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease; }
   .welcome-action svg { width:1.5rem; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.8; }

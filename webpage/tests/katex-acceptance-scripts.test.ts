@@ -100,8 +100,8 @@ test("acceptance scripts verify static local KaTeX rendering at every target wid
   );
 
   assert.ok(
-    geometry.includes(".elevate-formula-one-line, .solver-one-line"),
-    "geometry acceptance must retain the two narrowly scoped formula scrollers",
+    geometry.includes(".elevate-formula-one-line, .solver-one-line, .cell-formula-one-line, .welcome-target"),
+    "geometry acceptance must retain the narrowly scoped formula scrollers",
   );
   assert.match(
     geometry,
