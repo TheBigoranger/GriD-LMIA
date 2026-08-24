@@ -146,6 +146,38 @@ test("authors the approved lightweight Welcome copy, target, navigation, and not
   assert.match(homePortal, /--welcome-surface:\s*#fff/);
 });
 
+test("keeps Welcome author, v1.4.1 highlights, and citation source-grounded", () => {
+  const homePortal = read("src/components/HomePortal.astro");
+  const citation = "Yicheng Xu and Faryar Jabbari, “GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities,” arXiv:2608.03175, 2026.";
+  const bibtex = `@article{xu2026gridlmia,
+  title         = {GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities},
+  author        = {Xu, Yicheng and Jabbari, Faryar},
+  year          = {2026},
+  eprint        = {2608.03175},
+  archivePrefix = {arXiv}
+}`;
+
+  for (const copy of [
+    "Created and maintained by Yicheng Xu.",
+    "pdlmi constraint concatenation",
+    "Seven source-grounded examples",
+    "Source/publish build boundary",
+    "194 public API records",
+  ]) assert.ok(homePortal.includes(copy), `Welcome project information missing: ${copy}`);
+
+  assert.ok(homePortal.includes(`const citation = ${JSON.stringify(citation)};`));
+  assert.ok(homePortal.includes(`const bibtex = String.raw\`${bibtex}\`;`));
+  assert.match(homePortal, /href=\{local\("about\/"\)\}/);
+  assert.match(homePortal, /href=\{local\("version-history\/"\)\}/);
+  assert.match(homePortal, /href=\{local\("citing\/"\)\}/);
+  assert.match(homePortal, /<section class="welcome-info" aria-labelledby="welcome-info-title">/);
+  assert.match(homePortal, /<p class="citation-label" id="citation-plain-label">Plain text<\/p>/);
+  assert.match(homePortal, /<pre class="citation-code" aria-labelledby="citation-plain-label" tabindex="0"><code>\{citation\}<\/code><\/pre>/);
+  assert.match(homePortal, /<p class="citation-label" id="citation-bibtex-label">BibTeX<\/p>/);
+  assert.match(homePortal, /<pre class="citation-code citation-code--bibtex" aria-labelledby="citation-bibtex-label" tabindex="0"><code>\{bibtex\}<\/code><\/pre>/);
+  assert.doesNotMatch(homePortal, /navigator\.clipboard|copy-button|client:/);
+});
+
 test("centered component formulas use display mode and keep the storage RHS intact", async () => {
   const storageFigure = read("src/components/CellStorageFigure.astro");
   const storage = read("src/components/CellStorageExplorer.tsx");

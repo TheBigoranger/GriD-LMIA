@@ -27,6 +27,14 @@ const primaryLabels = [...primaryLinkBlock.matchAll(/label:\s*"([^"]+)"/g)].map(
 const primaryRoutes = [...primaryLinkBlock.matchAll(/href:\s*local\("([^"]+)"\)/g)].map((match) => match[1]);
 const workflowLabels = [...workflowBlock.matchAll(/title:\s*"([^"]+)"/g)].map((match) => match[1]);
 const workflowRoutes = [...workflowBlock.matchAll(/href:\s*local\("([^"]+)"\)/g)].map((match) => match[1]);
+const welcomeCitation = "Yicheng Xu and Faryar Jabbari, “GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities,” arXiv:2608.03175, 2026.";
+const welcomeBibtex = `@article{xu2026gridlmia,
+  title         = {GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities},
+  author        = {Xu, Yicheng and Jabbari, Faryar},
+  year          = {2026},
+  eprint        = {2608.03175},
+  archivePrefix = {arXiv}
+}`;
 const journey = component("JourneyCurve.astro");
 const gridExplorer = component("GridPartitionExplorer.tsx");
 const gridPartition = read("src/lib/grid-partition.ts");
@@ -218,6 +226,13 @@ check("welcome remains static and excludes detailed mathematics", !/RenderedMath
 check("welcome illustrations use concise notation and retain rho and Sigma", /<text class="diagram-math" x="90" y="181">𝓕 ≼ 0<\/text>/u.test(home) && /<text class="diagram-math" x="90" y="181">ρ ∈ 𝒫<\/text>/.test(home) && !/F\(ρ\) ≼ 0|\\mu|μ|µ/u.test(home) && /<text class="certificate-symbol" x="90" y="101">Σ<\/text>/.test(home) && !/(?:Σ|\\Sigma)[_+]/.test(home));
 check("welcome target scrolling is local and width-aware", /\.welcome-target\s*\{[^}]*max-width:100%[^}]*overflow-x:auto[^}]*overscroll-behavior-inline:contain/.test(home) && /welcome-target__math\.formula-display\)\s*\{[^}]*width:max-content[^}]*min-width:100%[^}]*max-width:none/.test(home));
 check("welcome workflow reflows from five to two to one columns", /\.welcome-workflow\s*\{[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/.test(home) && /@media \(max-width:1050px\)[\s\S]*\.welcome-workflow\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/.test(home) && /@media \(max-width:620px\)[\s\S]*\.welcome-workflow\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/.test(home) && /\.welcome-workflow > li\s*\{[^}]*min-width:\s*0/.test(home));
+check("welcome project information is exact, static, and locally contained", [
+  "Created and maintained by Yicheng Xu.",
+  "pdlmi constraint concatenation",
+  "Seven source-grounded examples",
+  "Source/publish build boundary",
+  "194 public API records",
+].every((fragment) => home.includes(fragment)) && home.includes(`const citation = ${JSON.stringify(welcomeCitation)};`) && home.includes(`const bibtex = String.raw\`${welcomeBibtex}\`;`) && /href=\{local\("about\/"\)\}/.test(home) && /href=\{local\("version-history\/"\)\}/.test(home) && /href=\{local\("citing\/"\)\}/.test(home) && (home.match(/<article class="welcome-info__card/g)?.length ?? 0) === 3 && /<p class="citation-label" id="citation-plain-label">Plain text<\/p>[\s\S]*<pre class="citation-code" aria-labelledby="citation-plain-label" tabindex="0">/.test(home) && /<p class="citation-label" id="citation-bibtex-label">BibTeX<\/p>[\s\S]*<pre class="citation-code citation-code--bibtex" aria-labelledby="citation-bibtex-label" tabindex="0">/.test(home) && /\.citation-code\s*\{[^}]*box-sizing:border-box[^}]*max-width:100%[^}]*overflow-x:auto[^}]*overscroll-behavior-inline:contain/.test(home) && !/navigator\.clipboard|copy-button|client:/.test(home));
 check("migrated grid and storage wrappers render math on the server", (gridFigure.match(/<GridPartitionExplorer\b/g)?.length ?? 0) === 1 && /import \{ renderMath \}/.test(gridFigure) && /<GridPartitionExplorer client:visible mathMarkup=\{mathMarkup\}/.test(gridFigure) && !/client:load/.test(gridFigure) && (cellStorageFigure.match(/<CellStorageExplorer\b/g)?.length ?? 0) === 1 && /import \{ renderMath \}/.test(cellStorageFigure) && /<CellStorageExplorer client:visible mathMarkup=\{mathMarkup\}/.test(cellStorageFigure) && !/client:load/.test(cellStorageFigure));
 check("migrated interactive figures appear once on their promised detail routes", (griddingMath.match(/GridPartitionFigure/g)?.length ?? 0) === 3 && (griddingMath.match(/<GridPartitionFigure \/>/g)?.length ?? 0) === 1 && (coefficientAlgebra.match(/CellStorageFigure/g)?.length ?? 0) === 3 && (coefficientAlgebra.match(/<CellStorageFigure \/>/g)?.length ?? 0) === 1);
 check("migrated storage matrix preserves the documented lower-right entry", /2\+\\\\rho_1\^2/.test(cellStorageFigure) && !/2\+\\\\rho_2\^2/.test(cellStorageFigure) && /2 \+ rho1 \*\* 2/.test(cellBernstein));

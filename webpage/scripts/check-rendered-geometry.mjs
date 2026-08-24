@@ -9,6 +9,14 @@ const defaultViewports = [320, 390, 700, 768, 1024, 1280, 1440];
 const defaultThemes = ["light", "dark"];
 const tolerance = 1;
 const formulaShiftTolerance = 1;
+const welcomeCitation = "Yicheng Xu and Faryar Jabbari, “GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities,” arXiv:2608.03175, 2026.";
+const welcomeBibtex = `@article{xu2026gridlmia,
+  title         = {GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities},
+  author        = {Xu, Yicheng and Jabbari, Faryar},
+  year          = {2026},
+  eprint        = {2608.03175},
+  archivePrefix = {arXiv}
+}`;
 
 function commaSeparated(value) {
   return value?.split(",").map((item) => item.trim()).filter(Boolean) ?? [];
@@ -748,11 +756,42 @@ async function auditWelcomeRoot(browser, origin, failures) {
         const workflowColumns = workflow
           ? getComputedStyle(workflow).gridTemplateColumns.split(" ").filter(Boolean).length
           : 0;
+        const info = section.querySelector(".welcome-info");
+        const infoGrid = section.querySelector(".welcome-info__grid");
+        const infoLinks = [...section.querySelectorAll(".welcome-info a")]
+          .map((link) => new URL(link.href).pathname);
+        const citationCodes = [...section.querySelectorAll(".citation-code")]
+          .map((code) => {
+            const codeRect = code.getBoundingClientRect();
+            const cardRect = code.closest(".welcome-info__card")?.getBoundingClientRect();
+            const labelId = code.getAttribute("aria-labelledby") ?? "";
+            return {
+              overflowX: getComputedStyle(code).overflowX,
+              needsScroll: code.scrollWidth > code.clientWidth + 1,
+              tabIndex: code.tabIndex,
+              labelId,
+              labelText: labelId ? document.getElementById(labelId)?.textContent?.trim() ?? "" : "",
+              text: code.textContent ?? "",
+              contained: Boolean(
+                cardRect &&
+                codeRect.left >= cardRect.left - 1 &&
+                codeRect.right <= cardRect.right + 1
+              ),
+            };
+          });
         const text = section.textContent ?? "";
         return {
           actionCount: section.querySelectorAll(".welcome-actions a").length,
           workflowCount: section.querySelectorAll(".welcome-workflow a").length,
           workflowColumns,
+          infoCount: info ? 1 : 0,
+          infoHeadingCount: info?.querySelectorAll("h2").length ?? 0,
+          infoCardCount: info?.querySelectorAll(".welcome-info__card").length ?? 0,
+          infoColumns: infoGrid
+            ? getComputedStyle(infoGrid).gridTemplateColumns.split(" ").filter(Boolean).length
+            : 0,
+          infoLinks,
+          citationCodes,
           islandCount: section.querySelectorAll("astro-island").length,
           targetCount: section.querySelectorAll(".welcome-target").length,
           targetDisplayCount: section.querySelectorAll(".welcome-target > .formula-display > .katex-display").length,
@@ -771,11 +810,49 @@ async function auditWelcomeRoot(browser, origin, failures) {
         };
       });
 
+      const citationKeyboard = [];
+      const citationLocators = page.locator(".citation-code");
+      for (let index = 0; index < await citationLocators.count(); index += 1) {
+        const code = citationLocators.nth(index);
+        const needsScroll = await code.evaluate(
+          (node) => node.scrollWidth > node.clientWidth + 1,
+        );
+        let moved = false;
+        if (needsScroll) {
+          await code.evaluate((node) => { node.scrollLeft = 0; });
+          await code.focus();
+          for (let press = 0; press < 4; press += 1) {
+            await page.keyboard.press("ArrowRight");
+          }
+          await page.waitForTimeout(50);
+          moved = await code.evaluate((node) => node.scrollLeft > 0);
+        }
+        citationKeyboard.push({ needsScroll, moved });
+      }
+      welcome.citationKeyboard = citationKeyboard;
+
       const expectedColumns = viewport.width <= 620 ? 1 : 5;
+      const expectedInfoColumns = viewport.width <= 620 ? 1 : 3;
       if (
         welcome.actionCount !== 4 ||
         welcome.workflowCount !== 5 ||
         welcome.workflowColumns !== expectedColumns ||
+        welcome.infoCount !== 1 ||
+        welcome.infoHeadingCount !== 1 ||
+        welcome.infoCardCount !== 3 ||
+        welcome.infoColumns !== expectedInfoColumns ||
+        !["about", "version-history", "citing"].every((route) =>
+          welcome.infoLinks.some((path) => path.endsWith(`/${route}/`))
+        ) ||
+        welcome.citationCodes.length !== 2 ||
+        welcome.citationCodes.some((code) => code.overflowX !== "auto" || code.tabIndex !== 0 || !code.contained) ||
+        welcome.citationCodes[0]?.labelId !== "citation-plain-label" ||
+        welcome.citationCodes[0]?.labelText !== "Plain text" ||
+        welcome.citationCodes[0]?.text !== welcomeCitation ||
+        welcome.citationCodes[1]?.labelId !== "citation-bibtex-label" ||
+        welcome.citationCodes[1]?.labelText !== "BibTeX" ||
+        welcome.citationCodes[1]?.text !== welcomeBibtex ||
+        welcome.citationKeyboard.some((code) => code.needsScroll && !code.moved) ||
         welcome.islandCount !== 0 ||
         welcome.targetCount !== 1 ||
         welcome.targetDisplayCount !== 1 ||
