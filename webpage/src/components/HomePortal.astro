@@ -109,14 +109,16 @@ const bibtex = String.raw`@article{xu2026gridlmia,
       <h2 id="welcome-info-title">Authors, updates, and citation</h2>
     </header>
 
-    <div class="welcome-info__grid">
-      <article class="welcome-info__card">
+    <div class="welcome-info__stream">
+      <article class="welcome-info__item">
         <h3>Author and maintainer</h3>
         <p>Created and maintained by Yicheng Xu.</p>
         <a href={local("about/")}>About GriD-LMIA <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="welcome-info__card welcome-info__card--updates">
+      <hr class="welcome-info__separator" />
+
+      <article class="welcome-info__item">
         <h3>Latest in v1.4.1</h3>
         <ul>
           <li>pdlmi constraint concatenation</li>
@@ -127,7 +129,9 @@ const bibtex = String.raw`@article{xu2026gridlmia,
         <a href={local("version-history/")}>Full version history <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="welcome-info__card welcome-info__card--citation">
+      <hr class="welcome-info__separator" />
+
+      <article class="welcome-info__item">
         <h3>Cite GriD-LMIA</h3>
         <p class="citation-label" id="citation-plain-label">Plain text</p>
         <pre class="citation-code" aria-labelledby="citation-plain-label" tabindex="0"><code>{citation}</code></pre>
@@ -174,20 +178,23 @@ const bibtex = String.raw`@article{xu2026gridlmia,
   .diagram-label { font:800 18px/1 system-ui,sans-serif; letter-spacing:.08em; } .diagram-math { font:italic 16px/1 Georgia,serif; } .diagram-caption { font:600 14px/1 system-ui,sans-serif; } .certificate-symbol { font:38px/1 Georgia,serif; }
   .workflow-arrow { position:absolute; z-index:1; inset-block-start:58%; inset-inline-end:calc(clamp(1.15rem,2.6vw,2.4rem) * -.82); width:clamp(1.5rem,2.4vw,2.5rem); fill:none; stroke:var(--welcome-accent); stroke-linecap:round; stroke-linejoin:round; stroke-width:2.5; pointer-events:none; }
   .welcome-info { margin-block-start:clamp(1rem,1.7vw,1.4rem); border-block-start:1px solid var(--welcome-line); padding-block-start:clamp(1rem,1.7vw,1.35rem); }
-  .welcome-info__header { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:.25rem 1rem; margin-block-end:.75rem; }
+  .welcome-info__header { margin-block-end:.75rem; }
   .welcome-info__header p { margin:0; color:var(--welcome-accent); font-size:.74rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
-  .welcome-info h2 { margin:0; color:var(--welcome-ink); font-size:clamp(1.05rem,1.4vw,1.3rem); line-height:1.25; }
-  .welcome-info__grid { display:grid; grid-template-columns:minmax(11rem,.8fr) minmax(15rem,1.15fr) minmax(0,2fr); gap:.75rem; }
-  .welcome-info__card { min-width:0; border:1px solid var(--welcome-line); border-radius:10px; padding:.85rem; background:#fbfdff; }
-  .welcome-info__card h3 { margin:0 0 .45rem; color:var(--welcome-ink); font-size:.94rem; line-height:1.3; }
-  .welcome-info__card p { margin:.35rem 0; color:var(--welcome-muted); font-size:.84rem; line-height:1.45; }
-  .welcome-info__card ul { display:grid; gap:.18rem; margin:.3rem 0 .55rem; padding-inline-start:1.1rem; color:var(--welcome-muted); font-size:.82rem; line-height:1.35; }
-  .welcome-info__card a { display:inline-flex; align-items:center; gap:.25rem; margin-block-start:.25rem; color:var(--welcome-accent); font-size:.82rem; font-weight:750; text-decoration:none; }
-  .welcome-info__card a:hover { color:var(--welcome-teal); text-decoration:underline; }
-  .welcome-info__card .citation-label { margin:.25rem 0 .2rem; color:var(--welcome-ink); font-size:.7rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
-  .citation-code { box-sizing:border-box; max-width:100%; margin:0 0 .45rem; overflow-x:auto; overscroll-behavior-inline:contain; border:1px solid #d7e1ef; border-radius:6px; padding:.55rem .65rem; color:var(--welcome-ink); background:#f6f9ff; font-size:.7rem; line-height:1.4; white-space:pre; }
+  .welcome-info h2 { margin:.25rem 0 0; color:var(--welcome-ink); font-size:clamp(1.05rem,1.4vw,1.3rem); line-height:1.25; }
+  .welcome-info__stream { display:flex; flex-direction:column; }
+  .welcome-info__item { min-width:0; padding-block:1.35rem; }
+  .welcome-info__item:first-child { padding-block-start:1.45rem; }
+  .welcome-info__separator { width:100%; margin:0; border:0; border-block-start:1px solid var(--welcome-line); }
+  .welcome-info__item h3 { margin:0 0 .45rem; color:var(--welcome-ink); font-size:1rem; line-height:1.3; }
+  .welcome-info__item p { margin:.35rem 0; color:var(--welcome-muted); font-size:.9rem; line-height:1.45; }
+  .welcome-info__item ul { margin:.3rem 0 .55rem; padding-inline-start:1.1rem; color:var(--welcome-muted); font-size:.88rem; line-height:1.45; }
+  .welcome-info__item li + li { margin-block-start:.18rem; }
+  .welcome-info__item a { display:inline-flex; align-items:center; gap:.25rem; margin-block-start:.25rem; color:var(--welcome-accent); font-size:.86rem; font-weight:750; text-decoration:none; }
+  .welcome-info__item a:hover { color:var(--welcome-teal); text-decoration:underline; }
+  .welcome-info__item .citation-label { margin:.25rem 0 .2rem; color:var(--welcome-ink); font-size:.72rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+  .citation-code { box-sizing:border-box; max-width:100%; margin:0 0 .45rem; overflow-x:auto; overscroll-behavior-inline:contain; border:1px solid #d7e1ef; border-radius:6px; padding:.55rem .65rem; color:var(--welcome-ink); background:#f6f9ff; font-size:.74rem; line-height:1.4; white-space:pre; }
   .citation-code--bibtex { max-height:8.2rem; }
-  @media (max-width:1050px) { .welcome-workflow { grid-template-columns:repeat(2,minmax(0,1fr)); } .welcome-workflow > li:last-child { grid-column:1/-1; width:min(50%,22rem); justify-self:center; } .workflow-arrow { display:none; } .welcome-info__grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .welcome-info__card--citation { grid-column:1/-1; } }
-  @media (max-width:620px) { :global(.sl-markdown-content > .welcome) { margin-inline:-.25rem; } .welcome { border-radius:16px; padding:1.15rem; } .welcome h1 { font-size:clamp(2.8rem,18vw,4.4rem); } .welcome-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; } .welcome-action { min-width:0; padding-inline:.75rem; } .welcome-workflow { grid-template-columns:minmax(0,1fr); gap:.85rem; } .welcome-workflow > li:last-child { grid-column:auto; width:100%; } .workflow-step { grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto; justify-items:center; border-block-start:1px solid var(--welcome-line); border-radius:0; padding-block:1rem; } .workflow-heading { width:100%; min-height:0; } .workflow-heading > span:last-child { overflow-wrap:normal; word-break:normal; hyphens:none; } .workflow-visual { grid-column:1; grid-row:2; } .workflow-visual > svg { width:min(100%,8.5rem); } .welcome-info__header { display:block; } .welcome-info__header h2 { margin-block-start:.25rem; } .welcome-info__grid { grid-template-columns:minmax(0,1fr); } .welcome-info__card--citation { grid-column:auto; } }
+  @media (max-width:1050px) { .welcome-workflow { grid-template-columns:repeat(2,minmax(0,1fr)); } .welcome-workflow > li:last-child { grid-column:1/-1; width:min(50%,22rem); justify-self:center; } .workflow-arrow { display:none; } }
+  @media (max-width:620px) { :global(.sl-markdown-content > .welcome) { margin-inline:-.25rem; } .welcome { border-radius:16px; padding:1.15rem; } .welcome h1 { font-size:clamp(2.8rem,18vw,4.4rem); } .welcome-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; } .welcome-action { min-width:0; padding-inline:.75rem; } .welcome-workflow { grid-template-columns:minmax(0,1fr); gap:.85rem; } .welcome-workflow > li:last-child { grid-column:auto; width:100%; } .workflow-step { grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto; justify-items:center; border-block-start:1px solid var(--welcome-line); border-radius:0; padding-block:1rem; } .workflow-heading { width:100%; min-height:0; } .workflow-heading > span:last-child { overflow-wrap:normal; word-break:normal; hyphens:none; } .workflow-visual { grid-column:1; grid-row:2; } .workflow-visual > svg { width:min(100%,8.5rem); } }
   @media (prefers-reduced-motion:reduce) { .welcome-action,.workflow-step { transition:none; } }
 </style>

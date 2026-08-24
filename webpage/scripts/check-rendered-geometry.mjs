@@ -757,13 +757,15 @@ async function auditWelcomeRoot(browser, origin, failures) {
           ? getComputedStyle(workflow).gridTemplateColumns.split(" ").filter(Boolean).length
           : 0;
         const info = section.querySelector(".welcome-info");
-        const infoGrid = section.querySelector(".welcome-info__grid");
+        const infoStream = section.querySelector(".welcome-info__stream");
         const infoLinks = [...section.querySelectorAll(".welcome-info a")]
           .map((link) => new URL(link.href).pathname);
+        const infoOrder = [...section.querySelectorAll(".welcome-info__item h3")]
+          .map((heading) => heading.textContent?.trim() ?? "");
         const citationCodes = [...section.querySelectorAll(".citation-code")]
           .map((code) => {
             const codeRect = code.getBoundingClientRect();
-            const cardRect = code.closest(".welcome-info__card")?.getBoundingClientRect();
+            const itemRect = code.closest(".welcome-info__item")?.getBoundingClientRect();
             const labelId = code.getAttribute("aria-labelledby") ?? "";
             return {
               overflowX: getComputedStyle(code).overflowX,
@@ -773,9 +775,9 @@ async function auditWelcomeRoot(browser, origin, failures) {
               labelText: labelId ? document.getElementById(labelId)?.textContent?.trim() ?? "" : "",
               text: code.textContent ?? "",
               contained: Boolean(
-                cardRect &&
-                codeRect.left >= cardRect.left - 1 &&
-                codeRect.right <= cardRect.right + 1
+                itemRect &&
+                codeRect.left >= itemRect.left - 1 &&
+                codeRect.right <= itemRect.right + 1
               ),
             };
           });
@@ -786,10 +788,11 @@ async function auditWelcomeRoot(browser, origin, failures) {
           workflowColumns,
           infoCount: info ? 1 : 0,
           infoHeadingCount: info?.querySelectorAll("h2").length ?? 0,
-          infoCardCount: info?.querySelectorAll(".welcome-info__card").length ?? 0,
-          infoColumns: infoGrid
-            ? getComputedStyle(infoGrid).gridTemplateColumns.split(" ").filter(Boolean).length
-            : 0,
+          infoItemCount: info?.querySelectorAll(".welcome-info__item").length ?? 0,
+          infoSeparatorCount: info?.querySelectorAll(".welcome-info__separator").length ?? 0,
+          infoDisplay: infoStream ? getComputedStyle(infoStream).display : "",
+          infoDirection: infoStream ? getComputedStyle(infoStream).flexDirection : "",
+          infoOrder,
           infoLinks,
           citationCodes,
           islandCount: section.querySelectorAll("astro-island").length,
@@ -832,15 +835,21 @@ async function auditWelcomeRoot(browser, origin, failures) {
       welcome.citationKeyboard = citationKeyboard;
 
       const expectedColumns = viewport.width <= 620 ? 1 : 5;
-      const expectedInfoColumns = viewport.width <= 620 ? 1 : 3;
       if (
         welcome.actionCount !== 4 ||
         welcome.workflowCount !== 5 ||
         welcome.workflowColumns !== expectedColumns ||
         welcome.infoCount !== 1 ||
         welcome.infoHeadingCount !== 1 ||
-        welcome.infoCardCount !== 3 ||
-        welcome.infoColumns !== expectedInfoColumns ||
+        welcome.infoItemCount !== 3 ||
+        welcome.infoSeparatorCount !== 2 ||
+        welcome.infoDisplay !== "flex" ||
+        welcome.infoDirection !== "column" ||
+        JSON.stringify(welcome.infoOrder) !== JSON.stringify([
+          "Author and maintainer",
+          "Latest in v1.4.1",
+          "Cite GriD-LMIA",
+        ]) ||
         !["about", "version-history", "citing"].every((route) =>
           welcome.infoLinks.some((path) => path.endsWith(`/${route}/`))
         ) ||

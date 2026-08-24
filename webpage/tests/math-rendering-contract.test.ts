@@ -178,6 +178,43 @@ test("keeps Welcome author, v1.4.1 highlights, and citation source-grounded", ()
   assert.doesNotMatch(homePortal, /navigator\.clipboard|copy-button|client:/);
 });
 
+test("keeps Welcome project information in one open vertical stream", () => {
+  const homePortal = read("src/components/HomePortal.astro");
+  const infoStart = homePortal.indexOf('<section class="welcome-info"');
+  const infoMarkup = homePortal.slice(infoStart, homePortal.indexOf("<style>"));
+  const infoStyles = homePortal.slice(
+    homePortal.indexOf(".welcome-info {"),
+    homePortal.indexOf(".citation-code {"),
+  );
+
+  // The source order is the reading order; separators divide content without
+  // introducing alternate card, column, grid, or tab navigation structures.
+  assert.notEqual(infoStart, -1);
+  assert.equal((infoMarkup.match(/class="welcome-info__stream"/g) ?? []).length, 1);
+  assert.match(
+    infoMarkup,
+    /Author and maintainer[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Latest in v1\.4\.1[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Cite GriD-LMIA/,
+  );
+  assert.equal((infoMarkup.match(/class="welcome-info__separator"/g) ?? []).length, 2);
+  assert.doesNotMatch(infoMarkup, /welcome-info__(?:card|column|grid|tab)|role="tablist"|<details\b/i);
+  assert.match(
+    homePortal,
+    /\.welcome-info__stream\s*\{[^}]*display:flex[^}]*flex-direction:column/,
+  );
+  assert.match(infoStyles, /\.welcome-info__item\s*\{[^}]*padding-block:1\.35rem/);
+  assert.match(infoStyles, /\.welcome-info__item:first-child\s*\{[^}]*padding-block-start:1\.45rem/);
+  assert.match(infoStyles, /\.welcome-info__item h3\s*\{[^}]*font-size:1rem/);
+  assert.match(infoStyles, /\.welcome-info__item p\s*\{[^}]*font-size:\.9rem/);
+  assert.match(infoStyles, /\.welcome-info__item ul\s*\{[^}]*font-size:\.88rem[^}]*line-height:1\.45/);
+  assert.match(infoStyles, /\.welcome-info__item a\s*\{[^}]*font-size:\.86rem/);
+  assert.match(infoStyles, /\.welcome-info__item \.citation-label\s*\{[^}]*font-size:\.72rem/);
+  assert.match(homePortal, /\.citation-code\s*\{[^}]*font-size:\.74rem/);
+  assert.doesNotMatch(
+    infoStyles,
+    /display:grid|grid-template/,
+  );
+});
+
 test("centered component formulas use display mode and keep the storage RHS intact", async () => {
   const storageFigure = read("src/components/CellStorageFigure.astro");
   const storage = read("src/components/CellStorageExplorer.tsx");
