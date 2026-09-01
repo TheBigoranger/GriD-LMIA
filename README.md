@@ -7,10 +7,10 @@ grids. It represents known data (`pdmat`) and continuous decision matrices
 rate-vertex derivatives with `rhodiff`, and exports finite certificates to
 YALMIP through `pdlmi`.
 
-Current source and documentation: **v1.4.1**. Latest tagged GitHub Release:
+Current source and documentation: **v1.4.2**. Latest tagged GitHub Release:
 **v1.4.0**.
 
-## What changed in v1.4.1
+## What changed in v1.4.2
 
 - Scalar `pdlmi` wrappers can be concatenated horizontally or vertically with
   other wrappers and native YALMIP `constraint` or `lmi` lists. Concatenation
@@ -22,6 +22,9 @@ Current source and documentation: **v1.4.1**. Latest tagged GitHub Release:
   from the GriD-LMIA software paper, a delay-system paper, ROLMIP, and a control
   systems textbook. Each script records its source, settings, tunable values,
   solver diagnostics, and numerical comparison.
+- Example filenames now use problem-oriented semantic names. Authors, years,
+  publication numbering, certificate choices, and tunable numerical settings
+  remain in the script headers and catalog rather than the paths.
 - The printable and Web manuals document the new API and examples. The public
   inventory now contains 194 symbols.
 

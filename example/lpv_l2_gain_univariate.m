@@ -1,4 +1,4 @@
-% MASUBUCHI1998_UNIVARIATE_SOS Reproduce a short one-parameter SOS case.
+% LPV_L2_GAIN_UNIVARIATE Reproduce a short one-parameter LPV gain case.
 %
 % Provenance
 %   Source: Masubuchi, Kume, and Shimemura, "Spline-Type Solution to

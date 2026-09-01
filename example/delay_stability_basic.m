@@ -1,4 +1,4 @@
-% DELAY_CASE_A_THEOREM2_SOS Reproduce the simple delay theorem with SOS.
+% DELAY_STABILITY_BASIC Reproduce the basic delay-stability construction.
 %
 % Provenance
 %   Source: Yicheng Xu, "Stability Analysis of Time-Varying Delay Systems

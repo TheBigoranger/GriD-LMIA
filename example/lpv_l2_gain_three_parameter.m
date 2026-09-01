@@ -1,4 +1,4 @@
-% AGULHARI2019_THREE_PARAMETER_DIRECT Reproduce the three-parameter case.
+% LPV_L2_GAIN_THREE_PARAMETER Reproduce the three-parameter LPV gain case.
 %
 % Provenance
 %   Source: Agulhari, Felipe, Oliveira, and Peres, "Algorithm 998: The Robust

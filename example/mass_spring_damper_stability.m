@@ -1,4 +1,4 @@
-% YU_DUAN2013_EXAMPLE_4_10_MASS_SPRING_DAMPER Reproduce Example 4.10.
+% MASS_SPRING_DAMPER_STABILITY Reproduce a mass-spring-damper stability case.
 %
 % Provenance
 %   Source: Hai-Hua Yu and Guangren Duan, LMIs in Control Systems: Analysis,

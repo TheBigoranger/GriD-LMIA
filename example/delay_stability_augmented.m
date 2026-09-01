@@ -1,4 +1,4 @@
-% DELAY_CASE_A_THEOREM3_DIRECT_10CELL Reproduce the augmented delay theorem.
+% DELAY_STABILITY_AUGMENTED Reproduce the augmented delay-stability construction.
 %
 % Provenance
 %   Source: Yicheng Xu, "Stability Analysis of Time-Varying Delay Systems

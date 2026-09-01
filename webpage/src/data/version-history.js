@@ -1,10 +1,10 @@
 export const versionHistory = [
   {
-    version: "v1.4.1",
-    date: "2026-08-23",
+    version: "v1.4.2",
+    date: "2026-08-31",
     status: "current documentation snapshot",
     summary:
-      "Documents terminal pdlmi constraint concatenation, adds seven source-grounded reproduction scripts, and separates source-authoring builds from PDF-only publication builds. The synchronized manuals index 194 public API records.",
+      "Documents terminal pdlmi constraint concatenation, records seven source-grounded examples at stable problem-oriented paths, and separates source-authoring builds from PDF-only publication builds. The synchronized manuals index 194 public API records.",
   },
   {
     version: "v1.4.0",

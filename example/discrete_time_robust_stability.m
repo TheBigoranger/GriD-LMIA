@@ -1,4 +1,4 @@
-% ROLMIP_MANUAL_SECTION_7_1_DISCRETE_STABILITY Reproduce ROLMIP §7.1.
+% DISCRETE_TIME_ROBUST_STABILITY Reproduce a discrete-time robust-stability case.
 %
 % Provenance
 %   Source: ROLMIP User's Manual, §7.1, "Robust Stability Analysis," and

@@ -1,4 +1,4 @@
-% YU_DUAN2013_EXAMPLE_4_9_AFFINE_STABILITY Reproduce textbook Example 4.9.
+% CONTINUOUS_TIME_ROBUST_STABILITY Reproduce a continuous-time robust-stability case.
 %
 % Provenance
 %   Source: Hai-Hua Yu and Guangren Duan, LMIs in Control Systems: Analysis,
