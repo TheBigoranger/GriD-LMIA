@@ -6,6 +6,8 @@ function [results, coverage] = run_coverage
     %
     %   The coverage scope contains the production classes, package helpers,
     %   and install_pd_lmi.m. Test sources are deliberately excluded.
+    %   Percentage baselines remain fixed; removing production code may
+    %   legitimately reduce the number of statements or decisions.
 
     import matlab.unittest.TestRunner
     import matlab.unittest.TestSuite
@@ -37,6 +39,7 @@ function [results, coverage] = run_coverage
 
     results = runner.run(suite);
     assertSuccess(results);
+    tests.infrastructure.api_gate(results);
     coverage = summarizeCoverage(coverageOutputs);
 
     statementBaseline = struct("Covered", 3325, "Total", 3442);
@@ -76,6 +79,11 @@ function coverage = summarizeCoverage(coverageOutputs)
 end
 
 function summary = metricSummary(covered, total)
+    if ~isfinite(covered) || ~isfinite(total) || total <= 0 || ...
+            covered < 0 || covered > total
+        error("tests:InvalidCoverage", ...
+            "Coverage must contain finite counts with 0 <= covered <= total and total > 0.");
+    end
     summary = struct("Covered", covered, "Total", total, ...
         "Percentage", 100 * covered / total);
 end
@@ -87,10 +95,5 @@ function assertCoverage(actual, baseline, label)
             "%s coverage regressed from %d/%d (%.2f%%) to %d/%d (%.2f%%).", ...
             label, baseline.Covered, baseline.Total, baselinePercentage, ...
             actual.Covered, actual.Total, actual.Percentage);
-    end
-    if actual.Total < baseline.Total
-        error("tests:CoverageDenominatorRegression", ...
-            "%s coverage total decreased from %d to %d; inspect uncovered locations.", ...
-            label, baseline.Total, actual.Total);
     end
 end

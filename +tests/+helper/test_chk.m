@@ -1,9 +1,19 @@
 function tests = test_chk
-    %TEST_CHK Shared sanity predicate helper.
+    % Behavioral regressions for helper.chk.
     tests = functiontests(localfunctions);
 end
 
-function testValNumPreRetInp(testCase)
+function test_later_matrix_entry_and_last_rate_bound_fail(testCase)
+    % Later invalid entries must retain the caller diagnostic in chained checks.
+    testCase.verifyError(@() helper.chk([1 2;3 NaN], "fixture:value", ...
+        "matrix", "numeric", "real", "finite"), "fixture:value");
+    testCase.verifyError(@() helper.chk([-2 3;5 4], "fixture:bounds", ...
+        "bounds", "numeric", "finite", "rowbounds"), "fixture:bounds");
+    testCase.verifyEqual(helper.chk([-2 3;5 5], "fixture:bounds", ...
+        "bounds", "numeric", "finite", "rowbounds"), [-2 3;5 5]);
+end
+
+function test_valid_numeric_predicate_chains_return_original(testCase)
     % Valid numeric predicate chains should return the original value.
     val = helper.chk([1 2], "test:InvalidValue", "bad value", ...
         "numeric", "real", "finite", "integer", "positive", "Size", [1, 2]);
@@ -11,7 +21,7 @@ function testValNumPreRetInp(testCase)
     testCase.verifyEqual(val, [1 2]);
 end
 
-function testCelShaPreUseCal(testCase)
+function test_cell_validation_failures_preserve_caller_id(testCase)
     % Cell validation failures preserve the caller ID and standard label text.
     err = catchErr(@() helper.chk({1, 2}, "test:InvalidCell", ...
         "bad cell", "cell", "Numel", 3));
@@ -21,7 +31,7 @@ function testCelShaPreUseCal(testCase)
         "bad cell must contain 3 elements.");
 end
 
-function testMatrixPredicate(testCase)
+function test_matrix_predicates_accept_2_d_matrices(testCase)
     % Matrix predicates should accept 2-D matrices and reject N-D arrays.
     testCase.verifyEqual(helper.chk(eye(2), "test:InvalidMatrix", "bad matrix", ...
         "numeric", "real", "finite", "matrix", "nonempty"), eye(2));
@@ -29,13 +39,13 @@ function testMatrixPredicate(testCase)
         "bad matrix", "matrix"), "test:InvalidMatrix");
 end
 
-function testUnkPreFaiAsVal(testCase)
+function test_unknown_predicate_tags_indicate_helper_bug(testCase)
     % Unknown predicate tags indicate a helper bug, not caller bad input.
     testCase.verifyError(@() helper.chk(1, "test:InvalidValue", "bad value", ...
         "not-a-predicate"), "helper:InvalidValidatorCall");
 end
 
-function testMsgAndPrecedence(testCase)
+function test_predicate_order_owns_first_standardized_failure(testCase)
     % Predicate order owns the first standardized failure and its message.
     err = catchErr(@() helper.chk("bad", "test:InvalidValue", ...
         "input value", "numeric", "finite", "vector"));
@@ -51,7 +61,7 @@ function testMsgAndPrecedence(testCase)
         "input value must be scalar.");
 end
 
-function testBouOptAndCalErr(testCase)
+function test_range_count_options_caller_errors_malformed(testCase)
     % Range and count options retain caller errors; malformed calls are helper bugs.
     testCase.verifyError(@() helper.chk(-1, "test:InvalidValue", ...
         "input value", "nonnegative"), "test:InvalidValue");

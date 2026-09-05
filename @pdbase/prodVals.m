@@ -1,6 +1,6 @@
 function vals = prodVals(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
         grid, errId, validationMode, lhsNumRateRows, rhsNumRateRows)
-    %PRODVALS Multiply complete cell-local Bernstein coefficient trees.
+    %PRODVALS Multiply complete cell-wise Bernstein coefficient trees.
     %
     %   Syntax:
     %     vals = obj.prodVals(lhsVals, lhsDeg, rhsVals, rhsDeg, grid, errId)
@@ -27,7 +27,7 @@ function vals = prodVals(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
     %         rhs.LocalValues, rhs.Degree, lhs.GridInfo.Vectors, ...
     %         "pdmat:InvalidProduct", "fast");
     %
-    %   This protected kernel owns the cell-local Bernstein convolution used
+    %   This protected kernel owns the cell-wise Bernstein convolution used
     %   by pdmat and pdvar multiplication. Ordinary rows may broadcast over one
     %   active derivative-rate table, but products with actual rate rows on
     %   both sides are rejected because they would be quadratic in rho_dot.
@@ -51,6 +51,7 @@ function vals = prodVals(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
         "scalar"));
     nPar = obj.npar();
     plan = mkPlan(nPar, lhsDeg, rhsDeg);
+    plan = addPairPlan(plan);
     nCell = cellfun(@numel, grid) - 1;
     firstCell = true;
     vals = helper.mkNest(nCell, @prodAt);
@@ -59,13 +60,13 @@ function vals = prodVals(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
         lhs = helper.cellGet(lhsVals, subs);
         rhs = helper.cellGet(rhsVals, subs);
         doChk = validationMode == "strict" || firstCell;
-        [coeffs, plan] = prodRows(lhs, rhs, plan, ...
+        coeffs = prodRows(lhs, rhs, plan, ...
             lhsNumRateRows, rhsNumRateRows, errId, doChk);
         firstCell = false;
     end
 end
 
-function [coeffs, plan] = prodRows(lhs, rhs, plan, lhsRows, rhsRows, ...
+function coeffs = prodRows(lhs, rhs, plan, lhsRows, rhsRows, ...
         errId, doChk)
     %PRODROWS Broadcast an ordinary row over at most one rate-row operand.
     if doChk
@@ -79,7 +80,7 @@ function [coeffs, plan] = prodRows(lhs, rhs, plan, lhsRows, rhsRows, ...
             "Products may contain actual rate-vertex rows on at most one side.");
     end
     if ~lhsRate && ~rhsRate
-        [coeffs, plan] = prodRow(lhs, rhs, plan);
+        coeffs = prodRow(lhs, rhs, plan);
         return
     end
     nRows = max(size(lhs, 1), size(rhs, 1));
@@ -87,36 +88,66 @@ function [coeffs, plan] = prodRows(lhs, rhs, plan, lhsRows, rhsRows, ...
     for row = 1:nRows
         left = lhs(min(row, size(lhs, 1)), :);
         right = rhs(min(row, size(rhs, 1)), :);
-        [rowVals, plan] = prodRow(left, right, plan);
+        rowVals = prodRow(left, right, plan);
         coeffs(row, :) = rowVals;
     end
 end
 
-function [out, plan] = prodRow(lhs, rhs, plan)
-    %PRODROW Select the numeric, known-affine, or generic local kernel.
-    lhsNum = all(cellfun(@isnumeric, lhs));
-    rhsNum = all(cellfun(@isnumeric, rhs));
-    if lhsNum && rhsNum
-        plan = addTenPlan(plan);
-        out = numProd(lhs, rhs, plan);
-        return
+function out = prodRow(lhs, rhs, plan)
+    %PRODROW Contract weighted coefficient blocks for numeric or affine data.
+    knownLeft = all(cellfun(@isnumeric, lhs));
+    lhsSize = size(lhs{1});
+    rhsSize = size(rhs{1});
+    reshapeOutput = false;
+    % Flatten the matrix factor for scalar multiplication so the same block
+    % contraction applies without expanding scalars into identity matrices.
+    if isequal(lhsSize, [1 1]) && ~isequal(rhsSize, [1 1])
+        outSize = rhsSize;
+        rhs = cellfun(@(a) reshape(a, 1, []), rhs, UniformOutput=false);
+        reshapeOutput = true;
+    elseif isequal(rhsSize, [1 1]) && ~isequal(lhsSize, [1 1])
+        outSize = lhsSize;
+        lhs = cellfun(@(a) reshape(a, [], 1), lhs, UniformOutput=false);
+        reshapeOutput = true;
     end
-    lhsAff = any(cellfun(@(val) isa(val, "sdpvar"), lhs));
-    rhsAff = any(cellfun(@(val) isa(val, "sdpvar"), rhs));
-    lhsScalar = isequal(size(lhs{1}), [1 1]);
-    rhsScalar = isequal(size(rhs{1}), [1 1]);
-    plan = addPairPlan(plan);
-    if lhsNum && rhsAff && ~lhsScalar && ~rhsScalar
-        out = affProd(lhs, rhs, plan, true);
-    elseif lhsAff && rhsNum && ~lhsScalar && ~rhsScalar
-        out = affProd(lhs, rhs, plan, false);
+    if knownLeft
+        blocks = vertcat(rhs{:});
+        blockSize = size(rhs{1}, 1);
     else
-        out = genProd(lhs, rhs, plan);
+        blocks = horzcat(lhs{:});
+        blockSize = size(lhs{1}, 2);
+    end
+
+    out = cell(1, plan.OutputCount);
+    for outIdx = 1:plan.OutputCount
+        pairs = plan.Pairs{outIdx};
+        scales = plan.Scales{outIdx};
+        nPair = size(pairs, 1);
+        if knownLeft
+            left = cell(1, nPair);
+            for k = 1:nPair
+                left{k} = lhs{pairs(k, 1)} .* scales(k);
+            end
+            rows = reshape((((pairs(:, 2) - 1) * blockSize) + ...
+                (1:blockSize)).', [], 1);
+            out{outIdx} = horzcat(left{:}) * blocks(rows, :);
+        else
+            right = cell(nPair, 1);
+            for k = 1:nPair
+                right{k} = rhs{pairs(k, 2)} .* scales(k);
+            end
+            cols = reshape((((pairs(:, 1) - 1) * blockSize) + ...
+                (1:blockSize)).', [], 1);
+            out{outIdx} = blocks(:, cols) * vertcat(right{:});
+        end
+        if reshapeOutput
+            out{outIdx} = reshape(out{outIdx}, outSize);
+        end
     end
 end
 
 function plan = mkPlan(nPar, lhsDeg, rhsDeg)
-    %MKPLAN Normalize degrees before adding the required kernel plan lazily.
+    %MKPLAN Normalize degrees and record coefficient counts for the product.
     lhsDeg = helper.normDeg(lhsDeg, nPar, ...
         "pdbase:InvalidDegree", "lhsDeg");
     rhsDeg = helper.normDeg(rhsDeg, nPar, ...
@@ -133,10 +164,7 @@ function plan = mkPlan(nPar, lhsDeg, rhsDeg)
 end
 
 function plan = addPairPlan(plan)
-    %ADDPAIRPLAN Build coefficient pairs only for affine or generic products.
-    if isfield(plan, "Pairs")
-        return
-    end
+    %ADDPAIRPLAN Build shared coefficient pairs and weights for every cell.
     lhsLbl = mkLbls(plan.LhsDegree);
     outLbl = mkLbls(plan.OutputDegree);
     % Map row-major tensor labels to flat repository positions.
@@ -172,28 +200,6 @@ function plan = addPairPlan(plan)
     end
     plan.Pairs = pairs;
     plan.Scales = scales;
-end
-
-function plan = addTenPlan(plan)
-    %ADDTENPLAN Build tensor metadata only for numeric convolution.
-    if isfield(plan, "LhsTensorIndices")
-        return
-    end
-    lhsLbl = mkLbls(plan.LhsDegree);
-    rhsLbl = mkLbls(plan.RhsDegree);
-    outLbl = mkLbls(plan.OutputDegree);
-    lhsW = helper.bernConvWeights(lhsLbl, plan.LhsDegree);
-    rhsW = helper.bernConvWeights(rhsLbl, plan.RhsDegree);
-    outW = helper.bernConvWeights(outLbl, plan.OutputDegree);
-    plan.LhsWeights = lhsW;
-    plan.RhsWeights = rhsW;
-    plan.OutputWeights = outW;
-    plan.LhsTensorIndices = tenIndex(lhsLbl, plan.LhsDegree);
-    plan.RhsTensorIndices = tenIndex(rhsLbl, plan.RhsDegree);
-    plan.OutputTensorIndices = tenIndex(outLbl, plan.OutputDegree);
-    plan.LhsShape = tenShape(plan.LhsDegree, plan.NumParameters);
-    plan.RhsShape = tenShape(plan.RhsDegree, plan.NumParameters);
-    plan.OutputShape = tenShape(plan.OutputDegree, plan.NumParameters);
 end
 
 function chkLeaf(lhs, rhs, plan, lhsRows, rhsRows, errId)
@@ -240,138 +246,6 @@ function sz = getSize(rows, errId)
             error(errId, ...
                 "Every coefficient on one product side must have the same matrix size.");
         end
-    end
-end
-
-function out = numProd(lhs, rhs, plan)
-    %NUMPROD Apply binomial-weighted tensor convolution entry-wise.
-    lhsSize = size(lhs{1});
-    rhsSize = size(rhs{1});
-    lhsScalar = isequal(lhsSize, [1 1]);
-    rhsScalar = isequal(rhsSize, [1 1]);
-    if lhsScalar
-        outSize = rhsSize;
-        innerCount = 1;
-    elseif rhsScalar
-        outSize = lhsSize;
-        innerCount = 1;
-    else
-        outSize = [lhsSize(1), rhsSize(2)];
-        innerCount = lhsSize(2);
-    end
-    leftTen = packTen(lhs, lhsSize, plan.LhsShape, ...
-        plan.LhsTensorIndices, plan.LhsWeights);
-    rightTen = packTen(rhs, rhsSize, plan.RhsShape, ...
-        plan.RhsTensorIndices, plan.RhsWeights);
-    out = repmat({zeros(outSize)}, 1, plan.OutputCount);
-    for row = 1:outSize(1)
-        for col = 1:outSize(2)
-            tensor = zeros(plan.OutputShape);
-            for inner = 1:innerCount
-                if lhsScalar
-                    left = leftTen{1, 1};
-                    right = rightTen{row, col};
-                elseif rhsScalar
-                    left = leftTen{row, col};
-                    right = rightTen{1, 1};
-                else
-                    left = leftTen{row, inner};
-                    right = rightTen{inner, col};
-                end
-                if plan.NumParameters == 1
-                    tensor = tensor + conv(left(:), right(:));
-                else
-                    tensor = tensor + convn(left, right);
-                end
-            end
-            values = tensor(plan.OutputTensorIndices) ./ plan.OutputWeights;
-            for k = 1:plan.OutputCount
-                out{k}(row, col) = values(k);
-            end
-        end
-    end
-end
-
-function tensors = packTen(coeffs, sz, shape, indices, weights)
-    %PACKTEN Pack all matrix entries into weighted coefficient tensors.
-    nCoeff = numel(coeffs);
-    stack = cat(3, coeffs{:});
-    values = reshape(permute(stack, [3 1 2]), nCoeff, []);
-    values = values .* weights;
-
-    packed = zeros(prod(shape), prod(sz));
-    packed(indices, :) = values;
-    tensors = cell(sz);
-    for entry = 1:prod(sz)
-        tensors{entry} = reshape(packed(:, entry), shape);
-    end
-end
-
-function out = affProd(lhs, rhs, plan, knownLeft)
-    %AFFPROD Contract all contributing known-affine pairs at once.
-    if knownLeft
-        symbolic = vertcat(rhs{:});
-        blockSize = size(rhs{1}, 1);
-    else
-        symbolic = horzcat(lhs{:});
-        blockSize = size(lhs{1}, 2);
-    end
-
-    out = cell(1, plan.OutputCount);
-    for outIdx = 1:plan.OutputCount
-        pairs = plan.Pairs{outIdx};
-        scales = plan.Scales{outIdx};
-        nPair = size(pairs, 1);
-        if knownLeft
-            left = cell(1, nPair);
-            for k = 1:nPair
-                left{k} = lhs{pairs(k, 1)} .* scales(k);
-            end
-            rows = reshape((((pairs(:, 2) - 1) * blockSize) + ...
-                (1:blockSize)).', [], 1);
-            out{outIdx} = horzcat(left{:}) * symbolic(rows, :);
-        else
-            right = cell(nPair, 1);
-            for k = 1:nPair
-                right{k} = rhs{pairs(k, 2)} .* scales(k);
-            end
-            cols = reshape((((pairs(:, 1) - 1) * blockSize) + ...
-                (1:blockSize)).', [], 1);
-            out{outIdx} = symbolic(:, cols) * vertcat(right{:});
-        end
-    end
-end
-
-function out = genProd(lhs, rhs, plan)
-    %GENPROD Accumulate the precomputed coefficient-pair map.
-    out = cell(1, plan.OutputCount);
-    for outIdx = 1:plan.OutputCount
-        pairs = plan.Pairs{outIdx};
-        scales = plan.Scales{outIdx};
-        acc = [];
-        for k = 1:size(pairs, 1)
-            term = (lhs{pairs(k, 1)} * rhs{pairs(k, 2)}) .* scales(k);
-            if isempty(acc)
-                acc = term;
-            else
-                acc = acc + term;
-            end
-        end
-        out{outIdx} = acc;
-    end
-end
-
-function indices = tenIndex(labels, degree)
-    %TENINDEX Map repository labels into MATLAB tensor storage.
-    mult = cumprod([1, degree(1:end - 1) + 1]);
-    indices = labels * mult' + 1;
-end
-
-function shape = tenShape(degree, nPar)
-    %TENSHAPE Keep one-parameter tensors as column vectors.
-    shape = degree + 1;
-    if nPar == 1
-        shape = [degree + 1, 1];
     end
 end
 

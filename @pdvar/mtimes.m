@@ -18,6 +18,20 @@ function out = mtimes(lhs, rhs)
     %     A = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     %     C = A * P;
 
+    % Zero and cancellation shortcuts cannot supply missing coefficient evidence.
+    if (isa(lhs, "pdmat") && lhs.SourceSummary == "function") || ...
+            (isa(rhs, "pdmat") && rhs.SourceSummary == "function")
+        error("pdvar:FunctionOnlyAlgebra", ...
+            "Function-backed pdmat objects need explicit Bernstein coefficient evidence for this operation.");
+    end
+
+    % An active rate table stays rate-dependent even when its values are zero.
+    if isa(lhs, "pdbase") && isa(rhs, "pdbase") && ...
+            lhs.NumRateRows ~= 0 && rhs.NumRateRows ~= 0
+        error("pdvar:InvalidMultiplication", ...
+            "Products may contain derivative rate vertices on at most one side.");
+    end
+
     % Classify special paths before entering general coefficient algebra.
     route = routeProd(lhs, rhs);
     switch route

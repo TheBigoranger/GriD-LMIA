@@ -68,13 +68,24 @@ function out = rhodiff(obj, rb)
     end
 
     nCell = obj.GridInfo.NumNodes - 1;
-    vals = helper.mkNest(nCell, ...
-        @(subs) diffCell(obj, subs, verts, outDeg, plans));
+    firstCell = true;
+    vals = helper.mkNest(nCell, @mkCell);
     hasDec = obj.ContainsDecision && any(deg > 0);
     out = obj.mkRhodiff(outDeg, vals, rb, hasDec, size(verts, 1));
+
+    function coeffs = mkCell(subs)
+        % Capture expanded elevation kernels once, then share only numeric
+        % plans across cells; every cell still computes its own partials.
+        if firstCell
+            [coeffs, plans] = diffCell(obj, subs, verts, outDeg, plans);
+            firstCell = false;
+        else
+            coeffs = diffCell(obj, subs, verts, outDeg, plans);
+        end
+    end
 end
 
-function coeffs = diffCell(obj, subs, verts, outDeg, plans)
+function [coeffs, plans] = diffCell(obj, subs, verts, outDeg, plans)
     %DIFFCELL Build all rate-vertex derivative rows for one physical cell.
     deg = obj.Degree;
     nPar = obj.npar();
@@ -104,7 +115,7 @@ function coeffs = diffCell(obj, subs, verts, outDeg, plans)
     % Tensor partials do not depend on the selected rate vertex. Compute and
     % elevate each active direction once, then reuse those affine expressions.
     activeDims = find(deg > 0);
-    partials = tensorPartials(vals, deg, h, activeDims, plans);
+    [partials, plans] = tensorPartials(vals, deg, h, activeDims, plans);
     for row = 1:nVert
         coeffs(row, :) = combinePartials(partials, activeDims, ...
             verts(row, :), obj.MatrixSize, nOut);
@@ -120,7 +131,7 @@ function row = scalarDiff(vals, deg, h, rate)
     end
 end
 
-function partials = tensorPartials(vals, deg, h, activeDims, plans)
+function [partials, plans] = tensorPartials(vals, deg, h, activeDims, plans)
     %TENSORPARTIALS Differentiate and elevate each active tensor direction.
     partials = cell(1, numel(deg));
     % Map tensor labels to repository flat positions in combRows order.
@@ -144,7 +155,12 @@ function partials = tensorPartials(vals, deg, h, activeDims, plans)
 
         % Each partial has one reduced axis. Elevating it independently before
         % applying the rate vertex keeps all directions in one tensor basis.
-        partials{dim} = pdbase.elevRow(part, partDeg, deg, plans{dim});
+        if plans{dim}.Columns == 0
+            [partials{dim}, plans{dim}] = pdbase.elevRow( ...
+                part, partDeg, deg, plans{dim});
+        else
+            partials{dim} = pdbase.elevRow(part, partDeg, deg, plans{dim});
+        end
     end
 end
 

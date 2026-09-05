@@ -284,10 +284,11 @@ quarterTurn =
 
 ## Limitations and See Also
 
-Function-only data that omit stored Bernstein evidence raise
-`pdmat:FunctionOnlyAlgebra`. Structural operations preserve such a
-function, call YALMIP, modify the physical grid, or change local-label/rate
-ordering.
+Coefficient-mapping operations on function-only data raise
+`pdmat:FunctionOnlyAlgebra`. Unary `+` and `squeeze` are identity exceptions
+that retain the exact function evaluator. For coefficient-backed data,
+structural operations transform numeric matrix entries and preserve the
+physical grid, local-label order, and stored rate-row order.
 
 [`pdmat algebra`](/GriD-LMIA/documents/reference/pdmat/algebra/) ·
 [`storage`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) ·

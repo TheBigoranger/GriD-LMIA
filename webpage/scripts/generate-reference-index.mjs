@@ -32,7 +32,7 @@ function familyLabel(route, entries) {
 function symbolList(entries) {
   return entries.map((entry) => `<li>
 <div><a href="${entry.href}"><code>${escapeHtml(entry.name)}</code></a><span>${escapeHtml(entry.type)}</span></div>
-<p>${wrapCompounds(entry.task)}</p>
+<p data-prose-context="limitations">${wrapCompounds(entry.task)}</p>
 </li>`).join("\n");
 }
 
@@ -45,7 +45,7 @@ function family(route, familyEntries) {
   const content = singleEntry
     ? `<div class="reference-index__direct-meta">
 <span>${escapeHtml(singleEntry.type)}</span>
-<p>${wrapCompounds(singleEntry.task)}</p>
+<p data-prose-context="limitations">${wrapCompounds(singleEntry.task)}</p>
 </div>`
     : `<details class="reference-index__symbols">
 <summary>Show direct symbol links</summary>

@@ -4,6 +4,7 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
     %   Syntax:
     %     tbl = obj.bernTbl(errId, valFcn, exprFcn, rateVerts)
     %     tbl = obj.bernTbl(errId, valFcn, exprFcn, rateVerts, cellSub)
+    %     tbl = obj.bernTbl(errId, valFcn, exprFcn, rateVerts, cellSubs)
     %     tbl = obj.bernTbl(errId, valFcn, exprFcn, rateVerts, "oneLine")
     %
     %   Arguments:
@@ -12,7 +13,8 @@ function tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
     %     valFcn    - Coefficient-to-table-value mapping.
     %     exprFcn   - Coefficient-to-expression-text mapping.
     %     rateVerts - Empty or one row per active rate vertex.
-    %     varargin  - Optional cell selector and "oneLine" flag.
+    %     varargin  - Optional one-row or m-by-npar cell selector and
+    %                 "oneLine" flag. Repeated rows keep their first use.
     %
     %   Output:
     %     T - Detailed coefficient table or one-line expression table.
@@ -310,22 +312,47 @@ function [cells, isOneLine] = parseArgs(obj, errId, varargin)
                     "The only text option supported by bernTable is ""oneLine"".");
             end
         elseif ~hasCell
-            if iscell(arg)
-                cells = cellfun(@double, arg);
-            else
-                cells = double(arg);
-            end
-            cells = reshape(cells, 1, []);
-
-            % Reuse the public coefficient accessor so the table accepts
-            % exactly the same nested LocalValues physical cells as coeffs().
-            obj.coeffs(cells);
+            cells = normCells(obj, arg);
             hasCell = true;
         else
             error(errId, ...
                 "bernTable accepts at most one physical-cell selector and the optional ""oneLine"" mode.");
         end
     end
+end
+
+function cells = normCells(obj, arg)
+    %NORMCELLS Validate each selector row before stable deduplication.
+    nPar = obj.npar();
+    if iscell(arg)
+        valid = cellfun(@(val) isnumeric(val) && isreal(val) && ...
+            isscalar(val) && isfinite(val), arg);
+        if any(~valid(:))
+            invalidCells(nPar);
+        end
+        cells = cellfun(@double, arg);
+    elseif isnumeric(arg) && isreal(arg) && ismatrix(arg)
+        cells = double(arg);
+    else
+        invalidCells(nPar);
+    end
+
+    if isempty(cells) || size(cells, 2) ~= nPar
+        invalidCells(nPar);
+    end
+
+    % coeffs remains the authority for integer, positive, and range checks.
+    for row = 1:size(cells, 1)
+        obj.coeffs(cells(row, :));
+    end
+    cells = unique(cells, "rows", "stable");
+end
+
+function invalidCells(nPar)
+    %INVALIDCELLS Keep malformed selectors on the shared pdbase contract.
+    error("pdbase:InvalidCellSubs", ...
+        "cellSubs must be a nonempty m-by-%d numeric matrix or cell array of finite real numeric scalars.", ...
+        nPar);
 end
 
 function txt = oneBasis(name, deg, idx)

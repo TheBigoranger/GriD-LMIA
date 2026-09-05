@@ -148,13 +148,16 @@ test("font stability ignores unrelated document-flow movement", () => {
   const comparisonEnd = geometry.indexOf("async function inspect", comparisonStart);
   const comparison = geometry.slice(comparisonStart, comparisonEnd);
 
+  assert.match(comparison, /intrinsicFormulaRect\(before\[index\]\)/);
+  assert.match(comparison, /intrinsicFormulaRect\(after\[index\]\)/);
+  const nativeGeometry = read("scripts/formula-geometry.mjs");
   assert.match(
-    comparison,
+    nativeGeometry,
     /formulaRect\.left\s*-\s*wrapperRect\.left/,
     "font stability must compare the formula position within its wrapper",
   );
   assert.match(
-    comparison,
+    nativeGeometry,
     /formulaRect\.top\s*-\s*wrapperRect\.top/,
     "font stability must not treat an image-driven document shift as a formula shift",
   );

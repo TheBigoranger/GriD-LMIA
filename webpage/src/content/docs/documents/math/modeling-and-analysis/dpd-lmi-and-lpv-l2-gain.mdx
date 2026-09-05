@@ -80,8 +80,7 @@ $(\vect\rho,\dot{\vect\rho})\in\mathcal P\times\mathcal R$, where
 $$
 \begin{aligned}
 \dot P(\vect\rho,\dot{\vect\rho})
-&=\sum_{s=1}^{\ell}\dot\rho_s\\
-&\quad{}\cdot\frac{\partial P}{\partial\rho_s}(\vect\rho),\\
+&=\sum_{s=1}^{\ell}\dot\rho_s\frac{\partial P}{\partial\rho_s}(\vect\rho),\\
 \operatorname{He}(X)&=X+X^\top.
 \end{aligned}
 $$
@@ -99,8 +98,7 @@ $$
 \mathcal F(\vect\rho,\dot{\vect\rho})
 &=F_0(\vect\rho)\\
 &\quad+\sum_{k=1}^{N}F_k(\vect\rho)y_k(\vect\rho)\\
-&\quad+\sum_{k=1}^{N}\sum_{s=1}^{\ell}R_{ks}(\vect\rho)\\
-&\qquad{}\cdot\dot\rho_s\frac{\partial y_k}{\partial\rho_s}(\vect\rho).
+&\quad+\sum_{k=1}^{N}\sum_{s=1}^{\ell}R_{ks}(\vect\rho)\dot\rho_s\frac{\partial y_k}{\partial\rho_s}(\vect\rho).
 \end{aligned}
 $$
 

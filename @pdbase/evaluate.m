@@ -33,30 +33,44 @@ function out = evaluate(obj, pt)
 
     [subs, alpha] = localPoint(obj, pt);
     coeffs = obj.coeffs(subs);
-    lbls = obj.lbls();
-    weights = ones(1, size(lbls, 1));
-    for k = 1:numel(weights)
-        for p = 1:numel(alpha)
-            j = lbls(k, p);
-            deg = obj.Degree(p);
-            weights(k) = weights(k) * nchoosek(deg, j) ...
+    % Compute each direction once; kron keeps earlier axes varying slowly,
+    % matching combRows without constructing the full tensor-label table.
+    weights = 1;
+    for p = 1:numel(alpha)
+        deg = obj.Degree(p);
+        basis = zeros(1, deg + 1);
+        for j = 0:deg
+            basis(j + 1) = nchoosek(deg, j) ...
                 * (1 - alpha(p))^(deg - j) * alpha(p)^j;
         end
+        weights = kron(weights, basis);
     end
 
     % A leaf is either one ordinary coefficient row or a rate-vertex table.
-    % Reconstructing rows independently preserves symbolic formulas and the
-    % package-wide combRows order without consulting assignment metadata.
-    rows = cell(1, size(coeffs, 1));
-    for row = 1:size(coeffs, 1)
-        val = zeros(obj.MatrixSize);
-        for k = 1:size(coeffs, 2)
-            val = val + coeffs{row, k} .* weights(k);
+    % Numeric packing keeps rate rows adjacent within each coefficient;
+    % symbolic rows retain their formulas without assignment metadata.
+    nRows = size(coeffs, 1);
+    rows = cell(1, nRows);
+    if all(cellfun('isclass', coeffs(:), 'double'))
+        % Two-dimensional packing also supports sparse double coefficients.
+        % Other payload types retain their arithmetic without coercion.
+        packed = reshape(horzcat(coeffs{:}), [], numel(weights));
+        vals = reshape(packed * weights(:), [], nRows);
+        for row = 1:nRows
+            rows{row} = reshape(vals(:, row), obj.MatrixSize);
         end
-        rows{row} = val;
+    else
+        for row = 1:nRows
+            val = zeros(obj.MatrixSize);
+            for k = 1:size(coeffs, 2)
+                val = val + coeffs{row, k} .* weights(k);
+            end
+            rows{row} = val;
+        end
     end
 
-    if isscalar(rows)
+    % A fixed rate box still has one active row; only ordinary data is unboxed.
+    if obj.NumRateRows == 0
         out = rows{1};
     else
         out = rows;

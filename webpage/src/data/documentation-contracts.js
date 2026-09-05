@@ -2,7 +2,7 @@
 // Sources: doc/documentation-inventory.json and doc/support/terminology.json.
 // Do not edit by hand.
 
-export const documentationVersion = "v1.4.2";
+export const documentationVersion = "v1.4.3";
 export const documentationRecords = [
   {
     "id": "pdbase.pdbase",
@@ -15,8 +15,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_validation.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "pdbase(gridVectors,matrixSize,degree)",
@@ -51,8 +50,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -80,8 +78,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -109,8 +106,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -138,8 +134,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -167,8 +162,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -196,8 +190,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -225,8 +218,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -254,8 +246,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -283,8 +274,7 @@ export const documentationRecords = [
       "@pdbase/pdbase.m:properties (SetAccess = private)"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "value = obj.Property"
@@ -313,8 +303,7 @@ export const documentationRecords = [
       "@pdbase/coeffs.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_validation.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "cells(obj)",
@@ -345,8 +334,7 @@ export const documentationRecords = [
       "@pdbase/coeffs.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_validation.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "cells(obj)",
@@ -377,8 +365,7 @@ export const documentationRecords = [
       "@pdbase/lbls.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_validation.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "cells(obj)",
@@ -409,9 +396,9 @@ export const documentationRecords = [
       "@pdbase/rhodiff.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_evaluate.m",
-      "+tests/+pdbase/test_elevate.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+pdbase/+polynomial/test_evaluate.m",
+      "+tests/+pdbase/+polynomial/test_elevate.m",
+      "+tests/+pdbase/+polynomial/test_rhodiff.m"
     ],
     "call_forms_options": [
       "evaluate(obj,rho)",
@@ -419,7 +406,7 @@ export const documentationRecords = [
       "rhodiff(obj[,rateBounds])"
     ],
     "inputs": "A coefficient-backed object, parameter point, nonnegative degree increment, or compatible rate box.",
-    "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows.",
+    "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects function-only storage at backend evaluation, invalid points or increments, missing or inconsistent rate bounds, and repeated differentiation.",
     "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration.",
     "tex_anchor": "sec:pdbase-evaluate",
@@ -442,9 +429,9 @@ export const documentationRecords = [
       "@pdbase/rhodiff.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_evaluate.m",
-      "+tests/+pdbase/test_elevate.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+pdbase/+polynomial/test_evaluate.m",
+      "+tests/+pdbase/+polynomial/test_elevate.m",
+      "+tests/+pdbase/+polynomial/test_rhodiff.m"
     ],
     "call_forms_options": [
       "evaluate(obj,rho)",
@@ -452,7 +439,7 @@ export const documentationRecords = [
       "rhodiff(obj[,rateBounds])"
     ],
     "inputs": "A coefficient-backed object, parameter point, nonnegative degree increment, or compatible rate box.",
-    "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows.",
+    "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects function-only storage at backend evaluation, invalid points or increments, missing or inconsistent rate bounds, and repeated differentiation.",
     "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration.",
     "tex_anchor": "sec:pdbase-evaluate",
@@ -475,9 +462,9 @@ export const documentationRecords = [
       "@pdbase/elevate.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_evaluate.m",
-      "+tests/+pdbase/test_elevate.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+pdbase/+polynomial/test_evaluate.m",
+      "+tests/+pdbase/+polynomial/test_elevate.m",
+      "+tests/+pdbase/+polynomial/test_rhodiff.m"
     ],
     "call_forms_options": [
       "evaluate(obj,rho)",
@@ -485,7 +472,7 @@ export const documentationRecords = [
       "rhodiff(obj[,rateBounds])"
     ],
     "inputs": "A coefficient-backed object, parameter point, nonnegative degree increment, or compatible rate box.",
-    "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows.",
+    "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects function-only storage at backend evaluation, invalid points or increments, missing or inconsistent rate bounds, and repeated differentiation.",
     "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration.",
     "tex_anchor": "sec:pdbase-evaluate",
@@ -516,9 +503,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -565,9 +550,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -614,9 +597,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -663,9 +644,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -712,9 +691,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -761,9 +738,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -810,9 +785,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -859,9 +832,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -908,9 +879,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -957,9 +926,7 @@ export const documentationRecords = [
       "@pdbase/numArgumentsFromSubscript.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -1006,9 +973,7 @@ export const documentationRecords = [
       "@pdbase/end.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdbase/+indexing/test_shape_protocols.m"
     ],
     "call_forms_options": [
       "ncell(obj)",
@@ -1046,9 +1011,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1076,9 +1057,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1106,9 +1103,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1136,9 +1149,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1166,9 +1195,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1196,9 +1241,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1226,9 +1287,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1256,9 +1333,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1286,9 +1379,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1316,9 +1425,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1346,9 +1471,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1376,9 +1517,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1406,9 +1563,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1436,9 +1609,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1466,9 +1655,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1496,9 +1701,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1526,9 +1747,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1556,9 +1793,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1586,9 +1839,25 @@ export const documentationRecords = [
       "@pdbase/*.m public operation files"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+algebra/test_uplus.m",
+      "+tests/+pdbase/+algebra/test_uminus.m",
+      "+tests/+pdbase/+matrix/test_transpose.m",
+      "+tests/+pdbase/+matrix/test_ctranspose.m",
+      "+tests/+pdbase/+matrix/test_vec.m",
+      "+tests/+pdbase/+matrix/test_reshape.m",
+      "+tests/+pdbase/+matrix/test_squeeze.m",
+      "+tests/+pdbase/+matrix/test_diag.m",
+      "+tests/+pdbase/+algebra/test_trace.m",
+      "+tests/+pdbase/+matrix/test_tril.m",
+      "+tests/+pdbase/+matrix/test_triu.m",
+      "+tests/+pdbase/+algebra/test_sum.m",
+      "+tests/+pdbase/+algebra/test_mean.m",
+      "+tests/+pdbase/+algebra/test_cumsum.m",
+      "+tests/+pdbase/+matrix/test_flip.m",
+      "+tests/+pdbase/+matrix/test_fliplr.m",
+      "+tests/+pdbase/+matrix/test_flipud.m",
+      "+tests/+pdbase/+matrix/test_rot90.m",
+      "+tests/+pdbase/+matrix/test_repmat.m"
     ],
     "call_forms_options": [
       "MATLAB unary, transpose, shape, diagonal, triangular, reduction, reordering, rotation, and repetition forms documented at the anchor"
@@ -1617,10 +1886,7 @@ export const documentationRecords = [
       "@pdbase/vertcat.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "cat(dim,A,...)",
@@ -1651,10 +1917,7 @@ export const documentationRecords = [
       "@pdbase/vertcat.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "cat(dim,A,...)",
@@ -1685,10 +1948,7 @@ export const documentationRecords = [
       "@pdbase/horzcat.m"
     ],
     "test_evidence": [
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_matrix_ops.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdvar/test_matrix_ops.m"
+      "+tests/+pdbase/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "cat(dim,A,...)",
@@ -1718,14 +1978,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -1736,9 +2007,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "pdmat",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1758,14 +2029,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -1776,9 +2058,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "FunctionHandle",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1798,14 +2080,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -1816,9 +2109,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "bernTable",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1838,14 +2131,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -1856,9 +2160,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "disp",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1878,14 +2182,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -1896,9 +2211,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "display",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1918,14 +2233,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -1936,9 +2262,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "plot",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1958,14 +2284,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -1976,9 +2313,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "evaluate",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -1998,14 +2335,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2016,9 +2364,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "plus",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2038,14 +2386,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2056,9 +2415,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "minus",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2078,14 +2437,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2096,9 +2466,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "mtimes",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2118,14 +2488,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2136,9 +2517,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "eq",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2158,14 +2539,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2176,9 +2568,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "ge",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2198,14 +2590,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2216,9 +2619,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "le",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2238,14 +2641,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2256,9 +2670,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "isequal",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2278,14 +2692,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2296,9 +2721,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "blkdiag",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2318,14 +2743,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2336,9 +2772,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "cat",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2358,14 +2794,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2376,9 +2823,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "subsref",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2398,14 +2845,25 @@ export const documentationRecords = [
       "@pdmat/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_construction.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdmat/test_display_plot.m",
-      "+tests/+pdmat/test_algebra.m",
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_validation.m",
-      "+tests/+pdvar/test_multiplication.m"
+      "+tests/+pdmat/+construction/test_constructor.m",
+      "+tests/+pdmat/+display/test_bern_table.m",
+      "+tests/+pdmat/+display/test_display.m",
+      "+tests/+pdmat/+display/test_plot.m",
+      "+tests/+pdmat/+polynomial/test_evaluate.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_mtimes.m",
+      "+tests/+pdmat/+algebra/test_eq.m",
+      "+tests/+pdmat/+algebra/test_ge.m",
+      "+tests/+pdmat/+algebra/test_le.m",
+      "+tests/+pdmat/+algebra/test_isequal.m",
+      "+tests/+pdmat/+matrix/test_blkdiag.m",
+      "+tests/+pdmat/+matrix/test_cat.m",
+      "+tests/+pdmat/+indexing/test_subsref.m",
+      "+tests/+pdmat/+indexing/test_subsasgn.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,RateBounds,ValidationMode])",
@@ -2416,9 +2874,9 @@ export const documentationRecords = [
       "A*X and X*A for compatible affine sdpvar X"
     ],
     "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
-    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product.",
+    "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "subsasgn",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2439,10 +2897,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2471,10 +2952,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2503,10 +3007,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2535,10 +3062,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2567,10 +3117,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2599,10 +3172,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2631,10 +3227,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2663,10 +3282,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2695,10 +3337,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2727,10 +3392,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2759,10 +3447,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2791,10 +3502,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2823,10 +3557,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2855,10 +3612,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2887,10 +3667,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2919,10 +3722,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2951,10 +3777,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -2983,10 +3832,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3015,10 +3887,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3047,10 +3942,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3079,10 +3997,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3111,10 +4052,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3143,10 +4107,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3175,10 +4162,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3207,10 +4217,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3239,10 +4272,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3271,10 +4327,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3303,10 +4382,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3335,10 +4437,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3367,10 +4492,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3399,10 +4547,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3431,10 +4602,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3463,10 +4657,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3495,10 +4712,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3527,10 +4767,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3559,10 +4822,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3591,10 +4877,33 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdmat/test_matrix_ops.m",
-      "+tests/+pdmat/test_evaluate.m",
-      "+tests/+pdmat/test_rate_rows.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdmat/+indexing/test_shape_protocols.m",
+      "+tests/+pdmat/+matrix/test_ctranspose.m",
+      "+tests/+pdmat/+algebra/test_cumsum.m",
+      "+tests/+pdmat/+matrix/test_diag.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdmat/+matrix/test_flip.m",
+      "+tests/+pdmat/+matrix/test_fliplr.m",
+      "+tests/+pdmat/+matrix/test_flipud.m",
+      "+tests/+pdmat/+matrix/test_horzcat.m",
+      "+tests/+pdmat/+algebra/test_mean.m",
+      "+tests/+pdmat/+matrix/test_repmat.m",
+      "+tests/+pdmat/+matrix/test_reshape.m",
+      "+tests/+pdmat/+matrix/test_matrix_ops_integration.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+algebra/test_rate_rows_integration.m",
+      "+tests/+pdmat/+matrix/test_rot90.m",
+      "+tests/+pdmat/+matrix/test_squeeze.m",
+      "+tests/+pdmat/+algebra/test_sum.m",
+      "+tests/+pdmat/+algebra/test_algebra_integration.m",
+      "+tests/+pdmat/+algebra/test_trace.m",
+      "+tests/+pdmat/+matrix/test_transpose.m",
+      "+tests/+pdmat/+matrix/test_tril.m",
+      "+tests/+pdmat/+matrix/test_triu.m",
+      "+tests/+pdmat/+algebra/test_uminus.m",
+      "+tests/+pdmat/+algebra/test_uplus.m",
+      "+tests/+pdmat/+matrix/test_vec.m",
+      "+tests/+pdmat/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdmat syntax is documented in the pdmat inherited-storage and matrix-operation sections"
@@ -3622,12 +4931,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3635,9 +4955,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "pdvar",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3657,12 +4977,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3670,9 +5001,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "bernTable",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3692,12 +5023,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3705,9 +5047,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "blkdiag",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3727,12 +5069,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3740,9 +5093,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "cat",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3762,12 +5115,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3775,9 +5139,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "eq",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3797,12 +5161,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3810,9 +5185,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "ge",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3832,12 +5207,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3845,9 +5231,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "le",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3867,12 +5253,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3880,9 +5277,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "isequal",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3902,12 +5299,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3915,9 +5323,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "minus",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3937,12 +5345,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3950,9 +5369,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "mtimes",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -3972,12 +5391,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -3985,9 +5415,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "plus",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -4007,12 +5437,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -4020,9 +5461,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "subsasgn",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -4042,12 +5483,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -4055,9 +5507,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "subsref",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -4077,12 +5529,23 @@ export const documentationRecords = [
       "@pdvar/*.m excluding private and protected kernels"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_construction.m",
-      "+tests/+pdbase/test_bernstein_table.m",
-      "+tests/+pdvar/test_affine_algebra.m",
-      "+tests/+pdvar/test_multiplication.m",
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_value.m"
+      "+tests/+pdvar/+construction/test_constructor.m",
+      "+tests/+pdvar/+display/test_bern_table.m",
+      "+tests/+pdvar/+matrix/test_blkdiag.m",
+      "+tests/+pdvar/+matrix/test_cat.m",
+      "+tests/+pdvar/+algebra/test_eq.m",
+      "+tests/+pdvar/+algebra/test_comparisons.m",
+      "+tests/+pdvar/+algebra/test_ge.m",
+      "+tests/+pdvar/+algebra/test_le.m",
+      "+tests/+pdvar/+algebra/test_isequal.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_mtimes.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+indexing/test_subsasgn.m",
+      "+tests/+pdvar/+indexing/test_indexing.m",
+      "+tests/+pdvar/+indexing/test_subsref.m",
+      "+tests/+pdvar/+polynomial/test_value.m"
     ],
     "call_forms_options": [
       "pdvar(n[,p],grid[,structure][,Degree,RateBounds,ValidationMode])",
@@ -4090,9 +5553,9 @@ export const documentationRecords = [
       "documented affine, comparison, block, indexing, and value forms"
     ],
     "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
-    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller.",
+    "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order.",
+    "supported_scope": "Degree-zero or continuous arbitrary-degree cell-wise decisions and affine expressions. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "value",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -4113,10 +5576,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4145,10 +5630,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4177,10 +5684,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4209,10 +5738,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4241,10 +5792,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4273,10 +5846,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4305,10 +5900,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4337,10 +5954,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4369,10 +6008,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4401,10 +6062,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4433,10 +6116,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4465,10 +6170,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4497,10 +6224,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4529,10 +6278,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4561,10 +6332,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4593,10 +6386,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4625,10 +6440,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4657,10 +6494,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4689,10 +6548,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4721,10 +6602,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4753,10 +6656,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4785,10 +6710,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4817,10 +6764,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4849,10 +6818,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4881,10 +6872,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4913,10 +6926,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4945,10 +6980,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -4977,10 +7034,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5009,10 +7088,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5041,10 +7142,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5073,10 +7196,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5105,10 +7250,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5137,10 +7304,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5169,10 +7358,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5201,10 +7412,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5233,10 +7466,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5265,10 +7520,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5297,10 +7574,32 @@ export const documentationRecords = [
       "@pdbase public method files"
     ],
     "test_evidence": [
-      "+tests/+pdvar/test_matrix_ops.m",
-      "+tests/+pdvar/test_evaluate.m",
-      "+tests/+pdvar/test_rhodiff_rate.m",
-      "+tests/+pdbase/test_public_names.m"
+      "+tests/+pdvar/+indexing/test_shape_protocols.m",
+      "+tests/+pdvar/+matrix/test_ctranspose.m",
+      "+tests/+pdvar/+algebra/test_cumsum.m",
+      "+tests/+pdvar/+matrix/test_diag.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_evaluate.m",
+      "+tests/+pdvar/+matrix/test_flip.m",
+      "+tests/+pdvar/+matrix/test_fliplr.m",
+      "+tests/+pdvar/+matrix/test_flipud.m",
+      "+tests/+pdvar/+matrix/test_horzcat.m",
+      "+tests/+pdvar/+algebra/test_mean.m",
+      "+tests/+pdvar/+matrix/test_repmat.m",
+      "+tests/+pdvar/+matrix/test_reshape.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+algebra/test_affine_algebra_integration.m",
+      "+tests/+pdvar/+matrix/test_rot90.m",
+      "+tests/+pdvar/+matrix/test_squeeze.m",
+      "+tests/+pdvar/+algebra/test_sum.m",
+      "+tests/+pdvar/+algebra/test_trace.m",
+      "+tests/+pdvar/+matrix/test_transpose.m",
+      "+tests/+pdvar/+matrix/test_tril.m",
+      "+tests/+pdvar/+matrix/test_triu.m",
+      "+tests/+pdvar/+algebra/test_uminus.m",
+      "+tests/+pdvar/+algebra/test_uplus.m",
+      "+tests/+pdvar/+matrix/test_vec.m",
+      "+tests/+pdvar/+matrix/test_vertcat.m"
     ],
     "call_forms_options": [
       "Complete pdvar syntax is documented in the pdvar inherited-storage and matrix-operation sections"
@@ -5327,12 +7626,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5361,12 +7657,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5395,12 +7688,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5429,12 +7719,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5463,12 +7750,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5497,12 +7781,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5531,12 +7812,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5565,12 +7843,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5599,12 +7874,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5633,12 +7905,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5667,12 +7936,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5701,12 +7967,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5735,12 +7998,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5769,12 +8029,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5803,12 +8060,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5837,12 +8091,9 @@ export const documentationRecords = [
       "@pdlmi/pdlmi.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_equalities.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m"
+      "+tests/+pdlmi/+construction/test_constructor.m",
+      "+tests/+pdlmi/+assembly/test_equalities.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "pdlmi(expr,relation,name=value)",
@@ -5876,12 +8127,15 @@ export const documentationRecords = [
       "@pdlmi/toYalmip.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m",
-      "+tests/+pdlmi/test_solver_smoke.m"
+      "+tests/+pdlmi/+certificates/test_use_polya.m",
+      "+tests/+pdlmi/+certificates/test_certificate_replacement.m",
+      "+tests/+pdlmi/+certificates/test_use_putinar.m",
+      "+tests/+pdlmi/+certificates/test_gram_equiv.m",
+      "+tests/+pdlmi/+solver/test_solver_smoke.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_put.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_box.m",
+      "+tests/+pdlmi/+certificates/test_use_full_box.m",
+      "+tests/+pdlmi/+export/test_to_yalmip.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -5918,12 +8172,15 @@ export const documentationRecords = [
       "@pdlmi/toYalmip.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m",
-      "+tests/+pdlmi/test_solver_smoke.m"
+      "+tests/+pdlmi/+certificates/test_use_polya.m",
+      "+tests/+pdlmi/+certificates/test_certificate_replacement.m",
+      "+tests/+pdlmi/+certificates/test_use_putinar.m",
+      "+tests/+pdlmi/+certificates/test_gram_equiv.m",
+      "+tests/+pdlmi/+solver/test_solver_smoke.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_put.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_box.m",
+      "+tests/+pdlmi/+certificates/test_use_full_box.m",
+      "+tests/+pdlmi/+export/test_to_yalmip.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -5960,12 +8217,15 @@ export const documentationRecords = [
       "@pdlmi/toYalmip.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m",
-      "+tests/+pdlmi/test_solver_smoke.m"
+      "+tests/+pdlmi/+certificates/test_use_polya.m",
+      "+tests/+pdlmi/+certificates/test_certificate_replacement.m",
+      "+tests/+pdlmi/+certificates/test_use_putinar.m",
+      "+tests/+pdlmi/+certificates/test_gram_equiv.m",
+      "+tests/+pdlmi/+solver/test_solver_smoke.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_put.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_box.m",
+      "+tests/+pdlmi/+certificates/test_use_full_box.m",
+      "+tests/+pdlmi/+export/test_to_yalmip.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -6002,12 +8262,15 @@ export const documentationRecords = [
       "@pdlmi/toYalmip.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m",
-      "+tests/+pdlmi/test_solver_smoke.m"
+      "+tests/+pdlmi/+certificates/test_use_polya.m",
+      "+tests/+pdlmi/+certificates/test_certificate_replacement.m",
+      "+tests/+pdlmi/+certificates/test_use_putinar.m",
+      "+tests/+pdlmi/+certificates/test_gram_equiv.m",
+      "+tests/+pdlmi/+solver/test_solver_smoke.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_put.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_box.m",
+      "+tests/+pdlmi/+certificates/test_use_full_box.m",
+      "+tests/+pdlmi/+export/test_to_yalmip.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -6044,12 +8307,15 @@ export const documentationRecords = [
       "@pdlmi/toYalmip.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m",
-      "+tests/+pdlmi/test_solver_smoke.m"
+      "+tests/+pdlmi/+certificates/test_use_polya.m",
+      "+tests/+pdlmi/+certificates/test_certificate_replacement.m",
+      "+tests/+pdlmi/+certificates/test_use_putinar.m",
+      "+tests/+pdlmi/+certificates/test_gram_equiv.m",
+      "+tests/+pdlmi/+solver/test_solver_smoke.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_put.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_box.m",
+      "+tests/+pdlmi/+certificates/test_use_full_box.m",
+      "+tests/+pdlmi/+export/test_to_yalmip.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -6086,12 +8352,15 @@ export const documentationRecords = [
       "@pdlmi/useFullBox.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m",
-      "+tests/+pdlmi/test_putinar.m",
-      "+tests/+pdlmi/test_sparse_putinar.m",
-      "+tests/+pdlmi/test_sp_box.m",
-      "+tests/+pdlmi/test_full_box.m",
-      "+tests/+pdlmi/test_solver_smoke.m"
+      "+tests/+pdlmi/+certificates/test_use_polya.m",
+      "+tests/+pdlmi/+certificates/test_certificate_replacement.m",
+      "+tests/+pdlmi/+certificates/test_use_putinar.m",
+      "+tests/+pdlmi/+certificates/test_gram_equiv.m",
+      "+tests/+pdlmi/+solver/test_solver_smoke.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_put.m",
+      "+tests/+pdlmi/+certificates/test_use_sp_box.m",
+      "+tests/+pdlmi/+certificates/test_use_full_box.m",
+      "+tests/+pdlmi/+export/test_to_yalmip.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -6124,7 +8393,7 @@ export const documentationRecords = [
       "@pdlmi/vertcat.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m"
+      "+tests/+pdlmi/+assembly/test_concatenation.m"
     ],
     "call_forms_options": [
       "F = [C1,C2,...]"
@@ -6152,7 +8421,7 @@ export const documentationRecords = [
       "@pdlmi/horzcat.m"
     ],
     "test_evidence": [
-      "+tests/+pdlmi/test_constraints.m"
+      "+tests/+pdlmi/+assembly/test_concatenation.m"
     ],
     "call_forms_options": [
       "F = [C1;C2;...]"
@@ -6181,12 +8450,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6215,12 +8489,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6249,12 +8528,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6283,12 +8567,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6317,12 +8606,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6351,12 +8645,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6385,12 +8684,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6419,12 +8723,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6453,12 +8762,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6487,12 +8801,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6521,12 +8840,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6555,12 +8879,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
@@ -6589,12 +8918,17 @@ export const documentationRecords = [
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
+      "+tests/+helper/test_cell_get.m",
       "+tests/+helper/test_chk.m",
+      "+tests/+helper/test_chk_cont.m",
+      "+tests/+helper/test_comb_rows.m",
+      "+tests/+helper/test_fit_vals.m",
       "+tests/+helper/test_is_zero.m",
+      "+tests/+helper/test_mk_grid.m",
+      "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
-      "+tests/+pdbase/test_construction.m",
-      "+tests/+pdbase/test_local_storage.m",
-      "+tests/+pdbase/test_rhodiff.m"
+      "+tests/+helper/test_norm_mode.m",
+      "+tests/+helper/test_rate_verts.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"

@@ -291,6 +291,23 @@ lower-equals-upper axes are collapsed. This example has
 - Function-only objects that omit `Degree` keep exact evaluation and remain outside coefficient algebra.
 - Mixed physical bounds are rejected by coefficient algebra until a compatible common grid exists.
 
+## Function-only Evidence Boundary
+
+Omitting `Degree` creates function-only known data. Exact evaluation, plotting, inspection, unary `+`, and `squeeze` remain available. Coefficient arithmetic rejects `F+0`, `F-F`, `0*F`, and `F==F` before shortcuts. Explicit valid `Degree` retains supported coefficient algebra.
+
+```matlab
+F = pdmat([0 1], @(rho) 1+rho);
+try
+    Z = 0*F;
+    error('example:ExpectedRejection', 'Expected rejection.');
+catch exception
+    assert(strcmp(exception.identifier, 'pdmat:FunctionOnlyAlgebra'))
+end
+A = pdmat([0 1], @(rho) 1+rho, Degree=1);
+Z = 0*A;
+assert(Z.evaluate(0.5) == 0)
+```
+
 ## See Also
 
 [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) ·

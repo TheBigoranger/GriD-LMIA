@@ -23,7 +23,7 @@ function parseValues(draft: string): number[] {
   return values;
 }
 
-/** Compare the three product kernels through their shared coefficient-pair plan. */
+/** Inspect numeric and affine payloads through the same weighted contraction. */
 export default function ProductPlanExplorer() {
   const id = useId();
   const [draft, setDraft] = useState({ leftDegree: "1", rightDegree: "1", route: "numeric" as ProductRoute, left: "4 2", right: "0.5 3" });
@@ -52,12 +52,12 @@ export default function ProductPlanExplorer() {
           <label htmlFor={`${id}-right-degree`}>Right tensor degree</label>
           <input id={`${id}-right-degree`} aria-describedby={`${id}-error`} aria-invalid={Boolean(error)} value={draft.rightDegree}
             onChange={(event) => setDraft((current) => ({ ...current, rightDegree: event.target.value }))} />
-          <label htmlFor={`${id}-route`}>Payload route</label>
+          <label htmlFor={`${id}-route`}>Coefficient payload</label>
           <select id={`${id}-route`} aria-describedby={`${id}-error`} value={draft.route}
             onChange={(event) => setDraft((current) => ({ ...current, route: event.target.value as ProductRoute }))}>
-            <option value="numeric">Numeric tensor convolution</option>
-            <option value="known-affine">Known–affine contraction</option>
-            <option value="generic">Generic planned fallback</option>
+            <option value="numeric">Known x known</option>
+            <option value="known-affine">Known x affine</option>
+            <option value="affine-known">Affine x known</option>
           </select>
           {draft.route === "numeric" ? <>
             <label htmlFor={`${id}-left`}>Left coefficients</label>
@@ -72,11 +72,10 @@ export default function ProductPlanExplorer() {
         </form>
         <section className="plan-summary" aria-live="polite">
           <p><strong>Kernel:</strong> {model.kernel}</p>
-          <p><strong>Packed tensor shapes:</strong> {model.packedShapes.map((shape) => `[${shape.join(" × ")}]`).join(" → ")}</p>
+          <p><strong>Coefficient-label counts (left, right, output):</strong> {model.labelCounts.join(", ")}</p>
           <p><strong>Planned label pairs:</strong> {model.contributions.length}</p>
-          <p><strong><code>convn</code> route:</strong> {model.usesConvn ? "Numeric payload" : "Inactive"}</p>
           {model.outputCoefficients ? <p><strong>Product coefficients:</strong> [{model.outputCoefficients.map((value) => Number(value.toPrecision(6))).join(", ")}]</p> : null}
-          {model.contractionBlocks.length ? <p><strong>Affine blocks:</strong> {model.contractionBlocks.join(" and ")}</p> : null}
+          {model.contractionBlocks.length ? <p><strong>Ordered payload blocks:</strong> {model.contractionBlocks.join(" and ")}</p> : null}
         </section>
         <div className="plan-entry-grid" aria-label="Planned normalized product contributions">
           {model.contributions.map((item, index) => (
@@ -89,7 +88,7 @@ export default function ProductPlanExplorer() {
           ))}
         </div>
       </div>
-      <figcaption>All payload routes use the same normalized label pairs. Only purely numeric tensors enter <code>convn</code>.</figcaption>
+      <figcaption>Every payload uses the same normalized label pairs and weighted block contraction. Known-affine and affine-known products preserve operand order and remain affine in the decision variables.</figcaption>
     </figure>
   );
 }

@@ -132,6 +132,8 @@ raise `pdbase:InvalidDiff`. Missing, malformed, or inconsistent bounds raise
 `pdbase:MissingRateBounds`, `pdbase:InvalidRateBounds`, or
 `pdbase:RateBoundsMismatch`.
 
+A single fixed rate vertex still returns a `1 × 1` cell containing the evaluated matrix. Ordinary storage with `NumRateRows == 0` returns a matrix even when `RateBounds` metadata is present.
+
 ## See Also
 
 [`pdmat storage and elevation`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) ·

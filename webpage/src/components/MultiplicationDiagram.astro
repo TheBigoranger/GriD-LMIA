@@ -32,13 +32,11 @@ import DiagramFrame from "./DiagramFrame.astro";
         <p>Bernstein [2, 6.5, 6]</p>
       </section>
     </div>
-    <svg viewBox="0 0 900 300" role="img" aria-labelledby="multiply-title multiply-desc">
+    <svg viewBox="0 0 900 260" role="img" aria-labelledby="multiply-title multiply-desc">
       <title id="multiply-title">Two affine functions and their quadratic product on zero to one</title>
       <desc id="multiply-desc">P descends from four to two while Q rises from one half to three. They cross before their product reaches six.</desc>
       <g class="axes">
         <path d="M60 250 H840"/><path d="M60 250 V35"/>
-        <text x="60" y="276" text-anchor="middle">0</text><text x="840" y="276" text-anchor="middle">1</text>
-        <text x="450" y="294" text-anchor="middle">α</text>
       </g>
       <g class="grid">
         <path d="M60 215 H840 M60 180 H840 M60 145 H840 M60 110 H840 M60 75 H840 M60 40 H840" />
@@ -52,6 +50,7 @@ import DiagramFrame from "./DiagramFrame.astro";
         <circle class="point--result" cx="60" cy="190" r="5"/><circle class="point--result" cx="840" cy="70" r="5"/>
       </g>
     </svg>
+    <div class="curve-axis-labels" aria-label="Parameter alpha from zero to one"><span>0</span><span>α</span><span>1</span></div>
   </div>
   <p class="middle-coefficient">The middle result is (4·3 + 2·0.5) / 2 = 6.5.</p>
 </DiagramFrame>
@@ -88,8 +87,8 @@ import DiagramFrame from "./DiagramFrame.astro";
   h4 { color: currentColor; font-size: 0.9rem; }
   .curve-copy p { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   svg { width: 100%; height: auto; overflow: visible; }
+  .curve-axis-labels { display: flex; justify-content: space-between; margin: 0 6.6667%; color: var(--sl-color-text); font-size: 0.875rem; }
   .axes path { fill: none; stroke: var(--sl-color-text); stroke-width: 2; }
-  .axes text { fill: var(--sl-color-text); font-family: system-ui, sans-serif; font-size: 16px; }
   .grid path { fill: none; stroke: var(--diagram-border); stroke-width: 1; stroke-dasharray: 4 8; }
   .curve { fill: none; stroke-width: 5; stroke-linecap: round; }
   .curve--first { stroke: var(--diagram-input); }

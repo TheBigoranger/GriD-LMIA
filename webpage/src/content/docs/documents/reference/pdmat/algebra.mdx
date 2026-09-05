@@ -145,13 +145,7 @@ $$
 The ordered coefficient convolution is then
 
 $$
-\begin{aligned}
-R^{(c)}[\vect k]
-&=\sum_{\vect i+\vect j=\vect k}
-  \Omega(\vect i,\vect j)\\
-&\qquad{}\cdot
-  P^{(c)}[\vect i]Q^{(c)}[\vect j].
-\end{aligned}
+R^{(c)}[\vect k]=\sum_{\vect i+\vect j=\vect k}\Omega(\vect i,\vect j)P^{(c)}[\vect i]Q^{(c)}[\vect j].
 $$
 
 Matrix order is preserved. Numeric scalars and matrices use the corresponding MATLAB-compatible left or right product. Degrees and tensor labels add componentwise.
@@ -269,12 +263,28 @@ The weighted convolution below uses the same normalized Bernstein rule as
   rate-row operands must have exactly matching grids and nonempty matching
   rate boxes. Explicit preprocessing aligns any chosen rate boxes.
 - Multiplication preserves rate rows when only one side has them. Two active
-  rate-row tables and rate-row by ordinary decision products are rejected.
-  Compatible `RateBounds` with zero stored rows remains ordinary metadata.
+  rate-row tables are rejected even when both are zero. A known rate-row `pdmat` may multiply an ordinary `pdvar` in either order. Ordinary `RateBounds` with zero stored rows remains metadata.
 - Numeric and `pdmat` products return known `pdmat` data with
   `ContainsDecision=false`. A mixed affine `sdpvar` product returns `pdvar`.
 - A symbolic operand must be real, affine, and two-dimensional. Nonlinear,
   complex, incompatible, and function-only mixed products fail before mapping.
+
+## Function-only Evidence Boundary
+
+Omitting `Degree` creates function-only known data. Exact evaluation, plotting, inspection, unary `+`, and `squeeze` remain available. Coefficient arithmetic rejects `F+0`, `F-F`, `0*F`, and `F==F` before shortcuts. Explicit valid `Degree` retains supported coefficient algebra.
+
+```matlab
+F = pdmat([0 1], @(rho) 1+rho);
+try
+    Z = 0*F;
+    error('example:ExpectedRejection', 'Expected rejection.');
+catch exception
+    assert(strcmp(exception.identifier, 'pdmat:FunctionOnlyAlgebra'))
+end
+A = pdmat([0 1], @(rho) 1+rho, Degree=1);
+Z = 0*A;
+assert(Z.evaluate(0.5) == 0)
+```
 
 ## See Also
 

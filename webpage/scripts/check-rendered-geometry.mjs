@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { access, readFile, readdir, stat } from "node:fs/promises";
 import { extname, join, relative, resolve, sep } from "node:path";
 import { chromium } from "playwright";
+import { intrinsicFormulaRect } from "./formula-geometry.mjs";
 
 const root = resolve("dist");
 const base = "/GriD-LMIA";
@@ -159,11 +160,15 @@ async function formulaSnapshot(page) {
         formula.closest(".katex-display")?.parentElement ??
         formula.parentElement ??
         formula;
-      const wrapperRect = wrapper.getBoundingClientRect();
+      const content = formula.closest(".formula-fit-content");
+      const nativeOrigin = content ?? wrapper;
+      const transform = content ? new DOMMatrixReadOnly(getComputedStyle(content).transform) : new DOMMatrixReadOnly();
+      const wrapperRect = nativeOrigin.getBoundingClientRect();
       const formulaRect = formula.getBoundingClientRect();
       return {
         index,
         markup: formula.outerHTML,
+        scale: { x: Math.hypot(transform.a, transform.b), y: Math.hypot(transform.c, transform.d) },
         rootCount: 1,
         display: Boolean(formula.closest(".katex-display")),
         wrapperRect: {
@@ -212,18 +217,10 @@ function recordHydrationStability(before, after, failures, route, width) {
 }
 
 function recordFontStability(before, after, failures, route, width) {
-  const relativeRect = ({ formulaRect, wrapperRect } = {}) => formulaRect && wrapperRect
-    ? {
-        left: formulaRect.left - wrapperRect.left,
-        top: formulaRect.top - wrapperRect.top,
-        width: formulaRect.width,
-        height: formulaRect.height,
-      }
-    : null;
   const count = Math.max(before.length, after.length);
   for (let index = 0; index < count; index += 1) {
-    const initial = relativeRect(before[index]);
-    const settled = relativeRect(after[index]);
+    const initial = intrinsicFormulaRect(before[index]);
+    const settled = intrinsicFormulaRect(after[index]);
     if (!initial || !settled) {
       failures.push({
         width,
@@ -369,7 +366,7 @@ async function inspect(page) {
         continue;
       }
       const formula = roots[0];
-      const displayRoot = wrapper.querySelector(":scope > .katex-display");
+      const displayRoot = wrapper.querySelector(":scope > .formula-fit-size > .formula-fit-content > .katex-display");
       const expectsDisplay = wrapper.classList.contains("formula-display");
       if (expectsDisplay !== Boolean(displayRoot)) {
         failures.push({
@@ -382,6 +379,29 @@ async function inspect(page) {
       }
       const rendered = formula.getBoundingClientRect();
       const style = getComputedStyle(formula);
+      if (expectsDisplay) {
+        const content = wrapper.querySelector(".formula-fit-content");
+        const frameStyle = getComputedStyle(wrapper);
+        const availableWidth = wrapper.clientWidth - parseFloat(frameStyle.paddingLeft) - parseFloat(frameStyle.paddingRight);
+        const naturalWidth = content?.offsetWidth ?? 0;
+        const scale = Number(wrapper.dataset.formulaScale);
+        const expectedScale = Math.max(.85, Math.min(1, availableWidth / naturalWidth));
+        if (!naturalWidth || !Number.isFinite(scale) || !wrapper.hasAttribute("data-formula-fitted") || Math.abs(scale - expectedScale) > .002) {
+          failures.push({ type: "formula-fit-scale", selector: describe(wrapper), actual: scale, allowed: expectedScale });
+        }
+        if (naturalWidth * .85 > availableWidth + tolerance && wrapper.tabIndex !== 0) {
+          failures.push({ type: "formula-scroll-keyboard", selector: describe(wrapper) });
+        }
+        const slot = wrapper.querySelector(".formula-fit-size")?.getBoundingClientRect();
+        if (slot && naturalWidth <= availableWidth && Math.abs((slot.left + slot.right) / 2 - (wrapper.getBoundingClientRect().left + wrapper.getBoundingClientRect().right) / 2) > tolerance) {
+          failures.push({ type: "formula-fit-centering", selector: describe(wrapper) });
+        }
+        const baseSize = parseFloat(style.fontSize);
+        const scripts = [...formula.querySelectorAll(".msupsub .sizing")];
+        if (scripts.some((node) => parseFloat(getComputedStyle(node).fontSize) >= baseSize)) {
+          failures.push({ type: "formula-script-proportion", selector: describe(wrapper) });
+        }
+      }
       const residualSource = [...wrapper.childNodes]
         .filter((node) => node.nodeType === Node.TEXT_NODE)
         .map((node) => node.textContent ?? "")
@@ -406,7 +426,7 @@ async function inspect(page) {
       }
 
       const localScroller = wrapper.closest(
-        ".elevate-formula-one-line, .solver-one-line, .cell-formula-one-line, .welcome-target",
+        "[data-formula-fit], .elevate-formula-one-line, .solver-one-line, .cell-formula-one-line, .welcome-target",
       );
       const localScrollerStyle = localScroller ? getComputedStyle(localScroller) : null;
       const localNeedsScroll = Boolean(
@@ -497,6 +517,34 @@ async function inspect(page) {
           allowed: Math.floor(available.width),
           context: contextFor(wrapper),
         });
+      }
+    }
+
+    for (const label of document.querySelectorAll(".curve-axis-labels span")) {
+      const bounds = label.getBoundingClientRect();
+      if (bounds.width && parseFloat(getComputedStyle(label).fontSize) < 12) {
+        failures.push({ type: "multiplication-axis-label-size", selector: describe(label), actual: parseFloat(getComputedStyle(label).fontSize), allowed: 12 });
+      }
+    }
+
+    // Unicode labels use font-native script glyphs, not KaTeX style nodes.
+    const scriptGlyphs = "₀₁₂₃₄₅₆₇₈₉⁰¹²³⁴⁵⁶⁷⁸⁹";
+    const glyphCanvas = document.createElement("canvas").getContext("2d");
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const text = walker.currentNode;
+      const parent = text.parentElement;
+      if (!parent || parent.closest(".katex, pre, code, script, style") || !/[₀-₉⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(text.textContent ?? "")) continue;
+      const font = getComputedStyle(parent);
+      if (font.display === "none" || !parent.getBoundingClientRect().width || !glyphCanvas) continue;
+      glyphCanvas.font = `${font.fontStyle} ${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
+      for (const glyph of text.textContent ?? "") {
+        const index = scriptGlyphs.indexOf(glyph);
+        if (index < 0) continue;
+        const script = glyphCanvas.measureText(glyph);
+        const base = glyphCanvas.measureText(String(index % 10));
+        const ratio = (script.actualBoundingBoxAscent + script.actualBoundingBoxDescent) / (base.actualBoundingBoxAscent + base.actualBoundingBoxDescent);
+        if (!(ratio > 0 && ratio < .9)) failures.push({ type: "unicode-script-proportion", selector: describe(parent), actual: ratio, context: text.textContent });
       }
     }
 
@@ -743,7 +791,7 @@ async function auditWelcomeRoot(browser, origin, failures) {
         const rect = section.getBoundingClientRect();
         const workflow = section.querySelector(".welcome-workflow");
         const target = section.querySelector(".welcome-target");
-        const targetFormula = target?.querySelector(":scope > .formula-display > .katex-display");
+        const targetFormula = target?.querySelector(":scope > .formula-display > .formula-fit-size > .formula-fit-content > .katex-display");
         const targetTex = targetFormula
           ?.querySelector('annotation[encoding="application/x-tex"]')
           ?.textContent ?? "";
@@ -797,7 +845,7 @@ async function auditWelcomeRoot(browser, origin, failures) {
           citationCodes,
           islandCount: section.querySelectorAll("astro-island").length,
           targetCount: section.querySelectorAll(".welcome-target").length,
-          targetDisplayCount: section.querySelectorAll(".welcome-target > .formula-display > .katex-display").length,
+          targetDisplayCount: section.querySelectorAll(".welcome-target > .formula-display > .formula-fit-size > .formula-fit-content > .katex-display").length,
           targetMathCount: section.querySelectorAll(".welcome-target math[display='block']").length,
           targetTex,
           targetNeedsScroll,
@@ -847,7 +895,7 @@ async function auditWelcomeRoot(browser, origin, failures) {
         welcome.infoDirection !== "column" ||
         JSON.stringify(welcome.infoOrder) !== JSON.stringify([
           "Author and maintainer",
-          "Latest in v1.4.2",
+          "Latest in v1.4.3",
           "Cite GriD-LMIA",
         ]) ||
         !["about", "version-history", "citing"].every((route) =>

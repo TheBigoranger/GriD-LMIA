@@ -23,10 +23,7 @@ matrix or affine expression in place of a known numeric matrix. On cell
 $\mathcal H_{\vect c}$, set
 
 $$
-\begin{aligned}
-\vect\alpha
-&:=\phi_{\vect c}^{-1}(\vect\rho).
-\end{aligned}
+\vect\alpha:=\phi_{\vect c}^{-1}(\vect\rho).
 $$
 
 The tensor-product basis and decision expansion are
@@ -44,13 +41,7 @@ $$
 Therefore,
 
 $$
-\begin{aligned}
-P^{(\vect c)}(\vect\rho)
-&=\sum_{\substack{\vect i\in\\
-  \prod_{s=1}^{\ell}\{0,\ldots,m_s\}}}\\
-&\quad X^{(\vect c)}[\vect i]\,
-  B_{\vect i}^{\vect m}(\vect\alpha).
-\end{aligned}
+P^{(\vect c)}(\vect\rho)=\sum_{\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}X^{(\vect c)}[\vect i]B_{\vect i}^{\vect m}(\vect\alpha).
 $$
 
 Here every $X^{(\vect c)}[\vect i]$ is stored in the corresponding
@@ -116,8 +107,7 @@ $$
 {\rho_1^{(c+1)}-\rho_1^{(c)}},\\
 B_j^1(\alpha)&:=(1-\alpha)^{1-j}\alpha^j,\\
 P^{(c)}(\rho)
-&=B_0^1(\alpha)P^{(c)}[0]\\
-&\quad+B_1^1(\alpha)P^{(c)}[1].
+&=B_0^1(\alpha)P^{(c)}[0]+B_1^1(\alpha)P^{(c)}[1].
 \end{aligned}
 $$
 

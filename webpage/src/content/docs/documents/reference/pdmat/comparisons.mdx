@@ -79,12 +79,12 @@ entry-wise mode tests individual scalar entries.
 
 ## Validation And Limitations
 
-- `pdmat:InvalidEquality` applies when either `==` operand lies outside the
-  `pdmat` type. Incompatible `pdmat` operands delegate through subtraction and
+- Equality accepts coefficient-backed `pdmat` and compatible finite real numeric
+  operands. Unsupported types raise `pdmat:InvalidEquality`. Incompatible `pdmat` operands delegate through subtraction and
   alignment, then propagate the applicable subtraction, grid, or rate-bound
   compatibility error.
-- Function-only data lack finite coefficient evidence and therefore stay in
-  evaluation workflows.
+- Function-only data reject `==`, `<=`, and `>=`, including self-comparison.
+  Exact evaluation, plotting, inspection, unary `+`, and `squeeze` remain supported.
 - A known `pdmat` equality returns a logical result, while a decision-dependent
   equality returns a `pdlmi` residual.
   `pdlmi(A,"==")` raises `pdlmi:UnsupportedPdmatEquality`.

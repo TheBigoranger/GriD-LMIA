@@ -1,9 +1,17 @@
 function tests = test_norm_deg
-    %TEST_NORM_DEG Shared scalar and direction-wise degree contract.
+    % Behavioral regressions for helper.norm_deg.
     tests = functiontests(localfunctions);
 end
 
-function testScaExpAndVecNor(testCase)
+function test_later_invalid_entry_and_integer_class(testCase)
+    % Check the complete vector and normalize valid integer-valued classes.
+    testCase.verifyEqual(helper.normDeg(uint8([0 3 1]), 3, "fixture:degree"), [0 3 1]);
+    for bad = {[0 2 -1], [0 2 Inf], [0 2 0.5]}
+        testCase.verifyError(@() helper.normDeg(bad{1}, 3, "fixture:degree"), "fixture:degree");
+    end
+end
+
+function test_scalars_expand_uniformly_vector_orientation_public(testCase)
     % Scalars expand uniformly and vector orientation is not public state.
     testCase.verifyEqual( ...
         helper.normDeg(2, 3, "test:InvalidDegree", "Degree"), ...
@@ -18,16 +26,7 @@ function testScaExpAndVecNor(testCase)
         "test:InvalidDegree"), [1 1]);
 end
 
-function testGriDefOwn(testCase)
-    % The standalone grid helper defaults to pdbase-owned diagnostics.
-    info = helper.mkGrid({[0 1], [10 20]});
-
-    testCase.verifyEqual(info.NumNodes, [2 2]);
-    testCase.verifyError(@() helper.mkGrid({[0 0]}), ...
-        "pdbase:InvalidGridVector");
-end
-
-function testInvInpPreCalErr(testCase)
+function test_reject_shape_value_outside_scalar_or(testCase)
     % Reject every shape and value outside scalar-or-ell-vector degrees.
     bad = {[], [1 2], [1 2; 3 4], -1, 0.5, Inf, NaN, 1i, ...
         "one", true};

@@ -61,8 +61,8 @@ test("formula styles use stable fluid wrappers without changing KaTeX metrics", 
     .map(({ selector }) => selector);
   assert.deepEqual(
     formulaScrollers,
-    [".elevate-formula-one-line", ".solver-one-line", ".cell-formula-one-line"],
-    "only explicitly indivisible one-line formulas may scroll horizontally",
+    [".formula-display", ".elevate-formula-one-line", ".solver-one-line", ".cell-formula-one-line"],
+    "outer display frames provide accessible local scrolling at the scale floor",
   );
 
 });

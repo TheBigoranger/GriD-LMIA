@@ -21,7 +21,7 @@ Groups compatible source degrees and reuses each `elevRow` plan across physical 
 
 ## <span id="pdbase-prodvals"></span>`prodVals`
 
-Selects numeric scaled tensor convolution, known–affine block contraction, or generic planned pair accumulation. Public `pdmat` and `pdvar` multiplication own dimension and affinity validation.
+Applies one weighted block contraction to numeric and affine coefficient payloads, reusing planned label pairs and weights across physical cells and rate rows. Public `pdmat` and `pdvar` multiplication own dimension and affinity validation.
 
 ## <span id="pdbase-berntbl"></span>`bernTbl`
 
@@ -43,9 +43,11 @@ Checks compatible parameter bounds and constructs the sorted union of interior g
 
 `mapUnary` applies a matrix operation to every cell, label, and rate row. `mkUnOp` rebuilds the same dynamic class with the transformed payload shape.
 
-## <span id="pdbase-joinraterows"></span>`joinRateRows` And <span id="pdbase-zipraterows"></span>`zipRateRows`
+## <span id="pdbase-joinraterows"></span>`joinRateRows`
 
-These methods align ordinary and rate-dependent payloads while preserving the deterministic rate-row order.
+This method aligns ordinary and rate-dependent payloads while preserving deterministic rate-row order. Public callers traverse physical cells directly and reuse that row alignment. The former `zipRateRows` helper is retired.
+
+<span id="pdbase-zipraterows"></span>
 
 ## Public-Path Example
 

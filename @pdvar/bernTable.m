@@ -4,10 +4,13 @@ function tbl = bernTable(obj, varargin)
     %   Syntax:
     %   tbl = obj.bernTable() lists every physical cell.
     %   tbl = obj.bernTable(cellSubs) selects one cell.
+    %   tbl = obj.bernTable(cellSubsMatrix) selects m cells in row order.
     %   tbl = obj.bernTable(..., "oneLine") combines each symbolic coefficient
     %   with its Bernstein basis text. The output is a MATLAB table in
-    %   repository coefficient and rate-vertex order. Invalid cell subscripts,
-    %   repeated selectors, and unknown text options are rejected.
+    %   repository coefficient and rate-vertex order. Numeric and cell-array
+    %   m-by-npar selectors remove duplicate rows after their first occurrence.
+    %   Invalid cell subscripts, repeated selector arguments, and unknown text
+    %   options are rejected.
     %
     %   Output:
     %     tbl - MATLAB table with symbolic coefficient text and Bernstein

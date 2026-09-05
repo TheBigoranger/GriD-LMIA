@@ -8,14 +8,14 @@ function results = run_all
     %     results = tests.run_all();
     root = fileparts(mfilename("fullpath"));
     suiteNames = ["installation", "helper", "pdbase", ...
-        "pdmat", "pdvar", "pdlmi"];
+        "pdmat", "pdvar", "pdlmi", "infrastructure"];
     results = [];
     for suiteIndex = 1:numel(suiteNames)
         suiteName = suiteNames(suiteIndex);
         fprintf(1, 'Test suite START %d/%d: %s\n', ...
             suiteIndex, numel(suiteNames), char(suiteName));
         drawnow;
-        suiteResults = runtests(fullfile(root, "+" + suiteName));
+        suiteResults = runtests(fullfile(root, "+" + suiteName), "IncludingSubfolders", true);
         if isempty(results)
             results = suiteResults;
         else
@@ -32,4 +32,5 @@ function results = run_all
         drawnow;
     end
     assertSuccess(results);
+    tests.infrastructure.api_gate(results);
 end

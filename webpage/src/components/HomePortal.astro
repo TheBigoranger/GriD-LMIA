@@ -1,5 +1,7 @@
 ---
 import KaTeXMath from "./KaTeXMath.astro";
+import Term from "./Term.astro";
+
 
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base.replace(/\/?$/, "/")}${path.replace(/^\/+/, "")}`;
@@ -35,11 +37,11 @@ const bibtex = String.raw`@article{xu2026gridlmia,
   <header class="welcome-hero">
     <p class="welcome-platform">MATLAB / YALMIP</p>
     <h1 id="welcome-title">GriD-LMIA</h1>
-    <p class="welcome-subtitle">Gridding-based parameter-dependent LMI assembly for MATLAB and YALMIP</p>
+    <p class="welcome-subtitle">Gridding-based parameter-dependent <Term id="lmi" /> assembly for MATLAB and YALMIP</p>
     <p class="welcome-summary">Model and solve parameter-dependent LMIs over tensor grids using Bernstein polynomial data and rigorous finite certificates.</p>
 
     <figure class="welcome-target" aria-labelledby="welcome-target-caption">
-      <figcaption id="welcome-target-caption">General DPD-LMI target</figcaption>
+      <figcaption id="welcome-target-caption">General <Term id="dpd-lmi" /> target</figcaption>
       <KaTeXMath class="welcome-target__math formula-block formula-one-line" tex={targetTex} display />
     </figure>
 
@@ -70,7 +72,7 @@ const bibtex = String.raw`@article{xu2026gridlmia,
             {step.key === "model" && (
               <svg viewBox="0 0 180 190">
                 <path class="diagram-line diagram-strong" d="M45 18h62l28 28v111H45Z"/><path class="diagram-line" d="M107 18v28h28M62 66h56M62 82h45M62 111h56M62 127h42"/>
-                <rect class="diagram-accent" x="61" y="91" width="57" height="29" rx="5"/><text class="diagram-label" x="90" y="111">LMI</text><text class="diagram-math" x="90" y="181">𝓕 ≼ 0</text>
+                <rect class="diagram-accent" x="61" y="91" width="57" height="29" rx="5"/><text class="diagram-label" x="90" y="111">{"LMI"}</text><text class="diagram-math" x="90" y="181">𝓕 ≼ 0</text>
               </svg>
             )}
             {step.key === "grid" && (
@@ -113,17 +115,18 @@ const bibtex = String.raw`@article{xu2026gridlmia,
       <article class="welcome-info__item">
         <h3>Author and maintainer</h3>
         <p>Created and maintained by Yicheng Xu.</p>
+        <p>The package name is <Term id="grid-lmia" definition />.</p>
         <a href={local("about/")}>About GriD-LMIA <span aria-hidden="true">→</span></a>
       </article>
 
       <hr class="welcome-info__separator" />
 
       <article class="welcome-info__item">
-        <h3>Latest in v1.4.2</h3>
+        <h3>Latest in v1.4.3</h3>
         <ul>
-          <li>pdlmi constraint concatenation</li>
-          <li>Seven source-grounded examples</li>
-          <li>Source/publish build boundary</li>
+          <li>809 behavioral tests across 141 files</li>
+          <li>Explicit function-only and rate-product rejection</li>
+          <li>Complete formulas with native script proportions</li>
           <li>194 public API records</li>
         </ul>
         <a href={local("version-history/")}>Full version history <span aria-hidden="true">→</span></a>
@@ -156,7 +159,7 @@ const bibtex = String.raw`@article{xu2026gridlmia,
   .welcome-summary { max-width:50rem; margin:clamp(.6rem,1vw,.8rem) 0 0; color:var(--welcome-muted); font-size:clamp(.96rem,1.2vw,1.1rem); line-height:1.5; }
   .welcome-target { max-width:100%; margin:clamp(.7rem,1.2vw,.95rem) 0 0; overflow-x:auto; overscroll-behavior-inline:contain; }
   .welcome-target figcaption { margin:0; color:var(--welcome-muted); font-size:.78rem; font-weight:800; letter-spacing:.06em; text-align:center; text-transform:uppercase; }
-  :global(.welcome-target__math.formula-display) { width:max-content; min-width:100%; max-width:none; padding-block:.1rem; }
+  :global(.welcome-target__math.formula-display) { width:100%; min-width:0; max-width:100%; padding-block:.1rem; }
   .welcome-actions { display:flex; flex-wrap:wrap; gap:.75rem 1.15rem; margin-block-start:clamp(.9rem,1.5vw,1.2rem); }
   .welcome-action { display:inline-flex; min-width:9.25rem; align-items:center; justify-content:center; gap:.6rem; border:2px solid var(--welcome-accent); border-radius:7px; padding:.68rem 1.1rem; color:var(--welcome-accent); background:var(--welcome-surface); font-size:.95rem; font-weight:750; line-height:1; text-decoration:none; transition:border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease; }
   .welcome-action svg { width:1.5rem; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.8; }

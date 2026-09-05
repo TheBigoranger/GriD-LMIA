@@ -26,25 +26,51 @@ function [out, plan] = elevRow(coeffs, fromDeg, toDeg, plan)
     %   sparse form. Applying it to a horizontally packed coefficient row
     %   preserves matrix payload shape and works for both numeric coefficients
     %   and affine sdpvar coefficients.
+    %
+    %   A plan is a plain struct, independent of coefficient values and grid
+    %   coordinates. FromDegree, ToDegree and NumParameters identify the map;
+    %   SourceCount and TargetCount are prod(fromDeg+1) and prod(toDeg+1).
+    %   Operator is TargetCount-by-SourceCount: if E = plan.Operator, then
+    %       out{j} = sum_i E(j,i)*coeffs{i}.
+    %   For scalar degrees 1 -> 2, E = [1 0; 1/2 1/2; 0 1], so {A,B}
+    %   becomes {A,(A+B)/2,B}. A and B may themselves be matrices.
+    %   Reuse requires the same degree pair and coefficient label order;
+    %   the caller validates the payloads before applying a supplied plan.
+    %   The first nonempty row also stores Columns, Kernel=kron(E',I), and
+    %   Blocks (the packed column indices of each target coefficient).
+    %   Capture the returned plan to reuse this expanded matrix on later rows;
+    %   a different payload width replaces Kernel, without rebuilding E.
 
     if nargin < 4 || isempty(plan)
         plan = mkPlan(fromDeg, toDeg);
     end
+    % An empty row is the build-only interface used by elevData and rhodiff:
+    % return the plan without applying it to any coefficients.
     if isempty(coeffs) || isequal(fromDeg, toDeg)
         out = coeffs;
         return
     end
 
     matrixColumns = size(coeffs{1}, 2);
+    if plan.Columns ~= matrixColumns
+        plan.Columns = matrixColumns;
+        plan.Kernel = kron(plan.Operator', speye(matrixColumns));
+        % Keep each index vector horizontal, matching the original slicing
+        % path for both numeric matrices and YALMIP's overloaded subsref.
+        plan.Blocks = reshape(1:matrixColumns*plan.TargetCount, ...
+            matrixColumns, plan.TargetCount)';
+    end
     packed = horzcat(coeffs{:});
-    packed = packed * kron(plan.Operator', speye(matrixColumns));
+    % Packing m-by-n coefficients gives [C1 ... Cs], of size m-by-(n*s).
+    % E' combines these horizontal blocks; kron(E',I_n) applies each scalar
+    % weight to a whole matrix, producing [D1 ... Dt] without mixing columns.
+    packed = packed * plan.Kernel;
     if isnumeric(packed)
         packed = full(packed);
     end
     out = cell(1, plan.TargetCount);
     for k = 1:plan.TargetCount
-        columns = (k - 1) * matrixColumns + (1:matrixColumns);
-        out{k} = packed(:, columns);
+        out{k} = packed(:, plan.Blocks(k, :));
     end
 end
 
@@ -61,34 +87,32 @@ function plan = mkPlan(fromDeg, toDeg)
     end
     srcLbl = helper.combRows(arrayfun(@(d) 0:d, fromDeg, ...
         "UniformOutput", false));
-    dstLbl = helper.combRows(arrayfun(@(d) 0:d, toDeg, ...
-        "UniformOutput", false));
     gap = toDeg - fromDeg;
-    pairCount = size(srcLbl, 1) * prod(gap + 1);
-    rows = zeros(pairCount, 1);
-    cols = zeros(pairCount, 1);
-    srcPairLabels = zeros(pairCount, nPar);
-    gapPairLabels = zeros(pairCount, nPar);
-    nextPair = 1;
-    for k = 1:size(dstLbl, 1)
-        delta = dstLbl(k, :) - srcLbl;
-        keep = all(delta >= 0, 2) & all(delta <= gap, 2);
-        src = find(keep);
-        kept = delta(keep, :);
-        range = nextPair:(nextPair + numel(src) - 1);
-        rows(range) = k;
-        cols(range) = src;
-        srcPairLabels(range, :) = srcLbl(src, :);
-        gapPairLabels(range, :) = kept;
-        nextPair = nextPair + numel(src);
-    end
+    % Elevation multiplies the source basis by the degree-gap expansion of 1.
+    % Enumerate only contributing (source,gap) pairs, instead of scanning all
+    % source labels for every target. Each pair has target beta=alpha+delta.
+    gapLbl = helper.combRows(arrayfun(@(d) 0:d, gap, ...
+        "UniformOutput", false));
+    cols = repelem((1:size(srcLbl, 1))', size(gapLbl, 1));
+    srcPairLabels = srcLbl(cols, :);
+    gapPairLabels = repmat(gapLbl, size(srcLbl, 1), 1);
+    % Earlier axes vary more slowly in combRows order. These strides convert
+    % each target multi-index directly to its one-based sparse-matrix row.
+    strides = fliplr(cumprod([1, fliplr(toDeg(2:end) + 1)]));
+    rows = 1 + (srcPairLabels + gapPairLabels) * strides';
+    % For each retained (beta,alpha), the weight is the product over axes q:
+    % binom(fromDeg(q),alpha(q))*binom(gap(q),beta(q)-alpha(q))
+    % / binom(toDeg(q),beta(q)). The helper evaluates these ratios stably.
     vals = helper.bernConvRatios(srcPairLabels, fromDeg, ...
         gapPairLabels, gap);
     plan.FromDegree = fromDeg;
     plan.ToDegree = toDeg;
     plan.NumParameters = nPar;
     plan.SourceCount = size(srcLbl, 1);
-    plan.TargetCount = size(dstLbl, 1);
+    plan.TargetCount = prod(toDeg + 1);
     plan.Operator = sparse(rows, cols, vals, ...
         plan.TargetCount, plan.SourceCount);
+    plan.Columns = 0;
+    plan.Kernel = [];
+    plan.Blocks = [];
 end

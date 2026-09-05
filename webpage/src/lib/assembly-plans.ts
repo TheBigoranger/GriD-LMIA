@@ -20,7 +20,7 @@ export interface ElevationPlan {
   maximumSampleError: number;
 }
 
-export type ProductRoute = "numeric" | "known-affine" | "generic";
+export type ProductRoute = "numeric" | "known-affine" | "affine-known";
 
 export interface ProductContribution {
   target: number[];
@@ -31,13 +31,12 @@ export interface ProductContribution {
 
 export interface ProductPlan {
   route: ProductRoute;
-  kernel: "scaled tensor convolution" | "planned block contraction" | "planned pair accumulation";
+  kernel: "weighted block contraction";
   outputDegree: number[];
-  packedShapes: [number[], number[], number[]];
+  labelCounts: [number, number, number];
   contributions: ProductContribution[];
   outputCoefficients: number[] | null;
   contractionBlocks: string[];
-  usesConvn: boolean;
 }
 
 export type GramFamily = "putinar" | "sparseputinar" | "sparsefullbox" | "fullbox";
@@ -232,21 +231,18 @@ export function buildProductPlan(input: {
       }, 0));
   }
 
-  const routeData = {
-    numeric: { kernel: "scaled tensor convolution" as const, usesConvn: true, contractionBlocks: [] },
-    "known-affine": {
-      kernel: "planned block contraction" as const,
-      usesConvn: false,
-      contractionBlocks: ["known-left × affine-right", "affine-left × known-right"],
-    },
-    generic: { kernel: "planned pair accumulation" as const, usesConvn: false, contractionBlocks: [] },
+  const contractionBlocks = {
+    numeric: ["known-left x known-right"],
+    "known-affine": ["known-left x affine-right"],
+    "affine-known": ["affine-left x known-right"],
   }[input.route];
 
   return {
     route: input.route,
-    ...routeData,
+    kernel: "weighted block contraction",
+    contractionBlocks,
     outputDegree,
-    packedShapes: [leftDegree.map((value) => value + 1), rightDegree.map((value) => value + 1), outputDegree.map((value) => value + 1)],
+    labelCounts: [leftLabels.length, rightLabels.length, outputLabels.length],
     contributions,
     outputCoefficients,
   };

@@ -44,8 +44,10 @@ function out = affineBinOp(lhs, rhs, fcn, errId)
     data = pdbase.elevData([ld, rd], deg, grid, "fast");
     lhsVals = data(1).LocalValues;
     rhsVals = data(2).LocalValues;
-    vals = anchor.zipRateRows(lhsVals, rhsVals, fcn, grid, ...
-        "pdvar:InvalidCoefficientRows");
+    nCell = cellfun(@numel, grid) - 1;
+    vals = helper.mkNest(nCell, @(subs) anchor.joinRateRows( ...
+        {helper.cellGet(lhsVals, subs), helper.cellGet(rhsVals, subs)}, ...
+        @(parts) fcn(parts{1}, parts{2}), "pdvar:InvalidCoefficientRows"));
 
     if helper.isZero(vals, "vals")
         out = zeroObj(grid, reqSize);

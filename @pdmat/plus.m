@@ -13,6 +13,13 @@ function out = plus(lhs, rhs)
     %     A = pdmat({[0 1]}, {1, 2}, Degree=1);
     %     C = A + 3;
 
+    % Zero and cancellation shortcuts cannot supply missing coefficient evidence.
+    if (isa(lhs, "pdmat") && lhs.SourceSummary == "function") || ...
+            (isa(rhs, "pdmat") && rhs.SourceSummary == "function")
+        error("pdmat:FunctionOnlyAlgebra", ...
+            "Function-backed pdmat objects need explicit Bernstein coefficient evidence for this operation.");
+    end
+
     if isa(lhs, "pdmat") && isa(rhs, "pdmat")
         zeroVal = [];
         if helper.isZero(lhs, "obj")

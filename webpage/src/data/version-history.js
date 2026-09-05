@@ -1,8 +1,14 @@
 export const versionHistory = [
   {
+    version: "v1.4.3",
+    date: "2026-09-04",
+    status: "current documentation snapshot",
+    summary: "Expands 141 test files to 809 cases, verifies 169 API entries, rejects function-only arithmetic shortcuts and two active-rate products even when zero, and preserves the 1-by-1 cell container for a fixed rate vertex. The manuals clarify these boundaries and fit complete formulas with native script proportions.",
+  },
+  {
     version: "v1.4.2",
     date: "2026-08-31",
-    status: "current documentation snapshot",
+    status: "prior documentation snapshot",
     summary:
       "Documents terminal pdlmi constraint concatenation, records seven source-grounded examples at stable problem-oriented paths, and separates source-authoring builds from PDF-only publication builds. The synchronized manuals index 194 public API records.",
   },

@@ -116,7 +116,6 @@ classdef pdbase
         tbl = bernTbl(obj, errId, valFcn, exprFcn, rateVerts, varargin)
         rb = pickRateBounds(obj, errId, varargin)
         coeffs = joinRateRows(obj, leaves, fcn, errId)
-        vals = zipRateRows(obj, lhsVals, rhsVals, fcn, grid, errId)
         vals = prodVals(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
             grid, errId, validationMode, lhsNumRateRows, rhsNumRateRows)
         grid = mergeGrid(obj, errId, varargin)
@@ -130,7 +129,6 @@ classdef pdbase
         [out, plan] = elevRow(coeffs, fromDeg, toDeg, plan)
         vals = mapVals(vals, fcn, grid)
         [rows, cols] = matSubs(subs, sz, errId)
-        dims = normRedDims(dims, errId, name)
     end
 
 end

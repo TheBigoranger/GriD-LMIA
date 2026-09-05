@@ -123,7 +123,7 @@ test("authors the approved lightweight Welcome copy, target, navigation, and not
   for (const copy of [
     "MATLAB / YALMIP",
     "GriD-LMIA",
-    "Gridding-based parameter-dependent LMI assembly for MATLAB and YALMIP",
+    'Gridding-based parameter-dependent <Term id="lmi" /> assembly for MATLAB and YALMIP',
     "Model and solve parameter-dependent LMIs over tensor grids using Bernstein polynomial data and rigorous finite certificates.",
     "Reference", "Learn", "Examples", "Install",
     "Model the DPD-LMI", "Partition the parameter box", "Build Bernstein data",
@@ -146,7 +146,7 @@ test("authors the approved lightweight Welcome copy, target, navigation, and not
   assert.match(homePortal, /--welcome-surface:\s*#fff/);
 });
 
-test("keeps Welcome author, v1.4.2 highlights, and citation source-grounded", () => {
+test("keeps Welcome author, v1.4.3 highlights, and citation source-grounded", () => {
   const homePortal = read("src/components/HomePortal.astro");
   const citation = "Yicheng Xu and Faryar Jabbari, “GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities,” arXiv:2608.03175, 2026.";
   const bibtex = `@article{xu2026gridlmia,
@@ -159,9 +159,9 @@ test("keeps Welcome author, v1.4.2 highlights, and citation source-grounded", ()
 
   for (const copy of [
     "Created and maintained by Yicheng Xu.",
-    "pdlmi constraint concatenation",
-    "Seven source-grounded examples",
-    "Source/publish build boundary",
+    "809 behavioral tests across 141 files",
+    "Explicit function-only and rate-product rejection",
+    "Complete formulas with native script proportions",
     "194 public API records",
   ]) assert.ok(homePortal.includes(copy), `Welcome project information missing: ${copy}`);
 
@@ -193,7 +193,7 @@ test("keeps Welcome project information in one open vertical stream", () => {
   assert.equal((infoMarkup.match(/class="welcome-info__stream"/g) ?? []).length, 1);
   assert.match(
     infoMarkup,
-    /Author and maintainer[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Latest in v1\.4\.2[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Cite GriD-LMIA/,
+    /Author and maintainer[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Latest in v1\.4\.3[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Cite GriD-LMIA/,
   );
   assert.equal((infoMarkup.match(/class="welcome-info__separator"/g) ?? []).length, 2);
   assert.doesNotMatch(infoMarkup, /welcome-info__(?:card|column|grid|tab)|role="tablist"|<details\b/i);
@@ -271,7 +271,7 @@ test("home-only interactive explorers migrate once to their detailed mathematics
   assert.match(explorer, /A\.LocalValues[\s\S]*cell\.coefficients\.map/);
 });
 
-test("only explicitly indivisible one-line formulas opt into local scrolling", () => {
+test("outer formula frames provide bounded scrolling while internal math stays native", () => {
   const elevate = read("src/content/docs/documents/reference/pdmat/elevate.mdx");
   const solverSmoke = read("src/content/docs/examples/solver-smoke.md");
   const home = read("src/components/HomePortal.astro");
@@ -304,14 +304,14 @@ test("only explicitly indivisible one-line formulas opt into local scrolling", (
     /\.cell-formula-one-line\s*\{[^}]*max-width:\s*100%[^}]*overflow-x:\s*auto[^}]*\}/s,
   );
   assert.match(home, /\.welcome-target\s*\{[^}]*max-width:100%[^}]*overflow-x:auto[^}]*overscroll-behavior-inline:contain[^}]*\}/);
-  assert.match(home, /welcome-target__math\.formula-display\)\s*\{[^}]*width:max-content[^}]*min-width:100%[^}]*max-width:none[^}]*\}/);
+  assert.match(home, /welcome-target__math\.formula-display\)\s*\{[^}]*width:100%[^}]*min-width:0[^}]*max-width:100%[^}]*\}/);
   assert.doesNotMatch(
     allSource,
-    /(?:\.formula-display|\.math-strip(?:__row)?)\s*\{[^}]*overflow-x:\s*(?:auto|scroll)/si,
+    /\.math-strip(?:__row)?\s*\{[^}]*overflow-x:\s*(?:auto|scroll)/si,
   );
   assert.match(
     geometry,
-    /closest\(\s*"\.elevate-formula-one-line, \.solver-one-line, \.cell-formula-one-line, \.welcome-target",\s*\)/s,
+    /closest\(\s*"\[data-formula-fit\], \.elevate-formula-one-line, \.solver-one-line, \.cell-formula-one-line, \.welcome-target",\s*\)/s,
   );
   assert.match(
     geometry,
@@ -425,7 +425,8 @@ test("React formulas consume trusted build-time markup without a document typese
   assert.match(helper, /dangerouslySetInnerHTML=\{\{\s*__html:\s*markup\s*\}\}/);
   assert.doesNotMatch(helper, /\brenderMath\s*\(|\brenderToString\s*\(|katex-renderer/i);
   assert.doesNotMatch(helper, /\btex\s*:\s*string\b/);
-  assert.doesNotMatch(helper, /\buseEffect\b|\buseRef\b|textContent|document\.|window\./);
+  assert.doesNotMatch(helper, /textContent|document\.|window\./);
+  assert.match(helper, /useEffect\(\(\) => \{\s*if \(frame.current\) frame.current.dataset.formulaReady = "";\s*\}, \[markup\]\)/);
 });
 
 test("the React wrapper stays internal while public formula wrappers are consumed", () => {

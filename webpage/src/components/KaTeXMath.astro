@@ -13,5 +13,5 @@ const markup = renderMath(tex, { displayMode: display });
 ---
 
 {display
-  ? <div class={classes} set:html={markup} />
+  ? <div class={classes} data-formula-fit tabindex="0" aria-label="Mathematical formula"><span class="formula-fit-size"><span class="formula-fit-content" set:html={markup} /></span></div>
   : <span class={classes} set:html={markup} />}

@@ -1,0 +1,2296 @@
+[
+  {
+    "Owner": "helper",
+    "Method": "bernConvRatios",
+    "Tests": [
+      "tests.helper.test_bern_conv/test_moderate_degrees_independently_computed_binomial",
+      "tests.helper.test_bern_conv/test_four_arguments_cover_ordinary_product_elevation",
+      "tests.helper.test_bern_conv/test_degree_1030_first_required_range_where",
+      "tests.helper.test_bern_conv/test_helpers_reject_misaligned_or_out_range",
+      "tests.helper.test_bern_conv/test_zero_degree_axes_and_later_invalid_labels"
+    ],
+    "Contract": "helper.bernConvRatios: Moderate degrees retain the independently computed binomial values.; Four arguments cover ordinary product and elevation ratios.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "bernConvWeights",
+    "Tests": [
+      "tests.helper.test_bern_conv/test_moderate_degrees_independently_computed_binomial",
+      "tests.helper.test_bern_conv/test_four_arguments_cover_ordinary_product_elevation",
+      "tests.helper.test_bern_conv/test_degree_1030_first_required_range_where",
+      "tests.helper.test_bern_conv/test_helpers_reject_misaligned_or_out_range",
+      "tests.helper.test_bern_conv/test_zero_degree_axes_and_later_invalid_labels"
+    ],
+    "Contract": "helper.bernConvWeights: Moderate degrees retain the independently computed binomial values.; Four arguments cover ordinary product and elevation ratios.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "cellGet",
+    "Tests": [
+      "tests.helper.test_cell_get/test_nested_subscripts_preserve_payload",
+      "tests.helper.test_cell_get/test_three_axes_keep_rate_table_shape",
+      "tests.helper.test_cell_get/test_root_and_partial_path_return_subtrees"
+    ],
+    "Contract": "helper.cellGet: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "chk",
+    "Tests": [
+      "tests.helper.test_chk/test_valid_numeric_predicate_chains_return_original",
+      "tests.helper.test_chk/test_cell_validation_failures_preserve_caller_id",
+      "tests.helper.test_chk/test_matrix_predicates_accept_2_d_matrices",
+      "tests.helper.test_chk/test_unknown_predicate_tags_indicate_helper_bug",
+      "tests.helper.test_chk/test_predicate_order_owns_first_standardized_failure",
+      "tests.helper.test_chk/test_range_count_options_caller_errors_malformed",
+      "tests.helper.test_chk/test_later_matrix_entry_and_last_rate_bound_fail"
+    ],
+    "Contract": "helper.chk: Valid numeric predicate chains should return the original value.; Cell validation failures preserve the caller ID and standard label text.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "chkCont",
+    "Tests": [
+      "tests.helper.test_chk_cont/test_late_cell_row_and_numeric_threshold",
+      "tests.helper.test_chk_cont/test_tensor_face_checks_every_row_and_corner",
+      "tests.helper.test_chk_cont/test_zero_degree_axis_still_requires_matching_faces"
+    ],
+    "Contract": "helper.chkCont: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "combRows",
+    "Tests": [
+      "tests.helper.test_comb_rows/test_asymmetric_cartesian_order",
+      "tests.helper.test_comb_rows/test_column_vectors_and_singleton_middle_axis",
+      "tests.helper.test_comb_rows/test_empty_axis_and_duplicate_values"
+    ],
+    "Contract": "helper.combRows: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "fitVals",
+    "Tests": [
+      "tests.helper.test_fit_vals/test_unequal_cell_matrix_polynomial",
+      "tests.helper.test_fit_vals/test_zero_degree_axis_and_rectangular_tensor_polynomial",
+      "tests.helper.test_fit_vals/test_bilinear_tensor_corner_order"
+    ],
+    "Contract": "helper.fitVals: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "fixture:InvalidDegree"
+  },
+  {
+    "Owner": "helper",
+    "Method": "isZero",
+    "Tests": [
+      "tests.helper.test_is_zero/test_numeric_zero_evidence_finite_real_nonempty",
+      "tests.helper.test_is_zero/test_scalar_zero_expands_while_incompatible_zero",
+      "tests.helper.test_is_zero/test_nested_cells_constant_rate_payloads_share",
+      "tests.helper.test_is_zero/test_function_only_pdmat_placeholder_zeros_algebra",
+      "tests.helper.test_is_zero/test_helper_misuse_fail_as_helper_contract",
+      "tests.helper.test_is_zero/test_later_nested_affine_identity_and_distinct_variables"
+    ],
+    "Contract": "helper.isZero: Keep YALMIP coefficient bases deterministic for the pdvar object route.; Numeric zero evidence must be finite, real, nonempty, and identically zero.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "mkGrid",
+    "Tests": [
+      "tests.helper.test_mk_grid/test_standalone_grid_helper_defaults_pdbase_owned",
+      "tests.helper.test_mk_grid/test_complete_grid_metadata",
+      "tests.helper.test_mk_grid/test_later_axis_invalid_and_column_normalization"
+    ],
+    "Contract": "helper.mkGrid: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "fixture:InvalidGridVector, pdbase:InvalidGridVector"
+  },
+  {
+    "Owner": "helper",
+    "Method": "mkNest",
+    "Tests": [
+      "tests.helper.test_mk_nest/test_all_leaves_receive_full_subscripts",
+      "tests.helper.test_mk_nest/test_singleton_middle_axis_preserves_all_subscripts",
+      "tests.helper.test_mk_nest/test_cell_payload_is_not_flattened"
+    ],
+    "Contract": "helper.mkNest: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "normDeg",
+    "Tests": [
+      "tests.helper.test_norm_deg/test_scalars_expand_uniformly_vector_orientation_public",
+      "tests.helper.test_norm_deg/test_reject_shape_value_outside_scalar_or",
+      "tests.helper.test_norm_deg/test_later_invalid_entry_and_integer_class"
+    ],
+    "Contract": "helper.normDeg: Scalars expand uniformly and vector orientation is not public state.; Reject every shape and value outside scalar-or-ell-vector degrees.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "helper",
+    "Method": "normMode",
+    "Tests": [
+      "tests.helper.test_norm_mode/test_modes_and_caller_errors",
+      "tests.helper.test_norm_mode/test_missing_and_character_matrix_are_rejected",
+      "tests.helper.test_norm_mode/test_whitespace_is_not_silently_trimmed"
+    ],
+    "Contract": "helper.normMode: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "fixture:InvalidValidationMode"
+  },
+  {
+    "Owner": "helper",
+    "Method": "rateVerts",
+    "Tests": [
+      "tests.helper.test_rate_verts/test_fixed_and_varying_directions",
+      "tests.helper.test_rate_verts/test_last_fixed_axis_does_not_permute_vertices",
+      "tests.helper.test_rate_verts/test_zero_and_nonzero_fixed_boxes_keep_one_row"
+    ],
+    "Contract": "helper.rateVerts: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "installation",
+    "Method": "install_pd_lmi",
+    "Tests": [
+      "tests.installation.test_install_pd_lmi/test_fallback_and_repeated_installation",
+      "tests.installation.test_install_pd_lmi/test_success_stage_report",
+      "tests.installation.test_install_pd_lmi/test_failure_stage_and_cause",
+      "tests.installation.test_install_pd_lmi/test_failed_probe_restores_path",
+      "tests.installation.test_install_pd_lmi/test_user_path_fallback",
+      "tests.installation.test_install_pd_lmi/test_save_exception_fallback",
+      "tests.installation.test_install_pd_lmi/test_persistence_failure_rollback",
+      "tests.installation.test_install_pd_lmi/test_shadowed_class_rollback",
+      "tests.installation.test_install_pd_lmi/test_missing_yalmip",
+      "tests.installation.test_install_pd_lmi/test_incomplete_yalmip",
+      "tests.installation.test_install_pd_lmi/test_solver_priority_and_probe_exceptions",
+      "tests.installation.test_install_pd_lmi/test_malformed_registry_and_enumeration_failure",
+      "tests.installation.test_install_pd_lmi/test_first_nonempty_user_path_and_empty_fallback",
+      "tests.installation.test_install_pd_lmi/test_second_persistence_exception_restores_path_and_reports_cause"
+    ],
+    "Contract": "installation.install_pd_lmi: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "install_pd_lmi:IncompleteYALMIP, install_pd_lmi:MissingYALMIP, install_pd_lmi:NoWorkingSDPSolver, install_pd_lmi:PathConflict, install_pd_lmi:PathSaveFailed"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "cat",
+    "Tests": [
+      "tests.pdbase.construction.test_constructor/test_direct_pdbase_operands_create_ambiguous_matlab"
+    ],
+    "Contract": "pdbase.cat: Scalar construction should populate default coefficient-backed state.; Default objects are coefficient-backed zeros, not sampled grid data.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs, pdbase:InvalidCoefficientCell, pdbase:InvalidCoefficientPayload, pdbase:InvalidCoefficientRows, pdbase:InvalidDegree, pdbase:InvalidGrid, pdbase:InvalidGridVector, pdbase:InvalidLocalValues, pdbase:InvalidMatrixSize, pdbase:InvalidRateBounds, pdbase:InvalidValidationMode, pdbase:UnsupportedConcatenation"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "cells",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdbase.cells: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "coeffs",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdbase.coeffs: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "ctranspose",
+    "Tests": [
+      "tests.pdbase.matrix.test_ctranspose/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_ctranspose/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_ctranspose/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.ctranspose: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "cumsum",
+    "Tests": [
+      "tests.pdbase.algebra.test_cumsum/test_all_cells_and_rate_rows",
+      "tests.pdbase.algebra.test_cumsum/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.algebra.test_cumsum/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.algebra.test_cumsum/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.cumsum: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidCumsum"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "diag",
+    "Tests": [
+      "tests.pdbase.matrix.test_diag/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_diag/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.matrix.test_diag/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_diag/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.diag: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidDiag"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "elevate",
+    "Tests": [
+      "tests.pdbase.polynomial.test_elevate/test_public_coefficient_elevation_changes_basis_source",
+      "tests.pdbase.polynomial.test_elevate/test_tensor_elevation_package_wide_coefficient_row",
+      "tests.pdbase.polynomial.test_elevate/test_rate_rows_elevated_without_reordering_or",
+      "tests.pdbase.polynomial.test_elevate/test_invalid_increments_fail_transforming_coefficient",
+      "tests.pdbase.polynomial.test_elevate/test_call_local_validation_mode_scalar_text",
+      "tests.pdbase.polynomial.test_elevate/test_value_class_copy_changes_basis_while",
+      "tests.pdbase.polynomial.test_elevate/test_rate_vertex_same_map_without_mixing",
+      "tests.pdbase.polynomial.test_elevate/test_binomial_reference_all_rows",
+      "tests.pdbase.polynomial.test_elevate/test_object_api_rejects_negative_increment",
+      "tests.pdbase.polynomial.test_elevate/test_constant_tensor_incidence",
+      "tests.pdbase.polynomial.test_elevate/test_nonuniform_tensor_mixed_rows_independent_incidence"
+    ],
+    "Contract": "Preserve every polynomial and affine identity under degree elevation, across cells and rate rows.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
+    "Invalid": "pdbase:InvalidDegreeIncrement, pdbase:InvalidValidationMode"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "end",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdbase.end: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "evaluate",
+    "Tests": [
+      "tests.pdbase.polynomial.test_evaluate/test_stored_coefficient_row_reconstruct_matrix_value",
+      "tests.pdbase.polynomial.test_evaluate/test_multiple_stored_rows_row_cell_array",
+      "tests.pdbase.polynomial.test_evaluate/test_direct_pdbase_calls_own_malformed_out",
+      "tests.pdbase.polynomial.test_evaluate/test_all_rows_at_endpoints_and_interior",
+      "tests.pdbase.polynomial.test_evaluate/test_unequal_tensor_degrees_rectangular_rate_rows",
+      "tests.pdbase.polynomial.test_evaluate/test_single_coefficients_keep_original_arithmetic",
+      "tests.pdbase.polynomial.test_evaluate/test_fixed_rate_result_keeps_cell_container",
+      "tests.pdbase.polynomial.test_evaluate/test_discontinuous_tensor_internal_boundary_uses_right_cells"
+    ],
+    "Contract": "Reconstruct coefficients at endpoints/interior and use right-cell boundary ownership. Ordinary storage returns a matrix; active rate storage returns a 1-by-N cell array, including N=1.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values. Independent pointwise polynomial or derivative values and explicit container checks.",
+    "Invalid": "pdbase:InvalidPoint, pdbase:PointOutOfBounds"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "flip",
+    "Tests": [
+      "tests.pdbase.matrix.test_flip/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_flip/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_flip/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.flip: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidFlip for a nonpositive dimension."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "fliplr",
+    "Tests": [
+      "tests.pdbase.matrix.test_fliplr/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_fliplr/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_fliplr/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.fliplr: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "flipud",
+    "Tests": [
+      "tests.pdbase.matrix.test_flipud/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_flipud/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_flipud/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.flipud: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "height",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdbase.height: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "horzcat",
+    "Tests": [
+      "tests.pdbase.construction.test_constructor/test_direct_pdbase_operands_create_ambiguous_matlab"
+    ],
+    "Contract": "pdbase.horzcat: Scalar construction should populate default coefficient-backed state.; Default objects are coefficient-backed zeros, not sampled grid data.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs, pdbase:InvalidCoefficientCell, pdbase:InvalidCoefficientPayload, pdbase:InvalidCoefficientRows, pdbase:InvalidDegree, pdbase:InvalidGrid, pdbase:InvalidGridVector, pdbase:InvalidLocalValues, pdbase:InvalidMatrixSize, pdbase:InvalidRateBounds, pdbase:InvalidValidationMode, pdbase:UnsupportedConcatenation"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "lbls",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdbase.lbls: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "length",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdbase.length: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "mean",
+    "Tests": [
+      "tests.pdbase.algebra.test_mean/test_all_cells_and_rate_rows",
+      "tests.pdbase.algebra.test_mean/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.algebra.test_mean/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.algebra.test_mean/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.mean: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidMean"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "ncell",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdbase.ncell: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "ncoeff",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdbase.ncoeff: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "ndims",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdbase.ndims: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "npar",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdbase.npar: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "numArgumentsFromSubscript",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdbase.numArgumentsFromSubscript: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "numel",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdbase.numel: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "pdbase",
+    "Tests": [
+      "tests.pdbase.construction.test_constructor/test_scalar_construction_populate_default_coefficient",
+      "tests.pdbase.construction.test_constructor/test_matrix_protocol_methods_report_stored_payload",
+      "tests.pdbase.construction.test_constructor/test_direct_pdbase_operands_create_ambiguous_matlab",
+      "tests.pdbase.construction.test_constructor/test_tensor_construction_preserve_explicit_flags_rate",
+      "tests.pdbase.construction.test_constructor/test_named_metadata_may_omit_optional_localvalues",
+      "tests.pdbase.construction.test_constructor/test_ratebounds_only_stored_rate_metadata_state",
+      "tests.pdbase.construction.test_constructor/test_explicit_internal_row_counts_require_matching",
+      "tests.pdbase.construction.test_constructor/test_public_state_properties_inspectable_but_mutable",
+      "tests.pdbase.construction.test_constructor/test_scalar_grids_expose_flat_cell_coefficient",
+      "tests.pdbase.construction.test_constructor/test_tensor_grids_preserve_nested_physical_cell",
+      "tests.pdbase.construction.test_constructor/test_rate_bounds_live_object_inside_localvalues",
+      "tests.pdbase.construction.test_constructor/test_tensor_localvalues_nested_by_physical_cell",
+      "tests.pdbase.construction.test_constructor/test_each_physical_cell_contain_exactly_ncoeff",
+      "tests.pdbase.construction.test_constructor/test_coeffs_reject_out_range_wrong_width",
+      "tests.pdbase.construction.test_constructor/test_grid_input_nonempty_cell_array_grid",
+      "tests.pdbase.construction.test_constructor/test_grid_vectors_finite_strictly_increasing_numeric",
+      "tests.pdbase.construction.test_constructor/test_degree_accepts_only_scalar_or_finite",
+      "tests.pdbase.construction.test_constructor/test_matrixsize_positive_2_d_integer_size",
+      "tests.pdbase.construction.test_constructor/test_ratebounds_match_parameter_count_contain_finite",
+      "tests.pdbase.construction.test_constructor/test_localvalues_fail_missing_cells_or_wrong",
+      "tests.pdbase.construction.test_constructor/test_plain_payloads_stay_finite_real_numeric",
+      "tests.pdbase.construction.test_constructor/test_pdbase_storage_accepts_real_2_d",
+      "tests.pdbase.construction.test_constructor/test_rate_affine_payload_structs_preserve_constant",
+      "tests.pdbase.construction.test_constructor/test_malformed_rate_affine_structs_fail_payload",
+      "tests.pdbase.construction.test_constructor/test_rate_affine_payloads_require_explicit_ratebounds",
+      "tests.pdbase.construction.test_constructor/test_supplying_ratebounds_rate_domain_metadata",
+      "tests.pdbase.construction.test_constructor/test_valid_normalized_storage_has_identical_public",
+      "tests.pdbase.construction.test_constructor/test_fast_trusts_later_generated_cells_strict",
+      "tests.pdbase.construction.test_constructor/test_missing_nonscalar_nontext_empty_unsupported_modes",
+      "tests.pdbase.construction.test_constructor/test_fast_construction_may_trust_generated_later"
+    ],
+    "Contract": "pdbase.pdbase: Scalar construction should populate default coefficient-backed state.; Default objects are coefficient-backed zeros, not sampled grid data.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs, pdbase:InvalidCoefficientCell, pdbase:InvalidCoefficientPayload, pdbase:InvalidCoefficientRows, pdbase:InvalidDegree, pdbase:InvalidGrid, pdbase:InvalidGridVector, pdbase:InvalidLocalValues, pdbase:InvalidMatrixSize, pdbase:InvalidRateBounds, pdbase:InvalidValidationMode, pdbase:UnsupportedConcatenation"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "repmat",
+    "Tests": [
+      "tests.pdbase.matrix.test_repmat/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_repmat/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.matrix.test_repmat/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_repmat/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.repmat: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidRepmat"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "reshape",
+    "Tests": [
+      "tests.pdbase.matrix.test_reshape/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_reshape/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.matrix.test_reshape/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_reshape/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.reshape: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidReshape"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "rhodiff",
+    "Tests": [
+      "tests.pdbase.polynomial.test_rhodiff/test_parent_implementation_dynamic_class_row_order",
+      "tests.pdbase.polynomial.test_rhodiff/test_linear_tensor_polynomial_has_constant_partial",
+      "tests.pdbase.polynomial.test_rhodiff/test_degree_zero_input_still_produces_complete",
+      "tests.pdbase.polynomial.test_rhodiff/test_fixed_scheduling_rate_vertex_two_duplicate",
+      "tests.pdbase.polynomial.test_rhodiff/test_each_fixed_tensor_direction_removes_duplicate",
+      "tests.pdbase.polynomial.test_rhodiff/test_missing_malformed_mismatched_repeated_derivative",
+      "tests.pdbase.polynomial.test_rhodiff/test_unequal_cell_widths_and_rate_signs",
+      "tests.pdbase.polynomial.test_rhodiff/test_tensor_zero_axis_nonuniform_widths_and_fixed_rates"
+    ],
+    "Contract": "Use signed rate vertices and degree/cell-width factors on every coefficient difference.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
+    "Invalid": "pdbase:InvalidDiff, pdbase:InvalidRateBounds, pdbase:MissingRateBounds, pdbase:RateBoundsMismatch"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "rot90",
+    "Tests": [
+      "tests.pdbase.matrix.test_rot90/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_rot90/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.matrix.test_rot90/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_rot90/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.rot90: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "size",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdbase.size: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "squeeze",
+    "Tests": [
+      "tests.pdbase.matrix.test_squeeze/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_squeeze/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_squeeze/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.squeeze: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "sum",
+    "Tests": [
+      "tests.pdbase.algebra.test_sum/test_all_cells_and_rate_rows",
+      "tests.pdbase.algebra.test_sum/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.algebra.test_sum/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.algebra.test_sum/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.sum: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidSum"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "trace",
+    "Tests": [
+      "tests.pdbase.algebra.test_trace/test_all_cells_and_rate_rows",
+      "tests.pdbase.algebra.test_trace/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.algebra.test_trace/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.trace: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "transpose",
+    "Tests": [
+      "tests.pdbase.matrix.test_transpose/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_transpose/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_transpose/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.transpose: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "tril",
+    "Tests": [
+      "tests.pdbase.matrix.test_tril/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_tril/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.matrix.test_tril/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_tril/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.tril: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidTriangularPart"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "triu",
+    "Tests": [
+      "tests.pdbase.matrix.test_triu/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_triu/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdbase.matrix.test_triu/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_triu/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.triu: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdbase:InvalidTriangularPart"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "uminus",
+    "Tests": [
+      "tests.pdbase.algebra.test_uminus/test_all_cells_and_rate_rows",
+      "tests.pdbase.algebra.test_uminus/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.algebra.test_uminus/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.uminus: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "uplus",
+    "Tests": [
+      "tests.pdbase.algebra.test_uplus/test_all_cells_and_rate_rows",
+      "tests.pdbase.algebra.test_uplus/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.algebra.test_uplus/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.uplus: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "vec",
+    "Tests": [
+      "tests.pdbase.matrix.test_vec/test_all_cells_and_rate_rows",
+      "tests.pdbase.matrix.test_vec/test_rectangular_tensor_zero_degree_axis",
+      "tests.pdbase.matrix.test_vec/test_fixed_rate_tensor_preserves_derivative_state"
+    ],
+    "Contract": "pdbase.vec: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "vertcat",
+    "Tests": [
+      "tests.pdbase.construction.test_constructor/test_direct_pdbase_operands_create_ambiguous_matlab"
+    ],
+    "Contract": "pdbase.vertcat: Scalar construction should populate default coefficient-backed state.; Default objects are coefficient-backed zeros, not sampled grid data.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs, pdbase:InvalidCoefficientCell, pdbase:InvalidCoefficientPayload, pdbase:InvalidCoefficientRows, pdbase:InvalidDegree, pdbase:InvalidGrid, pdbase:InvalidGridVector, pdbase:InvalidLocalValues, pdbase:InvalidMatrixSize, pdbase:InvalidRateBounds, pdbase:InvalidValidationMode, pdbase:UnsupportedConcatenation"
+  },
+  {
+    "Owner": "pdbase",
+    "Method": "width",
+    "Tests": [
+      "tests.pdbase.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdbase.width: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "horzcat",
+    "Tests": [
+      "tests.pdlmi.assembly.test_concatenation/test_raw_yalmip_constraints_dispatch_pdlmi_both",
+      "tests.pdlmi.assembly.test_concatenation/test_existing_yalmip_lists_composable_or_pdlmi",
+      "tests.pdlmi.assembly.test_concatenation/test_each_wrapper_exported_independently_yalmip_merges",
+      "tests.pdlmi.assembly.test_concatenation/test_identity_equality_contributes_same_empty_list",
+      "tests.pdlmi.assembly.test_concatenation/test_logical_certificates_undeclared_operand_classes"
+    ],
+    "Contract": "Export scalar wrappers in written order and concatenate supported YALMIP constraint lists.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdlmi:InvalidConcatenation"
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "pdlmi",
+    "Tests": [
+      "tests.pdlmi.construction.test_constructor/test_rhodiff_stores_row_rate_vertex_pdlmi",
+      "tests.pdlmi.construction.test_constructor/test_fixed_rate_contributes_direct_constraint_without",
+      "tests.pdlmi.construction.test_constructor/test_tensor_rate_bounds_create_constraint_rate",
+      "tests.pdlmi.construction.test_constructor/test_fixed_tensor_direction_contributes_two_distinct",
+      "tests.pdlmi.construction.test_constructor/test_residual_assembly_constrain_elevated_derivative_rate",
+      "tests.pdlmi.construction.test_constructor/test_direct_assembly_constrains_rate_row_cubic",
+      "tests.pdlmi.construction.test_constructor/test_rectangular_structurally_full_square_residuals",
+      "tests.pdlmi.construction.test_constructor/test_later_offending_coefficient_changes_constraint",
+      "tests.pdlmi.construction.test_constructor/test_direct_elevated_paths_cell_entry_derivative",
+      "tests.pdlmi.construction.test_constructor/test_full_variable_can_still_form_lmi",
+      "tests.pdlmi.construction.test_constructor/test_supplying_only_degree_accepted_but_make",
+      "tests.pdlmi.construction.test_constructor/test_retired_names_out_source_text_while",
+      "tests.pdlmi.construction.test_constructor/test_relation_validation",
+      "tests.pdlmi.construction.test_constructor/test_parser_errors_distinguish_malformed_syntax",
+      "tests.pdlmi.construction.test_constructor/test_direct_assembly_has_same_public_structure",
+      "tests.pdlmi.construction.test_constructor/test_constructor_mode_failures_owned_by_pdlmi",
+      "tests.pdlmi.construction.test_constructor/test_apply_method_parses_own_trailing_mode",
+      "tests.pdlmi.construction.test_constructor/test_apply_calls_reject_missing_malformed_transient",
+      "tests.pdlmi.construction.test_constructor/test_constructor_selectors_apply_methods_reject_malformed",
+      "tests.pdlmi.construction.test_constructor/test_later_cell_or_rate_row_selects",
+      "tests.pdlmi.construction.test_constructor/test_strict_assembly_diagnoses_later_cell_tensor",
+      "tests.pdlmi.construction.test_constructor/test_complete_direct_constraint_expression_order",
+      "tests.pdlmi.assembly.test_equalities/test_composed_fixed_rate_equality_preserves_affine_targets",
+      "tests.pdlmi.assembly.test_known_pdmat/test_numeric_pdmat_comparisons_return_wrappers_equality"
+    ],
+    "Contract": "pdlmi.pdlmi: rhodiff stores one row per rate vertex; pdlmi constrains every row.; A fixed rate contributes one direct constraint without duplicate rows.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdlmi:DuplicateOption, pdlmi:ElementwiseInequality, pdlmi:ImplicitUsePolya, pdlmi:InvalidApplyOptions, pdlmi:InvalidAssemblyData, pdlmi:InvalidExpression, pdlmi:InvalidOptions, pdlmi:InvalidPutinarOrder, pdlmi:InvalidRelation, pdlmi:InvalidUseFullBoxPreorder, pdlmi:InvalidUsePolya, pdlmi:InvalidUseSparseFullBoxPreorder, pdlmi:InvalidValidationMode, pdlmi:UnknownOption; pdlmi:MissingCoefficientEvidence, pdlmi:UnsupportedPdmatEquality"
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "toYalmip",
+    "Tests": [
+      "tests.pdlmi.export.test_to_yalmip/test_stored_constraints",
+      "tests.pdlmi.export.test_to_yalmip/test_solver_facing_shot_concatenation_match_previous",
+      "tests.pdlmi.export.test_to_yalmip/test_export_after_replacement_keeps_saved_list_independent",
+      "tests.pdlmi.solver.test_solver_smoke/test_composed_fixed_rate_certificate_and_infeasible_control"
+    ],
+    "Contract": "Export the full ordered stored constraint list including empty and mixed cases.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional input rejection for a valid stored scalar wrapper; known false certificates emit the documented inconclusive warning."
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "useFullBox",
+    "Tests": [
+      "tests.pdlmi.certificates.test_use_full_box/test_dimensional_tensor_defaults_documented_formulas",
+      "tests.pdlmi.certificates.test_use_full_box/test_explicit_absolute_orders_retained_while_insufficient",
+      "tests.pdlmi.certificates.test_use_full_box/test_odd_interval_certificates_repeat_scalar_endpoint",
+      "tests.pdlmi.certificates.test_use_full_box/test_each_cell_rate_row_entry_owns",
+      "tests.pdlmi.certificates.test_use_full_box/test_semidefinite_mode_still_lifts_matrix_dimension",
+      "tests.pdlmi.certificates.test_use_full_box/test_each_gram_block_prod_order_mask",
+      "tests.pdlmi.certificates.test_use_full_box/test_masks_order_mask_below_zero_absent",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_every_source_and_destination_family",
+      "tests.pdlmi.certificates.test_gram_equiv/test_all_cells_rates_entries_and_signs",
+      "tests.pdlmi.certificates.test_gram_equiv/test_odd_interval_identity_all_cells",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_tensor_rate_replacement_preserves_rectangular_residual",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_rejected_replacement_leaves_prior_certificate_usable",
+      "tests.pdlmi.certificates.test_gram_equiv/test_tensor_zero_axis_mixed_rates_complete_gram_identities"
+    ],
+    "Contract": "Rebuild from the original residual, clear all inactive family state, preserve source objects and match fresh construction. Failed replacement leaves the previous certificate usable; tensor and fixed-rate residuals retain all targets.",
+    "Oracle": "All ordered constraint expressions after auxiliary-variable alignment by Gram block role. Independent binomial Gram identities, both signs, interval parity and every cell/rate/matrix entry.",
+    "Invalid": "pdlmi:ElementwiseInequality, pdlmi:FullBoxOrderTooLow, pdlmi:InvalidFullBoxOrder"
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "usePolya",
+    "Tests": [
+      "tests.pdlmi.certificates.test_use_polya/test_bare_flags_name_value_forms_select",
+      "tests.pdlmi.certificates.test_use_polya/test_polya_option_interactions",
+      "tests.pdlmi.certificates.test_use_polya/test_counts_include_cell_elevated_tensor_label",
+      "tests.pdlmi.certificates.test_use_polya/test_reapplying_degree_replaces_selection_rather_than",
+      "tests.pdlmi.certificates.test_use_polya/test_elevation_can_certify_positive_polynomial_whose",
+      "tests.pdlmi.certificates.test_use_polya/test_polya_degree_validation",
+      "tests.pdlmi.certificates.test_use_polya/test_direction_wise_increments_tensor_counts_replace",
+      "tests.pdlmi.certificates.test_use_polya/test_tensor_p_lya_accepts_ell_vectors",
+      "tests.pdlmi.certificates.test_use_polya/test_complete_elevated_expression_order",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_every_source_and_destination_family",
+      "tests.pdlmi.certificates.test_use_polya/test_anisotropic_tensor_fixed_rate_complete_expression_order",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_tensor_rate_replacement_preserves_rectangular_residual",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_rejected_replacement_leaves_prior_certificate_usable"
+    ],
+    "Contract": "Rebuild from the original residual, clear all inactive family state, preserve source objects and match fresh construction. Failed replacement leaves the previous certificate usable; tensor and fixed-rate residuals retain all targets.",
+    "Oracle": "All ordered constraint expressions after auxiliary-variable alignment by Gram block role.",
+    "Invalid": "pdlmi:ConflictingPolyaOptions, pdlmi:InvalidPolyaDegree, pdlmi:UnknownOption"
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "usePutinar",
+    "Tests": [
+      "tests.pdlmi.certificates.test_use_putinar/test_constructor_forms_and_inactive_defaults",
+      "tests.pdlmi.certificates.test_use_putinar/test_default_order_by_residual_degree",
+      "tests.pdlmi.certificates.test_use_putinar/test_interval_selector_intentionally_shares_fullbox_s",
+      "tests.pdlmi.certificates.test_use_putinar/test_order_validation_and_disabled_selection",
+      "tests.pdlmi.certificates.test_use_putinar/test_malformed_and_conflicting_options",
+      "tests.pdlmi.certificates.test_use_putinar/test_replacement_from_other_families",
+      "tests.pdlmi.certificates.test_use_putinar/test_order_zero_omits_both_nominal_negative",
+      "tests.pdlmi.certificates.test_use_putinar/test_putinar_only_empty_admissible_singleton_masks",
+      "tests.pdlmi.certificates.test_use_putinar/test_singleton_multiplier_absent_when_axis_order",
+      "tests.pdlmi.certificates.test_use_putinar/test_degree_interval_targets_two_endpoint_psd",
+      "tests.pdlmi.certificates.test_use_putinar/test_independent_scalar_certificate_follows_each_matlab",
+      "tests.pdlmi.certificates.test_use_putinar/test_rectangular_derivative_rows_receive_independent",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_every_source_and_destination_family",
+      "tests.pdlmi.certificates.test_gram_equiv/test_all_cells_rates_entries_and_signs",
+      "tests.pdlmi.certificates.test_gram_equiv/test_odd_interval_identity_all_cells",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_tensor_rate_replacement_preserves_rectangular_residual",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_rejected_replacement_leaves_prior_certificate_usable",
+      "tests.pdlmi.certificates.test_gram_equiv/test_tensor_zero_axis_mixed_rates_complete_gram_identities",
+      "tests.pdlmi.solver.test_solver_smoke/test_composed_fixed_rate_certificate_and_infeasible_control"
+    ],
+    "Contract": "Rebuild from the original residual, clear all inactive family state, preserve source objects and match fresh construction. Failed replacement leaves the previous certificate usable; tensor and fixed-rate residuals retain all targets.",
+    "Oracle": "All ordered constraint expressions after auxiliary-variable alignment by Gram block role. Independent binomial Gram identities, both signs, interval parity and every cell/rate/matrix entry.",
+    "Invalid": "pdlmi:ConflictingPutinarOptions, pdlmi:ConflictingRelaxations, pdlmi:DuplicateOption, pdlmi:ElementwiseInequality, pdlmi:InvalidOptions, pdlmi:InvalidPutinarOrder, pdlmi:InvalidUsePutinar, pdlmi:PutinarOrderTooLow"
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "useSpBox",
+    "Tests": [
+      "tests.pdlmi.certificates.test_use_sp_box/test_constructor_forms_and_immutability",
+      "tests.pdlmi.certificates.test_use_sp_box/test_endpoint_normalization_bypass_validation_explicit",
+      "tests.pdlmi.certificates.test_use_sp_box/test_width_order_and_validation",
+      "tests.pdlmi.certificates.test_use_sp_box/test_rebuild_from_each_family",
+      "tests.pdlmi.certificates.test_use_sp_box/test_window_widths_and_cone_sizes",
+      "tests.pdlmi.certificates.test_use_sp_box/test_tensor_corners_identify_both_axes_without",
+      "tests.pdlmi.certificates.test_use_sp_box/test_width_becomes_dense_only_it_saturates",
+      "tests.pdlmi.certificates.test_use_sp_box/test_2_cells_2_rate_rows_2",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_every_source_and_destination_family",
+      "tests.pdlmi.certificates.test_gram_equiv/test_all_cells_rates_entries_and_signs",
+      "tests.pdlmi.certificates.test_gram_equiv/test_odd_interval_identity_all_cells",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_tensor_rate_replacement_preserves_rectangular_residual",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_rejected_replacement_leaves_prior_certificate_usable",
+      "tests.pdlmi.certificates.test_gram_equiv/test_tensor_zero_axis_mixed_rates_complete_gram_identities",
+      "tests.pdlmi.solver.test_solver_smoke/test_composed_fixed_rate_certificate_and_infeasible_control"
+    ],
+    "Contract": "Rebuild from the original residual, clear all inactive family state, preserve source objects and match fresh construction. Failed replacement leaves the previous certificate usable; tensor and fixed-rate residuals retain all targets.",
+    "Oracle": "All ordered constraint expressions after auxiliary-variable alignment by Gram block role. Independent binomial Gram identities, both signs, interval parity and every cell/rate/matrix entry.",
+    "Invalid": "pdlmi:ConflictingRelaxations, pdlmi:ConflictingSparseFullBoxOptions, pdlmi:DuplicateOption, pdlmi:ElementwiseInequality, pdlmi:InvalidBandWidth, pdlmi:InvalidOptions, pdlmi:InvalidSparseFullBoxOrder, pdlmi:SparseFullBoxOrderTooLow"
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "useSpPut",
+    "Tests": [
+      "tests.pdlmi.certificates.test_use_sp_put/test_constructor_selection_and_immutability",
+      "tests.pdlmi.certificates.test_use_sp_put/test_endpoint_normalization_bypass_explicit_order",
+      "tests.pdlmi.certificates.test_use_sp_put/test_singleton_and_dense_limits",
+      "tests.pdlmi.certificates.test_use_sp_put/test_anisotropic_orders_and_zero_degree",
+      "tests.pdlmi.certificates.test_use_sp_put/test_validation_and_parser_precedence",
+      "tests.pdlmi.certificates.test_use_sp_put/test_replace_certificate_families",
+      "tests.pdlmi.certificates.test_use_sp_put/test_differentiation_lowers_degree_8_local_certificates",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_every_source_and_destination_family",
+      "tests.pdlmi.certificates.test_gram_equiv/test_all_cells_rates_entries_and_signs",
+      "tests.pdlmi.certificates.test_gram_equiv/test_odd_interval_identity_all_cells",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_tensor_rate_replacement_preserves_rectangular_residual",
+      "tests.pdlmi.certificates.test_certificate_replacement/test_rejected_replacement_leaves_prior_certificate_usable",
+      "tests.pdlmi.certificates.test_gram_equiv/test_tensor_zero_axis_mixed_rates_complete_gram_identities"
+    ],
+    "Contract": "Rebuild from the original residual, clear all inactive family state, preserve source objects and match fresh construction. Failed replacement leaves the previous certificate usable; tensor and fixed-rate residuals retain all targets.",
+    "Oracle": "All ordered constraint expressions after auxiliary-variable alignment by Gram block role. Independent binomial Gram identities, both signs, interval parity and every cell/rate/matrix entry.",
+    "Invalid": "pdlmi:ConflictingRelaxations, pdlmi:ConflictingSparsePutinarOptions, pdlmi:DuplicateOption, pdlmi:ElementwiseInequality, pdlmi:InvalidCliqueSize, pdlmi:InvalidOptions, pdlmi:InvalidSparsePutinarOrder, pdlmi:InvalidUseSparsePutinar, pdlmi:SparsePutinarOrderTooLow"
+  },
+  {
+    "Owner": "pdlmi",
+    "Method": "vertcat",
+    "Tests": [
+      "tests.pdlmi.assembly.test_concatenation/test_raw_yalmip_constraints_dispatch_pdlmi_both",
+      "tests.pdlmi.assembly.test_concatenation/test_existing_yalmip_lists_composable_or_pdlmi",
+      "tests.pdlmi.assembly.test_concatenation/test_each_wrapper_exported_independently_yalmip_merges",
+      "tests.pdlmi.assembly.test_concatenation/test_identity_equality_contributes_same_empty_list",
+      "tests.pdlmi.assembly.test_concatenation/test_logical_certificates_undeclared_operand_classes"
+    ],
+    "Contract": "Export scalar wrappers in written order and concatenate supported YALMIP constraint lists.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdlmi:InvalidConcatenation"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "bernTable",
+    "Tests": [
+      "tests.pdmat.display.test_bern_table/test_berntable_expose_cell_wise_bernstein_metadata",
+      "tests.pdmat.display.test_bern_table/test_optional_cell_selector_narrow_output_hypercube",
+      "tests.pdmat.display.test_bern_table/test_multi_cell_selectors_preserve_order_and_stably_deduplicate",
+      "tests.pdmat.display.test_bern_table/test_oneline_bernstein_basis_multipliers_including_middle",
+      "tests.pdmat.display.test_bern_table/test_tensor_selectors_zero_degree_axes_complete",
+      "tests.pdmat.display.test_bern_table/test_matrix_values_expand_by_row_while",
+      "tests.pdmat.display.test_bern_table/test_odd_height_matrix_blocks_place_metadata",
+      "tests.pdmat.display.test_bern_table/test_oneline_expand_matrix_rows_honor_active",
+      "tests.pdmat.display.test_bern_table/test_tensor_rows_follow_local_label_combination",
+      "tests.pdmat.display.test_bern_table/test_complete_tensor_rate_table",
+      "tests.pdmat.display.test_bern_table/test_function_only_selectors_cannot_tabulate_placeholders"
+    ],
+    "Contract": "Expose ordered cell, rate, coefficient and matrix-row groups and complete basis expressions; multi-cell selectors preserve first-occurrence row order.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs, pdmat:FunctionOnlyBernsteinTable, pdmat:InvalidBernsteinTableInput"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "blkdiag",
+    "Tests": [
+      "tests.pdmat.matrix.test_blkdiag/test_blkdiag_align_grids_elevate_degree_accept",
+      "tests.pdmat.matrix.test_blkdiag/test_function_only_block_operands_rejected",
+      "tests.pdmat.matrix.test_blkdiag/test_tensor_refinement_degree_alignment_and_block_order",
+      "tests.pdmat.matrix.test_matrix_ops_integration/test_tensor_block_composition_then_indexing_matches_numeric_matrix"
+    ],
+    "Contract": "pdmat.blkdiag: blkdiag should align grids, elevate degree, and accept numeric blocks.; Compare one physical cell's coefficients against numeric expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "cat",
+    "Tests": [
+      "tests.pdmat.matrix.test_cat/test_parent_forwarding_dispatch_object_first_numeric",
+      "tests.pdmat.matrix.test_cat/test_cat_elevate_degrees_dim_1_2",
+      "tests.pdmat.matrix.test_cat/test_concatenation_validates_dimension_non_scalar_block",
+      "tests.pdmat.matrix.test_cat/test_function_only_block_operands_rejected",
+      "tests.pdmat.matrix.test_cat/test_tensor_refinement_degree_alignment_and_block_order"
+    ],
+    "Contract": "pdmat.cat: Parent forwarding supports object-first and numeric-first forms; degree alignment preserves different operand widths sharing one source degree and rejects unsupported dimensions.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:InvalidConcatenation, pdmat:UnsupportedCatDimension; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "cells",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdmat.cells: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "coeffs",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdmat.coeffs: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "ctranspose",
+    "Tests": [
+      "tests.pdmat.matrix.test_ctranspose/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_ctranspose/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_ctranspose/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.ctranspose: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "cumsum",
+    "Tests": [
+      "tests.pdmat.algebra.test_cumsum/test_all_cells_and_rate_rows",
+      "tests.pdmat.algebra.test_cumsum/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.algebra.test_cumsum/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.algebra.test_cumsum/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.cumsum: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidCumsum; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "diag",
+    "Tests": [
+      "tests.pdmat.matrix.test_diag/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_diag/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.matrix.test_diag/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_diag/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.diag: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidDiag; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "disp",
+    "Tests": [
+      "tests.pdmat.display.test_display/test_disp_stay_compact_while_display_prints"
+    ],
+    "Contract": "pdmat.disp: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "display",
+    "Tests": [
+      "tests.pdmat.display.test_display/test_disp_stay_compact_while_display_prints"
+    ],
+    "Contract": "pdmat.display: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "elevate",
+    "Tests": [
+      "tests.pdmat.polynomial.test_elevate/test_function_only_pdmat_placeholders_coefficient",
+      "tests.pdmat.polynomial.test_elevate/test_function_plus_degree_data_exact_evaluator",
+      "tests.pdmat.polynomial.test_elevate/test_sparse_plan_internal_metadata_numeric_payloads",
+      "tests.pdmat.polynomial.test_elevate/test_fixed_tensor_direction_reduces_active_rows",
+      "tests.pdmat.polynomial.test_elevate/test_binomial_reference_all_rows",
+      "tests.pdmat.polynomial.test_elevate/test_object_api_requires_coefficients",
+      "tests.pdmat.polynomial.test_elevate/test_zero_increment_does_not_admit_function_only_data"
+    ],
+    "Contract": "Preserve every polynomial and affine identity under degree elevation, across cells and rate rows.",
+    "Oracle": "Independent binomial formulas for every cell and rate row, including rectangular payloads and unequal tensor degrees in fast and strict modes; explicit polynomial values.",
+    "Invalid": "pdbase:MissingCoefficientEvidence"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "end",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdmat.end: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "eq",
+    "Tests": [
+      "tests.pdmat.algebra.test_eq/test_equality_returns_logical_coefficient_backed",
+      "tests.pdmat.algebra.test_eq/test_numeric_equality_reuse_scalar_expansion_matrix",
+      "tests.pdmat.algebra.test_eq/test_equality_subtraction_owned_numeric_validation_api",
+      "tests.pdmat.algebra.test_eq/test_function_only_self_equality_rejected"
+    ],
+    "Contract": "pdmat.eq: Equality returns one logical from the coefficient-backed difference.; Numeric equality should reuse scalar expansion and matrix subtraction.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:InvalidEquality, pdmat:InvalidSubtraction; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "evaluate",
+    "Tests": [
+      "tests.pdmat.polynomial.test_evaluate/test_scalar_coefficient_backed_data_evaluate_by",
+      "tests.pdmat.polynomial.test_evaluate/test_tensor_coefficient_backed_data_interpolate_across",
+      "tests.pdmat.polynomial.test_evaluate/test_3_d_degree_2_data_evaluate",
+      "tests.pdmat.polynomial.test_evaluate/test_these_controls_represent_rho_2_independently",
+      "tests.pdmat.polynomial.test_evaluate/test_function_backed_pdmat_evaluate_retained_exact",
+      "tests.pdmat.polynomial.test_evaluate/test_function_bernstein_objects_evaluate_original_handle",
+      "tests.pdmat.polynomial.test_evaluate/test_exact_handles_still_obey_grid_bounds",
+      "tests.pdmat.polynomial.test_evaluate/test_evaluation_reject_out_bounds_wrong_dimensional",
+      "tests.pdmat.polynomial.test_evaluate/test_distinct_face_values_make_deterministic_right",
+      "tests.pdmat.polynomial.test_evaluate/test_all_rows_at_endpoints_and_interior",
+      "tests.pdmat.polynomial.test_evaluate/test_fixed_rate_evaluation_preserves_single_row_cell_output",
+      "tests.pdmat.polynomial.test_evaluate/test_tensor_derivative_values_match_physical_analytic_oracle",
+      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment",
+      "tests.pdmat.matrix.test_matrix_ops_integration/test_tensor_block_composition_then_indexing_matches_numeric_matrix"
+    ],
+    "Contract": "Reconstruct coefficients at endpoints/interior and use right-cell boundary ownership. Ordinary storage returns a matrix; active rate storage returns a 1-by-N cell array, including N=1.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values. Independent pointwise polynomial or derivative values and explicit container checks.",
+    "Invalid": "pdmat:DiscontinuousLocalValues, pdmat:InvalidFunctionValue, pdmat:InvalidPoint, pdmat:PointOutOfBounds"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "flip",
+    "Tests": [
+      "tests.pdmat.matrix.test_flip/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_flip/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_flip/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.flip: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidFlip for a nonpositive dimension.; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "fliplr",
+    "Tests": [
+      "tests.pdmat.matrix.test_fliplr/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_fliplr/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_fliplr/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.fliplr: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "flipud",
+    "Tests": [
+      "tests.pdmat.matrix.test_flipud/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_flipud/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_flipud/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.flipud: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "ge",
+    "Tests": [
+      "tests.pdmat.algebra.test_ge/test_residual_signs_and_operand_order",
+      "tests.pdmat.algebra.test_ge/test_function_only_both_operand_orders_rejected",
+      "tests.pdmat.algebra.test_ge/test_fixed_tensor_rate_rows_export_complete_signs"
+    ],
+    "Contract": "pdmat.ge: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:InvalidSubtraction; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "height",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdmat.height: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "horzcat",
+    "Tests": [
+      "tests.pdmat.matrix.test_horzcat/test_native_block_order_all_rows",
+      "tests.pdmat.matrix.test_horzcat/test_function_only_block_operands_rejected",
+      "tests.pdmat.matrix.test_horzcat/test_tensor_refinement_degree_alignment_and_block_order"
+    ],
+    "Contract": "pdmat.horzcat: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:InvalidConcatenation for mismatched nonconcatenated matrix dimensions.; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "isequal",
+    "Tests": [
+      "tests.pdmat.algebra.test_isequal/test_equality_compare_coefficient_evidence_grid_degree",
+      "tests.pdmat.algebra.test_isequal/test_later_rate_coefficient_breaks_equality",
+      "tests.pdmat.algebra.test_isequal/test_function_identity_never_equals_placeholder_data"
+    ],
+    "Contract": "pdmat.isequal: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "lbls",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdmat.lbls: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "le",
+    "Tests": [
+      "tests.pdmat.algebra.test_le/test_residual_signs_and_operand_order",
+      "tests.pdmat.algebra.test_le/test_function_only_both_operand_orders_rejected",
+      "tests.pdmat.algebra.test_le/test_fixed_tensor_rate_rows_export_complete_signs"
+    ],
+    "Contract": "pdmat.le: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:InvalidSubtraction; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "length",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdmat.length: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "mean",
+    "Tests": [
+      "tests.pdmat.algebra.test_mean/test_all_cells_and_rate_rows",
+      "tests.pdmat.algebra.test_mean/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.algebra.test_mean/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.algebra.test_mean/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.mean: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidMean; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "minus",
+    "Tests": [
+      "tests.pdmat.algebra.test_minus/test_complete_residual_in_both_orders",
+      "tests.pdmat.algebra.test_minus/test_refined_tensor_subtraction_preserves_values",
+      "tests.pdmat.algebra.test_minus/test_function_only_cancellation_shortcuts_rejected",
+      "tests.pdmat.algebra.test_algebra_integration/test_tensor_refinement_product_transpose_and_reduction"
+    ],
+    "Contract": "pdmat.minus: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidSubtraction; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "mtimes",
+    "Tests": [
+      "tests.pdmat.algebra.test_mtimes/test_multi_cell_3_d_matrix_product",
+      "tests.pdmat.algebra.test_mtimes/test_degree_1030_finite_product_elevation_planning",
+      "tests.pdmat.algebra.test_mtimes/test_matrix_multiplication_convolve_bernstein",
+      "tests.pdmat.algebra.test_mtimes/test_scalar_scaling_preserve_complete_derivative_rate",
+      "tests.pdmat.algebra.test_mtimes/test_product_validation_distinct_rate_vertices_2",
+      "tests.pdmat.algebra.test_mtimes/test_fixed_rate_box_still_represents_rate",
+      "tests.pdmat.algebra.test_mtimes/test_scalar_sdpvar_scalar_pdmat_broadcast_both",
+      "tests.pdmat.algebra.test_mtimes/test_compatible_affine_known_matrices_multiply_either",
+      "tests.pdmat.algebra.test_mtimes/test_symbolic_scaling_matrix_products_known_data",
+      "tests.pdmat.algebra.test_mtimes/test_proven_known_zeros_compact_zero_product",
+      "tests.pdmat.algebra.test_mtimes/test_matrix_bridge_preserves_dimension_coefficient",
+      "tests.pdmat.algebra.test_mtimes/test_metadata_only_known_bounds_ordinary_rows",
+      "tests.pdmat.algebra.test_mtimes/test_noncommuting_matrix_products_all_rows",
+      "tests.pdmat.algebra.test_mtimes/test_zero_valued_active_rate_tables_cannot_multiply_each_other",
+      "tests.pdmat.algebra.test_mtimes/test_function_only_zero_products_rejected",
+      "tests.pdmat.algebra.test_algebra_integration/test_tensor_refinement_product_transpose_and_reduction",
+      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment"
+    ],
+    "Contract": "Preserve operand order and binomial product weights, rate rows and affine identities; validate zero shortcuts.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra, pdmat:InvalidMultiplication; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable. Two active rate tables rejected even when their values are zero."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "ncell",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdmat.ncell: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "ncoeff",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdmat.ncoeff: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "ndims",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdmat.ndims: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "npar",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdmat.npar: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "numArgumentsFromSubscript",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdmat.numArgumentsFromSubscript: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "numel",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdmat.numel: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "pdmat",
+    "Tests": [
+      "tests.pdmat.construction.test_constructor/test_function_backed_construction_exact_handle",
+      "tests.pdmat.construction.test_constructor/test_explicit_degree_tensor_functions_populate_bernstein",
+      "tests.pdmat.construction.test_constructor/test_polynomial_handles_become_coefficient_backed_when",
+      "tests.pdmat.construction.test_constructor/test_each_cell_order_fitted_controls_physical",
+      "tests.pdmat.construction.test_constructor/test_numeric_fallback_certify_matrix_polynomials_cell",
+      "tests.pdmat.construction.test_constructor/test_plain_numeric_vector_accepted_as_parameter",
+      "tests.pdmat.construction.test_constructor/test_function_only_construction_probe_size_without",
+      "tests.pdmat.construction.test_constructor/test_scalar_global_bernstein_data_form_overlapping",
+      "tests.pdmat.construction.test_constructor/test_tensor_global_cell_data_preserve_grid",
+      "tests.pdmat.construction.test_constructor/test_public_global_grid_construction_anisotropic_matrix",
+      "tests.pdmat.construction.test_constructor/test_misaligned_nested_localvalues_warn_without_changing",
+      "tests.pdmat.construction.test_constructor/test_3_by_3_global_degree_grid",
+      "tests.pdmat.construction.test_constructor/test_explicit_tensor_local_values_continuous_when",
+      "tests.pdmat.construction.test_constructor/test_faces_package_s_scale_aware_numerical",
+      "tests.pdmat.construction.test_constructor/test_only_explicit_multidimensional_scalar_degree",
+      "tests.pdmat.construction.test_constructor/test_global_shape_infers_each_axis_flat",
+      "tests.pdmat.construction.test_constructor/test_global_grids_accept_implicit_singleton_axes",
+      "tests.pdmat.construction.test_constructor/test_constructor_reject_unsupported_source_payload_types",
+      "tests.pdmat.construction.test_constructor/test_global_coefficient_grids_imply_degree_compatible",
+      "tests.pdmat.construction.test_constructor/test_global_payloads_share_finite_real_matrix",
+      "tests.pdmat.construction.test_constructor/test_explicit_localvalues_validate_nesting_degree_payload",
+      "tests.pdmat.construction.test_constructor/test_function_handles_match_parameter_arity_return",
+      "tests.pdmat.construction.test_constructor/test_explicit_degree_function_data_reject",
+      "tests.pdmat.construction.test_constructor/test_over_degree_matrix_entry_reject_complete",
+      "tests.pdmat.construction.test_constructor/test_numeric_probing_fallback_still_reject_non",
+      "tests.pdmat.construction.test_constructor/test_bernstein_probing_reject_handles_inconsistent_output",
+      "tests.pdmat.construction.test_constructor/test_fixed_representation_flags_stay_unavailable_while",
+      "tests.pdmat.construction.test_constructor/test_constructor_option_syntax_rejects_missing_nontext",
+      "tests.pdmat.construction.test_constructor/test_callback_failures_normalized_at_lower_bound",
+      "tests.pdmat.construction.test_constructor/test_explicit_degree_rejects_empty_non_scalar",
+      "tests.pdmat.construction.test_constructor/test_explicit_leaves_row_or_row_distinct",
+      "tests.pdmat.construction.test_constructor/test_mode_selection_transient_leaves_represented_data",
+      "tests.pdmat.construction.test_constructor/test_source_normalization_reject_malformed_later_cells",
+      "tests.pdmat.construction.test_constructor/test_pdmat_owns_all_validationmode_diagnostics_at",
+      "tests.pdmat.construction.test_constructor/test_slicing_away_only_discontinuous_entry_restores",
+      "tests.pdmat.construction.test_constructor/test_certified_tensor_function_survives_composed_coefficient_use"
+    ],
+    "Contract": "pdmat.pdmat: Function-backed construction should keep the exact handle and; placeholders.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:DiscontinuousLocalValues, pdmat:DuplicateOption, pdmat:InvalidCoefficientCell, pdmat:InvalidCoefficientPayload, pdmat:InvalidData, pdmat:InvalidDegree, pdmat:InvalidFunctionHandle, pdmat:InvalidFunctionOutput, pdmat:InvalidFunctionValue, pdmat:InvalidLocalValues, pdmat:InvalidOptions, pdmat:InvalidRateBounds, pdmat:InvalidSource, pdmat:InvalidValidationMode, pdmat:NonBernsteinPolynomial, pdmat:ScalarDegreeExpansion, pdmat:UnknownOption, pdmat:UnsupportedOption"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "plot",
+    "Tests": [
+      "tests.pdmat.display.test_plot/test_1_d_plotting_sample_evaluate_label",
+      "tests.pdmat.display.test_plot/test_2_d_plotting_create_transparent_surface",
+      "tests.pdmat.display.test_plot/test_unnamed_expression_documented_fallback_legend_name",
+      "tests.pdmat.display.test_plot/test_higher_dimensional_objects_fix_unselected_dimensions",
+      "tests.pdmat.display.test_plot/test_invalid_plot_dimensions_sample_counts_fail",
+      "tests.pdmat.display.test_plot/test_adjacent_cells_contribute_sample_only_once",
+      "tests.pdmat.display.test_plot/test_plot_selection_rejects_indices_beyond_distinct",
+      "tests.pdmat.display.test_plot/test_reversed_axes_complete_matrix_surfaces",
+      "tests.pdmat.display.test_plot/test_function_only_plot_preserves_hold_and_exact_matrix_data"
+    ],
+    "Contract": "pdmat.plot: 1-D plotting should sample through evaluate and label each matrix entry.; 2-D plotting should create one transparent surface per matrix entry.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:InvalidPlotDimensions, pdmat:InvalidPlotOptions, pdmat:InvalidRateVertex"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "plus",
+    "Tests": [
+      "tests.pdmat.algebra.test_plus/test_addition_elevate_lower_degree_operands_summing",
+      "tests.pdmat.algebra.test_plus/test_numeric_scalars_promote_compatible_constant_pdmat",
+      "tests.pdmat.algebra.test_plus/test_proven_numeric_zeros_identities_only_size",
+      "tests.pdmat.algebra.test_plus/test_ordinary_operands_broadcast_products_allow_explicit",
+      "tests.pdmat.algebra.test_plus/test_complete_residual_in_both_orders",
+      "tests.pdmat.algebra.test_plus/test_function_only_zero_shortcuts_rejected"
+    ],
+    "Contract": "pdmat.plus: Addition should elevate lower-degree operands before summing coefficients.; Numeric scalars should promote to compatible constant pdmat operands.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidAddition, pdmat:InvalidMultiplication, pdmat:InvalidSubtraction, pdmat:MixedGrid; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "repmat",
+    "Tests": [
+      "tests.pdmat.matrix.test_repmat/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_repmat/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.matrix.test_repmat/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_repmat/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.repmat: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidRepmat; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "reshape",
+    "Tests": [
+      "tests.pdmat.matrix.test_reshape/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_reshape/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.matrix.test_reshape/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_reshape/test_function_only_transform_rejected_without_source_change",
+      "tests.pdmat.matrix.test_matrix_ops_integration/test_tensor_block_composition_then_indexing_matches_numeric_matrix"
+    ],
+    "Contract": "pdmat.reshape: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidReshape; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "rhodiff",
+    "Tests": [
+      "tests.pdmat.polynomial.test_rhodiff/test_pdmat_differentiation_numeric_clears_exact_function",
+      "tests.pdmat.polynomial.test_rhodiff/test_unequal_cell_widths_and_rate_signs",
+      "tests.pdmat.polynomial.test_rhodiff/test_tensor_rate_order",
+      "tests.pdmat.polynomial.test_rhodiff/test_zero_degree_tensor_axis",
+      "tests.pdmat.polynomial.test_rhodiff/test_fixed_zero_rate_retains_derivative_identity_and_rejects_repeat",
+      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment"
+    ],
+    "Contract": "Use signed rate vertices and degree/cell-width factors on every coefficient difference.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
+    "Invalid": "pdmat:FunctionOnlyDiff, pdmat:InvalidDiff"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "rot90",
+    "Tests": [
+      "tests.pdmat.matrix.test_rot90/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_rot90/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.matrix.test_rot90/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_rot90/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.rot90: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "size",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdmat.size: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "squeeze",
+    "Tests": [
+      "tests.pdmat.matrix.test_squeeze/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_squeeze/test_function_only_identity_preserves_exact_evaluator",
+      "tests.pdmat.matrix.test_squeeze/test_fixed_rate_identity_copy_does_not_alias_source"
+    ],
+    "Contract": "pdmat.squeeze: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "subsasgn",
+    "Tests": [
+      "tests.pdmat.indexing.test_subsasgn/test_subscript_assignment_accept_numeric_constants_pdmat",
+      "tests.pdmat.indexing.test_subsasgn/test_assignment_preserves_unselected_entries",
+      "tests.pdmat.indexing.test_subsasgn/test_function_only_assignment_operands_rejected",
+      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment"
+    ],
+    "Contract": "pdmat.subsasgn: Subscript assignment should accept numeric constants and pdmat blocks.; Compare one physical cell's coefficients against numeric expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "subsref",
+    "Tests": [
+      "tests.pdmat.indexing.test_subsref/test_matrix_indexing_slice_payloads_while_dot",
+      "tests.pdmat.indexing.test_subsref/test_reordered_repeated_and_logical_selectors",
+      "tests.pdmat.indexing.test_subsref/test_function_only_slices_rejected_but_metadata_available",
+      "tests.pdmat.matrix.test_matrix_ops_integration/test_tensor_block_composition_then_indexing_matches_numeric_matrix"
+    ],
+    "Contract": "pdmat.subsref: Matrix indexing should slice payloads while dot access stays available.; Compare one physical cell's coefficients against numeric expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "sum",
+    "Tests": [
+      "tests.pdmat.algebra.test_sum/test_all_cells_and_rate_rows",
+      "tests.pdmat.algebra.test_sum/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.algebra.test_sum/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.algebra.test_sum/test_function_only_transform_rejected_without_source_change",
+      "tests.pdmat.algebra.test_algebra_integration/test_tensor_refinement_product_transpose_and_reduction"
+    ],
+    "Contract": "pdmat.sum: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidSum; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "trace",
+    "Tests": [
+      "tests.pdmat.algebra.test_trace/test_all_cells_and_rate_rows",
+      "tests.pdmat.algebra.test_trace/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.algebra.test_trace/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.trace: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "transpose",
+    "Tests": [
+      "tests.pdmat.matrix.test_transpose/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_transpose/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_transpose/test_function_only_transform_rejected_without_source_change",
+      "tests.pdmat.algebra.test_algebra_integration/test_tensor_refinement_product_transpose_and_reduction",
+      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment"
+    ],
+    "Contract": "pdmat.transpose: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "tril",
+    "Tests": [
+      "tests.pdmat.matrix.test_tril/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_tril/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.matrix.test_tril/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_tril/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.tril: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidTriangularPart; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "triu",
+    "Tests": [
+      "tests.pdmat.matrix.test_triu/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_triu/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdmat.matrix.test_triu/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_triu/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.triu: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:InvalidTriangularPart; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "uminus",
+    "Tests": [
+      "tests.pdmat.algebra.test_uminus/test_all_cells_and_rate_rows",
+      "tests.pdmat.algebra.test_uminus/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.algebra.test_uminus/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.uminus: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "uplus",
+    "Tests": [
+      "tests.pdmat.algebra.test_uplus/test_all_cells_and_rate_rows",
+      "tests.pdmat.algebra.test_uplus/test_function_only_identity_preserves_exact_evaluator",
+      "tests.pdmat.algebra.test_uplus/test_fixed_rate_identity_copy_does_not_alias_source"
+    ],
+    "Contract": "pdmat.uplus: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "vec",
+    "Tests": [
+      "tests.pdmat.matrix.test_vec/test_all_cells_and_rate_rows",
+      "tests.pdmat.matrix.test_vec/test_rectangular_tensor_maps_with_fixed_and_mixed_rates",
+      "tests.pdmat.matrix.test_vec/test_function_only_transform_rejected_without_source_change"
+    ],
+    "Contract": "pdmat.vec: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "vertcat",
+    "Tests": [
+      "tests.pdmat.matrix.test_vertcat/test_native_block_order_all_rows",
+      "tests.pdmat.matrix.test_vertcat/test_function_only_block_operands_rejected",
+      "tests.pdmat.matrix.test_vertcat/test_tensor_refinement_degree_alignment_and_block_order"
+    ],
+    "Contract": "pdmat.vertcat: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdmat:InvalidConcatenation for mismatched nonconcatenated matrix dimensions.; pdmat:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdmat",
+    "Method": "width",
+    "Tests": [
+      "tests.pdmat.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdmat.width: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "bernTable",
+    "Tests": [
+      "tests.pdvar.display.test_bern_table/test_pdvar_rows_share_pdmat_metadata_but",
+      "tests.pdvar.display.test_bern_table/test_matrix_valued_sdpvar_rows_share_centered",
+      "tests.pdvar.display.test_bern_table/test_oneline_emit_complete_bernstein_expression_matrix",
+      "tests.pdvar.display.test_bern_table/test_oneline_combine_bernstein_basis_text_sdisplay",
+      "tests.pdvar.display.test_bern_table/test_multi_cell_selectors_preserve_symbolic_and_rate_group_order",
+      "tests.pdvar.display.test_bern_table/test_helper_text_bernstein_scales_degree_elevation",
+      "tests.pdvar.display.test_bern_table/test_rhodiff_leaves_store_coefficient_row_active",
+      "tests.pdvar.display.test_bern_table/test_oneline_rate_rows_separate_groups_composite",
+      "tests.pdvar.display.test_bern_table/test_matrix_expansion_inside_each_cell_rate",
+      "tests.pdvar.display.test_bern_table/test_option_validation_match_pdmat_berntable_surface",
+      "tests.pdvar.display.test_bern_table/test_all_cell_coefficients_and_variable_names",
+      "tests.pdvar.display.test_bern_table/test_fixed_tensor_rate_table_retains_every_coefficient"
+    ],
+    "Contract": "Expose ordered cell, rate, coefficient and matrix-row groups and complete basis expressions; multi-cell selectors preserve first-occurrence row order.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs, pdvar:InvalidBernsteinTableInput"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "blkdiag",
+    "Tests": [
+      "tests.pdvar.matrix.test_blkdiag/test_blkdiag_align_grids_elevate_degree_accept",
+      "tests.pdvar.matrix.test_blkdiag/test_blkdiag_preserve_derivative_rate_rows_broadcast",
+      "tests.pdvar.matrix.test_blkdiag/test_tensor_mixed_rate_rectangular_blocks",
+      "tests.pdvar.matrix.test_blkdiag/test_function_only_and_nonlinear_blocks_are_rejected"
+    ],
+    "Contract": "pdvar.blkdiag: Clear YALMIP global state so variable IDs do not leak between tests.; blkdiag should align grids, elevate degree, and accept numeric blocks.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdvar:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "cat",
+    "Tests": [
+      "tests.pdvar.matrix.test_cat/test_lower_degree_blocks_elevated_coefficient_wise",
+      "tests.pdvar.matrix.test_cat/test_affine_sdpvar_blocks_promote_degree_0",
+      "tests.pdvar.matrix.test_cat/test_ordinary_coefficient_rows_broadcast_across",
+      "tests.pdvar.matrix.test_cat/test_tensor_mixed_rate_affine_blocks_preserve_written_order"
+    ],
+    "Contract": "pdvar.cat: Clear YALMIP global state so variable IDs do not leak between tests.; Lower-degree blocks are elevated before coefficient-wise concatenation.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "cells",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdvar.cells: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "coeffs",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdvar.coeffs: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "ctranspose",
+    "Tests": [
+      "tests.pdvar.matrix.test_ctranspose/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_ctranspose/test_rectangular_tensor_adjoint_ordinary",
+      "tests.pdvar.matrix.test_ctranspose/test_rectangular_tensor_adjoint_fixed"
+    ],
+    "Contract": "pdvar.ctranspose: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "cumsum",
+    "Tests": [
+      "tests.pdvar.algebra.test_cumsum/test_all_cells_and_rate_rows",
+      "tests.pdvar.algebra.test_cumsum/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.algebra.test_cumsum/test_tensor_reverse_column_accumulation_mixed"
+    ],
+    "Contract": "pdvar.cumsum: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidCumsum"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "diag",
+    "Tests": [
+      "tests.pdvar.matrix.test_diag/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_diag/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.matrix.test_diag/test_tensor_offset_diagonal_mixed"
+    ],
+    "Contract": "pdvar.diag: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidDiag"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "elevate",
+    "Tests": [
+      "tests.pdvar.polynomial.test_elevate/test_elevation_reuses_same_yalmip_decisions_instead",
+      "tests.pdvar.polynomial.test_elevate/test_physical_cell_rate_row_elevated_without",
+      "tests.pdvar.polynomial.test_elevate/test_binomial_reference_all_rows",
+      "tests.pdvar.polynomial.test_elevate/test_tensor_incidence_preserves_decisions",
+      "tests.pdvar.polynomial.test_elevate/test_fixed_tensor_elevation_semigroup_and_invalid_increments"
+    ],
+    "Contract": "Preserve every polynomial and affine identity under degree elevation, across cells and rate rows.",
+    "Oracle": "Independent binomial formulas, complete affine bases and decision identities across multiple cells and rate rows with rectangular payloads in fast and strict modes.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "end",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdvar.end: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "eq",
+    "Tests": [
+      "tests.pdvar.algebra.test_eq/test_subtraction_aligns_grids_degrees_promotes_supported",
+      "tests.pdvar.algebra.test_eq/test_derivative_rows_cannot_broadcast_during_coefficient",
+      "tests.pdvar.algebra.test_eq/test_fast_internal_sampling_may_defer_later",
+      "tests.pdvar.algebra.test_eq/test_single_distinct_rate_vertex_derivative_equality",
+      "tests.pdvar.algebra.test_eq/test_once_both_sides_derivative_rows_algebra",
+      "tests.pdvar.algebra.test_eq/test_elevated_tensor_identity_exports_no_constraints",
+      "tests.pdvar.algebra.test_comparisons/test_function_only_equality_rejected_in_both_orders"
+    ],
+    "Contract": "pdvar.eq: Equality tests rely on isolated YALMIP handles and assignments.; Subtraction aligns grids/degrees and promotes supported ordinary operands.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdvar:InvalidEqualityRows, pdvar:InvalidSubtraction, pdvar:MixedGrid; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "evaluate",
+    "Tests": [
+      "tests.pdvar.polynomial.test_evaluate/test_evaluation_assembles_affine_expression_never_calls",
+      "tests.pdvar.polynomial.test_evaluate/test_tensor_weights_follow_combrows_order_metadata",
+      "tests.pdvar.polynomial.test_evaluate/test_each_stored_rate_row_becomes_matrix",
+      "tests.pdvar.polynomial.test_evaluate/test_four_rate_vertices_package_wide_lower",
+      "tests.pdvar.polynomial.test_evaluate/test_discontinuous_derivative_makes_boundary_owner",
+      "tests.pdvar.polynomial.test_evaluate/test_public_validation_distinguishes_malformed_points",
+      "tests.pdvar.polynomial.test_evaluate/test_all_rows_at_endpoints_and_interior",
+      "tests.pdvar.polynomial.test_evaluate/test_fixed_tensor_rectangular_values_have_one_active_row"
+    ],
+    "Contract": "Reconstruct coefficients at endpoints/interior and use right-cell boundary ownership. Ordinary storage returns a matrix; active rate storage returns a 1-by-N cell array, including N=1.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values. Independent pointwise polynomial or derivative values and explicit container checks.",
+    "Invalid": "pdvar:InvalidPoint, pdvar:PointOutOfBounds"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "flip",
+    "Tests": [
+      "tests.pdvar.matrix.test_flip/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_flip/test_tensor_default_axis_reversal_ordinary",
+      "tests.pdvar.matrix.test_flip/test_tensor_default_axis_reversal_fixed"
+    ],
+    "Contract": "pdvar.flip: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidFlip for a nonpositive dimension."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "fliplr",
+    "Tests": [
+      "tests.pdvar.matrix.test_fliplr/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_fliplr/test_tensor_column_reversal_ordinary",
+      "tests.pdvar.matrix.test_fliplr/test_tensor_column_reversal_fixed"
+    ],
+    "Contract": "pdvar.fliplr: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "flipud",
+    "Tests": [
+      "tests.pdvar.matrix.test_flipud/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_flipud/test_tensor_row_reversal_ordinary",
+      "tests.pdvar.matrix.test_flipud/test_tensor_row_reversal_fixed"
+    ],
+    "Contract": "pdvar.flipud: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "ge",
+    "Tests": [
+      "tests.pdvar.algebra.test_ge/test_residual_signs_and_operand_order",
+      "tests.pdvar.algebra.test_ge/test_tensor_fixed_rate_constraint_sign_and_order",
+      "tests.pdvar.algebra.test_ge/test_function_only_comparison_rejected_in_both_orders"
+    ],
+    "Contract": "pdvar.ge: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdvar:InvalidSubtraction; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "height",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdvar.height: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "horzcat",
+    "Tests": [
+      "tests.pdvar.matrix.test_horzcat/test_native_block_order_all_rows",
+      "tests.pdvar.matrix.test_horzcat/test_tensor_fixed_rate_numeric_blocks_keep_order",
+      "tests.pdvar.matrix.test_horzcat/test_function_only_concatenation_is_rejected"
+    ],
+    "Contract": "pdvar.horzcat: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdvar:InvalidConcatenation for mismatched nonconcatenated matrix dimensions.; pdvar:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "isequal",
+    "Tests": [
+      "tests.pdvar.algebra.test_isequal/test_same_values_do_not_merge_decision_identity",
+      "tests.pdvar.algebra.test_isequal/test_later_cell_and_last_entry_change_is_detected",
+      "tests.pdvar.algebra.test_isequal/test_equal_polynomial_different_representation_is_not_identity"
+    ],
+    "Contract": "pdvar.isequal: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "lbls",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdvar.lbls: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "le",
+    "Tests": [
+      "tests.pdvar.algebra.test_le/test_residual_signs_and_operand_order",
+      "tests.pdvar.algebra.test_le/test_tensor_fixed_rate_constraint_sign_and_order",
+      "tests.pdvar.algebra.test_le/test_function_only_comparison_rejected_in_both_orders"
+    ],
+    "Contract": "pdvar.le: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdvar:InvalidSubtraction; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "length",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdvar.length: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "mean",
+    "Tests": [
+      "tests.pdvar.algebra.test_mean/test_all_cells_and_rate_rows",
+      "tests.pdvar.algebra.test_mean/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.algebra.test_mean/test_tensor_multi_dimension_average_mixed"
+    ],
+    "Contract": "pdvar.mean: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidMean"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "minus",
+    "Tests": [
+      "tests.pdvar.algebra.test_minus/test_complete_residual_in_both_orders",
+      "tests.pdvar.algebra.test_minus/test_tensor_refinement_and_anisotropic_subtraction",
+      "tests.pdvar.algebra.test_minus/test_function_only_rejection_survives_cancelled_decision"
+    ],
+    "Contract": "pdvar.minus: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidSubtraction; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "mtimes",
+    "Tests": [
+      "tests.pdvar.algebra.test_mtimes/test_planned_contractions_exact_affine_bases",
+      "tests.pdvar.algebra.test_mtimes/test_known_coefficient_data_may_multiply_pdvar",
+      "tests.pdvar.algebra.test_mtimes/test_metadata_only_ratebounds_do_create_active",
+      "tests.pdvar.algebra.test_mtimes/test_numeric_products_preserve_affine_yalmip_structure",
+      "tests.pdvar.algebra.test_mtimes/test_known_multiplication_arbitrary_degree_decisions",
+      "tests.pdvar.algebra.test_mtimes/test_scalar_pdvar_scale_numeric_pdmat_matrices",
+      "tests.pdvar.algebra.test_mtimes/test_unequal_direction_wise_degrees_add_while",
+      "tests.pdvar.algebra.test_mtimes/test_scalar_pdmat_scale_matrix_valued_decisions",
+      "tests.pdvar.algebra.test_mtimes/test_exercise_complete_accepted_scalar_matrix",
+      "tests.pdvar.algebra.test_mtimes/test_package_expressions_still_reject_scalar_matrix",
+      "tests.pdvar.algebra.test_mtimes/test_known_data_products_preserve_output_row",
+      "tests.pdvar.algebra.test_mtimes/test_known_rate_row_factor_affine_safe",
+      "tests.pdvar.algebra.test_mtimes/test_numeric_matrices_may_multiply_rate_row",
+      "tests.pdvar.algebra.test_mtimes/test_scalar_matrix_placement_preserve_derivative_row",
+      "tests.pdvar.algebra.test_mtimes/test_zero_products_carry_decision_rate_metadata",
+      "tests.pdvar.algebra.test_mtimes/test_zero_derivative_products_validate_both_rate",
+      "tests.pdvar.algebra.test_mtimes/test_products_same_bound_mixed_grids_recomputed",
+      "tests.pdvar.algebra.test_mtimes/test_chained_affine_products_preserve_degree_growth",
+      "tests.pdvar.algebra.test_mtimes/test_products_that_leave_affine_sdp_layer",
+      "tests.pdvar.algebra.test_mtimes/test_rate_row_products_require_matching_grid",
+      "tests.pdvar.algebra.test_mtimes/test_noncommuting_matrix_products_all_rows",
+      "tests.pdvar.algebra.test_mtimes/test_zero_fixed_rate_tables_cannot_multiply_each_other",
+      "tests.pdvar.algebra.test_mtimes/test_zero_known_and_decision_rate_tables_rejected_in_both_orders",
+      "tests.pdvar.algebra.test_mtimes/test_cancelled_decision_product_rejects_function_only_evidence",
+      "tests.pdvar.algebra.test_mtimes/test_tensor_refined_rectangular_affine_product_chain",
+      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction"
+    ],
+    "Contract": "Preserve operand order and binomial product weights, rate rows and affine identities; validate zero shortcuts.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
+    "Invalid": "pdvar:FunctionOnlyAlgebra, pdvar:InvalidMultiplication, pdvar:MixedGrid; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable. Two active rate tables rejected even when their values are zero."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "ncell",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdvar.ncell: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "ncoeff",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdvar.ncoeff: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "ndims",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdvar.ndims: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "npar",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_complete_cell_and_label_order"
+    ],
+    "Contract": "pdvar.npar: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "numArgumentsFromSubscript",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdvar.numArgumentsFromSubscript: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "numel",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdvar.numel: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "pdvar",
+    "Tests": [
+      "tests.pdvar.construction.test_constructor/test_square_forms_follow_sdpvar_s_symmetric",
+      "tests.pdvar.construction.test_constructor/test_explicit_flags_let_square_matrices_choose",
+      "tests.pdvar.construction.test_constructor/test_public_constructor_original_degree_default",
+      "tests.pdvar.construction.test_constructor/test_degree_zero_variables_parameter_independent_stored",
+      "tests.pdvar.construction.test_constructor/test_constructor_created_decisions_support_nonnegative",
+      "tests.pdvar.construction.test_constructor/test_plain_numeric_vector_accepted_as_parameter",
+      "tests.pdvar.construction.test_constructor/test_degree_accepts_ell_vectors_reports_owner",
+      "tests.pdvar.construction.test_constructor/test_explicit_multidimensional_scalar_shorthand_warns",
+      "tests.pdvar.construction.test_constructor/test_adjacent_scalar_cells_share_same_boundary",
+      "tests.pdvar.construction.test_constructor/test_two_quadratic_cells_share_only_common",
+      "tests.pdvar.construction.test_constructor/test_tensor_labels_combrows_order_0_0",
+      "tests.pdvar.construction.test_constructor/test_adjacent_quadratic_tensor_cells_reuse_control",
+      "tests.pdvar.construction.test_constructor/test_degree_0_2_shares_complete_constant",
+      "tests.pdvar.construction.test_constructor/test_constructor_ratebounds_metadata_outside_localvalues",
+      "tests.pdvar.construction.test_constructor/test_public_parsing_rejects_missing_grids_malformed",
+      "tests.pdvar.construction.test_constructor/test_mode_builds_same_shape_grid_degree",
+      "tests.pdvar.construction.test_constructor/test_pdvar_owns_missing_malformed_validationmode",
+      "tests.pdvar.construction.test_constructor/test_exact_recomputation_recognizes_continuous_slice",
+      "tests.pdvar.construction.test_constructor/test_anisotropic_face_edge_and_corner_identity",
+      "tests.pdvar.construction.test_constructor/test_rectangular_decisions_share_both_zero_degree_axes"
+    ],
+    "Contract": "pdvar.pdvar: Square forms follow sdpvar's symmetric default; rectangular is full.; Explicit flags let square matrices choose full or symmetric payloads.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidRateBounds, pdvar:InvalidDegree, pdvar:InvalidInput, pdvar:InvalidOptions, pdvar:InvalidStructure, pdvar:InvalidValidationMode, pdvar:ScalarDegreeExpansion, pdvar:UnknownOption, pdvar:UnsupportedOption"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "plus",
+    "Tests": [
+      "tests.pdvar.algebra.test_plus/test_numeric_constants_become_degree_0_data",
+      "tests.pdvar.algebra.test_plus/test_zero_pdvar_pdmat_numeric_operands_preserve",
+      "tests.pdvar.algebra.test_plus/test_bare_affine_sdpvar_matrices_promote_constant",
+      "tests.pdvar.algebra.test_plus/test_coefficient_backed_pdmat_operands_can_enter",
+      "tests.pdvar.algebra.test_plus/test_restrict_coarse_quadratic_at_alpha_5",
+      "tests.pdvar.algebra.test_plus/test_complete_residual_in_both_orders",
+      "tests.pdvar.algebra.test_plus/test_tensor_refinement_preserves_full_affine_bases",
+      "tests.pdvar.algebra.test_plus/test_cancelled_decision_still_rejects_function_only_partner"
+    ],
+    "Contract": "pdvar.plus: Clear YALMIP global state so variable IDs do not leak between tests.; Numeric constants become degree-0 data and are elevated to degree 1.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidAddition, pdvar:InvalidSubtraction, pdvar:MixedGrid; Function-only coefficient evidence rejected, including zero/cancellation paths where applicable."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "repmat",
+    "Tests": [
+      "tests.pdvar.matrix.test_repmat/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_repmat/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.matrix.test_repmat/test_tensor_vertical_replication_mixed"
+    ],
+    "Contract": "pdvar.repmat: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidRepmat"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "reshape",
+    "Tests": [
+      "tests.pdvar.matrix.test_reshape/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_reshape/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.matrix.test_reshape/test_tensor_inferred_row_reshape_mixed"
+    ],
+    "Contract": "pdvar.reshape: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidReshape"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "rhodiff",
+    "Tests": [
+      "tests.pdvar.polynomial.test_rhodiff/test_scalar_degree_derivatives_become_degree_zero",
+      "tests.pdvar.polynomial.test_rhodiff/test_constructor_created_scalar_quadratics_drop_degree",
+      "tests.pdvar.polynomial.test_rhodiff/test_tensor_derivatives_degree_combrows_rate_vertex",
+      "tests.pdvar.polynomial.test_rhodiff/test_constructor_created_tensor_quadratics_elevate",
+      "tests.pdvar.polynomial.test_rhodiff/test_unequal_zero_direction_degrees_common_tensor",
+      "tests.pdvar.polynomial.test_rhodiff/test_constant_tensor_has_zero_coefficient_rate",
+      "tests.pdvar.polynomial.test_rhodiff/test_tensor_plans_preserve_later_cells_and_matrix_shapes",
+      "tests.pdvar.polynomial.test_rhodiff/test_rhodiff_object_ratebounds_or_reject_incompatible",
+      "tests.pdvar.polynomial.test_rhodiff/test_rate_vertex_expressions_terminal_until_quadratic",
+      "tests.pdvar.polynomial.test_rhodiff/test_fixed_rate_produces_row_while_derivative",
+      "tests.pdvar.polynomial.test_rhodiff/test_degree_zero_rate_dependent_expressions_differentiate",
+      "tests.pdvar.polynomial.test_rhodiff/test_affine_algebra_broadcast_ordinary_coefficients",
+      "tests.pdvar.polynomial.test_rhodiff/test_matching_rate_vertex_tables_combine_row",
+      "tests.pdvar.polynomial.test_rhodiff/test_known_data_products_multiply_each_derivative",
+      "tests.pdvar.polynomial.test_rhodiff/test_numeric_products_preserve_metadata_only_bounds",
+      "tests.pdvar.polynomial.test_rhodiff/test_unequal_cell_widths_and_rate_signs",
+      "tests.pdvar.polynomial.test_rhodiff/test_tensor_rate_order",
+      "tests.pdvar.polynomial.test_rhodiff/test_fixed_tensor_rate_order",
+      "tests.pdvar.polynomial.test_rhodiff/test_rectangular_zero_axis_mixed_rates_use_exact_derivative_oracle",
+      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction"
+    ],
+    "Contract": "Use signed rate vertices and degree/cell-width factors on every coefficient difference.",
+    "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
+    "Invalid": "pdvar:InvalidDiff, pdvar:InvalidMultiplication, pdvar:InvalidRateBounds, pdvar:MissingRateBounds, pdvar:RateBoundsMismatch"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "rot90",
+    "Tests": [
+      "tests.pdvar.matrix.test_rot90/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_rot90/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.matrix.test_rot90/test_tensor_negative_rotation_mixed"
+    ],
+    "Contract": "pdvar.rot90: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "size",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdvar.size: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "squeeze",
+    "Tests": [
+      "tests.pdvar.matrix.test_squeeze/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_squeeze/test_tensor_rectangular_identity_ordinary",
+      "tests.pdvar.matrix.test_squeeze/test_tensor_rectangular_identity_fixed"
+    ],
+    "Contract": "pdvar.squeeze: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "subsasgn",
+    "Tests": [
+      "tests.pdvar.indexing.test_subsasgn/test_subscript_assignment_accept_numeric_constants_pdvar",
+      "tests.pdvar.indexing.test_subsasgn/test_assignment_same_ordinary_rate_row_broadcast",
+      "tests.pdvar.indexing.test_subsasgn/test_assigning_ordinary_blocks_into_derivative_rows",
+      "tests.pdvar.indexing.test_subsasgn/test_assignment_preserves_unselected_entries",
+      "tests.pdvar.indexing.test_subsasgn/test_fixed_tensor_assignment_keeps_unselected_affine_entries",
+      "tests.pdvar.indexing.test_indexing/test_function_only_block_assignment_is_rejected"
+    ],
+    "Contract": "pdvar.subsasgn: Clear YALMIP global state so variable IDs do not leak between tests.; Subscript assignment should accept numeric constants and pdvar blocks.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdvar:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "subsref",
+    "Tests": [
+      "tests.pdvar.indexing.test_subsref/test_matrix_indexing_slice_payloads_while_dot",
+      "tests.pdvar.indexing.test_subsref/test_reordered_repeated_and_logical_selectors",
+      "tests.pdvar.indexing.test_subsref/test_fixed_rate_tensor_slice_preserves_order_and_identity",
+      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction"
+    ],
+    "Contract": "pdvar.subsref: Clear YALMIP global state so variable IDs do not leak between tests.; Matrix indexing should slice payloads while dot access stays available.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "sum",
+    "Tests": [
+      "tests.pdvar.algebra.test_sum/test_all_cells_and_rate_rows",
+      "tests.pdvar.algebra.test_sum/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.algebra.test_sum/test_tensor_multi_dimension_reduction_mixed",
+      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction"
+    ],
+    "Contract": "pdvar.sum: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidSum"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "trace",
+    "Tests": [
+      "tests.pdvar.algebra.test_trace/test_all_cells_and_rate_rows",
+      "tests.pdvar.algebra.test_trace/test_rectangular_tensor_diagonal_sum_ordinary",
+      "tests.pdvar.algebra.test_trace/test_rectangular_tensor_diagonal_sum_fixed"
+    ],
+    "Contract": "pdvar.trace: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "transpose",
+    "Tests": [
+      "tests.pdvar.matrix.test_transpose/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_transpose/test_rectangular_tensor_transpose_ordinary",
+      "tests.pdvar.matrix.test_transpose/test_rectangular_tensor_transpose_fixed"
+    ],
+    "Contract": "pdvar.transpose: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "tril",
+    "Tests": [
+      "tests.pdvar.matrix.test_tril/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_tril/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.matrix.test_tril/test_tensor_upper_offset_mask_mixed"
+    ],
+    "Contract": "pdvar.tril: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidTriangularPart"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "triu",
+    "Tests": [
+      "tests.pdvar.matrix.test_triu/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_triu/test_invalid_arguments_leave_source_unchanged",
+      "tests.pdvar.matrix.test_triu/test_tensor_lower_offset_mask_mixed"
+    ],
+    "Contract": "pdvar.triu: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "pdvar:InvalidTriangularPart"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "uminus",
+    "Tests": [
+      "tests.pdvar.algebra.test_uminus/test_all_cells_and_rate_rows",
+      "tests.pdvar.algebra.test_uminus/test_anisotropic_tensor_negation_ordinary",
+      "tests.pdvar.algebra.test_uminus/test_anisotropic_tensor_negation_fixed"
+    ],
+    "Contract": "pdvar.uminus: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "uplus",
+    "Tests": [
+      "tests.pdvar.algebra.test_uplus/test_all_cells_and_rate_rows",
+      "tests.pdvar.algebra.test_uplus/test_anisotropic_tensor_identity_ordinary",
+      "tests.pdvar.algebra.test_uplus/test_anisotropic_tensor_identity_fixed"
+    ],
+    "Contract": "pdvar.uplus: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "value",
+    "Tests": [
+      "tests.pdvar.polynomial.test_value/test_ordinary_assigned_decisions_complete_bernstein",
+      "tests.pdvar.polynomial.test_value/test_proven_symbolic_cancellations_become_ordinary",
+      "tests.pdvar.polynomial.test_value/test_unsolved_yalmip_decisions_leak_nan_payloads",
+      "tests.pdvar.polynomial.test_value/test_ratebounds_metadata_alone_does_make_ordinary",
+      "tests.pdvar.polynomial.test_value/test_scalar_rate_rows_split_into_lower",
+      "tests.pdvar.polynomial.test_value/test_fixed_rate_exports_pdmat_while_preserving",
+      "tests.pdvar.polynomial.test_value/test_tensor_rate_cells_helper_combrows_lower",
+      "tests.pdvar.polynomial.test_value/test_assigned_values_stale_source_metadata_determine",
+      "tests.pdvar.polynomial.test_value/test_assigned_cancellation_can_recover_continuity",
+      "tests.pdvar.polynomial.test_value/test_value_full_tensor_scale_aware_continuity",
+      "tests.pdvar.polynomial.test_value/test_partial_assignment_and_reassignment",
+      "tests.pdvar.polynomial.test_value/test_assigned_tensor_derivative_elevation_exports_all_rate_controls"
+    ],
+    "Contract": "Export assigned values without changing decisions, preserve row forms, and independently classify continuity.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdvar:UnassignedValue"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "vec",
+    "Tests": [
+      "tests.pdvar.matrix.test_vec/test_all_cells_and_rate_rows",
+      "tests.pdvar.matrix.test_vec/test_tensor_column_major_vectorization_ordinary",
+      "tests.pdvar.matrix.test_vec/test_tensor_column_major_vectorization_fixed"
+    ],
+    "Contract": "pdvar.vec: Compare complete public results with independently specified expectations.",
+    "Oracle": "Native matrix payload operations and full affine difference bases.",
+    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "vertcat",
+    "Tests": [
+      "tests.pdvar.matrix.test_vertcat/test_native_block_order_all_rows",
+      "tests.pdvar.matrix.test_vertcat/test_tensor_fixed_rate_numeric_blocks_keep_order",
+      "tests.pdvar.matrix.test_vertcat/test_function_only_concatenation_is_rejected"
+    ],
+    "Contract": "pdvar.vertcat: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdvar:InvalidConcatenation for mismatched nonconcatenated matrix dimensions.; pdvar:FunctionOnlyAlgebra"
+  },
+  {
+    "Owner": "pdvar",
+    "Method": "width",
+    "Tests": [
+      "tests.pdvar.indexing.test_shape_protocols/test_payload_shape_and_container_indexing"
+    ],
+    "Contract": "pdvar.width: Compare complete public results with independently specified expectations.",
+    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
+    "Invalid": "pdbase:InvalidCellSubs"
+  }
+]

@@ -1,5 +1,5 @@
 function tests = test_install_pd_lmi
-%TEST_INSTALL_PD_LMI Isolated dependency, fallback, rollback, and save tests.
+    % Behavioral regressions for installation.install_pd_lmi.
     tests = functiontests(localfunctions);
 end
 
@@ -8,13 +8,14 @@ function setupOnce(testCase)
     originalPath = path;
     testCase.addTeardown(@() path(originalPath));
     mockDir = makeMockYalmip();
+    testCase.addTeardown(@() removeMock(mockDir));
     addpath(mockDir, "-begin");
     rehash;
     testCase.TestData.MockDir = mockDir;
     setMock("fallback", 0);
 end
 
-function testFalRepAndRepRun(testCase)
+function test_fallback_and_repeated_installation(testCase)
     setMock("fallback", 0);
     first = install_pd_lmi();
     second = install_pd_lmi();
@@ -32,7 +33,7 @@ function testFalRepAndRepRun(testCase)
     testCase.verifyEmpty(state.SaveCalls{2});
 end
 
-function testSucRunPriAllSte(testCase)
+function test_success_stage_report(testCase)
 %TESTSUCRUNPRIALLSTE Report every installation stage and final success.
     setMock("fallback", 0);
 
@@ -49,7 +50,7 @@ function testSucRunPriAllSte(testCase)
     end
 end
 
-function testFaiRunPriSteAndCau(testCase)
+function test_failure_stage_and_cause(testCase)
 %TESTFAIRUNPRISTEANDCAU Print the active stage and original error details.
     setMock("no-solver", 0);
     before = path;
@@ -64,7 +65,7 @@ function testFaiRunPriSteAndCau(testCase)
     testCase.verifyEqual(path, before);
 end
 
-function testFaiProRolBacPat(testCase)
+function test_failed_probe_restores_path(testCase)
     setMock("no-solver", 0);
     before = path;
 
@@ -72,7 +73,7 @@ function testFaiProRolBacPat(testCase)
     testCase.verifyEqual(path, before);
 end
 
-function testNonPriSavUseUse(testCase)
+function test_user_path_fallback(testCase)
     setMock("fallback", [1 0]);
     report = install_pd_lmi();
     state = getMock();
@@ -84,7 +85,7 @@ function testNonPriSavUseUse(testCase)
         {fullfile(state.UserPath, "pathdef.m")});
 end
 
-function testPriSavExcUseUse(testCase)
+function test_save_exception_fallback(testCase)
     setMock("fallback", [0 0], 1);
     report = install_pd_lmi();
     state = getMock();
@@ -96,7 +97,7 @@ function testPriSavExcUseUse(testCase)
         {fullfile(state.UserPath, "pathdef.m")});
 end
 
-function testPerFaiRolBacPat(testCase)
+function test_persistence_failure_rollback(testCase)
     setMock("fallback", [1 1]);
     before = path;
 
@@ -104,7 +105,24 @@ function testPerFaiRolBacPat(testCase)
     testCase.verifyEqual(path, before);
 end
 
-function testShaClaRolBacPat(testCase)
+function test_second_persistence_exception_restores_path_and_reports_cause(testCase)
+    % Failure after a successful solver probe must not leave a partial install.
+    setMock("fallback", [1 0], 2);
+    before = path;
+    output = evalc(['testCase.verifyError(@() install_pd_lmi(), ' ...
+        '"install_pd_lmi:PathSaveFailed");']);
+    state = getMock();
+    testCase.verifyEqual(path, before);
+    testCase.verifyEqual(numel(state.SaveCalls), 2);
+    testCase.verifySubstring(output, 'Injected savepath failure.');
+    testCase.verifySubstring(output, 'step 5/5');
+    % A subsequent valid attempt still succeeds after the failed transaction.
+    setMock("fallback", 0);
+    recovered = install_pd_lmi();
+    testCase.verifyTrue(recovered.Persisted);
+end
+
+function test_shadowed_class_rollback(testCase)
     setMock("fallback", 0);
     originalFolder = pwd;
     cd(tempdir);
@@ -114,21 +132,21 @@ function testShaClaRolBacPat(testCase)
     writelines(["function obj = pdmat(varargin)", "obj = [];", "end"], ...
         fullfile(conflictDir, "@pdmat", "pdmat.m"));
     addpath(conflictDir, "-begin");
-    cleanup = onCleanup(@() rmpath(conflictDir)); %#ok<NASGU>
+    cleanup = onCleanup(@() removeMock(conflictDir)); %#ok<NASGU>
     before = path;
 
     testCase.verifyError(@() install_pd_lmi(), "install_pd_lmi:PathConflict");
     testCase.verifyEqual(path, before);
 end
 
-function testMissingYalmip(testCase)
+function test_missing_yalmip(testCase)
     tempHidYal(testCase.TestData.MockDir);
     cleanup = onCleanup(@() restoreMockYalmip(testCase.TestData.MockDir)); %#ok<NASGU>
 
     testCase.verifyError(@() install_pd_lmi(), "install_pd_lmi:MissingYALMIP");
 end
 
-function testIncompleteYalmip(testCase)
+function test_incomplete_yalmip(testCase)
     tempHidYal(testCase.TestData.MockDir);
     incompleteDir = tempname;
     mkdir(incompleteDir);
@@ -148,6 +166,9 @@ function setMock(mode, saveStatus, throwCalls)
     global pd_lmi_install_mock
     pd_lmi_install_mock = struct( ...
         "Mode", mode, ...
+        "Registry", struct("tag", {'mosek','copt','sedumi','sdpt3','lmilab'}), ...
+        "RegistryThrow", false, "ProbeThrow", {{'mosek'}}, ...
+        "Working", {{'sedumi'}}, "ProbeCalls", {{}}, ...
         "SaveStatus", saveStatus, ...
         "ThrowCalls", throwCalls, ...
         "SaveCalls", {{}}, ...
@@ -186,7 +207,7 @@ end
 
 function restIncMoc(incompleteDir, mockDir)
 %RESTOREINCOMPLETEMOCK Restore both path priority and the shared mock state.
-    rmpath(incompleteDir);
+    removeMock(incompleteDir);
     restoreMockYalmip(mockDir);
 end
 
@@ -202,7 +223,9 @@ function mockDir = makeMockYalmip()
         "opts = struct('solver', varargin{2});", "end"], ...
         fullfile(mockDir, "sdpsettings.m"));
     writelines(["function solvers = getavailablesolvers(varargin)", ...
-        "solvers = struct('tag', {'mosek', 'copt', 'sedumi'});", "end"], ...
+        "global pd_lmi_install_mock", ...
+        "if pd_lmi_install_mock.RegistryThrow, error('mock:Registry','registry failed'); end", ...
+        "solvers = pd_lmi_install_mock.Registry;", "end"], ...
         fullfile(mockDir, "getavailablesolvers.m"));
     writelines(["function status = savepath(varargin)", ...
         "global pd_lmi_install_mock", ...
@@ -222,8 +245,63 @@ function mockDir = makeMockYalmip()
         fullfile(mockDir, "userpath.m"));
     writelines(["function diagnostics = optimize(varargin)", ...
         "global pd_lmi_install_mock", ...
-        "if strcmp(pd_lmi_install_mock.Mode, 'fallback') && strcmpi(varargin{3}.solver, 'sedumi')", ...
+        "solver=varargin{3}.solver;", ...
+        "pd_lmi_install_mock.ProbeCalls{end+1}=solver;", ...
+        "if any(strcmpi(solver,pd_lmi_install_mock.ProbeThrow)), error('mock:Probe','probe failed'); end", ...
+        "if strcmp(pd_lmi_install_mock.Mode,'fallback') && any(strcmpi(solver,pd_lmi_install_mock.Working))", ...
         "    diagnostics = struct('problem', 0);", ...
         "else", "    diagnostics = struct('problem', 1);", "end", "end"], ...
         fullfile(mockDir, "optimize.m"));
+end
+function test_solver_priority_and_probe_exceptions(testCase)
+    global pd_lmi_install_mock
+    priority={'mosek','copt','sedumi','sdpt3','lmilab'};
+    for first=1:5
+        setMock("fallback",0);
+        pd_lmi_install_mock.Registry=struct('tag',fliplr(priority));
+        pd_lmi_install_mock.Working=priority(first:end);
+        pd_lmi_install_mock.ProbeThrow=priority(1:first-1);
+        actual=install_pd_lmi();
+        testCase.verifyEqual(actual.Solver,priority{first});
+        testCase.verifyEqual(pd_lmi_install_mock.ProbeCalls,priority(1:first));
+    end
+end
+
+function test_malformed_registry_and_enumeration_failure(testCase)
+    global pd_lmi_install_mock
+    for registry={[],struct('wrong','mosek'),struct('tag','unknown')}
+        setMock("fallback",0);
+        pd_lmi_install_mock.Registry=registry{1};
+        before=path;
+        testCase.verifyError(@() install_pd_lmi(),'install_pd_lmi:NoWorkingSDPSolver');
+        testCase.verifyEqual(path,before);
+        testCase.verifyEmpty(pd_lmi_install_mock.SaveCalls);
+    end
+    pd_lmi_install_mock.RegistryThrow=true;
+    testCase.verifyError(@() install_pd_lmi(),'install_pd_lmi:NoWorkingSDPSolver');
+end
+
+function test_first_nonempty_user_path_and_empty_fallback(testCase)
+    global pd_lmi_install_mock
+    setMock("fallback",[1 0]);
+    first=fullfile(tempdir,'first-user'); second=fullfile(tempdir,'second-user');
+    pd_lmi_install_mock.UserPath=[pathsep first pathsep second pathsep];
+    actual=install_pd_lmi();
+    testCase.verifyTrue(actual.Persisted);
+    testCase.verifyEqual(string(pd_lmi_install_mock.SaveCalls{2}{1}),string(fullfile(first,'pathdef.m')));
+    setMock("fallback",1);
+    pd_lmi_install_mock.UserPath='';
+    before=path;
+    testCase.verifyError(@() install_pd_lmi(),'install_pd_lmi:PathSaveFailed');
+    testCase.verifyEqual(path,before);
+end
+
+
+function removeMock(folder)
+    % Only delete the exact test-owned folder under the system temporary root.
+    folder=char(java.io.File(folder).getCanonicalPath());
+    base=char(java.io.File(tempdir).getCanonicalPath());
+    assert(startsWith(lower(folder),[lower(base) filesep]),'Mock path must be under tempdir.');
+    if any(strcmpi(strsplit(path,pathsep),folder)), rmpath(folder); end
+    if isfolder(folder), rmdir(folder,'s'); end
 end

@@ -7,8 +7,27 @@ grids. It represents known data (`pdmat`) and continuous decision matrices
 rate-vertex derivatives with `rhodiff`, and exports finite certificates to
 YALMIP through `pdlmi`.
 
-Current source and documentation: **v1.4.2**. Latest tagged GitHub Release:
+Current source and documentation: **v1.4.3**. Latest tagged GitHub Release:
 **v1.4.0**.
+
+## What changed in v1.4.3
+
+- The runtime suite now contains 809 tests in 141 files, with at least three
+  distinct cases per file. It checks composed tensor-grid workflows, affine
+  variable identities, certificate replacement, and invalid-use boundaries.
+- Function-only `pdmat` operands reject coefficient-dependent arithmetic,
+  including zero products and cancellation. Exact evaluation, inspection,
+  and plotting remain available; explicitly degree-validated function sources
+  retain supported coefficient arithmetic.
+- Products of two operands with active rate rows are rejected even when their
+  values are zero. Evaluation with one fixed rate row returns a `1x1` cell,
+  consistently with the rate-row output contract.
+- `bernTable` accepts multiple physical-cell selectors in a numeric or cell
+  array, preserves their requested order, and removes later duplicates.
+  `coeffs` continues to select one physical cell.
+- Both manuals explain these boundaries. Web displays preserve native script
+  proportions and scale complete formulas to no less than 85% on narrow
+  screens, with formula-local scrolling when needed.
 
 ## What changed in v1.4.2
 
@@ -152,10 +171,14 @@ results = tests.run_all();
 assert(all([results.Passed]) && ~any([results.Incomplete]))
 ```
 
-The v1.4.1 source gate passed 440 runtime tests with zero failures and zero
-incompletes. Production coverage was 3339/3456 statements (96.61%) and
-1681/1792 decisions (93.81%). Solver smoke tests accepted results only when
-`diagnostic.problem == 0`.
+The v1.4.3 source gate passed 809 runtime tests with zero failures and zero
+incompletes, including the traceability gate for 169 public API entries.
+`tests.run_coverage()` measured 3308/3420 statements (96.73%) and 1692/1796
+decisions (94.21%), above the unchanged percentage baselines of 3325/3442
+and 1671/1782. Eight isolated fault injections were detected by behavioral
+assertions. Feasible solver checks used MOSEK and required
+`diagnostic.problem == 0`, finite values, and independent normalized residuals
+no greater than `1e-7`; infeasible controls were also retained.
 
 Run the independent MATLAB SOS validation from the repository root:
 
@@ -169,7 +192,8 @@ Run the independent Julia/SumOfSquares validation with:
 julia --project=sos_validation/julia sos_validation/julia/run_all.jl
 ```
 
-The release gate passed 54 MATLAB SOS tests and 231 Julia SOS tests. On a
+The earlier release gate passed 54 MATLAB SOS tests and 231 Julia SOS tests;
+these optional external comparisons were not rerun for v1.4.3. On a
 Windows system that blocks cached Julia extension DLLs, use the same command
 with `--compiled-modules=no` after `julia`.
 

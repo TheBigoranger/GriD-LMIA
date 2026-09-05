@@ -1,6 +1,6 @@
 ---
 title: Coefficient Algebra And Assembly Plans
-description: Exact sparse elevation, three product kernels, differentiation, and reusable numeric plans.
+description: Exact sparse elevation, unified weighted block contraction, differentiation, and reusable numeric plans.
 ---
 
 import ElevationPlanExplorer from "../../../../../components/ElevationPlanExplorer.tsx";
@@ -90,17 +90,17 @@ $$
 
 Matrix order is preserved. Each coefficient pair is evaluated in the written order $P[\vect i]Q[\vect j]$.
 
-## Three Product Kernels
+## Weighted Product Contraction
 
-The numeric route first multiplies every coefficient by its tensor binomial scale, applies `conv` or `convn`, and divides by the output scale. For example, the degree-one rows $[4,2]$ and $[0.5,3]$ give
+The mathematical convolution identity weights coefficient pairs by their binomial ratio. The runtime evaluates those pairs through one block contraction for numeric and affine payloads. For example, the degree-one rows $[4,2]$ and $[0.5,3]$ give
 
 $$
 [4,2]\star_{\mathrm B}[0.5,3]=[2,6.5,6].
 $$
 
-The middle coefficient is $\tfrac12(4\cdot3+2\cdot0.5)=6.5$. This route is used only when both packed tensors are numeric.
+The middle coefficient is $\tfrac12(4\cdot3+2\cdot0.5)=6.5$.
 
-The known–affine route uses planned label pairs and contracts known coefficient blocks with affine YALMIP blocks. For
+For known–affine products, the same contraction multiplies known coefficient blocks with affine YALMIP blocks. For
 
 $$
 A(\alpha)=A_0B_0^1(\alpha)+A_1B_1^1(\alpha).
@@ -124,14 +124,13 @@ $$
 p_2=A_1x_1.
 $$
 
-The known blocks multiply the affine blocks directly, so the result remains affine when the public multiplication rules allow it. The generic fallback uses the same planned pairs and weights, but it accumulates each compatible payload product in repository order.
+The known blocks multiply the affine blocks directly, so the result remains affine when the public multiplication rules allow it. Scalar broadcasting flattens and restores the relevant matrix dimensions while retaining written factor order.
 
-MATLAB `convn` accepts numeric arrays and its output lacks the affine symbolic
-block structure required for YALMIP `sdpvar` data. `prodVals` therefore sends
-numeric data to tensor convolution and keeps symbolic data on the planned
-contraction paths.
+`prodVals` reuses the numeric pair and weight plan across physical cells and
+stored rate rows. Both numeric and symbolic data use the weighted block
+contraction, preserving the existing YALMIP variable identities.
 
-<CallGraph family="multiplication" caption="Multiplication selects a coefficient kernel after shared alignment or maps a bare affine sdpvar through the pdmat bridge." links={[
+<CallGraph family="multiplication" caption="Multiplication applies weighted block contraction after shared alignment or maps a bare affine sdpvar through the pdmat bridge." links={[
   { href: "#normalized-product-identity", label: "Product derivation" },
   { href: "/GriD-LMIA/documents/reference/pdmat/algebra/#pdmat-mtimes", label: "pdmat mtimes" },
   { href: "/GriD-LMIA/documents/reference/pdvar/algebra/#pdvar-mtimes", label: "pdvar mtimes" },

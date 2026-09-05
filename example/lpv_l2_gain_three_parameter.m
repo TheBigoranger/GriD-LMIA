@@ -1,6 +1,6 @@
 % LPV_L2_GAIN_THREE_PARAMETER Reproduce the three-parameter LPV gain case.
 %
-% Provenance
+% Provenancev
 %   Source: Agulhari, Felipe, Oliveira, and Peres, "Algorithm 998: The Robust
 %   LMI Parser---A Toolbox to Construct LMI Conditions for Uncertain
 %   Systems," ACM Transactions on Mathematical Software, 45(3), 2019,

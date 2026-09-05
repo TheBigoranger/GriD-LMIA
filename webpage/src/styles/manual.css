@@ -26,6 +26,9 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
+  --diagram-input: #93c5fd;
+  --diagram-second: #fdba74;
+  --diagram-result: #5eead4;
   --sl-color-accent-low: #172554;
   --sl-color-accent: #60a5fa;
   --sl-color-accent-high: #dbeafe;
@@ -38,6 +41,8 @@
   --home-aurora-band: rgb(125 211 252 / 0.065);
   --home-shadow: rgb(0 0 0 / 0.26);
 }
+
+[data-theme="dark"] .diagram-panel--result .diagram-step { color: #0f172a; }
 
 [data-theme="dark"] .sl-skip-link:focus {
   color: white;
@@ -434,13 +439,43 @@
   margin-inline: auto;
   padding-block: 0.25rem;
   text-align: center;
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.formula-fit-size {
+  display: block;
+  width: max-content;
+  margin-inline: auto;
+  position: relative;
+  vertical-align: middle;
+  max-width: none;
+}
+
+.formula-fit-content {
+  display: inline-block;
+  width: max-content;
+  max-width: none;
+  transform-origin: left top;
+  white-space: nowrap;
+}
+
+[data-formula-fitted] > .formula-fit-size {
+  overflow: clip;
+}
+
+[data-formula-fitted] > .formula-fit-size > .formula-fit-content {
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 .formula-inline > .katex {
   max-width: 100%;
 }
 
-.formula-display > .katex-display {
+.formula-fit-content > .katex-display {
   max-width: 100%;
   margin-block: 0.35rem;
 }
@@ -515,8 +550,8 @@
 }
 
 .elevate-formula-one-line > .formula-display {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 
 .solver-one-line {
@@ -526,8 +561,8 @@
 }
 
 .solver-one-line > .formula-display {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 
 .sl-markdown-content .expressive-code,
@@ -805,9 +840,9 @@
 }
 
 .cell-formula-one-line > .formula-display {
-  width: max-content;
-  min-width: 100%;
-  max-width: none;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .cell-stage--basis .cell-bernstein-readout {

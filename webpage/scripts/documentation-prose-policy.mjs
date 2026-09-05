@@ -249,7 +249,8 @@ export function markdownProseLines(source) {
     const asideStart = line.match(/<Aside\b[^>]*\btitle=["']([^"']+)["'][^>]*>/i);
     if (asideStart) asideContexts.push(isAllowedBoundaryHeading(asideStart[1].split(":")[0]));
     const allowedNegative =
-      asideContexts.some(Boolean) || headings.some((item) => item && isAllowedBoundaryHeading(item));
+      asideContexts.some(Boolean) || headings.some((item) => item && isAllowedBoundaryHeading(item)) ||
+      /^<p data-prose-context="limitations">/.test(trimmed);
 
     if (!/^(?:import|export)\b/.test(trimmed)) {
       const text = cleanMarkdownLine(line);

@@ -10,7 +10,8 @@ function val = evaluate(obj, pt)
     %     pt  - In-bounds point with one coordinate per parameter.
     %
     %   Output:
-    %     val - Numeric matrix value at pt.
+    %     val - Numeric matrix value for ordinary or exact function data.
+    %           Rate-row data returns a 1-by-N cell array, including N=1.
     %
     %   Example:
     %     A = pdmat({[0 1]}, {1, 3}, Degree=1);

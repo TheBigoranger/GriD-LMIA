@@ -62,13 +62,7 @@ U = X * A; V = A * X;
 For a quadratic decision and affine known factor on one cell,
 
 $$
-\begin{aligned}
-(PA)[k]
-&=\sum_{i+j=k}
-\frac{\binom{2}{i}\binom{1}{j}}{\binom{3}{k}}\\
-&\qquad{}\cdot P[i]A[j],\\
-k&=0,1,2,3.
-\end{aligned}
+(PA)[k]=\sum_{i+j=k}\frac{\binom{2}{i}\binom{1}{j}}{\binom{3}{k}}P[i]A[j],\qquad k=0,1,2,3.
 $$
 
 Written matrix order is preserved. $P[i]A[j]$ stays in that order and remains
@@ -111,13 +105,15 @@ leave the package's affine YALMIP layer.
 ## Validation and operation boundaries
 
 - Products with decision dependence on both sides are rejected as nonlinear.
-- Products with active rate-row tables on both sides are rejected.
+- Products with active rate-row tables on both sides are rejected even when both contain only zero coefficients. A known rate-row `pdmat` may multiply an ordinary `pdvar` in either order.
 - Affine `sdpvar` multiplication requires decision-free data on the `pdvar` side.
 - A bare `sdpvar` multiplied by `pdmat` must be real, affine, two-dimensional,
   and dimensionally compatible.
 - Numeric and `pdmat` promotion still requires compatible physical bounds and matrix dimensions.
 - Numeric or known data may multiply a derivative object while preserving its rate rows.
 - Compatible `RateBounds` with zero stored rows is metadata and remains valid in an ordinary product.
+
+Function-only known operands are also rejected after decision cancellation. For `P = pdvar(1,[0 1])`, `Z = P-P`, and `F = pdmat([0 1],@(rho) 1+rho)`, both `Z*F` and `F*Z` raise `pdvar:FunctionOnlyAlgebra`. Explicitly degree-validated known functions remain valid neighbors.
 
 ## See Also
 

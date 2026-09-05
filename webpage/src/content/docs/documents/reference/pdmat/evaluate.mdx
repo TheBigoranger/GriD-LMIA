@@ -72,8 +72,7 @@ $$
 A(\vect\rho)
 &=A^{(\vect c)}(\vect\alpha),\\
 A^{(\vect c)}(\vect\alpha)
-&=\sum_{\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}}\\
-&\quad C^{(\vect c)}[\vect i]\,
+&=\sum_{\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}} C^{(\vect c)}[\vect i]\,
 B_{\vect i}^{\vect m}(\vect\alpha).
 \end{aligned}
 $$
@@ -165,6 +164,8 @@ Function-backed objects route evaluation through the retained function handle.
 - Bad point shape or nonfinite values raise `pdmat:InvalidPoint`.
 - Points outside grid bounds raise `pdmat:PointOutOfBounds`.
 - Function-handle failures during evaluation raise `pdmat:InvalidFunctionValue`.
+
+A single fixed rate vertex still returns a `1 × 1` cell containing the evaluated matrix. Ordinary storage with `NumRateRows == 0` returns a matrix even when `RateBounds` metadata is present.
 
 ## See Also
 

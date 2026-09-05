@@ -20,6 +20,20 @@ function out = mtimes(lhs, rhs)
     %     B = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     %     C = A * B;
 
+    % Zero and cancellation shortcuts cannot supply missing coefficient evidence.
+    if (isa(lhs, "pdmat") && lhs.SourceSummary == "function") || ...
+            (isa(rhs, "pdmat") && rhs.SourceSummary == "function")
+        error("pdmat:FunctionOnlyAlgebra", ...
+            "Function-backed pdmat objects need explicit Bernstein coefficient evidence for this operation.");
+    end
+
+    % An active rate table stays rate-dependent even when its values are zero.
+    if isa(lhs, "pdmat") && isa(rhs, "pdmat") && ...
+            lhs.NumRateRows ~= 0 && rhs.NumRateRows ~= 0
+        error("pdmat:InvalidMultiplication", ...
+            "Products may contain actual rate-vertex rows on at most one side.");
+    end
+
     if isa(lhs, "sdpvar") || isa(rhs, "sdpvar")
         % pdmat is method-superior to sdpvar so both operand orders reach
         % the affine expression layer through one matrix-product bridge.

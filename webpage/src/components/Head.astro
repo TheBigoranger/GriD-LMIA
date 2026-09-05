@@ -30,6 +30,15 @@ const localKatexFonts = [
 ---
 
 <StarlightHead />
+<script>
+  import { installFormulaFit } from "../lib/formula-fit";
+  let dispose = installFormulaFit();
+  document.addEventListener("astro:before-swap", () => dispose());
+  document.addEventListener("astro:page-load", () => {
+    dispose();
+    dispose = installFormulaFit();
+  });
+</script>
 {localKatexFonts.map((href) => (
   <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />
 ))}

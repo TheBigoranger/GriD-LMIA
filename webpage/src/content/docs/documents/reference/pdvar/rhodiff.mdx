@@ -149,7 +149,7 @@ always `1`, the second rate has two endpoints, and `D.NumRateRows` is `2`.
 - Re-differentiating an existing rate-vertex expression raises `pdvar:InvalidDiff`.
 
 - Products with rate dependence on both sides raise the documented product-validation error.
-- A rate-dependent expression can multiply known data. Multiplication by another decision expression is rejected to preserve affine YALMIP dependence.
+- A decision-bearing `pdvar` derivative can multiply known data. Multiplication by another decision-bearing expression is rejected to preserve affine YALMIP dependence. A known rate-row `pdmat` may multiply an ordinary decision expression in either order.
 
 ## See Also
 

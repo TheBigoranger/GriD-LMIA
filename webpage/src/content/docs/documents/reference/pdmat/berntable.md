@@ -32,7 +32,7 @@ T = bernTable(A, cellSubs, "oneLine")
 | Argument | Description |
 | :--- | :--- |
 | `A` | A coefficient-backed `pdmat` object. |
-| `cellSubs` | Physical-cell subscript to inspect, such as `1` for a one-parameter grid or `[1 1]` for a tensor grid. |
+| `cellSubs` | Nonempty numeric or cell-array matrix with one finite-real integer physical-cell subscript per row and one column per parameter. Cell-array entries are numeric scalars. Omit it to inspect every cell. |
 | `"oneLine"` | Compact mode that returns one row per selected physical cell and active rate vertex with a readable Bernstein expression. |
 
 ## Output
@@ -169,6 +169,21 @@ expressionCount =
 - Function-only objects that omit Bernstein coefficient evidence raise `pdmat:FunctionOnlyBernsteinTable` when calling `bernTable`. Backend degree elevation instead raises `pdbase:MissingCoefficientEvidence`.
 - Invalid cell subscripts raise `pdbase:InvalidCellSubs`.
 - Unknown display modes, such as `"wide"`, raise `pdmat:InvalidBernsteinTableInput`.
+
+## Multiple Physical Cells
+
+Rows select complete physical-cell blocks in the requested order. The first occurrence of each selector row is retained. Later duplicates are removed. These selectors combine with `"oneLine"`, which emits one expression per selected cell and stored rate vertex. The `coeffs` accessor still selects one physical cell.
+
+```matlab
+A1 = pdmat([0 1 3], @(x) 1+x, Degree=1);
+A2 = pdmat({[0 1 3],[-2 0 4]}, @(x,y) x+y, Degree=[1 1]);
+T1 = bernTable(A1, [2;1;2], "oneLine");
+T2 = bernTable(A2, [2 1;1 2;2 1]);
+T3 = bernTable(A2, {2,1;1,2;2,1});
+assert(isequal(T2,T3))
+```
+
+Empty, fractional, nonfinite, complex, out-of-bounds, or wrong-width selectors are rejected. Supplying more than one selector argument is also invalid.
 
 ## See Also
 

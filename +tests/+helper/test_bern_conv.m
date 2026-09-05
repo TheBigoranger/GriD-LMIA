@@ -1,9 +1,22 @@
 function tests = test_bern_conv
-    %TEST_BERN_CONV Check stable Bernstein convolution weights and ratios.
+    % Behavioral regressions for helper.bern_conv.
     tests = functiontests(localfunctions);
 end
 
-function testWeightsMatchDirectFormula(testCase)
+function test_zero_degree_axes_and_later_invalid_labels(testCase)
+    % A zero tensor degree contributes unit factors without changing row order.
+    lhs = [0 0 0;0 1 2;0 2 3];
+    rhs = [0 2 1;0 1 0;0 0 1];
+    expected = directRatios(lhs,[0 2 3],rhs,[0 2 1],lhs+rhs,[0 4 4]);
+    verifyScaled(testCase, helper.bernConvRatios(lhs,[0 2 3],rhs,[0 2 1]), expected, 128);
+    lhs(end,end) = 4;
+    testCase.verifyError(@() helper.bernConvWeights(lhs,[0 2 3]), ...
+        "helper:InvalidBernConvWeights");
+    testCase.verifyError(@() helper.bernConvRatios(lhs,[0 2 3],rhs,[0 2 1]), ...
+        "helper:InvalidBernConvRatios");
+end
+
+function test_moderate_degrees_independently_computed_binomial(testCase)
     % Moderate degrees retain the independently computed binomial values.
     for degree = [0 1 2 7 16 32]
         labels = (0:degree).';
@@ -21,7 +34,7 @@ function testWeightsMatchDirectFormula(testCase)
     verifyScaled(testCase, actual, expected, 128);
 end
 
-function testRatiosMatchDirectFormula(testCase)
+function test_four_arguments_cover_ordinary_product_elevation(testCase)
     % Four arguments cover ordinary product and elevation ratios.
     lhsDegree = [4 2];
     rhsDegree = [3 1];
@@ -44,7 +57,7 @@ function testRatiosMatchDirectFormula(testCase)
     verifyScaled(testCase, actual, expected, 128);
 end
 
-function testDegree1030RemainsFinite(testCase)
+function test_degree_1030_first_required_range_where(testCase)
     % Degree 1030 is the first required range where central nchoosek overflows.
     degree = 1030;
     weights = helper.bernConvWeights((0:degree).', degree);
@@ -66,7 +79,7 @@ function testDegree1030RemainsFinite(testCase)
     testCase.verifyGreaterThanOrEqual(shifted, zeros(size(shifted)));
 end
 
-function testInvalidLabelsFailClearly(testCase)
+function test_helpers_reject_misaligned_or_out_range(testCase)
     % Shared helpers reject misaligned or out-of-range internal label tables.
     testCase.verifyError(@() helper.bernConvWeights([0 1], 2), ...
         "helper:InvalidBernConvWeights");

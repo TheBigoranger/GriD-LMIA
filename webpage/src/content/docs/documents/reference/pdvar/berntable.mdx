@@ -48,7 +48,7 @@ box becomes finite vertex rows.
 | Input | Meaning |
 | :--- | :--- |
 | `P` | A `pdvar` object. |
-| `cellSubscript` | Optional tensor-cell subscript accepted by `P.coeffs(...)`. Omit it to inspect all cells. |
+| `cellSubscript` | Nonempty numeric or cell-array matrix with one finite-real integer physical-cell subscript per row and one column per parameter. Cell-array entries are numeric scalars. Omit it to inspect every cell. |
 | `"oneLine"` | Optional display mode that prints one compact expression per local row. The default is the expanded table. |
 
 Unsupported names, malformed cell subscripts, and unsupported display modes are
@@ -151,6 +151,22 @@ promising the workspace-dependent YALMIP text in `Value`.
 coefficient degree further. `bernTable` reports the resulting stored rows.
 It is an inspection aid. Serialization uses the documented object state and
 constructor contracts.
+
+## Multiple Physical Cells
+
+Rows select complete physical-cell blocks in the requested order. The first occurrence of each selector row is retained. Later duplicates are removed. These selectors combine with `"oneLine"`, which emits one expression per selected cell and stored rate vertex. The `coeffs` accessor still selects one physical cell.
+
+```matlab
+yalmip('clear')
+P1 = pdvar(1,[0 1 3]);
+P2 = pdvar(1,{[0 1 3],[-2 0 4]},Degree=[1 1]);
+T1 = bernTable(P1, [2;1;2], "oneLine");
+T2 = bernTable(P2, [2 1;1 2;2 1]);
+T3 = bernTable(P2, {2,1;1,2;2,1});
+assert(isequal(T2,T3))
+```
+
+Empty, fractional, nonfinite, complex, out-of-bounds, or wrong-width selectors are rejected. Supplying more than one selector argument is also invalid.
 
 ## See Also
 

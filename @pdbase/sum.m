@@ -36,7 +36,14 @@ function out = sum(obj, varargin)
             "Sum dimension must be a unique positive integer vector or ""all"".");
     end
 
-    dims = pdbase.normRedDims(arg, prefix + ":InvalidSum", "Sum");
+    dims = helper.chk(arg, prefix + ":InvalidSum", "Sum dimensions", ...
+        "numeric", "real", "vector", "nonempty", "finite", ...
+        "integer", "positive");
+    dims = reshape(double(dims), 1, []);
+    if numel(unique(dims)) ~= numel(dims)
+        error(prefix + ":InvalidSum", ...
+            "Sum dimensions must be a nonempty unique positive integer vector.");
+    end
     out = mapUnary(obj, @(a) reduce(a, dims));
 end
 
