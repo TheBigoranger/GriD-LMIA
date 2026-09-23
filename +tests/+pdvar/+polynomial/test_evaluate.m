@@ -3,6 +3,48 @@ function tests = test_evaluate
     tests = functiontests(localfunctions);
 end
 
+function test_higher_order_spline_evaluation_derivative_and_recovery(testCase)
+    grid = [-2 -.5 1 4];
+    for q = [1 2 Inf]
+        P = pdvar(2,3,grid,'full',Degree=3,Continuity=q);
+        expressions = [];
+        for c = 1:3
+            coefficients = P.coeffs(c);
+            expressions = [expressions, horzcat(coefficients{:})]; %#ok<AGROW>
+        end
+        ids = getvariables(expressions);
+        assignments = sin((1:numel(ids))*.37)+(1:numel(ids))/17;
+        assign(recover(ids),assignments);
+        controls = reshape(assignments,6,[]);
+        known = value(P);
+        D = rhodiff(P,[-2 3]);
+        recovered = value(D);
+        for c = 1:3
+            coefficients = P.coeffs(c);
+            width = grid(c+1)-grid(c);
+            for t = [.13 .57 .91]
+                point = grid(c)+t*width;
+                expected = reshape(controls* ...
+                    tests.infrastructure.spline_basis({grid},3,q,point)',2,3);
+                testCase.verifyEqual(value(evaluate(P,point)),expected,AbsTol=1e-12);
+                testCase.verifyEqual(evaluate(known,point),expected,AbsTol=1e-12);
+                derivative = zeros(2,3);
+                for k = 0:2
+                    derivative = derivative + 3/width*nchoosek(2,k)*t^k*(1-t)^(2-k)* ...
+                        (value(coefficients{k+2})-value(coefficients{k+1}));
+                end
+                rows = evaluate(D,point);
+                rates = [-2 3];
+                for row = 1:2
+                    testCase.verifyEqual(value(rows{row}),rates(row)*derivative,AbsTol=1e-12);
+                    testCase.verifyEqual(evaluate(recovered{row},point), ...
+                        rates(row)*derivative,AbsTol=1e-12);
+                end
+            end
+        end
+    end
+end
+
 function test_fixed_tensor_rectangular_values_have_one_active_row(testCase)
     % Evaluate tensor Bernstein weights directly, including a zero-degree axis.
     P = pdvar(2,3,{[0 2 5],[-3 1 6]},'full',Degree=[0 2]);

@@ -12,7 +12,8 @@ function test_fixed_zero_rate_retains_derivative_identity_and_rejects_repeat(tes
     end
     testCase.verifyEqual(D.NumRateRows, 1);
     testCase.verifyEqual(D.RateBounds, zeros(2));
-    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifyEqual(D.Continuity, [Inf Inf]);
+    testCase.verifyTrue(D.IsContinuous);
     testCase.verifyError(@() rhodiff(D), "pdmat:InvalidDiff");
 end
 
@@ -27,7 +28,8 @@ function test_pdmat_differentiation_numeric_clears_exact_function(testCase)
     testCase.verifyEqual(D.Degree, 1);
     testCase.verifyEqual(D.coeffs(1), {0, -8; 0, 12}, AbsTol=1e-10);
     testCase.verifyFalse(D.ContainsDecision);
-    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifyEqual(D.Continuity, Inf);
+    testCase.verifyTrue(D.IsContinuous);
     testCase.verifyEqual(D.RateBounds, rb);
     testCase.verifyEqual(D.SourceSummary, "derivative");
     testCase.verifyEmpty(D.FunctionHandle);
@@ -96,6 +98,22 @@ function test_zero_degree_tensor_axis(testCase)
     source = pdmat(grid, data, Degree=deg, RateBounds=rb);
     actual = tests.infrastructure.verify_tensor_diff(testCase, source, rb, false);
     testCase.verifyEqual(actual.NumRateRows, 8);
+end
+
+function test_zero_partial_exclusion_and_large_offset_nonzero_regression(testCase)
+    zeroPartial = pdmat({[0 1 2], [-1 1 4]}, ...
+        @(x, y) y.^2, Degree=[1 2], Continuity=[Inf Inf]);
+    excluded = rhodiff(zeroPartial, [3 3; -2 5]);
+    testCase.verifyEqual(excluded.Continuity, [Inf Inf]);
+
+    offset = 1e12;
+    nonzero = pdmat([0 1 2], ...
+        {{offset, offset+1}, {offset+1, offset+3}}, Degree=1);
+    derivative = rhodiff(nonzero, [1 1]);
+    testCase.verifyEqual(nonzero.Continuity, 0);
+    testCase.verifyEqual(derivative.Continuity, -1);
+    testCase.verifyEqual(derivative.coeffs(1), {1});
+    testCase.verifyEqual(derivative.coeffs(2), {2});
 end
 
 function data = makeNumGrid(grid, deg, sz)

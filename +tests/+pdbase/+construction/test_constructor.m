@@ -89,6 +89,36 @@ function test_tensor_construction_preserve_explicit_flags_rate(testCase)
     testCase.verifyEqual(obj.ncoeff(), 9);
 end
 
+function test_continuity_metadata_and_legacy_alias(testCase)
+    % Continuity is stored once; IsContinuous is its dependent compatibility view.
+    grid = {[0 1 2], [10 20]};
+    direct = pdbase(grid, [1 1], [2 1], Continuity=[1 -1]);
+    legacyTrue = pdbase(grid, [1 1], [1 1], IsContinuous=true);
+    legacyFalse = pdbase(grid, [1 1], [1 1], IsContinuous=false);
+
+    testCase.verifyEqual(direct.Continuity, [1 -1]);
+    testCase.verifyFalse(direct.IsContinuous);
+    testCase.verifyEqual(legacyTrue.Continuity, [0 0]);
+    testCase.verifyTrue(legacyTrue.IsContinuous);
+    testCase.verifyEqual(legacyFalse.Continuity, [-1 -1]);
+    testCase.verifyFalse(legacyFalse.IsContinuous);
+end
+
+function test_continuity_alias_conflicts_and_invalid_values(testCase)
+    grid = {[0 1], [10 20]};
+    testCase.verifyError(@() pdbase(grid, [1 1], [1 1], ...
+        Continuity=0, IsContinuous=true), ...
+        "pdbase:ConflictingContinuityOptions");
+    testCase.verifyError(@() pdbase(grid, [1 1], [1 1], ...
+        IsContinuous=true, Continuity=0), ...
+        "pdbase:ConflictingContinuityOptions");
+    bad = {[], [0 1 2], [0.5 1], [NaN 0], [-2 0], "C1"};
+    for k = 1:numel(bad)
+        testCase.verifyError(@() pdbase(grid, [1 1], [1 1], ...
+            Continuity=bad{k}), "pdbase:InvalidContinuity");
+    end
+end
+
 function test_named_metadata_may_omit_optional_localvalues(testCase)
     % Named metadata may omit the optional LocalValues position.
     obj = pdbase({[0 1]}, [1 1], 0, ...
@@ -125,6 +155,8 @@ function test_public_state_properties_inspectable_but_mutable(testCase)
 
     testCase.verifyError(@() setSummary(obj), "MATLAB:class:SetProhibited");
     testCase.verifyError(@() setDeg(obj), "MATLAB:class:SetProhibited");
+    testCase.verifyError(@() setContinuity(obj), "MATLAB:class:SetProhibited");
+    testCase.verifyError(@() setIsContinuous(obj), "MATLAB:class:SetProhibited");
 end
 
 function test_scalar_grids_expose_flat_cell_coefficient(testCase)
@@ -421,6 +453,15 @@ end
 function setDeg(obj)
     % Local setter helper should exercise the Degree immutability path.
     obj.Degree = 3;
+end
+
+function setContinuity(obj)
+    % Both the stored bound and derived compatibility property are read-only.
+    obj.Continuity = 0;
+end
+
+function setIsContinuous(obj)
+    obj.IsContinuous = true;
 end
 function c = mkCoeff(offset)
     % Keep tensor-cell payloads visually distinct while preserving flat order.

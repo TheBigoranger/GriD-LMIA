@@ -3,6 +3,42 @@ function tests = test_mtimes
     tests = functiontests(localfunctions);
 end
 
+function test_cell_varying_constant_factors_preserve_tensor_affine_rate_rows(testCase)
+    % Written-order native matrix products are the coefficient oracle.
+    grid={[0 1 3],[-2 0 4],[10 14]};
+    degree=[0 2 3]; rb=[0 0;-2 3;1 1];
+    P=pdvar(2,3,grid,'full',Degree=degree);
+    L=pdmat(grid,helper.mkNest([2 2 1], ...
+        @(s) {[1+s(1),2;-3,4+s(2)]}),Degree=[0 0 0]);
+    R=pdmat(grid,helper.mkNest([2 2 1], ...
+        @(s) {[1,2+s(1),-1;3,4,2;0,-2,5+s(2)]}),Degree=[0 0 0]);
+    S=pdmat(grid,helper.mkNest([2 2 1], ...
+        @(s) {2+s(1)+3*s(2)}),Degree=[0 0 0]);
+    sources={P,rhodiff(P,rb)};
+    for index=1:numel(sources)
+        source=sources{index}; saved=source.LocalValues;
+        left=L*source; right=source*R; scaled=S*source;
+        testCase.verifyEqual(left.Degree,degree);
+        testCase.verifyEqual(right.MatrixSize,[2 3]);
+        testCase.verifyEqual(right.NumRateRows,source.NumRateRows);
+        testCase.verifyEqual(right.RateBounds,source.RateBounds);
+        for subs=source.cells()'
+            c=source.coeffs(subs'); l=L.coeffs(subs');
+            r=R.coeffs(subs'); s=S.coeffs(subs');
+            cl=left.coeffs(subs'); cr=right.coeffs(subs'); cs=scaled.coeffs(subs');
+            for coefficient=1:numel(c)
+                tests.infrastructure.verify_expr(testCase, ...
+                    cl{coefficient},l{1}*c{coefficient});
+                tests.infrastructure.verify_expr(testCase, ...
+                    cr{coefficient},c{coefficient}*r{1});
+                tests.infrastructure.verify_expr(testCase, ...
+                    cs{coefficient},s{1}*c{coefficient});
+            end
+        end
+        testCase.verifyEqual(source.LocalValues,saved);
+    end
+end
+
 function test_zero_fixed_rate_tables_cannot_multiply_each_other(testCase)
     % Zero values do not erase the unsupported product of two active rate tables.
     P = pdvar(2,[0 2 5],'full',Degree=1);

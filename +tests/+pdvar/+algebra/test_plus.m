@@ -18,6 +18,42 @@ function test_tensor_refinement_preserves_full_affine_bases(testCase)
     end
 end
 
+function test_discontinuous_tensor_refinement_preserves_both_affine_operand_branches(testCase)
+    % Local affine polynomials are offset+u+2*v; upper faces keep their source.
+    grid={[0 1 3],[-2 0 4]}; target={[0 .5 1 2 3],[-2 -1 0 2 4]};
+    values=cell(1,2);
+    for i=1:2
+        for j=1:2
+            offset=10*i+j;
+            values{i}{j}={offset,offset+2,offset+1,offset+3};
+        end
+    end
+    A=pdmat(grid,values,Degree=[1 1]);
+    X=sdpvar(2,3,'full'); M=[1 -2 3;5 7 -11];
+    P=X*A; K=M*A; Q=pdvar(2,3,target,'full',Degree=[0 0]);
+    saved=P.LocalValues; q=Q.coeffs([1 1]);
+    decisionResult=P+Q; knownResult=K+Q;
+    for i=1:4
+        for j=1:4
+            source=ceil([i j]/2); a=mod([i j]-1,2)/2;
+            offset=10*source(1)+source(2);
+            actual=decisionResult.coeffs([i j]); known=knownResult.coeffs([i j]);
+            for p=0:1
+                for r=0:1
+                    value=offset+a(1)+p/2+2*(a(2)+r/2);
+                    index=2*p+r+1;
+                    tests.infrastructure.verify_expr(testCase,actual{index},X*value+q{1});
+                    tests.infrastructure.verify_expr(testCase,known{index},M*value+q{1});
+                end
+            end
+        end
+    end
+    testCase.verifyEqual(decisionResult.Degree,[1 1]);
+    testCase.verifyEqual(decisionResult.Continuity,[-1 -1]);
+    testCase.verifyEqual(knownResult.Continuity,[-1 -1]);
+    testCase.verifyEqual(P.LocalValues,saved);
+end
+
 function test_cancelled_decision_still_rejects_function_only_partner(testCase)
     % Zero algebra cannot bypass the known-data evidence boundary.
     P = pdvar(1,[0 2 5],Degree=2);

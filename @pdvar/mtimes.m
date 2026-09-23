@@ -10,7 +10,7 @@ function out = mtimes(lhs, rhs)
     %     lhs, rhs - Compatible pdvar, pdmat, or finite numeric operands.
     %
     %   Output:
-    %     C - Affine cell-local product with at most one decision/rate side.
+    %     C - Affine cell-wise product with at most one decision/rate side.
     %         A 1-by-1 pdvar or pdmat acts as a scalar multiplier.
     %
     %   Example:
@@ -189,9 +189,10 @@ function out = genProd(lhs, rhs)
         "pdvar:InvalidMultiplication", "fast", ...
         ld.NumRateRows, rd.NumRateRows);
 
+    continuity = min(ld.Continuity, rd.Continuity);
     out = pdvar(mkCtorState(grid, sz, ld.Degree + rd.Degree, vals, ...
         ld.ContainsDecision || rd.ContainsDecision, rb, ...
-        "expression", [], "fast", max(ld.NumRateRows, rd.NumRateRows)));
+        "expression", continuity, "fast", max(ld.NumRateRows, rd.NumRateRows)));
 end
 
 function sz = prodSz(lhs, rhs)

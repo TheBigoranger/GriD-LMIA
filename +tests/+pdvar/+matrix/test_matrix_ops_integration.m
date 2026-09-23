@@ -210,7 +210,8 @@ function test_degree_two_derivatives_rate_row_both(testCase)
     for out = {N, S, M, C}
         testCase.verifyEqual(out{1}.RateBounds, [-1 2]);
         testCase.verifyEqual(out{1}.Degree, 1);
-        testCase.verifyFalse(out{1}.IsContinuous);
+        testCase.verifyEqual(out{1}.Continuity, Inf);
+        testCase.verifyTrue(out{1}.IsContinuous);
     end
 end
 

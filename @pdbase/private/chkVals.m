@@ -1,6 +1,6 @@
 function [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, nPar, ...
         nRateRows, forceRateRows, mode)
-    %CHKVALS Validate normalized cell-local Bernstein storage.
+    %CHKVALS Validate normalized cell-wise Bernstein storage.
     %
     %   Syntax:
     %     [hasRate, rowKind] = chkVals(vals, nCell, nCoeff, sz, ...

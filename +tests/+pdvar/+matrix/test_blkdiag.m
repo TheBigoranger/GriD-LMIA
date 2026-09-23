@@ -54,7 +54,8 @@ function test_blkdiag_preserve_derivative_rate_rows_broadcast(testCase)
 
     testCase.verifyEqual(size(B), [2 2]);
     testCase.verifyEqual(B.Degree, 1);
-    testCase.verifyFalse(B.IsContinuous);
+    testCase.verifyEqual(B.Continuity, Inf);
+    testCase.verifyTrue(B.IsContinuous);
     testCase.verifyEqual(size(cb), [2 2]);
     tests.infrastructure.verify_expr(testCase, cb(1, :), {blkdiag(cd{1, 1}, cp{1}), blkdiag(cd{1, 1}, cp{2})});
     tests.infrastructure.verify_expr(testCase, cb(2, :), {blkdiag(cd{2, 1}, cp{1}), blkdiag(cd{2, 1}, cp{2})});

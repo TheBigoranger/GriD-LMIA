@@ -30,7 +30,8 @@ function out = cat(dim, varargin)
 
     nCell = cellfun(@numel, grid) - 1;
     vals = helper.mkNest(nCell, @(subs) catCell(anchor, dim, data, subs));
-    out = mkCoeffObj(grid, vals, deg, rb, [], [], [], "fast", ...
+    continuity = min(vertcat(data.Continuity), [], 1);
+    out = mkCoeffObj(grid, vals, deg, rb, [], continuity, [], "fast", ...
         max(arrayfun(@(d) d.NumRateRows, data)));
 
     if ~isequal(size(out), sz)
@@ -66,7 +67,7 @@ function [data, outSize] = catData(dim, args, grid, rb)
         "MatrixSize", [], ...
         "Degree", [], ...
         "LocalValues", [], ...
-        "IsContinuous", [], ...
+        "Continuity", [], ...
         "NumRateRows", []), 1, numel(args));
     raw = cell(1, numel(args));
     sz = zeros(numel(args), 2);
@@ -134,7 +135,7 @@ function [data, outSize] = catData(dim, args, grid, rb)
             data(k).Degree = zeros(1, numel(grid));
             nCell = cellfun(@numel, grid) - 1;
             data(k).LocalValues = helper.mkNest(nCell, @(~) {mat});
-            data(k).IsContinuous = true;
+            data(k).Continuity = inf(1, numel(grid));
             data(k).NumRateRows = 0;
         end
     end

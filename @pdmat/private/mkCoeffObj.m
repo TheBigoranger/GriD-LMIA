@@ -1,10 +1,10 @@
-function out = mkCoeffObj(grid, vals, deg, rb, summary, isCont, sz, ...
+function out = mkCoeffObj(grid, vals, deg, rb, summary, continuity, sz, ...
         validationMode, numRateRows)
     %MKCOEFFOBJ Rebuild coefficient-backed pdmat data without a user warning.
     %
     %   Syntax:
     %     out = mkCoeffObj(grid, vals, deg)
-    %     out = mkCoeffObj(grid, vals, deg, rb, summary, isCont, sz, ...
+    %     out = mkCoeffObj(grid, vals, deg, rb, summary, continuity, sz, ...
     %         validationMode, numRateRows)
     %
     %   Arguments:
@@ -13,7 +13,7 @@ function out = mkCoeffObj(grid, vals, deg, rb, summary, isCont, sz, ...
     %     deg            - 1-by-ell Bernstein degree.
     %     rb             - Optional RateBounds metadata.
     %     summary        - Optional SourceSummary value.
-    %     isCont         - Optional known continuity classification.
+    %     continuity     - Optional proven direction-wise lower bound.
     %     sz             - Optional matrix payload size.
     %     validationMode - Optional "fast" or "strict" constructor validation.
     %     numRateRows    - Zero or the number of explicit rate rows.
@@ -23,12 +23,12 @@ function out = mkCoeffObj(grid, vals, deg, rb, summary, isCont, sz, ...
     %
     %   Example:
     %     out = mkCoeffObj(grid, vals, deg, [], ...
-    %         "coefficient-backed", true, [1 1]);
+    %         "coefficient-backed", zeros(1, numel(grid)), [1 1]);
     %
-    %   A caller may pass an exact continuity result when its operation proves
-    %   one. Otherwise continuity is recomputed over every shared face, since
-    %   algebra can cancel a jump even when an input was discontinuous. The
-    %   prepared struct avoids repeating public source parsing.
+    %   A caller may pass a propagated lower bound. Missing metadata triggers
+    %   full inference; a propagated -1 triggers only a C0 recovery scan so
+    %   cancellation can restore continuity without overclaiming C1-plus.
+    %   The prepared struct avoids repeating public source parsing.
 
     if nargin < 4
         rb = [];
@@ -41,9 +41,11 @@ function out = mkCoeffObj(grid, vals, deg, rb, summary, isCont, sz, ...
         firstLeaf = helper.cellGet(vals, firstSubs);
         sz = size(firstLeaf{1});
     end
-    if nargin < 6 || isempty(isCont)
+    if nargin < 6 || isempty(continuity)
         nCell = cellfun(@numel, grid) - 1;
-        isCont = helper.chkCont(vals, nCell, deg);
+        [~, continuity] = helper.chkCont(vals, nCell, deg, grid);
+    elseif any(continuity < 0)
+        continuity = recoverC0(vals, grid, deg, continuity);
     end
     if nargin < 8
         validationMode = "fast";
@@ -59,7 +61,7 @@ function out = mkCoeffObj(grid, vals, deg, rb, summary, isCont, sz, ...
     init.MatrixSize = sz;
     init.Degree = deg;
     init.LocalValues = vals;
-    init.IsContinuous = isCont;
+    init.Continuity = continuity;
     init.ContainsDecision = false;
     init.NumRateRows = numRateRows;
     init.RateBounds = rb;
@@ -67,4 +69,13 @@ function out = mkCoeffObj(grid, vals, deg, rb, summary, isCont, sz, ...
     init.FunctionHandle = [];
     init.ValidationMode = validationMode;
     out = pdmat(init);
+end
+
+function continuity = recoverC0(vals, grid, degree, continuity)
+    %RECOVERC0 Recover only lost C0 evidence after a propagated -1 bound.
+    nCell = cellfun(@numel, grid) - 1;
+    [~, recovered] = helper.chkCont(vals, nCell, degree, grid, ...
+        zeros(1, numel(grid)));
+    lost = continuity < 0;
+    continuity(lost) = recovered(lost);
 end

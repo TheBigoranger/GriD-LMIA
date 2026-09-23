@@ -18,7 +18,8 @@ function test_scalar_degree_derivatives_become_degree_zero(testCase)
 
     testCase.verifyEqual(D.Degree, 0);
     testCase.verifyEqual(D.ncoeff(), 1);
-    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifyEqual(D.Continuity, Inf);
+    testCase.verifyTrue(D.IsContinuous);
     testCase.verifyEqual(D.RateBounds, [-2 3]);
     testCase.verifyEqual(D.SourceSummary, "derivative");
     verifyCoeffTable(testCase, cd, {
@@ -122,7 +123,8 @@ function test_unequal_zero_direction_degrees_common_tensor(testCase)
     end
     testCase.verifyEqual(D.Degree, [1 2]);
     testCase.verifySize(D.coeffs([1 1]), [4 6]);
-    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifyEqual(D.Continuity, [Inf Inf]);
+    testCase.verifyTrue(D.IsContinuous);
     testCase.verifyEqual(D.RateBounds, rb);
     testCase.verifyEqual(objectVariables(D), beforeVars);
     verifyCoeffTable(testCase, D.coeffs([1 1]), expected);
@@ -189,7 +191,8 @@ function test_constant_tensor_has_zero_coefficient_rate(testCase)
 
     testCase.verifyEqual(D.Degree, [0 0]);
     testCase.verifyFalse(D.ContainsDecision);
-    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifyEqual(D.Continuity, [Inf Inf]);
+    testCase.verifyTrue(D.IsContinuous);
     testCase.verifySize(D.coeffs([1 1]), [4 1]);
     testCase.verifySize(D.coeffs([2 1]), [4 1]);
     verifyCoeffTable(testCase, D.coeffs([1 1]), {0; 0; 0; 0});
@@ -281,7 +284,8 @@ function test_affine_algebra_broadcast_ordinary_coefficients(testCase)
     E = D + X;
     K = D + A;
 
-    testCase.verifyFalse(S.IsContinuous);
+    testCase.verifyEqual(S.Continuity, Inf);
+    testCase.verifyTrue(S.IsContinuous);
     verifyCoeffTable(testCase, S.coeffs(1), {
         cd{1, 1} + cp{1}, cd{1, 1} + cp{2}
         cd{2, 1} + cp{1}, cd{2, 1} + cp{2}
@@ -312,7 +316,8 @@ function test_matching_rate_vertex_tables_combine_row(testCase)
     S = Dp + Dq;
     R = Dp - Dq;
 
-    testCase.verifyFalse(S.IsContinuous);
+    testCase.verifyEqual(S.Continuity, Inf);
+    testCase.verifyTrue(S.IsContinuous);
     testCase.verifyEqual(S.RateBounds, [-1 2]);
     verifyCoeffTable(testCase, S.coeffs(1), {
         cp{1, 1} + cq{1, 1}
@@ -522,4 +527,49 @@ function test_fixed_tensor_rate_order(testCase)
     source = pdvar(2, grid, "full", Degree=[1 2 1], RateBounds=rb);
     actual = tests.infrastructure.verify_tensor_diff(testCase, source, rb, true);
     testCase.verifyEqual(actual.NumRateRows, 2);
+end
+
+function test_directionwise_reduction_zero_rates_and_partial_minima(testCase)
+    grid = {[0 1 2], [-2 0 3]};
+    P = pdvar(1, grid, Degree=[3 2], Continuity=[2 1]);
+
+    firstOnly = rhodiff(P, [1 1; 0 0]);
+    both = rhodiff(P, [1 1; 2 2]);
+
+    testCase.verifyEqual(firstOnly.Continuity, [1 1]);
+    testCase.verifyEqual(both.Continuity, [1 0]);
+    testCase.verifyEqual(firstOnly.NumRateRows, 1);
+    testCase.verifyEqual(both.NumRateRows, 1);
+end
+
+function test_three_parameter_rectangular_zero_axis_and_fixed_rates(testCase)
+    % Every affine coefficient must retain tensor and collapsed-rate ordering.
+    grid = {[0 1 3],[-2 0 4],[10 12 16]};
+    rb = [-2 3;7 7;-1 4];
+    P = pdvar(2,3,grid,'full',Degree=[2 0 3],RateBounds=rb);
+    D = tests.infrastructure.verify_tensor_diff(testCase,P,rb,true);
+    testCase.verifyEqual(D.MatrixSize,[2 3]);
+    testCase.verifyEqual(D.NumRateRows,4);
+end
+
+function test_affine_partial_cancellation_retains_zero_and_nonzero_rate_rows(testCase)
+    % Equal partials cancel only at the opposing-rate vertex, in every cell.
+    grid = {[0 1 3],[-2 0 4]};
+    X = sdpvar(2,3,'full');
+    A = pdmat(grid,@(x,y) x+y,Degree=[1 1]);
+    P = X*A;
+    before = P.LocalValues;
+    D = rhodiff(P,[1 1;-1 2]);
+    Z = rhodiff(P,[1 1;-1 -1]);
+    for subs = P.cells()'
+        expected = [repmat({zeros(2,3)},1,4);repmat({3*X},1,4)];
+        verifyCoeffTable(testCase,D.coeffs(subs'),expected);
+        verifyCoeffTable(testCase,Z.coeffs(subs'),repmat({zeros(2,3)},1,4));
+    end
+    testCase.verifyEqual(D.NumRateRows,2);
+    testCase.verifyEqual(Z.NumRateRows,1);
+    testCase.verifyEqual(Z.RateBounds,[1 1;-1 -1]);
+    testCase.verifyEqual(Z.Continuity,[Inf Inf]);
+    testCase.verifyEqual(Z.Degree,[1 1]);
+    testCase.verifyEqual(P.LocalValues,before);
 end

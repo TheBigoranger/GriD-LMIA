@@ -55,11 +55,9 @@ function data = normOperand(grid, val, reqSize, rb, errId)
             error(errId, ...
                 "Rate-vertex pdmat operands require matching physical grids.");
         else
-            % Re-sampling through evaluate keeps subdivision local to pdmat algebra.
-            data.LocalValues = helper.fitVals(info, val.Degree, ...
-                val.MatrixSize, @(pt) evaluate(val, pt), "pdmat");
+            data.LocalValues = helper.refineVals(info, val);
         end
-        data.IsContinuous = val.IsContinuous;
+        data.Continuity = val.Continuity;
         return
     end
 
@@ -81,6 +79,6 @@ function data = normOperand(grid, val, reqSize, rb, errId)
     data.Degree = zeros(1, numel(grid));
     nCell = info.NumNodes - 1;
     data.LocalValues = helper.mkNest(nCell, @(~) {mat});
-    data.IsContinuous = true;
+    data.Continuity = inf(1, numel(grid));
     data.NumRateRows = 0;
 end

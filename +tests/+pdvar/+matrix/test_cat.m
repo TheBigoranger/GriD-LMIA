@@ -54,7 +54,8 @@ function test_ordinary_coefficient_rows_broadcast_across(testCase)
 
     testCase.verifyEqual(size(C), [2 2]);
     testCase.verifyEqual(C.Degree, 1);
-    testCase.verifyFalse(C.IsContinuous);
+    testCase.verifyEqual(C.Continuity, Inf);
+    testCase.verifyTrue(C.IsContinuous);
     testCase.verifyEqual(C.RateBounds, [-1 2]);
     testCase.verifyEqual(size(cc), [2 2]);
     tests.infrastructure.verify_expr(testCase, cc(1, :), {[cd{1, 1}, cp{1}], [cd{1, 1}, cp{2}]});

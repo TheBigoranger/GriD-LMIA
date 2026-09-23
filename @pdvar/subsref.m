@@ -20,7 +20,7 @@ function varargout = subsref(obj, S)
             obj.GridInfo.Vectors);
         out = pdvar(mkCtorState(obj.GridInfo.Vectors, [numel(rows), numel(cols)], ...
             obj.Degree, vals, obj.ContainsDecision, obj.RateBounds, ...
-            "expression", [], "fast", obj.NumRateRows));
+            "expression", obj.Continuity, "fast", obj.NumRateRows));
 
         if numel(S) == 1
             varargout{1} = out;

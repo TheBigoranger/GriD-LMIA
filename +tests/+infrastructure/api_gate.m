@@ -19,7 +19,12 @@ function api_gate(results, map, api)
         mapped = string(entry.Tests);
         assert(~isempty(mapped), 'tests:MissingTest', 'No tests mapped for %s.', keys(k));
         for name = reshape(mapped,1,[])
-            assert(startsWith(name, "tests." + string(entry.Owner) + "."), ...
+            owners = string(entry.Owner);
+            if owners == "helper"
+                % Shared internal mechanics are verified at public calling seams.
+                owners = ["helper","pdbase","pdmat","pdvar","pdlmi"];
+            end
+            assert(any(startsWith(name, "tests." + owners + ".")), ...
                 'tests:WrongOwner', 'Wrong calling-class ownership: %s.', name);
             index = find(names == name);
             assert(isscalar(index), 'tests:MissingTest', 'Missing or duplicate test: %s.', name);

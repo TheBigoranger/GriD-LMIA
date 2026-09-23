@@ -1,6 +1,36 @@
 [
   {
     "Owner": "helper",
+    "Method": "bernRestrict",
+    "Tests": [
+      "tests.pdmat.algebra.test_plus/test_refinement_preserves_discontinuous_source_cell_endpoints",
+      "tests.pdmat.algebra.test_plus/test_high_degree_graded_and_repeated_refinement_has_exact_monomial_controls",
+      "tests.pdvar.algebra.test_plus/test_restrict_coarse_quadratic_at_alpha_5",
+      "tests.pdvar.construction.test_continuity/test_spline_basis_degrees_orders_grids_and_endpoints"
+    ],
+    "Contract": "Restrict a source-cell polynomial to each contained physical interval without changing Bernstein orientation.",
+    "Oracle": "Literal discontinuous controls, hand-computed quadratic coefficients, and independent Cox-de Boor basis evaluations at public callers.",
+    "Invalid": "Normalized internal input only; physical bounds and unsupported source modes are validated by public algebra callers."
+  },
+  {
+    "Owner": "helper",
+    "Method": "refineVals",
+    "Tests": [
+      "tests.pdmat.algebra.test_plus/test_refinement_preserves_discontinuous_source_cell_endpoints",
+      "tests.pdmat.algebra.test_plus/test_three_axis_refinement_preserves_jumps_and_zero_degree_faces",
+      "tests.pdmat.algebra.test_plus/test_refinement_preserves_single_and_sparse_numeric_payloads",
+      "tests.pdmat.algebra.test_algebra_integration/test_discontinuous_refinement_composes_with_arithmetic_and_blocks",
+      "tests.pdvar.algebra.test_plus/test_discontinuous_tensor_refinement_preserves_both_affine_operand_branches",
+      "tests.pdmat.algebra.test_algebra_integration/test_same_bound_tensor_grids_refine_each",
+      "tests.pdvar.algebra.test_plus/test_restrict_coarse_quadratic_at_alpha_5",
+      "tests.pdvar.algebra.test_affine_algebra_integration/test_rate_row_expressions_cannot_resampled_or"
+    ],
+    "Contract": "Preserve every original cell polynomial and affine identity through tensor common-grid refinement.",
+    "Oracle": "Explicit local controls, independently specified polynomials and complete affine bases through public operations.",
+    "Invalid": "Public callers reject incompatible bounds, function-only evidence and different-grid active rate rows before refinement."
+  },
+  {
+    "Owner": "helper",
     "Method": "bernConvRatios",
     "Tests": [
       "tests.helper.test_bern_conv/test_moderate_degrees_independently_computed_binomial",
@@ -61,11 +91,17 @@
     "Tests": [
       "tests.helper.test_chk_cont/test_late_cell_row_and_numeric_threshold",
       "tests.helper.test_chk_cont/test_tensor_face_checks_every_row_and_corner",
-      "tests.helper.test_chk_cont/test_zero_degree_axis_still_requires_matching_faces"
+      "tests.helper.test_chk_cont/test_zero_degree_axis_still_requires_matching_faces",
+      "tests.helper.test_chk_cont/test_directionwise_orders_use_physical_widths",
+      "tests.helper.test_chk_cont/test_complete_polynomial_classifies_as_infinite",
+      "tests.helper.test_chk_cont/test_late_interface_matrix_entry_and_rate_row_classification",
+      "tests.helper.test_chk_cont/test_affine_symbolic_derivatives_compare_exact_bases",
+      "tests.helper.test_chk_cont/test_invalid_direction_metadata_is_rejected",
+      "tests.helper.test_chk_cont/test_nonunit_derivative_threshold_and_interior_face_entry"
     ],
-    "Contract": "helper.chkCont: Compare complete public results with independently specified expectations.",
-    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
-    "Invalid": "No additional rejected-input contract for this normalized-input/protocol operation; public caller validation is tested separately."
+    "Contract": "Preserve the three-input Boolean C0 check and optionally classify direction-wise physical-derivative matching through requested maximum orders.",
+    "Oracle": "Independent finite differences scaled by each physical cell width, complete tensor faces, matrix entries, rate rows, numerical tolerance boundaries, and exact affine bases.",
+    "Invalid": "helper:InvalidContinuityInput for direction-count mismatches among cells, degrees, grids, and maximum orders."
   },
   {
     "Owner": "helper",
@@ -461,6 +497,8 @@
       "tests.pdbase.construction.test_constructor/test_matrix_protocol_methods_report_stored_payload",
       "tests.pdbase.construction.test_constructor/test_direct_pdbase_operands_create_ambiguous_matlab",
       "tests.pdbase.construction.test_constructor/test_tensor_construction_preserve_explicit_flags_rate",
+      "tests.pdbase.construction.test_constructor/test_continuity_metadata_and_legacy_alias",
+      "tests.pdbase.construction.test_constructor/test_continuity_alias_conflicts_and_invalid_values",
       "tests.pdbase.construction.test_constructor/test_named_metadata_may_omit_optional_localvalues",
       "tests.pdbase.construction.test_constructor/test_ratebounds_only_stored_rate_metadata_state",
       "tests.pdbase.construction.test_constructor/test_explicit_internal_row_counts_require_matching",
@@ -488,9 +526,9 @@
       "tests.pdbase.construction.test_constructor/test_missing_nonscalar_nontext_empty_unsupported_modes",
       "tests.pdbase.construction.test_constructor/test_fast_construction_may_trust_generated_later"
     ],
-    "Contract": "pdbase.pdbase: Scalar construction should populate default coefficient-backed state.; Default objects are coefficient-backed zeros, not sampled grid data.",
+    "Contract": "Construct normalized base state with one stored direction-wise Continuity bound and a dependent read-only IsContinuous compatibility property; parse legacy IsContinuous without storing a duplicate flag.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
-    "Invalid": "pdbase:InvalidCellSubs, pdbase:InvalidCoefficientCell, pdbase:InvalidCoefficientPayload, pdbase:InvalidCoefficientRows, pdbase:InvalidDegree, pdbase:InvalidGrid, pdbase:InvalidGridVector, pdbase:InvalidLocalValues, pdbase:InvalidMatrixSize, pdbase:InvalidRateBounds, pdbase:InvalidValidationMode, pdbase:UnsupportedConcatenation"
+    "Invalid": "pdbase:ConflictingContinuityOptions, pdbase:InvalidContinuity, pdbase:InvalidCellSubs, pdbase:InvalidCoefficientCell, pdbase:InvalidCoefficientPayload, pdbase:InvalidCoefficientRows, pdbase:InvalidDegree, pdbase:InvalidGrid, pdbase:InvalidGridVector, pdbase:InvalidLocalValues, pdbase:InvalidMatrixSize, pdbase:InvalidRateBounds, pdbase:InvalidValidationMode, pdbase:UnsupportedConcatenation"
   },
   {
     "Owner": "pdbase",
@@ -708,6 +746,7 @@
     "Method": "pdlmi",
     "Tests": [
       "tests.pdlmi.construction.test_constructor/test_rhodiff_stores_row_rate_vertex_pdlmi",
+      "tests.pdlmi.solver.test_solver_smoke/test_multicell_cubic_continuity_bounded_real_certificate",
       "tests.pdlmi.construction.test_constructor/test_fixed_rate_contributes_direct_constraint_without",
       "tests.pdlmi.construction.test_constructor/test_tensor_rate_bounds_create_constraint_rate",
       "tests.pdlmi.construction.test_constructor/test_fixed_tensor_direction_contributes_two_distinct",
@@ -741,6 +780,7 @@
     "Method": "toYalmip",
     "Tests": [
       "tests.pdlmi.export.test_to_yalmip/test_stored_constraints",
+      "tests.pdlmi.export.test_to_yalmip/test_refinement_derivative_constant_sandwich_exports_analytic_coefficients",
       "tests.pdlmi.export.test_to_yalmip/test_solver_facing_shot_concatenation_match_previous",
       "tests.pdlmi.export.test_to_yalmip/test_export_after_replacement_keeps_saved_list_independent",
       "tests.pdlmi.solver.test_solver_smoke/test_composed_fixed_rate_certificate_and_infeasible_control"
@@ -1144,7 +1184,8 @@
     "Tests": [
       "tests.pdmat.algebra.test_isequal/test_equality_compare_coefficient_evidence_grid_degree",
       "tests.pdmat.algebra.test_isequal/test_later_rate_coefficient_breaks_equality",
-      "tests.pdmat.algebra.test_isequal/test_function_identity_never_equals_placeholder_data"
+      "tests.pdmat.algebra.test_isequal/test_function_identity_never_equals_placeholder_data",
+      "tests.pdmat.algebra.test_isequal/test_equal_values_ignore_weaker_continuity_certificate"
     ],
     "Contract": "pdmat.isequal: Compare complete public results with independently specified expectations.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
@@ -1213,6 +1254,7 @@
     "Method": "mtimes",
     "Tests": [
       "tests.pdmat.algebra.test_mtimes/test_multi_cell_3_d_matrix_product",
+      "tests.pdmat.algebra.test_mtimes/test_square_constant_factors_preserve_written_order_for_numeric_storage",
       "tests.pdmat.algebra.test_mtimes/test_degree_1030_finite_product_elevation_planning",
       "tests.pdmat.algebra.test_mtimes/test_matrix_multiplication_convolve_bernstein",
       "tests.pdmat.algebra.test_mtimes/test_scalar_scaling_preserve_complete_derivative_rate",
@@ -1333,11 +1375,14 @@
       "tests.pdmat.construction.test_constructor/test_source_normalization_reject_malformed_later_cells",
       "tests.pdmat.construction.test_constructor/test_pdmat_owns_all_validationmode_diagnostics_at",
       "tests.pdmat.construction.test_constructor/test_slicing_away_only_discontinuous_entry_restores",
-      "tests.pdmat.construction.test_constructor/test_certified_tensor_function_survives_composed_coefficient_use"
+      "tests.pdmat.construction.test_constructor/test_certified_tensor_function_survives_composed_coefficient_use",
+      "tests.pdmat.construction.test_continuity/test_automatic_classification_and_explicit_weaker_bounds",
+      "tests.pdmat.construction.test_continuity/test_function_sources_scalar_warning_and_invalid_requests",
+      "tests.pdmat.construction.test_continuity/test_late_matrix_rate_row_and_tolerance_evidence"
     ],
-    "Contract": "pdmat.pdmat: Function-backed construction should keep the exact handle and; placeholders.",
-    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
-    "Invalid": "pdmat:DiscontinuousLocalValues, pdmat:DuplicateOption, pdmat:InvalidCoefficientCell, pdmat:InvalidCoefficientPayload, pdmat:InvalidData, pdmat:InvalidDegree, pdmat:InvalidFunctionHandle, pdmat:InvalidFunctionOutput, pdmat:InvalidFunctionValue, pdmat:InvalidLocalValues, pdmat:InvalidOptions, pdmat:InvalidRateBounds, pdmat:InvalidSource, pdmat:InvalidValidationMode, pdmat:NonBernsteinPolynomial, pdmat:ScalarDegreeExpansion, pdmat:UnknownOption, pdmat:UnsupportedOption"
+    "Contract": "Construct exact function-backed data or certified coefficients; infer the highest proven direction-wise continuity, or verify and store an explicit weaker lower bound.",
+    "Oracle": "Independent physical-width finite differences over late interfaces, matrix entries, rate rows, and numerical tolerance boundaries.",
+    "Invalid": "pdmat:ContinuityMismatch, pdmat:FunctionOnlyContinuity, pdmat:InvalidContinuity, pdmat:DiscontinuousLocalValues, pdmat:DuplicateOption, pdmat:InvalidCoefficientCell, pdmat:InvalidCoefficientPayload, pdmat:InvalidData, pdmat:InvalidDegree, pdmat:InvalidFunctionHandle, pdmat:InvalidFunctionOutput, pdmat:InvalidFunctionValue, pdmat:InvalidLocalValues, pdmat:InvalidOptions, pdmat:InvalidRateBounds, pdmat:InvalidSource, pdmat:InvalidValidationMode, pdmat:NonBernsteinPolynomial, pdmat:ScalarContinuityExpansion, pdmat:ScalarDegreeExpansion, pdmat:UnknownOption, pdmat:UnsupportedOption"
   },
   {
     "Owner": "pdmat",
@@ -1366,6 +1411,7 @@
       "tests.pdmat.algebra.test_plus/test_proven_numeric_zeros_identities_only_size",
       "tests.pdmat.algebra.test_plus/test_ordinary_operands_broadcast_products_allow_explicit",
       "tests.pdmat.algebra.test_plus/test_complete_residual_in_both_orders",
+      "tests.pdmat.algebra.test_plus/test_refinement_preserves_discontinuous_source_cell_endpoints",
       "tests.pdmat.algebra.test_plus/test_function_only_zero_shortcuts_rejected"
     ],
     "Contract": "pdmat.plus: Addition should elevate lower-degree operands before summing coefficients.; Numeric scalars should promote to compatible constant pdmat operands.",
@@ -1408,6 +1454,7 @@
       "tests.pdmat.polynomial.test_rhodiff/test_tensor_rate_order",
       "tests.pdmat.polynomial.test_rhodiff/test_zero_degree_tensor_axis",
       "tests.pdmat.polynomial.test_rhodiff/test_fixed_zero_rate_retains_derivative_identity_and_rejects_repeat",
+      "tests.pdmat.polynomial.test_rhodiff/test_zero_partial_exclusion_and_large_offset_nonzero_regression",
       "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment"
     ],
     "Contract": "Use signed rate vertices and degree/cell-width factors on every coefficient difference.",
@@ -1747,6 +1794,7 @@
     "Method": "evaluate",
     "Tests": [
       "tests.pdvar.polynomial.test_evaluate/test_evaluation_assembles_affine_expression_never_calls",
+      "tests.pdvar.polynomial.test_evaluate/test_higher_order_spline_evaluation_derivative_and_recovery",
       "tests.pdvar.polynomial.test_evaluate/test_tensor_weights_follow_combrows_order_metadata",
       "tests.pdvar.polynomial.test_evaluate/test_each_stored_rate_row_becomes_matrix",
       "tests.pdvar.polynomial.test_evaluate/test_four_rate_vertices_package_wide_lower",
@@ -1902,6 +1950,7 @@
     "Method": "mtimes",
     "Tests": [
       "tests.pdvar.algebra.test_mtimes/test_planned_contractions_exact_affine_bases",
+      "tests.pdvar.algebra.test_mtimes/test_cell_varying_constant_factors_preserve_tensor_affine_rate_rows",
       "tests.pdvar.algebra.test_mtimes/test_known_coefficient_data_may_multiply_pdvar",
       "tests.pdvar.algebra.test_mtimes/test_metadata_only_ratebounds_do_create_active",
       "tests.pdvar.algebra.test_mtimes/test_numeric_products_preserve_affine_yalmip_structure",
@@ -2015,11 +2064,20 @@
       "tests.pdvar.construction.test_constructor/test_pdvar_owns_missing_malformed_validationmode",
       "tests.pdvar.construction.test_constructor/test_exact_recomputation_recognizes_continuous_slice",
       "tests.pdvar.construction.test_constructor/test_anisotropic_face_edge_and_corner_identity",
-      "tests.pdvar.construction.test_constructor/test_rectangular_decisions_share_both_zero_degree_axes"
+      "tests.pdvar.construction.test_constructor/test_rectangular_decisions_share_both_zero_degree_axes",
+      "tests.pdvar.construction.test_continuity/test_defaults_normalization_warning_and_invalid_inputs",
+      "tests.pdvar.construction.test_continuity/test_twenty_five_cubic_decision_counts",
+      "tests.pdvar.construction.test_continuity/test_nonuniform_seams_and_affine_basis_rank",
+      "tests.pdvar.construction.test_continuity/test_spline_basis_degrees_orders_grids_and_endpoints",
+      "tests.pdvar.construction.test_continuity/test_small_spaces_equal_previous_free_control_parameterization",
+      "tests.pdvar.construction.test_continuity/test_c0_preserves_full_tensor_allocation_and_shared_identities",
+      "tests.pdvar.construction.test_continuity/test_tensor_basis_matrix_payloads_and_zero_infinite_axes",
+      "tests.pdvar.construction.test_continuity/test_long_graded_grids_keep_bounded_local_extraction",
+      "tests.pdvar.construction.test_continuity/test_anisotropic_mixed_orders_zero_degree_and_matrix_counts"
     ],
-    "Contract": "pdvar.pdvar: Square forms follow sdpvar's symmetric default; rectangular is full.; Explicit flags let square matrices choose full or symmetric payloads.",
-    "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
-    "Invalid": "pdbase:InvalidRateBounds, pdvar:InvalidDegree, pdvar:InvalidInput, pdvar:InvalidOptions, pdvar:InvalidStructure, pdvar:InvalidValidationMode, pdvar:ScalarDegreeExpansion, pdvar:UnknownOption, pdvar:UnsupportedOption"
+    "Contract": "Allocate C0 by default or direction-wise C1 and higher Bernstein decisions without equality constraints, normalizing saturated and single-cell axes to Inf.",
+    "Oracle": "Independent Cox-de Boor values, physical finite-difference seam bounds, affine rank and old-coordinate space equivalence, exact C0 variable identities, bounded partition-of-unity extraction on long graded grids, 25-cell cubic counts, and scalar/full/symmetric tensor payloads.",
+    "Invalid": "pdbase:InvalidRateBounds, pdvar:DuplicateOption, pdvar:InvalidContinuity, pdvar:InvalidDegree, pdvar:InvalidInput, pdvar:InvalidOptions, pdvar:InvalidStructure, pdvar:InvalidValidationMode, pdvar:ScalarContinuityExpansion, pdvar:ScalarDegreeExpansion, pdvar:UnknownOption, pdvar:UnsupportedOption"
   },
   {
     "Owner": "pdvar",
@@ -2085,6 +2143,9 @@
       "tests.pdvar.polynomial.test_rhodiff/test_tensor_rate_order",
       "tests.pdvar.polynomial.test_rhodiff/test_fixed_tensor_rate_order",
       "tests.pdvar.polynomial.test_rhodiff/test_rectangular_zero_axis_mixed_rates_use_exact_derivative_oracle",
+      "tests.pdvar.polynomial.test_rhodiff/test_directionwise_reduction_zero_rates_and_partial_minima",
+      "tests.pdvar.polynomial.test_rhodiff/test_three_parameter_rectangular_zero_axis_and_fixed_rates",
+      "tests.pdvar.polynomial.test_rhodiff/test_affine_partial_cancellation_retains_zero_and_nonzero_rate_rows",
       "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction"
     ],
     "Contract": "Use signed rate vertices and degree/cell-width factors on every coefficient difference.",

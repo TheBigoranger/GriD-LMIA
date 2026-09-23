@@ -1,21 +1,22 @@
-function out = mkRhodiff(obj, deg, vals, rb, ~, numRateRows)
+function out = mkRhodiff(obj, deg, vals, rb, ~, numRateRows, continuity)
     %MKRHODIFF Rebuild a numeric derivative and clear exact-function state.
     %
     %   Syntax:
-    %     out = obj.mkRhodiff(deg, vals, rb, hasDec, numRateRows)
+    %     out = obj.mkRhodiff(deg, vals, rb, hasDec, numRateRows, continuity)
     %
     %   Arguments:
     %     deg  - Degree of the derivative coefficient tree.
     %     vals - Nested derivative coefficient tree with rate rows.
     %     rb   - RateBounds used to enumerate derivative-rate vertices.
     %     numRateRows - Number of distinct derivative-rate vertices.
+    %     continuity - Proven direction-wise lower bound after differentiation.
     %
     %   Output:
-    %     out - Discontinuous derivative pdmat with no FunctionHandle.
+    %     out - Derivative pdmat with no FunctionHandle and the supplied bound.
     %
     %   Example:
     %     out = obj.mkRhodiff(deg, vals, obj.RateBounds, false, ...
-    %         numRateRows);
+    %         numRateRows, continuity);
 
     init = struct;
     init.PdmatInternal = true;
@@ -23,7 +24,7 @@ function out = mkRhodiff(obj, deg, vals, rb, ~, numRateRows)
     init.MatrixSize = obj.MatrixSize;
     init.Degree = deg;
     init.LocalValues = vals;
-    init.IsContinuous = false;
+    init.Continuity = continuity;
     init.ContainsDecision = false;
     init.NumRateRows = numRateRows;
     init.RateBounds = rb;

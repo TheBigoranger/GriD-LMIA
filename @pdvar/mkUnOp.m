@@ -17,5 +17,5 @@ function out = mkUnOp(obj, vals, sz)
 
     out = pdvar(mkCtorState(obj.GridInfo.Vectors, sz, obj.Degree, vals, ...
         obj.ContainsDecision, obj.RateBounds, ...
-        "expression", [], "fast", obj.NumRateRows));
+        "expression", obj.Continuity, "fast", obj.NumRateRows));
 end

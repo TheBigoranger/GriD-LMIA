@@ -1,16 +1,16 @@
 function init = mkCtorState(grid, sz, deg, vals, hasDec, rb, summary, ...
-        isCont, validationMode, numRateRows)
+        continuity, validationMode, numRateRows)
     %MKCTORSTATE Package prepared coefficient data for the pdvar constructor.
     %
     %   Syntax:
     %     init = mkCtorState(grid, sz, deg, vals, hasDec, rb, ...
-    %         summary, isCont, validationMode, numRateRows)
+    %         summary, continuity, validationMode, numRateRows)
     %
     %   Arguments:
     %     grid, sz, deg, vals - Grid, matrix size, degree, and LocalValues.
     %     hasDec              - Decision-dependence flag.
     %     rb, summary         - RateBounds and source label.
-    %     isCont              - Optional continuity flag; default true.
+    %     continuity          - Optional proven direction-wise lower bound.
     %     validationMode      - Optional "fast" or "strict" validation.
     %     numRateRows         - Zero or the number of explicit rate rows.
     %
@@ -25,15 +25,11 @@ function init = mkCtorState(grid, sz, deg, vals, hasDec, rb, summary, ...
     if nargin < 10 || isempty(numRateRows)
         numRateRows = 0;
     end
-    if numRateRows ~= 0
-        % Active derivative vertices remain deliberately cell-local even when
-        % a particular coefficient realization happens to match at a face.
-        isCont = false;
-    elseif nargin < 8 || isempty(isCont)
-        % Recompute globally unless the caller supplies an exact preservation
-        % proof; an operand-level continuity flag cannot detect cancellation.
+    if nargin < 8 || isempty(continuity)
         nCell = cellfun(@numel, grid) - 1;
-        isCont = helper.chkCont(vals, nCell, deg);
+        [~, continuity] = helper.chkCont(vals, nCell, deg, grid);
+    elseif any(continuity < 0)
+        continuity = recoverC0(vals, grid, deg, continuity);
     end
     if nargin < 9
         validationMode = "fast";
@@ -45,10 +41,19 @@ function init = mkCtorState(grid, sz, deg, vals, hasDec, rb, summary, ...
         "MatrixSize", sz, ...
         "Degree", deg, ...
         "LocalValues", {vals}, ...
-        "IsContinuous", isCont, ...
+        "Continuity", continuity, ...
         "ContainsDecision", hasDec, ...
         "NumRateRows", numRateRows, ...
         "RateBounds", rb, ...
         "SourceSummary", summary, ...
         "ValidationMode", validationMode);
+end
+
+function continuity = recoverC0(vals, grid, degree, continuity)
+    %RECOVERC0 Recover only lost C0 evidence after a propagated -1 bound.
+    nCell = cellfun(@numel, grid) - 1;
+    [~, recovered] = helper.chkCont(vals, nCell, degree, grid, ...
+        zeros(1, numel(grid)));
+    lost = continuity < 0;
+    continuity(lost) = recovered(lost);
 end

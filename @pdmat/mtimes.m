@@ -124,7 +124,9 @@ function out = mtimes(lhs, rhs)
         return
     end
 
-    out = mkCoeffObj(grid, vals, ld.Degree + rd.Degree, rb, [], [], [], ...
+    continuity = min(ld.Continuity, rd.Continuity);
+    out = mkCoeffObj(grid, vals, ld.Degree + rd.Degree, rb, [], ...
+        continuity, [], ...
         "fast", max(ld.NumRateRows, rd.NumRateRows));
 end
 

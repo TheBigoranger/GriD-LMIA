@@ -1,5 +1,5 @@
 function [vals, labels] = fitVals(info, deg, sz, evalFcn, owner)
-    %FITVALS Fit cell-local Bernstein coefficients from point samples.
+    %FITVALS Fit cell-wise Bernstein coefficients from point samples.
     %
     %   Syntax:
     %     vals = helper.fitVals(info, deg, sz, evalFcn, owner)
@@ -13,7 +13,7 @@ function [vals, labels] = fitVals(info, deg, sz, evalFcn, owner)
     %     owner   - Error identifier stem for degree validation.
     %
     %   Output:
-    %     vals   - Nested cell-local coefficient tree in combRows label order.
+    %     vals   - Nested cell-wise coefficient tree in combRows label order.
     %     labels - Local Bernstein labels used for every physical cell.
     %
     %   Example:

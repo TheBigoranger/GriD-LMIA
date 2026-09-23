@@ -31,7 +31,8 @@ function test_function_backed_construction_exact_handle(testCase)
     testCase.verifyTrue(isa(A, "pdbase"));
     testCase.verifyEqual(A.Degree, 1);
     testCase.verifyEqual(size(A), [1 2]);
-    testCase.verifyTrue(A.IsContinuous);
+    testCase.verifyEqual(A.Continuity, -1);
+    testCase.verifyFalse(A.IsContinuous);
     testCase.verifyFalse(A.ContainsDecision);
     testCase.verifyEmpty(A.RateBounds);
     testCase.verifyEqual(A.SourceSummary, "function");

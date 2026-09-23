@@ -1,5 +1,5 @@
 classdef pdbase
-    %PDBASE Shared cell-local Bernstein storage for gridded PD-LMI objects.
+    %PDBASE Shared cell-wise Bernstein storage for gridded PD-LMI objects.
     %
     %   Syntax:
     %     obj = pdbase(gridVectors, matrixSize, degree)
@@ -9,28 +9,40 @@ classdef pdbase
     %     gridVectors - Cell array of strictly increasing parameter grids.
     %     matrixSize  - Positive [rows, columns] coefficient-matrix size.
     %     degree      - Nonnegative scalar shorthand or ell-element degree.
-    %     localValues - Optional nested cell-local coefficient tree.
-    %     Name=Value  - Continuity, decision, rate, and source metadata.
+    %     localValues - Optional nested cell-wise coefficient tree.
+    %     Continuity  - Scalar or ell-vector lower bound: -1, an integer
+    %                   order, or Inf. pdbase stores but does not infer it.
+    %     IsContinuous - Legacy parse-only alias: true maps to C0 and false
+    %                    maps to -1; do not combine it with Continuity.
+    %     Name=Value  - Decision, rate, source, and validation metadata.
     %
     %   Output:
     %     obj - Shared grid and coefficient-storage object whose Degree is
     %           stored as a 1-by-ell row vector.
     %
     %   Example:
-    %     obj = pdbase({[0 1 2]}, [2 2], 1);
+    %     obj = pdbase({[0 1 2]}, [2 2], 1, Continuity=0);
     %     c = obj.coeffs(1);
+    %     tf = obj.IsContinuous;
     %     elevated = obj.elevate(1);
+    %
+    %   IsContinuous is read-only and derived as all(Continuity >= 0); no
+    %   separate Boolean continuity state is stored.
 
     properties (SetAccess = private)
         GridInfo
         MatrixSize
         Degree
         LocalValues
-        IsContinuous
+        Continuity
         ContainsDecision
         NumRateRows
         RateBounds
         SourceSummary
+    end
+
+    properties (Dependent, SetAccess = private)
+        IsContinuous
     end
 
     methods
@@ -88,9 +100,9 @@ classdef pdbase
             obj.MatrixSize = sz;
             obj.Degree = deg;
             obj.LocalValues = vals;
-            % Continuity is metadata at pdbase level; subclasses own any
-            % boundary coefficient sharing needed to make it true.
-            obj.IsContinuous = options.IsContinuous;
+            % Continuity is a proven direction-wise lower bound. Subclasses
+            % own the sharing or coefficient checks that justify it.
+            obj.Continuity = normContinuity(options.Continuity, nPar);
             obj.ContainsDecision = options.ContainsDecision;
             % RateBounds stores the rho_dot domain independently of LocalValues.
             if isempty(localValues)
@@ -104,6 +116,11 @@ classdef pdbase
             end
             obj.RateBounds = rb;
             obj.SourceSummary = options.SourceSummary;
+        end
+
+
+        function tf = get.IsContinuous(obj)
+            tf = all(obj.Continuity >= 0);
         end
     end
 
@@ -121,7 +138,7 @@ classdef pdbase
         grid = mergeGrid(obj, errId, varargin)
         out = mapUnary(obj, fcn, sz)
         out = mkUnOp(obj, vals, sz)
-        out = mkRhodiff(obj, deg, vals, rb, hasDec, numRateRows)
+        out = mkRhodiff(obj, deg, vals, rb, hasDec, numRateRows, continuity)
     end
 
     methods (Static, Access = protected)
@@ -136,7 +153,7 @@ end
 function [localValues, options] = argParser(args)
     %ARGPARSER Parse optional coefficient storage and pdbase metadata.
     options = struct( ...
-        "IsContinuous", false, ...
+        "Continuity", -1, ...
         "ContainsDecision", false, ...
         "NumRateRows", 0, ...
         "RateBounds", [], ...
@@ -158,7 +175,7 @@ function [localValues, options] = argParser(args)
             "ValidationMode requires the scalar text 'fast' or 'strict'.");
     end
 
-    names = ["IsContinuous", "ContainsDecision", "NumRateRows", ...
+    names = ["Continuity", "IsContinuous", "ContainsDecision", "NumRateRows", ...
         "RateBounds", "SourceSummary", "ValidationMode"];
     first = args{1};
     firstName = "";
@@ -176,6 +193,8 @@ function [localValues, options] = argParser(args)
         error("pdbase:InvalidOptions", "pdbase options must be Name=Value pairs.");
     end
 
+    seenContinuity = false;
+    seenLegacyContinuity = false;
     for k = 1:2:numel(optArgs)
         name = optArgs{k};
         if ~((ischar(name) && isrow(name)) || ...
@@ -186,12 +205,34 @@ function [localValues, options] = argParser(args)
         name = string(name);
         value = optArgs{k + 1};
         switch name
-            case {"IsContinuous", "ContainsDecision"}
+            case "Continuity"
+                if seenContinuity || seenLegacyContinuity
+                    error("pdbase:ConflictingContinuityOptions", ...
+                        "Continuity and IsContinuous may not be supplied together or repeated.");
+                end
+                options.Continuity = value;
+                seenContinuity = true;
+            case "IsContinuous"
+                if seenContinuity || seenLegacyContinuity
+                    error("pdbase:ConflictingContinuityOptions", ...
+                        "Continuity and IsContinuous may not be supplied together or repeated.");
+                end
                 value = logical(value);
                 if ~isscalar(value)
                     error("pdbase:InvalidOptions", "%s must be a scalar logical.", name);
                 end
-                options.(char(name)) = value;
+                if value
+                    options.Continuity = 0;
+                else
+                    options.Continuity = -1;
+                end
+                seenLegacyContinuity = true;
+            case "ContainsDecision"
+                value = logical(value);
+                if ~isscalar(value)
+                    error("pdbase:InvalidOptions", "%s must be a scalar logical.", name);
+                end
+                options.ContainsDecision = value;
             case "NumRateRows"
                 if ~(isnumeric(value) && isreal(value) && isscalar(value))
                     error("pdbase:InvalidOptions", ...
@@ -210,5 +251,24 @@ function [localValues, options] = argParser(args)
             otherwise
                 error("pdbase:UnknownOption", "Unsupported pdbase option: %s.", name);
         end
+    end
+end
+
+function continuity = normContinuity(value, nPar)
+    %NORMCONTINUITY Normalize internal continuity metadata without inference.
+    if ~(isnumeric(value) && isreal(value) && isvector(value) && ...
+            ~isempty(value) && all(~isnan(value), "all") && ...
+            all(value == -1 | value == inf | ...
+            (isfinite(value) & value >= 0 & value == fix(value)), "all"))
+        error("pdbase:InvalidContinuity", ...
+            "Continuity must contain -1, nonnegative integers, or Inf.");
+    end
+    if isscalar(value)
+        continuity = repmat(double(value), 1, nPar);
+    elseif numel(value) == nPar
+        continuity = reshape(double(value), 1, []);
+    else
+        error("pdbase:InvalidContinuity", ...
+            "Continuity must be scalar or have one entry per parameter.");
     end
 end

@@ -51,7 +51,9 @@ function vals = prodVals(obj, lhsVals, lhsDeg, rhsVals, rhsDeg, ...
         "scalar"));
     nPar = obj.npar();
     plan = mkPlan(nPar, lhsDeg, rhsDeg);
-    plan = addPairPlan(plan);
+    if plan.LhsCount ~= 1 && plan.RhsCount ~= 1
+        plan = addPairPlan(plan);
+    end
     nCell = cellfun(@numel, grid) - 1;
     firstCell = true;
     vals = helper.mkNest(nCell, @prodAt);
@@ -95,6 +97,16 @@ end
 
 function out = prodRow(lhs, rhs, plan)
     %PRODROW Contract weighted coefficient blocks for numeric or affine data.
+    % A degree-zero factor has one coefficient per cell and rate row. Native
+    % multiplication preserves written order and scalar broadcasting without
+    % constructing a polynomial pair plan or slicing symbolic blocks.
+    if plan.LhsCount == 1
+        out = cellfun(@(val) lhs{1} * val, rhs, UniformOutput=false);
+        return
+    elseif plan.RhsCount == 1
+        out = cellfun(@(val) val * rhs{1}, lhs, UniformOutput=false);
+        return
+    end
     knownLeft = all(cellfun(@isnumeric, lhs));
     lhsSize = size(lhs{1});
     rhsSize = size(rhs{1});

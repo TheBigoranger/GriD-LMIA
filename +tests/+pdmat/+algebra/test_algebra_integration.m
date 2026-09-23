@@ -2,6 +2,23 @@ function tests = test_algebra_integration
     % Behavioral regressions for pdmat.algebra_integration.
     tests = functiontests(localfunctions);
 end
+
+function test_discontinuous_refinement_composes_with_arithmetic_and_blocks(testCase)
+    % All operators must preserve each side of the same interior source jump.
+    L=[1 2;3 5]; R=[7 -2;4 1]; U=[20 3;-1 8]; V=[2 30;7 -5]; N=[2 1;-3 4];
+    A=pdmat([0 .5 1],{{L,R},{U,V}},Degree=1); saved=A.LocalValues;
+    B=pdmat([0 .25 .5 .75 1],{{N},{N},{N},{N}},Degree=0);
+    restricted={{L,(L+R)/2},{(L+R)/2,R},{U,(U+V)/2},{(U+V)/2,V}};
+    operations={@plus,@minus,@mtimes,@(x,y) cat(2,x,y),@blkdiag};
+    for index=1:numel(operations)
+        operation=operations{index}; actual=operation(A,B);
+        for c=1:4
+            expected=cellfun(@(x) operation(x,N),restricted{c},UniformOutput=false);
+            testCase.verifyEqual(actual.coeffs(c),expected,AbsTol=1e-12);
+        end
+    end
+    testCase.verifyEqual(A.LocalValues,saved);
+end
 function test_tensor_refinement_product_transpose_and_reduction(testCase)
     % Noncommuting products must remain correct through several shape operations.
     f = @(x,y) [x^2+y, 1+x; 2*y, x-y];

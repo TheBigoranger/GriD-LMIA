@@ -17,5 +17,5 @@ function out = zeroObj(grid, sz)
     info = helper.mkGrid(grid, "pdmat");
     vals = helper.mkNest(info.NumNodes - 1, @(~) {zeros(sz)});
     out = mkCoeffObj(grid, vals, zeros(1, numel(grid)), [], ...
-        "coefficient-backed", true, sz);
+        "coefficient-backed", inf(1, numel(grid)), sz);
 end

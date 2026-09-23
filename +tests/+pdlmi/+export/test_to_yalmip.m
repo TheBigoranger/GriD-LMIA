@@ -8,6 +8,39 @@ function setupOnce(~)
     yalmip("clear");
 end
 
+function test_refinement_derivative_constant_sandwich_exports_analytic_coefficients(testCase)
+    % d[X*(x^2+x*y)+Y]/dt = X*((2*vx+vy)*x+vx*y), independently of Y.
+    coarse={[1 3],[2 6]}; fine={[1 2 3],[2 4 6]};
+    X=sdpvar(2); Y=pdvar(2,fine,'symmetric',Degree=[0 0]);
+    A=pdmat(coarse,@(x,y) x^2+x*y,Degree=[2 1]);
+    refined=X*A+Y; rb=[-1 2;-3 1]; L=[1 2;-1 3];
+    residual=L'*rhodiff(refined,rb)*L-eye(2);
+    certificate=residual<=0; reference=[];
+    vertices=[-1 -3;-1 1;2 -3;2 1];
+    for i=1:2
+        for j=1:2
+            coefficients=residual.coeffs([i j]);
+            for rate=1:4
+                for p=0:2
+                    for q=0:1
+                        x=fine{1}(i)+p/2; y=fine{2}(j)+2*q;
+                        factor=(2*vertices(rate,1)+vertices(rate,2))*x+vertices(rate,1)*y;
+                        expected=L'*X*L*factor-eye(2);
+                        tests.infrastructure.verify_expr(testCase,coefficients{rate,2*p+q+1},expected);
+                        reference=[reference,(-expected>=0)]; %#ok<AGROW>
+                    end
+                end
+            end
+        end
+    end
+    testCase.verifyEqual(residual.GridInfo.Vectors,fine);
+    testCase.verifyEqual(residual.Degree,[2 1]);
+    testCase.verifyEqual(residual.NumRateRows,4);
+    testCase.verifyEqual(residual.RateBounds,rb);
+    testCase.verifyEqual(numel(certificate.Constraints),96);
+    veriConCol(testCase,toYalmip(certificate),reference);
+end
+
 function test_export_after_replacement_keeps_saved_list_independent(testCase)
     % Exported lists retain their original cones after another family is built.
     P = pdvar(2, [0 1 4], Degree=2, RateBounds=[2 2]);

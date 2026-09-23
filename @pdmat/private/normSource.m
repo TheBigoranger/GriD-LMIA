@@ -1,10 +1,11 @@
-function [sz, deg, vals, isCont, summary, fh, rb] = normSource( ...
-        grid, src, optDeg, degreeSpecified, rb)
+function [sz, deg, vals, continuity, summary, fh, rb] = normSource( ...
+        grid, src, optDeg, degreeSpecified, rb, contOpt, contSpecified)
     %NORMSOURCE Normalize pdmat sources into pdbase constructor inputs.
     %
     %   Syntax:
-    %     [sz, deg, vals, isCont, summary, fh, rb] = ...
-    %         normSource(grid, src, optDeg, degreeSpecified, rb)
+    %     [sz, deg, vals, continuity, summary, fh, rb] = ...
+    %         normSource(grid, src, optDeg, degreeSpecified, rb, ...
+    %         contOpt, contSpecified)
     %
     %   Arguments:
     %     grid   - Physical parameter grid vectors.
@@ -12,11 +13,13 @@ function [sz, deg, vals, isCont, summary, fh, rb] = normSource( ...
     %     optDeg - Requested scalar or per-parameter degree payload.
     %     degreeSpecified - True only when the public Degree option appeared.
     %     rb      - Optional parameter-rate bounds.
+    %     contOpt - Requested continuity lower bound.
+    %     contSpecified - True only when Continuity appeared publicly.
     %
     %   Output:
     %     sz, deg - Inferred matrix size and Bernstein degree.
     %     vals    - Nested local coefficient tree.
-    %     isCont  - Shared-face continuity classification.
+    %     continuity - Inferred or verified direction-wise lower bound.
     %     summary - Source-mode label; fh is the optional exact evaluator.
     %     rb      - Empty or validated parameter-rate bounds.
     %
@@ -25,15 +28,17 @@ function [sz, deg, vals, isCont, summary, fh, rb] = normSource( ...
     %
     %   SRC may be a function handle, a global numeric cell grid, or nested
     %   LocalValues. The outputs contain the inferred matrix size, degree,
-    %   local coefficient tree, inferred continuity, source summary, optional
-    %   exact evaluator, and normalized rate-bound state. Only explicit nested
-    %   LocalValues need face checks; global Bernstein grids and function sources
-    %   are continuous by construction.
-    %   Function-only sources are intentionally kept outside coefficient
-    %   algebra unless an explicit degree certifies Bernstein data.
+    %   local coefficient tree, continuity evidence, source summary, optional
+    %   exact evaluator, and normalized rate-bound state. Every coefficient-
+    %   backed source is classified or checked across all physical interfaces.
+    %   Function-only sources carry -1 because their placeholder LocalValues
+    %   are not evidence; an explicit Degree first certifies Bernstein data.
 
     info = helper.mkGrid(grid, "pdmat");
     vecs = info.Vectors;
+    if contSpecified
+        chkContinuityRequest(contOpt, numel(vecs));
+    end
     if nargin < 5 || isempty(rb)
         rb = [];
     else
@@ -53,7 +58,16 @@ function [sz, deg, vals, isCont, summary, fh, rb] = normSource( ...
     end
     if isa(src, "function_handle")
         [sz, deg, vals, summary, fh] = fcnData(src, info, optDeg);
-        isCont = true;
+        if summary == "function"
+            if contSpecified
+                error("pdmat:FunctionOnlyContinuity", ...
+                    "Function-only pdmat data cannot certify an explicit continuity order.");
+            end
+            continuity = -ones(1, numel(vecs));
+        else
+            continuity = sourceContinuity(vals, info, deg, ...
+                contOpt, contSpecified);
+        end
         return
     end
 
@@ -66,10 +80,10 @@ function [sz, deg, vals, isCont, summary, fh, rb] = normSource( ...
     summary = "coefficient-backed";
     if ~isempty(src) && all(cellfun(@isnumeric, src(:)))
         [sz, deg, vals] = gridToLocal(src, vecs, optDeg, "pdmat");
-        isCont = true;
     else
-        [sz, deg, vals, isCont] = localData(src, vecs, optDeg, rb);
+        [sz, deg, vals] = localData(src, vecs, optDeg, rb);
     end
+    continuity = sourceContinuity(vals, info, deg, contOpt, contSpecified);
 end
 
 function [sz, deg, vals, summary, fh] = fcnData(fh, info, optDeg)
@@ -126,11 +140,11 @@ function [sz, deg, vals, summary, fh] = fcnData(fh, info, optDeg)
     summary = "function-bernstein";
 end
 
-function [sz, deg, vals, isCont] = localData(src, vecs, optDeg, rb)
+function [sz, deg, vals] = localData(src, vecs, optDeg, rb)
     %LOCALDATA Validate nested LocalValues while inferring its degree.
     %
     %   Syntax:
-    %     [sz, deg, vals, isCont] = localData(src, gridVectors, optDeg)
+    %     [sz, deg, vals] = localData(src, gridVectors, optDeg, rb)
     %   SCAN NEST also enforces one matrix size and one coefficient count for
     %   every physical cell. Invalid nesting or inconsistent leaves are
     %   reported with pdmat-specific errors rather than silently reshaped.
@@ -160,9 +174,57 @@ function [sz, deg, vals, isCont] = localData(src, vecs, optDeg, rb)
     end
 
     vals = src;
-    % Explicit local leaves may represent discontinuous known data, unlike a
-    % global coefficient grid whose shared nodes already enforce continuity.
-    isCont = helper.chkCont(vals, nCell, deg);
+end
+
+function continuity = sourceContinuity(vals, info, degree, request, specified)
+    %SOURCECONTINUITY Infer all orders or verify only the requested lower bound.
+    nCell = info.NumNodes - 1;
+    if ~specified
+        [~, continuity] = helper.chkCont(vals, nCell, degree, info.Vectors);
+        return
+    end
+
+    scalarRequest = isnumeric(request) && isscalar(request);
+    continuity = normContinuity(request, numel(info.Vectors), nCell, degree);
+    if scalarRequest && numel(info.Vectors) > 1
+        warning("pdmat:ScalarContinuityExpansion", ...
+            "Scalar Continuity expands uniformly across all parameter directions.");
+    end
+    maxOrders = continuity;
+    maxOrders(isinf(maxOrders)) = degree(isinf(maxOrders));
+    if ~helper.chkCont(vals, nCell, degree, info.Vectors, maxOrders)
+        error("pdmat:ContinuityMismatch", ...
+            "Coefficient evidence does not satisfy the requested Continuity lower bound.");
+    end
+end
+
+function continuity = normContinuity(value, nPar, nCell, degree)
+    %NORMCONTINUITY Validate public pdmat continuity requests.
+    chkContinuityRequest(value, nPar);
+    if isscalar(value)
+        continuity = repmat(double(value), 1, nPar);
+    elseif numel(value) == nPar
+        continuity = reshape(double(value), 1, []);
+    else
+        error("pdmat:InvalidContinuity", ...
+            "Continuity must be scalar or have one entry per parameter.");
+    end
+    continuity(nCell == 1 | continuity >= degree) = inf;
+end
+
+function chkContinuityRequest(value, nPar)
+    %CHKCONTINUITYREQUEST Validate a public request before source routing.
+    if ~(isnumeric(value) && isreal(value) && isvector(value) && ...
+            ~isempty(value) && all(~isnan(value), "all") && ...
+            all(value == inf | ...
+            (isfinite(value) & value >= 0 & value == fix(value)), "all"))
+        error("pdmat:InvalidContinuity", ...
+            "Continuity must contain nonnegative integers or Inf.");
+    end
+    if ~(isscalar(value) || numel(value) == nPar)
+        error("pdmat:InvalidContinuity", ...
+            "Continuity must be scalar or have one entry per parameter.");
+    end
 end
 
 function [sz, nCoeff, rowKind] = scanNest(vals, nCell, nPar, nRateRows)

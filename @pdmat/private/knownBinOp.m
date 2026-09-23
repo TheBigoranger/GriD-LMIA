@@ -34,7 +34,7 @@ function out = knownBinOp(lhs, rhs, fcn, errId)
     ld = normOperand(grid, lhs, reqSize, rb, errId);
     rd = normOperand(grid, rhs, reqSize, rb, errId);
 
-    % Elevate both operands before applying the cell-local coefficient operation.
+    % Elevate both operands before applying the cell-wise coefficient operation.
     deg = max(ld.Degree, rd.Degree);
     data = pdbase.elevData([ld, rd], deg, grid, "fast");
     lhsVals = data(1).LocalValues;
@@ -50,6 +50,7 @@ function out = knownBinOp(lhs, rhs, fcn, errId)
         return
     end
 
-    out = mkCoeffObj(grid, vals, deg, rb, [], [], [], "fast", ...
+    continuity = min(ld.Continuity, rd.Continuity);
+    out = mkCoeffObj(grid, vals, deg, rb, [], continuity, [], "fast", ...
         max(ld.NumRateRows, rd.NumRateRows));
 end

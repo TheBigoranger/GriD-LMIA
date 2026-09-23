@@ -58,7 +58,8 @@ function test_assignment_same_ordinary_rate_row_broadcast(testCase)
     cc = P.coeffs(1);
 
     testCase.verifyEqual(P.Degree, 1);
-    testCase.verifyFalse(P.IsContinuous);
+    testCase.verifyEqual(P.Continuity, Inf);
+    testCase.verifyTrue(P.IsContinuous);
     testCase.verifyEqual(size(cc), [2 2]);
     tests.infrastructure.verify_expr(testCase, cc(1, :), { ...
         [cd{1, 1}, cp{1}(1, 2); cp{1}(2, 1), cp{1}(2, 2)], ...
@@ -79,7 +80,8 @@ function test_assigning_ordinary_blocks_into_derivative_rows(testCase)
     cc = D.coeffs(1);
 
     testCase.verifyEqual(D.Degree, 1);
-    testCase.verifyFalse(D.IsContinuous);
+    testCase.verifyEqual(D.Continuity, Inf);
+    testCase.verifyTrue(D.IsContinuous);
     testCase.verifyEqual(size(cc), [2 2]);
     tests.infrastructure.verify_expr(testCase, cc(1, :), { ...
         [cp{1}(2, 2), cd{1, 1}(1, 2); cd{1, 1}(2, 1), cd{1, 1}(2, 2)], ...

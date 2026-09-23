@@ -73,7 +73,10 @@ function test_degree_zero_input_still_produces_complete(testCase)
     testCase.verifyEqual(D.Degree, 0);
     testCase.verifyEqual(D.coeffs(1), {zeros(2); zeros(2)});
     testCase.verifyFalse(D.ContainsDecision);
-    veriDerSta(testCase, D, [-1 2]);
+    testCase.verifyEqual(D.Continuity, Inf);
+    testCase.verifyTrue(D.IsContinuous);
+    testCase.verifyEqual(D.RateBounds, [-1 2]);
+    testCase.verifyEqual(D.SourceSummary, "derivative");
 end
 
 function test_fixed_scheduling_rate_vertex_two_duplicate(testCase)

@@ -47,8 +47,9 @@ function obj = subsasgn(obj, S, rhs)
 
     hasDec = lhsData.ContainsDecision || rhsData.ContainsDecision;
     numRateRows = max(lhsData.NumRateRows, rhsData.NumRateRows);
+    continuity = min(lhsData.Continuity, rhsData.Continuity);
     obj = pdvar(mkCtorState(grid, obj.MatrixSize, deg, vals, hasDec, rb, ...
-        "expression", [], "fast", numRateRows));
+        "expression", continuity, "fast", numRateRows));
 end
 
 function out = setBlock(lhs, rhs, rows, cols)

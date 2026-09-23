@@ -3,12 +3,14 @@ classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
     %
     %   Syntax:
     %     A = pdmat(gridVectors, source)
-    %     A = pdmat(gridVectors, source, Degree=m, RateBounds=rb)
+    %     A = pdmat(gridVectors, source, Degree=m, Continuity=c, RateBounds=rb)
     %
     %   Arguments:
     %     gridVectors - Parameter grid cell array or one-vector shorthand.
     %     source      - Function handle, global coefficient grid, or LocalValues.
     %     Degree      - Optional scalar shorthand or ell-element Bernstein degree.
+    %     Continuity  - Optional nonnegative integer or Inf lower bound per
+    %                   direction, verified against coefficient evidence.
     %     RateBounds  - Optional ell-by-2 parameter-rate box.
     %
     %   Output:
@@ -16,23 +18,31 @@ classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
     %
     %   source may be a function handle, a global cell grid of numeric
     %   Bernstein coefficients, or nested LocalValues in the pdbase contract.
-    %   Nested LocalValues with mismatched shared faces produce a
+    %   Nested LocalValues with a C0 mismatch produce a
     %   pdmat:DiscontinuousLocalValues warning and IsContinuous=false;
-    %   their cell-local coefficient data is left unchanged.
+    %   their cell-wise coefficient data is left unchanged.
     %   Function-backed objects without Degree only probe the lower grid
     %   point for size; inherited LocalValues are placeholder zeros, not
-    %   coefficient evidence. Function handles with explicit Degree are
+    %   coefficient evidence and Continuity is -1 in every direction; an
+    %   explicit request fails with pdmat:FunctionOnlyContinuity.
+    %   Function handles with explicit Degree are
     %   validated as local Bernstein data while retaining FunctionHandle.
     %   Public Degree is a 1-by-ell row vector. Explicit multidimensional
     %   scalar Degree expands uniformly and warns once; omitted inference and
     %   one-dimensional construction remain warning-free.
+    %   When Continuity is omitted for coefficient-backed data, the highest
+    %   provable direction-wise order is inferred. Explicit requests store
+    %   the normalized requested lower bound after verification and fail with
+    %   pdmat:ContinuityMismatch when the coefficients do not support it.
+    %   A multidimensional scalar request expands uniformly and warns once;
+    %   single-cell axes and requests at least Degree normalize to Inf.
     %   RateBounds alone is metadata. Explicit nested leaves may instead use
     %   one row per distinct vertex, ordered by combRows(RateBounds); fixed
     %   directions contribute one value instead of duplicate endpoints.
     %
     %   Example:
     %     data = {1, 2, 3};
-    %     A = pdmat([0 1 2], data, Degree=1);
+    %     A = pdmat([0 1 2], data, Degree=1, Continuity=0);
     %     c = A.coeffs(2);
 
     properties (SetAccess = private)
@@ -49,7 +59,11 @@ classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
                 sz = init.MatrixSize;
                 deg = init.Degree;
                 vals = init.LocalValues;
-                isCont = init.IsContinuous;
+                if isfield(init, "Continuity")
+                    continuity = init.Continuity;
+                else
+                    continuity = double(init.IsContinuous) - 1;
+                end
                 summary = init.SourceSummary;
                 fh = init.FunctionHandle;
                 if isfield(init, "NumRateRows")
@@ -70,7 +84,8 @@ classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
                 end
                 warnCont = false;
             else
-                [degOpt, degreeSpecified, rbOpt, validationMode] = ...
+                [degOpt, degreeSpecified, contOpt, contSpecified, ...
+                    rbOpt, validationMode] = ...
                     parseOpts(varargin{:});
                 if isnumeric(gridVectors) && isvector(gridVectors) && numel(gridVectors) >= 2
                     % Accept scalar-parameter shorthand at the public entry;
@@ -79,16 +94,18 @@ classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
                 end
 
                 grid = gridVectors;
-                [sz, deg, vals, isCont, summary, fh, rb] = ...
-                    normSource(grid, source, degOpt, degreeSpecified, rbOpt);
+                [sz, deg, vals, continuity, summary, fh, rb] = ...
+                    normSource(grid, source, degOpt, degreeSpecified, ...
+                    rbOpt, contOpt, contSpecified);
                 numRateRows = 0;
-                warnCont = ~isCont;
+                warnCont = summary == "coefficient-backed" && ...
+                    any(continuity < 0);
             end
 
             % pdmat remains known numeric data; RateBounds is independent
             % metadata unless explicit LocalValues contain rate-vertex rows.
             obj@pdbase(grid, sz, deg, vals, ...
-                IsContinuous=isCont, ...
+                Continuity=continuity, ...
                 ContainsDecision= false, ...
                 NumRateRows=numRateRows, ...
                 RateBounds=rb, ...
@@ -98,26 +115,30 @@ classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
             obj.FunctionHandle = fh;
             if warnCont
                 warning("pdmat:DiscontinuousLocalValues", ...
-                    "Nested LocalValues have mismatched shared Bernstein faces; IsContinuous is false.");
+                    "Nested LocalValues have no C0 guarantee in every direction; IsContinuous is false.");
             end
         end
     end
 
     methods (Access = protected)
         out = mkUnOp(obj, vals, sz)
-        out = mkRhodiff(obj, deg, vals, rb, hasDec, numRateRows)
+        out = mkRhodiff(obj, deg, vals, rb, hasDec, numRateRows, continuity)
     end
 
 end
 
-function [degOpt, degreeSpecified, rbOpt, validationMode] = parseOpts(varargin)
+function [degOpt, degreeSpecified, contOpt, contSpecified, ...
+        rbOpt, validationMode] = parseOpts(varargin)
     %PARSEOPTS Parse optional Bernstein degree and rate metadata.
     degOpt = [];
     degreeSpecified = false;
+    contOpt = [];
+    contSpecified = false;
     rbOpt = [];
     validationMode = "fast";
     seenDegree = false;
     seenRate = false;
+    seenContinuity = false;
     seenValidation = false;
     if mod(numel(varargin), 2) ~= 0
         if ~isempty(varargin) && ...
@@ -152,6 +173,14 @@ function [degOpt, degreeSpecified, rbOpt, validationMode] = parseOpts(varargin)
                 end
                 rbOpt = varargin{k + 1};
                 seenRate = true;
+            case "Continuity"
+                if seenContinuity
+                    error("pdmat:DuplicateOption", ...
+                        "Continuity may be supplied only once.");
+                end
+                contOpt = varargin{k + 1};
+                contSpecified = true;
+                seenContinuity = true;
             case "ValidationMode"
                 if seenValidation
                     error("pdmat:InvalidValidationMode", ...

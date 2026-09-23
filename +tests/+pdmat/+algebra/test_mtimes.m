@@ -2,6 +2,29 @@ function tests = test_mtimes
     % Behavioral regressions for pdmat.mtimes.
     tests = functiontests(localfunctions);
 end
+
+function test_square_constant_factors_preserve_written_order_for_numeric_storage(testCase)
+    % Noncommuting square factors expose reversals as values, not shape errors.
+    for convert={@double,@single,@sparse}
+        cast=convert{1}; L=cast([1 2;0 3]); R=cast([0 -1;2 1]);
+        values={{cast([1 3;2 5]),cast([7 -2;1 4]),cast([-3 6;8 2]),cast([4 1;-5 3])}, ...
+            {cast([4 1;-5 3]),cast([2 -7;3 11]),cast([6 2;9 -1]),cast([1 4;7 2])}};
+        A=pdmat([0 1 3],values,Degree=3); saved=A.LocalValues;
+        left=L*A; right=A*R;
+        for c=1:2
+            actualLeft=left.coeffs(c); actualRight=right.coeffs(c);
+            for k=1:4
+                testCase.verifyEqual(full(double(actualLeft{k})), ...
+                    full(double(L*values{c}{k})),AbsTol=1e-6);
+                testCase.verifyEqual(full(double(actualRight{k})), ...
+                    full(double(values{c}{k}*R)),AbsTol=1e-6);
+            end
+        end
+        testCase.verifyEqual(left.Degree,3);
+        testCase.verifyEqual(right.MatrixSize,[2 2]);
+        testCase.verifyEqual(A.LocalValues,saved);
+    end
+end
 function test_zero_valued_active_rate_tables_cannot_multiply_each_other(testCase)
     % Zero controls cannot bypass the prohibition on two active rate tables.
     A = pdmat([0 2 5], {1,3,7}, Degree=1, RateBounds=[0 0]);

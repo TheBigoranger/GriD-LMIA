@@ -18,5 +18,5 @@ function out = zeroObj(grid, sz)
     vals = helper.mkNest(info.NumNodes - 1, @(~) {zeros(sz)});
     out = pdvar(mkCtorState(grid, sz, zeros(1, numel(grid)), ...
         vals, false, [], ...
-        "expression", true));
+        "expression", inf(1, numel(grid))));
 end

@@ -11,7 +11,7 @@ function vals = chkBernstein(fh, info, deg, sz)
     %     matrixSize - Required function-output size.
     %
     %   Output:
-    %     vals - Certified cell-local coefficient tree.
+    %     vals - Certified cell-wise coefficient tree.
     %
     %   Example:
     %     info = helper.mkGrid({[0 1]}, "pdmat");

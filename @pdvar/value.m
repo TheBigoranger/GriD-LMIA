@@ -15,9 +15,9 @@ function out = value(obj)
     %   An ordinary pdvar returns one coefficient-backed pdmat.  A pdvar
     %   with derivative rate rows returns one pdmat per distinct RateBounds
     %   vertex in helper.combRows order. Outputs preserve the grid, matrix size,
-    %   degree, and local coefficient order. Ordinary numeric outputs recompute
-    %   complete-face continuity and may recover continuity after cancellation.
-    %   Derivative row exports remain deliberately discontinuous; rate bounds
+    %   degree, and local coefficient order. Every numeric output fully infers
+    %   direction-wise continuity from its complete coefficient evidence, so
+    %   assignment may reveal matching seams after cancellation. Rate bounds
     %   are not stored on the returned pdmat objects.
     %
     %   Every symbolic coefficient must have an assigned finite numeric
@@ -75,22 +75,15 @@ function rowVals = pickRow(vals, subs, row)
 end
 
 function out = mkPdmat(obj, vals)
-    % Prepared construction preserves deliberate derivative discontinuities
-    % without presenting them as invalid user-supplied local data.
+    % Prepared construction avoids user-source warnings after full inference.
     init = struct;
     init.PdmatInternal = true;
     init.Grid = obj.GridInfo.Vectors;
     init.MatrixSize = obj.MatrixSize;
     init.Degree = obj.Degree;
     init.LocalValues = vals;
-    if obj.NumRateRows ~= 0
-        % Each exported derivative vertex retains the source's deliberate
-        % cell-local semantics after rate metadata is removed.
-        init.IsContinuous = false;
-    else
-        init.IsContinuous = helper.chkCont(vals, ...
-            obj.GridInfo.NumNodes - 1, obj.Degree);
-    end
+    [~, init.Continuity] = helper.chkCont(vals, ...
+        obj.GridInfo.NumNodes - 1, obj.Degree, obj.GridInfo.Vectors);
     init.SourceSummary = "coefficient-backed";
     init.FunctionHandle = [];
     out = pdmat(init);

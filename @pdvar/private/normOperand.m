@@ -44,13 +44,10 @@ function data = normOperand(grid, val, reqSize, rb, errId)
             error(errId, ...
                 "Rate-vertex pdvar expressions require matching grids in this operation.");
         else
-            % Same-bound refinement only takes Bernstein point samples and
-            % recombines them linearly, preserving affine YALMIP structure.
-            vals = helper.fitVals(info, val.Degree, val.MatrixSize, ...
-                @(pt) evalPdvar(val, pt), "pdvar");
+            vals = helper.refineVals(info, val);
         end
         data = pack(val.MatrixSize, val.Degree, vals, ...
-            val.ContainsDecision, val.IsContinuous, numRateRows);
+            val.ContainsDecision, val.Continuity, numRateRows);
         return
     end
 
@@ -73,23 +70,20 @@ function data = normOperand(grid, val, reqSize, rb, errId)
             error(errId, ...
                 "Rate-vertex pdmat expressions require matching grids in pdvar algebra.");
         else
-            % Coefficient-backed known data is re-expressed on the same
-            % common refinement before entering symbolic pdvar algebra.
-            vals = helper.fitVals(info, val.Degree, val.MatrixSize, ...
-                @(pt) evaluate(val, pt), "pdvar");
+            vals = helper.refineVals(info, val);
         end
         data = pack(val.MatrixSize, val.Degree, vals, false, ...
-            val.IsContinuous, numRateRows);
+            val.Continuity, numRateRows);
         return
     end
 
     mat = chkMat(val, reqSize, errId);
     data = pack(size(mat), zeros(1, numel(grid)), ...
         helper.mkNest(info.NumNodes - 1, @(~) {mat}), ...
-        isa(mat, "sdpvar"), true, 0);
+        isa(mat, "sdpvar"), inf(1, numel(grid)), 0);
 end
 
-function data = pack(sz, deg, vals, hasDec, isCont, numRateRows)
+function data = pack(sz, deg, vals, hasDec, continuity, numRateRows)
     %PACK Keep the metadata fields consumed by the pdvar constructor together.
     %   NUMRATEROWS distinguishes ordinary coefficient leaves from rate-vertex
     %   tables; the distinction is needed by later degree and row operations.
@@ -97,7 +91,7 @@ function data = pack(sz, deg, vals, hasDec, isCont, numRateRows)
     data.Degree = deg;
     data.LocalValues = vals;
     data.ContainsDecision = hasDec;
-    data.IsContinuous = isCont;
+    data.Continuity = continuity;
     data.NumRateRows = numRateRows;
 end
 
@@ -112,48 +106,6 @@ function tf = sameGrid(info, val, errId)
     tf = true;
     for k = 1:numel(info.Vectors)
         tf = tf && isequal(info.Vectors{k}, val.GridInfo.Vectors{k});
-    end
-end
-
-function val = evalPdvar(obj, pt)
-    %EVALPDVAR Reconstruct one pdvar expression at a physical point.
-    %   This sampling path is used only to refit ordinary coefficient data on
-    %   a common refinement grid; it preserves affine YALMIP expressions.
-    [subs, alpha] = localPoint(obj, pt);
-    coeffs = obj.coeffs(subs);
-    lbls = obj.lbls();
-    val = zeros(obj.MatrixSize);
-    for k = 1:numel(coeffs)
-        w = 1;
-        for p = 1:numel(alpha)
-            j = lbls(k, p);
-            deg = obj.Degree(p);
-            w = w * nchoosek(deg, j) * ...
-                (1 - alpha(p))^(deg - j) * alpha(p)^j;
-        end
-        val = val + coeffs{k} .* w;
-    end
-end
-
-function [subs, alpha] = localPoint(obj, pt)
-    %LOCALPOINT Map a physical point to its cell and Bernstein coordinates.
-    %   alpha=(rho-lo)/(hi-lo) is 0 at the lower face and 1 at the upper
-    %   face of each cell, matching repository endpoint labels.
-    nPar = obj.npar();
-    subs = zeros(1, nPar);
-    alpha = zeros(1, nPar);
-    for p = 1:nPar
-        v = obj.GridInfo.Vectors{p};
-        x = pt(p);
-        if x == v(end)
-            subs(p) = numel(v) - 1;
-        else
-            subs(p) = find(v <= x, 1, "last");
-        end
-
-        lo = v(subs(p));
-        hi = v(subs(p) + 1);
-        alpha(p) = (x - lo) / (hi - lo);
     end
 end
 

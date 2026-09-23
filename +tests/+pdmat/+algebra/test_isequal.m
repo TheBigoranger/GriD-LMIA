@@ -2,6 +2,17 @@ function tests = test_isequal
     % Behavioral regressions for pdmat.isequal.
     tests = functiontests(localfunctions);
 end
+
+function test_equal_values_ignore_weaker_continuity_certificate(testCase)
+    grid = {[0 1 3]};
+    values = {{0, 1, 3, 6}, {6, 12, 22, 40}};
+    inferred = pdmat(grid, values, Degree=3);
+    weaker = pdmat(grid, values, Degree=3, Continuity=0);
+
+    testCase.verifyEqual(inferred.Continuity, 2);
+    testCase.verifyEqual(weaker.Continuity, 0);
+    testCase.verifyTrue(isequal(inferred, weaker));
+end
 function test_later_rate_coefficient_breaks_equality(testCase)
     % A mismatch outside the first rate row must not compare equal.
     A = pdmat([0 1], {{1, 2; 3, 4}}, Degree=1, RateBounds=[-2 5]);

@@ -139,6 +139,62 @@ function out = consEntSil(fun)
     out = fun();
 end
 
+function test_multicell_cubic_continuity_bounded_real_certificate(testCase)
+    % Each fixed continuity order solves the same nonuniform-grid problem.
+    % Compare physical residuals as well as the assembled solver constraints.
+    grid = [0 .2 .65 1];
+    options = sdpsettings('solver',testCase.TestData.Solver,'verbose',0);
+    for q = [0 1 2 Inf]
+        yalmip('clear');
+        A = pdmat(grid,@(x) [-1 .5;-1 -2]+x*[-1.3 -20;2 -10],Degree=1);
+        B = pdmat(grid,@(x) [1 -4;-1 -1]+x*[2.2 .5;-6 -5],Degree=1);
+        P = pdvar(2,grid,Degree=3,Continuity=q);
+        gamma = pdvar(1,grid,Degree=0);
+        derivative = rhodiff(P,[-1 1]);
+        boundedReal = [derivative+P*A+A'*P,P*B,eye(2); ...
+            B'*P,-gamma*eye(2),zeros(2); ...
+            eye(2),zeros(2),-gamma*eye(2)] <= 0;
+        positive = P >= 0;
+        constraints = [boundedReal.toYalmip,positive.toYalmip];
+        objective = gamma.LocalValues{1}{1};
+        solution = optimize(constraints,objective,options);
+        testCase.assertEqual(solution.problem,0,solution.info);
+        tests.infrastructure.verify_solved(testCase,constraints);
+        gammaValue = value(objective);
+        testCase.verifyTrue(isfinite(gammaValue));
+        fprintf('Multicell cubic C%g gamma: %.12g\n',q,gammaValue);
+        for c = 1:3
+            coefficients = P.coeffs(c);
+            coefficients = cellfun(@value,coefficients,'UniformOutput',false);
+            width = grid(c+1)-grid(c);
+            for t = [0 .19 .61 1]
+                rho = grid(c)+t*width;
+                pv = zeros(2); dp = zeros(2);
+                for k = 0:3
+                    pv = pv+nchoosek(3,k)*t^k*(1-t)^(3-k)*coefficients{k+1};
+                end
+                for k = 0:2
+                    dp = dp+3/width*nchoosek(2,k)*t^k*(1-t)^(2-k)* ...
+                        (coefficients{k+2}-coefficients{k+1});
+                end
+                av = [-1 .5;-1 -2]+rho*[-1.3 -20;2 -10];
+                bv = [1 -4;-1 -1]+rho*[2.2 .5;-6 -5];
+                testCase.verifyTrue(all(isfinite(pv(:))));
+                testCase.verifyGreaterThanOrEqual(min(eig(pv))/max(1,norm(pv,'fro')),-1e-7);
+                for rate = [-1 1]
+                    residual = [rate*dp+pv*av+av'*pv,pv*bv,eye(2); ...
+                        bv'*pv,-gammaValue*eye(2),zeros(2); ...
+                        eye(2),zeros(2),-gammaValue*eye(2)];
+                    testCase.verifyLessThanOrEqual(max(eig((residual+residual')/2))/ ...
+                        max(1,norm(residual,'fro')),1e-7);
+                end
+            end
+        end
+        impossible = optimize([P>=2*eye(2),P<=eye(2)],[],options);
+        testCase.verifyEqual(impossible.problem,1,impossible.info);
+    end
+end
+
 function test_composed_fixed_rate_certificate_and_infeasible_control(testCase)
     % Solve a derivative/matrix/certificate pipeline and independently sample it.
     yalmip('clear');

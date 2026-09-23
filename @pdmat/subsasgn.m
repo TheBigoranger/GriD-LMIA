@@ -35,7 +35,8 @@ function obj = subsasgn(obj, S, rhs)
         @(parts) setBlock(parts{1}, parts{2}, rows, cols), ...
         "pdmat:InvalidCoefficientRows"));
 
-    obj = mkCoeffObj(grid, vals, deg, rb, [], [], [], "fast", ...
+    continuity = min(lhsData.Continuity, rhsData.Continuity);
+    obj = mkCoeffObj(grid, vals, deg, rb, [], continuity, [], "fast", ...
         max(lhsData.NumRateRows, rhsData.NumRateRows));
 end
 

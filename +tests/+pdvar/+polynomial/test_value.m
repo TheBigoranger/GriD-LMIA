@@ -24,7 +24,8 @@ function test_assigned_tensor_derivative_elevation_exports_all_rate_controls(tes
         testCase.verifyEqual(rows{row}.Degree,[1 3]);
         testCase.verifyEmpty(rows{row}.RateBounds);
         testCase.verifyFalse(rows{row}.ContainsDecision);
-        testCase.verifyFalse(rows{row}.IsContinuous);
+        testCase.verifyEqual(rows{row}.Continuity, [Inf Inf]);
+        testCase.verifyTrue(rows{row}.IsContinuous);
         for i = 1:2
             for j = 1:2
                 c = rows{row}.coeffs([i j]);
@@ -238,10 +239,11 @@ function verifyNumericCoeffs(testCase, actual, expected)
 end
 
 function verifyRatePdmat(testCase, obj, degree, expected)
-    % Converted derivative rows are known, discontinuous, and rate-metadata free.
+    % Single-cell derivative rows are known and vacuously smooth on their grid.
     testCase.verifyClass(obj, "pdmat");
     testCase.verifyEqual(obj.Degree, degree);
-    testCase.verifyFalse(obj.IsContinuous);
+    testCase.verifyEqual(obj.Continuity, inf(1, obj.npar()));
+    testCase.verifyTrue(obj.IsContinuous);
     testCase.verifyFalse(obj.ContainsDecision);
     testCase.verifyEmpty(obj.RateBounds);
     testCase.verifyEqual(obj.SourceSummary, "coefficient-backed");

@@ -69,3 +69,28 @@ function test_missing_invalid_evidence_and_partial_pass_rejected(testCase)
     testCase.verifyError(@() tests.infrastructure.api_gate(result, map, api), ...
         'tests:UnverifiedApi');
 end
+
+function test_shared_helper_maps_to_verified_public_callers(testCase)
+    [result,map,~]=fixture();
+    map.Owner='helper'; map.Method='refineVals';
+    api=["helper","refineVals"];
+    caught='';
+    try
+        tests.infrastructure.api_gate(result,map,api);
+    catch error
+        caught=error.identifier;
+    end
+    testCase.verifyEmpty(caught);
+    for owner=["installation","unknown"]
+        map.Tests="tests."+owner+".test_example/test_case";
+        testCase.verifyError(@() tests.infrastructure.api_gate(result,map,api), ...
+            'tests:WrongOwner');
+    end
+    map.Tests=result.Name;
+    result.Passed=false; result.Failed=true;
+    testCase.verifyError(@() tests.infrastructure.api_gate(result,map,api), ...
+        'tests:UnverifiedApi');
+    result.Failed=false; result.Incomplete=true;
+    testCase.verifyError(@() tests.infrastructure.api_gate(result,map,api), ...
+        'tests:UnverifiedApi');
+end
