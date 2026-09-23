@@ -895,7 +895,7 @@ async function auditWelcomeRoot(browser, origin, failures) {
         welcome.infoDirection !== "column" ||
         JSON.stringify(welcome.infoOrder) !== JSON.stringify([
           "Author and maintainer",
-          "Latest in v1.4.3",
+          "Latest in v1.5.0",
           "Cite GriD-LMIA",
         ]) ||
         !["about", "version-history", "citing"].every((route) =>

@@ -17,11 +17,11 @@ const root = path.resolve(import.meta.dirname, "..");
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 
 test("projects the accepted shared documentation contracts", () => {
-  assert.equal(documentationRecords.length, 194);
-  assert.equal(referenceEntries.length, 194);
+  assert.equal(documentationRecords.length, 197);
+  assert.equal(referenceEntries.length, 197);
   assert.equal(terminologyTerms.length, 8);
   assert.deepEqual(documentationContractSummary.ownerCounts, {
-    pdbase: 49, pdmat: 55, pdvar: 52, pdlmi: 24, helper: 13, root: 1,
+    pdbase: 50, pdmat: 55, pdvar: 52, pdlmi: 24, helper: 15, root: 1,
   });
   assert.ok(documentationRecords.every((record) => record.executable_example));
   assert.ok(referenceEntries.every((entry) => entry.href.startsWith("/GriD-LMIA/")));
@@ -29,8 +29,8 @@ test("projects the accepted shared documentation contracts", () => {
     record.web_route_or_anchor,
     record.web_example_evidence,
   ]);
-  assert.equal(webTargets.length, 388);
-  assert.equal(new Set(webTargets).size, 388);
+  assert.equal(webTargets.length, 394);
+  assert.equal(new Set(webTargets).size, 394);
 });
 
 test("uses record kind when generating diagnostic IDs", () => {

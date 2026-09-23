@@ -20,11 +20,11 @@ test("pins the accepted printable manual identity", async () => {
   assert.equal(await sha256File(manual), expectedPublication.manualSha256);
   assert.equal(await pdfPageCount(manual), expectedPublication.manualPageCount);
   assert.deepEqual(expectedPublication, {
-    documentationVersion: "v1.4.3",
-    latestTaggedRelease: "v1.4.0",
-    apiRecordCount: 194,
-    manualSha256: "7F3207AE01387EA2EDAC2D7677D8CB66B15C9B6EFC14B4C841101C0F6F2B5A97",
-    manualPageCount: 179,
+    documentationVersion: "v1.5.0",
+    latestTaggedRelease: "v1.5.0",
+    apiRecordCount: 197,
+    manualSha256: "86E50D7110108128A2D7386A35532315E5D93591B754FD7FD7F81F544774101F",
+    manualPageCount: 184,
   });
 });
 
@@ -42,9 +42,9 @@ test("keeps publish mode independent from unpublished documentation sources", ()
 
 test("validates the committed publication manifest", async () => {
   const manifest = await validatePublicationManifest(webpageRoot);
-  assert.equal(manifest.documentationVersion, "v1.4.3");
-  assert.equal(manifest.apiRecordCount, 194);
-  assert.equal(manifest.manual.pageCount, 179);
+  assert.equal(manifest.documentationVersion, "v1.5.0");
+  assert.equal(manifest.apiRecordCount, 197);
+  assert.equal(manifest.manual.pageCount, 184);
 });
 
 test("normalizes generated text line endings without normalizing binary artifacts", () => {
@@ -60,10 +60,10 @@ test("rejects stale visible version-history roles", () => {
     { version: "v1.4.0", status: "latest tagged GitHub Release" },
   ];`;
   const staleTag = `export const versionHistory = [
-    { version: "v1.4.3", status: "current documentation snapshot" },
+    { version: "v1.5.0", status: "current documentation snapshot" },
     { version: "v1.3.8", status: "latest tagged GitHub Release" },
   ];`;
 
-  assert.throws(() => validateVersionHistorySource(staleCurrent), /row 1 must be v1\.4\.3/);
-  assert.throws(() => validateVersionHistorySource(staleTag), /tagged entry must be v1\.4\.0/);
+  assert.throws(() => validateVersionHistorySource(staleCurrent), /row 1 must be v1\.5\.0/);
+  assert.throws(() => validateVersionHistorySource(staleTag), /tagged entry must be v1\.5\.0/);
 });

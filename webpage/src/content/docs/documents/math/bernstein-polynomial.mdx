@@ -93,10 +93,14 @@ coefficient labels.
 
 <CellStorageDiagram />
 
-A constructor-created continuous `pdvar` shares the complete Bernstein
-control face between adjacent cells. The shared handles enforce equality of
-face values through shared handles. Neighboring cells may have different one-sided
-gradients at the same interface.
+With default order-zero continuity, a constructor-created `pdvar` shares the
+complete Bernstein control face between adjacent cells. Neighboring cells may
+have different one-sided gradients at the same interface. Higher-order
+`Continuity` requests use spline controls and Bernstein extraction to match
+physical derivatives across the interface through the coefficient construction.
+Known `pdmat` coefficients instead support inferred or verified seam orders.
+The direction-wise bound is stored in `Continuity`, with
+`IsContinuous=all(Continuity>=0)`.
 
 Differentiation is therefore deliberately cell-wise. Along direction $s$,
 forward coefficient differences are multiplied by $M_s$ and divided by the

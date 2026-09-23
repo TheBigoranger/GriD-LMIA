@@ -21,7 +21,8 @@ metadata and coefficients consistent.
 | `MatrixSize` | Always-two-dimensional `[rows columns]` payload size. |
 | `Degree` | Direction-wise Bernstein degree stored as a `1 × npar` row. |
 | `LocalValues` | Nested physical-cell tree. Each leaf is an ordinary coefficient row or a derivative rate-row table. |
-| `IsContinuous` | Whether adjacent physical cells represent continuous data. |
+| `Continuity` | Direction-wise proven lower bounds: `-1` means value continuity is unproved, a nonnegative integer gives the guaranteed derivative order, and `Inf` denotes polynomial continuation. |
+| `IsContinuous` | Dependent logical scalar `all(Continuity >= 0)`. |
 | `ContainsDecision` | Whether payloads contain YALMIP decision dependence. |
 | `NumRateRows` | Exact number of explicit stored rate rows. Ordinary data, including `RateBounds`-only metadata, reports `0`. |
 | `RateBounds` | Empty or `npar × 2` lower/upper rate bounds. |

@@ -43,7 +43,7 @@ $(m_1-1)$. Degree $(0)$ remains zero. For several parameters, the partial along 
 vector `A.Degree` before the rate-weighted sum is formed. A zero-degree axis
 contributes the zero partial, so multivariate `rhodiff` preserves the complete
 direction-wise degree row.
-`D` is a `pdmat` with `IsContinuous=false` and one numeric coefficient row per
+`D` is a `pdmat` with propagated `Continuity` and one numeric coefficient row per
 distinct rate-box vertex in `helper.combRows` order. `D.NumRateRows` is the
 exact stored-row count. A fixed axis contributes one value in place of two endpoints.
 
@@ -75,6 +75,13 @@ The two rows evaluate the constant physical derivative `2` at rates `-1` and
 - Existing explicit rate rows, including a previous derivative, raise
   `pdmat:InvalidDiff`. Repeated differentiation is unsupported.
 - The output is cell-wise and generally discontinuous at shared faces.
+
+The `Continuity` bound uses only nonzero rate-weighted partials. The
+differentiated direction loses one finite order, down to `-1`, while tangential
+orders and `Inf` are retained. Componentwise minima combine the contributing
+partials and rate rows. Zero rate multipliers and coefficient-wise zero
+partials are omitted. A completely zero derivative has `Inf` in every
+direction. `IsContinuous` is therefore `all(D.Continuity >= 0)`.
 
 ## See Also
 

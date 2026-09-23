@@ -14,6 +14,24 @@ import { Aside } from "@astrojs/starlight/components";
 
 Every operation acts on the matrix payload stored at each local Bernstein label. The returned `pdmat` preserves known-data semantics and exposes the aligned grid, degree, and payload shape through its properties.
 
+## Continuity And Exact Refinement
+
+Exact degree elevation and common-grid Bernstein restriction preserve the
+existing direction-wise continuity bounds. Addition, subtraction, supported
+products, concatenation, block assembly, and assignment propagate
+componentwise minima. Numeric constants carry infinite order. Unary matrix
+operations and block selection retain the source bound. Reconstructed
+coefficients with a propagated `-1` are checked for recovered value continuity
+after cancellation or selection. This recovery is limited to order zero,
+so the stored bound can be weaker than the result's maximal smoothness.
+
+Grid alignment restricts each source cell independently to its subcells. It
+preserves coefficient jumps and existing symbolic variables. Rate-vertex
+tables require matching physical grids and retain their separate rows. The
+refinement uses each source cell's own coefficients at a shared boundary. A generic degree-zero
+coefficient object is constant within each cell, while constructor-created
+`pdvar(..., Degree=0)` shares one decision across the grid.
+
 ## <span id="pdmat-plus"></span><span id="pdmat-minus"></span><span id="pdmat-uplus"></span><span id="pdmat-uminus"></span>Add, subtract, and align coefficients
 
 ```matlab

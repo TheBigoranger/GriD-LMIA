@@ -6,14 +6,14 @@ description: Install GriD-LMIA, open the synchronized manual, and verify the MAT
 import { versionInfo } from "../../data/version.js";
 
 The online and printable manuals describe documentation version
-**{versionInfo.current}**. Package v1.4.0 is the latest tagged GitHub Release.
+**{versionInfo.current}**. Package v1.5.0 is the latest tagged GitHub Release.
 
 ## Downloads
 
 | Item | Link |
 | :--- | :--- |
 | {versionInfo.current} manual | [Open the synchronized printable manual](/GriD-LMIA/manual.pdf) |
-| Latest GitHub Release (v1.4.0) | [Open the GitHub Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.4.0) |
+| Latest GitHub Release (v1.5.0) | [Open the GitHub Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.0) |
 | {versionInfo.current} source snapshot | [Download `main` as ZIP](https://github.com/TheBigoranger/GriD-LMIA/archive/refs/heads/main.zip) |
 | GitHub repository | [TheBigoranger/GriD-LMIA](https://github.com/TheBigoranger/GriD-LMIA) |
 | Version history | [Open version history](/GriD-LMIA/version-history/) |
@@ -21,7 +21,7 @@ The online and printable manuals describe documentation version
 
 The synchronized {versionInfo.current} site publishes the PDF manual at its
 stable manual route. The manual link is the current site artifact, while the
-Release link targets the immutable v1.4.0 package snapshot.
+Release link targets the immutable v1.5.0 package snapshot.
 
 ## Requirements
 
@@ -68,8 +68,8 @@ results = tests.run_all();
 
 The release gate is `tests.run_coverage()` with zero failed and zero incomplete
 results while meeting the production coverage baselines. The current
-documentation snapshot records the verified v1.4.3 package surface, while the
-latest immutable Release remains v1.4.0. Accepted solver smoke cases require
+v1.5.0 release passes 848 runtime cases, including the 171-entry API gate.
+Measured production coverage is 96.80% for statements and 94.35% for decisions. Accepted solver smoke cases require
 `problem == 0`.
 
 ## First Lookup

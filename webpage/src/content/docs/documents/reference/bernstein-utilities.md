@@ -39,6 +39,12 @@ Normalizes two-dimensional numeric, logical, colon, and `end` matrix subscripts 
 
 Checks compatible parameter bounds and constructs the sorted union of interior grid nodes before cell-wise algebra.
 
+Ordinary coefficient data are re-expressed on this grid by
+[`helper.refineVals`](/GriD-LMIA/documents/reference/shared-helpers/#helper-refinevals),
+which applies exact Bernstein restriction within each original cell. This
+preserves the separate one-sided values at a discontinuous source face.
+Rate-vertex tables require matching physical grids.
+
 ## <span id="pdbase-mapunary"></span>`mapUnary` And <span id="pdbase-mkunop"></span>`mkUnOp`
 
 `mapUnary` applies a matrix operation to every cell, label, and rate row. `mkUnOp` rebuilds the same dynamic class with the transformed payload shape.

@@ -34,11 +34,13 @@ rows = value(rhodiff(P))
 ## Output
 
 For an ordinary expression, `A` is one `pdmat` that preserves the parameter
-grid, matrix size, Bernstein degree, local coefficient order, and continuity
-metadata. For a derivative expression with rate rows, `rows` is a
+grid, matrix size, Bernstein degree, and local coefficient order. Numeric
+recovery reclassifies continuity from the recovered coefficients, which may
+prove a stronger order than the symbolic lower bound. For a derivative
+expression with rate rows, `rows` is a
 `1 × P.NumRateRows` cell array of `pdmat` objects, in distinct lower/upper
-Cartesian vertex order after fixed axes collapse. Returned `pdmat` objects do
-returns ordinary known data and discards rate metadata.
+Cartesian vertex order after fixed axes collapse. Each returned `pdmat` has
+ordinary known data, with rate metadata discarded.
 
 ## Example
 

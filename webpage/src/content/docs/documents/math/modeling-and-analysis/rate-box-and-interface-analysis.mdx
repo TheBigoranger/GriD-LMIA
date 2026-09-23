@@ -64,9 +64,9 @@ and output contract.
 
 ## Shared Values, Different One-Sided Slopes
 
-A continuous piecewise-polynomial `pdvar` shares full face-control handles
-between neighboring cells. Therefore its values agree on each face. The
-normal derivatives may differ:
+With the default `Continuity=0`, a piecewise-polynomial `pdvar` shares full
+face-control handles between neighboring cells. Therefore its values agree
+on each face, while normal derivatives may differ:
 
 $$
 \begin{aligned}
@@ -78,8 +78,11 @@ P_{\vect c^-}|_{\text{face}}
 \end{aligned}
 $$
 
-This is $C^0$ piecewise-polynomial storage with cell-wise derivatives that may
-differ across faces.
+This default construction gives $C^0$ piecewise-polynomial storage with
+cell-wise derivatives that may differ across faces. Higher requested
+[`Continuity` orders](/GriD-LMIA/documents/reference/pdvar/constructor/#direction-wise-continuity)
+use spline extraction to match the corresponding physical derivatives across
+each seam.
 
 ## Clarke Interface Coverage
 

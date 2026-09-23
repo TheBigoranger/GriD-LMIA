@@ -23,9 +23,21 @@ plans below.
 
 ## Shared Grid And Degree Alignment
 
-Binary algebra first forms a common physical grid, resolves rate bounds, and
-elevates both coefficient rows to the componentwise maximum degree vector.
-Only then does it assemble the cell result.
+Binary algebra first forms a compatible physical grid and resolves rate bounds.
+Addition, subtraction, and concatenation elevate coefficient rows to the
+componentwise maximum degree before assembly. Products retain each operand's
+degree and produce the componentwise sum of those degrees.
+
+For ordinary coefficient-backed operands, the common grid is the sorted union
+of compatible axis nodes. Each target interval lies in one source cell. Its
+normalized endpoints define a de Casteljau restriction map, which transforms
+that cell's Bernstein controls to the subinterval. Tensor directions are
+restricted independently, preserving jumps at original faces and the existing
+affine decision variables. Rate-vertex tables instead require matching
+physical grids. Degree-zero coefficients are constant within each cell.
+The developer-facing
+[`bernRestrict` and `refineVals` helpers](/GriD-LMIA/documents/reference/shared-helpers/#helper-bernrestrict)
+expose these maps and coefficient trees.
 
 <CallGraph family="alignment" caption="Shared grid, rate-box, and componentwise degree alignment." links={[
   { href: "/GriD-LMIA/documents/math/gridding-and-degree/", label: "Grid and degree mathematics" },

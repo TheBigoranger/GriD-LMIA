@@ -19,6 +19,8 @@ or [`pdvar`](/GriD-LMIA/documents/reference/pdvar/constructor/).
 obj = pdbase(gridVectors, matrixSize, degree)
 obj = pdbase(gridVectors, matrixSize, degree, localValues)
 obj = pdbase(gridVectors, matrixSize, degree, localValues, Name=Value)
+obj = pdbase(..., Continuity=orders)
+obj = pdbase(..., IsContinuous=tf)  % Legacy alias
 obj = pdbase(..., ValidationMode=mode)
 ```
 
@@ -30,7 +32,8 @@ obj = pdbase(..., ValidationMode=mode)
 | `matrixSize` | Positive integer row vector `[rows columns]`. |
 | `degree` | One finite nonnegative integer scalar shorthand or an `npar`-element direction-wise vector. A scalar expands uniformly, and the result is stored as a `1 × npar` row. |
 | `localValues` | Optional nested physical-cell tree. An ordinary leaf is a `1 × prod(degree+1)` coefficient cell. A rate-dependent leaf is a rate-row-by-coefficient cell array. |
-| `IsContinuous` | Logical scalar metadata. Default `false`. |
+| `Continuity` | Direction-wise lower bounds: `-1`, nonnegative integers, or `Inf`. Scalar input expands uniformly. Default `-1`. The backend treats these bounds as caller-supplied metadata. |
+| `IsContinuous` | Legacy parse-only alias: `true` maps to order zero, `false` to `-1`. Supplying both continuity options or repeating either raises `pdbase:ConflictingContinuityOptions`. |
 | `ContainsDecision` | Logical scalar metadata. Default `false`. |
 | `RateBounds` | Empty or finite `npar × 2` lower/upper bounds with each lower bound less than or equal to its upper bound. |
 | `SourceSummary` | Source label. Default `"coefficient-backed"`. |
@@ -45,7 +48,7 @@ and leaves `NumRateRows=0`.
 
 The returned value has private-set `GridInfo`, `MatrixSize`, direction-wise
 row-vector `Degree`,
-`LocalValues`, `IsContinuous`, `ContainsDecision`, `NumRateRows`, `RateBounds`,
+`LocalValues`, `Continuity`, dependent `IsContinuous=all(Continuity>=0)`, `ContainsDecision`, `NumRateRows`, `RateBounds`,
 and `SourceSummary` properties. It is a value object: later
 operations return new values while preserving the source.
 
@@ -84,6 +87,7 @@ $\prod_{s=1}^{\ell}(m_s+1)=2\cdot4\cdot1$.
 
 ## Validation and limitations
 
+Malformed continuity orders raise `pdbase:InvalidContinuity`.
 Grid failures use `pdbase:InvalidGrid` or `pdbase:InvalidGridVector`.
 Payload shape, degree, local-tree, coefficient-count, coefficient-payload, and
 rate failures use the corresponding `pdbase:Invalid...` identifier. Direct

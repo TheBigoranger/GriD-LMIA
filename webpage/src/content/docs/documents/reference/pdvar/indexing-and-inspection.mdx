@@ -77,8 +77,9 @@ rate rows have separate counts.
 tf = isequal(P,Q)
 ```
 
-Returns a MATLAB logical after comparing normalized grids, shapes, degree,
-metadata, and symbolic coefficient evidence. Overloaded `P == Q` instead
+Returns a MATLAB logical requiring identical grids, shapes, degree, metadata
+including `Continuity`, and symbolic coefficient evidence. Each operand
+retains its original grid and degree during this check. Overloaded `P == Q` instead
 creates a direct [`pdlmi` equality](/GriD-LMIA/documents/reference/pdvar/comparisons/#pdvar-comparison-eq).
 
 ```matlab

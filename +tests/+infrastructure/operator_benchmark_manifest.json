@@ -1,0 +1,2437 @@
+{
+  "Version": 1,
+  "Seed": 20260922,
+  "Note": "Frozen before runtime changes. Numeric fixtures use products of 1+rho^degree; affine fixtures retain independent decisions. Piecewise product factors vary by cell.",
+  "Cases": [
+    {
+      "Name": "diff_small_numeric",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        1,
+        1
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_100cells_numeric",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.01,
+          0.02,
+          0.03,
+          0.04,
+          0.05,
+          0.06,
+          0.07,
+          0.08,
+          0.09,
+          0.1,
+          0.11,
+          0.12,
+          0.13,
+          0.14,
+          0.15,
+          0.16,
+          0.17,
+          0.18,
+          0.19,
+          0.2,
+          0.21,
+          0.22,
+          0.23,
+          0.24,
+          0.25,
+          0.26,
+          0.27,
+          0.28,
+          0.29,
+          0.3,
+          0.31,
+          0.32,
+          0.33,
+          0.34,
+          0.35,
+          0.36,
+          0.37,
+          0.38,
+          0.39,
+          0.4,
+          0.41,
+          0.42,
+          0.43,
+          0.44,
+          0.45,
+          0.46,
+          0.47,
+          0.48,
+          0.49,
+          0.5,
+          0.51,
+          0.52,
+          0.53,
+          0.54,
+          0.55,
+          0.56,
+          0.57,
+          0.58,
+          0.59,
+          0.6,
+          0.61,
+          0.62,
+          0.63,
+          0.64,
+          0.65,
+          0.66,
+          0.67,
+          0.68,
+          0.69,
+          0.7,
+          0.71,
+          0.72,
+          0.73,
+          0.74,
+          0.75,
+          0.76,
+          0.77,
+          0.78,
+          0.79,
+          0.8,
+          0.81,
+          0.82,
+          0.83,
+          0.84,
+          0.85,
+          0.86,
+          0.87,
+          0.88,
+          0.89,
+          0.9,
+          0.91,
+          0.92,
+          0.93,
+          0.94,
+          0.95,
+          0.96,
+          0.97,
+          0.98,
+          0.99,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_tensor2_numeric",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_tensor3_numeric",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.25,
+          0.6,
+          1
+        ],
+        [
+          -2,
+          -1,
+          1,
+          3
+        ],
+        [
+          0,
+          0.5,
+          2
+        ]
+      ],
+      "Degree": [
+        2,
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 5,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_zeroaxis_numeric",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        0,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          0,
+          0
+        ],
+        [
+          -2,
+          3
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_fixed_numeric",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        1
+      ],
+      "Shape": [
+        8,
+        8
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_same_numeric",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        0,
+        0
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 10,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_axis_numeric",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        0,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 10,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_tensor2_numeric",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 10,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_tensor3_numeric",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.3,
+          1
+        ],
+        [
+          -2,
+          3
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "Degree": [
+        1,
+        0,
+        2
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 10,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_highdegree_numeric",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.00001,
+          1
+        ]
+      ],
+      "Degree": [
+        10
+      ],
+      "Shape": [
+        1,
+        1
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 10,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_repeat_numeric",
+      "Kind": "repeat",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 10,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_constant_numeric",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        0
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_cubic_left_numeric",
+      "Kind": "left",
+      "Grid": [
+        [
+          0,
+          0.3,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_degree8_numeric",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        8,
+        8
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_tensor3_numeric",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          0.5,
+          1
+        ],
+        [
+          -2,
+          3
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "Degree": [
+        0,
+        2,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_sparse_numeric",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        8,
+        8
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": true,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_piecewise_numeric",
+      "Kind": "piecewise",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        1
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_rates_numeric",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": true,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_fixedrate_numeric",
+      "Kind": "left",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        1
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          2,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": true,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "general_product_numeric",
+      "Kind": "general",
+      "Grid": [
+        [
+          0,
+          0.3,
+          1
+        ]
+      ],
+      "Degree": [
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_small_affine",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        1,
+        1
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 8,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_100cells_affine",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.01,
+          0.02,
+          0.03,
+          0.04,
+          0.05,
+          0.06,
+          0.07,
+          0.08,
+          0.09,
+          0.1,
+          0.11,
+          0.12,
+          0.13,
+          0.14,
+          0.15,
+          0.16,
+          0.17,
+          0.18,
+          0.19,
+          0.2,
+          0.21,
+          0.22,
+          0.23,
+          0.24,
+          0.25,
+          0.26,
+          0.27,
+          0.28,
+          0.29,
+          0.3,
+          0.31,
+          0.32,
+          0.33,
+          0.34,
+          0.35,
+          0.36,
+          0.37,
+          0.38,
+          0.39,
+          0.4,
+          0.41,
+          0.42,
+          0.43,
+          0.44,
+          0.45,
+          0.46,
+          0.47,
+          0.48,
+          0.49,
+          0.5,
+          0.51,
+          0.52,
+          0.53,
+          0.54,
+          0.55,
+          0.56,
+          0.57,
+          0.58,
+          0.59,
+          0.6,
+          0.61,
+          0.62,
+          0.63,
+          0.64,
+          0.65,
+          0.66,
+          0.67,
+          0.68,
+          0.69,
+          0.7,
+          0.71,
+          0.72,
+          0.73,
+          0.74,
+          0.75,
+          0.76,
+          0.77,
+          0.78,
+          0.79,
+          0.8,
+          0.81,
+          0.82,
+          0.83,
+          0.84,
+          0.85,
+          0.86,
+          0.87,
+          0.88,
+          0.89,
+          0.9,
+          0.91,
+          0.92,
+          0.93,
+          0.94,
+          0.95,
+          0.96,
+          0.97,
+          0.98,
+          0.99,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_tensor2_affine",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_tensor3_affine",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.25,
+          0.6,
+          1
+        ],
+        [
+          -2,
+          -1,
+          1,
+          3
+        ],
+        [
+          0,
+          0.5,
+          2
+        ]
+      ],
+      "Degree": [
+        2,
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_zeroaxis_affine",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        0,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          0,
+          0
+        ],
+        [
+          -2,
+          3
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "diff_fixed_affine",
+      "Kind": "derivative",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        1
+      ],
+      "Shape": [
+        8,
+        8
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_same_affine",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        0,
+        0
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 3,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_axis_affine",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        0,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_tensor2_affine",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_tensor3_affine",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.3,
+          1
+        ],
+        [
+          -2,
+          3
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "Degree": [
+        1,
+        0,
+        2
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_highdegree_affine",
+      "Kind": "refine",
+      "Grid": [
+        [
+          0,
+          0.00001,
+          1
+        ]
+      ],
+      "Degree": [
+        10
+      ],
+      "Shape": [
+        1,
+        1
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "refine_repeat_affine",
+      "Kind": "repeat",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_constant_affine",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        0
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 4,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_cubic_left_affine",
+      "Kind": "left",
+      "Grid": [
+        [
+          0,
+          0.3,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 3,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_degree8_affine",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        8,
+        8
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_tensor3_affine",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          0.5,
+          1
+        ],
+        [
+          -2,
+          3
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "Degree": [
+        0,
+        2,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_sparse_affine",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        8,
+        8
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": true,
+      "Batch": 3,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_piecewise_affine",
+      "Kind": "piecewise",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        1
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_rates_affine",
+      "Kind": "right",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": true,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_fixedrate_affine",
+      "Kind": "left",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        1
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          2,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": true,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "general_product_affine",
+      "Kind": "general",
+      "Grid": [
+        [
+          0,
+          0.3,
+          1
+        ]
+      ],
+      "Degree": [
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 3,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "product_affine_constant",
+      "Kind": "affinefactor",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        3
+      ],
+      "Shape": [
+        2,
+        3
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "function_construct",
+      "Kind": "function",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 3,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "higher_continuity_construct",
+      "Kind": "construct",
+      "Grid": [
+        [
+          0,
+          0.3,
+          1
+        ]
+      ],
+      "Degree": [
+        3
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        2
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "direct_assembly",
+      "Kind": "direct",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "combined_fixture_inclusive",
+      "Kind": "pipeline",
+      "Grid": [
+        [
+          0,
+          0.25,
+          1
+        ],
+        [
+          -2,
+          0,
+          3
+        ]
+      ],
+      "Degree": [
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "",
+      "ValidComparison": true
+    },
+    {
+      "Name": "jump_correctness_only",
+      "Kind": "jump",
+      "Grid": [
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        1
+      ],
+      "Shape": [
+        1,
+        1
+      ],
+      "Payload": "numeric",
+      "Rates": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "Order": [
+        0
+      ],
+      "Axes": [
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 50,
+      "Primary": "",
+      "ValidComparison": false
+    },
+    {
+      "Name": "audited_derivative",
+      "Kind": "audited_derivative",
+      "Grid": [
+        [
+          -2,
+          -1,
+          0,
+          3
+        ],
+        [
+          1,
+          1.3,
+          2,
+          4
+        ],
+        [
+          -1,
+          0,
+          2
+        ]
+      ],
+      "Degree": [
+        3,
+        2,
+        2
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "Order": [
+        0,
+        1,
+        "Inf"
+      ],
+      "Axes": [
+        1,
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "derivative",
+      "ValidComparison": true
+    },
+    {
+      "Name": "audited_refinement",
+      "Kind": "audited_refinement",
+      "Grid": [
+        [
+          0,
+          0.5,
+          1
+        ],
+        [
+          0,
+          0.5,
+          1
+        ]
+      ],
+      "Degree": [
+        3,
+        3
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "refinement",
+      "ValidComparison": true
+    },
+    {
+      "Name": "audited_product",
+      "Kind": "audited_product",
+      "Grid": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "Degree": [
+        8,
+        8
+      ],
+      "Shape": [
+        2,
+        2
+      ],
+      "Payload": "affine",
+      "Rates": [
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "Order": [
+        0,
+        0
+      ],
+      "Axes": [
+        1,
+        1
+      ],
+      "ActiveRows": false,
+      "Sparse": false,
+      "Batch": 1,
+      "Primary": "product",
+      "ValidComparison": true
+    }
+  ]
+}

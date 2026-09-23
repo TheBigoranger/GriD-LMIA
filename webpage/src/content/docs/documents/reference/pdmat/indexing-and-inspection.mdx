@@ -81,9 +81,13 @@ All describe one numeric payload. `ndims` is always two. Use `ncell`,
 tf = isequal(A,B)
 ```
 
-Returns a MATLAB logical after comparing normalized grid, payload, degree,
-metadata, and known coefficient/source evidence. It preserves the existing modeling
-constraint.
+Returns a MATLAB logical. Matrix size, decision presence, explicit rate-row
+count, and rate bounds must match. Coefficient-backed operands are aligned on
+compatible grids and degrees, then compared with entrywise tolerance
+`1e-9*max([1; abs(A(:)); abs(B(:))])` for each coefficient matrix.
+Incompatible grids, rate bounds, or operand normalization return `false`.
+If either operand is function-only, degree, grid vectors, source summary, and
+function handle must also match. Both paths ignore `Continuity` lower bounds.
 
 ```matlab
 A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);

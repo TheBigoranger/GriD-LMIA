@@ -1,8 +1,14 @@
 export const versionHistory = [
   {
+    version: "v1.5.0",
+    date: "2026-09-22",
+    status: "current documentation snapshot and latest tagged GitHub Release",
+    summary: "Adds direction-wise Continuity lower bounds, verified known-data seam orders, and higher-order spline decisions with zero auxiliary continuity equalities. Differentiation propagates contributing directional orders, numeric recovery reclassifies coefficients, and common-grid algebra uses exact Bernstein restriction. The manuals cover 197 public symbols. The runtime suite passes 848 cases, including the 171-entry API gate.",
+  },
+  {
     version: "v1.4.3",
     date: "2026-09-04",
-    status: "current documentation snapshot",
+    status: "final v1.4 source and documentation snapshot",
     summary: "Expands 141 test files to 809 cases, verifies 169 API entries, rejects function-only arithmetic shortcuts and two active-rate products even when zero, and preserves the 1-by-1 cell container for a fixed rate vertex. The manuals clarify these boundaries and fit complete formulas with native script proportions.",
   },
   {
@@ -15,7 +21,7 @@ export const versionHistory = [
   {
     version: "v1.4.0",
     date: "2026-08-14",
-    status: "latest tagged GitHub Release",
+    status: "earlier tagged GitHub Release",
     summary:
       "Adds dimension-compatible multiplication between a real affine two-dimensional sdpvar and coefficient-backed pdmat in either order. The mixed product returns pdvar and reuses the existing decisions, preserves known grid and rate metadata, and distinguishes metadata-only RateBounds from active rate rows. The synchronized printable and Web manuals retain the 192-symbol public inventory.",
   },

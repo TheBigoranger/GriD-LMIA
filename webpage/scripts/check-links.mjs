@@ -144,8 +144,8 @@ for (const [target, owners] of uniqueDeclaredTargets) {
     failures.push(`${owners[0]} target ${target} renders ${renderedCount} times; expected exactly once`);
   }
 }
-if (declaredTargets.length !== 388 || uniqueDeclaredTargets.size !== 388) {
-  failures.push(`expected 388 unique declared API targets, found ${uniqueDeclaredTargets.size}`);
+if (declaredTargets.length !== 394 || uniqueDeclaredTargets.size !== 394) {
+  failures.push(`expected 394 unique declared API targets, found ${uniqueDeclaredTargets.size}`);
 }
 
 if (failures.length) {
@@ -158,4 +158,4 @@ if (badBaseLinks.length) {
   process.exit(1);
 }
 
-console.log(`Checked ${htmlFiles.length} HTML files, unique IDs, and 388 API/example targets for ${base} internal links.`);
+console.log(`Checked ${htmlFiles.length} HTML files, unique IDs, and 394 API/example targets for ${base} internal links.`);

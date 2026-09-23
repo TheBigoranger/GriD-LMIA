@@ -4,11 +4,11 @@ import path from "node:path";
 import { inflateSync } from "node:zlib";
 
 export const expectedPublication = Object.freeze({
-  documentationVersion: "v1.4.3",
-  latestTaggedRelease: "v1.4.0",
-  apiRecordCount: 194,
-  manualSha256: "7F3207AE01387EA2EDAC2D7677D8CB66B15C9B6EFC14B4C841101C0F6F2B5A97",
-  manualPageCount: 179,
+  documentationVersion: "v1.5.0",
+  latestTaggedRelease: "v1.5.0",
+  apiRecordCount: 197,
+  manualSha256: "86E50D7110108128A2D7386A35532315E5D93591B754FD7FD7F81F544774101F",
+  manualPageCount: 184,
 });
 
 const fixedArtifacts = [
@@ -101,13 +101,13 @@ export function validateVersionHistorySource(source) {
     /version:\s*"([^"]+)"[\s\S]*?status:\s*"([^"]+)"/g,
   )].map((match) => ({ version: match[1], status: match[2] }));
   const current = rows[0];
-  const tagged = rows.find((row) => row.status === "latest tagged GitHub Release");
+  const tagged = rows.find((row) => row.status.split(" and ").includes("latest tagged GitHub Release"));
   if (current?.version !== expectedPublication.documentationVersion
-      || current?.status !== "current documentation snapshot") {
+      || !current?.status.split(" and ").includes("current documentation snapshot")) {
     fail(`Version-history row 1 must be ${expectedPublication.documentationVersion} with current documentation snapshot status.`);
   }
   if (tagged?.version !== expectedPublication.latestTaggedRelease
-      || tagged?.status !== "latest tagged GitHub Release") {
+      || !tagged?.status.split(" and ").includes("latest tagged GitHub Release")) {
     fail(`Version-history tagged entry must be ${expectedPublication.latestTaggedRelease} with latest tagged GitHub Release status.`);
   }
   return rows;

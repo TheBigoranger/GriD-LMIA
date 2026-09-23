@@ -47,6 +47,7 @@ A = pdmat(gridVector, source, Degree=degree)
 A = pdmat(gridVector, source, RateBounds=rb)
 A = pdmat(gridVectors, source)
 A = pdmat(gridVectors, source, Degree=degree, RateBounds=rb)
+A = pdmat(..., Continuity=orders)
 A = pdmat(..., ValidationMode=mode)
 ```
 
@@ -58,6 +59,7 @@ A = pdmat(..., ValidationMode=mode)
 | `source` | Function handle, global cell grid of numeric Bernstein coefficients such as `{1, 2, 3}`, or explicit nested `LocalValues` such as `{{[1 0], [0 1]}, {[2 0], [0 2]}}`. |
 | `Degree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector, such as `Degree=[1 3]`. The accepted value is stored as a $1\times\ell$ row. Required when a function handle should be validated as Bernstein coefficient evidence. |
 | `RateBounds` | Finite $\ell\times2$ lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`. Explicit nested leaves may instead contain one row per distinct rate-box vertex. Fixed axes contribute one value. |
+| `Continuity` | Scalar or direction-wise nonnegative integer or `Inf`. See the continuity contract below. |
 | `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"` and transient for the current construction. Public source validation remains complete in both modes. |
 
 Unsupported metadata options: `IsContinuous` and `ContainsDecision`.
@@ -65,6 +67,39 @@ Unsupported metadata options: `IsContinuous` and `ContainsDecision`.
 For diagrams of one- and two-parameter grid inputs, the global
 coefficient-grid shape, and the separate role of Bernstein `Degree`, see
 [Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/).
+
+## Direction-Wise Continuity
+
+`Continuity=orders` accepts a scalar or one nonnegative integer or `Inf` per
+parameter direction. Explicit multidimensional scalar input warns once with
+`pdmat:ScalarContinuityExpansion`. Omitted defaults and vector inputs are
+silent. Single-cell axes and requests at least the corresponding degree
+normalize to `Inf`. Invalid orders, including `-1`, fractional values, NaN,
+negative infinity, and wrong lengths, raise `pdmat:InvalidContinuity`.
+A repeated option raises `pdmat:DuplicateOption`.
+
+Omitting `Continuity` infers the highest supported order from every coefficient
+face, matrix entry, and active rate row. An explicit request verifies and stores
+that lower bound, even when the data support a higher order. A valid request
+unsupported by the coefficients raises `pdmat:ContinuityMismatch`.
+Function-only sources carry `Continuity=-ones(1,ell)` and `IsContinuous=false`:
+coefficient proof requires an explicit validated degree. An explicit request on that
+source raises `pdmat:FunctionOnlyContinuity`.
+
+Physical derivative matching includes cell-width scaling. On nonuniform cubic
+cells, the following coefficients match through order two:
+
+```matlab
+grid = {[0 1 3]};
+values = {{0, 1, 3, 6}, {6, 12, 22, 40}};
+A = pdmat(grid, values, Degree=3);
+B = pdmat(grid, values, Degree=3, Continuity=1);
+assert(A.Continuity == 2 && B.Continuity == 1)
+```
+
+The shared value is 6. The first derivatives are `3*(6-3)/1 = 9` and
+`3*(12-6)/2 = 9`, while the second derivatives are
+`6*(6-2*3+1)/1^2 = 6` and `6*(22-2*12+6)/2^2 = 6`.
 
 ## Returned Object
 
@@ -77,7 +112,8 @@ readable through dot syntax and have private set access:
 | `MatrixSize` | `A.MatrixSize` | Matrix size of each numeric payload. |
 | `Degree` | `A.Degree` | Direction-wise local Bernstein degree stored as a $1\times\ell$ row. |
 | `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | cell-wise numeric Bernstein coefficients. |
-| `IsContinuous` | `A.IsContinuous` | `true` for function/global-grid data and for nested local values with matching shared faces. Otherwise the constructor warns and returns `false`. |
+| `Continuity` | `A.Continuity` | Verified or inferred direction-wise lower bounds. Function-only data carry `-1` in every direction. |
+| `IsContinuous` | `A.IsContinuous` | Dependent logical scalar `all(A.Continuity >= 0)`. |
 | `ContainsDecision` | `A.ContainsDecision` | Always `false`, which records known data free of YALMIP decisions. |
 | `NumRateRows` | `A.NumRateRows` | Exact explicit stored-row count. Ordinary data and `RateBounds`-only metadata report `0`. |
 | `RateBounds` | `A.RateBounds` | Empty or the stored scheduling-rate box used by `rhodiff`, rate-row inspection, and `pdlmi`. |
@@ -199,7 +235,9 @@ ans =
 ```
 
 Nested `LocalValues` are useful when each physical cell has its own local
-coefficient matrices.
+coefficient matrices. A flat global source `{1, 2, 3}` on `[0 1 2]` with
+`Degree=1` creates rows `{1, 2}` and `{2, 3}`. In contrast, nested
+`{{1, 2, 3}}` on `[0 1]` with `Degree=2` creates one quadratic cell.
 
 ### Function-backed Bernstein evidence
 

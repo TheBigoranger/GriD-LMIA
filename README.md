@@ -2,13 +2,33 @@
 
 **Gri**dding-based **D**PD-**LMI A**ssembler (GriD-LMIA) is a MATLAB/YALMIP
 research package for modeling parameter-dependent LMIs on tensor-product box
-grids. It represents known data (`pdmat`) and continuous decision matrices
+grids. It represents known data (`pdmat`) and decision matrices
 (`pdvar`) in cell-wise Bernstein bases, forms
 rate-vertex derivatives with `rhodiff`, and exports finite certificates to
 YALMIP through `pdlmi`.
 
-Current source and documentation: **v1.4.3**. Latest tagged GitHub Release:
-**v1.4.0**.
+Current source and documentation: **v1.5.0**. Latest tagged GitHub Release:
+**v1.5.0**.
+
+## What changed in v1.5.0
+
+- `Continuity` records a direction-wise continuity lower bound, with `-1`
+  denoting no C0 guarantee and `Inf` denoting a global polynomial in that
+  direction. Constructors accept scalar shorthand or one order per direction.
+  The public `pdmat` and `pdvar` constructors require nonnegative orders or `Inf`.
+  `IsContinuous` is derived from these orders.
+- Decision construction retains C0 as the default and supports higher-order
+  continuity through spline controls and cell-wise Bernstein extraction.
+  These controls generally are not function values at grid nodes.
+- Known coefficient data infer continuity, while an explicit order requests a
+  verified lower bound. Differentiation, algebra, indexing, and numeric recovery
+  now carry the corresponding direction-wise continuity information.
+- Common-grid alignment restricts existing coefficients to each target cell.
+  This preserves discontinuities without fitting across a source-cell boundary.
+  Affine derivative combinations and degree-zero-factor products also use
+  specialized assembly paths.
+- Both manuals explain the supported forms, examples, and limitations against
+  the current source. The v1.5.0 release includes the accepted printable manual.
 
 ## What changed in v1.4.3
 
@@ -47,7 +67,7 @@ Current source and documentation: **v1.4.3**. Latest tagged GitHub Release:
 - The printable and Web manuals document the new API and examples. The public
   inventory now contains 194 symbols.
 
-The latest tagged v1.4.0 release retains the mixed `sdpvar`/`pdmat`
+The earlier tagged v1.4.0 release introduced the mixed `sdpvar`/`pdmat`
 multiplication feature described in its release notes.
 
 ## Historical migration from v1.2
@@ -77,13 +97,15 @@ may continue to use names such as `UsePolya`, `PutinarOrder`, and
 - Tensor coefficient counts are `prod(Degree + 1)`. Alignment uses the
   componentwise maximum, multiplication adds degrees componentwise, and
   elevation accepts direction-wise increments.
-- A zero-degree axis means that the object is constant in that direction.
+- A zero-degree axis makes each cell polynomial constant in that direction.
+  Known nested data may still jump between cells. Decision construction shares
+  that constant across the direction to satisfy its continuity requirement.
   `rhodiff` preserves a common tensor degree by exact elevation.
 - `PolyaDegree`, `PutinarOrder`, `SparseFullBoxOrder`, and `FullBoxOrder`
   accept scalar shorthand or per-axis vectors. `BandWidth` remains scalar.
 
-See the [v1.4.0 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.4.0)
-for the latest immutable package snapshot. The v1.3.8 and v1.2.4
+See the [v1.5.0 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.0)
+for the latest immutable package snapshot. The v1.4.3, v1.3.8, and v1.2.4
 manuals remain the final documentation snapshots of their completed minor
 lines in the version history.
 
@@ -160,6 +182,8 @@ accept solver results or recovered objectives only after checking
   implement structural-matrix chordal decomposition.
 - Function-only `pdmat` data need explicit Bernstein coefficient evidence
   before coefficient algebra or certificate assembly.
+- Function-only `pdmat` reports unknown continuity and rejects an explicit
+  `Continuity` request. Known-data seam checks use a numerical tolerance.
 - YALMIP owns objectives, solver selection, optimization, and diagnostics.
 
 ## Verify a checkout
@@ -171,14 +195,15 @@ results = tests.run_all();
 assert(all([results.Passed]) && ~any([results.Incomplete]))
 ```
 
-The v1.4.3 source gate passed 809 runtime tests with zero failures and zero
-incompletes, including the traceability gate for 169 public API entries.
-`tests.run_coverage()` measured 3308/3420 statements (96.73%) and 1692/1796
-decisions (94.21%), above the unchanged percentage baselines of 3325/3442
-and 1671/1782. Eight isolated fault injections were detected by behavioral
-assertions. Feasible solver checks used MOSEK and required
-`diagnostic.problem == 0`, finite values, and independent normalized residuals
-no greater than `1e-7`; infeasible controls were also retained.
+The v1.5.0 source gate passed 848 runtime tests with zero failures and zero
+incompletes, including the traceability gate for 171 public API entries.
+`tests.run_coverage()` also passed the same 848 tests and measured
+3626/3746 statements (96.80%) and 1853/1964 decisions (94.35%), above the
+unchanged percentage baselines of 3325/3442 and 1671/1782. Feasible solver
+checks used MOSEK and required `diagnostic.problem == 0`, finite values, and
+independent normalized residuals no greater than `1e-7`. Infeasible controls
+were also retained. These correctness checks do not establish a speedup for
+every workload.
 
 Run the independent MATLAB SOS validation from the repository root:
 
@@ -192,8 +217,8 @@ Run the independent Julia/SumOfSquares validation with:
 julia --project=sos_validation/julia sos_validation/julia/run_all.jl
 ```
 
-The earlier release gate passed 54 MATLAB SOS tests and 231 Julia SOS tests;
-these optional external comparisons were not rerun for v1.4.3. On a
+The earlier release gate passed 54 MATLAB SOS tests and 231 Julia SOS tests.
+These optional external comparisons were not run again for v1.5.0. On a
 Windows system that blocks cached Julia extension DLLs, use the same command
 with `--compiled-modules=no` after `julia`.
 

@@ -21,7 +21,7 @@ $\mathcal V_{\mathcal R}$ follow the
 
 ## Purpose
 
-Return a discontinuous, rate-vertex derivative expression for a `pdvar` object.
+Return a cell-wise, rate-vertex derivative expression for a `pdvar` object.
 
 ## Syntax
 
@@ -39,11 +39,18 @@ D = rhodiff(P)
 
 ## Output
 
-`D` is a `pdvar` with `IsContinuous=false`, `NumRateRows` equal to the exact
+`D` is a `pdvar` with propagated `Continuity`, `NumRateRows` equal to the exact
 stored-row count, and `SourceSummary="derivative"`. It inherits the usual read-only fields
 (`GridInfo`, `MatrixSize`, `Degree`, `LocalValues`, `ContainsDecision`,
 `RateBounds`, and the rest) and is inspected with ordinary dot syntax or
 `coeffs`.
+
+The `Continuity` bound uses only nonzero rate-weighted partials. The
+differentiated direction loses one finite order, down to `-1`, while tangential
+orders and `Inf` are retained. Componentwise minima combine the contributing
+partials and rate rows. Zero rate multipliers and coefficient-wise zero
+partials are omitted. A completely zero derivative has `Inf` in every
+direction. `IsContinuous` is therefore `all(D.Continuity >= 0)`.
 
 Each physical cell stores one coefficient row per distinct `rho_dot` vertex.
 An axis contributes two choices only when its lower and upper bounds differ.

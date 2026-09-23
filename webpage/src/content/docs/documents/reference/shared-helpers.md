@@ -11,6 +11,37 @@ They are documented as maintainer-facing support APIs. `bernTbl`,
 on the [protected backend utilities](/GriD-LMIA/documents/reference/bernstein-utilities/)
 page.
 
+## <span id="helper-bernrestrict"></span>`helper.bernRestrict` And <span id="helper-refinevals"></span>`helper.refineVals`
+
+```matlab
+map = helper.bernRestrict(degree, lo, hi)
+values = helper.refineVals(info, obj)
+```
+
+`bernRestrict` returns a square numeric map with `degree+1` rows and columns.
+For a normalized interval `0 <= lo < hi <= 1`, it maps a column of original
+Bernstein coefficients to the same polynomial on that subinterval using
+de Casteljau subdivision. Both endpoint values are preserved.
+
+`refineVals` accepts target grid metadata from `helper.mkGrid` and an ordinary
+coefficient-backed object. The target grid refines the original grid with
+identical outer bounds. It returns a nested coefficient tree preserving degree,
+payload shape, label order, and existing symbolic decisions. Each source cell
+is restricted separately, preserving both sides of a discontinuous seam.
+
+```matlab
+A = pdmat([0 1 3], {{0, 1}, {4, 6}}, Degree=1);
+info = helper.mkGrid({[0 0.5 1 2 3]});
+values = helper.refineVals(info, A);
+assert(values{2}{end} == 1 && values{3}{1} == 4)
+```
+
+These developer-facing helpers assume caller-validated degrees, intervals,
+grid relationships, coefficient evidence, and ordinary rows. Validation belongs
+to the owning caller. Public algebra requires matching physical grids for
+rate-vertex tables, while `refineVals` accepts ordinary rows only. See
+[exact algebra](/GriD-LMIA/documents/reference/pdmat/algebra/#continuity-and-exact-refinement).
+
 ## <span id="helper-cellget"></span>`helper.cellGet`
 
 **Syntax:** `leaf = helper.cellGet(values,cellSubscripts)`.
@@ -167,23 +198,30 @@ weights finite. It returns weights for the owning convolution kernel.
 
 ## <span id="helper-chkcont"></span>`helper.chkCont`
 
-**Syntax:** `tf = helper.chkCont(values,cellCounts,degree)`.
+**Syntax:** `tf = helper.chkCont(values,cellCounts,degree)`,
+`[tf,continuity] = helper.chkCont(values,cellCounts,degree,grids)`, or
+`[tf,continuity] = helper.chkCont(values,cellCounts,degree,grids,maxOrders)`.
 
 **Arguments:** `values` is a normalized nested coefficient tree.
-`cellCounts` and `degree` are normalized `1 × ell` rows.
+`cellCounts` and `degree` are normalized `1 × ell` rows. Optional `grids`
+supplies physical axis vectors, while `maxOrders` supplies scalar or
+direction-wise verification caps. Omitted grids use unit-width cells.
 
-**Output and shape:** `tf` is one logical scalar. It is true only when every
-pair of neighboring physical cells has matching coefficients on the complete
-shared face and on every stored row.
+**Output and shape:** `tf` is one logical scalar indicating whether every
+requested seam order matches. The historical three-input, one-output form
+checks order zero. The second output classifies the highest proved order per
+direction, capped by `maxOrders` when supplied. It is `-1` after a value mismatch
+and `Inf` after all orders through the axis degree pass. Physical derivatives
+use forward differences divided by the corresponding cell-width power across
+complete tensor faces, matrix entries, and stored rows.
 
 **Validation:** The helper classifies and preserves existing internal storage.
 Numeric faces use the scale-aware tolerance
 `1e-9*max(1,norm(lhs,'fro'),norm(rhs,'fro'))`. Affine `sdpvar` faces compare
 their complete bases exactly.
 
-**Limitations:** Inputs are assumed structurally valid. The function returns
-false at the first mismatch and preserves the input coefficients. Constructors
-own continuity enforcement.
+**Limitations:** Inputs are assumed structurally valid. The function preserves
+the input coefficients. Constructors own continuity enforcement.
 
 **See Also:** [`pdmat constructor`](/GriD-LMIA/documents/reference/pdmat/constructor/) · [`pdvar value`](/GriD-LMIA/documents/reference/pdvar/value/)
 

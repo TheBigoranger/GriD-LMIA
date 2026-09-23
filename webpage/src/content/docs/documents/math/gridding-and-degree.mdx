@@ -91,7 +91,7 @@ $$
 $$
 
 For one-parameter degree $\vect m=(2)$, each cell has labels
-$i_1=0,1,2$, but a continuous
+$i_1=0,1,2$, but a default order-zero continuous
 `pdvar` shares the endpoint handle across the interface.
 
 ## Two-Dimensional Input
@@ -100,7 +100,7 @@ An anisotropic grid is valid and often useful:
 
 ```matlab
 grid = {[0 0.25 1], [-1 1]};
-A = pdmat(grid, @(rho1,rho2) [1+rho1 rho1*rho2; rho1*rho2 2+rho2^2], ...
+A = pdmat(grid, @(rho1,rho2) [1+rho1^3 rho1*rho2; rho1*rho2 2+rho2], ...
     Degree=[3 1]);
 ```
 
@@ -125,7 +125,7 @@ $\prod_{s=1}^{\ell}(m_s+1)$ local labels. A scalar input is uniform shorthand fo
 row vector. The two products measure different things:
 physical partition size and local polynomial representation size.
 
-`pdbase.cells()` traverses physical cells, while `pdbase.labels()` traverses
+`pdbase.cells()` traverses physical cells, while `pdbase.lbls()` traverses
 zero-based Bernstein labels. `LocalValues` stores the corresponding nested
 cell structure. See [pdbase storage and inspection](/GriD-LMIA/documents/reference/pdbase/storage-inspection/)
 for the exact traversal contract.
