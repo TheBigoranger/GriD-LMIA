@@ -29,6 +29,14 @@ function test_function_only_rejection_survives_cancelled_decision(testCase)
     testCase.verifyError(@() F-Z,'pdvar:FunctionOnlyAlgebra');
 end
 
+function test_zero_subtrahend_retains_common_grid(testCase)
+    P = pdvar(1, [0 1], Degree=1);
+    Z = pdmat([0 .5 1], {0, 0, 0}, Degree=1);
+    C = P - Z;
+    testCase.verifyEqual(C.GridInfo.Vectors{1}, [0 .5 1]);
+    tests.infrastructure.verify_expr(testCase, C.evaluate(.25), P.evaluate(.25));
+end
+
 function test_complete_residual_in_both_orders(testCase)
     A = tests.infrastructure.fixture("pdvar", true);
     saved = A.LocalValues;

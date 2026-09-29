@@ -64,6 +64,16 @@ function test_proven_numeric_zeros_identities_only_size(testCase)
         "pdmat:InvalidSubtraction");
 end
 
+function test_zero_identity_retains_common_grid_and_rate_bounds(testCase)
+    A = pdmat([0 1], {2, 4}, Degree=1);
+    Z = pdmat([0 .5 1], {0, 0, 0}, Degree=1, RateBounds=[-1 2]);
+    for C = {A + Z, Z + A}
+        testCase.verifyEqual(C{1}.GridInfo.Vectors{1}, [0 .5 1]);
+        testCase.verifyEqual(C{1}.RateBounds, [-1 2]);
+        testCase.verifyEqual(C{1}.evaluate(.25), A.evaluate(.25));
+    end
+end
+
 function test_ordinary_operands_broadcast_products_allow_explicit(testCase)
     % Ordinary operands broadcast; products allow explicit rows on one side.
     R = rateScalar();

@@ -39,9 +39,19 @@ function out = evaluate(obj, pt)
     for p = 1:numel(alpha)
         deg = obj.Degree(p);
         basis = zeros(1, deg + 1);
-        for j = 0:deg
-            basis(j + 1) = nchoosek(deg, j) ...
-                * (1 - alpha(p))^(deg - j) * alpha(p)^j;
+        if alpha(p) == 0
+            basis(1) = 1;
+        elseif alpha(p) == 1
+            basis(end) = 1;
+        else
+            j = 0:deg;
+            % Log weights keep large binomial coefficients finite before
+            % multiplying by small powers; normalization retains unity.
+            logBasis = gammaln(deg + 1) - gammaln(j + 1) ...
+                - gammaln(deg - j + 1) ...
+                + j .* log(alpha(p)) + (deg - j) .* log1p(-alpha(p));
+            basis = exp(logBasis);
+            basis = basis / sum(basis);
         end
         weights = kron(weights, basis);
     end

@@ -38,3 +38,11 @@ function test_unequal_cell_matrix_polynomial(testCase)
     tests.infrastructure.verify_expr(testCase,actual,expected);
     testCase.verifyError(@() helper.fitVals(info,-1,[1 1],@(r) r,'fixture'), 'fixture:InvalidDegree');
 end
+
+function test_ill_conditioned_explicit_degree_rejected(testCase)
+    info = helper.mkGrid({[0 1]}, "fixture");
+    testCase.verifyError(@() helper.fitVals(info, 30, [1 1], ...
+        @(r) r(1), "fixture"), "fixture:UnstableBernsteinFit");
+    testCase.verifyError(@() helper.fitVals(info, 1030, [1 1], ...
+        @(r) r(1), "fixture"), "fixture:UnstableBernsteinFit");
+end

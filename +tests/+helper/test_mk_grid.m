@@ -31,3 +31,8 @@ function test_complete_grid_metadata(testCase)
     testCase.verifyEqual(actual.Points, [2 -3;2 5;7 -3;7 5;11 -3;11 5]);
     testCase.verifyError(@() helper.mkGrid({[2 2]},'fixture'), 'fixture:InvalidGridVector');
 end
+
+function test_reject_nonfinite_cell_width(testCase)
+    testCase.verifyError(@() helper.mkGrid({[-1e308 1e308]}, "fixture"), ...
+        "fixture:InvalidGridVector");
+end

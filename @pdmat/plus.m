@@ -41,9 +41,12 @@ function out = plus(lhs, rhs)
                 error("pdmat:InvalidAddition", ...
                     "pdmat matrix sizes are incompatible for this operation.");
             end
-            zeroVal.pickRateBounds("pdmat:InvalidAddition", zeroVal, out);
-            zeroVal.mergeGrid("pdmat:MixedGrid", zeroVal, out);
-            return
+            rb = zeroVal.pickRateBounds("pdmat:InvalidAddition", zeroVal, out);
+            grid = zeroVal.mergeGrid("pdmat:MixedGrid", zeroVal, out);
+            % A finer zero grid or changed rate bounds must reach knownBinOp.
+            if isequal(grid, out.GridInfo.Vectors) && isequal(rb, out.RateBounds)
+                return
+            end
         end
     end
     if isa(lhs, "pdmat") && helper.isZero(rhs, "add", lhs.MatrixSize)

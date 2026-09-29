@@ -22,9 +22,12 @@ function out = minus(lhs, rhs)
             error("pdvar:InvalidSubtraction", ...
                 "pdvar operand matrix sizes are incompatible for this operation.");
         end
-        lhs.mergeGrid("pdvar:MixedGrid", rhs, lhs);
-        out = lhs;
-        return
+        grid = lhs.mergeGrid("pdvar:MixedGrid", rhs, lhs);
+        % A finer zero grid still changes the affine certificate partition.
+        if isequal(grid, lhs.GridInfo.Vectors)
+            out = lhs;
+            return
+        end
     end
     if isa(lhs, "pdvar") && helper.isZero(rhs, "add", lhs.MatrixSize)
         out = lhs;

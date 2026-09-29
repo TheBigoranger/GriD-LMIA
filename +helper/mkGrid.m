@@ -34,6 +34,11 @@ function info = mkGrid(grid, owner)
             "grid vector", ...
             "numeric", "real", "vector", "finite", "increasing", "MinNumel", 2);
         v = reshape(v, 1, []);
+        % Parameter-to-cell mapping needs a finite width for every interval.
+        if any(~isfinite(diff(v)))
+            error(owner + ":InvalidGridVector", ...
+                "Grid intervals must have finite widths.");
+        end
 
         vecs{k} = v;
         bounds(k, :) = [v(1), v(end)];

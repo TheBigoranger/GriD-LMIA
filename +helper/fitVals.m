@@ -26,6 +26,12 @@ function [vals, labels] = fitVals(info, deg, sz, evalFcn, owner)
     vecs = info.Vectors;
     nPar = numel(vecs);
     deg = helper.normDeg(deg, nPar, owner + ":InvalidDegree", "Degree");
+    % ponytail: equispaced fitting is unstable at high degree; reject it until
+    % a stable fitting algorithm replaces this collocation solve.
+    if any(deg > 64)
+        error(owner + ":UnstableBernsteinFit", ...
+            "Explicit Degree is too high for stable Bernstein fitting.");
+    end
     labels = helper.combRows(arrayfun(@(d) 0:d, deg, ...
         "UniformOutput", false));
     nCoeff = size(labels, 1);
@@ -44,6 +50,11 @@ function [vals, labels] = fitVals(info, deg, sz, evalFcn, owner)
             end
             basis(s, k) = term;
         end
+    end
+    % Reject fits that could corrupt coefficients before polynomial checks.
+    if rcond(basis) < 1e-6
+        error(owner + ":UnstableBernsteinFit", ...
+            "Bernstein fitting is ill-conditioned for this Degree.");
     end
     weights = basis \ eye(nCoeff);
     nCell = info.NumNodes - 1;

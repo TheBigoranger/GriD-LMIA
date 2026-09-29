@@ -27,6 +27,8 @@ classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
     %   explicit request fails with pdmat:FunctionOnlyContinuity.
     %   Function handles with explicit Degree are
     %   validated as local Bernstein data while retaining FunctionHandle.
+    %   Ill-conditioned explicit-degree fits fail with
+    %   pdmat:UnstableBernsteinFit instead of storing unreliable controls.
     %   Public Degree is a 1-by-ell row vector. Explicit multidimensional
     %   scalar Degree expands uniformly and warns once; omitted inference and
     %   one-dimensional construction remain warning-free.

@@ -103,6 +103,15 @@ function test_zero_pdvar_pdmat_numeric_operands_preserve(testCase)
         "pdvar:InvalidSubtraction");
 end
 
+function test_zero_identity_retains_common_grid(testCase)
+    P = pdvar(1, [0 1], Degree=1);
+    Z = pdmat([0 .5 1], {0, 0, 0}, Degree=1);
+    for C = {P + Z, Z + P}
+        testCase.verifyEqual(C{1}.GridInfo.Vectors{1}, [0 .5 1]);
+        tests.infrastructure.verify_expr(testCase, C{1}.evaluate(.25), P.evaluate(.25));
+    end
+end
+
 function test_bare_affine_sdpvar_matrices_promote_constant(testCase)
     % Bare affine sdpvar matrices promote to constant coefficient data.
     P = pdvar(2, {[0 1]}, "full");

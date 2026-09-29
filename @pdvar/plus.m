@@ -42,8 +42,11 @@ function out = plus(lhs, rhs)
             error("pdvar:InvalidAddition", ...
                 "pdvar operand matrix sizes are incompatible for this operation.");
         end
-        out.mergeGrid("pdvar:MixedGrid", zeroVal, out);
-        return
+        grid = out.mergeGrid("pdvar:MixedGrid", zeroVal, out);
+        % A finer zero grid still changes the affine certificate partition.
+        if isequal(grid, out.GridInfo.Vectors)
+            return
+        end
     end
     if isa(lhs, "pdvar") && helper.isZero(rhs, "add", lhs.MatrixSize)
         out = lhs;

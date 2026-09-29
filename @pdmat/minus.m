@@ -29,10 +29,13 @@ function out = minus(lhs, rhs)
                 "pdmat matrix sizes are incompatible for this operation.");
         end
 
-        rhs.pickRateBounds("pdmat:InvalidSubtraction", rhs, lhs);
-        rhs.mergeGrid("pdmat:MixedGrid", rhs, lhs);
-        out = lhs;
-        return
+        rb = rhs.pickRateBounds("pdmat:InvalidSubtraction", rhs, lhs);
+        grid = rhs.mergeGrid("pdmat:MixedGrid", rhs, lhs);
+        % A finer zero grid or changed rate bounds must reach knownBinOp.
+        if isequal(grid, lhs.GridInfo.Vectors) && isequal(rb, lhs.RateBounds)
+            out = lhs;
+            return
+        end
     end
 
     if isa(lhs, "pdmat") && helper.isZero(rhs, "add", lhs.MatrixSize)

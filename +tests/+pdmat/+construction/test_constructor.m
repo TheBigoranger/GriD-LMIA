@@ -62,6 +62,18 @@ function test_explicit_degree_tensor_functions_populate_bernstein(testCase)
     testCase.verifyEqual(A.evaluate([0.5 11]), [121.5; -120.5], AbsTol=1e-10);
 end
 
+function test_explicit_degree_rejects_unstable_fit(testCase)
+    testCase.verifyError(@() pdmat([0 1], @(rho) rho, Degree=30), ...
+        "pdmat:UnstableBernsteinFit");
+    testCase.verifyError(@() pdmat([0 1], @numericOnlyMatrixPolynomial, Degree=30), ...
+        "pdmat:UnstableBernsteinFit");
+end
+
+function test_constructor_rejects_nonfinite_cell_width(testCase)
+    testCase.verifyError(@() pdmat([-1e308 1e308], {0, 1}, Degree=1), ...
+        "pdmat:InvalidGridVector");
+end
+
 function test_polynomial_handles_become_coefficient_backed_when(testCase)
     % Polynomial handles should become coefficient-backed when Degree is
     % explicit.

@@ -32,6 +32,15 @@ function test_function_only_cancellation_shortcuts_rejected(testCase)
     testCase.verifyEqual(F.LocalValues, saved);
 end
 
+function test_zero_subtrahend_retains_common_grid_and_rate_bounds(testCase)
+    A = pdmat([0 1], {2, 4}, Degree=1);
+    Z = pdmat([0 .5 1], {0, 0, 0}, Degree=1, RateBounds=[-1 2]);
+    C = A - Z;
+    testCase.verifyEqual(C.GridInfo.Vectors{1}, [0 .5 1]);
+    testCase.verifyEqual(C.RateBounds, [-1 2]);
+    testCase.verifyEqual(C.evaluate(.25), A.evaluate(.25));
+end
+
 function test_complete_residual_in_both_orders(testCase)
     A = tests.infrastructure.fixture("pdmat", true);
     saved = A.LocalValues;

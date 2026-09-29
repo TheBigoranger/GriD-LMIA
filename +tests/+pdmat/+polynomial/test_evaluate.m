@@ -45,6 +45,14 @@ function test_scalar_coefficient_backed_data_evaluate_by(testCase)
     testCase.verifyEqual(A.evaluate(0.75), 3.5, AbsTol=1e-12);
 end
 
+function test_high_degree_linear_has_finite_bernstein_weights(testCase)
+    % The binomial coefficient overflows before its Bernstein term does.
+    A = pdmat([0 1], num2cell(1 + (0:1030) / 1030), Degree=1030);
+    for point = [0 .5 1]
+        testCase.verifyEqual(A.evaluate(point), 1 + point, AbsTol=1e-10);
+    end
+end
+
 function test_tensor_coefficient_backed_data_interpolate_across(testCase)
     % Tensor coefficient-backed data should interpolate across both dimensions.
     A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=[1 1]);
