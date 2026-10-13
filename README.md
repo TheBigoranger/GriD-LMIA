@@ -80,14 +80,12 @@ The [Web manual](https://www.ethanyxu.com/GriD-LMIA/) and [printable manual](doc
 
 Direct is the default. Calling another selector replaces the current certificate:
 
-| Certificate | Selection | Role |
-| --- | --- | --- |
-| Direct | `constraint = P >= A` | Coefficient-wise Bernstein inequalities |
-| Pólya | `constraint.usePolya([1 2])` | Degree elevation before coefficient tests |
-| Putinar | `constraint.usePutinar([2 3])` | Box quadratic-module Gram certificate |
-| SparsePutinar | `constraint.useSpPut(2, [2 3])` | Tensor windows for the Putinar Gram certificate |
-| SparseFullBox | `constraint.useSpBox(2, [2 3])` | Tensor windows for full-box preordering |
-| FullBox | `constraint.useFullBox([2 3])` | Dense full-box preordering |
+- **Direct:** `constraint = P >= A` gives coefficient-wise Bernstein inequalities.
+- **Pólya:** `constraint.usePolya([1 2])` elevates degree before coefficient tests.
+- **Putinar:** `constraint.usePutinar([2 3])` uses a box quadratic-module Gram certificate.
+- **SparsePutinar:** `constraint.useSpPut(2, [2 3])` uses tensor windows for the Putinar Gram certificate.
+- **SparseFullBox:** `constraint.useSpBox(2, [2 3])` uses tensor windows for full-box preordering.
+- **FullBox:** `constraint.useFullBox([2 3])` uses dense full-box preordering.
 
 These are box-specific, fixed-order sufficient constructions. Sparse certificates use Bernstein-label windows; they do not infer sparsity graphs or perform chordal decomposition. Function-only `pdmat` objects need explicit coefficient evidence before coefficient algebra or certificate assembly.
 
