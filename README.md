@@ -7,8 +7,18 @@ grids. It represents known data (`pdmat`) and decision matrices
 rate-vertex derivatives with `rhodiff`, and exports finite certificates to
 YALMIP through `pdlmi`.
 
-Current source and documentation: **v1.5.0**. Latest tagged GitHub Release:
+Current source and documentation: **v1.5.1**. Latest tagged GitHub Release:
 **v1.5.0**.
+
+## What changed in v1.5.1
+
+- Zero-operand addition and subtraction preserve refined grid metadata.
+- Bernstein evaluation avoids overflowing binomial coefficients; explicit-degree
+  fitting rejects ill-conditioned systems, and grids reject nonfinite cell widths.
+- Two examples based on an unpublished time-delay manuscript are temporarily
+  excluded from the public package and printable manual.
+- Public examples omit private source paths, and local performance tools are
+  excluded from the package distribution.
 
 ## What changed in v1.5.0
 

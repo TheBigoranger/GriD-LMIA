@@ -6,9 +6,7 @@
 %   Decision and Control, 1998, Example 1,
 %   DOI 10.1109/CDC.1998.758549. The matrices and rate-dependent bounded-real
 %   formulation follow the GriD-LMIA software paper, "Degree, grid, and
-%   certificate sensitivity when ell=1." Local anchors are
-%   H:\office\UCI\research\Grid LMIA\PD software paper v2\paper.tex and
-%   pics/masubuchi_k2_comparison.csv in that project.
+%   certificate sensitivity when ell=1."
 %   Reproduction type: exact model and certificate setting used by the
 %   software-paper row m=1, k=2, Putinar order 5.
 %

@@ -3,10 +3,7 @@
 % Provenance
 %   Source: Hai-Hua Yu and Guangren Duan, LMIs in Control Systems: Analysis,
 %   Design and Applications, CRC Press, 2013, Example 4.9 and LMI (4.30),
-%   ISBN 978-1-4665-8300-9. Local source:
-%   H:\office\UCI\research\paper reading\LMI in control\Yu, Hai-Hua_ Duan,
-%   Guangren - LMIs in control systems _ analysis, design and applications
-%   (2013, CRC Press) - libgen.lc.pdf.
+%   ISBN 978-1-4665-8300-9.
 %   Reproduction type: exact affine system and constant common quadratic
 %   Lyapunov certificate, translated from the MATLAB LMI Toolbox to
 %   GriD-LMIA.

@@ -3,11 +3,8 @@
 % Provenance
 %   Source: Hai-Hua Yu and Guangren Duan, LMIs in Control Systems: Analysis,
 %   Design and Applications, CRC Press, 2013, Example 4.10, equations
-%   (4.33)-(4.35), ISBN 978-1-4665-8300-9. Local source:
-%   H:\office\UCI\research\paper reading\LMI in control\Yu, Hai-Hua_ Duan,
-%   Guangren - LMIs in control systems _ analysis, design and applications
-%   (2013, CRC Press) - libgen.lc.pdf. The model is attributed there to
-%   Gahinet et al. (1996) and Yu (2002).
+%   (4.33)-(4.35), ISBN 978-1-4665-8300-9. The model is attributed there
+%   to Gahinet et al. (1996) and Yu (2002).
 %   Reproduction type: exact unit-mass model and both parameter boxes from
 %   the textbook, translated to a two-parameter Direct certificate.
 %

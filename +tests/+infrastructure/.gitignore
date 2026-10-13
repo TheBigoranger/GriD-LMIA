@@ -1,0 +1,12 @@
+# Publish only reusable test support and the API traceability gate.
+# Performance tools and their configuration remain in local-full.
+/*.py
+/benchmark_*.m
+/operator_solver_evidence.m
+/operator_benchmark_manifest.json
+
+# Disposable historical evidence must not be reintroduced during synchronization.
+/*_20[0-9][0-9][0-9][0-9][0-9][0-9].json
+/*_20[0-9][0-9][0-9][0-9][0-9][0-9].md
+/*.log
+/*.mat
