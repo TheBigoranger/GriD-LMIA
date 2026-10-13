@@ -215,23 +215,6 @@ independent normalized residuals no greater than `1e-7`. Infeasible controls
 were also retained. These correctness checks do not establish a speedup for
 every workload.
 
-Run the independent MATLAB SOS validation from the repository root:
-
-```matlab
-run("sos_validation/matlab/tests/run_tests.m")
-```
-
-Run the independent Julia/SumOfSquares validation with:
-
-```text
-julia --project=sos_validation/julia sos_validation/julia/run_all.jl
-```
-
-The earlier release gate passed 54 MATLAB SOS tests and 231 Julia SOS tests.
-These optional external comparisons were not run again for v1.5.0. On a
-Windows system that blocks cached Julia extension DLLs, use the same command
-with `--compiled-modules=no` after `julia`.
-
 ## Documentation
 
 - [Project guide and repository branches](SUMMARY.md)
