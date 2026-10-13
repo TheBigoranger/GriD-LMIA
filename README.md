@@ -224,6 +224,7 @@ with `--compiled-modules=no` after `julia`.
 
 ## Documentation
 
+- [Project guide and repository branches](SUMMARY.md)
 - [Web manual](https://thebigoranger.github.io/GriD-LMIA/)
 - [Printable manual (PDF)](https://thebigoranger.github.io/GriD-LMIA/manual.pdf)
 - [Install and download](https://thebigoranger.github.io/GriD-LMIA/install/)
@@ -231,9 +232,11 @@ with `--compiled-modules=no` after `julia`.
 - [Version history](https://thebigoranger.github.io/GriD-LMIA/version-history/)
 - [GitHub Releases](https://github.com/TheBigoranger/GriD-LMIA/releases)
 
-The public repository delivers the printable manual at `doc/manual.pdf`; its
+The public `main` branch delivers the printable manual at `doc/manual.pdf`; its
 TeX sources remain in the local-complete development worktree. The
-Astro/Starlight Web manual source is in `webpage/`.
+Astro/Starlight Web manual source is published separately under
+[`webpage/` on the `webpage` branch](https://github.com/TheBigoranger/GriD-LMIA/tree/webpage/webpage).
+See [SUMMARY.md](SUMMARY.md) for project navigation and a lightweight package clone.
 
 ## Citing GriD-LMIA
 
