@@ -3,6 +3,13 @@ function tests = test_mtimes
     tests = functiontests(localfunctions);
 end
 
+function test_integer_numeric_operands_rejected_consistently(testCase)
+    A = pdmat([0 1], {2,0}, Degree=1);
+    testCase.verifyError(@() A*uint8(2), "pdmat:InvalidMultiplication");
+    testCase.verifyError(@() uint8(2)*A, "pdmat:InvalidMultiplication");
+    testCase.verifyError(@() A+uint8(2), "pdmat:InvalidAddition");
+end
+
 function test_square_constant_factors_preserve_written_order_for_numeric_storage(testCase)
     % Noncommuting square factors expose reversals as values, not shape errors.
     for convert={@double,@single,@sparse}

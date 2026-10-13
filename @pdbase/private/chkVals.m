@@ -124,5 +124,5 @@ function chkMat(val, sz)
 
     helper.chk(val, "pdbase:InvalidCoefficientPayload", ...
         "ordinary local coefficient payload", ...
-        "numeric", "real", "finite", "Size", sz);
+        "numeric", "floating", "real", "finite", "Size", sz);
 end

@@ -3,6 +3,14 @@ function tests = test_mk_grid
     tests = functiontests(localfunctions);
 end
 
+function test_integer_grid_is_normalized_before_width_arithmetic(testCase)
+    info = helper.mkGrid({uint8([0 2])}, 'fixture');
+    testCase.verifyEqual(info.Vectors, {[0 2]});
+    tooLarge = [uint64(2)^53, uint64(2)^53+uint64(1)];
+    testCase.verifyError(@() helper.mkGrid({tooLarge}, 'fixture'), ...
+        'fixture:InvalidGridVector');
+end
+
 function test_later_axis_invalid_and_column_normalization(testCase)
     % Validate every axis while normalizing column-vector orientation.
     actual = helper.mkGrid({[-3; 1; 8], [2; 5]}, "fixture");

@@ -85,3 +85,11 @@ function err = catchErr(fcn)
     catch err
     end
 end
+
+function test_floating_payload_predicate_preserves_single_and_rejects_integers(testCase)
+    x = single([1 -2]);
+    testCase.verifyEqual(helper.chk(x, 'fixture:payload', 'payload', 'floating'), x);
+    testCase.verifyEqual(helper.chk([1 -2], 'fixture:payload', 'payload', 'floating'), [1 -2]);
+    testCase.verifyError(@() helper.chk(uint8(2), 'fixture:payload', 'payload', ...
+        'numeric', 'floating'), 'fixture:payload');
+end

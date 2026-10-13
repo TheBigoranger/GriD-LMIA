@@ -2,6 +2,32 @@ function tests = test_minus
     % Public pdmat.minus behavioral contracts.
     tests = functiontests(localfunctions);
 end
+
+function test_integer_zero_rejected_and_floating_identity_preserved(testCase)
+    A = pdmat([0 1], {[1 2;3 4], [2 3;4 5]}, Degree=1);
+    for zero = {uint8(0), zeros(2, 'int16')}
+        testCase.verifyError(@() A - zero{1}, "pdmat:InvalidSubtraction");
+        testCase.verifyError(@() zero{1} - A, "pdmat:InvalidSubtraction");
+    end
+    for zero = {0, single(0), zeros(2), zeros(2, 'single')}
+        right = A - zero{1};
+        left = zero{1} - A;
+        testCase.verifyEqual(right.LocalValues, A.LocalValues);
+        testCase.verifyEqual(double(left.evaluate(.5)), -A.evaluate(.5));
+    end
+end
+
+
+function test_near_equal_large_coefficients_keep_nonzero_residual(testCase)
+    A = pdmat([0 1], {1e9, 1e9}, Degree=1);
+    B = pdmat([0 1], {1e9+.5, 1e9+.5}, Degree=1);
+    testCase.verifyTrue(isequal(A,B));
+    C = A-B;
+    testCase.verifyEqual(C.evaluate(.5), -.5);
+    testCase.verifyEqual(toYalmip(A >= B), false);
+    Z = A-A;
+    testCase.verifyEqual(Z.evaluate(.5), 0);
+end
 function test_refined_tensor_subtraction_preserves_values(testCase)
     % Refine different axes while aligning unequal degrees componentwise.
     f = @(x,y) [x^2+y, x*y; 2*x-y, 1+y];

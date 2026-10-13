@@ -33,6 +33,12 @@ function info = mkGrid(grid, owner)
         v = helper.chk(grid{k}, owner + ":InvalidGridVector", ...
             "grid vector", ...
             "numeric", "real", "vector", "finite", "increasing", "MinNumel", 2);
+        if isinteger(v)
+            % Coordinates must not inherit integer subtraction/division rules.
+            % Reject adjacent 64-bit nodes that collapse on double conversion.
+            v = double(v);
+            helper.chk(v, owner + ":InvalidGridVector", "grid vector", "increasing");
+        end
         v = reshape(v, 1, []);
         % Parameter-to-cell mapping needs a finite width for every interval.
         if any(~isfinite(diff(v)))

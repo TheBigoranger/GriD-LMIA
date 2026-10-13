@@ -484,3 +484,8 @@ function payload = ratePayload(nPar)
         payload.Rate{k} = k * ones(2);
     end
 end
+
+function test_integer_payload_rejected_at_base_storage_boundary(testCase)
+    testCase.verifyError(@() pdbase({[0 1]}, [1 1], 1, {{uint8(2),uint8(0)}}), ...
+        'pdbase:InvalidCoefficientPayload');
+end

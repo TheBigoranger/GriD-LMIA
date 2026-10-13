@@ -127,7 +127,7 @@ function mat = chkMat(val, reqSize, errId)
 
     helper.chk(val, errId, ...
         "numeric operand", ...
-        "numeric", "real", "finite", "matrix", "nonempty");
+        "numeric", "floating", "real", "finite", "matrix", "nonempty");
     if isempty(reqSize)
         mat = val;
     elseif isscalar(val)

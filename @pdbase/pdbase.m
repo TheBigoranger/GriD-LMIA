@@ -26,6 +26,9 @@ classdef pdbase
     %     tf = obj.IsContinuous;
     %     elevated = obj.elevate(1);
     %
+    %   Numeric LocalValues must use double or single floating-point values.
+    %   Integer grid vectors are converted to double before cell arithmetic.
+    %
     %   IsContinuous is read-only and derived as all(Continuity >= 0); no
     %   separate Boolean continuity state is stored.
 

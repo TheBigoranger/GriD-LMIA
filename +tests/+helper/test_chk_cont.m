@@ -3,6 +3,27 @@ function tests = test_chk_cont
     tests = functiontests(localfunctions);
 end
 
+function test_zero_derivatives_survive_underflowing_width_powers(testCase)
+    values = {{0, 1, 2}, {2, 3, 4}};
+    [tf, continuity] = helper.chkCont(values, 2, 2, {[0 1e-200 2e-200]});
+    testCase.verifyTrue(tf);
+    testCase.verifyEqual(continuity, Inf);
+end
+
+function test_nonfinite_derivatives_and_large_norms_do_not_prove_continuity(testCase)
+    % Slopes 1e308 and 3e308 differ even if an intermediate derivative overflows.
+    values = {{0, 1}, {1, 4}};
+    [tf, continuity] = helper.chkCont(values, 2, 1, {[0 1e-308 2e-308]});
+    testCase.verifyFalse(tf);
+    testCase.verifyEqual(continuity, 0);
+
+    % Frobenius norms may overflow although every face entry remains finite.
+    lhs = repmat(1e308, 2);
+    rhs = lhs;
+    rhs(2, 2) = 9e307;
+    testCase.verifyFalse(helper.chkCont({{zeros(2), lhs}, {rhs, zeros(2)}}, 2, 1));
+end
+
 function test_tensor_face_checks_every_row_and_corner(testCase)
     % Matching full faces must include the last coefficient of the last row.
     values = {{ {1,2,3,4;11,12,13,14}, {2,5,4,6;12,15,14,16} }, ...

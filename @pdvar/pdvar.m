@@ -31,6 +31,9 @@ classdef (InferiorClasses = {?pdmat, ?sdpvar}) pdvar < pdbase
     %     P = pdvar(2, [0 1 2], "symmetric", Degree=2, Continuity=1);
     %     c = P.coeffs(1);
     %
+    %   Numeric algebra/assignment constants must be double or single.
+    %   Integer grid vectors are converted to double before cell arithmetic.
+    %
     %   pdvar is method-superior to pdmat and sdpvar so mixed known,
     %   decision, and affine symbolic algebra dispatches through pdvar.
 

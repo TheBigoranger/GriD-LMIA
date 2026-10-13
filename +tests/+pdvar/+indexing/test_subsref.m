@@ -3,6 +3,18 @@ function tests = test_subsref
     tests = functiontests(localfunctions);
 end
 
+function test_constant_selected_block_removes_decision_dependence(testCase)
+    P = pdvar(2, [0 1], 'full');
+    P(:,2) = [3;5];
+    C = P(:,2); V = P(:,1);
+    testCase.verifyTrue(P.ContainsDecision);
+    testCase.verifyFalse(C.ContainsDecision);
+    testCase.verifyTrue(V.ContainsDecision);
+    X = sdpvar(1,2,'full');
+    R = C*X;
+    tests.infrastructure.verify_expr(testCase,R.evaluate(.5),[3;5]*X);
+end
+
 function test_fixed_rate_tensor_slice_preserves_order_and_identity(testCase)
     % Repeated rectangular selectors retain a single active fixed-rate row.
     P = pdvar(2,3,{[0 2 5],[-3 1 6]},'full',Degree=[1 2]);

@@ -37,7 +37,8 @@
       "tests.helper.test_bern_conv/test_four_arguments_cover_ordinary_product_elevation",
       "tests.helper.test_bern_conv/test_degree_1030_first_required_range_where",
       "tests.helper.test_bern_conv/test_helpers_reject_misaligned_or_out_range",
-      "tests.helper.test_bern_conv/test_zero_degree_axes_and_later_invalid_labels"
+      "tests.helper.test_bern_conv/test_zero_degree_axes_and_later_invalid_labels",
+      "tests.helper.test_bern_conv/test_underflowing_weights_preserve_endpoint_and_shifted_ratios"
     ],
     "Contract": "helper.bernConvRatios: Moderate degrees retain the independently computed binomial values.; Four arguments cover ordinary product and elevation ratios.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
@@ -79,7 +80,8 @@
       "tests.helper.test_chk/test_unknown_predicate_tags_indicate_helper_bug",
       "tests.helper.test_chk/test_predicate_order_owns_first_standardized_failure",
       "tests.helper.test_chk/test_range_count_options_caller_errors_malformed",
-      "tests.helper.test_chk/test_later_matrix_entry_and_last_rate_bound_fail"
+      "tests.helper.test_chk/test_later_matrix_entry_and_last_rate_bound_fail",
+      "tests.helper.test_chk/test_floating_payload_predicate_preserves_single_and_rejects_integers"
     ],
     "Contract": "helper.chk: Valid numeric predicate chains should return the original value.; Cell validation failures preserve the caller ID and standard label text.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
@@ -97,7 +99,9 @@
       "tests.helper.test_chk_cont/test_late_interface_matrix_entry_and_rate_row_classification",
       "tests.helper.test_chk_cont/test_affine_symbolic_derivatives_compare_exact_bases",
       "tests.helper.test_chk_cont/test_invalid_direction_metadata_is_rejected",
-      "tests.helper.test_chk_cont/test_nonunit_derivative_threshold_and_interior_face_entry"
+      "tests.helper.test_chk_cont/test_nonunit_derivative_threshold_and_interior_face_entry",
+      "tests.helper.test_chk_cont/test_zero_derivatives_survive_underflowing_width_powers",
+      "tests.helper.test_chk_cont/test_nonfinite_derivatives_and_large_norms_do_not_prove_continuity"
     ],
     "Contract": "Preserve the three-input Boolean C0 check and optionally classify direction-wise physical-derivative matching through requested maximum orders.",
     "Oracle": "Independent finite differences scaled by each physical cell width, complete tensor faces, matrix entries, rate rows, numerical tolerance boundaries, and exact affine bases.",
@@ -132,6 +136,7 @@
     "Method": "isZero",
     "Tests": [
       "tests.helper.test_is_zero/test_numeric_zero_evidence_finite_real_nonempty",
+      "tests.helper.test_is_zero/test_additive_identity_requires_floating_numeric_type",
       "tests.helper.test_is_zero/test_scalar_zero_expands_while_incompatible_zero",
       "tests.helper.test_is_zero/test_nested_cells_constant_rate_payloads_share",
       "tests.helper.test_is_zero/test_function_only_pdmat_placeholder_zeros_algebra",
@@ -148,7 +153,8 @@
     "Tests": [
       "tests.helper.test_mk_grid/test_standalone_grid_helper_defaults_pdbase_owned",
       "tests.helper.test_mk_grid/test_complete_grid_metadata",
-      "tests.helper.test_mk_grid/test_later_axis_invalid_and_column_normalization"
+      "tests.helper.test_mk_grid/test_later_axis_invalid_and_column_normalization",
+      "tests.helper.test_mk_grid/test_integer_grid_is_normalized_before_width_arithmetic"
     ],
     "Contract": "helper.mkGrid: Compare complete public results with independently specified expectations.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
@@ -524,7 +530,8 @@
       "tests.pdbase.construction.test_constructor/test_valid_normalized_storage_has_identical_public",
       "tests.pdbase.construction.test_constructor/test_fast_trusts_later_generated_cells_strict",
       "tests.pdbase.construction.test_constructor/test_missing_nonscalar_nontext_empty_unsupported_modes",
-      "tests.pdbase.construction.test_constructor/test_fast_construction_may_trust_generated_later"
+      "tests.pdbase.construction.test_constructor/test_fast_construction_may_trust_generated_later",
+      "tests.pdbase.construction.test_constructor/test_integer_payload_rejected_at_base_storage_boundary"
     ],
     "Contract": "Construct normalized base state with one stored direction-wise Continuity bound and a dependent read-only IsContinuous compatibility property; parse legacy IsContinuous without storing a duplicate flag.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
@@ -769,7 +776,8 @@
       "tests.pdlmi.construction.test_constructor/test_strict_assembly_diagnoses_later_cell_tensor",
       "tests.pdlmi.construction.test_constructor/test_complete_direct_constraint_expression_order",
       "tests.pdlmi.assembly.test_equalities/test_composed_fixed_rate_equality_preserves_affine_targets",
-      "tests.pdlmi.assembly.test_known_pdmat/test_numeric_pdmat_comparisons_return_wrappers_equality"
+      "tests.pdlmi.assembly.test_known_pdmat/test_numeric_pdmat_comparisons_return_wrappers_equality",
+      "tests.pdlmi.assembly.test_known_pdmat/test_large_finite_semidefinite_certificates_preserve_sign"
     ],
     "Contract": "pdlmi.pdlmi: rhodiff stores one row per rate vertex; pdlmi constrains every row.; A fixed rate contributes one direct constraint without duplicate rows.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
@@ -783,7 +791,8 @@
       "tests.pdlmi.export.test_to_yalmip/test_refinement_derivative_constant_sandwich_exports_analytic_coefficients",
       "tests.pdlmi.export.test_to_yalmip/test_solver_facing_shot_concatenation_match_previous",
       "tests.pdlmi.export.test_to_yalmip/test_export_after_replacement_keeps_saved_list_independent",
-      "tests.pdlmi.solver.test_solver_smoke/test_composed_fixed_rate_certificate_and_infeasible_control"
+      "tests.pdlmi.solver.test_solver_smoke/test_composed_fixed_rate_certificate_and_infeasible_control",
+      "tests.pdlmi.assembly.test_known_pdmat/test_large_finite_semidefinite_certificates_preserve_sign"
     ],
     "Contract": "Export the full ordered stored constraint list including empty and mixed cases.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
@@ -1056,7 +1065,8 @@
       "tests.pdmat.polynomial.test_elevate/test_fixed_tensor_direction_reduces_active_rows",
       "tests.pdmat.polynomial.test_elevate/test_binomial_reference_all_rows",
       "tests.pdmat.polynomial.test_elevate/test_object_api_requires_coefficients",
-      "tests.pdmat.polynomial.test_elevate/test_zero_increment_does_not_admit_function_only_data"
+      "tests.pdmat.polynomial.test_elevate/test_zero_increment_does_not_admit_function_only_data",
+      "tests.pdmat.polynomial.test_elevate/test_high_degree_elevation_preserves_affine_polynomial"
     ],
     "Contract": "Preserve every polynomial and affine identity under degree elevation, across cells and rate rows.",
     "Oracle": "Independent binomial formulas for every cell and rate row, including rectangular payloads and unequal tensor degrees in fast and strict modes; explicit polynomial values.",
@@ -1241,9 +1251,11 @@
     "Method": "minus",
     "Tests": [
       "tests.pdmat.algebra.test_minus/test_complete_residual_in_both_orders",
+      "tests.pdmat.algebra.test_minus/test_integer_zero_rejected_and_floating_identity_preserved",
       "tests.pdmat.algebra.test_minus/test_refined_tensor_subtraction_preserves_values",
       "tests.pdmat.algebra.test_minus/test_function_only_cancellation_shortcuts_rejected",
-      "tests.pdmat.algebra.test_algebra_integration/test_tensor_refinement_product_transpose_and_reduction"
+      "tests.pdmat.algebra.test_algebra_integration/test_tensor_refinement_product_transpose_and_reduction",
+      "tests.pdmat.algebra.test_minus/test_near_equal_large_coefficients_keep_nonzero_residual"
     ],
     "Contract": "pdmat.minus: Compare complete public results with independently specified expectations.",
     "Oracle": "Native matrix payload operations and full affine difference bases.",
@@ -1270,7 +1282,8 @@
       "tests.pdmat.algebra.test_mtimes/test_zero_valued_active_rate_tables_cannot_multiply_each_other",
       "tests.pdmat.algebra.test_mtimes/test_function_only_zero_products_rejected",
       "tests.pdmat.algebra.test_algebra_integration/test_tensor_refinement_product_transpose_and_reduction",
-      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment"
+      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment",
+      "tests.pdmat.algebra.test_mtimes/test_integer_numeric_operands_rejected_consistently"
     ],
     "Contract": "Preserve operand order and binomial product weights, rate rows and affine identities; validate zero shortcuts.",
     "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
@@ -1378,7 +1391,10 @@
       "tests.pdmat.construction.test_constructor/test_certified_tensor_function_survives_composed_coefficient_use",
       "tests.pdmat.construction.test_continuity/test_automatic_classification_and_explicit_weaker_bounds",
       "tests.pdmat.construction.test_continuity/test_function_sources_scalar_warning_and_invalid_requests",
-      "tests.pdmat.construction.test_continuity/test_late_matrix_rate_row_and_tolerance_evidence"
+      "tests.pdmat.construction.test_continuity/test_late_matrix_rate_row_and_tolerance_evidence",
+      "tests.pdmat.construction.test_continuity/test_extreme_widths_preserve_and_reject_requested_continuity",
+      "tests.pdmat.construction.test_constructor/test_integer_coefficients_rejected_before_arithmetic",
+      "tests.pdmat.construction.test_constructor/test_integer_grid_uses_floating_cell_coordinates"
     ],
     "Contract": "Construct exact function-backed data or certified coefficients; infer the highest proven direction-wise continuity, or verify and store an explicit weaker lower bound.",
     "Oracle": "Independent physical-width finite differences over late interfaces, matrix entries, rate rows, and numerical tolerance boundaries.",
@@ -1407,6 +1423,7 @@
     "Method": "plus",
     "Tests": [
       "tests.pdmat.algebra.test_plus/test_addition_elevate_lower_degree_operands_summing",
+      "tests.pdmat.algebra.test_plus/test_integer_zero_rejected_and_floating_identity_preserved",
       "tests.pdmat.algebra.test_plus/test_numeric_scalars_promote_compatible_constant_pdmat",
       "tests.pdmat.algebra.test_plus/test_proven_numeric_zeros_identities_only_size",
       "tests.pdmat.algebra.test_plus/test_ordinary_operands_broadcast_products_allow_explicit",
@@ -1455,7 +1472,10 @@
       "tests.pdmat.polynomial.test_rhodiff/test_zero_degree_tensor_axis",
       "tests.pdmat.polynomial.test_rhodiff/test_fixed_zero_rate_retains_derivative_identity_and_rejects_repeat",
       "tests.pdmat.polynomial.test_rhodiff/test_zero_partial_exclusion_and_large_offset_nonzero_regression",
-      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment"
+      "tests.pdmat.algebra.test_rate_rows_integration/test_fixed_and_moving_rates_survive_ordered_products_and_assignment",
+      "tests.pdmat.polynomial.test_rhodiff/test_large_rate_and_cell_width_have_finite_derivative",
+      "tests.pdmat.polynomial.test_rhodiff/test_extreme_width_rate_scaling_preserves_small_derivative",
+      "tests.pdmat.polynomial.test_rhodiff/test_overflowing_forward_difference_has_finite_scaled_result"
     ],
     "Contract": "Use signed rate vertices and degree/cell-width factors on every coefficient difference.",
     "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
@@ -1757,7 +1777,8 @@
       "tests.pdvar.polynomial.test_elevate/test_physical_cell_rate_row_elevated_without",
       "tests.pdvar.polynomial.test_elevate/test_binomial_reference_all_rows",
       "tests.pdvar.polynomial.test_elevate/test_tensor_incidence_preserves_decisions",
-      "tests.pdvar.polynomial.test_elevate/test_fixed_tensor_elevation_semigroup_and_invalid_increments"
+      "tests.pdvar.polynomial.test_elevate/test_fixed_tensor_elevation_semigroup_and_invalid_increments",
+      "tests.pdvar.polynomial.test_elevate/test_high_degree_elevation_preserves_affine_decision_basis"
     ],
     "Contract": "Preserve every polynomial and affine identity under degree elevation, across cells and rate rows.",
     "Oracle": "Independent binomial formulas, complete affine bases and decision identities across multiple cells and rate rows with rectangular payloads in fast and strict modes.",
@@ -1938,6 +1959,7 @@
     "Method": "minus",
     "Tests": [
       "tests.pdvar.algebra.test_minus/test_complete_residual_in_both_orders",
+      "tests.pdvar.algebra.test_minus/test_integer_zero_rejected_and_floating_identity_preserved",
       "tests.pdvar.algebra.test_minus/test_tensor_refinement_and_anisotropic_subtraction",
       "tests.pdvar.algebra.test_minus/test_function_only_rejection_survives_cancelled_decision"
     ],
@@ -1975,7 +1997,8 @@
       "tests.pdvar.algebra.test_mtimes/test_zero_known_and_decision_rate_tables_rejected_in_both_orders",
       "tests.pdvar.algebra.test_mtimes/test_cancelled_decision_product_rejects_function_only_evidence",
       "tests.pdvar.algebra.test_mtimes/test_tensor_refined_rectangular_affine_product_chain",
-      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction"
+      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction",
+      "tests.pdvar.algebra.test_mtimes/test_integer_numeric_operands_rejected_consistently"
     ],
     "Contract": "Preserve operand order and binomial product weights, rate rows and affine identities; validate zero shortcuts.",
     "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
@@ -2073,7 +2096,8 @@
       "tests.pdvar.construction.test_continuity/test_c0_preserves_full_tensor_allocation_and_shared_identities",
       "tests.pdvar.construction.test_continuity/test_tensor_basis_matrix_payloads_and_zero_infinite_axes",
       "tests.pdvar.construction.test_continuity/test_long_graded_grids_keep_bounded_local_extraction",
-      "tests.pdvar.construction.test_continuity/test_anisotropic_mixed_orders_zero_degree_and_matrix_counts"
+      "tests.pdvar.construction.test_continuity/test_anisotropic_mixed_orders_zero_degree_and_matrix_counts",
+      "tests.pdvar.construction.test_continuity/test_large_span_extraction_preserves_affine_polynomial"
     ],
     "Contract": "Allocate C0 by default or direction-wise C1 and higher Bernstein decisions without equality constraints, normalizing saturated and single-cell axes to Inf.",
     "Oracle": "Independent Cox-de Boor values, physical finite-difference seam bounds, affine rank and old-coordinate space equivalence, exact C0 variable identities, bounded partition-of-unity extraction on long graded grids, 25-cell cubic counts, and scalar/full/symmetric tensor payloads.",
@@ -2084,6 +2108,7 @@
     "Method": "plus",
     "Tests": [
       "tests.pdvar.algebra.test_plus/test_numeric_constants_become_degree_0_data",
+      "tests.pdvar.algebra.test_plus/test_integer_zero_rejected_and_floating_identity_preserved",
       "tests.pdvar.algebra.test_plus/test_zero_pdvar_pdmat_numeric_operands_preserve",
       "tests.pdvar.algebra.test_plus/test_bare_affine_sdpvar_matrices_promote_constant",
       "tests.pdvar.algebra.test_plus/test_coefficient_backed_pdmat_operands_can_enter",
@@ -2125,6 +2150,7 @@
     "Method": "rhodiff",
     "Tests": [
       "tests.pdvar.polynomial.test_rhodiff/test_scalar_degree_derivatives_become_degree_zero",
+      "tests.pdvar.polynomial.test_rhodiff/test_overflowing_affine_difference_preserves_shared_and_distinct_decisions",
       "tests.pdvar.polynomial.test_rhodiff/test_constructor_created_scalar_quadratics_drop_degree",
       "tests.pdvar.polynomial.test_rhodiff/test_tensor_derivatives_degree_combrows_rate_vertex",
       "tests.pdvar.polynomial.test_rhodiff/test_constructor_created_tensor_quadratics_elevate",
@@ -2146,7 +2172,9 @@
       "tests.pdvar.polynomial.test_rhodiff/test_directionwise_reduction_zero_rates_and_partial_minima",
       "tests.pdvar.polynomial.test_rhodiff/test_three_parameter_rectangular_zero_axis_and_fixed_rates",
       "tests.pdvar.polynomial.test_rhodiff/test_affine_partial_cancellation_retains_zero_and_nonzero_rate_rows",
-      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction"
+      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction",
+      "tests.pdvar.polynomial.test_rhodiff/test_large_rate_and_width_preserve_affine_differences",
+      "tests.pdvar.polynomial.test_rhodiff/test_extreme_scaled_derivative_retains_affine_variable_identity"
     ],
     "Contract": "Use signed rate vertices and degree/cell-width factors on every coefficient difference.",
     "Oracle": "Independent binomial coefficient formulas and explicit polynomial values.",
@@ -2195,7 +2223,8 @@
       "tests.pdvar.indexing.test_subsasgn/test_assigning_ordinary_blocks_into_derivative_rows",
       "tests.pdvar.indexing.test_subsasgn/test_assignment_preserves_unselected_entries",
       "tests.pdvar.indexing.test_subsasgn/test_fixed_tensor_assignment_keeps_unselected_affine_entries",
-      "tests.pdvar.indexing.test_indexing/test_function_only_block_assignment_is_rejected"
+      "tests.pdvar.indexing.test_indexing/test_function_only_block_assignment_is_rejected",
+      "tests.pdvar.indexing.test_subsasgn/test_complete_numeric_overwrite_removes_decision_dependence"
     ],
     "Contract": "pdvar.subsasgn: Clear YALMIP global state so variable IDs do not leak between tests.; Subscript assignment should accept numeric constants and pdvar blocks.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",
@@ -2208,7 +2237,8 @@
       "tests.pdvar.indexing.test_subsref/test_matrix_indexing_slice_payloads_while_dot",
       "tests.pdvar.indexing.test_subsref/test_reordered_repeated_and_logical_selectors",
       "tests.pdvar.indexing.test_subsref/test_fixed_rate_tensor_slice_preserves_order_and_identity",
-      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction"
+      "tests.pdvar.algebra.test_affine_algebra_integration/test_tensor_derivative_slice_known_sandwich_and_reduction",
+      "tests.pdvar.indexing.test_subsref/test_constant_selected_block_removes_decision_dependence"
     ],
     "Contract": "pdvar.subsref: Clear YALMIP global state so variable IDs do not leak between tests.; Matrix indexing should slice payloads while dot access stays available.",
     "Oracle": "Explicit expected values, symbols, metadata and errors in the named behavioral cases.",

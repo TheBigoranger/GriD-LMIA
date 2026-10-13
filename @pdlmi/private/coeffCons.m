@@ -90,7 +90,8 @@ function tf = numCert(expr, vals, relation, mode)
                         ok = all(mat(:) >= -tol);
                     end
                 else
-                    eigVals = eig((mat + mat') / 2);
+                    % Halve first so finite large coefficients stay finite.
+                    eigVals = eig(mat / 2 + mat' / 2);
                     if relation == "<="
                         ok = max(eigVals) <= tol;
                     else

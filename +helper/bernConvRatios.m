@@ -30,7 +30,25 @@ function ratios = bernConvRatios(lhsLabels, lhsDegree, ...
     % two. pow2 applies the exact degree correction without another large
     % intermediate binomial coefficient.
     degreeShift = sum(lhsDegree + rhsDegree - outputDegree);
-    ratios = pow2((lhsWeights .* rhsWeights) ./ outputWeights, degreeShift);
+    numerator = lhsWeights .* rhsWeights;
+    ratios = pow2(numerator ./ outputWeights, degreeShift);
+    % A normalized mass can underflow even when its binomial ratio is finite.
+    % Recompute only those rows in log space, after cancelling powers of two.
+    small = numerator < realmin | outputWeights < realmin | ~isfinite(ratios);
+    if any(small)
+        logs = zeros(nnz(small), 1);
+        for dim = 1:numel(lhsDegree)
+            logs = logs + logBinom(lhsDegree(dim), lhsLabels(small, dim)) ...
+                + logBinom(rhsDegree(dim), rhsLabels(small, dim)) ...
+                - logBinom(outputDegree(dim), outputLabels(small, dim));
+        end
+        ratios(small) = exp(logs);
+    end
+end
+
+function out = logBinom(degree, labels)
+    out = gammaln(degree + 1) - gammaln(labels + 1) ...
+        - gammaln(degree - labels + 1);
 end
 
 function chkPairShape(lhsLabels, lhsDegree, rhsLabels, rhsDegree)

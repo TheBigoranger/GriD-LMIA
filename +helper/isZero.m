@@ -37,7 +37,8 @@ function tf = isZero(val, mode, varargin)
         case "add"
             chkArgs(mode, varargin, 1);
             sz = varargin{1};
-            tf = isNum(val) && (isscalar(val) || isequal(size(val), sz));
+            tf = isfloat(val) && isNum(val) && ...
+                (isscalar(val) || isequal(size(val), sz));
         case "vals"
             chkArgs(mode, varargin, 0);
             tf = isVals(val);

@@ -3,6 +3,13 @@ function tests = test_mtimes
     tests = functiontests(localfunctions);
 end
 
+function test_integer_numeric_operands_rejected_consistently(testCase)
+    P = pdvar(1, [0 1]);
+    testCase.verifyError(@() P*uint8(2), "pdvar:InvalidMultiplication");
+    testCase.verifyError(@() uint8(2)*P, "pdvar:InvalidMultiplication");
+    testCase.verifyError(@() P+uint8(2), "pdvar:InvalidAddition");
+end
+
 function test_cell_varying_constant_factors_preserve_tensor_affine_rate_rows(testCase)
     % Written-order native matrix products are the coefficient oracle.
     grid={[0 1 3],[-2 0 4],[10 14]};

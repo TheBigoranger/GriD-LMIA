@@ -120,3 +120,14 @@ function test_object_api_requires_coefficients(testCase)
     source = pdmat({[0 1]}, @(rho) 1 + rho);
     testCase.verifyError(@() source.elevate(1), "pdbase:MissingCoefficientEvidence");
 end
+
+function test_high_degree_elevation_preserves_affine_polynomial(testCase)
+    % Linear Bernstein controls embed an independently specified affine curve.
+    source = pdmat([0 1], num2cell(2 + 3*(0:1100)/1100), Degree=1100);
+    elevated = source.elevate(1);
+    testCase.verifyEqual(cell2mat(elevated.coeffs(1)), ...
+        2 + 3*(0:1101)/1101, AbsTol=1e-10);
+    testCase.verifyEqual(elevated.evaluate(.37), 2 + 3*.37, AbsTol=1e-10);
+    testCase.verifyEqual(elevated.Degree, 1101);
+    testCase.verifyEqual(source.Degree, 1100);
+end

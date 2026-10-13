@@ -2,6 +2,39 @@ function tests = test_rhodiff
     % Behavioral regressions for pdmat.rhodiff.
     tests = functiontests(localfunctions);
 end
+
+function test_extreme_width_rate_scaling_preserves_small_derivative(testCase)
+    A = pdmat([0 1e308], {0,1e308}, Degree=1);
+    D = rhodiff(A, [1e-308 1e-308]);
+    c = D.coeffs(1);
+    testCase.verifyEqual(c{1}/1e-308, 1, AbsTol=1e-12);
+    A = pdmat({[0 1e-310],[0 1]}, {{{0,0,1e-310,1e-310}}}, Degree=[1 1]);
+    D = rhodiff(A, [1e-310 1e-310;0 0]);
+    c = D.coeffs([1 1]);
+    for k = 1:numel(c)
+        testCase.verifyEqual(c{k}/1e-310, 1, AbsTol=1e-12);
+    end
+    Z = rhodiff(A, zeros(2));
+    testCase.verifyEqual(Z.coeffs([1 1]), {0,0,0,0});
+    A = pdmat({[0 1e-300],[0 1]}, {{{0,0,1e300,1e300}}}, Degree=[1 1]);
+    D = rhodiff(A, [1e-300 1e-300;0 0]);
+    c = D.coeffs([1 1]);
+    for k = 1:numel(c)
+        testCase.verifyEqual(c{k}/1e300, 1, AbsTol=1e-12);
+    end
+    A = pdmat({[0 1e10],[0 1]}, {{{0,0,1e-310,1e-310}}}, Degree=[1 1]);
+    D = rhodiff(A, [1e100 1e100;0 0]);
+    c = D.coeffs([1 1]);
+    for k = 1:numel(c)
+        testCase.verifyEqual(c{k}/1e-220, 1, AbsTol=1e-12);
+    end
+end
+
+function test_overflowing_forward_difference_has_finite_scaled_result(testCase)
+    A = pdmat([0 1e308], {-1e308,1e308}, Degree=1);
+    D = rhodiff(A, [1 1]);
+    testCase.verifyEqual(D.coeffs(1), {2}, AbsTol=1e-12);
+end
 function test_fixed_zero_rate_retains_derivative_identity_and_rejects_repeat(testCase)
     % Zero numerical derivative values do not erase active-rate semantics.
     A = pdmat({[0 2 5], [-1 3]}, @(x,y) [x^2+y, x*y], ...
@@ -127,4 +160,13 @@ function data = makeNumGrid(grid, deg, sz)
         key = sum((cell2mat(subs) - 1) .* 10 .^ (0:(nPar - 1)));
         data{k} = reshape(key + (1:prod(sz)), sz);
     end
+end
+
+function test_large_rate_and_cell_width_have_finite_derivative(testCase)
+    % A(rho)=2*rho/1e308 and rhoDot=+/-1e308 give derivatives +/-2.
+    source = pdmat([0 1e308], {0, 1, 2}, Degree=2);
+    derivative = rhodiff(source, [-1e308 1e308]);
+    testCase.verifyEqual(derivative.coeffs(1), {-2, -2; 2, 2});
+    testCase.verifyEqual(derivative.NumRateRows, 2);
+    testCase.verifyEqual(derivative.RateBounds, [-1e308 1e308]);
 end

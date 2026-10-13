@@ -31,6 +31,14 @@ function test_scalar_zero_expands_while_incompatible_zero(testCase)
     testCase.verifyFalse(helper.isZero(zeros(2, 2), "add", [2 3]));
 end
 
+function test_additive_identity_requires_floating_numeric_type(testCase)
+    testCase.verifyFalse(helper.isZero(uint8(0), "add", [2 3]));
+    testCase.verifyFalse(helper.isZero(zeros(2, 3, 'int16'), "add", [2 3]));
+    testCase.verifyTrue(helper.isZero(uint8(0), "num"));
+    testCase.verifyTrue(helper.isZero(single(0), "add", [2 3]));
+    testCase.verifyTrue(helper.isZero(zeros(2, 3), "add", [2 3]));
+end
+
 function test_nested_cells_constant_rate_payloads_share(testCase)
     % Nested cells and Constant/Rate payloads share the same recursive evidence rule.
     zeroRate = struct("Constant", 0, "Rate", {{0}});

@@ -2,6 +2,19 @@ function tests = test_constructor
     % Behavioral regressions for pdmat.constructor.
     tests = functiontests(localfunctions);
 end
+
+function test_integer_coefficients_rejected_before_arithmetic(testCase)
+    testCase.verifyError(@() pdmat([0 1], {uint8(2),uint8(0)}, Degree=1), ...
+        "pdmat:InvalidData");
+    testCase.verifyError(@() pdmat([0 1], {{uint8(2),uint8(0)}}, Degree=1), ...
+        "pdmat:InvalidCoefficientPayload");
+end
+
+function test_integer_grid_uses_floating_cell_coordinates(testCase)
+    A = pdmat(uint8([0 2]), {0,2}, Degree=1);
+    testCase.verifyEqual(A.GridInfo.Vectors, {[0 2]});
+    testCase.verifyEqual(A.evaluate(.5), .5);
+end
 function test_certified_tensor_function_survives_composed_coefficient_use(testCase)
     % Evaluating a transformed object prevents its retained handle masking bad fits.
     f = @(x,y,z) [y^2+z, y*z; 2-y^2, 3*z-y];

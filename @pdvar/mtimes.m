@@ -18,6 +18,13 @@ function out = mtimes(lhs, rhs)
     %     A = pdmat({[0 1]}, {eye(2), 2 * eye(2)}, Degree=1);
     %     C = A * P;
 
+    % Validate integer constants before scalar/zero shortcuts use native math.
+    if (isnumeric(lhs) && ~isfloat(lhs)) || ...
+            (isnumeric(rhs) && ~isfloat(rhs))
+        error("pdvar:InvalidMultiplication", ...
+            "Numeric coefficient operands must use double or single values.");
+    end
+
     % Zero and cancellation shortcuts cannot supply missing coefficient evidence.
     if (isa(lhs, "pdmat") && lhs.SourceSummary == "function") || ...
             (isa(rhs, "pdmat") && rhs.SourceSummary == "function")

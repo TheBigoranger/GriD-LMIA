@@ -125,6 +125,22 @@ function test_tensor_incidence_preserves_decisions(testCase)
     end
 end
 
+function test_high_degree_elevation_preserves_affine_decision_basis(testCase)
+    % One decision times an affine curve must retain that decision at every label.
+    P = pdvar(1, [0 1], Degree=0);
+    decision = P.coeffs(1);
+    known = pdmat([0 1], num2cell(2 + 3*(0:1100)/1100), Degree=1100);
+    source = P * known;
+    elevated = source.elevate(1);
+    actual = elevated.coeffs(1);
+    expected = 2 + 3*(0:1101)/1101;
+    for k = 1:numel(actual)
+        testCase.verifyEqual(getvariables(actual{k}), getvariables(decision{1}));
+        difference = actual{k} - expected(k)*decision{1};
+        testCase.verifyLessThanOrEqual(norm(full(getbase(difference)), 'fro'), 1e-10);
+    end
+end
+
 function test_fixed_tensor_elevation_semigroup_and_invalid_increments(testCase)
     % Two anisotropic changes must match a direct independent binomial transform.
     P = pdvar(2,3,{[0 2 5],[-3 1 6]},'full',Degree=[0 2]);

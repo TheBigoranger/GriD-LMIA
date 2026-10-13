@@ -35,6 +35,12 @@ function init = mkCtorState(grid, sz, deg, vals, hasDec, rb, summary, ...
         validationMode = "fast";
     end
 
+    % Assignment and slicing can remove the last decision column. Recompute
+    % only potentially decision-backed outputs; known-only outputs stay cheap.
+    if hasDec
+        hasDec = hasDecision(vals);
+    end
+
     init = struct( ...
         "PdvarInternal", true, ...
         "Grid", {grid}, ...
@@ -47,6 +53,23 @@ function init = mkCtorState(grid, sz, deg, vals, hasDec, rb, summary, ...
         "RateBounds", rb, ...
         "SourceSummary", summary, ...
         "ValidationMode", validationMode);
+end
+
+function tf = hasDecision(vals)
+    %HASDECISION Inspect actual affine bases, including later cells/rate rows.
+    tf = false;
+    for k = 1:numel(vals)
+        value = vals{k};
+        if iscell(value)
+            tf = hasDecision(value);
+        elseif isa(value, "sdpvar")
+            base = getbase(value);
+            tf = full(any(base(:, 2:end) ~= 0, "all"));
+        end
+        if tf
+            return
+        end
+    end
 end
 
 function continuity = recoverC0(vals, grid, degree, continuity)

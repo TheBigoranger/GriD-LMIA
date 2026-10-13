@@ -125,6 +125,10 @@ function [tf, continuity] = chkCont(vals, nCell, degree, grids, maxOrders)
         for k = 1:numel(weights)
             out = out + weights(k) * leaf{row, indices(k)};
         end
+        % Exact zero derivatives stay zero when a tiny width power underflows.
+        if isnumeric(out) && all(out == 0, "all")
+            return
+        end
         out = out ./ widthPower;
     end
 end
@@ -142,7 +146,20 @@ function tf = sameMat(lhs, rhs)
         end
         return
     end
+    % Nonfinite scaled faces cannot establish a numerical continuity bound.
+    if any(~isfinite(lhs), "all") || any(~isfinite(rhs), "all")
+        tf = false;
+        return
+    end
     difference = lhs - rhs;
     tol = 1e-9 * max([1, norm(lhs, 'fro'), norm(rhs, 'fro')]);
+    if ~isfinite(tol)
+        % Compare in one common scale if finite entries overflow their norms.
+        scale = max([abs(lhs(:)); abs(rhs(:))]);
+        lhs = lhs / scale;
+        rhs = rhs / scale;
+        difference = lhs - rhs;
+        tol = 1e-9 * max([1/scale, norm(lhs, 'fro'), norm(rhs, 'fro')]);
+    end
     tf = norm(difference, 'fro') <= tol;
 end

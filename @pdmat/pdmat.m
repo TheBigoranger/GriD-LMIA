@@ -18,6 +18,9 @@ classdef (InferiorClasses = {?sdpvar}) pdmat < pdbase
     %
     %   source may be a function handle, a global cell grid of numeric
     %   Bernstein coefficients, or nested LocalValues in the pdbase contract.
+    %   Numeric coefficients and algebra constants must be double or single;
+    %   integer classes are rejected to prevent saturating/rounded arithmetic.
+    %   Integer grid vectors are converted to double before cell arithmetic.
     %   Nested LocalValues with a C0 mismatch produce a
     %   pdmat:DiscontinuousLocalValues warning and IsContinuous=false;
     %   their cell-wise coefficient data is left unchanged.

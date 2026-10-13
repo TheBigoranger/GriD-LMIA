@@ -43,10 +43,5 @@ function out = minus(lhs, rhs)
         return
     end
 
-    if isa(lhs, "pdmat") && isa(rhs, "pdmat") && isequal(lhs, rhs)
-        out = zeroObj(lhs.GridInfo.Vectors, lhs.MatrixSize);
-        return
-    end
-
     out = knownBinOp(lhs, rhs, @(a, b) a - b, "pdmat:InvalidSubtraction");
 end

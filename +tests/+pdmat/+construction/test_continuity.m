@@ -3,6 +3,15 @@ function tests = test_continuity
     tests = functiontests(localfunctions);
 end
 
+function test_extreme_widths_preserve_and_reject_requested_continuity(testCase)
+    affine = pdmat([0 1e-200 2e-200], {{0, 1, 2}, {2, 3, 4}}, ...
+        Degree=2, Continuity=Inf);
+    testCase.verifyEqual(affine.Continuity, Inf);
+    testCase.verifyEqual(affine.evaluate(1.5e-200), 3, AbsTol=1e-12);
+    testCase.verifyError(@() pdmat([0 1e-308 2e-308], {{0, 1}, {1, 4}}, ...
+        Degree=1, Continuity=Inf), "pdmat:ContinuityMismatch");
+end
+
 function test_automatic_classification_and_explicit_weaker_bounds(testCase)
     grid = {[0 1 3]};
     c2 = {{0, 1, 3, 6}, {6, 12, 22, 40}};

@@ -40,6 +40,7 @@ function val = chk(val, errId, label, varargin)
         key = string(varargin{k});
         switch key
             case "numeric", if badMsg == "" && badKey == "" && ~isnumeric(val), badMsg = " must be numeric."; end
+            case "floating", if badMsg == "" && badKey == "" && ~isfloat(val), badMsg = " must use double or single floating-point values."; end
             case "real", if badMsg == "" && badKey == "" && ~isreal(val), badMsg = " must be real."; end
             case "cell", if badMsg == "" && badKey == "" && ~iscell(val), badMsg = " must be a cell array."; end
             case "struct", if badMsg == "" && badKey == "" && ~isstruct(val), badMsg = " must be a structure."; end

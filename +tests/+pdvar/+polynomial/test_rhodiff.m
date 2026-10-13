@@ -170,6 +170,18 @@ function test_tensor_plans_preserve_later_cells_and_matrix_shapes(testCase)
     end
 end
 
+function test_large_rate_and_width_preserve_affine_differences(testCase)
+    source = pdvar(1, [0 1e308], Degree=2);
+    coefficients = source.coeffs(1);
+    derivative = rhodiff(source, [-1e308 1e308]);
+    expected = {-2*(coefficients{2}-coefficients{1}), ...
+        -2*(coefficients{3}-coefficients{2}); ...
+        2*(coefficients{2}-coefficients{1}), ...
+        2*(coefficients{3}-coefficients{2})};
+    verifyCoeffTable(testCase, derivative.coeffs(1), expected);
+    testCase.verifyEqual(derivative.NumRateRows, 2);
+end
+
 function test_rectangular_zero_axis_mixed_rates_use_exact_derivative_oracle(testCase)
     % The fixed first rate has no derivative contribution on a zero-degree axis.
     rb = [3 3;-2 5];
@@ -572,4 +584,51 @@ function test_affine_partial_cancellation_retains_zero_and_nonzero_rate_rows(tes
     testCase.verifyEqual(Z.Continuity,[Inf Inf]);
     testCase.verifyEqual(Z.Degree,[1 1]);
     testCase.verifyEqual(P.LocalValues,before);
+end
+
+function test_overflowing_affine_difference_preserves_shared_and_distinct_decisions(testCase)
+    % The shared coefficient has derivative 2*p; independent terms stay affine.
+    P = pdvar(1, [0 1e308], Degree=0);
+    Q = pdvar(1, [0 1e308], Degree=1);
+    p = P.coeffs(1);
+    q = Q.coeffs(1);
+    A = pdmat([0 1e308], {-1e308, 1e308}, Degree=1);
+    C = A*P + Q;
+    D = rhodiff(C, [-1 1]);
+    actual = D.coeffs(1);
+    expected = 2*p{1} + 1e-308*(q{2}-q{1});
+    expectedBase = full(getbase(expected));
+    for row = 1:2
+        signValue = 2*row-3;
+        testCase.verifyEqual(getvariables(actual{row}), getvariables(expected));
+        actualBase = full(getbase(actual{row}));
+        testCase.verifyTrue(all(isfinite(actualBase), 'all'));
+        active = expectedBase ~= 0;
+        testCase.verifyEqual(actualBase(active)./expectedBase(active), ...
+            signValue*ones(size(expectedBase(active))), AbsTol=1e-12);
+        testCase.verifyEqual(actualBase(~active), expectedBase(~active));
+    end
+end
+
+function test_extreme_scaled_derivative_retains_affine_variable_identity(testCase)
+    P = pdvar(1, [0 1e308]);
+    cp = P.coeffs(1);
+    C = 1e308*P;
+    D = rhodiff(C, [1e-308 1e-308]);
+    c = D.coeffs(1);
+    expected = cp{2}-cp{1};
+    testCase.verifyEqual(getvariables(c{1}), getvariables(expected));
+    testCase.verifyEqual(full(getbase(c{1}))/1e-308, ...
+        full(getbase(expected)), AbsTol=1e-12);
+    P = pdvar(1, {[0 1e-310],[0 1]});
+    cp = P.coeffs([1 1]);
+    C = 1e-310*P;
+    D = rhodiff(C, [-1e-310 -1e-310;0 0]);
+    c = D.coeffs([1 1]);
+    expected = {cp{1}-cp{3}, cp{2}-cp{4}, cp{1}-cp{3}, cp{2}-cp{4}};
+    for k = 1:numel(c)
+        testCase.verifyEqual(getvariables(c{k}), getvariables(expected{k}));
+        testCase.verifyEqual(full(getbase(c{k}))/1e-310, ...
+            full(getbase(expected{k})), AbsTol=1e-12);
+    end
 end

@@ -3,6 +3,18 @@ function tests = test_subsasgn
     tests = functiontests(localfunctions);
 end
 
+function test_complete_numeric_overwrite_removes_decision_dependence(testCase)
+    P = pdvar(2, [0 1], 'full');
+    P(:,:) = eye(2);
+    testCase.verifyFalse(P.ContainsDecision);
+    X = sdpvar(2,2,'full');
+    L = P*X; R = X*P;
+    tests.infrastructure.verify_expr(testCase,L.evaluate(.5),X);
+    tests.infrastructure.verify_expr(testCase,R.evaluate(.5),X);
+    testCase.verifyTrue(L.ContainsDecision);
+    testCase.verifyTrue(R.ContainsDecision);
+end
+
 function test_fixed_tensor_assignment_keeps_unselected_affine_entries(testCase)
     % Reversed row/column selection edits every fixed-rate leaf in written order.
     P = pdvar(2,3,{[0 2 5],[-3 1 6]},'full',Degree=[1 2]);

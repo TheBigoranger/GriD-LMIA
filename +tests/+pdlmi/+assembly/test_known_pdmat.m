@@ -179,6 +179,15 @@ function A = constantPdmat(value)
     A = pdmat([0 1], {{value}}, Degree=0);
 end
 
+function test_large_finite_semidefinite_certificates_preserve_sign(testCase)
+    % Eigenvalues are 0.8e308 and 1.2e308; forming M+M' overflows.
+    positive = pdmat([0 1], {[1e308 2e307; 2e307 1e308]}, Degree=0);
+    testCase.verifyTrue(toYalmip(positive >= 0));
+    testCase.verifyTrue(toYalmip(-positive <= 0));
+    verifyInconclusive(testCase, @() toYalmip(positive <= 0));
+    verifyInconclusive(testCase, @() toYalmip(-positive >= 0));
+end
+
 function verifyInconclusive(testCase, fcn)
     % A false export should issue the dedicated warning in every test runner.
     warnId = "pdlmi:InconclusiveCertificate";

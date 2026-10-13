@@ -187,6 +187,16 @@ function [coeffs, plans] = diffCell(obj, subs, verts, outDeg, plans, rateMap)
         return
     end
 
+    % Extreme widths/rates need joint scaling before an unweighted partial
+    % can overflow or underflow. Ordinary inputs retain the shared-partial map.
+    if needsWeightedScaling(vals, deg, h, verts)
+        for row = 1:nVert
+            coeffs(row, :) = weightedTensorDiff(vals, deg, h, ...
+                verts(row, :), obj.MatrixSize, plans);
+        end
+        return
+    end
+
     % Tensor partials do not depend on the selected rate vertex. Compute and
     % elevate each active direction once, then reuse those affine expressions.
     activeDims = find(deg > 0);
@@ -212,9 +222,8 @@ end
 function row = scalarDiff(vals, deg, h, rate)
     %SCALARDIFF Differentiate one scalar-parameter Bernstein coefficient row.
     row = cell(1, deg);
-    scale = deg * rate / h;
     for q = 0:(deg - 1)
-        row{q + 1} = (vals{q + 2} - vals{q + 1}) .* scale;
+        row{q + 1} = scaledDifference(vals{q + 2}, vals{q + 1}, deg, h, rate);
     end
 end
 
@@ -248,6 +257,117 @@ function [partials, plans] = tensorPartials(vals, deg, h, activeDims, plans)
         else
             partials{dim} = pdbase.elevRow(part, partDeg, deg, plans{dim});
         end
+    end
+end
+
+function tf = needsWeightedScaling(vals, deg, widths, verts)
+    %NEEDSWEIGHTEDSCALING Detect risky unweighted numeric/affine intermediates.
+    active = deg > 0;
+    factors = deg(active) ./ widths(active);
+    tf = any(~isfinite(factors) | factors == 0) || ...
+        any(abs(verts(:, active)) > 0 & abs(verts(:, active)) < realmin, "all");
+    if tf
+        return
+    end
+    for k = 1:numel(vals)
+        base = vals{k};
+        if isa(base, "sdpvar")
+            base = getbase(base);
+        end
+        magnitudes = abs(nonzeros(base));
+        if ~isempty(magnitudes) && ...
+                (any(max(magnitudes) > (realmax ./ factors)/2) || ...
+                 any(min(magnitudes) < realmin ./ factors))
+            tf = true;
+            return
+        end
+    end
+end
+
+function row = weightedTensorDiff(vals, deg, h, rate, sz, plans)
+    %WEIGHTEDTENSORDIFF Scale each partial jointly with its selected rate.
+    row = repmat({zeros(sz)}, 1, prod(deg + 1));
+    mult = fliplr(cumprod([1, fliplr(deg(2:end) + 1)]));
+    for dim = find(deg > 0 & rate ~= 0)
+        partDeg = deg;
+        partDeg(dim) = partDeg(dim) - 1;
+        labels = helper.combRows(arrayfun(@(d) 0:d, partDeg, "UniformOutput", false));
+        part = cell(1, size(labels, 1));
+        for k = 1:numel(part)
+            label = labels(k, :);
+            next = label;
+            next(dim) = next(dim) + 1;
+            part{k} = scaledDifference(vals{sum(next .* mult) + 1}, ...
+                vals{sum(label .* mult) + 1}, deg(dim), h(dim), rate(dim));
+        end
+        elevated = pdbase.elevRow(part, partDeg, deg, plans{dim});
+        for k = 1:numel(row)
+            row{k} = row{k} + elevated{k};
+        end
+    end
+end
+
+function out = scaledDifference(next, prev, degree, width, rate)
+    %SCALEDDIFFERENCE Avoid losing a representable derivative in intermediates.
+    if rate == 0
+        out = next .* 0;
+        return
+    end
+    if isa(next, "sdpvar") || isa(prev, "sdpvar")
+        % Align affine bases before subtraction, which can itself overflow.
+        [nextBase, nextIds] = affineBase(next);
+        [prevBase, prevIds] = affineBase(prev);
+        ids = union(nextIds, prevIds);
+        [~, nextColumns] = ismember(nextIds, ids);
+        [~, prevColumns] = ismember(prevIds, ids);
+        lhs = sparse(numel(next), numel(ids) + 1);
+        rhs = sparse(numel(prev), numel(ids) + 1);
+        lhs(:, [1, nextColumns + 1]) = nextBase;
+        rhs(:, [1, prevColumns + 1]) = prevBase;
+        scaled = scaledDifference(lhs, rhs, degree, width, rate);
+        if isempty(ids)
+            out = reshape(scaled(:, 1), size(next));
+        else
+            variables = recover(ids);
+            out = reshape(scaled(:, 1) + scaled(:, 2:end)*variables(:), size(next));
+        end
+        return
+    end
+    base = next - prev;
+    scale = degree * rate / width;
+    if isfinite(scale) && scale ~= 0
+        outBase = base .* scale;
+        if all(isfinite(outBase), "all") && ...
+                ~any(outBase == 0 & base ~= 0, "all")
+            out = outBase;
+            return
+        end
+    end
+    shift = zeros(size(base));
+    overflow = ~isfinite(base);
+    if any(overflow, "all")
+        % Half-size operands keep an opposite-sign finite difference finite.
+        % Scale only affected entries so small neighboring coefficients survive.
+        base(overflow) = next(overflow)/2 - prev(overflow)/2;
+        shift(overflow) = 1;
+    end
+    [fraction, exponent] = log2(abs(base));
+    [rateFraction, rateExponent] = log2(abs(rate));
+    [degreeFraction, degreeExponent] = log2(degree);
+    [widthFraction, widthExponent] = log2(width);
+    out = pow2(sign(base) .* sign(rate) .* fraction .* ...
+        rateFraction .* degreeFraction ./ widthFraction, ...
+        exponent + shift + rateExponent + degreeExponent - widthExponent);
+end
+
+function [base, ids] = affineBase(value)
+    %AFFINEBASE Keep constants and existing decisions in one numeric layout.
+    if isa(value, "sdpvar")
+        base = getbase(value);
+        ids = getvariables(value);
+    else
+        base = value(:);
+        ids = [];
     end
 end
 

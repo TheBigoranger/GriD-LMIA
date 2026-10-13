@@ -26,7 +26,7 @@ function sz = scanMats(vals, errId, msg)
     sz = [];
     for k = 1:numel(vals)
         oneSz = size(helper.chk(vals{k}, errId, msg, ...
-            "numeric", "real", "finite", "matrix", "nonempty"));
+            "numeric", "floating", "real", "finite", "matrix", "nonempty"));
         if isempty(sz)
             sz = oneSz;
         elseif ~isequal(sz, oneSz)

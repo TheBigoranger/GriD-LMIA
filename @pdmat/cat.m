@@ -82,7 +82,7 @@ function [data, outSize] = catData(dim, args, grid, rb)
         else
             helper.chk(val, "pdmat:InvalidConcatenation", ...
                 "numeric concatenation operand", ...
-                "numeric", "real", "finite", "matrix", "nonempty");
+                "numeric", "floating", "real", "finite", "matrix", "nonempty");
             raw{k} = val;
             sz(k, :) = size(val);
             isScalar(k) = isscalar(val);

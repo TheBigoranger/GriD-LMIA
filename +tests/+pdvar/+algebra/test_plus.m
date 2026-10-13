@@ -3,6 +3,21 @@ function tests = test_plus
     tests = functiontests(localfunctions);
 end
 
+function test_integer_zero_rejected_and_floating_identity_preserved(testCase)
+    A = pdvar(2, [0 1], 'full');
+    for zero = {uint8(0), zeros(2, 'int16')}
+        testCase.verifyError(@() A + zero{1}, "pdvar:InvalidAddition");
+        testCase.verifyError(@() zero{1} + A, "pdvar:InvalidAddition");
+    end
+    for zero = {0, single(0), zeros(2), zeros(2, 'single')}
+        right = A + zero{1};
+        left = zero{1} + A;
+        testCase.verifyEqual(right.LocalValues, A.LocalValues);
+        tests.infrastructure.verify_expr(testCase, left.evaluate(.5), A.evaluate(.5));
+    end
+end
+
+
 function test_tensor_refinement_preserves_full_affine_bases(testCase)
     % Distinct decisions and zero-degree axes cannot be merged by assigned values.
     P = pdvar(2,3,{[0 1 3],[-2 4]},'full',Degree=[1 0]);

@@ -93,6 +93,22 @@ function test_helpers_reject_misaligned_or_out_range(testCase)
         "helper:InvalidBernConvRatios");
 end
 
+function test_underflowing_weights_preserve_endpoint_and_shifted_ratios(testCase)
+    % Endpoint products are exactly one even when normalized masses vanish.
+    actual = helper.bernConvRatios([0; 1100], 1100, [0; 1], 1);
+    testCase.verifyEqual(actual, ones(2, 1), AbsTol=1e-12);
+
+    % Binomial(1100,1) gives an independent shifted Gram boundary value.
+    actual = helper.bernConvRatios([0; 549], 549, [0; 549], 549, ...
+        [1; 1099], 1100);
+    testCase.verifyEqual(actual, repmat(1/1100, 2, 1), RelTol=1e-10);
+
+    % The same underflow occurs across axes at modest individual degrees.
+    actual = helper.bernConvRatios([0 0; 300 300], [300 300], ...
+        [0 0; 300 300], [300 300]);
+    testCase.verifyEqual(actual, ones(2, 1), AbsTol=1e-12);
+end
+
 function ratios = directRatios(lhsLabels, lhsDegree, rhsLabels, ...
         rhsDegree, outputLabels, outputDegree)
     %DIRECTRATIOS Keep the low-degree oracle independent of production code.

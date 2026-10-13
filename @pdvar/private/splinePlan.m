@@ -22,6 +22,12 @@ function plan = splinePlan(grid, degree, order)
         return
     end
 
+    % Extraction uses ratios of knot differences, unchanged by uniform scaling.
+    % Individual cell widths may be finite while the full axis span overflows.
+    if ~isfinite(grid(end) - grid(1))
+        grid = grid / 2;
+    end
+
     if order == degree
         for e = 1:nCell
             % Restrict the original full-domain polynomial independently to

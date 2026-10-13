@@ -7,6 +7,25 @@ function setupOnce(~)
     yalmip("clear");
 end
 
+function test_large_span_extraction_preserves_affine_polynomial(testCase)
+    % Greville controls for rho/1e308 are independent of extraction arithmetic.
+    orders = [1 2 Inf];
+    controls = {[-1 -2/3 -1/3 1/3 2/3 1], ...
+        [-1 -2/3 0 2/3 1], [-1 -1/3 1/3 1]};
+    points = [-1e308 -5e307 0 5e307 1e308];
+    for k = 1:numel(orders)
+        P = pdvar(1, [-1e308 0 1e308], Degree=3, Continuity=orders(k));
+        variables = objectVariables(P);
+        testCase.verifyNumElements(variables, numel(controls{k}));
+        assign(recover(variables), controls{k}');
+        for point = points
+            testCase.verifyEqual(value(P.evaluate(point)), point/1e308, AbsTol=1e-12);
+        end
+        testCase.verifyEqual(P.Continuity, orders(k));
+        testCase.verifyEqual(P.GridInfo.Vectors, {[-1e308 0 1e308]});
+    end
+end
+
 function test_defaults_normalization_warning_and_invalid_inputs(testCase)
     grid = {[0 1 2], [10 20 30]};
     ordinary = pdvar(1, grid, Degree=[3 2]);

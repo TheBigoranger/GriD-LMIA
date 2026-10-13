@@ -1,141 +1,97 @@
 # GriD-LMIA
 
-**Gri**dding-based **D**PD-**LMI A**ssembler (GriD-LMIA) is a MATLAB/YALMIP
-research package for modeling parameter-dependent LMIs on tensor-product box
-grids. It represents known data (`pdmat`) and decision matrices
-(`pdvar`) in cell-wise Bernstein bases, forms
-rate-vertex derivatives with `rhodiff`, and exports finite certificates to
-YALMIP through `pdlmi`.
-
-Current source and documentation: **v1.5.1**. Latest tagged GitHub Release:
-**v1.5.0**.
-
-## What changed in v1.5.1
-
-- Zero-operand addition and subtraction preserve refined grid metadata.
-- Bernstein evaluation avoids overflowing binomial coefficients; explicit-degree
-  fitting rejects ill-conditioned systems, and grids reject nonfinite cell widths.
-- Two examples based on an unpublished time-delay manuscript are temporarily
-  excluded from the public package and printable manual.
-- Public examples omit private source paths, and local performance tools are
-  excluded from the package distribution.
-
-## What changed in v1.5.0
-
-- `Continuity` records a direction-wise continuity lower bound, with `-1`
-  denoting no C0 guarantee and `Inf` denoting a global polynomial in that
-  direction. Constructors accept scalar shorthand or one order per direction.
-  The public `pdmat` and `pdvar` constructors require nonnegative orders or `Inf`.
-  `IsContinuous` is derived from these orders.
-- Decision construction retains C0 as the default and supports higher-order
-  continuity through spline controls and cell-wise Bernstein extraction.
-  These controls generally are not function values at grid nodes.
-- Known coefficient data infer continuity, while an explicit order requests a
-  verified lower bound. Differentiation, algebra, indexing, and numeric recovery
-  now carry the corresponding direction-wise continuity information.
-- Common-grid alignment restricts existing coefficients to each target cell.
-  This preserves discontinuities without fitting across a source-cell boundary.
-  Affine derivative combinations and degree-zero-factor products also use
-  specialized assembly paths.
-- Both manuals explain the supported forms, examples, and limitations against
-  the current source. The v1.5.0 release includes the accepted printable manual.
-
-## What changed in v1.4.3
-
-- The runtime suite now contains 809 tests in 141 files, with at least three
-  distinct cases per file. It checks composed tensor-grid workflows, affine
-  variable identities, certificate replacement, and invalid-use boundaries.
-- Function-only `pdmat` operands reject coefficient-dependent arithmetic,
-  including zero products and cancellation. Exact evaluation, inspection,
-  and plotting remain available; explicitly degree-validated function sources
-  retain supported coefficient arithmetic.
-- Products of two operands with active rate rows are rejected even when their
-  values are zero. Evaluation with one fixed rate row returns a `1x1` cell,
-  consistently with the rate-row output contract.
-- `bernTable` accepts multiple physical-cell selectors in a numeric or cell
-  array, preserves their requested order, and removes later duplicates.
-  `coeffs` continues to select one physical cell.
-- Both manuals explain these boundaries. Web displays preserve native script
-  proportions and scale complete formulas to no less than 85% on narrow
-  screens, with formula-local scrolling when needed.
-
-## What changed in v1.4.2
-
-- Scalar `pdlmi` wrappers can be concatenated horizontally or vertically with
-  other wrappers and native YALMIP `constraint` or `lmi` lists. Concatenation
-  exports each wrapper in written order and returns a terminal YALMIP list.
-- Certificate selection remains a wrapper operation and must occur before
-  concatenation. Unsupported operands, logical known-data certificates, and
-  nonscalar wrapper arrays fail with `pdlmi:InvalidConcatenation`.
-- The root [`example/`](example/) catalog provides seven source-grounded cases
-  from the GriD-LMIA software paper, a delay-system paper, ROLMIP, and a control
-  systems textbook. Each script records its source, settings, tunable values,
-  solver diagnostics, and numerical comparison.
-- Example filenames now use problem-oriented semantic names. Authors, years,
-  publication numbering, certificate choices, and tunable numerical settings
-  remain in the script headers and catalog rather than the paths.
-- The printable and Web manuals document the new API and examples. The public
-  inventory now contains 194 symbols.
-
-The earlier tagged v1.4.0 release introduced the mixed `sdpvar`/`pdmat`
-multiplication feature described in its release notes.
-
-## Historical migration from v1.2
-
-The removed names have no compatibility aliases.
-
-| Removed API | v1.3.0 API |
-| --- | --- |
-| `bernsteinTable` | `bernTable` |
-| `applyPolya` | `usePolya` |
-| `applyPutinar` | `usePutinar` |
-| `applySparsePutinar` | `useSpPut` |
-| `applySparseFullBoxPreorder` | `useSpBox` |
-| `applyFullBoxPreorder` | `useFullBox` |
-| `elevVals` | `elevate` |
-| `normalizeDegree` | `normDeg` |
-
-Constructor option and selected-state names remain unchanged. Existing code
-may continue to use names such as `UsePolya`, `PutinarOrder`, and
-`UseSparseFullBoxPreorder`.
-
-## Direction-wise degree model
-
-- Bernstein degree is direction-wise: `Degree=[d1 ... dell]`. A scalar remains
-  shorthand and is expanded uniformly. Explicitly using that shorthand in a
-  multidimensional constructor emits a warning.
-- Tensor coefficient counts are `prod(Degree + 1)`. Alignment uses the
-  componentwise maximum, multiplication adds degrees componentwise, and
-  elevation accepts direction-wise increments.
-- A zero-degree axis makes each cell polynomial constant in that direction.
-  Known nested data may still jump between cells. Decision construction shares
-  that constant across the direction to satisfy its continuity requirement.
-  `rhodiff` preserves a common tensor degree by exact elevation.
-- `PolyaDegree`, `PutinarOrder`, `SparseFullBoxOrder`, and `FullBoxOrder`
-  accept scalar shorthand or per-axis vectors. `BandWidth` remains scalar.
-
-See the [v1.5.0 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.0)
-for the latest immutable package snapshot. The v1.4.3, v1.3.8, and v1.2.4
-manuals remain the final documentation snapshots of their completed minor
-lines in the version history.
+**Gri**dding-based **D**PD-**LMI A**ssembler is a MATLAB/YALMIP package for modeling and assembling differentiable parameter-dependent linear matrix inequalities on tensor-product box grids.
 
 ## Requirements and installation
 
-- MATLAB
-- A complete YALMIP installation on the MATLAB path
-- A working SDP solver visible to YALMIP
+- MATLAB.
+- A complete [YALMIP](https://yalmip.github.io/) installation on the MATLAB path.
+- A working SDP solver visible to YALMIP. The installer checks MOSEK, COPT, SeDuMi, SDPT3, and LMILAB in that order.
 
-Clone or download a tagged release, make it the MATLAB working directory, and
-run:
+For a reproducible package checkout, clone the release tag:
+
+```sh
+git clone --depth 1 --single-branch --branch v1.5.1 https://github.com/TheBigoranger/GriD-LMIA.git
+```
+
+Alternatively, download the [v1.5.1 release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.1). Make the package root the MATLAB working directory and run:
 
 ```matlab
 report = install_pd_lmi();
 ```
 
-The installer adds only the repository root, checks YALMIP and a supported
-solver, and does not edit `startup.m` or change solver defaults.
+The installer discovers the package location, adds only its root to the MATLAB path, checks dependencies and class resolution, and persists the path. It does not install dependencies, edit `startup.m`, or change solver defaults.
 
-## Minimal anisotropic example
+For a future Code Ocean environment, use the same pinned checkout and provide MATLAB, YALMIP, and the required solver separately. Four public examples default to SDPT3; `discrete_time_robust_stability.m` defaults to SeDuMi. Each script has an editable `solver` setting. A solver accepted by the installer does not guarantee that every unchanged example's default solver is available.
+
+For `install_pd_lmi:PathSaveFailed` specifically, the [installation guide](https://www.ethanyxu.com/GriD-LMIA/install/) explains how to re-add the repository root for the current MATLAB session. That fallback does not persist installation; other installer errors require correction. Code Ocean execution and its Markdown rendering have not been verified.
+
+## What changed in v1.5.1
+
+- Zero-operand addition and subtraction preserve refined grid and rate metadata; subtracting near-equal large coefficients retains nonzero residuals.
+- Bernstein evaluation, convolution, continuity checks, differentiation, spline extraction, and known-matrix certificate checks handle additional extreme-scale inputs without avoidable intermediate overflow or underflow. Explicit-degree fitting rejects degrees above 64 and ill-conditioned collocation systems; grid cell widths must be finite.
+- Numeric coefficient data and arithmetic constants must be `double` or `single`. Integer grid vectors are converted to `double` and revalidated. Decision-dependence metadata is recomputed after indexing or numeric replacement.
+- The public catalog contains five examples. Two examples from an unpublished delay-system manuscript remain withheld, and private source paths and local performance tools are excluded from distribution.
+- Software and website sources are published on separate branches; the package includes the current printable manual.
+
+See the [v1.5.1 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.1) for this immutable snapshot and the [Version History](https://www.ethanyxu.com/GriD-LMIA/version-history/) for earlier changes and migration guidance.
+
+## Mathematical problem and workflow
+
+Find scalar decision functions $y_1,\ldots,y_{n_y}$ such that
+
+$$
+\mathcal F(\boldsymbol{\rho},\dot{\boldsymbol{\rho}};y)
+= F_0(\boldsymbol{\rho})
++\sum_{k=1}^{n_y}F_k(\boldsymbol{\rho})y_k(\boldsymbol{\rho})
++\sum_{k=1}^{n_y}\sum_{s=1}^{\ell}
+T_{k,s}(\boldsymbol{\rho})\dot\rho_s
+\frac{\partial y_k(\boldsymbol{\rho})}{\partial\rho_s}
+\preceq0
+$$
+
+for every $(\boldsymbol{\rho},\dot{\boldsymbol{\rho}})\in\mathcal P\times\mathcal R$, where the supported parameter and rate sets are boxes:
+
+$$
+\mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s],
+\qquad
+\mathcal R=\prod_{s=1}^{\ell}[\underline v_s,\overline v_s].
+$$
+
+The known matrix functions $F_0$, $F_k$, and $T_{k,s}$ have compatible symmetric sizes. Matrix decisions are represented through their independent scalar entries. Setting every $T_{k,s}=0$ gives an ordinary derivative-free PD-LMI. LPV stability and induced-$L_2$-gain analysis are representative applications.
+
+1. **Partition the parameter box.** Independent axis grids form physical cells and exactly cover the assumed box.
+2. **Choose a finite decision space.** Continuous, cell-wise-differentiable piecewise Bernstein polynomials restrict the admissible decision functions. Direction-wise degrees may differ.
+3. **Form the residual.** Use `pdmat` for known data, `pdvar` for decisions, and `rhodiff` for rate-weighted cell-wise derivatives. Bernstein nonnegativity and partition of unity support coefficient-based certificates; affine rate dependence reduces exactly to rate vertices.
+4. **Select a sufficient certificate.** Direct coefficient inequalities or an explicit alternative replace the remaining parameter continuum by finitely many constraints. Failure of a chosen certificate does not prove infeasibility of the original problem.
+5. **Solve and recover.** Export with `toYalmip`, call YALMIP's `optimize`, check the solver diagnostic, and only then recover decisions or objectives.
+
+The [Web manual](https://www.ethanyxu.com/GriD-LMIA/) and [printable manual](doc/manual.pdf) develop the mathematics and supported boundaries.
+
+## Main features
+
+- Known polynomial data, affine decision expressions, and MATLAB-style matrix operations on nonuniform tensor grids.
+- Anisotropic Bernstein degree $\mathbf m=(m_1,\ldots,m_\ell)$, with $\prod_{s=1}^{\ell}(m_s+1)$ coefficients per physical cell. Common-grid alignment uses exact Bernstein restriction.
+- Direction-wise `Continuity` metadata, C0 decision construction by default, and higher-order spline decisions. Derivatives are taken cell-wise and retain rate-vertex rows.
+- Mixed coefficient-backed `pdmat` and real affine `sdpvar` multiplication in either order. Products with decision dependence on both sides, or active rate rows on both sides, are rejected.
+- Explicit certificate selection and terminal concatenation with native YALMIP constraints. YALMIP owns objectives, solver selection, optimization, and diagnostics.
+
+### Certificate choices
+
+Direct is the default. Calling another selector replaces the current certificate:
+
+| Certificate | Selection | Role |
+| --- | --- | --- |
+| Direct | `constraint = P >= A` | Coefficient-wise Bernstein inequalities |
+| Pólya | `constraint.usePolya([1 2])` | Degree elevation before coefficient tests |
+| Putinar | `constraint.usePutinar([2 3])` | Box quadratic-module Gram certificate |
+| SparsePutinar | `constraint.useSpPut(2, [2 3])` | Tensor windows for the Putinar Gram certificate |
+| SparseFullBox | `constraint.useSpBox(2, [2 3])` | Tensor windows for full-box preordering |
+| FullBox | `constraint.useFullBox([2 3])` | Dense full-box preordering |
+
+These are box-specific, fixed-order sufficient constructions. Sparse certificates use Bernstein-label windows; they do not infer sparsity graphs or perform chordal decomposition. Function-only `pdmat` objects need explicit coefficient evidence before coefficient algebra or certificate assembly.
+
+## Minimal example
 
 ```matlab
 yalmip("clear")
@@ -152,88 +108,42 @@ solution = optimize(F);
 assert(solution.problem == 0)
 ```
 
-Here the first parameter direction is affine and the second is quadratic.
-`Degree` is stored as the row vector `[1 2]`. Using `Degree=2` on this
-two-parameter grid would request the uniform degree `[2 2]` and emit the
-documented scalar-expansion warning.
+The first parameter direction is affine and the second is quadratic: `Degree=[1 2]`. A scalar degree is uniform shorthand; explicitly using it in a multidimensional constructor emits the documented warning.
 
-## Certificate choices
-
-Direct coefficient inequalities are the default. Alternative finite
-certificates are explicit and replace the current certificate selection:
-
-| Certificate | Selection | Role |
-| --- | --- | --- |
-| Direct | `P >= A` | Coefficient-wise Bernstein certificate |
-| Pólya | `constraint.usePolya([1 2])` | Direction-wise degree elevation before coefficient tests |
-| Putinar | `constraint.usePutinar([2 3])` | Box quadratic-module Gram certificate |
-| SparsePutinar | `constraint.useSpPut(2, [2 3])` | Sliding tensor-window decomposition of the Putinar Gram certificate |
-| SparseFullBox | `constraint.useSpBox(2, [2 3])` | Sliding tensor-window decomposition of the full-box preordering |
-| FullBox | `constraint.useFullBox([2 3])` | Dense full-box preordering |
-
-These are sufficient certificates. Failure of one finite certificate does not
-prove that the original continuous-domain inequality is infeasible. Always
-accept solver results or recovered objectives only after checking
-`solution.problem == 0`.
-
-## Current boundaries
-
-- Grids are tensor products of one-dimensional box partitions.
-- Decision expressions are affine in YALMIP variables. Products with decision
-  dependence on both sides are rejected.
-- Coefficient-backed `pdmat` may multiply a compatible real affine
-  two-dimensional `sdpvar` in either order. The result is `pdvar`.
-- Active rate-row tables may occur on at most one product side. Compatible
-  metadata-only `RateBounds` does not create rate dependence.
-- Putinar, SparsePutinar, SparseFullBox, and FullBox are box-specific fixed-order
-  constructions, not a general SOS parser.
-- SparsePutinar and SparseFullBox use tensor windows over Bernstein basis
-  labels. They do not infer a sparsity graph, compute a chordal completion, or
-  implement structural-matrix chordal decomposition.
-- Function-only `pdmat` data need explicit Bernstein coefficient evidence
-  before coefficient algebra or certificate assembly.
-- Function-only `pdmat` reports unknown continuity and rejects an explicit
-  `Continuity` request. Known-data seam checks use a numerical tolerance.
-- YALMIP owns objectives, solver selection, optimization, and diagnostics.
+The [five-example catalog](example/README.md) includes univariate and three-parameter LPV gain analysis, discrete-time robust stability, continuous-time robust stability, and a mass-spring-damper case. Each script identifies its source, tunable settings, solver diagnostics, and numerical comparison.
 
 ## Verify a checkout
 
-Run the complete MATLAB runtime suite from the repository root:
+From the package root, run:
 
 ```matlab
 results = tests.run_all();
 assert(all([results.Passed]) && ~any([results.Incomplete]))
 ```
 
-The v1.5.0 source gate passed 848 runtime tests with zero failures and zero
-incompletes, including the traceability gate for 171 public API entries.
-`tests.run_coverage()` also passed the same 848 tests and measured
-3626/3746 statements (96.80%) and 1853/1964 decisions (94.35%), above the
-unchanged percentage baselines of 3325/3442 and 1671/1782. Feasible solver
-checks used MOSEK and required `diagnostic.problem == 0`, finite values, and
-independent normalized residuals no greater than `1e-7`. Infeasible controls
-were also retained. These correctness checks do not establish a speedup for
-every workload.
+For the production-code coverage and API traceability gates:
+
+```matlab
+[results, coverage] = tests.run_coverage();
+```
+
+The examples are separate from the unit suite. Inspect their solver diagnostics and source comparisons; a script finishing is not itself evidence of a successful certificate. The second mass-spring parameter box intentionally illustrates a non-certificate outcome.
 
 ## Documentation
 
+- [Installation and download](https://www.ethanyxu.com/GriD-LMIA/install/)
+- [Web manual](https://www.ethanyxu.com/GriD-LMIA/)
+- [Printable manual (PDF)](doc/manual.pdf)
+- [API reference](https://www.ethanyxu.com/GriD-LMIA/documents/reference-index/)
+- [Version History and migration guidance](https://www.ethanyxu.com/GriD-LMIA/version-history/)
 - [Project guide and repository branches](SUMMARY.md)
-- [Web manual](https://thebigoranger.github.io/GriD-LMIA/)
-- [Printable manual (PDF)](https://thebigoranger.github.io/GriD-LMIA/manual.pdf)
-- [Install and download](https://thebigoranger.github.io/GriD-LMIA/install/)
-- [Reference index](https://thebigoranger.github.io/GriD-LMIA/documents/reference-index/)
-- [Version history](https://thebigoranger.github.io/GriD-LMIA/version-history/)
 - [GitHub Releases](https://github.com/TheBigoranger/GriD-LMIA/releases)
 
-The public `main` branch delivers the printable manual at `doc/manual.pdf`; its
-TeX sources remain in the local-complete development worktree. The
-Astro/Starlight Web manual source is published separately under
-[`webpage/` on the `webpage` branch](https://github.com/TheBigoranger/GriD-LMIA/tree/webpage/webpage).
-See [SUMMARY.md](SUMMARY.md) for project navigation and a lightweight package clone.
+The default `main` branch contains the software package and final PDF. Website sources are maintained on the separate [`webpage` branch](https://github.com/TheBigoranger/GriD-LMIA/tree/webpage). The pinned shallow clone above avoids downloading old website history for a fresh package checkout.
 
 ## Citing GriD-LMIA
 
-If GriD-LMIA supports published work, please cite the software paper:
+If GriD-LMIA supports published work, please cite the [software paper](https://arxiv.org/abs/2608.03175):
 
 ```bibtex
 @article{xu2026gridlmia,
@@ -244,5 +154,3 @@ If GriD-LMIA supports published work, please cite the software paper:
   url     = {https://arxiv.org/abs/2608.03175}
 }
 ```
-
-Paper: [arXiv:2608.03175](https://arxiv.org/abs/2608.03175).

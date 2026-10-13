@@ -3,6 +3,21 @@ function tests = test_plus
     tests = functiontests(localfunctions);
 end
 
+function test_integer_zero_rejected_and_floating_identity_preserved(testCase)
+    A = pdmat([0 1], {[1 2;3 4], [2 3;4 5]}, Degree=1);
+    for zero = {uint8(0), zeros(2, 'int16')}
+        testCase.verifyError(@() A + zero{1}, "pdmat:InvalidAddition");
+        testCase.verifyError(@() zero{1} + A, "pdmat:InvalidAddition");
+    end
+    for zero = {0, single(0), zeros(2), zeros(2, 'single')}
+        right = A + zero{1};
+        left = zero{1} + A;
+        testCase.verifyEqual(right.LocalValues, A.LocalValues);
+        testCase.verifyEqual(left.evaluate(.5), A.evaluate(.5));
+    end
+end
+
+
 function test_function_only_zero_shortcuts_rejected(testCase)
     % Placeholder zeros cannot authorize an arithmetic identity shortcut.
     F = pdmat([0 1], @(x) [x 2*x; 3*x 1+x]);
