@@ -58,7 +58,7 @@ $$
 \mathcal R=\prod_{s=1}^{\ell}[\underline v_s,\overline v_s].
 $$
 
-The known matrix functions $F_0$, $F_k$, and $T_{k,s}$ have compatible symmetric sizes. Matrix decisions are represented through their independent scalar entries. Setting every $T_{k,s}=0$ gives an ordinary derivative-free PD-LMI. LPV stability and induced-$L_2$-gain analysis are representative applications.
+The known matrix functions $F_0$, $F_k$, and $T_{k,s}$ have compatible symmetric sizes. Matrix decisions are represented through their independent scalar entries. Setting every $T_{k,s}=0$ gives an ordinary derivative-free PD-LMI. LPV stability and induced $L_2$ gain analysis are representative applications.
 
 1. **Partition the parameter box.** Independent axis grids form physical cells and exactly cover the assumed box.
 2. **Choose a finite decision space.** Continuous, cell-wise-differentiable piecewise Bernstein polynomials restrict the admissible decision functions. Direction-wise degrees may differ.
