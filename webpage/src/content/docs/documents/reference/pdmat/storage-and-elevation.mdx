@@ -1,0 +1,120 @@
+---
+title: pdmat Storage
+description: Class-specific cell traversal, coefficient evidence, labels, and counts for known data.
+---
+
+import CellStorageDiagram from "../../../../../components/CellStorageDiagram.astro";
+
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a><span>/</span><span>storage</span></nav>
+
+The implementation is inherited from `pdbase`, but these methods are complete
+public `pdmat` behavior. They expose known numeric coefficient evidence and
+return `pdmat` values in place of generic backend objects.
+
+The physical grid, shared boundary handles, global coefficient controls, and
+cell-wise `LocalValues` leaves are related as follows:
+
+<CellStorageDiagram />
+
+Read the figure from geometry to coefficient evidence:
+
+1. [`cells(A)`](#pdmat-cells) enumerates the physical-cell address
+   $\vect c$ shown by the grid.
+2. [`coeffs(A,cellSubscript)`](#pdmat-coeffs) follows that address into
+   `LocalValues{c₁}...{cₙ}` and returns the cell-wise coefficient leaves.
+3. [`lbls(A)`](#pdmat-lbls) supplies the local Bernstein multi-index
+   $\vect i$ attached to each coefficient column in the tensor lattice.
+4. [`ncell`, `ncoeff`, and `npar`](#pdmat-ncell) report, respectively, the
+   number of physical cells, local labels per cell, and parameter axes visible
+   in the same picture.
+
+## <span id="pdmat-cells"></span>`cells`
+
+```matlab
+cellSubscripts = cells(A)
+```
+
+Returns `A.ncell() × A.npar()` physical-cell subscript rows, with earlier axes
+varying more slowly. These rows are addresses of the physical cells highlighted
+in the left and right grids above. Bernstein-label enumeration uses `labels()`.
+
+## <span id="pdmat-coeffs"></span>`coeffs`
+
+```matlab
+knownCoefficients = coeffs(A,cellSubscript)
+entryCoefficients = coeffs(A(rowIndex,columnIndex),cellSubscript)
+```
+
+Returns the known numeric coefficient row for one physical cell. `cellSubscript`
+must contain one finite, in-range positive integer per parameter. Failures use
+`pdbase:InvalidCellSubs`. A function-only `pdmat` has an empty placeholder
+in place of coefficient evidence. Use [`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/)
+for that source.
+
+In the figure, this call selects one `LocalValues{c₁}...{cₙ}` branch. A shared
+boundary handle such as $P_2$ may therefore appear in the coefficient rows of
+two adjacent cells as one shared value.
+
+For matrix-valued data, index the `pdmat` first and then call `coeffs` to obtain
+the Bernstein coefficients of one matrix entry. The returned row keeps the same
+local-label order as `A.lbls()`.
+
+## <span id="pdmat-lbls"></span>`lbls`
+
+```matlab
+labels = lbls(A)
+```
+
+Returns the tensor Bernstein multi-index row associated with every coefficient
+column. It is the programmatic version of the 3 × 3 label lattice in the
+right-hand panel. Row $j$ labels the same coefficient column returned at
+position $j$ by `coeffs`.
+
+## <span id="pdmat-ncell"></span>`ncell`, <span id="pdmat-ncoeff"></span>`ncoeff`, and <span id="pdmat-npar"></span>`npar`
+
+```matlab
+physicalCellCount = ncell(A)
+coefficientColumns = ncoeff(A)
+parameterCount = npar(A)
+```
+
+`ncell` counts physical tensor cells, `ncoeff` returns
+`prod(Degree+1)`, and `npar` counts grid vectors. Matrix-entry counts come from
+`MatrixSize`. In the figure these are, respectively, the number of selectable
+hypercubes, the number of labels in the selected cell lattice, and the number
+of independent grid axes.
+
+```matlab
+A = pdmat({[0 1 2], [10 20]}, {1 3; 5 7}, Degree=[1 1]);
+cellSubscripts = A.cells()
+counts = [A.ncell() A.ncoeff() A.npar()]
+labels = A.lbls()
+firstCell = [A.coeffs([1 1]){:}]
+```
+
+```text
+cellSubscripts =
+     1     1
+     2     1
+
+counts =
+     2     4     2
+
+labels =
+     0     0
+     0     1
+     1     0
+     1     1
+
+firstCell =
+     1     3     5     7
+```
+
+## See Also
+
+[`pdmat elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) ·
+[`pdmat evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) ·
+[`pdmat algebra`](/GriD-LMIA/documents/reference/pdmat/algebra/) ·
+[`Mathematical notation`](/GriD-LMIA/documents/math/notation/) ·
+[`pdbase evaluation and elevation`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/) ·
+[`pdvar storage and evaluation`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/)

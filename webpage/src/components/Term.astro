@@ -1,0 +1,17 @@
+---
+import { terminologyTerms } from "../data/documentation-contracts.js";
+
+interface Props {
+  id: string;
+  definition?: boolean;
+}
+
+const { id, definition = false } = Astro.props;
+const term = terminologyTerms.find((candidate) => candidate.id === id);
+if (!term) throw new Error(`Unknown terminology id: ${id}`);
+const href = `/GriD-LMIA${term.web_definition_anchor}`;
+---
+
+{definition
+  ? <dfn id={`term-${term.id}`} data-term={term.id}>{term.expansion} ({term.abbreviation})</dfn>
+  : <a class="term-link" data-term={term.id} href={href} title={term.expansion}>{term.abbreviation}</a>}

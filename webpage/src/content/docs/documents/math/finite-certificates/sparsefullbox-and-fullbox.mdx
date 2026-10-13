@@ -1,0 +1,132 @@
+---
+title: SparseFullBox And FullBox
+description: Full-box preorderings, sliding tensor-window Gram blocks, endpoints, and exact coefficient matching.
+---
+
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import GramAssemblyExplorer from "../../../../../components/GramAssemblyExplorer.tsx";
+
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><span>Finite Certificates</span><span>/</span><span>SparseFullBox And FullBox</span></nav>
+
+<CertificateSpectrum selected="sparsefullbox" />
+
+FullBox uses every square-free product of the box generators. SparseFullBox keeps the same generator families, but it replaces each dense tensor Bernstein basis by overlapping sliding tensor windows.
+
+## Full-Box Preordering
+
+For $J\subseteq\{1,\ldots,\ell\}$, define
+
+$$
+g_J(\vect\alpha)
+=\prod_{s\in J}\alpha_s(1-\alpha_s),
+\qquad g_{\varnothing}=1.
+$$
+
+The FullBox certificate has the form
+
+$$
+S^{(\vect c)}(\vect\alpha)
+=\sum_{J\subseteq[\ell]}
+g_J(\vect\alpha)T_J(\vect\alpha).
+$$
+
+Here each subset contributes
+
+$$
+T_J(\vect\alpha)
+=Z_J(\vect\alpha)^\top Q_JZ_J(\vect\alpha),
+$$
+
+with
+
+$$
+Q_J\succeq0.
+$$
+
+Every Bernstein coefficient of this sum is matched to the sign-normalized residual coefficient. A negative component in the basis degree omits the corresponding generator term.
+
+```matlab
+selected = L.useFullBox();
+selected = L.useFullBox(r);
+```
+
+## Sliding Tensor Windows
+
+Let the Gram basis for one active generator term have degree $\vect d$. For side length $w$, define the side on axis $s$ by
+
+$$
+h_s=\min(w,d_s+1).
+$$
+
+Each start tuple $\vect u$ satisfies $0\le u_s\le d_s-h_s+1$ and selects the tensor label window
+
+$$
+\mathcal W_{\vect u}
+=\left\{\vect a:u_s\le a_s<u_s+h_s\right\}.
+$$
+
+The window basis $Z_{J,\vect u}$ contains only those labels. SparseFullBox assembles
+
+$$
+S^{(\vect c)}(\vect\alpha)
+=\sum_{J\subseteq[\ell]}g_J(\vect\alpha)
+\sum_{\vect u}T_{J,\vect u}(\vect\alpha).
+$$
+
+Each window contribution is
+
+$$
+T_{J,\vect u}(\vect\alpha)
+=Z_{J,\vect u}(\vect\alpha)^\top
+Q_{J,\vect u}Z_{J,\vect u}(\vect\alpha),
+$$
+
+with a separate positive semidefinite condition
+
+$$
+Q_{J,\vect u}\succeq0.
+$$
+
+The construction uses sliding windows in the tensor label lattice. This tensor
+support differs from a bandwidth constraint on one flattened Gram matrix.
+Overlapping windows contribute to the same target labels, and the exact
+coefficient identities accumulate every contribution.
+
+For a matrix inequality of size $n$, the PSD dimension of one window is
+
+$$
+n\prod_{s=1}^{\ell}h_s.
+$$
+
+```matlab
+selected = L.useSpBox();
+selected = L.useSpBox(w);
+selected = L.useSpBox(w, r);
+```
+
+<GramAssemblyExplorer client:visible />
+
+## Canonical Endpoints
+
+- $w=1$ normalizes to Direct after order validation.
+- An intermediate $w$ stores a SparseFullBox certificate with overlapping tensor windows.
+- When $w$ spans every active basis axis, the request normalizes to FullBox.
+
+These are stored selector states. Inspect the read-only `pdlmi` state when code must report the selected family.
+
+## Reusable Maps And Fresh Variables
+
+The Bernstein product weights, target-label groups, generator maps, and window incidence are numeric. The implementation may reuse them across compatible entries, cells, rate rows, and blocks. However, every entrywise certificate copy, physical cell, rate row, and window receives a fresh Gram variable. This retains the original cone partition and prevents unintended coupling between certificates.
+
+The optimized path preserves represented functions, existing YALMIP variables, certificate families, constraint order, PSD block dimensions, and cone partition, apart from ordinary floating-point summation differences.
+
+## Failure Interpretation And Limits
+
+A fixed order or window size is a sufficient certificate choice. Failure is
+inconclusive for the continuous inequality. The caller selects tensor windows,
+the solver, and every positivity margin. SparseFullBox uses tensor-label
+windows as its fixed support model.
+
+## See Also
+
+[SparsePutinar Tensor Windows](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) · [Bernstein–Gram Map](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/#reusable-bernsteingram-map) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [Certificate Map](/GriD-LMIA/documents/math/sos-certificates/)

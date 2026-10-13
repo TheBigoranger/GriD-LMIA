@@ -1,0 +1,162 @@
+---
+title: Markov–Lukács And Putinar
+description: Parity-specific interval Gram forms and the implemented singleton-generator Putinar box module.
+---
+
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+import GramAssemblyExplorer from "../../../../../components/GramAssemblyExplorer.tsx";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <span>Finite Certificates</span>
+  <span>/</span>
+  <span>Markov–Lukács And Putinar</span>
+</nav>
+
+<CertificateSpectrum selected="putinar" />
+
+The software state is `Putinar`. In one parameter its implementation uses the
+parity-specific Markov–Lukács interval form within that selector. The Gram notation below uses
+$Z_{\vect a}=\vect b_{\vect a}\otimes I_n$ for matrix size $n$, where $\vect b_{\vect a}$ is the
+degree-$\vect a=(a_1)$ Bernstein basis vector and every Gram matrix $Q$ satisfies
+$Q\succeq0$.
+
+## One-Parameter Even Degree
+
+For assembled degree $\vect M=(M_1)$ with $M_1=2r_1$, where
+$\vect r=(r_1)$, represent the target as
+
+$$
+\begin{aligned}
+G_0(\alpha)&:=Z_{\vect r}(\alpha)^\top Q_0Z_{\vect r}(\alpha),\\
+G_1(\alpha)&:=Z_{\vect r-\vect e_1}(\alpha)^\top
+Q_1Z_{\vect r-\vect e_1}(\alpha).
+\end{aligned}
+$$
+
+Thus
+
+$$
+\begin{aligned}
+S^{(\vect c)}(\alpha)
+&=-\mathcal F^{(\vect c)}(\alpha),\\
+S^{(\vect c)}(\alpha)
+&=G_0(\alpha)+\alpha(1-\alpha)G_1(\alpha).
+\end{aligned}
+$$
+
+with $Q_0,Q_1\succeq0$. The basis-to-coefficient Gram map is affine, and
+every resulting Bernstein coefficient is matched exactly to
+$C^{(\vect c)}[\vect i]$.
+
+## One-Parameter Odd Degree
+
+For $M_1=2r_1+1$, use endpoint weights:
+
+$$
+\begin{aligned}
+G_j(\alpha)&:=Z_{\vect r}(\alpha)^\top Q_jZ_{\vect r}(\alpha),\\
+S^{(\vect c)}(\alpha)
+&=(1-\alpha)G_0(\alpha)+\alpha G_1(\alpha),\\
+Q_0&\succeq0,\qquad Q_1\succeq0.
+\end{aligned}
+$$
+
+The minimum absolute order is $\vect r=(r_1)$ with
+$r_1=\lfloor M_1/2\rfloor$ in one parameter.
+
+## Multivariate Putinar Module
+
+For $\ell\ge2$, define
+$g_s(\vect\alpha)=\alpha_s(1-\alpha_s)$. The implemented module is
+
+$$
+S^{(\vect c)}
+=S_0+\sum_{s=1}^{\ell}g_sS_s,
+$$
+
+where each $S_s$ has a free positive-semidefinite Gram representation and the
+sum matches every target coefficient exactly. The minimum absolute order is
+$\vect r=\lceil\vect M/2\rceil$ componentwise.
+
+```matlab
+selected = L.usePutinar();
+selected = L.usePutinar(r);
+constraints = selected.toYalmip();
+```
+
+Each cell, stored rate row, and column-major matrix entry receives independent
+Gram blocks.
+These are non-strict software constraints. The theoretical
+$S^{(\vect c)}\succ0$ condition requires an explicit
+$S^{(\vect c)}-\varepsilon I\succeq0$ margin in the modeled residual.
+
+## Reusable Bernstein–Gram Map
+
+Let $\vect b_{\vect r}$ collect the tensor Bernstein basis labels of degree $\vect r$, and set $Z_{\vect r}=\vect b_{\vect r}\otimes I_n$. For two basis labels $\vect a$ and $\vect b$, their product is
+
+$$
+B_{\vect a}^{\vect r}B_{\vect b}^{\vect r}
+=\left[
+\prod_{s=1}^{\ell}
+\frac{\binom{r_s}{a_s}\binom{r_s}{b_s}}
+{\binom{2r_s}{a_s+b_s}}
+\right]
+B_{\vect a+\vect b}^{2\vect r}.
+$$
+
+The bracketed factor is numeric. For a symmetric Gram matrix $Q$, a diagonal term $Q_{\vect a,\vect a}$ contributes once, while an off-diagonal pair contributes $Q_{\vect a,\vect b}+Q_{\vect b,\vect a}=2Q_{\vect a,\vect b}$. The coefficient at target label $\vect k$ is therefore the sum of all diagonal and paired off-diagonal contributions whose labels satisfy $\vect a+\vect b=\vect k$. Generator multiplication adds a second numeric Bernstein product map before the exact coefficient identity is stored.
+
+For the small scalar basis $\vect z=[B_0^1,B_1^1]^\top$ and $Q=Q^\top$,
+
+$$
+\vect z^\top Q\vect z
+=Q_{00}B_0^2+Q_{01}B_1^2+Q_{11}B_2^2.
+$$
+
+The middle identity follows because $B_0^1B_1^1=\tfrac12B_1^2$ and the two symmetric off-diagonal entries contribute together.
+
+`gramCons` builds the target-label groups, diagonal groups, paired off-diagonal
+groups, generator maps, and tensor-window incidence once as fixed numeric plan
+data. It then allocates fresh Gram variables for every matrix entry when the
+inequality is entrywise, every physical cell, every rate row, and every
+certificate block. Fresh Gram variables preserve certificate independence.
+
+<GramAssemblyExplorer client:visible />
+
+The optimized assembly preserves represented functions, existing YALMIP variables, certificate families, constraint order, PSD block dimensions, and cone partition, apart from ordinary floating-point summation differences.
+
+## Relation To FullBox
+
+In one parameter, Putinar and FullBox use the same Markov–Lukács interval
+form. In several parameters, Putinar includes only the unweighted and singleton
+generator terms. FullBox includes every generator-subset product.
+
+## Failure Interpretation
+
+A fixed-order Gram model is a sufficient certificate. Failure may reflect
+certificate order, numerical conditioning, memory pressure, grid choice, or
+decision degree. It remains inconclusive about whether $S$ becomes indefinite somewhere.
+
+## Limitations
+
+The implementation is specialized to box generators and fixed absolute order.
+Its supported scope is the box-generator module at a caller-selected order and
+solver. Large Gram programs can be memory- or numerically
+limited.
+
+## Further Reading
+
+- de Klerk, Hess, and Laurent, [Improved convergence rates for Lasserre-type hierarchies of upper bounds for box-constrained polynomial optimization](https://doi.org/10.1137/16M1065264), for interval representations and box context.
+- Aylward, Itani, and Parrilo, [Explicit SOS decompositions of univariate polynomial matrices and the KYP lemma](https://www.mit.edu/~parrilo/pubs/files/AylwardItaniParrilo-ExplicitSOSDecompositionsOfUnivariatePolynomialMatricesAndTheKYPLemma.pdf).
+- Putinar, [Positive polynomials on compact semi-algebraic sets](https://www.jstor.org/stable/24897130).
+
+## See Also
+
+[Previous: Direct And Pólya](/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/) ·
+[Next: SparsePutinar Tensor Windows](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/) ·
+[Notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters) ·
+[`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) ·
+[`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) ·
+[`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/)

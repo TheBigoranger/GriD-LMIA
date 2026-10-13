@@ -1,0 +1,76 @@
+---
+import DiagramFrame from "./DiagramFrame.astro";
+
+interface Link { href: string; label: string; }
+interface Props {
+  family: "constructors" | "alignment" | "multiplication" | "elevation" | "differentiation" | "certificates";
+  caption: string;
+  links: Link[];
+}
+
+const { family, caption, links } = Astro.props;
+const assets = import.meta.glob("../assets/call-graphs/*.svg", { eager: true, query: "?url", import: "default" });
+const rawAssets = import.meta.glob("../assets/call-graphs/*.svg", { eager: true, query: "?raw", import: "default" });
+// These are trusted, prebuilt local SVGs. The browser only selects the
+// responsive layout and theme; Mermaid never enters the client bundle.
+const image = (layout: "desktop" | "mobile", theme: "light" | "dark") => {
+  const key = `../assets/call-graphs/${family}-${layout}-${theme}.svg`;
+  const viewBox = (rawAssets[key] as string).match(/viewBox="[^"]*\s([\d.]+)\s([\d.]+)"/);
+  if (!viewBox) throw new Error(`Missing intrinsic SVG viewBox for ${key}`);
+  const width = Number(viewBox[1]);
+  const height = Number(viewBox[2]);
+  return { src: assets[key] as string, ratio: `${width} / ${height}` };
+};
+const desktopLight = image("desktop", "light");
+const desktopDark = image("desktop", "dark");
+const mobileLight = image("mobile", "light");
+const mobileDark = image("mobile", "dark");
+---
+
+<DiagramFrame caption={caption} class="call-graph" label={`${caption}. Implementation call graph.`}>
+  <div class="call-graph__images">
+    <picture class="call-graph__image call-graph__image--desktop call-graph__image--light" style={`--call-graph-ratio: ${desktopLight.ratio}`}>
+      <img src={desktopLight.src} alt="" loading="lazy" decoding="async" />
+    </picture>
+    <picture class="call-graph__image call-graph__image--desktop call-graph__image--dark" style={`--call-graph-ratio: ${desktopDark.ratio}`}>
+      <source media="(prefers-color-scheme: dark)" srcset={desktopDark.src} />
+      <img src={desktopDark.src} alt="" loading="lazy" decoding="async" />
+    </picture>
+    <picture class="call-graph__image call-graph__image--mobile call-graph__image--light" style={`--call-graph-ratio: ${mobileLight.ratio}`}>
+      <img src={mobileLight.src} alt="" loading="lazy" decoding="async" />
+    </picture>
+    <picture class="call-graph__image call-graph__image--mobile call-graph__image--dark" style={`--call-graph-ratio: ${mobileDark.ratio}`}>
+      <source media="(prefers-color-scheme: dark)" srcset={mobileDark.src} />
+      <img src={mobileDark.src} alt="" loading="lazy" decoding="async" />
+    </picture>
+  </div>
+  <nav class="call-graph__links" aria-label="Call graph references">
+    {links.map((link) => <a href={link.href}>{link.label}</a>)}
+  </nav>
+</DiagramFrame>
+
+<style>
+  .call-graph__images, .call-graph__image, .call-graph__image img { width: 100%; min-width: 0; max-width: 100%; }
+  .call-graph__image { display: none; margin: 0; aspect-ratio: var(--call-graph-ratio); }
+  .call-graph__image--desktop.call-graph__image--light { display: block; }
+  .call-graph__image img { display: block; height: 100%; object-fit: contain; }
+  .call-graph__links { display: flex; flex-wrap: wrap; gap: .35rem .8rem; margin-block-start: .7rem; }
+  .call-graph__links a { overflow-wrap: anywhere; }
+  :global(html[data-theme="dark"]) .call-graph__image--light { display: none; }
+  :global(html[data-theme="dark"]) .call-graph__image--desktop.call-graph__image--dark { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :global(html:not([data-theme="light"])) .call-graph__image--light { display: none; }
+    :global(html:not([data-theme="light"])) .call-graph__image--desktop.call-graph__image--dark { display: block; }
+  }
+  @media (max-width: 700px) {
+    .call-graph__image--desktop { display: none !important; }
+    .call-graph__image--mobile.call-graph__image--light { display: block; }
+    :global(html[data-theme="dark"]) .call-graph__image--mobile.call-graph__image--light { display: none; }
+    :global(html[data-theme="dark"]) .call-graph__image--mobile.call-graph__image--dark { display: block; }
+    @media (prefers-color-scheme: dark) {
+      :global(html:not([data-theme="light"])) .call-graph__image--mobile.call-graph__image--light { display: none; }
+      :global(html:not([data-theme="light"])) .call-graph__image--mobile.call-graph__image--dark { display: block; }
+    }
+    .call-graph__links { display: grid; grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

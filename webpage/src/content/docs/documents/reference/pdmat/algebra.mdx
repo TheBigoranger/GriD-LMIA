@@ -1,0 +1,309 @@
+---
+title: pdmat Algebra
+description: Detailed coefficient-algebra syntax, formulas, examples, outputs, and errors for pdmat.
+---
+
+import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
+import MultiplicationDiagram from "../../../../../components/MultiplicationDiagram.astro";
+import CallGraph from "../../../../../components/CallGraph.astro";
+import AdditionExplorer from "../../../../../components/AdditionExplorer.tsx";
+import MultiplicationExplorer from "../../../../../components/MultiplicationExplorer.tsx";
+import { Aside } from "@astrojs/starlight/components";
+
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/matrix-operations/">matrix operations</a><span>/</span><span>algebra</span></nav>
+
+Every operation acts on the matrix payload stored at each local Bernstein label. The returned `pdmat` preserves known-data semantics and exposes the aligned grid, degree, and payload shape through its properties.
+
+## Continuity And Exact Refinement
+
+Exact degree elevation and common-grid Bernstein restriction preserve the
+existing direction-wise continuity bounds. Addition, subtraction, supported
+products, concatenation, block assembly, and assignment propagate
+componentwise minima. Numeric constants carry infinite order. Unary matrix
+operations and block selection retain the source bound. Reconstructed
+coefficients with a propagated `-1` are checked for recovered value continuity
+after cancellation or selection. This recovery is limited to order zero,
+so the stored bound can be weaker than the result's maximal smoothness.
+
+Grid alignment restricts each source cell independently to its subcells. It
+preserves coefficient jumps and existing symbolic variables. Rate-vertex
+tables require matching physical grids and retain their separate rows. The
+refinement uses each source cell's own coefficients at a shared boundary. A generic degree-zero
+coefficient object is constant within each cell, while constructor-created
+`pdvar(..., Degree=0)` shares one decision across the grid.
+
+## <span id="pdmat-plus"></span><span id="pdmat-minus"></span><span id="pdmat-uplus"></span><span id="pdmat-uminus"></span>Add, subtract, and align coefficients
+
+```matlab
+S = A + B; D = A - B; U = +A; N = -A;
+```
+
+`plus` and `minus` align compatible physical grids and exactly elevate each
+operand to the componentwise maximum of their direction-wise degrees before
+combining corresponding coefficients. Numeric constants are promoted to the
+payload size. `uplus` preserves the object. `uminus` negates every stored
+coefficient.
+
+<CallGraph family="alignment" caption="Binary algebra aligns grids, rate bounds, and every degree component before cell-row assembly." links={[
+  { href: "/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#shared-grid-and-degree-alignment", label: "Alignment mathematics" },
+  { href: "#pdmat-plus", label: "plus and minus API" },
+  { href: "/GriD-LMIA/documents/reference/pdvar/algebra/", label: "pdvar algebra" },
+]} />
+
+```matlab
+A = pdmat({[0 1]}, {0, 2}, Degree=1);
+B = pdmat({[0 1]}, {1, 3, 5}, Degree=2);
+S = A + B;
+disp(bernTable(S, 1, "oneLine"))
+```
+
+```text
+    CellSubscript              Expression
+    _____________    _______________________________
+
+        {[1]}        "(1-α)^2*1 + 2(1-α)α*4 + α^2*7"
+```
+
+For example, elevating a degree-one row to degree two gives
+
+$$
+[a_0,a_1]
+\longmapsto
+\left[a_0,\frac{a_0+a_1}{2},a_1\right].
+$$
+
+<MatrixGlyphDiagram before={[["a₀", "½(a₀+a₁)", "a₁"], ["b₀", "b₁", "b₂"]]} after={[["a₀+b₀", "½(a₀+a₁)+b₁", "a₁+b₂"]]} beforeLabel="degree-elevated rows" afterLabel="coefficient sum" caption="Degree elevation changes the representation, not the polynomial; addition then combines aligned local labels." />
+
+If compatible operands have different interior nodes, their sorted union is the common refinement. Grid refinement and degree elevation are independent alignment steps.
+
+<Aside type="note" title="Implementation remark: exact addition alignment">
+`plus` and `minus` first form the sorted-union refinement of compatible grid vectors and
+exactly re-express both operands on that refinement. They then elevate every
+direction to the componentwise maximum degree and apply addition or subtraction
+coefficient by coefficient. Neither alignment stage samples the represented
+function.
+</Aside>
+
+### Different grids and direction-wise degrees
+
+The two alignment stages are visible together in this example. `A` is affine
+only along the first parameter, while `B` is quadratic only along the second.
+Their physical grids have different interior nodes on both axes.
+
+```matlab
+A = pdmat({[0 0.4 1], [0 1]}, @(r1,r2) r1, Degree=[1 0]);
+B = pdmat({[0 0.7 1], [0 0.25 1]}, @(r1,r2) r2^2, Degree=[0 2]);
+S = A + B;
+S.GridInfo.Vectors{1}
+S.GridInfo.Vectors{2}
+disp(bernTable(S, [1 1], "oneLine"))
+```
+
+```text
+ans =
+         0    0.4000    0.7000    1.0000
+
+ans =
+         0    0.2500    1.0000
+
+    CellSubscript                                                                 Expression
+    _____________    _____________________________________________________________________________________________________________________________________
+
+       {[1 1]}       "(1-α1) * (1-α2)^2*0 + (1-α1) * 2(1-α2)α2*0 + (1-α1) * α2^2*0.0625 + α1 * (1-α2)^2*0.4000 + α1 * 2(1-α2)α2*0.4000 + α1 * α2^2*0.4625"
+```
+
+The represented functions are re-expressed exactly on the sorted-union grid,
+then elevated to the componentwise maximum degree `[1 2]`. The operation uses
+exact coefficient transformations. See
+[Gridding and local coordinates](/GriD-LMIA/documents/math/gridding-and-degree/)
+for physical-cell refinement and
+[`elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) for the
+componentwise coefficient transform.
+
+### Numerical addition explorer
+
+Edit either one-cell coefficient row. The explorer elevates both rows exactly
+to their common degree, then displays and plots the aligned operands and sum.
+
+<AdditionExplorer client:visible />
+
+## <span id="pdmat-mtimes"></span>Multiply in Bernstein coefficient space
+
+<CallGraph family="multiplication" caption="mtimes selects coefficient convolution or the affine sdpvar bridge while preserving written matrix order." links={[
+  { href: "/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#normalized-product-identity", label: "Product mathematics" },
+  { href: "#pdmat-mtimes", label: "mtimes API" },
+  { href: "/GriD-LMIA/documents/reference/pdvar/algebra/", label: "pdvar mtimes" },
+]} />
+
+```matlab
+K = A * B;
+L = X * A;
+R = A * X;
+```
+
+`mtimes` multiplies coefficient-backed functions exactly through their
+Bernstein coefficients. A compatible real affine two-dimensional `sdpvar` may
+also multiply coefficient-backed `pdmat` in either order. That mixed path
+returns `pdvar`, treats the symbolic matrix as parameter independent, and adds
+and reuses exactly the YALMIP decisions already present. On one cell,
+
+$$
+\omega_s(i_s,j_s)
+:=\frac{\binom{m_s}{i_s}\binom{n_s}{j_s}}
+{\binom{m_s+n_s}{i_s+j_s}},
+$$
+
+and let the tensor-product weight be
+
+$$
+\Omega(\vect i,\vect j)
+:=\prod_{s=1}^{\ell}\omega_s(i_s,j_s).
+$$
+
+The ordered coefficient convolution is then
+
+$$
+R^{(c)}[\vect k]=\sum_{\vect i+\vect j=\vect k}\Omega(\vect i,\vect j)P^{(c)}[\vect i]Q^{(c)}[\vect j].
+$$
+
+Matrix order is preserved. Numeric scalars and matrices use the corresponding MATLAB-compatible left or right product. Degrees and tensor labels add componentwise.
+
+<Aside type="note" title="Implementation remark: ordered product convolution">
+`mtimes` builds one normalized Bernstein product plan for two
+parameter-dependent factors. On each common-refinement cell it accumulates
+left-label/right-label pairs in written matrix-factor order and stores the
+result at their summed tensor label. For a bare affine `sdpvar`, a
+class-restricted bridge instead maps the existing known coefficient tree into
+`pdvar`. Both paths preserve written matrix order.
+</Aside>
+
+The implementation visits contribution pairs in increasing left label, with
+`j = k-i`, and keeps matrix multiplication in that order. A scalar
+degree-one check makes the normalized middle coefficient explicit:
+
+```matlab
+A = pdmat({[0 1]}, {2, 4}, Degree=1);
+B = pdmat({[0 1]}, {3, 5}, Degree=1);
+K = A * B;
+disp(bernTable(K, 1, "oneLine"))
+```
+
+```text
+    CellSubscript               Expression
+    _____________    _________________________________
+
+        {[1]}        "(1-α)^2*6 + 2(1-α)α*11 + α^2*20"
+```
+
+Here the middle Bernstein coefficient is `11 = 0.5*(2*5 + 4*3)`. This is an ordered coefficient
+convolution, which represents the exact polynomial product.
+
+```matlab
+grid = {[0 1], [10 20]};
+A = pdmat(grid, {1 2; 3 4}, Degree=[1 1]);
+B = pdmat(grid, {5 6; 7 8}, Degree=[1 1]);
+K = A * B;
+disp(bernTable(K, [1 1], "oneLine"))
+```
+
+```text
+    CellSubscript                                                                                                     Expression
+    _____________    ____________________________________________________________________________________________________________________________________________________________________________________________________________
+
+       {[1 1]}       "(1-α1)^2 * (1-α2)^2*5 + (1-α1)^2 * 2(1-α2)α2*8 + (1-α1)^2 * α2^2*12 + 2(1-α1)α1 * (1-α2)^2*11 + 2(1-α1)α1 * 2(1-α2)α2*15 + 2(1-α1)α1 * α2^2*20 + α1^2 * (1-α2)^2*21 + α1^2 * 2(1-α2)α2*26 + α1^2 * α2^2*32"
+```
+
+The operands may have different degrees and may use degree zero on any axis:
+
+```matlab
+A = pdmat({[0 1], [0 2]}, @(r1,r2) 1 + r1, Degree=[1 0]);
+B = pdmat({[0 1], [0 2]}, @(r1,r2) 2 + r2^2, Degree=[0 2]);
+K = A * B;
+disp(bernTable(K, [1 1], "oneLine"))
+```
+
+```text
+    CellSubscript                                                        Expression
+    _____________    __________________________________________________________________________________________________________________
+
+       {[1 1]}       "(1-α1) * (1-α2)^2*2 + (1-α1) * 2(1-α2)α2*2 + (1-α1) * α2^2*6 + α1 * (1-α2)^2*4 + α1 * 2(1-α2)α2*4 + α1 * α2^2*12"
+```
+
+The tensor convolution adds degrees componentwise, so `[1 0]+[0 2]=[1 2]`.
+The zero-degree axes remain valid inputs and enter the planned contraction directly before
+multiplication. The complete coefficient rule is derived in
+[Coefficient algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
+
+A bare affine `sdpvar` contributes degree zero. Scalar broadcasting and
+ordinary rectangular matrix products follow the package's `mtimes` contract:
+
+```matlab
+yalmip('clear')
+X = sdpvar(2, 3, 'full');
+Y = sdpvar(4, 2, 'full');
+A0 = reshape(1:12, 3, 4);
+A = pdmat([0 1], {A0, A0 + 12}, Degree=1);
+L = X * A;
+R = A * Y;
+leftClass = class(L)
+rightClass = class(R)
+leftSize = size(L)
+rightSize = size(R)
+mixedDegrees = [L.Degree R.Degree]
+```
+
+```text
+leftClass = 'pdvar'
+rightClass = 'pdvar'
+leftSize =
+     2     4
+rightSize =
+     3     2
+mixedDegrees =
+     1     1
+```
+
+<MultiplicationDiagram />
+
+### Numerical multiplication explorer
+
+The weighted convolution below uses the same normalized Bernstein rule as
+`pdmat.mtimes` and preserves the written factor order.
+
+<MultiplicationExplorer client:visible />
+
+## Validation and operation boundaries
+
+- Coefficient algebra requires Bernstein evidence and rejects function-only objects.
+- Physical bounds and matrix dimensions must be compatible before refinement or multiplication.
+- `mtimes` implements matrix multiplication. The public product follows written matrix order.
+- Ordinary one-row operands broadcast across explicit rate rows. Two
+  rate-row operands must have exactly matching grids and nonempty matching
+  rate boxes. Explicit preprocessing aligns any chosen rate boxes.
+- Multiplication preserves rate rows when only one side has them. Two active
+  rate-row tables are rejected even when both are zero. A known rate-row `pdmat` may multiply an ordinary `pdvar` in either order. Ordinary `RateBounds` with zero stored rows remains metadata.
+- Numeric and `pdmat` products return known `pdmat` data with
+  `ContainsDecision=false`. A mixed affine `sdpvar` product returns `pdvar`.
+- A symbolic operand must be real, affine, and two-dimensional. Nonlinear,
+  complex, incompatible, and function-only mixed products fail before mapping.
+
+## Function-only Evidence Boundary
+
+Omitting `Degree` creates function-only known data. Exact evaluation, plotting, inspection, unary `+`, and `squeeze` remain available. Coefficient arithmetic rejects `F+0`, `F-F`, `0*F`, and `F==F` before shortcuts. Explicit valid `Degree` retains supported coefficient algebra.
+
+```matlab
+F = pdmat([0 1], @(rho) 1+rho);
+try
+    Z = 0*F;
+    error('example:ExpectedRejection', 'Expected rejection.');
+catch exception
+    assert(strcmp(exception.identifier, 'pdmat:FunctionOnlyAlgebra'))
+end
+A = pdmat([0 1], @(rho) 1+rho, Degree=1);
+Z = 0*A;
+assert(Z.evaluate(0.5) == 0)
+```
+
+## See Also
+
+[`Mathematical notation`](/GriD-LMIA/documents/math/notation/) · [`structural operations`](/GriD-LMIA/documents/reference/pdmat/structural-operations/) · [`indexing and inspection`](/GriD-LMIA/documents/reference/pdmat/indexing-and-inspection/) · [`Bernstein utilities`](/GriD-LMIA/documents/reference/bernstein-utilities/)

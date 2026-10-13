@@ -1,0 +1,174 @@
+---
+title: pdmat evaluate
+description: Evaluate known pdmat data at one parameter point.
+---
+
+import EvaluateExplorer from "../../../../../components/EvaluateExplorer.tsx";
+import { Aside } from "@astrojs/starlight/components";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a>
+  <span>/</span>
+  <span>evaluate</span>
+</nav>
+
+Here $\vect\alpha=\phi_{\vect c}^{-1}(\vect\rho)$ is the local coordinate defined in the
+[global notation](/GriD-LMIA/documents/math/notation/#grids-cells-and-local-coordinates).
+
+The explorer compares scalar evaluation on one parameter axis with tensor
+evaluation on two axes. The 2D coefficient lattice uses the same
+last-axis-fastest label order as `A.lbls()`.
+
+<EvaluateExplorer client:visible />
+
+## Purpose
+
+Evaluate a `pdmat` object at a finite parameter point.
+
+## Syntax
+
+```matlab
+val = evaluate(A, pt)
+val = A.evaluate(pt)
+```
+
+## Arguments
+
+| Argument | Description |
+| :--- | :--- |
+| `A` | A `pdmat` object. |
+| `pt` | Finite real scalar for one parameter, such as `0.25`, or a row vector with one entry per parameter, such as `[0.25 12]`. The point must lie inside the grid bounds. |
+
+## Output
+
+For ordinary data, `val` is a numeric matrix with size `A.MatrixSize`. For
+explicit rate-row data, it is a `1 × A.NumRateRows` cell row containing one
+numeric matrix per distinct stored rate vertex.
+
+## Description
+
+For coefficient-backed data, let the evaluation point lie in the physical cell
+
+$$
+\begin{aligned}
+\mathcal H_{\vect c}
+&:=\prod_{s=1}^{\ell}
+\left[\rho_s^{(c_s)},\rho_s^{(c_s+1)}\right],\\
+\vect\rho&\in\mathcal H_{\vect c},\\
+\alpha_s
+&:=\frac{\rho_s-\rho_s^{(c_s)}}
+{\rho_s^{(c_s+1)}-\rho_s^{(c_s)}},\\
+s&=1,\ldots,\ell.
+\end{aligned}
+$$
+
+For direction-wise Bernstein degree
+$\vect m=(m_1,\ldots,m_\ell)$, `evaluate` computes the tensor expansion
+
+$$
+\begin{aligned}
+A(\vect\rho)
+&=A^{(\vect c)}(\vect\alpha),\\
+A^{(\vect c)}(\vect\alpha)
+&=\sum_{\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}} C^{(\vect c)}[\vect i]\,
+B_{\vect i}^{\vect m}(\vect\alpha).
+\end{aligned}
+$$
+
+Here the tensor-product basis is
+
+$$
+\begin{aligned}
+b_s(i_s,\alpha_s)
+&:=\binom{m_s}{i_s}
+\alpha_s^{i_s}(1-\alpha_s)^{m_s-i_s},\\
+B_{\vect i}^{\vect m}(\vect\alpha)
+&:=\prod_{s=1}^{\ell}b_s(i_s,\alpha_s).
+\end{aligned}
+$$
+
+Each $C^{(\vect c)}[\vect i]$ is the stored scalar or matrix
+coefficient at local label $\vect i$. The scalar basis weight multiplies
+the entire coefficient matrix. Function-backed objects keep the exact MATLAB
+function handle and call it directly.
+
+<Aside type="note" title="Implementation remark: boundary ownership and row reconstruction">
+At an interior grid node, `evaluate` selects the cell on the right. Only the
+global upper endpoint belongs to the final cell. It forms every tensor
+Bernstein weight explicitly from the local coordinates and reconstructs each
+stored ordinary or rate-vertex row independently in storage order. This path
+uses the stored tensor-product Bernstein sum directly and preserves each rate alternative.
+</Aside>
+
+Explicit rate rows are interpolated independently. `evaluate` preserves
+the alternatives:
+
+```matlab
+A = pdmat([0 1], {{1, 3; 10, 14}}, ...
+    Degree=1, RateBounds=[-1 2]);
+rateRows = cell2mat(A.evaluate(0.5))
+```
+
+```text
+rateRows = 1×2 double
+     2    12
+```
+
+## Examples
+
+### Function-call form
+
+```matlab
+A = pdmat({[0 1]}, {2, 4}, Degree=1);
+val = evaluate(A, 0.25)
+```
+
+```text
+val = 2.5000
+```
+
+At `rho = 0.25`, the public forward coordinate is `alpha = 0.25`, so the value is
+`0.75*2 + 0.25*4`.
+
+### Dot-call form
+
+```matlab
+A = pdmat({[0 1]}, {2, 4}, Degree=1);
+val = A.evaluate(0.75)
+```
+
+```text
+val = 3.5000
+```
+
+The dot-call form is equivalent to `evaluate(A, pt)` and is often convenient in
+interactive MATLAB sessions.
+
+### Function-backed evaluation
+
+```matlab
+F = pdmat({[0 pi]}, @(rho) sin(rho));
+val = F.evaluate(pi/2)
+```
+
+```text
+val = 1
+```
+
+Function-backed objects route evaluation through the retained function handle.
+
+## Validation And Errors
+
+- Bad point shape or nonfinite values raise `pdmat:InvalidPoint`.
+- Points outside grid bounds raise `pdmat:PointOutOfBounds`.
+- Function-handle failures during evaluation raise `pdmat:InvalidFunctionValue`.
+
+A single fixed rate vertex still returns a `1 × 1` cell containing the evaluated matrix. Ordinary storage with `NumRateRows == 0` returns a matrix even when `RateBounds` metadata is present.
+
+## See Also
+
+[`pdmat constructor`](/GriD-LMIA/documents/reference/pdmat/constructor/) ·
+[`rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) ·
+[`plot`](/GriD-LMIA/documents/reference/pdmat/plot/)

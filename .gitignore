@@ -1,0 +1,5 @@
+webpage/node_modules/
+webpage/dist/
+webpage/.astro/
+webpage/.vite/
+webpage/public/manual.pdf

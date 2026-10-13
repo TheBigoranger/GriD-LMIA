@@ -1,0 +1,196 @@
+---
+title: pdlmi
+description: Cell-wise YALMIP constraints for PD-LMI expressions.
+---
+
+import CertificateChooser from "../../../../../components/CertificateChooser.astro";
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+import CallGraph from "../../../../../components/CallGraph.astro";
+import ApiInventory from "../../../../../components/ApiInventory.astro";
+import PdlmiConcatenationFlow from "../../../../../components/PdlmiConcatenationFlow.astro";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <span>pdlmi</span>
+</nav>
+
+Throughout this reference,
+$S^{(\vect c)}=-\mathcal F^{(\vect c)}$ and $\vect M$ is the assembled
+residual degree. See the
+[global notation](/GriD-LMIA/documents/math/notation/#residual-and-positive-target).
+
+`pdlmi` stores finite certificates generated from `pdvar` residuals or
+coefficient-backed `pdmat` inequalities. Inequalities use semidefinite meaning
+only when every original
+coefficient is square Hermitian. Otherwise the whole inequality is entry-wise.
+Equality is direct coefficient equality and may be rectangular. Direct
+coefficient assembly is the default. Pólya degree elevation, fixed-order
+Putinar box assembly, tensor-window SparsePutinar assembly, tensor-window
+SparseFullBox assembly, and fixed-order
+FullBox Bernstein-Gram preordering are explicit alternatives.
+
+<CallGraph family="certificates" caption="Certificate selectors rebuild the pdlmi from the original residual and store finite constraints for toYalmip." links={[
+  { href: "/GriD-LMIA/documents/math/sos-certificates/#implementation-call-path", label: "Certificate assembly mathematics" },
+  { href: "/GriD-LMIA/documents/reference/pdlmi/toyalmip/", label: "toYalmip API" },
+  { href: "/GriD-LMIA/documents/math/finite-certificates/direct-and-polya/", label: "Direct and Pólya" },
+]} />
+
+<CertificateNavigation />
+
+<CertificateChooser />
+
+The six paths begin with the same stored residual. **Direct** tests every
+local coefficient and is the default. **Pólya** exactly elevates that residual
+before repeating the direct test. In one parameter, **Putinar** and
+**FullBox** dispatch to the same parity-specific Markov–Lukács form with
+minimum order `floor(M1/2)` for $\vect M=(M_1)$. In two or more parameters, Putinar uses an
+unweighted Gram term plus one generator-weighted term per axis at minimum
+componentwise `ceil(Degree/2)`, while FullBox includes every generator-subset product.
+**SparsePutinar** retains the Putinar parity or singleton-generator terms and
+uses overlapping tensor windows over each Bernstein Gram basis. In one
+parameter, `CliqueSize=1` normalizes to Direct. In higher dimensions it
+remains SparsePutinar. A saturated size greater than one normalizes to dense
+Putinar. **SparseFullBox** retains the FullBox parity/generator-mask terms and exact
+coefficient identities while replacing each dense tensor basis by
+overlapping tensor windows of side length $w$. Side length one
+canonicalizes to Direct, and a side at least
+  `max(order + 1)` canonicalizes to FullBox. Every Gram path matches exact
+box-polynomial identities. The
+[SOS certificate chapter](/GriD-LMIA/documents/math/sos-certificates/)
+derives these ideas. The API pages below stay focused on callable syntax.
+
+## Reference Index
+
+### Construction and comparisons
+
+| Reference | Task |
+| :--- | :--- |
+| [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) | Select Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, or FullBox assembly. |
+| [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) | Create known-data inequalities with `<=`/`>=`. Logical `pdmat == pdmat` remains separate. |
+| [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) | Create semidefinite or entry-wise inequalities with `<=`/`>=`, and direct equalities with `==`. |
+| [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) | Rebuild the original residual with a selected Pólya degree increment. |
+| [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) | Rebuild the original residual with the minimum or a selected absolute Putinar order. |
+| [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) | Rebuild the residual with sliding tensor windows of side length `b` (the `CliqueSize` option), an absolute order, and canonical Direct/Putinar endpoints. |
+| [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) | Rebuild the residual with sliding tensor-window Gram blocks of side length `w`, an absolute order, and canonical Direct/FullBox endpoints. |
+| [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) | Rebuild the original residual with the minimum or a selected absolute full-box order. |
+| [`horzcat`](#api-horzcat) and [`vertcat`](#api-vertcat) | Export scalar wrappers and concatenate them with YALMIP constraint lists in operand order. |
+
+### YALMIP export and solver use
+
+| Reference | Task |
+| :--- | :--- |
+| [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) | Concatenate stored constraints for ordinary YALMIP `optimize` calls. |
+
+<span id="pdlmi-concatenation"></span>
+
+## Terminal Constraint Concatenation
+
+The `horzcat` and `vertcat` overloads let a scalar `pdlmi` wrapper participate
+directly in an ordinary YALMIP constraint list. Both forms export every
+`pdlmi` operand with `toYalmip`, preserve the caller's operand order, and
+return a YALMIP `constraint` or `lmi` list.
+
+### Syntax
+
+```matlab
+F = [C1, C2, ...]
+F = [C1; C2; ...]
+```
+
+Each operand may be a scalar `pdlmi`, a YALMIP `constraint`, or a YALMIP `lmi`
+list. Horizontal and vertical forms have the same list semantics. An
+identity equality such as `P == P` exports an empty list, so it contributes
+the YALMIP empty-list identity and leaves adjacent constraints unchanged.
+
+<PdlmiConcatenationFlow />
+
+### Ordered Export Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]});
+x = sdpvar(1);
+
+positive = P >= 0;
+bounded = x <= 1;
+F = [positive.usePolya(1), x >= 0, bounded];
+
+diagnostic = optimize(F, [], sdpsettings('verbose', 0));
+```
+
+The selector is applied while `positive` is still a `pdlmi`. The bracketed
+expression then exports that selected wrapper and combines it with the two raw
+YALMIP constraints. Use [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)
+when explicit conversion is clearer than bracket syntax.
+
+> **Implementation remark: per-operand terminal export.** `horzcat` calls
+> `toYalmip` once for each scalar `pdlmi`, then delegates list ordering and
+> storage to YALMIP. `vertcat` reuses the same path because YALMIP constraint
+> lists assign the same list meaning to both bracket forms. This mechanism
+> changes the wrapper representation while preserving the selected finite
+> certificate and operand order.
+
+### Validation And Errors
+
+`pdlmi:InvalidConcatenation` identifies three rejected operand boundaries:
+
+- A logical known-data certificate produced by a `pdmat` comparison.
+- A MATLAB value outside the accepted `pdlmi`, `constraint`, and `lmi` classes.
+- A nonscalar `pdlmi` array.
+
+Concatenation is terminal: the returned value belongs to YALMIP rather than
+`pdlmi`. Apply `usePolya`, `usePutinar`, `useSpPut`, `useSpBox`, or
+`useFullBox` before forming the final list.
+
+## Implemented Behavior
+
+Documentation v1.5.0 describes `<=`, `>=`, and `==` for affine `pdvar`
+residuals and `<=`/`>=` for coefficient-backed known `pdmat` residuals.
+Inequalities select
+one global semidefinite or entry-wise interpretation from all original
+coefficients. Equality is always direct and supports rectangular or
+non-Hermitian residuals. Direct
+coefficient-wise assembly is the default. Pólya assembly performs exact degree
+elevation before applying the coefficient test. Putinar, SparsePutinar, SparseFullBox, and
+FullBox assembly create independent positive-semidefinite Gram blocks for
+every physical cell, active rate row, and column-major matrix entry, together
+with exact Bernstein coefficient identities.
+
+In one parameter, Putinar and FullBox share the parity-specific
+Markov–Lukács interval construction. For two or more parameters, Putinar uses
+an unweighted Gram term plus one term for each axis generator
+$\alpha_s(1-\alpha_s)$, while the full-box preordering uses every subset product of those
+generators. Both select a fixed absolute order on each local hypercube.
+For `pdvar`, `toYalmip` concatenates the resulting finite constraints for an
+ordinary YALMIP solver call. Direct and Pólya known-data wrappers export one
+stored scalar logical certificate. Known-data Gram families still return
+YALMIP constraints and may introduce auxiliary Gram variables.
+
+## Properties
+
+The constructor exposes private-set, read-only properties through dot access:
+
+| Property | Example | Meaning |
+| :--- | :--- | :--- |
+| `Constraints` | `C.Constraints` | Stored direct conditions, Gram-block conditions, and/or exact identities. May be empty for a proven equality. |
+| `Residual` | `C.Residual` | Promoted `lhs-rhs` expression used to rebuild alternative inequality certificates. |
+| `Relation` | `C.Relation` | `"<="`, `">="`, or `"=="`. |
+| `UsePolya`, `PolyaDegree` | `C.UsePolya`, `C.PolyaDegree` | Pólya selector and degree increment. |
+| `UsePutinar`, `PutinarOrder` | `C.UsePutinar`, `C.PutinarOrder` | Putinar selector and absolute order. |
+| `UseSparsePutinar`, `SparsePutinarOrder`, `CliqueSize` | `C.UseSparsePutinar`, `C.SparsePutinarOrder`, `C.CliqueSize` | SparsePutinar selector, direction-wise absolute order, and scalar tensor-window side `b`. |
+| `UseSparseFullBoxPreorder`, `SparseFullBoxOrder`, `BandWidth` | `C.UseSparseFullBoxPreorder`, `C.SparseFullBoxOrder`, `C.BandWidth` | SparseFullBox selector, direction-wise absolute order, and scalar tensor-window side `w`. Side one normalizes to Direct. A side at least `max(order + 1)` normalizes to FullBox. |
+| `UseFullBoxPreorder`, `FullBoxOrder` | `C.UseFullBoxPreorder`, `C.FullBoxOrder` | Full-box selector and absolute order. |
+
+Certificate selectors apply only to inequalities. Any selector on equality raises `pdlmi:UnsupportedEqualityCertificate`.
+
+The [SOS certificate map](/GriD-LMIA/documents/math/sos-certificates/)
+derives these coefficient and Gram constructions, including the
+one-dimensional Markov–Lukács form and the tensor box generators used in
+higher dimensions.
+
+## See Also
+
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`horzcat`](#api-horzcat) · [`vertcat`](#api-vertcat) · [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`certificate map`](/GriD-LMIA/documents/math/sos-certificates/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/)
+
+<ApiInventory owner="pdlmi" />

@@ -1,0 +1,355 @@
+---
+title: pdmat Constructor
+description: Construct known finite real matrix data on a parameter grid.
+---
+
+import CellBernsteinExpressionExplorer from "../../../../../components/CellBernsteinExpressionExplorer.astro";
+import CallGraph from "../../../../../components/CallGraph.astro";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a>
+  <span>/</span>
+  <span>constructor</span>
+</nav>
+
+## Bernstein Basis Expression
+
+The grid, physical-cell, and local-coordinate symbols follow the
+[global notation](/GriD-LMIA/documents/math/notation/#grids-cells-and-local-coordinates).
+Inside each selected cell, `pdmat` stores a separate tensor Bernstein expansion
+in local coordinates $\vect\alpha\in[0,1]^2$:
+
+<CellBernsteinExpressionExplorer />
+
+## Purpose
+
+Create a known-data `pdmat` object over one or more parameter-grid dimensions.
+
+## Implementation Call Path
+
+The constructor normalizes the grid and the complete degree vector before it
+builds known coefficients or a decision-control lattice. Both routes finish
+in the common `pdbase` storage contract.
+
+<CallGraph family="constructors" caption="Constructor parsing, vector-degree normalization, and common storage." links={[
+  { href: "/GriD-LMIA/documents/math/gridding-and-degree/", label: "Degree and grid mathematics" },
+  { href: "/GriD-LMIA/documents/reference/pdbase/constructor/", label: "pdbase storage API" },
+  { href: "/GriD-LMIA/documents/reference/pdvar/constructor/", label: "pdvar constructor" },
+]} />
+
+## Syntax
+
+```matlab
+A = pdmat(gridVector, source)
+A = pdmat(gridVector, source, Degree=degree)
+A = pdmat(gridVector, source, RateBounds=rb)
+A = pdmat(gridVectors, source)
+A = pdmat(gridVectors, source, Degree=degree, RateBounds=rb)
+A = pdmat(..., Continuity=orders)
+A = pdmat(..., ValidationMode=mode)
+```
+
+## Arguments
+
+| Argument | Description |
+| :--- | :--- |
+| `gridVectors` | Numeric vector shorthand for one parameter, such as `[0 1 2]`, or a cell array of strictly increasing vectors, such as `{[0 1], [10 20]}`. |
+| `source` | Function handle, global cell grid of numeric Bernstein coefficients such as `{1, 2, 3}`, or explicit nested `LocalValues` such as `{{[1 0], [0 1]}, {[2 0], [0 2]}}`. |
+| `Degree` | One finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise vector, such as `Degree=[1 3]`. The accepted value is stored as a $1\times\ell$ row. Required when a function handle should be validated as Bernstein coefficient evidence. |
+| `RateBounds` | Finite $\ell\times2$ lower/upper scheduling-rate bounds. With ordinary one-row data this is metadata for `rhodiff`. Explicit nested leaves may instead contain one row per distinct rate-box vertex. Fixed axes contribute one value. |
+| `Continuity` | Scalar or direction-wise nonnegative integer or `Inf`. See the continuity contract below. |
+| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. Default `"fast"` and transient for the current construction. Public source validation remains complete in both modes. |
+
+Unsupported metadata options: `IsContinuous` and `ContainsDecision`.
+
+For diagrams of one- and two-parameter grid inputs, the global
+coefficient-grid shape, and the separate role of Bernstein `Degree`, see
+[Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/).
+
+## Direction-Wise Continuity
+
+`Continuity=orders` accepts a scalar or one nonnegative integer or `Inf` per
+parameter direction. Explicit multidimensional scalar input warns once with
+`pdmat:ScalarContinuityExpansion`. Omitted defaults and vector inputs are
+silent. Single-cell axes and requests at least the corresponding degree
+normalize to `Inf`. Invalid orders, including `-1`, fractional values, NaN,
+negative infinity, and wrong lengths, raise `pdmat:InvalidContinuity`.
+A repeated option raises `pdmat:DuplicateOption`.
+
+Omitting `Continuity` infers the highest supported order from every coefficient
+face, matrix entry, and active rate row. An explicit request verifies and stores
+that lower bound, even when the data support a higher order. A valid request
+unsupported by the coefficients raises `pdmat:ContinuityMismatch`.
+Function-only sources carry `Continuity=-ones(1,ell)` and `IsContinuous=false`:
+coefficient proof requires an explicit validated degree. An explicit request on that
+source raises `pdmat:FunctionOnlyContinuity`.
+
+Physical derivative matching includes cell-width scaling. On nonuniform cubic
+cells, the following coefficients match through order two:
+
+```matlab
+grid = {[0 1 3]};
+values = {{0, 1, 3, 6}, {6, 12, 22, 40}};
+A = pdmat(grid, values, Degree=3);
+B = pdmat(grid, values, Degree=3, Continuity=1);
+assert(A.Continuity == 2 && B.Continuity == 1)
+```
+
+The shared value is 6. The first derivatives are `3*(6-3)/1 = 9` and
+`3*(12-6)/2 = 9`, while the second derivatives are
+`6*(6-2*3+1)/1^2 = 6` and `6*(22-2*12+6)/2^2 = 6`.
+
+## Returned Object
+
+`A` is a `pdmat < pdbase` object. All inherited `pdbase` properties are
+readable through dot syntax and have private set access:
+
+| Field | How to inspect it | Meaning for `pdmat` |
+| :--- | :--- | :--- |
+| `GridInfo` | `A.GridInfo.Vectors{1}`, `A.GridInfo.Points`, `A.GridInfo.Bounds` | Validated tensor-grid metadata. |
+| `MatrixSize` | `A.MatrixSize` | Matrix size of each numeric payload. |
+| `Degree` | `A.Degree` | Direction-wise local Bernstein degree stored as a $1\times\ell$ row. |
+| `LocalValues` | `A.LocalValues{1}` or `A.coeffs(1)` | cell-wise numeric Bernstein coefficients. |
+| `Continuity` | `A.Continuity` | Verified or inferred direction-wise lower bounds. Function-only data carry `-1` in every direction. |
+| `IsContinuous` | `A.IsContinuous` | Dependent logical scalar `all(A.Continuity >= 0)`. |
+| `ContainsDecision` | `A.ContainsDecision` | Always `false`, which records known data free of YALMIP decisions. |
+| `NumRateRows` | `A.NumRateRows` | Exact explicit stored-row count. Ordinary data and `RateBounds`-only metadata report `0`. |
+| `RateBounds` | `A.RateBounds` | Empty or the stored scheduling-rate box used by `rhodiff`, rate-row inspection, and `pdlmi`. |
+| `SourceSummary` | `A.SourceSummary` | Source label such as `coefficient-backed`, `function`, or `function-bernstein`. |
+| `FunctionHandle` | `A.FunctionHandle` | Exact evaluator for function-backed objects. Empty for coefficient-backed data. |
+
+These fields are exposed for inspection. Constructors and algebra create replacement values. The constructor
+and algebra methods keep `GridInfo`, `Degree`, `LocalValues`, and matrix sizes
+consistent. Direct assignment would break the coefficient-label contract.
+
+## Examples
+
+### Coefficient-backed scalar data
+
+```matlab
+A = pdmat({[0 1]}, {1, 3}, Degree=1);
+A.MatrixSize
+A.Degree
+A.SourceSummary
+A.FunctionHandle
+T = bernTable(A);
+T(:, ["TermIndex", "LocalIndex", "Basis", "Value"])
+```
+
+```text
+ans =
+     1     1
+
+ans =
+     1
+
+ans =
+    "coefficient-backed"
+
+ans =
+     []
+
+ans =
+  2x4 table
+
+    TermIndex    LocalIndex     Basis     Value
+    _________    __________    _______    _____
+
+        1          {[0]}       "(1-alpha)"    {[1]}
+        2          {[1]}       "alpha"        {[3]}
+```
+
+The runtime diagnostic uses the same public forward coordinate
+$\alpha=(\rho-\rho_1^{(c)})/(\rho_1^{(c+1)}-\rho_1^{(c)})$. The rows therefore run directly from
+$(1-\alpha)$ at local label `0` to $\alpha$ at local label `1`.
+
+### Tensor-grid coefficient ordering
+
+```matlab
+A = pdmat({[0 1], [10 20]}, {1, 3; 5, 7}, Degree=[1 1]);
+A.GridInfo.Vectors{2}
+A.coeffs([1 1])
+A.lbls()
+T = bernTable(A);
+T(:, ["TermIndex", "CellSubscript", "LocalIndex", "Value"])
+```
+
+```text
+ans =
+    10    20
+
+ans =
+  1x4 cell array
+    {[1]}    {[3]}    {[5]}    {[7]}
+
+ans =
+     0     0
+     0     1
+     1     0
+     1     1
+
+ans =
+  4x4 table
+
+    TermIndex    CellSubscript    LocalIndex    Value
+    _________    _____________    __________    _____
+
+        1           {[1 1]}        {[0 0]}      {[1]}
+        2           {[1 1]}        {[0 1]}      {[3]}
+        3           {[1 1]}        {[1 0]}      {[5]}
+        4           {[1 1]}        {[1 1]}      {[7]}
+```
+
+### Function-backed exact evaluator
+
+```matlab
+F = pdmat({[0 pi]}, @(rho) sin(rho));
+F.evaluate(pi/2)
+```
+
+```text
+ans =
+     1
+```
+
+Function-backed objects route evaluation through the retained function handle.
+
+### Explicit nested LocalValues
+
+```matlab
+localVals = {{[1 0], [0 1]}, {[2 0], [0 2]}};
+C = pdmat({[0 1 2]}, localVals, Degree=1);
+C.MatrixSize
+C.coeffs(2)
+```
+
+```text
+ans =
+     1     2
+
+ans =
+  1x2 cell array
+    {[2 0]}    {[0 2]}
+```
+
+Nested `LocalValues` are useful when each physical cell has its own local
+coefficient matrices. A flat global source `{1, 2, 3}` on `[0 1 2]` with
+`Degree=1` creates rows `{1, 2}` and `{2, 3}`. In contrast, nested
+`{{1, 2, 3}}` on `[0 1]` with `Degree=2` creates one quadratic cell.
+
+### Function-backed Bernstein evidence
+
+```matlab
+G = pdmat({[0 1]}, @(rho) rho.^2, Degree=2);
+G.SourceSummary
+G.coeffs(1)
+```
+
+```text
+ans =
+    "function-bernstein"
+
+ans =
+  1x3 cell array
+    {[0]}    {[0]}    {[1]}
+```
+
+Adding `Degree=2` tells the constructor to validate and store Bernstein
+coefficient evidence while retaining the exact function handle for evaluation.
+
+### Anisotropic two-parameter degree
+
+```matlab
+A = pdmat({[0 1], [10 20]}, {1 2; 3 4; 5 6}, Degree=[2 1]);
+T = bernTable(A, [1 1], "oneLine");
+disp(T)
+```
+
+```text
+    CellSubscript                                                       Expression
+    _____________    _________________________________________________________________________________________________________________
+
+       {[1 1]}       "(1-α1)^2 * (1-α2)*1 + (1-α1)^2 * α2*2 + 2(1-α1)α1 * (1-α2)*3 + 2(1-α1)α1 * α2*4 + α1^2 * (1-α2)*5 + α1^2 * α2*6"
+```
+
+The degree vector is quadratic along the first parameter and linear along the
+second. The selected-cell output exposes all six tensor labels directly.
+
+### Explicit rate-vertex rows
+
+```matlab
+A = pdmat([0 1], {{1, 3; 10, 14}}, ...
+    Degree=1, RateBounds=[-1 2]);
+disp("rateBounds =")
+disp(A.RateBounds)
+disp("rateRowValues =")
+disp(cell2mat(A.coeffs(1)))
+```
+
+```text
+rateBounds =
+    -1     2
+
+rateRowValues =
+     1     3
+    10    14
+```
+
+Each physical cell must use either one ordinary row or every distinct rate-box
+vertex row, uniformly. Vertex order is last-axis-fastest after fixed
+lower-equals-upper axes are collapsed. This example has
+`A.NumRateRows == 2`.
+
+## Validation And Errors
+
+- Malformed option sequences raise `pdmat:InvalidOptions`.
+- Unknown options raise `pdmat:UnknownOption`.
+- Internal metadata options raise `pdmat:UnsupportedOption`.
+- Function-handle probing or validation may raise `pdmat:InvalidFunctionHandle` or `pdmat:InvalidFunctionOutput`.
+- Unsupported source forms raise `pdmat:InvalidSource`. Inconsistent global
+  coefficient grids raise `pdmat:InvalidData`.
+- Invalid degrees and malformed nested storage raise `pdmat:InvalidDegree` and
+  `pdmat:InvalidLocalValues`.
+- An explicit multidimensional scalar `Degree` expands uniformly and warns
+  `pdmat:ScalarDegreeExpansion`. Omitted degree inference, function-only
+  construction that omits `Degree`, and all one-dimensional forms are silent.
+- Malformed rate boxes raise `pdmat:InvalidRateBounds`. Malformed, duplicate,
+  or missing validation values raise `pdmat:InvalidValidationMode`.
+- Malformed explicit coefficient-leaf counts or shapes raise
+  `pdmat:InvalidCoefficientCell`. Invalid, nonfinite, nonreal, or wrong-size
+  payloads raise `pdmat:InvalidCoefficientPayload`.
+- A function outside the representable space at an explicit degree raises
+  `pdmat:NonBernsteinPolynomial`. A failed or size-inconsistent validation
+  probe raises `pdmat:InvalidFunctionValue`.
+- Mismatched shared faces are retained as discontinuous local data and emit
+  `pdmat:DiscontinuousLocalValues`.
+
+- Function-only objects that omit `Degree` keep exact evaluation and remain outside coefficient algebra.
+- Mixed physical bounds are rejected by coefficient algebra until a compatible common grid exists.
+
+## Function-only Evidence Boundary
+
+Omitting `Degree` creates function-only known data. Exact evaluation, plotting, inspection, unary `+`, and `squeeze` remain available. Coefficient arithmetic rejects `F+0`, `F-F`, `0*F`, and `F==F` before shortcuts. Explicit valid `Degree` retains supported coefficient algebra.
+
+```matlab
+F = pdmat([0 1], @(rho) 1+rho);
+try
+    Z = 0*F;
+    error('example:ExpectedRejection', 'Expected rejection.');
+catch exception
+    assert(strcmp(exception.identifier, 'pdmat:FunctionOnlyAlgebra'))
+end
+A = pdmat([0 1], @(rho) 1+rho, Degree=1);
+Z = 0*A;
+assert(Z.evaluate(0.5) == 0)
+```
+
+## See Also
+
+[`evaluate`](/GriD-LMIA/documents/reference/pdmat/evaluate/) ·
+[`rhodiff`](/GriD-LMIA/documents/reference/pdmat/rhodiff/) ·
+[`bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/) ·
+[`comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) ·
+[`pdbase`](/GriD-LMIA/documents/reference/pdbase/)

@@ -1,0 +1,7 @@
+flowchart LR
+  A["pdmat / pdvar arguments"] --> B["parse and validate"]
+  B --> C["helper.mkGrid"]
+  B --> D["helper.normDeg"]
+  C --> E["source or control construction"]
+  D --> E
+  E --> F["pdbase storage"]

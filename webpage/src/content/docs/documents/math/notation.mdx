@@ -1,0 +1,161 @@
+---
+title: Mathematical Notation
+description: Canonical symbols for parameter boxes, tensor grids, local Bernstein coordinates, residuals, finite certificates, and Gram representations.
+---
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <span>Learn</span>
+  <span>/</span>
+  <span>Notation</span>
+</nav>
+
+This page is the shared symbol dictionary for the mathematical guides and API
+examples. A deep page still defines the symbols needed for its own argument.
+
+<span id="domains-and-rate-vertices"></span>
+
+## <span id="domains"></span>Parameter And Rate Domains
+
+$$
+\begin{aligned}
+\mathcal P&=\prod_{s=1}^{\ell}
+[\underline\rho_s,\overline\rho_s],\\
+\mathcal R&=\prod_{s=1}^{\ell}
+[\underline{\dot\rho}_s,\overline{\dot\rho}_s].
+\end{aligned}
+$$
+
+- $\vect\rho\in\mathcal P$ is the scheduling parameter and
+  $\dot{\vect\rho}\in\mathcal R$ is its admissible rate.
+- $\ell$ is the number of parameter axes.
+- $\vect\nu\in\mathcal V_{\mathcal R}$ denotes one distinct lower/upper rate
+  vertex. The set has size
+  $\prod_{s=1}^{\ell}(1+\mathbb 1_{\underline{\dot\rho}_s<\overline{\dot\rho}_s})$, which
+  equals $2^\ell$ when every axis varies. Reduction to these vertices is exact
+  when the residual is affine in $\vect\nu$.
+
+<span id="grids-cells-and-local-coordinates"></span>
+
+## <span id="grid"></span>Tensor Grid And Physical Cells
+
+$$
+\begin{aligned}
+\mathcal G_s&=\{\rho_s^{(1)},\ldots,\rho_s^{(k_s)}\},\\
+\mathcal G&=\mathcal G_1\times\cdots\times\mathcal G_\ell.
+\end{aligned}
+$$
+
+Here $k_s$ is the number of nodes on axis $s$. The physical-cell index
+$\vect c=(c_1,\ldots,c_\ell)$, where $c_s\in\{1,\ldots,k_s-1\}$, selects
+
+$$
+\begin{aligned}
+\mathcal H_{\vect c}
+&=\prod_{s=1}^{\ell}
+[\rho_s^{(c_s)},\rho_s^{(c_s+1)}],\\
+h_s^{\vect c}
+&=\rho_s^{(c_s+1)}-\rho_s^{(c_s)}.
+\end{aligned}
+$$
+
+The tensor grid partitions $\mathcal P$ exactly. Gridding becomes a modeling
+approximation only when it restricts the admissible decision-function space.
+
+## <span id="local-coordinates"></span>Local Coordinates And Labels
+
+The physical map $\phi_{\vect c}:[0,1]^\ell\to\mathcal H_{\vect c}$ and
+its inverse are
+
+$$
+\begin{aligned}
+\rho_s&=\rho_s^{(c_s)}+h_s^{\vect c}\alpha_s,\\
+\vect\alpha&=\phi_{\vect c}^{-1}(\vect\rho).
+\end{aligned}
+$$
+
+A local Bernstein label $\vect i=(i_1,\ldots,i_\ell)$ satisfies
+$i_s\in\{0,\ldots,m_s\}$ on axis $s$.
+
+<span id="bernstein-labels-and-degrees"></span>
+
+## <span id="degrees"></span>Polynomial And Certificate Degrees
+
+| Symbol | Meaning |
+| :--- | :--- |
+| $\vect m$ | Direction-wise modeled Bernstein degree of a decision function. |
+| $\vect M$ | Direction-wise assembled Bernstein degree of the residual or sign-normalized target. |
+| $\vect d$ | Direction-wise Pólya degree-elevation increment. |
+| $\vect r$ | Direction-wise absolute Gram order, specified independently of $\vect M$. |
+| $b$ | Scalar SparsePutinar tensor-window side stored by `CliqueSize`. |
+| $w$ | Scalar SparseFullBox tensor-window side stored by `BandWidth`. |
+
+The public MATLAB properties store these degree and order vectors as
+$1\times\ell$ rows. Scalar inputs are uniform shorthand. These quantities are
+independent of the number of physical grid cells.
+
+The local-label domain, tensor basis, and coefficient count are
+
+$$
+\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,m_s\}.
+$$
+
+$$
+B_{\vect i}^{\vect m}(\vect\alpha)=\prod_{s=1}^{\ell}B_{i_s}^{m_s}(\alpha_s).
+$$
+
+$$
+\prod_{s=1}^{\ell}(m_s+1).
+$$
+
+Even when $\ell=1$, the degree is written $\vect m=(m_1)$. Parity,
+differentiation, and endpoint statements then refer to the component $m_1$.
+
+## <span id="residual-target"></span>Residual And Positive Target
+
+On one physical cell,
+
+$$
+\mathcal F^{(\vect c)}(\vect\alpha)=\sum_{\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}B_{\vect i}^{\vect M}(\vect\alpha)\mathcal C^{(\vect c)}[\vect i].
+$$
+
+and a negative-semidefinite residual is sign-normalized as
+
+$$
+\begin{aligned}
+S^{(\vect c)}&=-\mathcal F^{(\vect c)},\\
+C^{(\vect c)}&=-\mathcal C^{(\vect c)}.
+\end{aligned}
+$$
+
+The theoretical target is
+$S^{(\vect c)}(\vect\alpha)\succ0$. YALMIP models non-strict
+semidefinite constraints. Encode a chosen margin explicitly as
+$S^{(\vect c)}(\vect\alpha)-\varepsilon I\succeq0$.
+
+<span id="strict-theory-and-software-constraints"></span>
+<span id="gram-basis-and-certificate-parameters"></span>
+
+## <span id="gram"></span>Gram Representation
+
+For tensor Bernstein basis vector $\vect b_{\vect a}$, define
+
+$$
+\begin{aligned}
+Z_{\vect a}&=\vect b_{\vect a}\otimes I_n,\\
+G_{\vect a}&:=Z_{\vect a}^\top QZ_{\vect a},\\
+Q&\succeq0.
+\end{aligned}
+$$
+
+The multi-index $\vect a$ specifies the basis degree, $I_n$ matches the
+matrix-polynomial size, and $Q$ is a positive-semidefinite Gram matrix.
+Weighted interval or box-generator terms change the coefficient-matching
+degree while preserving these symbol roles.
+
+## See Also
+
+[Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/) ·
+[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/) ·
+[Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/)

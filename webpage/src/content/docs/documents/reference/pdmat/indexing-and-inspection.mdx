@@ -1,0 +1,132 @@
+---
+title: pdmat Indexing And Inspection
+description: Complete known-data indexing, assignment, shape, equality, display, and MATLAB dispatch reference.
+---
+
+import MatrixGlyphDiagram from "../../../../../components/MatrixGlyphDiagram.astro";
+
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/">pdmat</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdmat/matrix-operations/">matrix operations</a><span>/</span><span>indexing and inspection</span></nav>
+
+## <span id="pdmat-subsref"></span>`subsref` and <span id="pdmat-end"></span>`end`
+
+```matlab
+block = A(rows,columns)
+last = A(:,end)
+property = A.Degree
+```
+
+Two-dimensional parentheses indexing selects the same matrix block from every
+known coefficient. `rows` and `columns` may be `:`, matching logical vectors,
+or finite in-range positive integers. `end` resolves against matrix-payload
+dimensions and preserve the cells. A function-only source lacks coefficient blocks and
+raises `pdmat:FunctionOnlyAlgebra`.
+
+## <span id="pdmat-subsasgn"></span>`subsasgn`
+
+```matlab
+A(rows,columns) = numericValue
+A(rows,columns) = compatiblePdmat
+```
+
+Assignment replaces the same block coefficient-wise. Numeric values must fit
+the indexed shape. A `pdmat` value must have compatible physical bounds and
+coefficient evidence. Alignment preserves the destination grid contract.
+Unsupported dot/brace assignment uses `pdmat:UnsupportedAssignment`.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+entry = A(1,end);
+A(2,1) = pdmat({[0 1]}, {9,10}, Degree=1);
+entryShape = size(entry)
+assignedAtOne = A.evaluate(1)
+```
+
+```text
+entryShape =
+     1     1
+
+assignedAtOne =
+     5     6
+    10     8
+```
+
+<MatrixGlyphDiagram before={[["a₁₁", "a₁₂"], ["a₂₁", "a₂₂"]]} after={[["a₁₂"]]} beforeLabel="each known matrix" afterLabel="A(1,2)" caption="Indexing and assignment visit the same payload block in every cell-wise coefficient." />
+
+## Payload shape
+
+### <span id="pdmat-size"></span>`size`
+
+```matlab
+shape = size(A)
+[rows,columns] = size(A)
+extent = size(A,dim)
+```
+
+### <span id="pdmat-numel"></span>`numel`, <span id="pdmat-ndims"></span>`ndims`, <span id="pdmat-length"></span>`length`, <span id="pdmat-height"></span>`height`, and <span id="pdmat-width"></span>`width`
+
+```matlab
+entryCount = numel(A)
+dimensionCount = ndims(A)
+largestExtent = length(A)
+rows = height(A)
+columns = width(A)
+```
+
+All describe one numeric payload. `ndims` is always two. Use `ncell`,
+`ncoeff`, and `npar` for storage axes.
+
+## <span id="pdmat-isequal"></span>`isequal`
+
+```matlab
+tf = isequal(A,B)
+```
+
+Returns a MATLAB logical. Matrix size, decision presence, explicit rate-row
+count, and rate bounds must match. Coefficient-backed operands are aligned on
+compatible grids and degrees, then compared with entrywise tolerance
+`1e-9*max([1; abs(A(:)); abs(B(:))])` for each coefficient matrix.
+Incompatible grids, rate bounds, or operand normalization return `false`.
+If either operand is function-only, degree, grid vectors, source summary, and
+function handle must also match. Both paths ignore `Continuity` lower bounds.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2; 3 4], [5 6; 7 8]}, Degree=1);
+shapeSummary = [height(A) width(A) length(A) numel(A) ndims(A)]
+selfEqual = isequal(A,A)
+```
+
+```text
+shapeSummary =
+     2     2     2     4     2
+
+selfEqual =
+  logical
+   1
+```
+
+## <span id="pdmat-disp"></span>`disp` and <span id="pdmat-display"></span>`display`
+
+```matlab
+disp(A)
+A
+```
+
+`disp` and MATLAB `display` print a concise known-data object summary.
+[`bernTable`](/GriD-LMIA/documents/reference/pdmat/berntable/)
+is the stable coefficient-row diagnostic.
+
+## <span id="pdmat-numArgumentsFromSubscript"></span>`numArgumentsFromSubscript`
+
+MATLAB calls this inherited protocol internally. It returns one so indexed
+`pdmat` values remain scalar objects for chained dot access. The method has an internal indexing role and zero modeling
+options or separate output workflow.
+
+## Validation, limitations, and See Also
+
+Malformed matrix subscripts and incompatible assignments use `pdmat`-owned
+errors. Indexing addresses matrix payload entries and preserves physical cells,
+coefficient labels, and the function state for later evaluation.
+
+[`storage`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) ·
+[`structural operations`](/GriD-LMIA/documents/reference/pdmat/structural-operations/) ·
+[`pdbase indexing protocol`](/GriD-LMIA/documents/reference/pdbase/indexing-protocol/)

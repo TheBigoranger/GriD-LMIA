@@ -1,0 +1,21 @@
+---
+import GridPartitionExplorer from "./GridPartitionExplorer.tsx";
+import { renderMath } from "../lib/katex-renderer.js";
+
+const cellKeys = [
+  "1", "2",
+  "1,1", "1,2", "2,1", "2,2",
+  "1,1,1", "1,1,2", "1,2,1", "1,2,2",
+  "2,1,1", "2,1,2", "2,2,1", "2,2,2",
+];
+
+// KaTeX stays on the server; the React island receives trusted markup only.
+const mathMarkup = {
+  gridPrefixes: [1, 2, 3].map((axis) => renderMath(`\\mathcal G_{${axis}}=`)),
+  cellPrefixes: Object.fromEntries(
+    cellKeys.map((key) => [key, renderMath(`\\mathcal H_{(${key})}=`)]),
+  ),
+};
+---
+
+<GridPartitionExplorer client:visible mathMarkup={mathMarkup} />

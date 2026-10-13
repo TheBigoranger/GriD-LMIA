@@ -1,0 +1,40 @@
+---
+import { documentationRecords } from "../data/documentation-contracts.js";
+
+interface Props {
+  owner: "pdbase" | "pdmat" | "pdvar" | "pdlmi" | "helper" | "root";
+}
+
+const { owner } = Astro.props;
+const records = documentationRecords.filter((record) => record.owner === owner);
+const title = owner === "root" ? "Installer" : owner === "helper" ? "helper.*" : owner;
+---
+
+<section class="api-inventory" aria-labelledby={`public-api-${owner}`}>
+  <h2 id={`public-api-${owner}`}>{title} public API inventory</h2>
+  <p>This source-indexed inventory records the implemented call surface, returned value, validation boundary, and executable example evidence for each public symbol.</p>
+  <div class="api-inventory__records">
+    {records.map((record) => {
+      const anchor = record.web_route_or_anchor.split("#")[1];
+      const exampleAnchor = record.web_example_evidence.split("#")[1];
+      return (
+        <details class="api-inventory__record" id={anchor}>
+          <summary><code>{record.symbol}</code><span>{record.kind}</span></summary>
+          <div class="api-inventory__body">
+            <p>{record.supported_scope}</p>
+            <dl>
+              <dt>Call forms and options</dt><dd><code>{record.call_forms_options.join(" · ")}</code></dd>
+              <dt>Inputs</dt><dd>{record.inputs}</dd>
+              <dt>Returns</dt><dd>{record.return_type_shape}</dd>
+              <dt>Validation and errors</dt><dd>{record.validation_errors}</dd>
+              <dt>Source evidence</dt><dd>{record.source_evidence.map((item) => <code>{item}</code>)}</dd>
+              <dt>Test evidence</dt><dd>{record.test_evidence.map((item) => <code>{item}</code>)}</dd>
+            </dl>
+            <h3 id={exampleAnchor}>Executable example evidence</h3>
+            <pre><code>{record.call_forms_options[0]}</code></pre>
+          </div>
+        </details>
+      );
+    })}
+  </div>
+</section>

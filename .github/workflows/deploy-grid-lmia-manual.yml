@@ -1,0 +1,48 @@
+name: Deploy GriD-LMIA Manual
+
+on:
+  push:
+    branches: [webpage]
+    paths:
+      - "webpage/**"
+      - "doc/manual.pdf"
+      - ".gitattributes"
+      - ".github/workflows/deploy-grid-lmia-manual.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/webpage'
+    runs-on: ubuntu-latest
+    env:
+      GRID_LMIA_DOC_BUILD_MODE: publish
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install, build, and upload site
+        uses: withastro/action@v6
+        with:
+          path: webpage
+          node-version: 24
+
+  deploy:
+    if: github.ref == 'refs/heads/webpage'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,190 @@
+---
+title: pdbase Storage And Inspection
+description: Shared properties, cell traversal, coefficient labels, counts, and payload-shape inspection.
+---
+
+import CellStorageDiagram from "../../../../../components/CellStorageDiagram.astro";
+
+<nav class="manual-trail"><a href="/GriD-LMIA/documents/">Documents</a><span>/</span><a href="/GriD-LMIA/documents/reference/pdbase/">pdbase</a><span>/</span><span>storage and inspection</span></nav>
+
+<CellStorageDiagram />
+
+## Inherited properties
+
+`pdmat` and `pdvar` inherit the following private-set public properties. Users
+may inspect them, while constructors and algebra methods own updates that keep
+metadata and coefficients consistent.
+
+| Property | Meaning |
+| :--- | :--- |
+| `GridInfo` | `Vectors`, tensor-product `Points`, per-axis `Bounds`, and `NumNodes`. |
+| `MatrixSize` | Always-two-dimensional `[rows columns]` payload size. |
+| `Degree` | Direction-wise Bernstein degree stored as a `1 × npar` row. |
+| `LocalValues` | Nested physical-cell tree. Each leaf is an ordinary coefficient row or a derivative rate-row table. |
+| `Continuity` | Direction-wise proven lower bounds: `-1` means value continuity is unproved, a nonnegative integer gives the guaranteed derivative order, and `Inf` denotes polynomial continuation. |
+| `IsContinuous` | Dependent logical scalar `all(Continuity >= 0)`. |
+| `ContainsDecision` | Whether payloads contain YALMIP decision dependence. |
+| `NumRateRows` | Exact number of explicit stored rate rows. Ordinary data, including `RateBounds`-only metadata, reports `0`. |
+| `RateBounds` | Empty or `npar × 2` lower/upper rate bounds. |
+| `SourceSummary` | Concise evidence label, such as `function`, `coefficient-backed`, `decision`, or derivative metadata. |
+
+`pdmat` additionally exposes `FunctionHandle`. Prefer the public traversal
+methods below over direct `LocalValues` indexing.
+
+## Cell and coefficient traversal
+
+### <span id="pdbase-cells"></span>`cells`
+
+```matlab
+cellSubscripts = cells(obj)
+```
+
+Returns an `ncell(obj) × npar(obj)` numeric matrix. Earlier parameter axes vary
+more slowly, matching `helper.combRows`.
+
+### <span id="pdbase-coeffs"></span>`coeffs`
+
+```matlab
+coefficientRow = coeffs(obj,cellSubscript)
+```
+
+`cellSubscript` supplies one finite positive integer per parameter axis.
+Ordinary storage returns a `1 × ncoeff(obj)` cell row. Derivative storage
+returns a `NumRateRows × ncoeff(obj)` cell array in rate-vertex order. Fixed
+rate axes collapse to one distinct value, so `NumRateRows` is `2^npar(obj)`
+only when every lower and upper bound differs.
+Malformed, wrong-length, or out-of-range selectors raise
+`pdbase:InvalidCellSubs`.
+
+### <span id="pdbase-lbls"></span>`lbls`
+
+```matlab
+labels = lbls(obj)
+```
+
+Returns `ncoeff(obj) × npar(obj)` integer multi-indices. Coordinate `s` runs
+from zero through `Degree(s)`. Earlier axes vary more slowly. The row order is the
+coefficient-column order returned by `coeffs`.
+
+```matlab
+A = pdmat({[0 1 2], [10 20]}, {1 3; 5 7}, Degree=[1 1]);
+cellSubscripts = A.cells()
+labels = A.lbls()
+firstCell = [A.coeffs([1 1]){:}]
+```
+
+```text
+cellSubscripts =
+     1     1
+     2     1
+
+labels =
+     0     0
+     0     1
+     1     0
+     1     1
+
+firstCell =
+     1     3     5     7
+```
+
+## Storage counts
+
+### <span id="pdbase-ncell"></span>`ncell`
+
+```matlab
+count = ncell(obj)
+```
+
+Returns `prod(GridInfo.NumNodes - 1)`.
+
+### <span id="pdbase-ncoeff"></span>`ncoeff`
+
+```matlab
+count = ncoeff(obj)
+```
+
+Returns `prod(Degree + 1)`, the coefficient columns in each cell. The result is
+independent of the rate-row count.
+
+### <span id="pdbase-npar"></span>`npar`
+
+```matlab
+count = npar(obj)
+```
+
+Returns the number of parameter-grid vectors.
+
+## Payload-shape protocol
+
+These methods report one coefficient matrix. Use `ncell`, `ncoeff`, and
+`NumRateRows` for the corresponding counts.
+
+### <span id="pdbase-size"></span>`size`
+
+```matlab
+shape = size(obj)
+[rows,columns] = size(obj)
+extent = size(obj,dim)
+```
+
+The first two forms return `MatrixSize`. An integer `dim > 2` returns `1`,
+matching a two-dimensional MATLAB matrix payload.
+
+### <span id="pdbase-numel"></span>`numel`
+
+```matlab
+count = numel(obj)
+```
+
+Returns `prod(MatrixSize)`. Subscripted `numel` calls return `1` to preserve
+scalar-object dispatch.
+
+### <span id="pdbase-ndims"></span>`ndims`
+
+```matlab
+count = ndims(obj)
+```
+
+Always returns `2`, including row vectors, column vectors, and results of
+`squeeze`.
+
+### <span id="pdbase-length"></span>`length`
+
+```matlab
+count = length(obj)
+```
+
+Returns `max(MatrixSize)`.
+
+### <span id="pdbase-height"></span>`height` and <span id="pdbase-width"></span>`width`
+
+```matlab
+rows = height(obj)
+columns = width(obj)
+```
+
+Return `MatrixSize(1)` and `MatrixSize(2)`.
+
+```matlab
+A = pdmat({[0 1]}, {[1 2 3; 4 5 6], [2 4 6; 8 10 12]}, Degree=1);
+shape = size(A)
+summary = [height(A) width(A) length(A) numel(A) ndims(A)]
+```
+
+```text
+shape =
+     2     3
+
+summary =
+     2     3     3     6     2
+```
+
+## Limitations and See Also
+
+The storage tree records cells and coefficient labels independently of the two matrix payload dimensions. Use
+[`evaluate`](/GriD-LMIA/documents/reference/pdbase/evaluation-and-elevation/#pdbase-evaluate)
+to reconstruct a point, and use the class-specific
+[`pdmat storage`](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/)
+or [`pdvar storage`](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/)
+pages for known-data and symbolic/rate-aware examples.

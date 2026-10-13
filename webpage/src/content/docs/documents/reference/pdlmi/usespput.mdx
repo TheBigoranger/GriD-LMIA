@@ -1,0 +1,210 @@
+---
+title: pdlmi useSpPut
+description: Rebuild a PD-LMI residual with sliding tensor-window Putinar Gram blocks.
+---
+
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+import { Aside } from "@astrojs/starlight/components";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <a href="/GriD-LMIA/documents/reference/pdlmi/">pdlmi</a>
+  <span>/</span>
+  <span>useSpPut</span>
+</nav>
+
+<CertificateNavigation selected="sparseputinar" showSections={false} />
+
+# `useSpPut`
+
+## Purpose
+
+`useSpPut` rebuilds an inequality from its stored `Residual` with a sliding
+tensor-window Gram decomposition. In one parameter it keeps Putinar's
+parity-specific Markov–Lukács terms. In two or more parameters it keeps the
+Putinar empty term and singleton generators. It then splits each dense
+Bernstein Gram basis into overlapping windows whose side is the user-selected
+`CliqueSize` value `b`.
+
+## Syntax
+
+```matlab
+Csparse = C.useSpPut()
+Csparse = C.useSpPut(b)
+Csparse = C.useSpPut(b, r)
+Csparse = C.useSpPut(..., ValidationMode=mode)
+```
+
+The same family is available during construction:
+
+```matlab
+Csparse = pdlmi(expr, relation, "UseSparsePutinar")
+Csparse = pdlmi(expr, relation, UseSparsePutinar=true)
+Csparse = pdlmi(expr, relation, CliqueSize=b)
+Csparse = pdlmi(expr, relation, SparsePutinarOrder=r)
+Csparse = pdlmi(expr, relation, CliqueSize=b, SparsePutinarOrder=r)
+```
+
+## Arguments And Options
+
+| Input | Contract |
+| :--- | :--- |
+| `C` | Any `pdlmi` object. The method rebuilds from `C.Residual` and replaces the currently selected family. |
+| `b` | Finite positive integer scalar passed as `CliqueSize`. Default `2`. The same tensor-window side is used on each axis, with automatic saturation on shorter axes. |
+| `r` | Finite nonnegative integer scalar shorthand or an $\ell$-entry direction-wise absolute Gram order specified independently of the residual degree. |
+| `ValidationMode` | Case-insensitive scalar text `"fast"` or `"strict"`. It applies to the current rebuild as transient state. |
+
+For residual degree `Degree`, the default and minimum order are `floor(Degree/2)` in one parameter and componentwise `ceil(Degree/2)` in two or more parameters. The accepted order is stored as a $1\times\ell$ row vector.
+
+## Returned State And Endpoint Rules
+
+`Csparse` is a new value object and `C` is unchanged. An intermediate sparse result exposes the following read-only state:
+
+```matlab
+Csparse.UseSparsePutinar
+Csparse.SparsePutinarOrder
+Csparse.CliqueSize
+```
+
+The endpoint is normalized after order validation:
+
+- In one parameter, `b == 1` returns an actual Direct object.
+- In two or more parameters, `b == 1` remains SparsePutinar and uses scalar windows.
+- When `b > 1` and `b >= max(r + 1)`, the windows saturate and the result is an actual dense Putinar object.
+- Every other valid size returns SparsePutinar state.
+
+Inactive sparse properties are zero. Therefore, inspect the returned selector properties instead of inferring the stored family from the requested size.
+
+## Construction And Constraint Order
+
+For one Gram specification with Bernstein degree vector $\vect d$, define the window side length by $w_s=\min(b,d_s+1)$. A start vector $\vect u$ ranges over $u_s=0,\ldots,d_s-w_s+1$, and the corresponding basis contains the labels in the tensor window $\vect u+\prod_{s=1}^{\ell}\{0,\ldots,w_s-1\}$. Each window receives an independent PSD Gram block.
+
+The block dimension for a symmetric $n\times n$ inequality is
+
+$$
+n\prod_{s=1}^{\ell}w_s,
+$$
+
+and the number of windows for that Gram specification is
+
+$$
+\prod_{s=1}^{\ell}(d_s-w_s+2).
+$$
+
+The exact target coefficient at each Bernstein label is the sum of the contributions from every overlapping window and every active Putinar term. The number of target coefficient identities remains $\prod_{s=1}^{\ell}(\mathrm{targetDegree}_s+1)$ for each certificate copy.
+
+Certificates are independent for every physical cell, every stored rate row, and every column-major matrix entry of an entrywise inequality. A symmetric matrix inequality instead uses matrix-valued PSD blocks.
+
+<Aside type="note" title="Implementation remark: overlapping coefficient accumulation">
+The assembler maps every window Gram entry to its target Bernstein label and
+adds all contributions that reach that label. Window overlap changes the
+number and maximum dimension of the PSD blocks while preserving every target
+coefficient identity.
+</Aside>
+
+## Examples
+
+### One-parameter intermediate and endpoints
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, Degree=4);
+L = P >= 0;
+
+sparse = L.useSpPut();
+selected = L.useSpPut(2, 2);
+directEndpoint = L.useSpPut(1, 2);
+denseEndpoint = L.useSpPut(3, 2);
+
+sparse.UseSparsePutinar
+sparse.SparsePutinarOrder
+sparse.CliqueSize
+selected.UseSparsePutinar
+directEndpoint.UseSparsePutinar
+denseEndpoint.UsePutinar
+numel(selected.Constraints)
+```
+
+```text
+ans =
+  logical
+   1
+
+ans =
+     2
+
+ans =
+     2
+
+ans =
+  logical
+   1
+
+ans =
+  logical
+   0
+
+ans =
+  logical
+   1
+
+ans =
+     8
+```
+
+At order two and `CliqueSize=2`, the degree-four fixture has three PSD blocks of dimension two and five exact coefficient identities. `CliqueSize=1` returns five Direct coefficient tests, while `CliqueSize=3` returns the two dense Putinar PSD blocks and five identities.
+
+### Two-parameter scalar windows
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1], [0 1]}, Degree=[4 4]);
+L = P >= 0;
+C = L.useSpPut(1, [2 2]);
+
+C.UseSparsePutinar
+C.CliqueSize
+numel(C.Constraints)
+```
+
+`CliqueSize=1` remains SparsePutinar in two dimensions. This fixture has 21 scalar PSD windows and 25 coefficient identities, so `numel(C.Constraints)` is 46.
+
+## Anisotropic Assembly Output
+
+For $\vect M=(2,6)$, $\vect r=(1,3)$, and `CliqueSize=2`, the three
+active Putinar basis degrees are $(1,3)$, $(0,3)$, and $(1,2)$. Their window
+diagrams contain respectively $3$, $3$, and $2$ PSD blocks, with block
+dimensions $4$, $2$, and $4$. All eight windows contribute to the same
+$3\times7$ tensor of 21 exact coefficient identities.
+
+## Validation And Errors
+
+- A malformed clique size raises `pdlmi:InvalidCliqueSize`.
+- A malformed order raises `pdlmi:InvalidSparsePutinarOrder`.
+- An integer order below the dimension-dependent minimum raises `pdlmi:SparsePutinarOrderTooLow`, including an endpoint request.
+- `UseSparsePutinar=false` with `CliqueSize` or `SparsePutinarOrder` raises `pdlmi:ConflictingSparsePutinarOptions`.
+- Enabling SparsePutinar with Pólya, Putinar, SparseFullBox, or FullBox raises `pdlmi:ConflictingRelaxations`.
+- Duplicate or malformed options raise `pdlmi:DuplicateOption` or `pdlmi:InvalidOptions`.
+- Every certificate option on relation `"=="` raises `pdlmi:UnsupportedEqualityCertificate`. Equality rejection occurs before method-argument validation.
+
+## Limitations
+
+SparsePutinar uses user-selected sliding tensor windows over Bernstein
+Gram-basis labels. The Zheng–Fantuzzi method instead derives structural-matrix
+graph cliques and a chordal decomposition from a polynomial-matrix sparsity
+graph.
+
+Smaller maximum PSD blocks trade against a larger block count. Total SDP size
+and solve time therefore depend on the complete block and equality structure.
+Failure remains inconclusive for the continuous inequality. The caller writes
+the positivity margin and selects the solver.
+
+## See Also
+
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) ·
+[`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) ·
+[`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) ·
+[`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) ·
+[`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) ·
+[`SparsePutinar mathematics`](/GriD-LMIA/documents/math/finite-certificates/sparseputinar/)

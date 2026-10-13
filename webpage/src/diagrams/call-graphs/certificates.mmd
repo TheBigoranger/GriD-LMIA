@@ -1,0 +1,10 @@
+flowchart LR
+  A["use* selector"] --> B["validate order / window"]
+  B --> C["rebuild pdlmi"]
+  C --> D{"certificate family"}
+  D --> E["coeffCons"]
+  D --> F["putSpec / boxSpec"]
+  F --> G["gramCons"]
+  E --> H["stored constraints"]
+  G --> H
+  H --> I["toYalmip"]

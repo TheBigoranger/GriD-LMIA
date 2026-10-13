@@ -1,0 +1,123 @@
+---
+title: Direct And Pólya
+description: Coefficient-wise positivity and exact Bernstein elevation by a selected Pólya increment.
+---
+
+import CertificateSpectrum from "../../../../../components/CertificateSpectrum.astro";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <span>Finite Certificates</span>
+  <span>/</span>
+  <span>Direct And Pólya</span>
+</nav>
+
+<CertificateSpectrum selected="direct" />
+
+Both methods use the sign-normalized positive target
+
+$$
+\begin{aligned}
+S^{(\vect c)}(\vect\alpha)
+&=-\mathcal F^{(\vect c)}(\vect\alpha),\\
+S^{(\vect c)}(\vect\alpha)
+&=\sum_{\vect i}C^{(\vect c)}[\vect i]
+B_{\vect i}^{\vect M}(\vect\alpha),\\
+C^{(\vect c)}&=-\mathcal C^{(\vect c)}.
+\end{aligned}
+$$
+
+The stored rate rows have already been stacked, so the certificate notation
+uses the stored-row index directly.
+
+## Direct
+
+Direct enforces
+
+$$
+\begin{aligned}
+C^{(\vect c)}[\vect i]&\succeq0,\\
+&\text{for every cell and label}.
+\end{aligned}
+$$
+
+Nonnegative Bernstein basis functions sum to one, so this condition implies
+$S^{(\vect c)}(\vect\alpha)\succeq0$ on the unit cell. It is the
+default `pdlmi` state.
+The theoretical target is strict,
+$S^{(\vect c)}(\vect\alpha)\succ0$. The software constraints are
+non-strict and require an explicit
+$S^{(\vect c)}-\varepsilon I\succeq0$ margin when strictness is needed.
+
+```matlab
+L = residual <= 0;
+constraints = L.toYalmip();
+```
+
+This path uses coefficient tests. The caller writes every margin and solver call.
+
+## Pólya Elevation
+
+For increment $d\in\mathbb N_0$, multiply the representation by the identity
+
+$$
+\prod_{s=1}^{\ell}
+[\alpha_s+(1-\alpha_s)]^{d_s}=1.
+$$
+
+This produces exact degree elevation from $\vect M$ to
+$\vect M+\vect d$. Pólya then applies
+the same coefficient test to the elevated matrices
+$\tilde C^{(\vect c)}[\vect i]$.
+
+```matlab
+selected = L.usePolya(d);
+constraints = selected.toYalmip();
+```
+
+The residual polynomial is unchanged. Reapplying a selector rebuilds from the
+stored original residual $\mathcal F$. Each certificate choice replaces the previous state.
+
+## Ordered Preallocation And Assembly
+
+Direct and Pólya first determine the target tensor degree and the exact number of coefficient constraints. The implementation preallocates that many cells, then fills them in physical-cell, rate-row, and local-label order. Pólya builds one numeric elevation plan for each compatible degree pair and applies it before the sign constraints are stored. This removes repeated structural discovery while retaining the established order seen by `toYalmip`.
+
+The optimized path preserves represented functions, existing YALMIP variables,
+certificate families, constraint order, PSD block dimensions, and cone
+partition, apart from ordinary floating-point summation differences. Direct
+and Pólya use coefficient tests, so their reusable data consist of numeric
+label and elevation maps.
+
+## When To Use Each
+
+Start with Direct. If a coarse representation has an unfavorable coefficient
+even though the target appears positive, try a modest direction-wise
+$\vect d$, refine a sensitive grid axis, or enlarge decision degree
+$\vect m$. These are separate operations and
+should be recorded separately.
+
+## Failure Interpretation
+
+Failure at one coefficient degree or Pólya increment is inconclusive for the
+continuous inequality. Likewise, `diagnostics.problem ~= 0` makes the objective
+unavailable and remains inconclusive about infeasibility.
+
+## Limitations
+
+Both methods remain sufficient coefficient tests. Pólya can increase the number
+of coefficient constraints quickly with dimension. The caller selects the
+increment. Equality assembly is direct-only.
+
+## Further Reading
+
+- Farouki, [The Bernstein polynomial basis: A centennial retrospective](https://doi.org/10.1016/j.cagd.2012.03.001), for exact degree elevation.
+- Powers and Reznick, [A new bound for Pólya's theorem](https://doi.org/10.1007/s002080000183), for the underlying positivity theorem.
+
+## See Also
+
+[Previous: Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/) ·
+[Next: Markov–Lukács And Putinar](/GriD-LMIA/documents/math/finite-certificates/markov-lukacs-and-putinar/) ·
+[Notation](/GriD-LMIA/documents/math/notation/#residual-and-positive-target) ·
+[`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) ·
+[`pdlmi` constructor](/GriD-LMIA/documents/reference/pdlmi/constructor/)

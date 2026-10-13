@@ -1,0 +1,165 @@
+---
+title: Bernstein Basis, Continuity, And Storage
+description: Cell-wise tensor Bernstein representation, shared-face values, storage labels, and the main algebraic links.
+---
+
+import BernsteinConceptDiagram from "../../../../components/BernsteinConceptDiagram.astro";
+import CellStorageDiagram from "../../../../components/CellStorageDiagram.astro";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <span>Coordinates And Bernstein</span>
+  <span>/</span>
+  <span>Bernstein Basis, Continuity, And Storage</span>
+</nav>
+
+This retained route is the conceptual overview. Detailed elevation,
+differentiation, convolution, subdivision, and traversal formulas now live in
+[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
+
+## Local Coordinates And The Tensor Representation
+
+Each physical cell $\mathcal H_{\vect c}$ is the product of the grid
+intervals $[\rho_s^{(c_s)},\rho_s^{(c_s+1)}]$. It is pulled back to the same
+reference box $[0,1]^\ell$ by
+
+$$
+\alpha_s
+=\frac{\rho_s-\rho_s^{(c_s)}}
+{\rho_s^{(c_s+1)}-\rho_s^{(c_s)}}.
+$$
+
+This separation is the organizing idea: physical knot locations and cell
+widths belong to the map $\phi_{\vect c}$, while coefficient algebra uses a
+fixed local coordinate. In one direction, write $\vect m=(m_1)$ and use
+$B_{i_1}^{m_1}(\alpha)=\binom{m_1}{i_1}\alpha^{i_1}(1-\alpha)^{m_1-i_1}$ for
+$i_1=0,\ldots,m_1$. After residual assembly the target degree is
+$\vect M=(M_1)$, with basis $B_{i_1}^{M_1}$. The multivariate basis is its
+tensor product,
+
+$$
+\begin{aligned}
+B_{\vect i}^{\vect M}(\vect\alpha)
+&=\prod_{s=1}^{\ell}B_{i_s}^{M_s}(\alpha_s),\\
+\vect i&\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}.
+\end{aligned}
+$$
+
+A cell-wise matrix polynomial therefore has one matrix coefficient for each
+tensor label:
+
+$$
+A^{(\vect c)}(\vect\alpha)
+=\sum_{\vect i\in\prod_{s=1}^{\ell}\{0,\ldots,M_s\}}C^{(\vect c)}[\vect i]\,
+B_{\vect i}^{\vect M}(\vect\alpha).
+$$
+
+Local coefficient labels are zero-based. Physical grid nodes and cell indices
+are one-based. Different physical cell sizes can still use the same tensor
+rules because every cell is represented on the reference box.
+
+<BernsteinConceptDiagram kind="basis" />
+
+## Convex-Hull Reasoning And The Direct Certificate
+
+Every Bernstein basis function is nonnegative on the reference box and the
+complete tensor basis sums to one. Consequently,
+$A^{(\vect c)}(\vect\alpha)$ is a convex combination of its
+coefficient matrices. Endpoint and face values are exposed by the
+corresponding boundary coefficients, while interior values remain inside the
+coefficient hull.
+
+<BernsteinConceptDiagram kind="convex" />
+
+For a residual $\mathcal F^{(\vect c)}$, `pdlmi` uses the sign-normalized
+positive target $S^{(\vect c)}=-\mathcal F^{(\vect c)}$. Requiring every
+Bernstein coefficient
+$C^{(\vect c)}[\vect i]\succeq0$ is therefore a finite sufficient
+condition for $S^{(\vect c)}(\vect\alpha)\succeq0$ throughout the
+cell. This is the Direct certificate. It gives an inexpensive and transparent
+sufficient condition. A strict theoretical target must be represented in
+software with an explicit margin such as
+$S^{(\vect c)}-\varepsilon I\succeq0$.
+
+## `LocalValues`, Face Continuity, And cell-wise Differentiation
+
+`LocalValues` mirrors the tensor geometry. Its outer nesting selects a
+physical cell. The leaf row follows the local label order returned by
+`lbls()`. There are $\prod_{s=1}^{\ell}(k_s-1)$ physical cells and
+$\prod_{s=1}^{\ell}(M_s+1)$ coefficient labels per ordinary residual row. Explicit
+scheduling-rate dependence adds rows at each leaf while preserving cells and
+coefficient labels.
+
+<CellStorageDiagram />
+
+With default order-zero continuity, a constructor-created `pdvar` shares the
+complete Bernstein control face between adjacent cells. Neighboring cells may
+have different one-sided gradients at the same interface. Higher-order
+`Continuity` requests use spline controls and Bernstein extraction to match
+physical derivatives across the interface through the coefficient construction.
+Known `pdmat` coefficients instead support inferred or verified seam orders.
+The direction-wise bound is stored in `Continuity`, with
+`IsContinuous=all(Continuity>=0)`.
+
+Differentiation is therefore deliberately cell-wise. Along direction $s$,
+forward coefficient differences are multiplied by $M_s$ and divided by the
+physical width $h_s^{\vect c}$. `rhodiff` elevates the directional partials
+to a common tensor degree, combines them with rate-box vertices in a
+deterministic order, and stores one row per vertex. The interface interpretation
+is developed in [Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/).
+The exact coefficient formulas are in
+[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/#differentiation-and-rate-rows).
+
+## Exact Algebra, Finite Certificates, And Independent Refinements
+
+The coefficient representation supports exact transformations directly from
+stored coefficients. Degree elevation changes only the Bernstein
+representation. Refining the physical grid re-expresses the same polynomial on
+smaller cells. Multiplication adds direction-wise degrees and uses an ordered,
+binomially normalized convolution, so matrix-factor order is preserved.
+Exact subdivision and the full formulas are collected in
+[Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/).
+
+These transformations feed several finite certificates. Direct constrains the
+target coefficients. Pólya first performs an exact degree elevation and then
+applies the same coefficient test. Putinar uses positive-semidefinite Gram
+blocks with an unweighted term and box-generator terms. SparsePutinar retains
+the Putinar terms while splitting dense Gram bases into overlapping tensor
+windows whose side is the `CliqueSize` value $b$. FullBox uses every
+square-free generator product. SparseFullBox retains those identities while
+replacing each dense tensor basis by overlapping sliding-window Gram blocks
+$Q_J^{(w)}$ over sliding tensor windows of scalar side $w$. The
+[Certificate Map And Selection Guide](/GriD-LMIA/documents/math/sos-certificates/)
+states the exact one- and multi-parameter forms.
+
+<span id="fixed-order-full-box-preordering"></span>
+
+The refinement knobs are independent: decision degree $\vect m$, assembled
+residual degree $\vect M$, Pólya increment $\vect d$, absolute Gram order
+$\vect r$, SparsePutinar `CliqueSize` value $b$, SparseFullBox window side $w$,
+and physical-grid refinement are distinct controls. Increasing one preserves
+the others.
+
+<span id="limitations"></span>
+
+The package remains limited to tensor-product box cells. Direct positivity is
+only a sufficient condition. Continuous `pdvar` gradients may differ across faces.
+Function-backed `pdmat` objects lack a coefficient table. Each
+fixed grid, degree, or certificate is claimed to solve the original continuum
+problem exactly.
+
+## Further Reading
+
+- Farouki, [The Bernstein polynomial basis: A centennial retrospective](https://doi.org/10.1016/j.cagd.2012.03.001).
+- Zettler and Garloff, [Robustness analysis of polynomials with polynomial parameter dependency using Bernstein expansion](https://doi.org/10.1109/9.746333).
+- Masubuchi, Kume, and Shimemura, [Spline-type solution to parameter-dependent LMIs](https://doi.org/10.1109/CDC.1998.761918).
+
+## See Also
+
+[Previous: Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/) ·
+[Next: Coefficient Algebra](/GriD-LMIA/documents/math/coordinates-and-bernstein/coefficient-algebra/) ·
+[Notation](/GriD-LMIA/documents/math/notation/#bernstein-labels-and-degrees) ·
+[`pdmat` storage](/GriD-LMIA/documents/reference/pdmat/storage-and-elevation/) ·
+[`pdmat elevate`](/GriD-LMIA/documents/reference/pdmat/elevate/) ·
+[`pdvar` storage and evaluation](/GriD-LMIA/documents/reference/pdvar/storage-and-evaluation/)

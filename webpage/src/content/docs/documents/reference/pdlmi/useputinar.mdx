@@ -1,0 +1,185 @@
+---
+title: pdlmi usePutinar
+description: Rebuild a PD-LMI residual with a fixed-order Putinar box Bernstein-Gram certificate.
+---
+
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <a href="/GriD-LMIA/documents/reference/pdlmi/">pdlmi</a>
+  <span>/</span>
+  <span>usePutinar</span>
+</nav>
+
+Gram bases, absolute order $\vect r$, and target coefficients follow the
+[global certificate notation](/GriD-LMIA/documents/math/notation/#gram-basis-and-certificate-parameters).
+
+<CertificateNavigation selected="putinar" showSections={false} />
+
+## Purpose
+
+Create a new `pdlmi` that represents the stored residual with the implemented
+cell-wise Putinar box Bernstein-Gram certificate.
+
+## Syntax
+
+```matlab
+Cputinar = C.usePutinar()
+Cputinar = C.usePutinar(order)
+Cputinar = C.usePutinar(..., ValidationMode=mode)
+```
+
+## Description
+
+Omitting `order` selects the smallest admissible absolute order
+
+$$
+\vect r=\begin{cases}
+\left(\left\lfloor M_1/2\right\rfloor\right),&\ell=1,\\
+\left\lceil \vect M/2\right\rceil,&\ell\ge2,
+\end{cases}
+$$
+
+where $\vect M$ is `C.Residual.Degree` and $\ell$ is the parameter count. The
+explicit form selects `order` independently of the residual degree. Both forms rebuild from `C.Residual`
+and `C.Relation`, return a new value object, and leave `C` unchanged. Applying
+Putinar after Pólya, FullBox, or an earlier Putinar order therefore replaces
+that selection and rebuilds from the original residual.
+
+For each physical cell and active rate row, `pdlmi` first sign-normalizes the
+target: a `>=` residual is used directly and a `<=` residual is negated. In
+one parameter, the method dispatches to the same parity-specific
+Markov–Lukács form as `useFullBox`. For two or more parameters, it
+represents the target as
+
+$$
+\begin{aligned}
+g_s(\vect\alpha)
+&:=\alpha_s(1-\alpha_s),\\
+\mathcal M_s(\vect\alpha)
+&:=g_s(\vect\alpha)S_s(\vect\alpha),\\
+S^{(\vect c)}(\vect\alpha)
+&=S_0(\vect\alpha)
++\sum_{s=1}^{\ell}\mathcal M_s(\vect\alpha).
+\end{aligned}
+$$
+
+At order $\vect r$, $S_0$ uses a tensor Bernstein Gram basis of degree
+$\vect r$. The multiplier $S_s$ uses degree
+$\vect r-\vect e_s$. A block is omitted if that vector has a negative
+component. Every present Gram matrix is constrained positive semidefinite.
+The target is exactly elevated and matched coefficient by coefficient at
+tensor degree $2\vect r$.
+
+For an entry-wise inequality, each MATLAB column-major scalar entry receives
+an independent scalar certificate. Each cell and rate row receives independent
+dense Gram blocks and independent coefficient equalities. The caller writes
+every positivity margin and passes the exported constraints to a chosen solver.
+Thus the method creates non-strict constraints. A theoretical
+$S^{(\vect c)}\succ0$ condition requires an explicit $\varepsilon I$
+margin in the residual.
+
+## Arguments
+
+| Input | Description |
+| :--- | :--- |
+| `C` | Any `pdlmi` object. Its stored `Residual` and `Relation` are the source for the rebuilt certificate. |
+| `order` | Optional finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise absolute Gram order. For $\ell=1$, it must satisfy $r_1\ge\lfloor M_1/2\rfloor$ with $\vect r=(r_1)$ and $\vect M=(M_1)$. For $\ell\ge2$, it must satisfy $\vect r\ge\lceil\vect M/2\rceil$ componentwise. |
+
+## Returned Object
+
+`Cputinar` is a new `pdlmi` with `UsePolya=false`,
+`UseFullBoxPreorder=false`, `UsePutinar=true`, and `PutinarOrder` equal to the
+selected order. Within each cell and rate row, `Constraints` stores the PSD
+Gram-block conditions before the exact coefficient identities.
+`toYalmip(Cputinar)` concatenates and preserves those stored entries.
+
+## Deterministic Transcript Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, {[0 1]}, Degree=2);
+direct = P >= 0;
+putinarDefault = direct.usePutinar();
+putinarHigher = putinarDefault.usePutinar(2);
+polya = direct.usePolya(1);
+putinarFromPolya = polya.usePutinar();
+Fputinar = toYalmip(putinarDefault);
+
+direct.UsePutinar
+direct.PutinarOrder
+numel(direct.Constraints)
+putinarDefault.UsePutinar
+putinarDefault.PutinarOrder
+numel(putinarDefault.Constraints)
+putinarHigher.PutinarOrder
+numel(putinarHigher.Constraints)
+putinarFromPolya.UsePolya
+putinarFromPolya.UsePutinar
+putinarFromPolya.PutinarOrder
+length(Fputinar)
+```
+
+For the degree-two scalar residual, order one stores two PSD blocks followed
+by three exact coefficient identities. Order two stores two PSD blocks
+followed by five identities. Selecting Putinar from `polya` returns to the
+stored degree-two residual and rebuilds the certificate from that evidence.
+
+`ValidationMode` is transient, accepts case-insensitive `"fast"` or
+`"strict"`, and applies only to this rebuild. Stored and inherited state remain unchanged.
+
+## Anisotropic Assembly Output
+
+For $\vect M=(2,4)$ and $\vect r=(1,2)$, the multivariate Putinar terms
+use Gram basis degrees
+
+$$
+\vect r=(1,2).
+$$
+
+$$
+\vect r-\vect e_1=(0,2).
+$$
+
+$$
+\vect r-\vect e_2=(1,1).
+$$
+
+Their contributions are matched to the $3\times5$ tensor of 15 target
+coefficients. This assembly diagram makes the unequal parameter orders
+explicit while keeping session-dependent YALMIP variable names outside the presentation.
+
+## Validation And Errors
+
+- A malformed `order` raises `pdlmi:InvalidPutinarOrder`.
+- A valid integer below $\lfloor m/2\rfloor$ in one parameter or $\lceil m/2\rceil$ in two or more parameters raises `pdlmi:PutinarOrderTooLow`.
+- Semidefinite and entry-wise inequalities retain their original global mode.
+- Equality is direct-only. This method raises `pdlmi:UnsupportedEqualityCertificate` before validating `order`.
+- Constructor selection errors are documented on the
+  [`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/)
+  page, including `pdlmi:InvalidUsePutinar`,
+  `pdlmi:ConflictingPutinarOptions`, and `pdlmi:ConflictingRelaxations`.
+
+In one parameter, this selector uses the parity-specific Markov–Lukács
+interval certificate. In two or more parameters it implements only the
+local-hypercube module generated by the separate factors
+$\alpha_s(1-\alpha_s)$. Its supported scope is the local hypercube module at a
+caller-selected order. A failed order remains inconclusive about the target's
+sign on the continuous cell.
+
+For two or more parameters, the distinct
+[`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/)
+method includes every subset product of the same generators. The two selectors
+share the one-parameter parity rule and default order.
+
+## See Also
+
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) ·
+[`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) ·
+[`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) ·
+[`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) ·
+[`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) ·
+[`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) ·
+[`SOS Certificates`](/GriD-LMIA/documents/math/sos-certificates/)

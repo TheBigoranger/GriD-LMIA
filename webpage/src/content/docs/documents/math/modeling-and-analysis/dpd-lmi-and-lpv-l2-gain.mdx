@@ -1,0 +1,173 @@
+---
+title: DPD-LMI And LPV L2-Gain Model
+description: Build the canonical LPV induced-L2-gain analysis problem from the plant model to a bounded-real DPD-LMI.
+---
+
+import JourneyCurve from "../../../../../components/JourneyCurve.astro";
+import ExportSolveFlow from "../../../../../components/ExportSolveFlow.astro";
+import Term from "../../../../../components/Term.astro";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <span>Modeling And Analysis</span>
+  <span>/</span>
+  <span>DPD-LMI And LPV L2-Gain Model</span>
+</nav>
+
+This page fixes the model and symbols used throughout the manual. Subsequent
+pages carry the same problem through rate reduction, cell coordinates,
+Bernstein residual assembly, a finite certificate, and YALMIP.
+
+A <Term id="lmi" definition /> constrains an affine symmetric matrix expression. A <Term id="pd-lmi" definition /> lets its data and decisions vary with a scheduling parameter. A <Term id="dpd-lmi" definition /> also contains derivative and scheduling-rate terms. A <Term id="lpv" definition /> model provides a standard application for this structure.
+
+<JourneyCurve />
+
+## LPV Plant And Objective
+
+Consider
+
+$$
+\begin{aligned}
+\dot x(t)
+&=A(\vect\rho(t))x(t)+B(\vect\rho(t))w(t),\\
+z(t)
+&=C(\vect\rho(t))x(t)+D(\vect\rho(t))w(t).
+\end{aligned}
+$$
+
+where $x(t)$ is the plant state, $w(t)$ is the disturbance, and $z(t)$
+is the performance output. The scheduling vector and rate satisfy
+
+$$
+\vect\rho(t)\in\mathcal P,\qquad
+\dot{\vect\rho}(t)\in\mathcal R,
+$$
+
+with parameter and rate boxes
+
+$$
+\mathcal P=\prod_{s=1}^{\ell}[\underline\rho_s,\overline\rho_s],
+\qquad
+\mathcal R=\prod_{s=1}^{\ell}[\underline{\dot\rho}_s,\overline{\dot\rho}_s].
+$$
+
+The goal is a zero-state induced-$L_2$ bound
+$\lVert z\rVert_2<\gamma\lVert w\rVert_2$.
+
+## Bounded-Real DPD-LMI
+
+Choose a differentiable symmetric matrix $P(\vect\rho)$. A standard
+sufficient analysis condition is
+
+$$
+P(\vect\rho)\succ0
+$$
+
+and
+
+$$
+\Biggl[\begin{matrix}
+\dot P+\operatorname{He}(PA) & PB & C^\top\\
+B^\top P & -\gamma I & D^\top\\
+C & D & -\gamma I
+\end{matrix}\Biggr]\prec0
+$$
+
+for every
+$(\vect\rho,\dot{\vect\rho})\in\mathcal P\times\mathcal R$, where
+
+$$
+\begin{aligned}
+\dot P(\vect\rho,\dot{\vect\rho})
+&=\sum_{s=1}^{\ell}\dot\rho_s\frac{\partial P}{\partial\rho_s}(\vect\rho),\\
+\operatorname{He}(X)&=X+X^\top.
+\end{aligned}
+$$
+
+The strict signs describe the mathematical analysis condition. The numerical
+model encodes every chosen $\varepsilon I$ margin explicitly.
+
+## General DPD-LMI Template
+
+The same workflow applies to residuals affine in general decision functions
+$y_k(\vect\rho)$ and their partial derivatives:
+
+$$
+\begin{aligned}
+\mathcal F(\vect\rho,\dot{\vect\rho})
+&=F_0(\vect\rho)\\
+&\quad+\sum_{k=1}^{N}F_k(\vect\rho)y_k(\vect\rho)\\
+&\quad+\sum_{k=1}^{N}\sum_{s=1}^{\ell}R_{ks}(\vect\rho)\dot\rho_s\frac{\partial y_k}{\partial\rho_s}(\vect\rho).
+\end{aligned}
+$$
+
+The package supports affine decision expressions. Products nonlinear in
+decision data, including decision-by-decision and decision-by-rate products,
+are rejected.
+
+## From Analysis Residual To Positive Target
+
+A comparison such as `residual <= 0` stores the original cell-wise residual
+$\mathcal F^{(\vect c)}$ and normalizes its sign to a positive target
+
+$$
+S^{(\vect c)}=-\mathcal F^{(\vect c)}\succ0.
+$$
+
+The package assembles the original relation as non-strict constraints and adds
+exactly the explicit
+$S^{(\vect c)}-\varepsilon I\succeq0$ margin required for strictness.
+
+## Modeling Path In MATLAB
+
+```matlab
+yalmip('clear')
+
+P = pdvar(n, grid, "symmetric", Degree=mVector);
+Pdot = rhodiff(P, rateBounds);
+
+residual = [ ...
+    Pdot + P*A + A'*P, P*B, C'; ...
+    B'*P,              -gamma*eye(nw), D'; ...
+    C,                 D,              -gamma*eye(nz)];
+
+L = residual <= -epsilon*eye(n + nw + nz);
+selected = L;  % Direct by default
+
+diagnostics = optimize(selected.toYalmip(), gamma.LocalValues{1}{1}, options);
+assert(diagnostics.problem == 0, diagnostics.info)
+Psol = value(P);
+```
+
+`pdlmi` assembles constraints. The caller selects the solver and makes the
+`optimize` call. Retain an optimized $\gamma$ only after
+`diagnostics.problem == 0`.
+
+<ExportSolveFlow />
+
+## What Comes Next
+
+The rate dependence above is affine, so the entire rate box reduces exactly to
+its vertices. Parameter dependence remains continuous and requires a separate
+finite sufficient certificate after gridding and Bernstein assembly.
+
+## Limitations
+
+This is a sufficient analysis condition for box-bounded scheduling parameters
+and rates. The modeler supplies the grid, $\varepsilon$, solver, and certificate
+order. Controller synthesis requires a separate formulation. A nonzero solver
+status remains inconclusive about feasibility of the continuous LPV problem.
+
+## Further Reading
+
+- Scherer, [Mixed $H_2/H_\infty$ control for time-varying and linear parametrically-varying systems](https://doi.org/10.1002/%28SICI%291099-1239%28199611%296%3A9%2F10%3C929%3A%3AAID-RNC260%3E3.0.CO%3B2-9), for parameter-dependent bounded-real analysis.
+- Scherer and Weiland, [Linear Matrix Inequalities in Control](https://www.imng.uni-stuttgart.de/mst/files/LectureNotes.pdf), for LMI and dissipation background.
+
+## See Also
+
+[Next: Rate-Box Reduction And Interface Analysis](/GriD-LMIA/documents/math/modeling-and-analysis/rate-box-and-interface-analysis/) ·
+[Notation](/GriD-LMIA/documents/math/notation/#residual-and-positive-target) ·
+[`pdvar` constructor](/GriD-LMIA/documents/reference/pdvar/constructor/) ·
+[`rhodiff`](/GriD-LMIA/documents/reference/pdvar/rhodiff/) ·
+[`pdlmi` constructor](/GriD-LMIA/documents/reference/pdlmi/constructor/)

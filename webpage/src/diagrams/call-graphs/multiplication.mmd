@@ -1,0 +1,14 @@
+flowchart LR
+  A["mtimes"] --> B{"operand kind"}
+  B -->|"parameter-dependent or numeric"| C["shared alignment"]
+  C --> D["prodVals"]
+  D --> E{"payload class"}
+  E --> F["numeric convolution"]
+  E --> G["known-affine contraction"]
+  E --> H["generic planned product"]
+  F --> I["coefficient product result"]
+  G --> I
+  H --> I
+  B -->|"bare affine sdpvar with pdmat"| J["affine product bridge"]
+  J --> K["map known coefficient tree"]
+  K --> L["pdvar result"]

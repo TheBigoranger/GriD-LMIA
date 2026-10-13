@@ -1,0 +1,105 @@
+---
+title: pdlmi usePolya
+description: Rebuild a PD-LMI residual with a Pólya degree increment.
+---
+
+import CertificateNavigation from "../../../../../components/CertificateNavigation.astro";
+
+<nav class="manual-trail">
+  <a href="/GriD-LMIA/documents/">Documents</a>
+  <span>/</span>
+  <a href="/GriD-LMIA/documents/reference/pdlmi/">pdlmi</a>
+  <span>/</span>
+  <span>usePolya</span>
+</nav>
+
+<CertificateNavigation selected="polya" showSections={false} />
+
+## Purpose
+
+Create a new `pdlmi` using the original stored residual and a selected Pólya
+degree increment.
+
+## Syntax
+
+```matlab
+Cpolya = C.usePolya()
+Cpolya = C.usePolya(degreeIncrement)
+Cpolya = C.usePolya(..., ValidationMode=mode)
+```
+
+## Description
+
+Omitting the increment selects uniform increment one. An explicit increment is a
+finite nonnegative integer scalar shorthand or an $\ell$-element direction-wise
+vector. It elevates the residual componentwise before `pdlmi` constrains every
+elevated coefficient and every active rate-vertex row. The method is
+value-like: it returns a new object and leaves `C` unchanged.
+
+Each call rebuilds from `C.Residual` and replaces a previous
+elevation. Thus `C.usePolya(2)` and `C.usePolya().usePolya(2)` both use
+an increment of two from the original residual. A prior Putinar or full-box
+selection is replaced in the same way.
+
+The diagram's first and second boxes represent the same residual polynomial.
+Only its Bernstein coefficient row is longer. The final arrow is the ordinary
+direct sign test. Pólya uses degree elevation and coefficient tests.
+
+## Example
+
+```matlab
+yalmip('clear')
+P = pdvar(1, [0 1], Degree=1);
+direct = P >= 0;
+one = direct.usePolya();
+two = one.usePolya(2);
+[direct.PolyaDegree one.PolyaDegree two.PolyaDegree]
+```
+
+```text
+ans =
+     0     1     2
+```
+
+`ValidationMode` is transient, accepts case-insensitive `"fast"` or
+`"strict"`, and applies only to this rebuild. Stored and inherited state remain unchanged.
+
+## Anisotropic Assembly Output
+
+For an assembled target degree $\vect M=(2,1)$ and increment
+$\vect d=(1,2)$, exact elevation gives
+
+$$
+\vect M+\vect d=(3,3).
+$$
+
+$$
+\vect i\in\{0,\ldots,3\}\times\{0,\ldots,3\}.
+$$
+
+The finite output is therefore a $4\times4$ tensor diagram of 16 elevated
+coefficient tests for each physical cell and stored rate row. The two
+parameter directions are elevated independently.
+
+## Validation And Errors
+
+The increment must be a finite nonnegative integer scalar shorthand or an
+$\ell$-element vector. The selected `PolyaDegree` is stored as a
+$1\times\ell$ row.
+Invalid values raise `pdlmi:InvalidPolyaDegree`.
+
+Semidefinite inequalities retain semidefinite coefficient tests. Entry-wise
+inequalities retain their global entry-wise mode after elevation. Equality is
+direct-only, so calling this method on relation `"=="` raises
+`pdlmi:UnsupportedEqualityCertificate` before degree validation.
+
+Pólya elevation is an exact re-expression of the stored residual followed by
+the direct coefficient test. The caller selects the exponent and writes every
+strict margin explicitly. This certificate uses coefficient tests in place of
+SOS multipliers. See the
+[certificate map](/GriD-LMIA/documents/math/sos-certificates/#polya-type-coefficient-relaxation)
+for the theorem's strict-positivity setting and the narrower runtime contract.
+
+## See Also
+
+[`pdlmi constructor`](/GriD-LMIA/documents/reference/pdlmi/constructor/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`SOS certificates`](/GriD-LMIA/documents/math/sos-certificates/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) · [`pdbase storage and inspection`](/GriD-LMIA/documents/reference/pdbase/storage-inspection/)

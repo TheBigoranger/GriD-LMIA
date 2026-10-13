@@ -1,0 +1,41 @@
+{
+  "name": "grid-lmia-webpage",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "prebuild": "node scripts/prepare-build.mjs",
+    "sync:contracts": "node scripts/sync-documentation-contracts.mjs",
+    "check:contracts": "node scripts/sync-documentation-contracts.mjs --check",
+    "audit:docs": "node scripts/audit-documentation.mjs",
+    "generate:call-graphs": "node scripts/generate-call-graphs.mjs",
+    "generate:index": "node scripts/generate-reference-index.mjs",
+    "sync:version": "node scripts/sync-version.mjs",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "build:publish": "node scripts/prepare-build.mjs --mode=publish && astro build",
+    "prepare:source": "node scripts/prepare-build.mjs --mode=source",
+    "prepare:publish": "node scripts/prepare-build.mjs --mode=publish",
+    "test": "node --test tests/*.test.ts",
+    "check:visual": "node scripts/check-visual-contract.mjs",
+    "check:geometry": "node scripts/check-rendered-geometry.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/react": "^6.0.1",
+    "@astrojs/starlight": "^0.41.3",
+    "astro": "^7.0.2",
+    "katex": "^0.16.47",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "11.15.0",
+    "playwright": "^1.62.0"
+  }
+}
