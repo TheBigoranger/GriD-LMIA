@@ -14,6 +14,14 @@ import { Aside } from "@astrojs/starlight/components";
 
 Every operation acts on the matrix payload stored at each local Bernstein label. The returned `pdmat` preserves known-data semantics and exposes the aligned grid, degree, and payload shape through its properties.
 
+## Numeric Constants And Zero Operations
+
+Numeric operands require finite real `double` or `single` matrices. Convert
+integer constants explicitly, including integer zero. Existing shape, function-only,
+decision-linearity, and rate-row checks still apply before shortcuts.
+Adding or subtracting a zero coefficient object preserves the compatible
+refined grid and rate metadata even when all coefficient values are zero.
+
 ## Continuity And Exact Refinement
 
 Exact degree elevation and common-grid Bernstein restriction preserve the
@@ -303,6 +311,18 @@ A = pdmat([0 1], @(rho) 1+rho, Degree=1);
 Z = 0*A;
 assert(Z.evaluate(0.5) == 0)
 ```
+
+## Cancellation And Floating-Point Comparison
+
+`isequal(A,B)` is an inspection comparison with a numerical tolerance. Exact
+cancellation requires an exactly zero coefficient difference. Subtraction forms the coefficient
+difference and preserves small nonzero residuals even when `isequal` returns
+true. For example, coefficients `1e9` and `1e9+0.5` retain a difference of
+`-0.5`. A known comparison uses that residual.
+
+High-degree product and elevation weights use a logarithmic binomial-ratio
+fallback if normalized intermediate weights underflow. This protects
+representable ratios while preserving the Bernstein convolution and matrix order.
 
 ## See Also
 

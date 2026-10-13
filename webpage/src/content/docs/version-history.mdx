@@ -23,31 +23,35 @@ import { historyPolicy, versionHistory } from "../../data/version-history.js";
 
 ## Version History
 
-Documentation v1.5.0 is the current manual snapshot and latest tagged GitHub
-Release. The v1.4.3 and v1.4.2 rows retain source and documentation snapshots,
-and v1.4.0 is an earlier tagged Release. The retained v1.3.8 row is the final
-documentation snapshot from the completed v1.3 line, and v1.2.4 serves the
-same role for v1.2. Earlier rows retain the final patch release from each older
-minor line, while a commit suffix identifies historical release evidence when
-applicable.
+Documentation v1.5.1 is the current manual snapshot and latest tagged GitHub
+Release. The preceding tagged Release is v1.5.0. Source and documentation
+snapshots are identified separately. Release links identify tags, while commit
+links identify published snapshots.
+The current catalog contains five public examples. Earlier entries retain their
+historical scope and validation results.
 
 <div class="history-list">
-  {versionHistory.length === 0 ? (
-    <article>
+  {versionHistory.map((entry) => (
+    <article id={entry.version.replaceAll(".", "-")}>
       <div>
-        <strong>Minor snapshot list is empty</strong>
-        <span>policy</span>
-      </div>
-      <p>The current version is synchronized from the TeX manual during build.</p>
-    </article>
-  ) : versionHistory.map((entry) => (
-    <article>
-      <div>
-        <strong>{entry.version}</strong>
+        <strong><a href={`#${entry.version.replaceAll(".", "-")}`}>{entry.version}</a></strong>
         <span>{entry.status}</span>
       </div>
-      <time>{entry.date}</time>
+      <time datetime={entry.date}>{entry.date}</time>
       <p>{entry.summary}</p>
+      {entry.changes && <ul>{entry.changes.map((change) => <li>{change}</li>)}</ul>}
+      {entry.compatibility && <p><b>Compatibility:</b> {entry.compatibility}</p>}
+      {entry.migration && (
+        <table class="history-migration">
+          <caption>Cumulative v1.3 migration from v1.2</caption>
+          <thead><tr><th scope="col">Removed API</th><th scope="col">Current API</th></tr></thead>
+          <tbody>{entry.migration.map(([removed, current]) => (
+            <tr><td><code>{removed}</code></td><td><code>{current}</code></td></tr>
+          ))}</tbody>
+        </table>
+      )}
+      {entry.migrationNote && <p>{entry.migrationNote}</p>}
+      {entry.evidence && <p><a href={entry.evidence.href}>{entry.evidence.label}</a></p>}
     </article>
   ))}
 </div>

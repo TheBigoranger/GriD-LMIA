@@ -358,6 +358,13 @@ assembly uses every generator-subset product. Neither is a general-domain or
 general-generator interface or an automatic hierarchy selector. Every assembly
 mode leaves the positivity margin and solver call to the modeler.
 
+## Known Semidefinite Data
+
+For a decision-free semidefinite residual, the numeric certificate symmetrizes
+each coefficient as `M/2 + M'/2` before its eigenvalue check. Halving first
+avoids the former intermediate overflow when summing finite large entries.
+The residual classification and certificate tolerance are preserved.
+
 ## See Also
 
 [`usePolya`](/GriD-LMIA/documents/reference/pdlmi/usepolya/) · [`usePutinar`](/GriD-LMIA/documents/reference/pdlmi/useputinar/) · [`useSpPut`](/GriD-LMIA/documents/reference/pdlmi/usespput/) · [`useSpBox`](/GriD-LMIA/documents/reference/pdlmi/usespbox/) · [`useFullBox`](/GriD-LMIA/documents/reference/pdlmi/usefullbox/) · [`toYalmip`](/GriD-LMIA/documents/reference/pdlmi/toyalmip/) · [`pdmat comparisons`](/GriD-LMIA/documents/reference/pdmat/comparisons/) · [`pdvar comparisons`](/GriD-LMIA/documents/reference/pdvar/comparisons/)

@@ -83,6 +83,15 @@ partials and rate rows. Zero rate multipliers and coefficient-wise zero
 partials are omitted. A completely zero derivative has `Inf` in every
 direction. `IsContinuous` is therefore `all(D.Continuity >= 0)`.
 
+## Extreme-Scale Derivatives
+
+Coefficient differences, degrees, rate vertices, and cell widths are scaled
+together when separate intermediate operations could overflow or underflow.
+This avoids specific intermediate range failures when the final rate-weighted
+result is representable. Exact zero rate contributions stay zero. Degree,
+rate-row order, and continuity propagation are unchanged. Results beyond
+floating-point range remain unsupported.
+
 ## See Also
 
 [`pdmat constructor`](/GriD-LMIA/documents/reference/pdmat/constructor/) ·

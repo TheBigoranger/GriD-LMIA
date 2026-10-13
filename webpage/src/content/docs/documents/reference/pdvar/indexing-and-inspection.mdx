@@ -48,6 +48,23 @@ shapes =
 
 <MatrixGlyphDiagram before={[["x₁₁", "x₁₂"], ["x₂₁", "x₂₂"]]} after={[["x₁₂"]]} beforeLabel="each symbolic matrix" afterLabel="P(1,2)" caption="The same symbolic matrix position is selected or replaced across all coefficients and rate rows." />
 
+Numeric assignment values must use finite real `double` or `single` data.
+Convert integer values explicitly before assigning them.
+
+After slicing or assignment, `ContainsDecision` is recomputed from the surviving
+affine bases in every cell and rate row. Removing the last decision contribution
+sets it to `false`. A selected block containing a decision keeps it `true`.
+
+```matlab
+yalmip('clear')
+P = pdvar(2, [0 1], 'full');
+P(:,2) = [3; 5];
+C = P(:,2);
+assert(P.ContainsDecision && ~C.ContainsDecision)
+X = sdpvar(1,2,'full');
+R = C*X;
+```
+
 ## Payload shape
 
 ### <span id="pdvar-size"></span>`size`

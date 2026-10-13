@@ -158,6 +158,16 @@ always `1`, the second rate has two endpoints, and `D.NumRateRows` is `2`.
 - Products with rate dependence on both sides raise the documented product-validation error.
 - A decision-bearing `pdvar` derivative can multiply known data. Multiplication by another decision-bearing expression is rejected to preserve affine YALMIP dependence. A known rate-row `pdmat` may multiply an ordinary decision expression in either order.
 
+## Extreme-Scale Derivatives
+
+Coefficient differences, degrees, rate vertices, and cell widths are scaled
+together when separate intermediate operations could overflow or underflow.
+The same safeguard applies to numeric coefficients and complete affine YALMIP
+bases. This avoids specific intermediate range failures when the final
+rate-weighted result is representable. Exact zero rate contributions stay zero.
+Degree, rate-row order, and continuity propagation are unchanged. Results beyond
+floating-point range remain unsupported.
+
 ## See Also
 
 [`pdvar constructor`](/GriD-LMIA/documents/reference/pdvar/constructor/) · [`pdlmi`](/GriD-LMIA/documents/reference/pdlmi/)

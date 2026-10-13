@@ -52,6 +52,9 @@ assignedAtOne =
 
 <MatrixGlyphDiagram before={[["a₁₁", "a₁₂"], ["a₂₁", "a₂₂"]]} after={[["a₁₂"]]} beforeLabel="each known matrix" afterLabel="A(1,2)" caption="Indexing and assignment visit the same payload block in every cell-wise coefficient." />
 
+Numeric assignment values must use finite real `double` or `single` data.
+Convert integer values explicitly before assigning them.
+
 ## Payload shape
 
 ### <span id="pdmat-size"></span>`size`
@@ -103,6 +106,10 @@ selfEqual =
   logical
    1
 ```
+
+The numerical tolerance of `isequal` is for inspection. Arithmetic forms
+the coefficient difference, so near-equal known coefficients can have a
+nonzero subtraction residual.
 
 ## <span id="pdmat-disp"></span>`disp` and <span id="pdmat-display"></span>`display`
 

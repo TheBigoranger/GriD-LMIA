@@ -4,11 +4,11 @@ import path from "node:path";
 import { inflateSync } from "node:zlib";
 
 export const expectedPublication = Object.freeze({
-  documentationVersion: "v1.5.0",
-  latestTaggedRelease: "v1.5.0",
+  documentationVersion: "v1.5.1",
+  latestTaggedRelease: "v1.5.1",
   apiRecordCount: 197,
-  manualSha256: "86E50D7110108128A2D7386A35532315E5D93591B754FD7FD7F81F544774101F",
-  manualPageCount: 184,
+  manualSha256: "DCA4219285C2AF37465BA66A78FBB600CE42B234C4627493ED28A60A59853110",
+  manualPageCount: 190,
 });
 
 const fixedArtifacts = [

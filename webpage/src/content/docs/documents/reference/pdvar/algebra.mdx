@@ -12,6 +12,14 @@ import { Aside } from "@astrojs/starlight/components";
 examples use deterministic metadata in place of session-dependent YALMIP
 variable names.
 
+## Numeric Constants And Zero Operations
+
+Numeric operands require finite real `double` or `single` matrices. Convert
+integer constants explicitly, including integer zero. Existing shape, function-only,
+decision-linearity, and rate-row checks still apply before shortcuts.
+Adding or subtracting a zero coefficient object preserves the compatible
+refined grid and rate metadata even when all coefficient values are zero.
+
 ## Continuity And Exact Refinement
 
 Exact degree elevation and common-grid Bernstein restriction preserve the
@@ -132,6 +140,15 @@ leave the package's affine YALMIP layer.
 - Compatible `RateBounds` with zero stored rows is metadata and remains valid in an ordinary product.
 
 Function-only known operands are also rejected after decision cancellation. For `P = pdvar(1,[0 1])`, `Z = P-P`, and `F = pdmat([0 1],@(rho) 1+rho)`, both `Z*F` and `F*Z` raise `pdvar:FunctionOnlyAlgebra`. Explicitly degree-validated known functions remain valid neighbors.
+
+## Decision Dependence After Selection
+
+`ContainsDecision` reflects the actual affine bases across all cells and rate
+rows. Slicing a known block or overwriting the final decision-bearing entry
+clears the flag. A resulting known `pdvar` block can participate in supported
+products with affine `sdpvar` factors. Products with two decision-bearing
+operands remain rejected. High-degree convolution/elevation ratios use a
+logarithmic fallback when normalized weights underflow.
 
 ## See Also
 

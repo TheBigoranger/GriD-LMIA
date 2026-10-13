@@ -68,6 +68,17 @@ For diagrams of one- and two-parameter grid inputs, the global
 coefficient-grid shape, and the separate role of Bernstein `Degree`, see
 [Gridding And Local Coordinates](/GriD-LMIA/documents/math/gridding-and-degree/).
 
+## Numeric Data And Grid Boundaries
+
+Grid vectors must be finite, real, and strictly increasing, with at least two
+nodes and a finite width for each interval. Integer vectors are converted to
+`double`. Adjacent nodes that collapse during conversion are rejected with
+`pdmat:InvalidGridVector`. Integer metadata such as `Degree` remains supported.
+
+Numeric coefficient payloads and numeric algebra or assignment constants must
+use `double` or `single`. Convert integer payloads explicitly. Numeric
+arithmetic validation also rejects integer zero.
+
 ## Direction-Wise Continuity
 
 `Continuity=orders` accepts a scalar or one nonnegative integer or `Inf` per
@@ -100,6 +111,10 @@ assert(A.Continuity == 2 && B.Continuity == 1)
 The shared value is 6. The first derivatives are `3*(6-3)/1 = 9` and
 `3*(12-6)/2 = 9`, while the second derivatives are
 `6*(6-2*3+1)/1^2 = 6` and `6*(22-2*12+6)/2^2 = 6`.
+
+Large finite faces are compared in a common scale when their norms overflow.
+Nonfinite scaled faces fail the continuity check. Exact numeric zero
+forward differences stay zero even when a tiny cell-width power underflows.
 
 ## Returned Object
 
@@ -328,6 +343,14 @@ lower-equals-upper axes are collapsed. This example has
 
 - Function-only objects that omit `Degree` keep exact evaluation and remain outside coefficient algebra.
 - Mixed physical bounds are rejected by coefficient algebra until a compatible common grid exists.
+
+### Explicit-Degree Fitting Limits
+
+Function-backed construction with explicit `Degree` fits a tensor Bernstein
+collocation system. Any degree component above 64 or a basis reciprocal
+condition estimate below `1e-6` raises `pdmat:UnstableBernsteinFit` before
+representability validation. This fitting guard does not impose a degree-64
+limit on directly supplied coefficient data.
 
 ## Function-only Evidence Boundary
 

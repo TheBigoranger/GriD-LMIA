@@ -55,9 +55,10 @@ for malformed internal use.
 **Syntax:** `value = helper.chk(value,errorId,message,tags...,Name,Value)`.
 
 Returns the unchanged value after common predicates pass. Supported tags cover
-numeric/real/cell/struct type, emptiness, scalar/vector/matrix shape, finite
+numeric/floating/real/cell/struct type, emptiness, scalar/vector/matrix shape, finite
 integer sign, strict increase, and row bounds. Size/count/range options add
 exact constraints. A failed predicate raises the caller-owned identifier.
+The `floating` predicate accepts only `double` and `single`.
 Malformed validator syntax raises `helper:InvalidValidatorCall`.
 
 ## <span id="helper-combrows"></span>`helper.combRows`
@@ -73,7 +74,9 @@ and rate vertices. Callers validate the axis values.
 **Syntax:** `tf = helper.isZero(value,mode,...)`.
 
 Modes `"num"`, `"add"`, `"vals"`, and `"obj"` apply the package's numeric,
-additive, coefficient-tree, and object evidence rules. A function-only
+additive, coefficient-tree, and object evidence rules. The additive shortcut mode requires
+floating-point inputs, so integer zero fails this shortcut's type check.
+The generic numeric zero classifier retains its numeric contract. A function-only
 `pdmat` placeholder remains distinct from coefficient zero evidence. Bad modes and arity use
 `helper:InvalidZeroMode` or `helper:InvalidZeroCall`.
 
@@ -83,7 +86,8 @@ additive, coefficient-tree, and object evidence rules. A function-only
 `info = helper.mkGrid(grid,owner)`.
 
 Validates a nonempty cell array of finite, real, strictly increasing vectors
-with at least two nodes. Returns `Vectors`, tensor-product `Points`, `Bounds`,
+with at least two nodes and finite interval widths. Integer grid vectors are
+converted to `double`. Nodes that collapse during conversion are rejected. Returns `Vectors`, tensor-product `Points`, `Bounds`,
 and `NumNodes`. Errors use `<owner>:InvalidGrid` or
 `<owner>:InvalidGridVector`. The default owner is `pdbase`.
 
@@ -165,7 +169,8 @@ labels and degrees. The six-input form accepts explicit row-aligned outputs,
 including generator-shifted Gram labels.
 
 **Output and shape:** `ratios` is an `N × 1` stable binomial-ratio vector, one
-value per input label-pair row.
+value per input label-pair row. A logarithmic binomial-ratio fallback handles
+underflowing normalized weights and nonfinite intermediate ratios.
 
 **Validation:** Bad arity, mismatched row counts, nonnormalized degrees,
 out-of-range labels, or nonfinite values raise
@@ -218,7 +223,9 @@ complete tensor faces, matrix entries, and stored rows.
 **Validation:** The helper classifies and preserves existing internal storage.
 Numeric faces use the scale-aware tolerance
 `1e-9*max(1,norm(lhs,'fro'),norm(rhs,'fro'))`. Affine `sdpvar` faces compare
-their complete bases exactly.
+their complete bases exactly. Finite numeric faces are rescaled together if
+their norms overflow. Nonfinite scaled faces fail the continuity check. Exact
+numeric zero derivatives stay zero when a tiny cell-width power underflows.
 
 **Limitations:** Inputs are assumed structurally valid. The function preserves
 the input coefficients. Constructors own continuity enforcement.
@@ -242,7 +249,10 @@ Bernstein nodes of that cell. Optional `labels` is the corresponding
 
 **Validation:** Degree normalization uses `helper.normDeg`. Invalid grid
 metadata, callback output, or matrix shape surfaces through the caller's
-construction and arithmetic checks.
+construction and arithmetic checks. A degree component above 64 or basis
+reciprocal condition estimate below `1e-6` raises
+`<owner>:UnstableBernsteinFit`. This degree limit applies only to fitting.
+Direct coefficient storage and evaluation retain their existing degree contract.
 
 **Limitations:** The helper fits samples on the tensor Bernstein nodes and
 provides fitted coefficient evidence. Callers own exact representability checks

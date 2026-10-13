@@ -28,7 +28,7 @@ obj = pdbase(..., ValidationMode=mode)
 
 | Input | Contract |
 | :--- | :--- |
-| `gridVectors` | Nonempty cell array of finite, real, strictly increasing vectors, each with at least two nodes. |
+| `gridVectors` | Nonempty cell array of finite, real, strictly increasing vectors, each with at least two nodes and finite interval widths. Integer nodes are converted to `double`. Collapsing adjacent nodes are rejected. |
 | `matrixSize` | Positive integer row vector `[rows columns]`. |
 | `degree` | One finite nonnegative integer scalar shorthand or an `npar`-element direction-wise vector. A scalar expands uniformly, and the result is stored as a `1 × npar` row. |
 | `localValues` | Optional nested physical-cell tree. An ordinary leaf is a `1 × prod(degree+1)` coefficient cell. A rate-dependent leaf is a rate-row-by-coefficient cell array. |
@@ -43,6 +43,10 @@ When `localValues` is omitted or empty, each physical cell receives a
 coefficient-backed zero payload with the requested matrix size. Explicit
 rate-row payloads require nonempty `RateBounds`. `RateBounds` alone is metadata
 and leaves `NumRateRows=0`.
+
+Numeric coefficient payloads must use finite real `double` or `single` matrices.
+Integer payloads require explicit conversion. Affine `sdpvar` payloads remain
+supported subject to the existing decision metadata and shape checks.
 
 ## Returned object
 

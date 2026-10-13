@@ -2,7 +2,7 @@
 // Sources: doc/documentation-inventory.json and doc/support/terminology.json.
 // Do not edit by hand.
 
-export const documentationVersion = "v1.5.0";
+export const documentationVersion = "v1.5.1";
 export const documentationRecords = [
   {
     "id": "pdbase.pdbase",
@@ -12,7 +12,9 @@ export const documentationRecords = [
     "category": "constructor",
     "inherited_from": null,
     "source_evidence": [
-      "@pdbase/pdbase.m"
+      "@pdbase/pdbase.m",
+      "@pdbase/private/chkVals.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdbase/+construction/test_constructor.m"
@@ -30,8 +32,8 @@ export const documentationRecords = [
     ],
     "inputs": "Tensor-grid vectors, matrix size, scalar or direction-wise Bernstein degree, optional nested local coefficients, and validated metadata options.",
     "return_type_shape": "A pdbase value object with normalized grid, degree, storage, and rate metadata.",
-    "validation_errors": "Rejects malformed grids, sizes, degrees, local trees, coefficient payloads, rate rows, rate bounds, and validation modes with the documented pdbase identifiers.",
-    "supported_scope": "Developer-facing storage backend for coefficient-backed numeric or affine YALMIP payloads.",
+    "validation_errors": "Rejects malformed grids, sizes, degrees, local trees, coefficient payloads, rate rows, rate bounds, and validation modes with the documented pdbase identifiers. Integer coefficient payloads and integer nodes that collapse after conversion are rejected.",
+    "supported_scope": "Developer-facing storage backend for coefficient-backed numeric or affine YALMIP payloads. Numeric payloads require double or single; integer grid vectors convert to double with a repeated increasing-order check.",
     "tex_anchor": "sec:pdbase-constructor",
     "tex_index": "pdbase",
     "tex_example_evidence": "doc/chapters/pdbase.tex#sec:pdbase-constructor",
@@ -422,12 +424,17 @@ export const documentationRecords = [
     "source_evidence": [
       "@pdbase/evaluate.m",
       "@pdbase/elevate.m",
-      "@pdbase/rhodiff.m"
+      "@pdbase/rhodiff.m",
+      "+helper/bernConvRatios.m"
     ],
     "test_evidence": [
       "+tests/+pdbase/+polynomial/test_evaluate.m",
       "+tests/+pdbase/+polynomial/test_elevate.m",
-      "+tests/+pdbase/+polynomial/test_rhodiff.m"
+      "+tests/+pdbase/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m"
     ],
     "call_forms_options": [
       "evaluate(obj,rho)",
@@ -437,7 +444,7 @@ export const documentationRecords = [
     "inputs": "A coefficient-backed object, parameter point, nonnegative degree increment, or compatible rate box.",
     "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects function-only storage at backend evaluation, invalid points or increments, missing or inconsistent rate bounds, and repeated differentiation.",
-    "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration. Continuity propagates by contributing partial direction and rate row, omitting zero contributions.",
+    "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration. Continuity propagates by contributing partial direction and rate row, omitting zero contributions. Risky derivative intermediates use joint coefficient/rate/width scaling; high-degree ratio plans fall back to log-binomial differences. Floating-point range and conditioning still apply.",
     "tex_anchor": "sec:pdbase-evaluate",
     "tex_index": "evaluate",
     "tex_example_evidence": "doc/chapters/pdbase.tex#sec:pdbase-evaluate,sec:pdbase-elevate,sec:pdbase-rhodiff",
@@ -455,12 +462,17 @@ export const documentationRecords = [
     "source_evidence": [
       "@pdbase/elevate.m",
       "@pdbase/evaluate.m",
-      "@pdbase/rhodiff.m"
+      "@pdbase/rhodiff.m",
+      "+helper/bernConvRatios.m"
     ],
     "test_evidence": [
       "+tests/+pdbase/+polynomial/test_evaluate.m",
       "+tests/+pdbase/+polynomial/test_elevate.m",
-      "+tests/+pdbase/+polynomial/test_rhodiff.m"
+      "+tests/+pdbase/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m"
     ],
     "call_forms_options": [
       "evaluate(obj,rho)",
@@ -470,7 +482,7 @@ export const documentationRecords = [
     "inputs": "A coefficient-backed object, parameter point, nonnegative degree increment, or compatible rate box.",
     "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects function-only storage at backend evaluation, invalid points or increments, missing or inconsistent rate bounds, and repeated differentiation.",
-    "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration. Continuity propagates by contributing partial direction and rate row, omitting zero contributions.",
+    "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration. Continuity propagates by contributing partial direction and rate row, omitting zero contributions. Risky derivative intermediates use joint coefficient/rate/width scaling; high-degree ratio plans fall back to log-binomial differences. Floating-point range and conditioning still apply.",
     "tex_anchor": "sec:pdbase-evaluate",
     "tex_index": "elevate",
     "tex_example_evidence": "doc/chapters/pdbase.tex#sec:pdbase-evaluate,sec:pdbase-elevate,sec:pdbase-rhodiff",
@@ -488,12 +500,17 @@ export const documentationRecords = [
     "source_evidence": [
       "@pdbase/rhodiff.m",
       "@pdbase/evaluate.m",
-      "@pdbase/elevate.m"
+      "@pdbase/elevate.m",
+      "+helper/bernConvRatios.m"
     ],
     "test_evidence": [
       "+tests/+pdbase/+polynomial/test_evaluate.m",
       "+tests/+pdbase/+polynomial/test_elevate.m",
-      "+tests/+pdbase/+polynomial/test_rhodiff.m"
+      "+tests/+pdbase/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+polynomial/test_rhodiff.m",
+      "+tests/+pdvar/+polynomial/test_rhodiff.m",
+      "+tests/+pdmat/+polynomial/test_elevate.m",
+      "+tests/+pdvar/+polynomial/test_elevate.m"
     ],
     "call_forms_options": [
       "evaluate(obj,rho)",
@@ -503,7 +520,7 @@ export const documentationRecords = [
     "inputs": "A coefficient-backed object, parameter point, nonnegative degree increment, or compatible rate box.",
     "return_type_shape": "An evaluated matrix, an exactly elevated value object, or a derivative object with rate-vertex rows. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
     "validation_errors": "Rejects function-only storage at backend evaluation, invalid points or increments, missing or inconsistent rate bounds, and repeated differentiation.",
-    "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration. Continuity propagates by contributing partial direction and rate row, omitting zero contributions.",
+    "supported_scope": "Exact Bernstein evaluation, lossless degree elevation, and cell-wise differentiation with affine rate enumeration. Continuity propagates by contributing partial direction and rate row, omitting zero contributions. Risky derivative intermediates use joint coefficient/rate/width scaling; high-degree ratio plans fall back to log-binomial differences. Floating-point range and conditioning still apply.",
     "tex_anchor": "sec:pdbase-evaluate",
     "tex_index": "rhodiff",
     "tex_example_evidence": "doc/chapters/pdbase.tex#sec:pdbase-evaluate,sec:pdbase-elevate,sec:pdbase-rhodiff",
@@ -2004,7 +2021,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/pdmat.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2026,7 +2049,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2036,10 +2060,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "pdmat",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2056,7 +2080,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/pdmat.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2078,7 +2108,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2088,10 +2119,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "FunctionHandle",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2108,7 +2139,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/bernTable.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2130,7 +2167,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2140,10 +2178,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "bernTable",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2160,7 +2198,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/disp.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2182,7 +2226,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2192,10 +2237,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "disp",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2212,7 +2257,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/display.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2234,7 +2285,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2244,10 +2296,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "display",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2264,7 +2316,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/plot.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2286,7 +2344,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2296,10 +2355,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "plot",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2316,7 +2375,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/evaluate.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2338,7 +2403,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2348,10 +2414,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "evaluate",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2368,7 +2434,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/plus.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2390,7 +2462,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2400,10 +2473,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "plus",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2420,7 +2493,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/minus.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2442,7 +2521,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2452,10 +2532,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "minus",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2472,7 +2552,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/mtimes.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2494,7 +2580,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2504,10 +2591,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "mtimes",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2524,7 +2611,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/eq.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2546,7 +2639,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2556,10 +2650,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "eq",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2576,7 +2670,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/ge.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2598,7 +2698,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2608,10 +2709,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "ge",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2628,7 +2729,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/le.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2650,7 +2757,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2660,10 +2768,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "le",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2680,7 +2788,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/isequal.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2702,7 +2816,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2712,10 +2827,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "isequal",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2732,7 +2847,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/blkdiag.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2754,7 +2875,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2764,10 +2886,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "blkdiag",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2784,7 +2906,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/cat.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2806,7 +2934,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2816,10 +2945,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "cat",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2836,7 +2965,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/subsref.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2858,7 +2993,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2868,10 +3004,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "subsref",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -2888,7 +3024,13 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdmat/subsasgn.m",
-      "@pdmat/*.m excluding private and protected kernels"
+      "@pdmat/*.m excluding private and protected kernels",
+      "@pdmat/private/scanMats.m",
+      "@pdmat/private/normOperand.m",
+      "+helper/mkGrid.m",
+      "+helper/chkCont.m",
+      "@pdlmi/private/coeffCons.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+pdmat/+construction/test_constructor.m",
@@ -2910,7 +3052,8 @@ export const documentationRecords = [
       "+tests/+pdmat/+matrix/test_blkdiag.m",
       "+tests/+pdmat/+matrix/test_cat.m",
       "+tests/+pdmat/+indexing/test_subsref.m",
-      "+tests/+pdmat/+indexing/test_subsasgn.m"
+      "+tests/+pdmat/+indexing/test_subsasgn.m",
+      "+tests/+helper/test_fit_vals.m"
     ],
     "call_forms_options": [
       "pdmat(grid,source[,Degree,Continuity,RateBounds,ValidationMode])",
@@ -2920,10 +3063,10 @@ export const documentationRecords = [
       "documented algebra, comparison, block, and two-subscript forms",
       "A*X and X*A for compatible affine sdpvar X"
     ],
-    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands.",
+    "inputs": "Function, global Bernstein-grid, or nested local known data plus compatible numeric, pdmat, or real affine two-dimensional sdpvar operands. Numeric coefficient payloads, function outputs, and algebra or assignment constants require finite real double or single matrices. Integer grid vectors normalize to double.",
     "return_type_shape": "Known matrix values, coefficient tables, figures, logical comparison results, coefficient-backed pdmat objects, or pdvar for a mixed pdmat/sdpvar product. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata.",
-    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed sources, function-only coefficient algebra, incompatible shapes or grids, nonlinear or complex symbolic products, unsupported comparisons, plotting requests, and indexing forms with documented pdmat identifiers. The isequal overload instead returns false for incompatible grid, rate-bound, or operand normalization checks and ignores Continuity lower-bound metadata. Integer numeric payloads and constants, including zero operands, are rejected before arithmetic shortcuts. Converted integer grid nodes must remain distinct. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Exact handle evaluation and finite coefficient evidence remain distinct. Coefficient-backed construction infers continuity or verifies explicit lower bounds, while function-only sources report unknown continuity and reject explicit requests. Coefficient algebra requires coefficient-backed sources, and a mixed affine sdpvar product maps the known coefficient tree into pdvar and reuses only the existing symbolic decisions. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Subtraction preserves small nonzero differences independently of the approximate isequal predicate. Continuity checks scale large finite faces and decline to certify nonfinite scaled faces. Known semidefinite certificate symmetrization halves each operand before addition.",
     "tex_anchor": "sec:pdmat-lookup",
     "tex_index": "subsasgn",
     "tex_example_evidence": "doc/chapters/pdmat.tex#sec:pdmat-lookup",
@@ -4975,7 +5118,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/pdvar.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5003,10 +5150,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "pdvar",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5023,7 +5170,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/bernTable.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5051,10 +5202,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "bernTable",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5071,7 +5222,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/blkdiag.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5099,10 +5254,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "blkdiag",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5119,7 +5274,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/cat.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5147,10 +5306,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "cat",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5167,7 +5326,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/eq.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5195,10 +5358,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "eq",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5215,7 +5378,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/ge.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5243,10 +5410,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "ge",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5263,7 +5430,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/le.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5291,10 +5462,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "le",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5311,7 +5482,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/isequal.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5339,10 +5514,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "isequal",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5359,7 +5534,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/minus.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5387,10 +5566,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "minus",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5407,7 +5586,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/mtimes.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5435,10 +5618,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "mtimes",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5455,7 +5638,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/plus.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5483,10 +5670,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "plus",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5503,7 +5690,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/subsasgn.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5531,10 +5722,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "subsasgn",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5551,7 +5742,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/subsref.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5579,10 +5774,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "subsref",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -5599,7 +5794,11 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "@pdvar/value.m",
-      "@pdvar/*.m excluding private and protected kernels"
+      "@pdvar/*.m excluding private and protected kernels",
+      "@pdvar/private/mkCtorState.m",
+      "@pdvar/private/normOperand.m",
+      "@pdvar/private/splinePlan.m",
+      "+helper/mkGrid.m"
     ],
     "test_evidence": [
       "+tests/+pdvar/+construction/test_constructor.m",
@@ -5627,10 +5826,10 @@ export const documentationRecords = [
       "bernTable(P[,cell][,oneLine])",
       "documented affine, comparison, block, indexing, and value forms"
     ],
-    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries.",
+    "inputs": "Matrix size, tensor grid, coefficient structure, degree and rate options, plus affine pdvar, numeric, sdpvar, or coefficient-backed pdmat operands within the documented boundaries. Numeric algebra or assignment constants require finite real double or single values; integer grid vectors normalize to double.",
     "return_type_shape": "Continuous decision objects, affine expression objects, symbolic coefficient tables, pdlmi comparisons, or numeric pdmat values after solver-status validation by the caller. Evaluation of one explicit fixed rate row returns a 1-by-1 cell; ordinary RateBounds metadata alone retains a matrix output.",
-    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers.",
-    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order.",
+    "validation_errors": "Rejects malformed construction, nonlinear decision products, function-only known operands, incompatible shapes, grids, rates, assignments, and unsupported indexing with documented pdvar identifiers. Integer numeric constants are rejected, including zeros. Converted integer grid nodes must remain distinct.",
+    "supported_scope": "Degree-zero or direction-wise continuous arbitrary-degree cell-wise decisions and affine expressions. Continuity selects C0 shared faces or higher-order spline extraction without auxiliary equalities. Numeric value recovery reinfers seam orders. The isequal overload compares exact representation metadata including Continuity. Multiplication permits one decision-bearing factor and compatible known data, including a direct pdmat/bare affine sdpvar product in either order. bernTable accepts numeric or cell-array multi-cell selector rows in stable requested order with duplicate rows removed; coeffs selects one cell. Function-only unary plus and squeeze preserve exact evaluation; coefficient arithmetic rejects zero/cancellation shortcuts. Two active rate tables cannot multiply even if zero; one known active-rate factor may multiply an ordinary decision factor in either order. Slicing and assignment inspect actual affine bases across all cells and rate rows, so removal of the last decision contribution clears ContainsDecision while preserving pdvar class. Known-only pdvar factors can participate in supported affine products. Higher-order spline extraction rescales overflowing full-axis spans.",
     "tex_anchor": "sec:pdvar-lookup",
     "tex_index": "value",
     "tex_example_evidence": "doc/chapters/pdvar.tex#sec:pdvar-lookup",
@@ -8199,7 +8398,8 @@ export const documentationRecords = [
       "@pdlmi/useSpPut.m",
       "@pdlmi/useSpBox.m",
       "@pdlmi/useFullBox.m",
-      "@pdlmi/toYalmip.m"
+      "@pdlmi/toYalmip.m",
+      "@pdlmi/private/coeffCons.m"
     ],
     "test_evidence": [
       "+tests/+pdlmi/+certificates/test_use_polya.m",
@@ -8210,7 +8410,8 @@ export const documentationRecords = [
       "+tests/+pdlmi/+certificates/test_use_sp_put.m",
       "+tests/+pdlmi/+certificates/test_use_sp_box.m",
       "+tests/+pdlmi/+certificates/test_use_full_box.m",
-      "+tests/+pdlmi/+export/test_to_yalmip.m"
+      "+tests/+pdlmi/+export/test_to_yalmip.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -8223,7 +8424,7 @@ export const documentationRecords = [
     "inputs": "A pdlmi wrapper and the selector's scalar shorthand or direction-wise increment, absolute order, clique size, or width.",
     "return_type_shape": "A rebuilt value wrapper in canonical selected state, or the stored YALMIP constraint array.",
     "validation_errors": "Rejects equality wrappers for Gram families, invalid increments, orders, clique sizes, widths, unsupported degree/rate states, and incompatible relations.",
-    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.",
+    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections. Known semidefinite certificates symmetrize as C/2+C-transpose/2 before eigenvalue testing to avoid an overflowing intermediate sum; the absolute tolerance remains 1e-10.",
     "tex_anchor": "sec:pdlmi-lookup",
     "tex_index": "usePolya",
     "tex_example_evidence": "doc/chapters/pdlmi.tex#sec:pdlmi-polya,sec:pdlmi-putinar,sec:pdlmi-sparse-putinar,sec:pdlmi-sparse-full-box,sec:pdlmi-full-box,sec:pdlmi-toyalmip",
@@ -8244,7 +8445,8 @@ export const documentationRecords = [
       "@pdlmi/useSpPut.m",
       "@pdlmi/useSpBox.m",
       "@pdlmi/useFullBox.m",
-      "@pdlmi/toYalmip.m"
+      "@pdlmi/toYalmip.m",
+      "@pdlmi/private/coeffCons.m"
     ],
     "test_evidence": [
       "+tests/+pdlmi/+certificates/test_use_polya.m",
@@ -8255,7 +8457,8 @@ export const documentationRecords = [
       "+tests/+pdlmi/+certificates/test_use_sp_put.m",
       "+tests/+pdlmi/+certificates/test_use_sp_box.m",
       "+tests/+pdlmi/+certificates/test_use_full_box.m",
-      "+tests/+pdlmi/+export/test_to_yalmip.m"
+      "+tests/+pdlmi/+export/test_to_yalmip.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -8268,7 +8471,7 @@ export const documentationRecords = [
     "inputs": "A pdlmi wrapper and the selector's scalar shorthand or direction-wise increment, absolute order, clique size, or width.",
     "return_type_shape": "A rebuilt value wrapper in canonical selected state, or the stored YALMIP constraint array.",
     "validation_errors": "Rejects equality wrappers for Gram families, invalid increments, orders, clique sizes, widths, unsupported degree/rate states, and incompatible relations.",
-    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.",
+    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections. Known semidefinite certificates symmetrize as C/2+C-transpose/2 before eigenvalue testing to avoid an overflowing intermediate sum; the absolute tolerance remains 1e-10.",
     "tex_anchor": "sec:pdlmi-lookup",
     "tex_index": "usePutinar",
     "tex_example_evidence": "doc/chapters/pdlmi.tex#sec:pdlmi-polya,sec:pdlmi-putinar,sec:pdlmi-sparse-putinar,sec:pdlmi-sparse-full-box,sec:pdlmi-full-box,sec:pdlmi-toyalmip",
@@ -8289,7 +8492,8 @@ export const documentationRecords = [
       "@pdlmi/usePutinar.m",
       "@pdlmi/useSpBox.m",
       "@pdlmi/useFullBox.m",
-      "@pdlmi/toYalmip.m"
+      "@pdlmi/toYalmip.m",
+      "@pdlmi/private/coeffCons.m"
     ],
     "test_evidence": [
       "+tests/+pdlmi/+certificates/test_use_polya.m",
@@ -8300,7 +8504,8 @@ export const documentationRecords = [
       "+tests/+pdlmi/+certificates/test_use_sp_put.m",
       "+tests/+pdlmi/+certificates/test_use_sp_box.m",
       "+tests/+pdlmi/+certificates/test_use_full_box.m",
-      "+tests/+pdlmi/+export/test_to_yalmip.m"
+      "+tests/+pdlmi/+export/test_to_yalmip.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -8313,7 +8518,7 @@ export const documentationRecords = [
     "inputs": "A pdlmi wrapper and the selector's scalar shorthand or direction-wise increment, absolute order, clique size, or width.",
     "return_type_shape": "A rebuilt value wrapper in canonical selected state, or the stored YALMIP constraint array.",
     "validation_errors": "Rejects equality wrappers for Gram families, invalid increments, orders, clique sizes, widths, unsupported degree/rate states, and incompatible relations.",
-    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.",
+    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections. Known semidefinite certificates symmetrize as C/2+C-transpose/2 before eigenvalue testing to avoid an overflowing intermediate sum; the absolute tolerance remains 1e-10.",
     "tex_anchor": "sec:pdlmi-lookup",
     "tex_index": "useSpPut",
     "tex_example_evidence": "doc/chapters/pdlmi.tex#sec:pdlmi-polya,sec:pdlmi-putinar,sec:pdlmi-sparse-putinar,sec:pdlmi-sparse-full-box,sec:pdlmi-full-box,sec:pdlmi-toyalmip",
@@ -8334,7 +8539,8 @@ export const documentationRecords = [
       "@pdlmi/usePutinar.m",
       "@pdlmi/useSpPut.m",
       "@pdlmi/useFullBox.m",
-      "@pdlmi/toYalmip.m"
+      "@pdlmi/toYalmip.m",
+      "@pdlmi/private/coeffCons.m"
     ],
     "test_evidence": [
       "+tests/+pdlmi/+certificates/test_use_polya.m",
@@ -8345,7 +8551,8 @@ export const documentationRecords = [
       "+tests/+pdlmi/+certificates/test_use_sp_put.m",
       "+tests/+pdlmi/+certificates/test_use_sp_box.m",
       "+tests/+pdlmi/+certificates/test_use_full_box.m",
-      "+tests/+pdlmi/+export/test_to_yalmip.m"
+      "+tests/+pdlmi/+export/test_to_yalmip.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -8358,7 +8565,7 @@ export const documentationRecords = [
     "inputs": "A pdlmi wrapper and the selector's scalar shorthand or direction-wise increment, absolute order, clique size, or width.",
     "return_type_shape": "A rebuilt value wrapper in canonical selected state, or the stored YALMIP constraint array.",
     "validation_errors": "Rejects equality wrappers for Gram families, invalid increments, orders, clique sizes, widths, unsupported degree/rate states, and incompatible relations.",
-    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.",
+    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections. Known semidefinite certificates symmetrize as C/2+C-transpose/2 before eigenvalue testing to avoid an overflowing intermediate sum; the absolute tolerance remains 1e-10.",
     "tex_anchor": "sec:pdlmi-lookup",
     "tex_index": "useSpBox",
     "tex_example_evidence": "doc/chapters/pdlmi.tex#sec:pdlmi-polya,sec:pdlmi-putinar,sec:pdlmi-sparse-putinar,sec:pdlmi-sparse-full-box,sec:pdlmi-full-box,sec:pdlmi-toyalmip",
@@ -8379,7 +8586,8 @@ export const documentationRecords = [
       "@pdlmi/usePutinar.m",
       "@pdlmi/useSpPut.m",
       "@pdlmi/useSpBox.m",
-      "@pdlmi/toYalmip.m"
+      "@pdlmi/toYalmip.m",
+      "@pdlmi/private/coeffCons.m"
     ],
     "test_evidence": [
       "+tests/+pdlmi/+certificates/test_use_polya.m",
@@ -8390,7 +8598,8 @@ export const documentationRecords = [
       "+tests/+pdlmi/+certificates/test_use_sp_put.m",
       "+tests/+pdlmi/+certificates/test_use_sp_box.m",
       "+tests/+pdlmi/+certificates/test_use_full_box.m",
-      "+tests/+pdlmi/+export/test_to_yalmip.m"
+      "+tests/+pdlmi/+export/test_to_yalmip.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -8403,7 +8612,7 @@ export const documentationRecords = [
     "inputs": "A pdlmi wrapper and the selector's scalar shorthand or direction-wise increment, absolute order, clique size, or width.",
     "return_type_shape": "A rebuilt value wrapper in canonical selected state, or the stored YALMIP constraint array.",
     "validation_errors": "Rejects equality wrappers for Gram families, invalid increments, orders, clique sizes, widths, unsupported degree/rate states, and incompatible relations.",
-    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.",
+    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections. Known semidefinite certificates symmetrize as C/2+C-transpose/2 before eigenvalue testing to avoid an overflowing intermediate sum; the absolute tolerance remains 1e-10.",
     "tex_anchor": "sec:pdlmi-lookup",
     "tex_index": "useFullBox",
     "tex_example_evidence": "doc/chapters/pdlmi.tex#sec:pdlmi-polya,sec:pdlmi-putinar,sec:pdlmi-sparse-putinar,sec:pdlmi-sparse-full-box,sec:pdlmi-full-box,sec:pdlmi-toyalmip",
@@ -8424,7 +8633,8 @@ export const documentationRecords = [
       "@pdlmi/usePutinar.m",
       "@pdlmi/useSpPut.m",
       "@pdlmi/useSpBox.m",
-      "@pdlmi/useFullBox.m"
+      "@pdlmi/useFullBox.m",
+      "@pdlmi/private/coeffCons.m"
     ],
     "test_evidence": [
       "+tests/+pdlmi/+certificates/test_use_polya.m",
@@ -8435,7 +8645,8 @@ export const documentationRecords = [
       "+tests/+pdlmi/+certificates/test_use_sp_put.m",
       "+tests/+pdlmi/+certificates/test_use_sp_box.m",
       "+tests/+pdlmi/+certificates/test_use_full_box.m",
-      "+tests/+pdlmi/+export/test_to_yalmip.m"
+      "+tests/+pdlmi/+export/test_to_yalmip.m",
+      "+tests/+pdlmi/+assembly/test_known_pdmat.m"
     ],
     "call_forms_options": [
       "usePolya(C[,increment])",
@@ -8448,7 +8659,7 @@ export const documentationRecords = [
     "inputs": "A pdlmi wrapper and the selector's scalar shorthand or direction-wise increment, absolute order, clique size, or width.",
     "return_type_shape": "A rebuilt value wrapper in canonical selected state, or the stored YALMIP constraint array.",
     "validation_errors": "Rejects equality wrappers for Gram families, invalid increments, orders, clique sizes, widths, unsupported degree/rate states, and incompatible relations.",
-    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections.",
+    "supported_scope": "Implemented Direct, Pólya, Putinar, SparsePutinar, SparseFullBox, and FullBox finite assemblies. Selectors replace earlier selections. Known semidefinite certificates symmetrize as C/2+C-transpose/2 before eigenvalue testing to avoid an overflowing intermediate sum; the absolute tolerance remains 1e-10.",
     "tex_anchor": "sec:pdlmi-lookup",
     "tex_index": "toYalmip",
     "tex_example_evidence": "doc/chapters/pdlmi.tex#sec:pdlmi-polya,sec:pdlmi-putinar,sec:pdlmi-sparse-putinar,sec:pdlmi-sparse-full-box,sec:pdlmi-full-box,sec:pdlmi-toyalmip",
@@ -8521,7 +8732,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/bernConvRatios.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8535,15 +8748,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.bernConvRatios",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8560,7 +8778,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/bernConvWeights.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8574,15 +8794,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.bernConvWeights",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8599,7 +8824,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/cellGet.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8613,15 +8840,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.cellGet",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8638,7 +8870,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/chk.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8652,15 +8886,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.chk",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8677,7 +8916,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/chkCont.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8691,15 +8932,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.chkCont",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8716,7 +8962,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/combRows.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8730,15 +8978,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.combRows",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8755,7 +9008,8 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/fitVals.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8769,15 +9023,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.fitVals",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8794,7 +9053,8 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/isZero.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8808,15 +9068,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.isZero",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8833,7 +9098,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/mkGrid.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8847,15 +9114,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.mkGrid",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8872,7 +9144,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/mkNest.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8886,15 +9160,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.mkNest",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8911,7 +9190,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/normDeg.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8925,15 +9206,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.normDeg",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8950,7 +9236,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/normMode.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -8964,15 +9252,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.normMode",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -8989,7 +9282,9 @@ export const documentationRecords = [
     "inherited_from": null,
     "source_evidence": [
       "+helper/rateVerts.m",
-      "+helper/*.m public package files"
+      "+helper/*.m public package files",
+      "+helper/isZero.m",
+      "+helper/fitVals.m"
     ],
     "test_evidence": [
       "+tests/+helper/test_bern_conv.m",
@@ -9003,15 +9298,20 @@ export const documentationRecords = [
       "+tests/+helper/test_mk_nest.m",
       "+tests/+helper/test_norm_deg.m",
       "+tests/+helper/test_norm_mode.m",
-      "+tests/+helper/test_rate_verts.m"
+      "+tests/+helper/test_rate_verts.m",
+      "+tests/+pdmat/+algebra/test_plus.m",
+      "+tests/+pdmat/+algebra/test_minus.m",
+      "+tests/+pdvar/+algebra/test_plus.m",
+      "+tests/+pdvar/+algebra/test_minus.m",
+      "+tests/+pdmat/+construction/test_constructor.m"
     ],
     "call_forms_options": [
       "Every helper.* signature is printed beside its reference entry in doc/chapters/helpers.tex"
     ],
     "inputs": "Normalized labels, degrees, nested cells, predicates, matrix payloads, grids, validation modes, or rate bounds according to the named helper.",
     "return_type_shape": "Numeric Bernstein plans, validated data, nested storage, continuity classifications, normalized metadata, or deterministic rate vertices.",
-    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input.",
-    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded.",
+    "validation_errors": "Each helper either owns the documented helper or caller error namespace or explicitly requires already normalized internal input. Explicit-degree function fitting raises owner:UnstableBernsteinFit when any degree component exceeds 64 or the tensor collocation rcond is below 1e-6. This limit does not constrain explicit coefficient storage or elevation.",
+    "supported_scope": "Public developer utilities used by constructors and exact coefficient operations. Local functions inside these files remain excluded. chk supports the floating predicate for double or single. mkGrid normalizes integer vectors to double and rechecks strict increase. chkCont rescales large finite faces, preserves exact numeric zero derivative faces, and rejects nonfinite scaled-face proof. bernConvRatios uses log-binomial fallback for underflowed normalized masses. isZero num mode accepts integer-class numeric zeros, whereas add mode requires double or single and compatible scalar expansion or matrix shape.",
     "tex_anchor": "sec:helpers",
     "tex_index": "helper.rateVerts",
     "tex_example_evidence": "doc/chapters/helpers.tex#sec:helpers",
@@ -9104,7 +9404,7 @@ export const documentationRecords = [
     "inputs": "No arguments. Requires an active MATLAB session with YALMIP and at least one working supported SDP solver.",
     "return_type_shape": "A report with PackageRoot, YALMIPRoot, Solver, AddedPaths, and Persisted fields.",
     "validation_errors": "Restores the original path and raises stable missing-YALMIP, incomplete-YALMIP, solver, shadow, or path-persistence errors.",
-    "supported_scope": "Adds the repository root, validates package class resolution, probes supported solvers, and persists the path.",
+    "supported_scope": "Adds the repository root, validates package class resolution, probes supported solvers, and persists the path. A documented user-side fallback catches only install_pd_lmi:PathSaveFailed after rollback and re-adds the repository root for the current session; it does not provide a successful installer report or persistent setup.",
     "tex_anchor": "sec:installation",
     "tex_index": "install_pd_lmi",
     "tex_example_evidence": "doc/chapters/installation.tex#sec:installation",

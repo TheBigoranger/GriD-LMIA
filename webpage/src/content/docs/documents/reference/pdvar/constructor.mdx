@@ -90,6 +90,17 @@ P = pdvar(..., ValidationMode=mode)
 
 Unsupported public options: `IsContinuous` and `ContainsDecision`.
 
+## Numeric Data And Grid Boundaries
+
+Grid vectors must be finite, real, and strictly increasing, with at least two
+nodes and a finite width for each interval. Integer vectors are converted to
+`double`. Adjacent nodes that collapse during conversion are rejected with
+`pdvar:InvalidGridVector`. Integer metadata such as `Degree` remains supported.
+
+Numeric coefficient payloads and numeric algebra or assignment constants must
+use `double` or `single`. Convert integer payloads explicitly. Numeric
+arithmetic validation also rejects integer zero.
+
 ## Direction-Wise Continuity
 
 `Continuity=orders` accepts a scalar or one nonnegative integer or `Inf` per
@@ -120,6 +131,11 @@ left = P.coeffs(1);
 right = P.coeffs(2);
 assert(numel(getvariables([left{:}, right{:}])) == 6)
 ```
+
+Spline extraction rescales grid coordinates uniformly when the full axis span
+overflows while individual cell widths remain finite. Ratios of knot differences
+and the intended spline space are preserved. Arithmetic retains MATLAB
+floating-point range and precision.
 
 ## Returned Object
 

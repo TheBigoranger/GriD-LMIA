@@ -146,7 +146,7 @@ test("authors the approved lightweight Welcome copy, target, navigation, and not
   assert.match(homePortal, /--welcome-surface:\s*#fff/);
 });
 
-test("keeps Welcome author, v1.5.0 highlights, and citation source-grounded", () => {
+test("keeps Welcome author, v1.5.1 highlights, and citation source-grounded", () => {
   const homePortal = read("src/components/HomePortal.astro");
   const citation = "Yicheng Xu and Faryar Jabbari, “GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities,” arXiv:2608.03175, 2026.";
   const bibtex = `@article{xu2026gridlmia,
@@ -159,9 +159,9 @@ test("keeps Welcome author, v1.5.0 highlights, and citation source-grounded", ()
 
   for (const copy of [
     "Created and maintained by Yicheng Xu.",
-    "848 behavioral tests and a 171-entry API gate",
-    "Direction-wise continuity and spline decisions",
-    "Exact cell-preserving Bernstein refinement",
+    "Stricter numeric payload validation",
+    "Accurate decision-dependence metadata",
+    "Stable extreme-scale coefficient arithmetic",
     "197 public API records",
   ]) assert.ok(homePortal.includes(copy), `Welcome project information missing: ${copy}`);
 
@@ -193,7 +193,7 @@ test("keeps Welcome project information in one open vertical stream", () => {
   assert.equal((infoMarkup.match(/class="welcome-info__stream"/g) ?? []).length, 1);
   assert.match(
     infoMarkup,
-    /Author and maintainer[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Latest in v1\.5\.0[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Cite GriD-LMIA/,
+    /Author and maintainer[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Latest in v1\.5\.1[\s\S]*<hr class="welcome-info__separator" \/>[\s\S]*Cite GriD-LMIA/,
   );
   assert.equal((infoMarkup.match(/class="welcome-info__separator"/g) ?? []).length, 2);
   assert.doesNotMatch(infoMarkup, /welcome-info__(?:card|column|grid|tab)|role="tablist"|<details\b/i);

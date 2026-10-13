@@ -159,6 +159,12 @@ val = 1
 
 Function-backed objects route evaluation through the retained function handle.
 
+Coefficient-backed evaluation uses a stable Bernstein recurrence instead of
+forming large raw binomial coefficients. This permits high-degree evaluation
+when its intermediate binomial values would overflow. Function-only evaluation
+still uses the retained exact handle. Explicit-degree fitting has its separate
+[conditioning limits](/GriD-LMIA/documents/reference/pdmat/constructor/#explicit-degree-fitting-limits).
+
 ## Validation And Errors
 
 - Bad point shape or nonfinite values raise `pdmat:InvalidPoint`.

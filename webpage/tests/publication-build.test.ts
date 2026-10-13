@@ -40,11 +40,11 @@ test("pins the accepted printable manual identity", async () => {
   assert.equal(await sha256File(manual), expectedPublication.manualSha256);
   assert.equal(await pdfPageCount(manual), expectedPublication.manualPageCount);
   assert.deepEqual(expectedPublication, {
-    documentationVersion: "v1.5.0",
-    latestTaggedRelease: "v1.5.0",
+    documentationVersion: "v1.5.1",
+    latestTaggedRelease: "v1.5.1",
     apiRecordCount: 197,
-    manualSha256: "86E50D7110108128A2D7386A35532315E5D93591B754FD7FD7F81F544774101F",
-    manualPageCount: 184,
+    manualSha256: "DCA4219285C2AF37465BA66A78FBB600CE42B234C4627493ED28A60A59853110",
+    manualPageCount: 190,
   });
 });
 
@@ -62,9 +62,9 @@ test("keeps publish mode independent from unpublished documentation sources", ()
 
 test("validates the committed publication manifest", async () => {
   const manifest = await validatePublicationManifest(webpageRoot);
-  assert.equal(manifest.documentationVersion, "v1.5.0");
+  assert.equal(manifest.documentationVersion, "v1.5.1");
   assert.equal(manifest.apiRecordCount, 197);
-  assert.equal(manifest.manual.pageCount, 184);
+  assert.equal(manifest.manual.pageCount, 190);
 });
 
 test("normalizes generated text line endings without normalizing binary artifacts", () => {
@@ -80,10 +80,10 @@ test("rejects stale visible version-history roles", () => {
     { version: "v1.4.0", status: "latest tagged GitHub Release" },
   ];`;
   const staleTag = `export const versionHistory = [
-    { version: "v1.5.0", status: "current documentation snapshot" },
+    { version: "v1.5.1", status: "current documentation snapshot" },
     { version: "v1.3.8", status: "latest tagged GitHub Release" },
   ];`;
 
-  assert.throws(() => validateVersionHistorySource(staleCurrent), /row 1 must be v1\.5\.0/);
-  assert.throws(() => validateVersionHistorySource(staleTag), /tagged entry must be v1\.5\.0/);
+  assert.throws(() => validateVersionHistorySource(staleCurrent), /row 1 must be v1\.5\.1/);
+  assert.throws(() => validateVersionHistorySource(staleTag), /tagged entry must be v1\.5\.1/);
 });
