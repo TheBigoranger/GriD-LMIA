@@ -25,18 +25,28 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.0",
     "@astrojs/react": "^6.0.1",
     "@astrojs/starlight": "^0.41.3",
-    "astro": "^7.0.2",
-    "katex": "^0.16.47",
+    "astro": "^7.3.8",
+    "katex": "^0.19.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
-    "@mermaid-js/mermaid-cli": "11.15.0",
+    "@mermaid-js/mermaid-cli": "11.16.0",
     "playwright": "^1.62.0"
+  },
+  "overrides": {
+    "katex": "$katex",
+    "postcss-nested": {
+      "postcss-selector-parser": "^7.1.6"
+    }
+  },
+  "allowScripts": {
+    "puppeteer@25.13.0": true
   }
 }

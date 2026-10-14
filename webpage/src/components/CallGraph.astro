@@ -53,7 +53,7 @@ const mobileDark = image("mobile", "dark");
   .call-graph__images, .call-graph__image, .call-graph__image img { width: 100%; min-width: 0; max-width: 100%; }
   .call-graph__image { display: none; margin: 0; aspect-ratio: var(--call-graph-ratio); }
   .call-graph__image--desktop.call-graph__image--light { display: block; }
-  .call-graph__image img { display: block; height: 100%; object-fit: contain; }
+  .call-graph__image img { display: block; height: 100%; object-fit: contain; background: transparent; color-scheme: normal; }
   .call-graph__links { display: flex; flex-wrap: wrap; gap: .35rem .8rem; margin-block-start: .7rem; }
   .call-graph__links a { overflow-wrap: anywhere; }
   :global(html[data-theme="dark"]) .call-graph__image--light { display: none; }

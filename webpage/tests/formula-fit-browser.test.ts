@@ -20,7 +20,7 @@ test("whole-formula layout preserves scripts, clamps and recovers after resize a
       const content = frame.querySelector<HTMLElement>(".formula-fit-content")!;
       const formula = frame.querySelector<HTMLElement>(".katex")!;
       const base = parseFloat(getComputedStyle(formula).fontSize);
-      const ratios = [...formula.querySelectorAll(".msupsub .sizing")].map((node) => parseFloat(getComputedStyle(node).fontSize) / base);
+      const ratios = [...formula.querySelectorAll(".msupsub .katex-sizing")].map((node) => parseFloat(getComputedStyle(node).fontSize) / base);
       return { scale: Number(frame.dataset.formulaScale), natural: content.offsetWidth, available: frame.clientWidth, scroll: frame.scrollWidth, tabIndex: frame.tabIndex, html: formula.outerHTML, ratios, height: frame.querySelector(".formula-fit-size")!.getBoundingClientRect().height, actualHeight: content.getBoundingClientRect().height };
     });
     await page.waitForFunction(() => document.querySelector("[data-formula-fitted]"));

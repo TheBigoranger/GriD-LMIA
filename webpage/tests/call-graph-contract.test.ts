@@ -20,7 +20,7 @@ test("call graphs are generated from six trusted Mermaid sources", () => {
   const preparation = read("scripts/prepare-build.mjs");
   const generator = read("scripts/generate-call-graphs.mjs");
   const puppeteer = JSON.parse(read("scripts/puppeteer-config.json"));
-  assert.equal(pkg.devDependencies["@mermaid-js/mermaid-cli"], "11.15.0");
+  assert.equal(pkg.devDependencies["@mermaid-js/mermaid-cli"], "11.16.0");
   assert.match(pkg.scripts.prebuild, /prepare-build\.mjs/);
   assert.match(preparation, /mode === "source"[\s\S]*generate-call-graphs\.mjs/);
   assert.match(generator, /--puppeteerConfigFile/);

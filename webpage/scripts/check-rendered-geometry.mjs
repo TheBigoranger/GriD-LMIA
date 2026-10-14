@@ -321,6 +321,15 @@ async function inspect(page) {
       });
     }
 
+    for (const image of document.querySelectorAll(".call-graph__image img")) {
+      const rect = image.getBoundingClientRect();
+      if (!rect.width || !rect.height) continue;
+      const style = getComputedStyle(image);
+      if (style.backgroundColor !== "rgba(0, 0, 0, 0)" || style.colorScheme !== "normal") {
+        failures.push({ type: "call-graph-theme", selector: describe(image), context: `${style.backgroundColor}; color-scheme: ${style.colorScheme}` });
+      }
+    }
+
     for (const formula of document.querySelectorAll(".katex")) {
       const rendered = formula.getBoundingClientRect();
       const style = getComputedStyle(formula);
@@ -397,7 +406,7 @@ async function inspect(page) {
           failures.push({ type: "formula-fit-centering", selector: describe(wrapper) });
         }
         const baseSize = parseFloat(style.fontSize);
-        const scripts = [...formula.querySelectorAll(".msupsub .sizing")];
+        const scripts = [...formula.querySelectorAll(".msupsub .katex-sizing")];
         if (scripts.some((node) => parseFloat(getComputedStyle(node).fontSize) >= baseSize)) {
           failures.push({ type: "formula-script-proportion", selector: describe(wrapper) });
         }
