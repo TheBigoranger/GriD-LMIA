@@ -14,6 +14,7 @@ matrix inequalities on parameter grids using cell-wise Bernstein representations
 - [API reference index](https://www.ethanyxu.com/GriD-LMIA/documents/reference-index/)
 - [Version history](https://www.ethanyxu.com/GriD-LMIA/version-history/)
 - [GitHub Releases](https://github.com/TheBigoranger/GriD-LMIA/releases)
+- [MIT License](LICENSE)
 
 ## Repository branches
 

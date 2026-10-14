@@ -11,10 +11,10 @@
 For a reproducible package checkout, clone the release tag:
 
 ```sh
-git clone --depth 1 --single-branch --branch v1.5.1 https://github.com/TheBigoranger/GriD-LMIA.git
+git clone --depth 1 --single-branch --branch v1.5.2 https://github.com/TheBigoranger/GriD-LMIA.git
 ```
 
-Alternatively, download the [v1.5.1 release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.1). Make the package root the MATLAB working directory and run:
+Alternatively, download the [v1.5.2 release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.2). Make the package root the MATLAB working directory and run:
 
 ```matlab
 report = install_pd_lmi();
@@ -26,15 +26,13 @@ For a future Code Ocean environment, use the same pinned checkout and provide MA
 
 For `install_pd_lmi:PathSaveFailed` specifically, the [installation guide](https://www.ethanyxu.com/GriD-LMIA/install/) explains how to re-add the repository root for the current MATLAB session. That fallback does not persist installation; other installer errors require correction. Code Ocean execution and its Markdown rendering have not been verified.
 
-## What changed in v1.5.1
+## What changed in v1.5.2
 
-- Zero-operand addition and subtraction preserve refined grid and rate metadata; subtracting near-equal large coefficients retains nonzero residuals.
-- Bernstein evaluation, convolution, continuity checks, differentiation, spline extraction, and known-matrix certificate checks handle additional extreme-scale inputs without avoidable intermediate overflow or underflow. Explicit-degree fitting rejects degrees above 64 and ill-conditioned collocation systems; grid cell widths must be finite.
-- Numeric coefficient data and arithmetic constants must be `double` or `single`. Integer grid vectors are converted to `double` and revalidated. Decision-dependence metadata is recomputed after indexing or numeric replacement.
-- The public catalog contains five examples. Two examples from an unpublished delay-system manuscript remain withheld, and private source paths and local performance tools are excluded from distribution.
-- Software and website sources are published on separate branches; the package includes the current printable manual.
+- GriD-LMIA's original source code, tests, examples, manual, and website content are now distributed under the MIT License, copyright 2026 Yicheng Xu.
+- The PDF and Web manuals explain the license scope and the separate licenses of MATLAB, YALMIP, and SDP solvers.
+- This release changes licensing and documentation only; the MATLAB runtime, public APIs, and five public examples are unchanged from v1.5.1.
 
-See the [v1.5.1 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.1) for this immutable snapshot and the [Version History](https://www.ethanyxu.com/GriD-LMIA/version-history/) for earlier changes and migration guidance.
+See the [v1.5.2 Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.2) for this immutable snapshot and the [Version History](https://www.ethanyxu.com/GriD-LMIA/version-history/) for earlier changes and migration guidance.
 
 ## Mathematical problem and workflow
 
@@ -138,6 +136,14 @@ The examples are separate from the unit suite. Inspect their solver diagnostics 
 - [GitHub Releases](https://github.com/TheBigoranger/GriD-LMIA/releases)
 
 The default `main` branch contains the software package and final PDF. Website sources are maintained on the separate [`webpage` branch](https://github.com/TheBigoranger/GriD-LMIA/tree/webpage). The pinned shallow clone above avoids downloading old website history for a fresh package checkout.
+
+## License
+
+GriD-LMIA's original source code, tests, examples, manual, and website content are licensed under the [MIT License](LICENSE), copyright (c) 2026 Yicheng Xu. Redistribution must retain the copyright and permission notices; the software is provided without warranty.
+
+MATLAB, YALMIP, SDP solvers, and any third-party code or reproduced material retain their own licenses and notices. Install external dependencies separately and comply with their terms. In particular, [YALMIP's license](https://yalmip.github.io/download/) restricts redistribution as part of a commercial product without its copyright owner's agreement. GriD-LMIA's MIT License does not grant rights to these dependencies or third-party materials.
+
+The citation request below is an academic courtesy, not an additional license condition.
 
 ## Citing GriD-LMIA
 
