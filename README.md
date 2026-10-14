@@ -29,7 +29,7 @@ the committed generated documentation and the SHA-256/page count of
 
 Author changes in the complete development worktree. Generate and review source
 outputs there, commit the approved snapshot, then synchronize only `webpage/`,
-`doc/manual.pdf`, this README, the deployment workflow, and required Git metadata
+`doc/manual.pdf`, `LICENSE`, this README, the deployment workflow, and required Git metadata
 into this publication branch. Never merge the development or package branch here.
 Dependencies, build output, TeX sources, MATLAB sources, and local skills are not
 publication inputs. Preserve this branch-specific README during synchronization.
@@ -41,3 +41,10 @@ trigger deployment when website sources, the PDF, workflow, or line-ending
 configuration change. The workflow is kept off `main`; do not rely on a default-
 branch manual-dispatch entry to publish it. Re-run an existing branch workflow
 run when a deployment retry is needed.
+
+## License
+
+The original GriD-LMIA website content and source are licensed under the
+[MIT License](LICENSE), copyright (c) 2026 Yicheng Xu. Third-party dependencies
+and reproduced material retain their own licenses and notices. The accompanying
+manual is also covered by the project's MIT License; scholarly citation is optional.

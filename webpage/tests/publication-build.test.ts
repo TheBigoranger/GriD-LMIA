@@ -40,10 +40,10 @@ test("pins the accepted printable manual identity", async () => {
   assert.equal(await sha256File(manual), expectedPublication.manualSha256);
   assert.equal(await pdfPageCount(manual), expectedPublication.manualPageCount);
   assert.deepEqual(expectedPublication, {
-    documentationVersion: "v1.5.1",
-    latestTaggedRelease: "v1.5.1",
+    documentationVersion: "v1.5.2",
+    latestTaggedRelease: "v1.5.2",
     apiRecordCount: 197,
-    manualSha256: "DCA4219285C2AF37465BA66A78FBB600CE42B234C4627493ED28A60A59853110",
+    manualSha256: "F3726F4F0E46E83EB6E69F21D908E44BF7E61CF975F61C61A4F2A932FED63762",
     manualPageCount: 190,
   });
 });
@@ -62,7 +62,7 @@ test("keeps publish mode independent from unpublished documentation sources", ()
 
 test("validates the committed publication manifest", async () => {
   const manifest = await validatePublicationManifest(webpageRoot);
-  assert.equal(manifest.documentationVersion, "v1.5.1");
+  assert.equal(manifest.documentationVersion, "v1.5.2");
   assert.equal(manifest.apiRecordCount, 197);
   assert.equal(manifest.manual.pageCount, 190);
 });
@@ -80,10 +80,10 @@ test("rejects stale visible version-history roles", () => {
     { version: "v1.4.0", status: "latest tagged GitHub Release" },
   ];`;
   const staleTag = `export const versionHistory = [
-    { version: "v1.5.1", status: "current documentation snapshot" },
+    { version: "v1.5.2", status: "current documentation snapshot" },
     { version: "v1.3.8", status: "latest tagged GitHub Release" },
   ];`;
 
-  assert.throws(() => validateVersionHistorySource(staleCurrent), /row 1 must be v1\.5\.1/);
-  assert.throws(() => validateVersionHistorySource(staleTag), /tagged entry must be v1\.5\.1/);
+  assert.throws(() => validateVersionHistorySource(staleCurrent), /row 1 must be v1\.5\.2/);
+  assert.throws(() => validateVersionHistorySource(staleTag), /tagged entry must be v1\.5\.2/);
 });

@@ -6,21 +6,25 @@ description: Install GriD-LMIA, open the synchronized manual, and verify the MAT
 import { versionInfo } from "../../data/version.js";
 
 The online and printable manuals describe documentation version
-**{versionInfo.current}**. Package v1.5.1 is the latest tagged GitHub Release.
+**{versionInfo.current}**. Package v1.5.2 is the latest tagged GitHub Release.
 
 ## Downloads
 
 | Item | Link |
 | :--- | :--- |
 | {versionInfo.current} manual | [Open the synchronized printable manual](/GriD-LMIA/manual.pdf) |
-| Latest GitHub Release (v1.5.1) | [Open the GitHub Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.1) |
-| {versionInfo.current} source snapshot | [Download the v1.5.1 ZIP](https://github.com/TheBigoranger/GriD-LMIA/archive/refs/tags/v1.5.1.zip) |
+| Latest GitHub Release (v1.5.2) | [Open the GitHub Release](https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.2) |
+| {versionInfo.current} source snapshot | [Download the v1.5.2 ZIP](https://github.com/TheBigoranger/GriD-LMIA/archive/refs/tags/v1.5.2.zip) |
+| MIT License | [Read the full license](https://github.com/TheBigoranger/GriD-LMIA/blob/v1.5.2/LICENSE) |
 | GitHub repository | [TheBigoranger/GriD-LMIA](https://github.com/TheBigoranger/GriD-LMIA) |
 | Version history | [Open version history](/GriD-LMIA/version-history/) |
 
 The synchronized {versionInfo.current} site publishes the PDF manual at its
 stable manual route. The manual link is the current site artifact, while the
-Release link targets the immutable v1.5.1 package snapshot.
+Release link targets the immutable v1.5.2 package snapshot.
+
+The original package and documentation use the MIT License, copyright (c) 2026
+Yicheng Xu. See [license scope and third-party terms](/GriD-LMIA/about/#license).
 
 ## Requirements
 
@@ -37,7 +41,7 @@ Release link targets the immutable v1.5.1 package snapshot.
 Clone the immutable release from a terminal, then open MATLAB in that checkout:
 
 ```sh
-git clone --depth 1 --single-branch --branch v1.5.1 https://github.com/TheBigoranger/GriD-LMIA.git
+git clone --depth 1 --single-branch --branch v1.5.2 https://github.com/TheBigoranger/GriD-LMIA.git
 cd GriD-LMIA
 ```
 
@@ -112,9 +116,11 @@ full-suite and coverage runs each passed 886/886 runtime tests, including the
 passed their documented acceptance checks, including the expected absence of
 a common quadratic certificate for the second mass-spring-damper box.
 
-See the [current release evidence](/GriD-LMIA/version-history/#v1-5-1).
-Historical counts belong to their own version entries. Accepted solver smoke
-cases require `problem == 0`.
+See the [historical v1.5.1 release evidence](/GriD-LMIA/version-history/#v1-5-1).
+Version v1.5.2 updates licensing and documentation and preserves MATLAB API
+behavior. Its runtime and coverage evidence remains the historical v1.5.1
+results quoted above. Historical counts belong to their own version entries.
+Accepted solver smoke cases require `problem == 0`.
 
 ## First Lookup
 

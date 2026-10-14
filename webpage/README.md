@@ -2,10 +2,17 @@
 
 This directory contains the GitHub Pages documentation site for GriD-LMIA (Gridding-based DPD-LMI Assembler), a MATLAB/YALMIP package for parameter-dependent linear matrix inequalities. The site is built with npm, Astro, and Starlight. Markdown math is rendered at build time through `remark-math` → `rehype-katex`, with KaTeX CSS and fonts bundled locally, so no client-side runtime typesetting or external asset fetch is required.
 
-The current public manual is **v1.5.1**. Its version is generated from the TeX
+The current public manual is **v1.5.2**. Its version is generated from the TeX
 manual; this website package keeps its independent npm version. The public
 example catalog contains five scripts. Current changes and cumulative API
 migration are documented in the [version history](https://www.ethanyxu.com/GriD-LMIA/version-history/).
+
+## License
+
+The original package and documentation, including this website, use the
+[MIT License](../LICENSE), copyright (c) 2026 Yicheng Xu. Third-party
+dependencies and reproduced materials retain their own licenses. Paper citation
+is appreciated and optional.
 
 ## Structure
 

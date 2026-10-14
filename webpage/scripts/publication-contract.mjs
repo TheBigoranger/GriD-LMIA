@@ -4,10 +4,10 @@ import path from "node:path";
 import { inflateSync } from "node:zlib";
 
 export const expectedPublication = Object.freeze({
-  documentationVersion: "v1.5.1",
-  latestTaggedRelease: "v1.5.1",
+  documentationVersion: "v1.5.2",
+  latestTaggedRelease: "v1.5.2",
   apiRecordCount: 197,
-  manualSha256: "DCA4219285C2AF37465BA66A78FBB600CE42B234C4627493ED28A60A59853110",
+  manualSha256: "F3726F4F0E46E83EB6E69F21D908E44BF7E61CF975F61C61A4F2A932FED63762",
   manualPageCount: 190,
 });
 

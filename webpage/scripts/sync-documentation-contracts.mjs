@@ -29,7 +29,7 @@ const inventory = JSON.parse(await readFile(inventoryPath, "utf8"));
 const terminology = JSON.parse(await readFile(terminologyPath, "utf8"));
 
 if (inventory.schema_version !== 2) fail("Expected documentation inventory schema_version 2.");
-if (inventory.version !== "v1.5.1") fail("Expected documentation inventory version v1.5.1.");
+if (inventory.version !== "v1.5.2") fail("Expected documentation inventory version v1.5.2.");
 if (!Array.isArray(inventory.records) || inventory.records.length !== 197) {
   fail(`Expected 197 public API records, found ${inventory.records?.length ?? "none"}.`);
 }

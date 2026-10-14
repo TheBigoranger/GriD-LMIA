@@ -13,7 +13,9 @@ description: Citation information for the GriD-LMIA software paper.
 
 # Citing GriD-LMIA
 
-If GriD-LMIA supports research reported in a paper, cite the software article by Yicheng Xu and Faryar Jabbari:
+If GriD-LMIA supports research reported in a paper, please consider citing the
+software article by Yicheng Xu and Faryar Jabbari. Citation is appreciated and
+optional under the [MIT License](/GriD-LMIA/about/#license).
 
 [Yicheng Xu and Faryar Jabbari, “GriD-LMIA: A Gridding-Based Assembler for Solving Differentiable Parameter-Dependent Linear Matrix Inequalities,” arXiv:2608.03175, 2026.](https://arxiv.org/abs/2608.03175)
 

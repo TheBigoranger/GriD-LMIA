@@ -2,6 +2,7 @@
   "name": "grid-lmia-webpage",
   "type": "module",
   "version": "0.0.1",
+  "license": "MIT",
   "scripts": {
     "prebuild": "node scripts/prepare-build.mjs",
     "sync:contracts": "node scripts/sync-documentation-contracts.mjs",

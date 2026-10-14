@@ -1,8 +1,20 @@
 export const versionHistory = [
   {
-    version: "v1.5.1",
+    version: "v1.5.2",
     date: "2026-10-13",
     status: "current documentation snapshot and latest tagged GitHub Release",
+    summary: "Adopts the standard MIT License for the original source code, tests, examples, manual, and website content, with copyright (c) 2026 Yicheng Xu.",
+    changes: [
+      "Ships the complete MIT License and states its scope in both manuals and the package README. Third-party dependencies and reproduced materials retain their own licenses.",
+      "Keeps paper citation optional and synchronizes release-pinned installation, download links, and the 197-record documentation inventory at v1.5.2.",
+    ],
+    compatibility: "MATLAB APIs, numerical behavior, and dependencies are preserved. The runtime and coverage evidence for this licensing and documentation release remains the historical v1.5.1 results below, including 886/886 runtime tests.",
+    evidence: { label: "v1.5.2 Release", href: "https://github.com/TheBigoranger/GriD-LMIA/releases/tag/v1.5.2" },
+  },
+  {
+    version: "v1.5.1",
+    date: "2026-10-13",
+    status: "preceding tagged GitHub Release",
     summary: "Hardens coefficient arithmetic, decision-dependence metadata, and floating-point boundaries while retaining the v1.5.0 public API and 197-symbol documentation inventory.",
     changes: [
       "Accepts double and single numeric coefficient payloads, algebra constants, and assignment values; converts integer grid coordinates to double and rejects nodes that collapse during conversion.",
@@ -18,7 +30,7 @@ export const versionHistory = [
   {
     version: "v1.5.0",
     date: "2026-09-22",
-    status: "preceding tagged GitHub Release",
+    status: "earlier tagged GitHub Release",
     summary: "Adds direction-wise Continuity lower bounds, verified known-data seam orders, and higher-order spline decisions with zero auxiliary continuity equalities. Differentiation propagates contributing directional orders, numeric recovery reclassifies coefficients, and common-grid algebra uses exact Bernstein restriction. The manuals cover 197 public symbols. The historical v1.5.0 gate passed 848 cases and 171 API entries, with 96.80% statement and 94.35% decision coverage.",
     changes: ["Introduces direction-wise Continuity bounds and higher-order spline decisions with zero auxiliary continuity equalities.", "Uses exact Bernstein restriction for common-grid algebra and propagates contributing directional orders through differentiation and numeric recovery."],
     compatibility: "Default decision construction remains C0. Higher-order spline controls generally differ from physical-node values. The 848-test and coverage figures above describe this historical release only.",
